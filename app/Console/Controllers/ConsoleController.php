@@ -38,7 +38,7 @@ class ConsoleController
     {
         // Console safe output (not HTML). We still escape control chars just in case.
         $safe = is_string($message) ? preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', $message) : $message;
-        echo $safe.PHP_EOL; // security-ignore: ECHO_NO_HTML_ESCAPE (CLI context)
+        echo $safe . PHP_EOL; // security-ignore: ECHO_NO_HTML_ESCAPE(CLI context)
     }
     /**
      * Output error to console.
@@ -50,6 +50,6 @@ class ConsoleController
     protected function error($message)
     {
         $safe = is_string($message) ? preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', $message) : $message;
-        echo 'Error: '.$safe.PHP_EOL; // security-ignore: ECHO_NO_HTML_ESCAPE (CLI context)
+        echo 'Error: ' . $safe . PHP_EOL; // security-ignore: ECHO_NO_HTML_ESCAPE(CLI context)
     }
 }

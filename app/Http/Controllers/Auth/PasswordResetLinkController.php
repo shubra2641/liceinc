@@ -1,8 +1,8 @@
 <?php
 namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\PasswordResetRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\View\View;
 /**
@@ -39,33 +39,19 @@ class PasswordResetLinkController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(PasswordResetRequest $request): RedirectResponse
     {
-        $this->validatePasswordResetRequest($request);
         $status = $this->sendPasswordResetLink($request);
         return $this->handlePasswordResetResponse($request, $status);
     }
     /**
-     * Validate the password reset request.
-     *
-     * @param  Request  $request  The current request
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    private function validatePasswordResetRequest(Request $request): void
-    {
-        $request->validate([
-            'email' => ['required', 'email'],
-        ]);
-    }
-    /**
      * Send password reset link to user.
      *
-     * @param  Request  $request  The current request
+     * @param  PasswordResetRequest  $request  The current request
      *
      * @return string The password reset status
      */
-    private function sendPasswordResetLink(Request $request): string
+    private function sendPasswordResetLink(PasswordResetRequest $request): string
     {
         return Password::sendResetLink(
             $request->only('email'),
@@ -74,12 +60,12 @@ class PasswordResetLinkController extends Controller
     /**
      * Handle the password reset response.
      *
-     * @param  Request  $request  The current request
+     * @param  PasswordResetRequest  $request  The current request
      * @param  string  $status  The password reset status
      *
      * @return RedirectResponse Appropriate redirect based on status
      */
-    private function handlePasswordResetResponse(Request $request, string $status): RedirectResponse
+    private function handlePasswordResetResponse(PasswordResetRequest $request, string $status): RedirectResponse
     {
         if ($status == Password::RESET_LINK_SENT) {
             return back()->with('success', __($status));

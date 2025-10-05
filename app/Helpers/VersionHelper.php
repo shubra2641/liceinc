@@ -231,7 +231,7 @@ class VersionHelper
             if (! $setting) {
                 $setting = new Setting();
                 $setting->key = 'site_name';
-                $setting->value = 'License Management System';
+                $setting->value = config('app.name', 'License Management System');
                 $setting->type = 'string';
                 $setting->save();
             }

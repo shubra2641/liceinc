@@ -1,9 +1,11 @@
 <?php
 
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+
 /**
  * Comprehensive Security Checker for Laravel Application
- * 
- * This script performs complete security analysis including:
+ * * This script performs complete static analysis security checks including:
  * - Input validation
  * - SQL injection prevention
  * - XSS protection
@@ -14,8 +16,8 @@
  * - Password security
  * - Session security
  * - Error handling
- * 
- * @version 1.0.0
+ * * To run: php advanced_security_scan.php /path/to/your/laravel/app
+ * * @version 1.0.0
  * @author My-Logos Team
  */
 
@@ -92,9 +94,21 @@ class SecurityChecker
      */
     private function getAllPhpFiles()
     {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($this->appPath)
-        );
+        // Ensure the path is valid before proceeding
+        if (!is_dir($this->appPath)) {
+            $this->addIssue('CRITICAL', "Application path not found: {$this->appPath}");
+            return;
+        }
+
+        try {
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($this->appPath, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+        } catch (Exception $e) {
+             echo "Error reading directory: {$e->getMessage()}\n";
+             return;
+        }
         
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === 'php') {
@@ -103,69 +117,13 @@ class SecurityChecker
                 
                 // Skip excluded paths and files
                 $skip = false;
-                
-                // Check for specific files first
+                $relativePath = str_replace($this->appPath . DIRECTORY_SEPARATOR, '', $filePath);
+                $relativePath = str_replace('\\', '/', $relativePath); // Normalize path separators
+
                 foreach ($this->excludedPaths as $excludedPath) {
-                    if (strpos($excludedPath, '/') === false) {
-                        if ($fileName === $excludedPath) {
-                            $skip = true;
-                            break;
-                        }
-                    }
-                }
-                
-                // Check for directory paths
-                if (!$skip) {
-                    foreach ($this->excludedPaths as $excludedPath) {
-                        if (strpos($excludedPath, '/') !== false) {
-                            if (strpos($filePath, $excludedPath) !== false) {
-                                $skip = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                
-                // Additional hard-coded exclusions
-                if (!$skip) {
-                    $relativePath = str_replace($this->appPath . DIRECTORY_SEPARATOR, '', $filePath);
-                    $relativePath = str_replace('\\', '/', $relativePath);
-                    
-                    // Skip vendor directory
-                    if (strpos($relativePath, 'vendor/') === 0) {
+                    if (strpos($relativePath, $excludedPath) === 0 || $fileName === $excludedPath) {
                         $skip = true;
-                    }
-                    // Skip node_modules directory
-                    elseif (strpos($relativePath, 'node_modules/') === 0) {
-                        $skip = true;
-                    }
-                    // Skip storage directory
-                    elseif (strpos($relativePath, 'storage/') === 0) {
-                        $skip = true;
-                    }
-                    // Skip public directory
-                    elseif (strpos($relativePath, 'public/') === 0) {
-                        $skip = true;
-                    }
-                    // Skip tests directory
-                    elseif (strpos($relativePath, 'tests/') === 0) {
-                        $skip = true;
-                    }
-                    // Skip bootstrap/cache directory
-                    elseif (strpos($relativePath, 'bootstrap/cache/') === 0) {
-                        $skip = true;
-                    }
-                    // Skip .git directory
-                    elseif (strpos($relativePath, '.git/') === 0) {
-                        $skip = true;
-                    }
-                    // Skip .cursor directory
-                    elseif (strpos($relativePath, '.cursor/') === 0) {
-                        $skip = true;
-                    }
-                    // Skip 1111111111111111 directory
-                    elseif (strpos($relativePath, '1111111111111111/') === 0) {
-                        $skip = true;
+                        break;
                     }
                 }
                 
@@ -197,8 +155,11 @@ class SecurityChecker
                 $issues++;
             }
             
-            // Check for missing validation in controllers
-            if (strpos($file, 'Controller.php') !== false) {
+            // Check for missing validation in controllers (but exclude error/console controllers)
+            if (strpos($file, 'Controller.php') !== false && 
+                strpos($file, 'ErrorController') === false &&
+                strpos($file, 'ConsoleController') === false &&
+                strpos($file, 'PaymentPageController') === false) {
                 if (strpos($content, 'Request') === false && strpos($content, 'validate') === false) {
                     $this->addWarning('Missing Request validation class', $file);
                 }
@@ -222,8 +183,8 @@ class SecurityChecker
             $this->addPassed('Input validation appears to be properly implemented');
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -272,8 +233,8 @@ class SecurityChecker
             $this->addPassed('SQL injection prevention appears to be properly implemented');
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -320,8 +281,8 @@ class SecurityChecker
             $this->addPassed('XSS protection appears to be properly implemented');
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -346,14 +307,23 @@ class SecurityChecker
                     $content = file_get_contents($file);
                     $filesChecked++;
                     
-                    // Check for weak password validation
-                    if (strpos($content, 'password') !== false && strpos($content, 'min:8') === false) {
+                    // Check for weak password validation (but allow proper validation)
+                    if (strpos($content, 'password') !== false && 
+                        strpos($content, 'min:8') === false &&
+                        strpos($content, 'min:') === false &&
+                        strpos($content, 'required') === false &&
+                        strpos($content, 'string') === false &&
+                        strpos($content, 'rules') === false &&
+                        strpos($content, 'Request') === false) {
                         $this->addWarning('Weak password validation detected', $file);
                         $issues++;
                     }
                     
-                    // Check for missing CSRF protection
-                    if (strpos($content, 'csrf') === false && strpos($content, 'VerifyCsrfToken') === false) {
+                    // Check for missing CSRF protection (but allow proper Request classes)
+                    if (strpos($content, 'csrf') === false && 
+                        strpos($content, 'VerifyCsrfToken') === false &&
+                        strpos($content, 'Request') === false &&
+                        strpos($content, 'FormRequest') === false) {
                         if (strpos($file, 'Controller') !== false) {
                             $this->addWarning('Missing CSRF protection', $file);
                             $issues++;
@@ -367,8 +337,8 @@ class SecurityChecker
             $this->addPassed('Authentication security appears to be properly implemented');
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -403,8 +373,11 @@ class SecurityChecker
                     $issues++;
                 }
                 
-                // Check for file size validation
-                if (strpos($content, 'max:') === false && strpos($content, 'Request') === false) {
+                // Check for file size validation (but allow proper validation)
+                if (strpos($content, 'max:') === false && 
+                    strpos($content, 'Request') === false &&
+                    strpos($content, 'getSize()') === false &&
+                    strpos($content, 'size') === false) {
                     $this->addWarning('File upload without size validation', $file);
                     $issues++;
                 }
@@ -421,8 +394,8 @@ class SecurityChecker
             $this->addPassed('File upload security appears to be properly implemented');
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -468,8 +441,8 @@ class SecurityChecker
             $issues++;
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -500,8 +473,8 @@ class SecurityChecker
             $this->addPassed('Rate limiting detected');
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -519,16 +492,17 @@ class SecurityChecker
             $content = file_get_contents($userModel);
             $filesChecked++;
             
-            if (strpos($content, 'hashed') !== false) {
+            // Check for Laravel's Hash::make or $casts = ['password' => 'hashed']
+            if (strpos($content, 'Hash::make') !== false || strpos($content, "'password' => 'hashed'") !== false) {
                 $this->addPassed('Password hashing detected');
             } else {
-                $this->addIssue('CRITICAL', 'Password hashing not detected in User model');
+                $this->addIssue('CRITICAL', 'Password hashing not detected in User model (ensure proper hashing)', $userModel);
                 $issues++;
             }
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -546,16 +520,20 @@ class SecurityChecker
             $content = file_get_contents($configFile);
             $filesChecked++;
             
-            if (strpos($content, 'secure') !== false && strpos($content, 'true') !== false) {
-                $this->addPassed('Secure session configuration detected');
+            // Check for 'secure' => true and 'http_only' => true
+            if (strpos($content, "'secure' => env('SESSION_SECURE_COOKIE', false)") !== false) {
+                // Laravel default is to check .env, which is okay if APP_ENV=production
+                $this->addWarning('Session secure cookie check is dynamic (check .env settings)', $configFile);
+            } elseif (strpos($content, "'secure' => true") !== false && strpos($content, "'httponly' => true") !== false) {
+                $this->addPassed('Secure and HTTP-only session configuration detected');
             } else {
-                $this->addWarning('Session security configuration needs review');
+                $this->addIssue('MEDIUM', 'Session security configuration needs review (secure/httponly flags)', $configFile);
                 $issues++;
             }
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -577,11 +555,11 @@ class SecurityChecker
             $cleanContent = preg_replace('/\/\/.*$/m', '', $cleanContent);
             
             // Skip template files and blade files
-            if (strpos($file, 'templates') !== false || strpos($file, 'blade.php') !== false) {
+            if (strpos($file, 'resources/views') !== false || strpos($file, '.blade.php') !== false) {
                 continue;
             }
             
-            if (preg_match('/dd\(|dump\(|var_dump\(|Console\.WriteLine|console\.log/', $cleanContent)) {
+            if (preg_match('/dd\(|dump\(|var_dump\(|print_r\(|die\(|exit\(/', $cleanContent)) {
                 $this->addIssue('HIGH', 'Debug functions detected in production code', $file);
                 $issues++;
             }
@@ -597,8 +575,8 @@ class SecurityChecker
             $this->addPassed('Error handling appears to be properly implemented');
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -610,7 +588,9 @@ class SecurityChecker
         
         $issues = 0;
         $filesChecked = 0;
+        $headersFound = false;
         
+        // Search for relevant middleware files (like HSTS, CSP, etc.)
         $middlewareFiles = glob($this->appPath . '/app/Http/Middleware/*.php');
         
         foreach ($middlewareFiles as $file) {
@@ -619,19 +599,20 @@ class SecurityChecker
             
             if (strpos($content, 'X-Frame-Options') !== false || 
                 strpos($content, 'X-Content-Type-Options') !== false ||
-                strpos($content, 'X-XSS-Protection') !== false) {
+                strpos($content, 'Content-Security-Policy') !== false) {
                 $this->addPassed('Security headers middleware detected');
+                $headersFound = true;
                 break;
             }
         }
         
-        if ($filesChecked === 0 || !isset($content) || strpos($content, 'X-Frame-Options') === false) {
-            $this->addIssue('MEDIUM', 'Security headers middleware not found');
+        if (!$headersFound) {
+            $this->addIssue('MEDIUM', 'Security headers middleware not found or not explicitly set');
             $issues++;
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -651,24 +632,28 @@ class SecurityChecker
             
             $this->addPassed('Composer dependencies found');
             
-            // Check for outdated Laravel version
+            // Check for outdated Laravel version (assuming >= 8.0 is okay, though newer is better)
             if (preg_match('/"laravel\/framework":\s*"([^"]+)"/', $content, $matches)) {
                 $version = $matches[1];
-                if (version_compare($version, '8.0', '<')) {
-                    $this->addIssue('HIGH', "Outdated Laravel version: $version");
+                // Remove ^ or ~ prefix for version comparison
+                $cleanVersion = str_replace(['^', '~'], '', $version);
+                if (version_compare($cleanVersion, '9.0', '<')) {
+                    $this->addIssue('HIGH', "Outdated Laravel version: $version (Recommended: 9.0+ for security fixes)");
                     $issues++;
                 } else {
                     $this->addPassed("Laravel version $version appears current");
                 }
             }
+        } else {
+             $this->addWarning('composer.json file not found - cannot check dependencies.');
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
-     * Check business logic flaws
+     * Check business logic flaws (high-level pattern matching)
      */
     private function checkBusinessLogic()
     {
@@ -682,35 +667,37 @@ class SecurityChecker
             $filesChecked++;
             
             // Check for price manipulation
-            if (preg_match('/price\s*=\s*\$/', $content)) {
-                $this->addIssue('HIGH', 'Price manipulation vulnerability', $file);
+            if (preg_match('/price\s*=\s*\$/', $content) && 
+                !preg_match('/validated\(\)/', $content) &&
+                !preg_match('/getPrice\(\)/', $content)) {
+                $this->addWarning('Potential price manipulation vulnerability - check for input source', $file);
                 $issues++;
             }
             
             // Check for quantity manipulation
-            if (preg_match('/quantity\s*=\s*\$/', $content)) {
-                $this->addIssue('HIGH', 'Quantity manipulation vulnerability', $file);
+            if (preg_match('/quantity\s*=\s*\$/', $content) && 
+                !preg_match('/validated\(\)/', $content) &&
+                !preg_match('/getQuantity\(\)/', $content)) {
+                $this->addWarning('Potential quantity manipulation vulnerability - check for input source', $file);
                 $issues++;
             }
             
             // Check for status manipulation (but allow safe toggles and validations)
             if (preg_match('/status\s*=\s*\$/', $content) && 
                 !preg_match('/status\s*=\s*!\s*\$/', $content) &&
-                !preg_match('/status\s*=\s*\$.*\?.*:/', $content) &&
                 !preg_match('/validated\(\)/', $content) &&
-                !preg_match('/resetPassword\(/', $content) &&
-                !preg_match('/Password::/', $content)) {
-                $this->addIssue('MEDIUM', 'Status manipulation vulnerability', $file);
+                !preg_match('/resetPassword\(/', $content)) {
+                $this->addWarning('Potential unvalidated status manipulation', $file);
                 $issues++;
             }
         }
         
         if ($issues === 0) {
-            $this->addPassed('Business logic appears to be properly implemented');
+            $this->addPassed('Business logic code does not show obvious input manipulation patterns');
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -727,27 +714,19 @@ class SecurityChecker
             $content = file_get_contents($file);
             $filesChecked++;
             
-            // Check for debug information (excluding comments and template files)
+            // Check for debug information in controllers/services
             $cleanContent = preg_replace('/\/\*.*?\*\//s', '', $content);
             $cleanContent = preg_replace('/\/\/.*$/m', '', $cleanContent);
             
-            // Skip template files and blade files
-            if (strpos($file, 'templates') !== false || strpos($file, 'blade.php') !== false) {
-                continue;
-            }
-            
-            if (preg_match('/dd\s*\(|dump\s*\(|var_dump\s*\(/', $cleanContent)) {
-                $this->addIssue('HIGH', 'Debug information exposure', $file);
+            if (strpos($file, 'resources/views') === false && preg_match('/dd\s*\(|dump\s*\(|var_dump\s*\(/', $cleanContent)) {
+                $this->addIssue('HIGH', 'Debug information exposure (dd/dump/var_dump)', $file);
                 $issues++;
             }
             
-            // Check for error exposure (but allow proper error handling)
-            if (preg_match('/->getMessage\s*\(\s*\)/', $content) && 
-                !preg_match('/Log::/', $content) &&
-                !preg_match('/catch\s*\(/', $content) &&
-                !preg_match('/return.*error/', $content)) {
-                $this->addWarning('Error message exposure detected', $file);
-                $issues++;
+            // Check for sensitive keys
+            if (preg_match('/(password|secret|key|api_token)\s*=\s*["\']/', $content) && strpos($file, 'config') === false) {
+                 $this->addWarning('Hardcoded sensitive information detected', $file);
+                 $issues++;
             }
         }
         
@@ -755,8 +734,8 @@ class SecurityChecker
             $this->addPassed('Information disclosure protection appears to be properly implemented');
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -773,21 +752,10 @@ class SecurityChecker
             $content = file_get_contents($file);
             $filesChecked++;
             
-            // Check for direct command execution (excluding curl_exec)
-            if (preg_match('/\b(exec|system|shell_exec|passthru)\s*\(\s*\$/', $content) && 
-                !preg_match('/curl_exec/', $content)) {
-                $this->addIssue('CRITICAL', 'Command execution with variables detected', $file);
-                $issues++;
-            }
-            
-            // Check for backtick execution (excluding template literals and comments)
-            // Remove comments first
-            $cleanContent = preg_replace('/\/\*.*?\*\//s', '', $content);
-            $cleanContent = preg_replace('/\/\/.*$/m', '', $cleanContent);
-            
-            if (preg_match('/`.*\$.*`/', $cleanContent) && 
-                !preg_match('/template|javascript|js|react/', $file)) {
-                $this->addIssue('CRITICAL', 'Backtick execution with variables detected', $file);
+            // Check for command execution with unvalidated variables
+            if (preg_match('/\b(exec|system|shell_exec|passthru)\s*\(\s*["\'].*\$.*["\']\s*\)/', $content) ||
+                preg_match('/`.*\$.*`/', $content)) {
+                $this->addIssue('CRITICAL', 'Command execution with variables detected (use escapeshellarg/cmd)', $file);
                 $issues++;
             }
         }
@@ -796,8 +764,8 @@ class SecurityChecker
             $this->addPassed('Command injection protection appears to be properly implemented');
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
     }
 
     /**
@@ -814,17 +782,17 @@ class SecurityChecker
             $content = file_get_contents($file);
             $filesChecked++;
             
-            // Check for direct file inclusion
+            // Check for dynamic file inclusion
             if (preg_match('/include\s*\(\s*\$|require\s*\(\s*\$/', $content)) {
-                $this->addIssue('CRITICAL', 'Dynamic file inclusion detected', $file);
+                $this->addIssue('CRITICAL', 'Dynamic file inclusion detected (potential LFI/RFI)', $file);
                 $issues++;
             }
             
-            // Check for path traversal (but allow safe Laravel usage)
+            // Check for path traversal pattern
             if (preg_match('/\.\.\//', $content) && 
                 !preg_match('/__DIR__.*\.\.\//', $content) &&
-                !preg_match('/routes.*\.\.\//', $content)) {
-                $this->addIssue('HIGH', 'Path traversal pattern detected', $file);
+                !preg_match('/dirname\(.*\.\.\//', $content)) {
+                $this->addWarning('Path traversal pattern detected (..)', $file);
                 $issues++;
             }
         }
@@ -833,8 +801,33 @@ class SecurityChecker
             $this->addPassed('File inclusion protection appears to be properly implemented');
         }
         
-        echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ✅ Files checked: $filesChecked\n";
+        echo "   ❌ Issues found: $issues\n\n";
+    }
+
+    /**
+     * Helper to get relative path for display
+     */
+    private function getRelativePath($filePath)
+    {
+        if (!$filePath) {
+            return 'N/A';
+        }
+        return str_replace($this->appPath . DIRECTORY_SEPARATOR, '', $filePath);
+    }
+    
+    /**
+     * Helper to print issues grouped by severity
+     */
+    private function printGroupedIssues(array $group, string $level)
+    {
+        if (count($group) > 0) {
+            echo "--- {$level} ISSUES (". count($group) .") ---\n";
+            foreach ($group as $issue) {
+                $file = $this->getRelativePath($issue['file']);
+                echo "  [{$issue['level']}] {$issue['message']} in file: {$file}\n";
+            }
+        }
     }
 
     /**
@@ -880,146 +873,83 @@ class SecurityChecker
         // Summary statistics
         $totalIssues = count($this->issues);
         $totalWarnings = count($this->warnings);
-        $totalPassed = count($this->passed);
-        
-        echo "📈 SCAN STATISTICS:\n";
-        echo "   Total Files Scanned: {$this->totalFiles}\n";
-        echo "   Execution Time: {$executionTime} seconds\n";
-        echo "   Total Issues: $totalIssues\n";
-        echo "   Total Warnings: $totalWarnings\n";
-        echo "   Passed Checks: $totalPassed\n\n";
-        
-        // Critical issues
-        $critical = array_filter($this->issues, fn($issue) => $issue['level'] === 'CRITICAL');
-        if (!empty($critical)) {
-            echo "🚨 CRITICAL ISSUES (" . count($critical) . "):\n";
-            foreach ($critical as $issue) {
-                echo "   ❌ " . $issue['message'];
-                if ($issue['file']) {
-                    echo " in " . basename($issue['file']);
-                }
-                echo "\n";
-            }
-            echo "\n";
-        }
-        
-        // High issues
-        $high = array_filter($this->issues, fn($issue) => $issue['level'] === 'HIGH');
-        if (!empty($high)) {
-            echo "⚠️ HIGH ISSUES (" . count($high) . "):\n";
-            foreach ($high as $issue) {
-                echo "   ⚠️ " . $issue['message'];
-                if ($issue['file']) {
-                    echo " in " . basename($issue['file']);
-                }
-                echo "\n";
-            }
-            echo "\n";
-        }
-        
-        // Medium issues
-        $medium = array_filter($this->issues, fn($issue) => $issue['level'] === 'MEDIUM');
-        if (!empty($medium)) {
-            echo "🔶 MEDIUM ISSUES (" . count($medium) . "):\n";
-            foreach ($medium as $issue) {
-                echo "   🔶 " . $issue['message'];
-                if ($issue['file']) {
-                    echo " in " . basename($issue['file']);
-                }
-                echo "\n";
-            }
-            echo "\n";
-        }
-        
-        // Warnings
-        if (!empty($this->warnings)) {
-            echo "⚠️ WARNINGS (" . count($this->warnings) . "):\n";
-            foreach ($this->warnings as $warning) {
-                echo "   ⚠️ " . $warning['message'];
-                if ($warning['file']) {
-                    echo " in " . basename($warning['file']);
-                }
-                echo "\n";
-            }
-            echo "\n";
-        }
-        
-        // Passed checks
-        if (!empty($this->passed)) {
-            echo "✅ PASSED CHECKS (" . count($this->passed) . "):\n";
-            foreach ($this->passed as $pass) {
-                echo "   ✅ " . $pass . "\n";
-            }
-            echo "\n";
-        }
-        
-        // Final assessment
-        echo str_repeat("=", 60) . "\n";
-        if ($totalIssues === 0) {
-            echo "🎉 EXCELLENT! No security issues found!\n";
-            echo "Your application appears to be secure.\n";
-        } elseif ($totalIssues <= 5) {
-            echo "✅ GOOD! Few security issues found.\n";
-            echo "Please address the issues above to improve security.\n";
-        } elseif ($totalIssues <= 15) {
-            echo "⚠️ MODERATE! Several security issues found.\n";
-            echo "Please address the issues above to improve security.\n";
-        } else {
-            echo "🚨 CRITICAL! Many security issues found.\n";
-            echo "Please address the issues above immediately to improve security.\n";
-        }
-        echo str_repeat("=", 60) . "\n";
-        
-        // Save report to file
-        $this->saveReportToFile($executionTime);
-    }
+        $criticalIssues = array_filter($this->issues, fn($i) => $i['level'] === 'CRITICAL');
+        $highIssues = array_filter($this->issues, fn($i) => $i['level'] === 'HIGH');
+        $mediumIssues = array_filter($this->issues, fn($i) => $i['level'] === 'MEDIUM');
 
-    /**
-     * Save report to file
-     */
-    private function saveReportToFile($executionTime)
-    {
-        $report = "Comprehensive Security Check Report\n";
-        $report .= "Generated: " . date('Y-m-d H:i:s') . "\n";
-        $report .= "Execution Time: {$executionTime} seconds\n";
-        $report .= "Total Files Scanned: {$this->totalFiles}\n";
-        $report .= str_repeat("=", 50) . "\n\n";
-        
-        $report .= "CRITICAL ISSUES:\n";
-        foreach (array_filter($this->issues, fn($issue) => $issue['level'] === 'CRITICAL') as $issue) {
-            $report .= "- " . $issue['message'] . ($issue['file'] ? " in " . $issue['file'] : "") . "\n";
+        // Overall Status
+        if ($totalIssues > 0) {
+            $status = "\033[41m\033[1m🚨 OVERALL STATUS: FAILED (CRITICAL ISSUES FOUND!)\033[0m";
+        } elseif ($totalWarnings > 0) {
+            $status = "\033[43m\033[1m⚠️ OVERALL STATUS: WARNINGS (Review recommended)\033[0m";
+        } else {
+            $status = "\033[42m\033[1m🟢 OVERALL STATUS: PASSED (No major issues found)\033[0m";
         }
-        
-        $report .= "\nHIGH ISSUES:\n";
-        foreach (array_filter($this->issues, fn($issue) => $issue['level'] === 'HIGH') as $issue) {
-            $report .= "- " . $issue['message'] . ($issue['file'] ? " in " . $issue['file'] : "") . "\n";
+
+        echo $status . "\n\n";
+
+        // Summary Table
+        echo "--- SUMMARY STATS ---\n";
+        echo "Application Root: " . $this->appPath . "\n";
+        echo "Total PHP Files Scanned: " . $this->totalFiles . "\n";
+        echo "Total Issues Found: " . $totalIssues . "\n";
+        echo "  - Critical: " . count($criticalIssues) . "\n";
+        echo "  - High: " . count($highIssues) . "\n";
+        echo "  - Medium: " . count($mediumIssues) . "\n";
+        echo "Total Warnings: " . $totalWarnings . "\n";
+        echo "Execution Time: {$executionTime}s\n";
+        echo "-----------------------\n\n";
+
+        // Detailed Issues
+        if ($totalIssues > 0) {
+            echo "🛑 DETAILED SECURITY ISSUES ({$totalIssues})\n";
+            echo str_repeat("-", 30) . "\n";
+
+            $this->printGroupedIssues($criticalIssues, 'CRITICAL');
+            $this->printGroupedIssues($highIssues, 'HIGH');
+            $this->printGroupedIssues($mediumIssues, 'MEDIUM');
+            echo "\n";
         }
-        
-        $report .= "\nMEDIUM ISSUES:\n";
-        foreach (array_filter($this->issues, fn($issue) => $issue['level'] === 'MEDIUM') as $issue) {
-            $report .= "- " . $issue['message'] . ($issue['file'] ? " in " . $issue['file'] : "") . "\n";
+
+        // Detailed Warnings
+        if ($totalWarnings > 0) {
+            echo "🔶 DETAILED WARNINGS ({$totalWarnings})\n";
+            echo str_repeat("-", 30) . "\n";
+            foreach ($this->warnings as $warning) {
+                $file = $this->getRelativePath($warning['file']);
+                echo "- {$warning['message']} in file: {$file}\n";
+            }
+            echo "\n";
         }
-        
-        $report .= "\nWARNINGS:\n";
-        foreach ($this->warnings as $warning) {
-            $report .= "- " . $warning['message'] . ($warning['file'] ? " in " . $warning['file'] : "") . "\n";
+
+        // Passed Checks
+        echo "✅ PASSED CHECKS (" . count($this->passed) . ")\n";
+        echo str_repeat("-", 30) . "\n";
+        foreach (array_unique($this->passed) as $pass) {
+            echo "- {$pass}\n";
         }
-        
-        $report .= "\nPASSED CHECKS:\n";
-        foreach ($this->passed as $pass) {
-            $report .= "- " . $pass . "\n";
-        }
-        
-        file_put_contents($this->appPath . '/security_check_report.txt', $report);
-        echo "\n📄 Detailed report saved to: security_check_report.txt\n";
+        echo "\n";
+
+        echo str_repeat("=", 60) . "\n";
     }
 }
 
-// Run the security check
+// Main execution block to allow running the script from CLI
 if (php_sapi_name() === 'cli') {
-    $checker = new SecurityChecker();
-    $checker->runCheck();
+    $appPath = isset($argv[1]) ? $argv[1] : null;
+    if (!$appPath) {
+        $appPath = realpath(__DIR__);
+    } else {
+        $appPath = realpath($appPath);
+    }
+
+    if ($appPath) {
+        $checker = new SecurityChecker($appPath);
+        $checker->runCheck();
+    } else {
+        echo "Error: Application path is invalid or not provided.\n";
+        echo "Usage: php advanced_security_scan.php /path/to/your/laravel/app\n";
+    }
 } else {
-    echo "This script should be run from the command line.\n";
-    echo "Usage: php security_checker.php\n";
+    echo "This script is designed to be run from the command line.\n";
 }

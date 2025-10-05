@@ -72,11 +72,8 @@ class LicenseVerificationLogger
             $userAgent = self::getValidatedUserAgent($request);
             // Hash the purchase code for security
             $purchaseCodeHash = hash('sha256', $purchaseCode);
-            // Determine status
-            $status = $isValid ? 'success' : 'failed';
-            if ($errorDetails) {
-                $status = 'error';
-            }
+            // Determine status with validation
+            $status = $this->determineStatus($isValid, $errorDetails);
             // Create log entry
             $log = LicenseVerificationLog::create([
                 'purchase_code_hash' => $purchaseCodeHash,
@@ -506,6 +503,32 @@ class LicenseVerificationLogger
         }
         return $limit;
     }
+    /**
+     * Determine status based on validation results.
+     *
+     * Determines the appropriate status based on validation results
+     * and error details with proper validation.
+     *
+     * @param  bool  $isValid  Whether the verification was successful
+     * @param  string|null  $errorDetails  Additional error details
+     *
+     * @return string The determined status
+     *
+     * @version 1.0.6
+     */
+    private static function determineStatus(bool $isValid, ?string $errorDetails): string
+    {
+        if ($isValid) {
+            return 'success';
+        }
+        
+        if ($errorDetails) {
+            return 'error';
+        }
+        
+        return 'failed';
+    }
+
     /**
      * Sanitize string input with XSS protection.
      *

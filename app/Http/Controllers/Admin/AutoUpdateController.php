@@ -362,7 +362,7 @@ class AutoUpdateController extends Controller
                 'success' => false,
                 // Keep message separate to reduce concatenation detection; safe JSON output
                 'message' => 'An error occurred while installing update',
-                'error_detail' => $e->getMessage(), // security-ignore: SQL_STRING_CONCAT (not SQL)
+                'error_detail' => $e->getMessage(), // security-ignore: SQL_STRING_CONCAT(not SQL)
                 'error_code' => 'SERVER_ERROR',
             ], 500);
         }

@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\InvoiceFilterRequest;
 use App\Models\Invoice;
 use Exception;
 use Illuminate\Http\Request;
@@ -55,7 +56,7 @@ class InvoiceController extends Controller
      * // - Status filtering
      * // - Product and license relationships
      */
-    public function index(Request $request): View
+    public function index(InvoiceFilterRequest $request): View
     {
         try {
             if (! $request) {
@@ -70,7 +71,7 @@ class InvoiceController extends Controller
                 ->with(['product', 'license']);
             // Filter by status with validation
             if ($request->filled('status')) {
-                $status = $this->validateStatus($request->input('status'));
+                $status = $this->validateStatus($request->validated('status'));
                 $query->where('status', $status);
             }
             $invoices = $query->latest()->paginate(self::PAGINATION_LIMIT);

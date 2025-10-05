@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace App\Http\Controllers;
+use App\Http\Requests\ProductSearchRequest;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\ProductCategory;
@@ -57,7 +58,7 @@ class ProductController extends Controller
      * // Access: GET /products?search=laravel&category=1&language=php
      * // Returns: View with filtered products
      */
-    public function index(Request $request): View
+    public function index(ProductSearchRequest $request): View
     {
         return $this->publicIndex($request);
     }
@@ -77,7 +78,7 @@ class ProductController extends Controller
      * // Access: GET /products/public?search=laravel&category=1&language=php&price_filter=paid&sort=price_low
      * // Returns: View with filtered and sorted products
      */
-    public function publicIndex(?Request $request = null): View
+    public function publicIndex(?ProductSearchRequest $request = null): View
     {
         try {
             // Rate limiting
@@ -94,7 +95,7 @@ class ProductController extends Controller
             $productsQuery = Product::with(['category', 'programmingLanguage'])->where('is_active', true);
             // Search functionality
             if ($request && $request->filled('search')) {
-                $search = $this->sanitizeInput($request->input('search'));
+                $search = $this->sanitizeInput($request->validated('search'));
                 if ($search) {
                     $productsQuery->where(function ($query) use ($search) {
                         $query->where('name', 'like', "%{$search}%")
@@ -104,21 +105,21 @@ class ProductController extends Controller
             }
             // Category filtering
             if ($request && $request->filled('category')) {
-                $categoryId = $this->sanitizeInput($request->input('category'));
+                $categoryId = $this->sanitizeInput($request->validated('category'));
                 if (is_numeric($categoryId)) {
                     $productsQuery->where('category_id', (int)$categoryId);
                 }
             }
             // Programming language filtering
             if ($request && $request->filled('language')) {
-                $languageId = $this->sanitizeInput($request->input('language'));
+                $languageId = $this->sanitizeInput($request->validated('language'));
                 if (is_numeric($languageId)) {
                     $productsQuery->where('programming_language', (int)$languageId);
                 }
             }
             // Price filtering
             if ($request && $request->filled('price_filter')) {
-                $priceFilter = $this->sanitizeInput($request->input('price_filter'));
+                $priceFilter = $this->sanitizeInput($request->validated('price_filter'));
                 if ($priceFilter === 'free') {
                     $productsQuery->where('price', 0);
                 } elseif ($priceFilter === 'paid') {
@@ -126,7 +127,7 @@ class ProductController extends Controller
                 }
             }
             // Sorting
-            $sort = $request ? $this->sanitizeInput($request->input('sort', 'name')) : 'name';
+            $sort = $request ? $this->sanitizeInput($request->validated('sort', 'name')) : 'name';
             switch ($sort) {
                 case 'price_low':
                     $productsQuery->orderBy('price', 'asc');

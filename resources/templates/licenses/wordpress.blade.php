@@ -23,6 +23,15 @@ class WP_LicenseVerifier {
      */
     public function verify_license($purchase_code, $domain = null) {
         try {
+            // Validate inputs
+            if (empty($purchase_code) || !is_string($purchase_code)) {
+                return $this->create_license_response(false, 'Invalid purchase code provided');
+            }
+            
+            if ($domain && !filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
+                return $this->create_license_response(false, 'Invalid domain format');
+            }
+            
             // Send single request to our system
             return $this->verify_with_our_system($purchase_code, $domain);
 

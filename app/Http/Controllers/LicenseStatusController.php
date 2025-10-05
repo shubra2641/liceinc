@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace App\Http\Controllers;
+use App\Http\Requests\LicenseStatusRequest;
 use App\Models\License;
 use App\Models\Setting;
 use App\Services\EnvatoService;
@@ -83,7 +84,7 @@ class LicenseStatusController extends Controller
      * // Check license status
      * $response = $licenseStatusController->check($request);
      */
-    public function check(Request $request): JsonResponse
+    public function check(LicenseStatusRequest $request): JsonResponse
     {
         try {
             return $this->transaction(function () use ($request) {
@@ -124,8 +125,8 @@ class LicenseStatusController extends Controller
                         422,
                     );
                 }
-                $licenseCode = $this->sanitizeInput($request->input('license_key'));
-                $email = $this->sanitizeInput($request->input('email'));
+                $licenseCode = $this->sanitizeInput($request->validated('license_key'));
+                $email = $this->sanitizeInput($request->validated('email'));
                 // Search for license by code and email
                 $license = $this->findLicenseByCodeAndEmail($licenseCode, $email);
                 if (! $license) {
@@ -171,8 +172,8 @@ class LicenseStatusController extends Controller
         } catch (Throwable $e) {
             Log::error('License check error', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging($request->input('license_key', '')),
-                'email' => $this->hashForLogging($request->input('email', '')),
+                'license_key' => $this->hashForLogging($request->validated('license_key')),
+                'email' => $this->hashForLogging($request->validated('email')),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
@@ -200,7 +201,7 @@ class LicenseStatusController extends Controller
      * // Get license history
      * $response = $licenseStatusController->history($request);
      */
-    public function history(Request $request): JsonResponse
+    public function history(LicenseStatusRequest $request): JsonResponse
     {
         try {
             return $this->transaction(function () use ($request) {
@@ -220,8 +221,8 @@ class LicenseStatusController extends Controller
                         422,
                     );
                 }
-                $licenseCode = $this->sanitizeInput($request->input('license_key'));
-                $email = $this->sanitizeInput($request->input('email'));
+                $licenseCode = $this->sanitizeInput($request->validated('license_key'));
+                $email = $this->sanitizeInput($request->validated('email'));
                 $license = $this->findLicenseByCodeAndEmail($licenseCode, $email);
                 if (! $license) {
                     Log::warning('License not found for history request', [
@@ -262,8 +263,8 @@ class LicenseStatusController extends Controller
         } catch (Throwable $e) {
             Log::error('License history error', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging($request->input('license_key', '')),
-                'email' => $this->hashForLogging($request->input('email', '')),
+                'license_key' => $this->hashForLogging($request->validated('license_key')),
+                'email' => $this->hashForLogging($request->validated('email')),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),

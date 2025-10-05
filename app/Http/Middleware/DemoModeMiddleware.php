@@ -179,7 +179,7 @@ class DemoModeMiddleware
     private function isDestructiveAction(Request $request): bool
     {
         $path = $this->sanitizeInput($request->path());
-        $action = $this->sanitizeInput($request->input('_method', $request->method()));
+        $action = $this->sanitizeInput($request->get('_method', $request->method()));
         // List of destructive actions
         $destructiveActions = [
             'create', 'store', 'edit', 'update', 'destroy', 'delete',
