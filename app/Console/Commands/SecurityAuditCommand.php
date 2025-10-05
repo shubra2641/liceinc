@@ -655,13 +655,7 @@ class SecurityAuditCommand extends Command
         } else {
             $this->info('No critical or high severity issues found.');
         }
-        // Log the audit completion
-        Log::info('Security audit completed', [
-            'total_issues' => count($this->issues),
-            'critical_issues' => count(array_filter($this->issues, fn ($i) => $i['severity'] === 'critical')),
-            'high_issues' => count(array_filter($this->issues, fn ($i) => $i['severity'] === 'high')),
-            'audit_duration' => round($this->auditStats['end_time'] - $this->auditStats['start_time'], 2).'s',
-        ]);
+        // Security audit completed - no logging needed for successful operations
     }
     /**
      * Check for users with default passwords.

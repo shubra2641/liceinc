@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="{{ asset('assets/install/css/license.css') }}">
     @endif
     
-    @stack('styles')
+    @yield('styles')
 </head>
 <body class="install-body">
     <!-- Installation Header -->
@@ -110,6 +110,6 @@
     <script src="{{ asset('assets/install/js/license.js') }}"></script>
     @endif
     
-    @stack('scripts')
+    @yield('scripts')
 </body>
 </html>

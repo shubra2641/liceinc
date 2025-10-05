@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\EnvatoVerificationRequest;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\User;
@@ -64,7 +65,7 @@ class EnvatoController extends Controller
      * // Verify purchase code
      * $response = $envatoController->verify($request, $envatoService);
      */
-    public function verify(Request $request, EnvatoService $envato): RedirectResponse
+    public function verify(EnvatoVerificationRequest $request, EnvatoService $envato): RedirectResponse
     {
         try {
             $this->validateVerifyRequest($request);
@@ -126,8 +127,8 @@ class EnvatoController extends Controller
         } catch (Throwable $e) {
             Log::error('Envato purchase verification error', [
                 'error' => $e->getMessage(),
-                'purchase_code' => $this->hashForLogging($request->input('purchase_code', '')),
-                'product_slug' => $request->input('product_slug', ''),
+                'purchase_code' => $this->hashForLogging($request->validated('purchase_code', '')),
+                'product_slug' => $request->validated('product_slug', ''),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
@@ -330,8 +331,8 @@ class EnvatoController extends Controller
                     'product_id' => 'required|exists:products, id',
                 ]);
                 // Sanitize input data
-                $purchaseCode = $this->sanitizeInput($request->input('purchase_code'));
-                $productId = (int)$request->input('product_id');
+                $purchaseCode = $this->sanitizeInput($request->validated('purchase_code'));
+                $productId = (int)$request->validated('product_id');
                 // Use the license auto-registration service
                 $registrationResult = $licenseService->autoRegisterLicense($purchaseCode, $productId);
                 if (! $registrationResult['success']) {
@@ -364,8 +365,8 @@ class EnvatoController extends Controller
         } catch (Throwable $e) {
             Log::error('User purchase verification error', [
                 'error' => $e->getMessage(),
-                'purchase_code' => $this->hashForLogging($request->input('purchase_code', '')),
-                'product_id' => $request->input('product_id', ''),
+                'purchase_code' => $this->hashForLogging($request->validated('purchase_code', '')),
+                'product_id' => $request->validated('product_id', ''),
                 'user_id' => auth()->id(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),

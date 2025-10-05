@@ -267,7 +267,9 @@ class TestLicenseGeneration extends Command
         $lines = explode("\n", $content);
         $this->info("\nFirst 10 lines of generated file:");
         $this->info('================================');
-        for ($i = 0; $i < min(10, count($lines)); $i++) {
+        $linesCount = count($lines);
+        $maxLines = min(10, $linesCount);
+        for ($i = 0; $i < $maxLines; $i++) {
             $this->line(($i + 1).': '.$lines[$i]);
         }
     }

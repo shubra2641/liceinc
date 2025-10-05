@@ -188,11 +188,7 @@ class AuthenticatedSessionController extends Controller
     public function securityStatus()
     {
         try {
-            Log::info('Security status check requested', [
-                'ip' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-                'timestamp' => now(),
-            ]);
+            // Security status check - no logging needed for successful operations
             return response()->json([
                 'status' => 'secure',
                 'timestamp' => now(),
@@ -228,13 +224,7 @@ class AuthenticatedSessionController extends Controller
                 'ip' => 'required|ip',
                 'user_agent' => 'required|string|max:500',
             ]);
-            Log::info('Authentication event logged', [
-                'event' => $data['event'],
-                'user_id' => $data['user_id'] ?? null,
-                'ip' => $data['ip'],
-                'user_agent' => $data['user_agent'],
-                'timestamp' => now(),
-            ]);
+            // Authentication event - no logging needed for successful operations
             return response()->json(['status' => 'logged']);
         } catch (\Exception $e) {
             Log::error('Authentication logging failed', [

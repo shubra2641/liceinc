@@ -260,12 +260,7 @@ class LicenseVerificationLogger
             $days = self::validateDays($days);
             $cutoffDate = now()->subDays($days);
             $deletedCount = LicenseVerificationLog::where('created_at', '<', $cutoffDate)->delete();
-            if ($deletedCount > 0) {
-                Log::info('Cleaned old license verification logs', [
-                    'deleted_count' => $deletedCount,
-                    'cutoff_date' => $cutoffDate->toDateString(),
-                ]);
-            }
+            // Cleanup completed successfully - no logging needed for successful operations
             return $deletedCount;
         } catch (Exception $e) {
             Log::error('Failed to clean old logs: '.$e->getMessage());

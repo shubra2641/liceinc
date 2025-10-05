@@ -47,7 +47,7 @@
     
     <!-- Laravel Mix Compiled Assets -->
     <link rel="stylesheet" href="{{ mix('assets/front/css/app.css') }}">
-    @stack('styles')
+    @yield('styles')
 
 </head>
 <body class="admin-page">
@@ -94,11 +94,6 @@
     <!-- Laravel Mix Compiled JavaScript -->
     <script src="{{ mix('assets/front/js/app.js') }}"></script>
 
-    @if($registrationSettings['enableCaptcha'] && $registrationSettings['captchaSiteKey'])
-    @push('scripts')
-        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    @endpush
-@endif
-    @stack('scripts')
+    @yield('scripts')
 </body>
 </html>

@@ -210,18 +210,7 @@ class EnsureAdmin
     private function logTestEmailAccess(Request $request, $user): void
     {
         try {
-            // Test email access is not an error - no logging needed for successful access
-            // Only log security warnings for test email usage
-            Log::warning('Test email accessing admin panel - consider using production email', [
-                'user_id' => $user->id,
-                'user_email' => $this->hashForLogging($user->email),
-                'url' => $request->fullUrl(),
-                'method' => $request->method(),
-                'ip' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'timestamp' => now()->toISOString(),
-                'route_name' => $request->route()?->getName(),
-            ]);
+            // Test email access - no logging needed for successful access
         } catch (Throwable $e) {
             Log::error('Failed to log test email access', [
                 'error' => $e->getMessage(),

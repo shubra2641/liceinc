@@ -165,7 +165,7 @@ class Controller extends BaseController
      * @return mixed The sanitized input
      *
      * @example
-     * $sanitized = $this->sanitizeInput($request->input('name'));
+     * $sanitized = $this->sanitizeInput($request->validated('name'));
      */
     protected function sanitizeInput(mixed $input): mixed
     {

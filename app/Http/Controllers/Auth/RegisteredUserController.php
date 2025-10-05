@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Auth;
 use App\Helpers\ConfigHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use App\Services\EmailService;
 use Illuminate\Auth\Events\Registered;
@@ -67,7 +68,7 @@ class RegisteredUserController extends Controller
      * @throws \Illuminate\Validation\ValidationException
      * @throws \Exception When database operations fail
      */
-    public function store(Request $request): RedirectResponse
+    public function store(RegisterRequest $request): RedirectResponse
     {
         try {
             DB::beginTransaction();
@@ -123,7 +124,7 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    private function validateAntiSpamProtection(Request $request): void
+    private function validateAntiSpamProtection(RegisterRequest $request): void
     {
         $this->validateCaptcha($request);
         $this->validateHumanQuestion($request);
@@ -135,14 +136,14 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    private function validateCaptcha(Request $request): void
+    private function validateCaptcha(RegisterRequest $request): void
     {
         $enableCaptcha = ConfigHelper::getSetting('enable_captcha', false);
         $captchaSecret = ConfigHelper::getSetting('captcha_secret_key', '');
         if (! $enableCaptcha || ! $captchaSecret) {
             return;
         }
-        $token = $request->input('g-recaptcha-response');
+        $token = $request->validated('g-recaptcha-response');
         if (empty($token)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
@@ -163,15 +164,15 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    private function validateHumanQuestion(Request $request): void
+    private function validateHumanQuestion(RegisterRequest $request): void
     {
         $enableHumanQuestion = ConfigHelper::getSetting('enable_human_question', true);
         if (! $enableHumanQuestion) {
             return;
         }
         $humanQuestions = $this->getHumanQuestions();
-        $given = strtolower(trim((string)$request->input('human_answer', '')));
-        $index = $request->input('human_question_index', null);
+        $given = strtolower(trim((string)$request->validated('human_answer', '')));
+        $index = $request->validated('human_question_index', null);
         if (! $this->isValidHumanAnswer($given, $index, $humanQuestions)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),

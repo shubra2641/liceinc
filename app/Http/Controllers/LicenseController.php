@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use App\Http\Requests\Admin\LicenseRequest;
 use App\Models\License;
 use App\Models\Product;
 use Carbon\Carbon;
@@ -143,7 +144,7 @@ class LicenseController extends Controller
      *     "notes": "License notes"
      * }
      */
-    public function store(Request $request)
+    public function store(LicenseRequest $request)
     {
         try {
             $validated = $request->validate([
@@ -157,7 +158,7 @@ class LicenseController extends Controller
             ]);
             // Keep backwards-compatible customer_id if passed (optional) - map to user_id
             if ($request->filled('customer_id')) {
-                $customerId = $this->sanitizeInput($request->input('customer_id'));
+                $customerId = $this->sanitizeInput($request->validated('customer_id'));
                 if (is_numeric($customerId) && $customerId > 0) {
                     $validated['user_id'] = $customerId;
                 }
@@ -218,7 +219,7 @@ class LicenseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, License $license)
+    public function update(LicenseRequest $request, License $license)
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users, id',
@@ -230,7 +231,7 @@ class LicenseController extends Controller
             'max_domains' => ['nullable', 'integer', 'min:1'],
         ]);
         if ($request->filled('customer_id')) {
-            $validated['user_id'] = $request->input('customer_id');
+            $validated['user_id'] = $request->validated('customer_id');
         }
         // Map UI field to DB column with proper parsing and allowing null to clear
         if (array_key_exists('expires_at', $validated)) {

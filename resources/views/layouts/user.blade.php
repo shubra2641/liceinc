@@ -70,7 +70,7 @@
     
     <!-- Laravel Mix Compiled Assets -->
     <link rel="stylesheet" href="{{ asset('assets/front/css/app.css') }}?v={{ filemtime(public_path('assets/front/css/app.css')) }}">
-    @stack('styles')
+    @yield('styles')
 
 
 </head>
@@ -405,7 +405,7 @@
     @endif
 
 
-    @stack('scripts')
+    @yield('scripts')
 
 </body>
 
