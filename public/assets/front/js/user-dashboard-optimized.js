@@ -12,16 +12,8 @@
         const notification = document.createElement('div');
         notification.className = `user-notification user-notification-${type} show`;
         // Sanitize message to prevent XSS
-        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
-        notification.innerHTML = `
+        // Message will be sanitized by SecurityUtils
+        notificationSecurityUtils.safeInnerHTML(this, `
             <div class="user-notification-content">
                 <div class="user-notification-icon">
                     <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
@@ -31,7 +23,7 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-        `;
+        `);
         
         document.body.appendChild(notification);
         setTimeout(() => notification.remove(), 5000);
@@ -82,16 +74,8 @@
         const errorDiv = document.createElement('div');
         errorDiv.className = 'form-error';
         // Sanitize message to prevent XSS
-        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
-        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${sanitizedMessage}`;
+        // Message will be sanitized by SecurityUtils
+        SecurityUtils.safeInnerHTML(errorDiv, `<i class="fas fa-exclamation-circle"></i> ${message}`);
         
         inputGroup.appendChild(errorDiv);
         input.classList.add('form-input-error');
@@ -311,15 +295,7 @@
     const showCopySuccess = (button) => {
         const originalText = button.innerHTML;
         // Sanitize original text to prevent XSS
-        const sanitizedOriginalText = originalText.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
+        // Text will be sanitized by SecurityUtils
         button.innerHTML = '<i class="fas fa-check"></i> Copied!';
         button.style.background = '#10b981';
         

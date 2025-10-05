@@ -73,15 +73,7 @@ function checkForUpdates() {
     })
     .finally(() => {
         // Sanitize original text to prevent XSS
-        const sanitizedOriginalText = originalText.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
+        // Text will be sanitized by SecurityUtils
         btn.innerHTML = sanitizedOriginalText;
         btn.disabled = false;
     });
@@ -131,15 +123,7 @@ function performUpdate(version) {
     })
     .finally(() => {
         // Sanitize original text to prevent XSS
-        const sanitizedOriginalText = originalText.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
+        // Text will be sanitized by SecurityUtils
         btn.innerHTML = sanitizedOriginalText;
         btn.disabled = false;
         bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
@@ -739,24 +723,24 @@ function loadVersionHistory() {
             html += '</div>';
             content.innerHTML = html;
         } else {
-            content.innerHTML = `
+            contentSecurityUtils.safeInnerHTML(this, `
                 <div class="text-center py-4">
                     <i class="fas fa-info-circle text-muted fs-1 mb-3"></i>
                     <h5 class="text-muted">No Version History Available</h5>
                     <p class="text-muted">Version information will appear here</p>
                 </div>
-            `;
+            `);
         }
     })
     .catch(error => {
         console.error('Error loading version history:', error);
-        document.getElementById('version-history-content').innerHTML = `
+        document.getElementById('version-history-content')SecurityUtils.safeInnerHTML(this, `
             <div class="text-center py-4">
                 <i class="fas fa-exclamation-triangle text-warning fs-1 mb-3"></i>
                 <h5 class="text-warning">Error loading version history</h5>
                 <p class="text-muted">Please try again later</p>
             </div>
-        `;
+        `);
     });
 }
 

@@ -80,22 +80,14 @@ class ProductShowManager {
         const notification = document.createElement('div');
         notification.className = `alert alert-${type} alert-dismissible fade show`;
         // Sanitize message to prevent XSS
-        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
-        notification.innerHTML = `
+        // Message will be sanitized by SecurityUtils
+        notificationSecurityUtils.safeInnerHTML(this, `
             <div class="d-flex align-items-center">
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
                 <span>${sanitizedMessage}</span>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
+        `);
         
         // Insert at the top of the page
         const container = document.querySelector('.user-dashboard-container') || document.body;

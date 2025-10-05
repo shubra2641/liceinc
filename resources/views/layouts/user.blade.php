@@ -376,6 +376,8 @@
 
 
     <!-- jQuery (must be loaded first) -->
+    <!-- Security Utils Library -->
+    <script src="{{ asset('assets/js/security-utils.js') }}"></script>
     <script src="{{ asset('assets/admin/js/jquery-3.6.0.min.js') }}"></script>
     <!-- Alpine.js for Interactive Components (Local) -->
     <script src="{{ asset('vendor/assets/alpinejs/alpine.min.js') }}" defer></script>

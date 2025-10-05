@@ -9,21 +9,13 @@ function showNotification(message, type = 'info') {
     notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show`;
     
     // Sanitize message to prevent XSS
-    const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
-        return {
-            '<': '&lt;',
-            '>': '&gt;',
-            '&': '&amp;',
-            '"': '&quot;',
-            "'": '&#x27;'
-        }[match];
-    });
+    // Message will be sanitized by SecurityUtils
     
-    notification.innerHTML = `
+    SecurityUtils.safeInnerHTML(this, `
         <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
-        ${sanitizedMessage}
+        ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
+    `);
     
     notification.style.cssText = `
         position: fixed;
@@ -100,17 +92,9 @@ class ToastManager {
         };
 
         // Sanitize message to prevent XSS
-        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
+        // Message will be sanitized by SecurityUtils
         
-        toast.innerHTML = `
+        toastSecurityUtils.safeInnerHTML(this, `
             <div class="toast-header">
                 <i class="${icons[type]} toast-icon"></i>
                 <h6 class="toast-title">${titles[type]}</h6>
@@ -121,7 +105,7 @@ class ToastManager {
             <div class="toast-body">
                 ${sanitizedMessage}
             </div>
-        `;
+        `);
 
         return toast;
     }
@@ -575,7 +559,7 @@ class AdminDashboard {
             }[match];
         });
         
-        preview.innerHTML = `<img src="${sanitizedSrc}" class="img-thumbnail image-preview">`;
+        previewSecurityUtils.safeInnerHTML(this, `<img src="${sanitizedSrc}" class="img-thumbnail image-preview">`);
             };
             reader.readAsDataURL(file);
         }
@@ -764,7 +748,7 @@ class AdminDashboard {
             }[match];
         });
         
-        iconPreview.innerHTML = `<i class="${sanitizedIconClass}"></i>`;
+        iconPreviewSecurityUtils.safeInnerHTML(this, `<i class="${sanitizedIconClass}"></i>`);
             });
         }
     }
@@ -1079,15 +1063,7 @@ class AdminDashboard {
     // Show alert message
     showAlert(message, type = 'info') {
         // Sanitize message to prevent XSS
-        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
+        // Message will be sanitized by SecurityUtils
         
         const alertHtml = `
             <div class="alert alert-${type} alert-dismissible fade show" role="alert">
@@ -1174,12 +1150,12 @@ class AdminDashboard {
             '<i class="fas fa-check-circle"></i>' :
             '<i class="fas fa-times-circle"></i>';
         
-        notification.innerHTML = `
+        notificationSecurityUtils.safeInnerHTML(this, `
             <div class="admin-notification-content">
                 <div class="admin-notification-icon">${icon}</div>
                 <div class="admin-notification-message">${message}</div>
             </div>
-        `;
+        `);
         
         notification.style.cssText = `
             position: fixed;
@@ -1265,7 +1241,7 @@ class AdminDashboard {
     previewTest() {
         const modal = document.createElement('div');
         modal.className = 'modal fade';
-        modal.innerHTML = `
+        modalSecurityUtils.safeInnerHTML(this, `
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -1287,7 +1263,7 @@ class AdminDashboard {
                     </div>
                 </div>
             </div>
-        `;
+        `);
         
         document.body.appendChild(modal);
         const bsModal = new bootstrap.Modal(modal);
@@ -2420,12 +2396,12 @@ class AdminDashboard {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                contentElement.innerHTML = `<pre>${data.content}</pre>`;
+                contentElementSecurityUtils.safeInnerHTML(this, `<pre>${data.content}</pre>`);
                 if (copyBtn) {
                     copyBtn.setAttribute('data-text', data.content);
                 }
             } else {
-                contentElement.innerHTML = `<div class="text-danger"><i class="fas fa-exclamation-triangle"></i> ${data.message || 'Error loading file'}</div>`;
+                contentElementSecurityUtils.safeInnerHTML(this, `<div class="text-danger"><i class="fas fa-exclamation-triangle"></i> ${data.message || 'Error loading file'}</div>`);
             }
         })
         .catch(error => {
@@ -2467,12 +2443,12 @@ class AdminDashboard {
         const contentElement = document.querySelector('.template-content');
         
         // Show loading
-        contentElement.innerHTML = `
+        contentElementSecurityUtils.safeInnerHTML(this, `
             <div class="text-center py-4">
                 <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
                 <p class="mt-2 text-muted">Loading template...</p>
             </div>
-        `;
+        `);
         
         // Make AJAX request
         fetch(`/admin/programming-languages/${languageId}/template`, {
@@ -2485,10 +2461,10 @@ class AdminDashboard {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                contentElement.innerHTML = `<pre class="bg-light p-3 rounded"><code>${data.content}</code></pre>`;
+                contentElementSecurityUtils.safeInnerHTML(this, `<pre class="bg-light p-3 rounded"><code>${data.content}</code></pre>`);
                 this.templateContent = data.content;
             } else {
-                contentElement.innerHTML = `<div class="text-danger text-center py-4"><i class="fas fa-exclamation-triangle fa-2x"></i><p class="mt-2">${data.message || 'Error loading template'}</p></div>`;
+                contentElementSecurityUtils.safeInnerHTML(this, `<div class="text-danger text-center py-4"><i class="fas fa-exclamation-triangle fa-2x"></i><p class="mt-2">${data.message || 'Error loading template'}</p></div>`);
             }
         })
         .catch(error => {
@@ -2666,7 +2642,7 @@ class AdminDashboard {
             const token = tokenInput ? tokenInput.value : '';
             
             if (!token) {
-                resultDiv.innerHTML = `
+                resultDivSecurityUtils.safeInnerHTML(this, `
                     <div class="admin-alert admin-alert-warning">
                         <div class="admin-alert-content">
                             <i class="fas fa-exclamation-triangle admin-alert-icon"></i>
@@ -2676,7 +2652,7 @@ class AdminDashboard {
                             </div>
                         </div>
                     </div>
-                `;
+                `);
                 return;
             }
             
@@ -2694,7 +2670,7 @@ class AdminDashboard {
             const data = await response.json();
 
             if (data.success) {
-                resultDiv.innerHTML = `
+                resultDivSecurityUtils.safeInnerHTML(this, `
                     <div class="admin-alert admin-alert-success">
                         <div class="admin-alert-content">
                             <i class="fas fa-check-circle admin-alert-icon"></i>
@@ -2704,9 +2680,9 @@ class AdminDashboard {
                             </div>
                         </div>
                     </div>
-                `;
+                `);
             } else {
-                resultDiv.innerHTML = `
+                resultDivSecurityUtils.safeInnerHTML(this, `
                     <div class="admin-alert admin-alert-error">
                         <div class="admin-alert-content">
                             <i class="fas fa-exclamation-triangle admin-alert-icon"></i>
@@ -2716,10 +2692,10 @@ class AdminDashboard {
                             </div>
                         </div>
                     </div>
-                `;
+                `);
             }
         } catch (error) {
-            resultDiv.innerHTML = `
+            resultDivSecurityUtils.safeInnerHTML(this, `
                 <div class="admin-alert admin-alert-error">
                     <div class="admin-alert-content">
                         <i class="fas fa-exclamation-triangle admin-alert-icon"></i>
@@ -2729,7 +2705,7 @@ class AdminDashboard {
                         </div>
                     </div>
                 </div>
-            `;
+            `);
         } finally {
             testBtn.innerHTML = originalText;
             testBtn.disabled = false;
@@ -2772,10 +2748,10 @@ class AdminDashboard {
                             // Create preview if it doesn't exist
                             const previewDiv = document.createElement('div');
                             previewDiv.className = 'mt-3';
-                            previewDiv.innerHTML = `
+                            previewDivSecurityUtils.safeInnerHTML(this, `
                                 <img src="${e.target.result}" alt="Preview" class="admin-image-preview">
                                 <p class="text-muted mt-1">Preview</p>
-                            `;
+                            `);
                             input.parentElement.appendChild(previewDiv);
                         }
                     };
@@ -2854,7 +2830,7 @@ class AdminDashboard {
             // Create a modal or overlay to show preloader preview
             const modal = document.createElement('div');
             modal.className = 'admin-preloader-modal';
-            modal.innerHTML = `
+            modalSecurityUtils.safeInnerHTML(this, `
                 <div class="admin-preloader-overlay">
                     <div class="admin-preloader-content">
                         <div class="admin-preloader-spinner"></div>
@@ -2864,7 +2840,7 @@ class AdminDashboard {
                         </button>
                     </div>
                 </div>
-            `;
+            `);
             
             document.body.appendChild(modal);
             
@@ -3432,12 +3408,12 @@ function addReadOnlyIndicator(templateTextarea) {
     // Create read-only indicator
     const indicator = document.createElement('div');
     indicator.className = 'readonly-indicator';
-    indicator.innerHTML = `
+    indicatorSecurityUtils.safeInnerHTML(this, `
         <div class="readonly-badge">
             <i class="fas fa-lock me-2"></i>
             <span>Read-only Template</span>
         </div>
-    `;
+    `);
     
     // Insert after the textarea
     templateTextarea.parentNode.insertBefore(indicator, templateTextarea.nextSibling);
@@ -3573,7 +3549,7 @@ function previewTemplate(templateName) {
         // Create preview modal
         const modal = document.createElement('div');
         modal.className = 'modal fade';
-        modal.innerHTML = `
+        modalSecurityUtils.safeInnerHTML(this, `
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -3608,7 +3584,7 @@ function previewTemplate(templateName) {
                     </div>
                 </div>
             </div>
-        `;
+        `);
         
         document.body.appendChild(modal);
         
@@ -3819,7 +3795,7 @@ function updateTemplateList() {
 function showAvailableTemplates() {
     const modal = document.createElement('div');
     modal.className = 'modal fade';
-    modal.innerHTML = `
+    modalSecurityUtils.safeInnerHTML(this, `
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -3874,7 +3850,7 @@ function showAvailableTemplates() {
                 </div>
             </div>
         </div>
-    `;
+    `);
     
     document.body.appendChild(modal);
     
@@ -3982,7 +3958,7 @@ function viewTemplateContent(templateName, buttonElement) {
     const templateData = JSON.parse(localStorage.getItem('template_' + templateName));
     if (templateData) {
         const viewer = document.getElementById('template-content-viewer');
-        viewer.innerHTML = `
+        viewerSecurityUtils.safeInnerHTML(this, `
             <div class="mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h6>${templateData.name}</h6>
@@ -4005,7 +3981,7 @@ function viewTemplateContent(templateName, buttonElement) {
                 </div>
             </div>
             <pre class="bg-light p-3 rounded code-preview"><code>${templateData.content}</code></pre>
-        `;
+        `);
     }
 }
 
@@ -4014,7 +3990,7 @@ function createTemplate() {
     
     const modal = document.createElement('div');
     modal.className = 'modal fade';
-    modal.innerHTML = `
+    modalSecurityUtils.safeInnerHTML(this, `
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -4055,7 +4031,7 @@ function createTemplate() {
                 </div>
             </div>
         </div>
-    `;
+    `);
     
     document.body.appendChild(modal);
     
@@ -5030,7 +5006,7 @@ function initializeHumanQuestions() {
         const wrapper = document.createElement('div');
         wrapper.className = 'human-question-row mb-3';
         wrapper.setAttribute('data-index', idx);
-        wrapper.innerHTML = `
+        wrapperSecurityUtils.safeInnerHTML(this, `
             <div class="row g-2 align-items-center">
                 <div class="col-md-7">
                     <input type="text" name="human_questions[${idx}][question]" class="admin-form-input" value="" placeholder="Question">
@@ -5042,7 +5018,7 @@ function initializeHumanQuestions() {
                     <button type="button" class="admin-btn admin-btn-danger btn-remove-question">&times;</button>
                 </div>
             </div>
-        `;
+        `);
         list.appendChild(wrapper);
         reindex();
     });
@@ -5116,7 +5092,7 @@ function initializeApiTesting() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    apiTestResult.innerHTML = `
+                    apiTestResultSecurityUtils.safeInnerHTML(this, `
                         <div class="admin-alert admin-alert-success">
                             <div class="admin-alert-content">
                                 <i class="fas fa-check-circle admin-alert-icon"></i>
@@ -5126,9 +5102,9 @@ function initializeApiTesting() {
                                 </div>
                             </div>
                         </div>
-                    `;
+                    `);
                 } else {
-                    apiTestResult.innerHTML = `
+                    apiTestResultSecurityUtils.safeInnerHTML(this, `
                         <div class="admin-alert admin-alert-danger">
                             <div class="admin-alert-content">
                                 <i class="fas fa-exclamation-triangle admin-alert-icon"></i>
@@ -5138,11 +5114,11 @@ function initializeApiTesting() {
                                 </div>
                             </div>
                         </div>
-                    `;
+                    `);
                 }
             })
             .catch(error => {
-                apiTestResult.innerHTML = `
+                apiTestResultSecurityUtils.safeInnerHTML(this, `
                     <div class="admin-alert admin-alert-danger">
                         <div class="admin-alert-content">
                             <i class="fas fa-exclamation-triangle admin-alert-icon"></i>
@@ -5152,7 +5128,7 @@ function initializeApiTesting() {
                             </div>
                         </div>
                     </div>
-                `;
+                `);
             })
             .finally(() => {
                 // Restore button state

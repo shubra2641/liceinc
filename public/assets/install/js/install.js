@@ -310,15 +310,7 @@
 
         resultDiv.className = 'connection-result ' + (success ? 'success' : 'error');
         // Sanitize message to prevent XSS
-        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
+        // Message will be sanitized by SecurityUtils
         resultDiv.innerHTML = '<i class="fas ' + (success ? 'fa-check-circle' : 'fa-times-circle') + '"></i> ' + sanitizedMessage;
         resultDiv.style.display = 'flex';
     }
@@ -510,22 +502,14 @@
         const notification = document.createElement('div');
         notification.className = `install-notification install-alert-${type}`;
         // Sanitize message to prevent XSS
-        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
-        notification.innerHTML = `
+        // Message will be sanitized by SecurityUtils
+        notificationSecurityUtils.safeInnerHTML(this, `
             <i class="fas ${getIconForType(type)}"></i>
             <span>${sanitizedMessage}</span>
             <button class="notification-close" onclick="this.parentElement.remove()">
                 <i class="fas fa-times"></i>
             </button>
-        `;
+        `);
 
         // Add to page
         const container = document.querySelector('.install-container') || document.body;

@@ -1761,7 +1761,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         "'": '&#x27;'
                     }[match];
                 });
-                modalContent.innerHTML = `
+                modalContentSecurityUtils.safeInnerHTML(this, `
                     <div class="row">
                         <div class="col-md-6">
                             <p><strong>Log ID:</strong> ${sanitizedLogId}</p>
@@ -1775,7 +1775,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <hr>
                     <h6>Detailed Information</h6>
                     <p>Detailed log information will be displayed here</p>
-                `;
+                `);
             }
             const modal = new bootstrap.Modal(document.getElementById('logDetailsModal'));
             modal.show();

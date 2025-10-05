@@ -204,15 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'license-error';
     // Sanitize message to prevent XSS
-    const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
-        return {
-            '<': '&lt;',
-            '>': '&gt;',
-            '&': '&amp;',
-            '"': '&quot;',
-            "'": '&#x27;'
-        }[match];
-    });
+    // Message will be sanitized by SecurityUtils
     errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + sanitizedMessage;
         
         // Insert after the input field

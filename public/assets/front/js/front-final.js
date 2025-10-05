@@ -498,19 +498,10 @@ class ProductShowManager {
         const notification = document.createElement('div');
         notification.className = `alert alert-${type} alert-dismissible fade show`;
         // Sanitize message to prevent XSS
-        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
-        notification.innerHTML = `
+        SecurityUtils.safeInnerHTML(notification, `
             <div class="d-flex align-items-center">
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
-                <span>${sanitizedMessage}</span>
+                <span>${message}</span>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         `;
@@ -548,7 +539,7 @@ window.ProductShowManager = ProductShowManager;
     const showNotification = (message, type = 'info') => {
         const notification = document.createElement('div');
         notification.className = `user-notification user-notification-${type} show`;
-        notification.innerHTML = `
+        notificationSecurityUtils.safeInnerHTML(this, `
             <div class="user-notification-content">
                 <div class="user-notification-icon">
                     <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
@@ -558,7 +549,7 @@ window.ProductShowManager = ProductShowManager;
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-        `;
+        `);
         
         document.body.appendChild(notification);
         setTimeout(() => notification.remove(), 5000);
@@ -609,16 +600,7 @@ window.ProductShowManager = ProductShowManager;
         const errorDiv = document.createElement('div');
         errorDiv.className = 'form-error';
         // Sanitize message to prevent XSS
-        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
-        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${sanitizedMessage}`;
+        SecurityUtils.safeInnerHTML(errorDiv, `<i class="fas fa-exclamation-circle"></i> ${message}`);
         
         inputGroup.appendChild(errorDiv);
         input.classList.add('form-input-error');
@@ -837,21 +819,11 @@ window.ProductShowManager = ProductShowManager;
 
     const showCopySuccess = (button) => {
         const originalText = button.innerHTML;
-        // Sanitize original text to prevent XSS
-        const sanitizedOriginalText = originalText.replace(/[<>&"']/g, function(match) {
-            return {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#x27;'
-            }[match];
-        });
         button.innerHTML = '<i class="fas fa-check"></i> Copied!';
         button.style.background = '#10b981';
         
         setTimeout(() => {
-            button.innerHTML = sanitizedOriginalText;
+            SecurityUtils.safeInnerHTML(button, originalText);
             button.style.background = '';
         }, 2000);
     };
@@ -1891,7 +1863,8 @@ class MaintenanceManager {
                 hour: 'numeric',
                 minute: '2-digit'
             });
-            lastUpdated.innerHTML = `<i class="fas fa-clock me-2"></i>Last updated: ${timeString}`;
+            // Use global security utility for safe HTML assignment
+            SecurityUtils.safeInnerHTML(lastUpdated, `<i class="fas fa-clock me-2"></i>Last updated: ${timeString}`);
         }
     }
 }
