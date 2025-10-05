@@ -72,7 +72,17 @@ function checkForUpdates() {
         showAlert('error', 'An error occurred while checking for updates');
     })
     .finally(() => {
-        btn.innerHTML = originalText;
+        // Sanitize original text to prevent XSS
+        const sanitizedOriginalText = originalText.replace(/[<>&"']/g, function(match) {
+            return {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+            }[match];
+        });
+        btn.innerHTML = sanitizedOriginalText;
         btn.disabled = false;
     });
 }
@@ -120,7 +130,17 @@ function performUpdate(version) {
         showAlert('error', 'An error occurred during update');
     })
     .finally(() => {
-        btn.innerHTML = originalText;
+        // Sanitize original text to prevent XSS
+        const sanitizedOriginalText = originalText.replace(/[<>&"']/g, function(match) {
+            return {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+            }[match];
+        });
+        btn.innerHTML = sanitizedOriginalText;
         btn.disabled = false;
         bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
     });
@@ -131,8 +151,18 @@ function showVersionDetails(version) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            // Sanitize version to prevent XSS
+            const sanitizedVersion = version.replace(/[<>&"']/g, function(match) {
+                return {
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '&': '&amp;',
+                    '"': '&quot;',
+                    "'": '&#x27;'
+                }[match];
+            });
             document.getElementById('versionDetailsTitle').innerHTML = 
-                '<i class="fas fa-info-circle me-2"></i>Version Details - ' + version;
+                '<i class="fas fa-info-circle me-2"></i>Version Details - ' + sanitizedVersion;
             
             let content = '<div class="version-details">';
             
@@ -140,7 +170,17 @@ function showVersionDetails(version) {
                 content += '<h6 class="text-success mb-3"><i class="fas fa-plus me-2"></i>New Features</h6>';
                 content += '<ul class="list-group list-group-flush mb-4">';
                 data.data.info.features.forEach(feature => {
-                    content += `<li class="list-group-item"><i class="fas fa-check text-success me-2"></i>${feature}</li>`;
+                    // Sanitize feature to prevent XSS
+                    const sanitizedFeature = feature.replace(/[<>&"']/g, function(match) {
+                        return {
+                            '<': '&lt;',
+                            '>': '&gt;',
+                            '&': '&amp;',
+                            '"': '&quot;',
+                            "'": '&#x27;'
+                        }[match];
+                    });
+                    content += `<li class="list-group-item"><i class="fas fa-check text-success me-2"></i>${sanitizedFeature}</li>`;
                 });
                 content += '</ul>';
             }
@@ -149,7 +189,17 @@ function showVersionDetails(version) {
                 content += '<h6 class="text-warning mb-3"><i class="fas fa-wrench me-2"></i>Bug Fixes</h6>';
                 content += '<ul class="list-group list-group-flush mb-4">';
                 data.data.info.fixes.forEach(fix => {
-                    content += `<li class="list-group-item"><i class="fas fa-check text-warning me-2"></i>${fix}</li>`;
+                    // Sanitize fix to prevent XSS
+                    const sanitizedFix = fix.replace(/[<>&"']/g, function(match) {
+                        return {
+                            '<': '&lt;',
+                            '>': '&gt;',
+                            '&': '&amp;',
+                            '"': '&quot;',
+                            "'": '&#x27;'
+                        }[match];
+                    });
+                    content += `<li class="list-group-item"><i class="fas fa-check text-warning me-2"></i>${sanitizedFix}</li>`;
                 });
                 content += '</ul>';
             }
@@ -158,7 +208,17 @@ function showVersionDetails(version) {
                 content += '<h6 class="text-info mb-3"><i class="fas fa-arrow-up me-2"></i>Improvements</h6>';
                 content += '<ul class="list-group list-group-flush mb-4">';
                 data.data.info.improvements.forEach(improvement => {
-                    content += `<li class="list-group-item"><i class="fas fa-check text-info me-2"></i>${improvement}</li>`;
+                    // Sanitize improvement to prevent XSS
+                    const sanitizedImprovement = improvement.replace(/[<>&"']/g, function(match) {
+                        return {
+                            '<': '&lt;',
+                            '>': '&gt;',
+                            '&': '&amp;',
+                            '"': '&quot;',
+                            "'": '&#x27;'
+                        }[match];
+                    });
+                    content += `<li class="list-group-item"><i class="fas fa-check text-info me-2"></i>${sanitizedImprovement}</li>`;
                 });
                 content += '</ul>';
             }
@@ -167,7 +227,17 @@ function showVersionDetails(version) {
                 content += '<h6 class="text-primary mb-3"><i class="fas fa-list me-2"></i>Update Instructions</h6>';
                 content += '<ul class="list-group list-group-flush">';
                 data.data.instructions.forEach(instruction => {
-                    content += `<li class="list-group-item"><i class="fas fa-arrow-right text-primary me-2"></i>${instruction}</li>`;
+                    // Sanitize instruction to prevent XSS
+                    const sanitizedInstruction = instruction.replace(/[<>&"']/g, function(match) {
+                        return {
+                            '<': '&lt;',
+                            '>': '&gt;',
+                            '&': '&amp;',
+                            '"': '&quot;',
+                            "'": '&#x27;'
+                        }[match];
+                    });
+                    content += `<li class="list-group-item"><i class="fas fa-arrow-right text-primary me-2"></i>${sanitizedInstruction}</li>`;
                 });
                 content += '</ul>';
             }
@@ -281,9 +351,20 @@ function displayUpdateInfo(updateData) {
     // Display changelog
     const changelogElement = document.getElementById('update-changelog');
     if (updateData.update_info.changelog && updateData.update_info.changelog.length > 0) {
-        changelogElement.innerHTML = '<ul class="list-unstyled">' + 
-            updateData.update_info.changelog.map(item => `<li><i class="fas fa-check text-success me-2"></i>${item}</li>`).join('') + 
-            '</ul>';
+        // Sanitize changelog items to prevent XSS
+        const sanitizedChangelog = updateData.update_info.changelog.map(item => {
+            const sanitizedItem = item.replace(/[<>&"']/g, function(match) {
+                return {
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '&': '&amp;',
+                    '"': '&quot;',
+                    "'": '&#x27;'
+                }[match];
+            });
+            return `<li><i class="fas fa-check text-success me-2"></i>${sanitizedItem}</li>`;
+        });
+        changelogElement.innerHTML = '<ul class="list-unstyled">' + sanitizedChangelog.join('') + '</ul>';
     } else {
         changelogElement.textContent = 'No changelog available';
     }
@@ -473,6 +554,25 @@ function checkAutoUpdates() {
 
 function showAutoUpdateInfo(updateData) {
     const updateInfoDiv = document.getElementById('auto-update-info');
+    // Sanitize update data to prevent XSS
+    const sanitizedCurrentVersion = updateData.current_version.replace(/[<>&"']/g, function(match) {
+        return {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+        }[match];
+    });
+    const sanitizedLatestVersion = updateData.latest_version.replace(/[<>&"']/g, function(match) {
+        return {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+        }[match];
+    });
     updateInfoDiv.innerHTML = `
         <div class="card">
             <div class="card-header">
@@ -484,8 +584,8 @@ function showAutoUpdateInfo(updateData) {
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Current Version:</strong> ${updateData.current_version}</p>
-                        <p><strong>Latest Version:</strong> ${updateData.latest_version}</p>
+                        <p><strong>Current Version:</strong> ${sanitizedCurrentVersion}</p>
+                        <p><strong>Latest Version:</strong> ${sanitizedLatestVersion}</p>
                         <p><strong>Update Type:</strong> 
                             <span class="badge ${updateData.update_info.is_major ? 'bg-warning' : 'bg-info'}">
                                 ${updateData.update_info.is_major ? 'Major' : 'Minor'}

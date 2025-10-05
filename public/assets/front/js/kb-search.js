@@ -36,7 +36,18 @@ function initializeSearchResults() {
                 }
 
                 if (url) {
-                    window.location.href = url;
+                    // Validate URL to prevent XSS and ensure it's safe
+                    try {
+                        const urlObj = new URL(url, window.location.origin);
+                        // Only allow same-origin URLs
+                        if (urlObj.origin === window.location.origin) {
+                            window.location.href = url;
+                        } else {
+                            console.error('Invalid URL: Cross-origin navigation blocked');
+                        }
+                    } catch (e) {
+                        console.error('Invalid URL format:', e);
+                    }
                 }
             });
         }

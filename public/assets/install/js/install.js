@@ -309,7 +309,17 @@
         if (!resultDiv) return;
 
         resultDiv.className = 'connection-result ' + (success ? 'success' : 'error');
-        resultDiv.innerHTML = '<i class="fas ' + (success ? 'fa-check-circle' : 'fa-times-circle') + '"></i> ' + message;
+        // Sanitize message to prevent XSS
+        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
+            return {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+            }[match];
+        });
+        resultDiv.innerHTML = '<i class="fas ' + (success ? 'fa-check-circle' : 'fa-times-circle') + '"></i> ' + sanitizedMessage;
         resultDiv.style.display = 'flex';
     }
 
@@ -467,7 +477,17 @@
             button.disabled = true;
             const originalText = button.innerHTML;
             button.dataset.originalText = originalText;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>' + getTranslation('testing') + '</span>';
+            // Sanitize translation text to prevent XSS
+            const sanitizedTranslation = getTranslation('testing').replace(/[<>&"']/g, function(match) {
+                return {
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '&': '&amp;',
+                    '"': '&quot;',
+                    "'": '&#x27;'
+                }[match];
+            });
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>' + sanitizedTranslation + '</span>';
         } else {
             button.classList.remove('loading');
             button.disabled = false;
@@ -489,9 +509,19 @@
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `install-notification install-alert-${type}`;
+        // Sanitize message to prevent XSS
+        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
+            return {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+            }[match];
+        });
         notification.innerHTML = `
             <i class="fas ${getIconForType(type)}"></i>
-            <span>${message}</span>
+            <span>${sanitizedMessage}</span>
             <button class="notification-close" onclick="this.parentElement.remove()">
                 <i class="fas fa-times"></i>
             </button>

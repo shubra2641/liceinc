@@ -203,7 +203,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create new error message
         const errorDiv = document.createElement('div');
         errorDiv.className = 'license-error';
-    errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + message;
+    // Sanitize message to prevent XSS
+    const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
+        return {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+        }[match];
+    });
+    errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + sanitizedMessage;
         
         // Insert after the input field
         const inputGroup = purchaseCodeInput.closest('.license-form-group');

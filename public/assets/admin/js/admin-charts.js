@@ -99,6 +99,10 @@ if (typeof window.AdminCharts === 'undefined') {
                 };
 
                 try {
+                    // Validate URL to prevent SSRF attacks
+                    if (!this.isValidUrl(primaryUrl)) {
+                        throw new Error('Invalid URL: SSRF protection activated');
+                    }
                     const resp = await fetch(primaryUrl, opts);
                     return await tryParseJson(resp);
                 } catch (e) {
@@ -111,6 +115,22 @@ if (typeof window.AdminCharts === 'undefined') {
             };
 
             this.init();
+        }
+
+        /**
+         * Validate URL to prevent SSRF attacks
+         */
+        isValidUrl(url) {
+            try {
+                const urlObj = new URL(url);
+                const allowedOrigins = [
+                    window.location.origin,
+                    window.location.protocol + '//' + window.location.host
+                ];
+                return allowedOrigins.some(origin => url.startsWith(origin));
+            } catch (e) {
+                return false;
+            }
         }
 
         init() {
@@ -1731,10 +1751,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const logId = e.target.closest('[data-action="view-log-details"]').dataset.logId;
             const modalContent = document.getElementById('logDetailsContent');
             if (modalContent) {
+                // Sanitize logId to prevent XSS
+                const sanitizedLogId = logId.replace(/[<>&"']/g, function(match) {
+                    return {
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '&': '&amp;',
+                        '"': '&quot;',
+                        "'": '&#x27;'
+                    }[match];
+                });
                 modalContent.innerHTML = `
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>Log ID:</strong> ${logId}</p>
+                            <p><strong>Log ID:</strong> ${sanitizedLogId}</p>
                             <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
                         </div>
                         <div class="col-md-6">

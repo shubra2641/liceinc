@@ -497,10 +497,20 @@ class ProductShowManager {
     showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `alert alert-${type} alert-dismissible fade show`;
+        // Sanitize message to prevent XSS
+        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
+            return {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+            }[match];
+        });
         notification.innerHTML = `
             <div class="d-flex align-items-center">
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
-                <span>${message}</span>
+                <span>${sanitizedMessage}</span>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         `;
@@ -598,7 +608,17 @@ window.ProductShowManager = ProductShowManager;
         
         const errorDiv = document.createElement('div');
         errorDiv.className = 'form-error';
-        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+        // Sanitize message to prevent XSS
+        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
+            return {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+            }[match];
+        });
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${sanitizedMessage}`;
         
         inputGroup.appendChild(errorDiv);
         input.classList.add('form-input-error');
@@ -817,11 +837,21 @@ window.ProductShowManager = ProductShowManager;
 
     const showCopySuccess = (button) => {
         const originalText = button.innerHTML;
+        // Sanitize original text to prevent XSS
+        const sanitizedOriginalText = originalText.replace(/[<>&"']/g, function(match) {
+            return {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+            }[match];
+        });
         button.innerHTML = '<i class="fas fa-check"></i> Copied!';
         button.style.background = '#10b981';
         
         setTimeout(() => {
-            button.innerHTML = originalText;
+            button.innerHTML = sanitizedOriginalText;
             button.style.background = '';
         }, 2000);
     };
@@ -1154,7 +1184,20 @@ window.ProductShowManager = ProductShowManager;
             const domainsList = $('.domains-list');
             if (!domainsList) return;
             
-            domainsList.innerHTML = domains.map(domain => `
+            // Sanitize domains to prevent XSS
+            const sanitizedDomains = domains.map(domain => ({
+                ...domain,
+                domain: domain.domain.replace(/[<>&"']/g, function(match) {
+                    return {
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '&': '&amp;',
+                        '"': '&quot;',
+                        "'": '&#x27;'
+                    }[match];
+                })
+            }));
+            domainsList.innerHTML = sanitizedDomains.map(domain => `
                 <div class="domain-item">
                     <div class="domain-info">
                         <div class="domain-name">
@@ -1255,7 +1298,48 @@ window.ProductShowManager = ProductShowManager;
                         }
                     ];
                     
-                    historyContent.innerHTML = mockHistory.map(item => `
+                    // Sanitize mock history data to prevent XSS
+                    const sanitizedHistory = mockHistory.map(item => ({
+                        ...item,
+                        title: item.title.replace(/[<>&"']/g, function(match) {
+                            return {
+                                '<': '&lt;',
+                                '>': '&gt;',
+                                '&': '&amp;',
+                                '"': '&quot;',
+                                "'": '&#x27;'
+                            }[match];
+                        }),
+                        description: item.description.replace(/[<>&"']/g, function(match) {
+                            return {
+                                '<': '&lt;',
+                                '>': '&gt;',
+                                '&': '&amp;',
+                                '"': '&quot;',
+                                "'": '&#x27;'
+                            }[match];
+                        }),
+                        date: item.date.replace(/[<>&"']/g, function(match) {
+                            return {
+                                '<': '&lt;',
+                                '>': '&gt;',
+                                '&': '&amp;',
+                                '"': '&quot;',
+                                "'": '&#x27;'
+                            }[match];
+                        }),
+                        ip: item.ip.replace(/[<>&"']/g, function(match) {
+                            return {
+                                '<': '&lt;',
+                                '>': '&gt;',
+                                '&': '&amp;',
+                                '"': '&quot;',
+                                "'": '&#x27;'
+                            }[match];
+                        })
+                    }));
+                    
+                    historyContent.innerHTML = sanitizedHistory.map(item => `
                         <div class="history-item">
                             <div class="history-item-icon ${item.type}">
                                 <i class="fas fa-${getHistoryIcon(item.type)}"></i>
