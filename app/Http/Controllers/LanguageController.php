@@ -55,10 +55,10 @@ class LanguageController extends Controller
     {
         $available = [];
         $langPath = resource_path('lang');
-        if (is_dir($langPath)) {
+        if (Storage::disk('local')->exists($langPath)) {
             $directories = array_diff(scandir($langPath), ['.', '..']);
             foreach ($directories as $dir) {
-                if (is_dir($langPath.DIRECTORY_SEPARATOR.$dir)) {
+                if (Storage::disk('local')->exists($langPath.DIRECTORY_SEPARATOR.$dir)) {
                     $available[] = $dir;
                 }
             }

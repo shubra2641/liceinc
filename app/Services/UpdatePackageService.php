@@ -434,10 +434,8 @@ class UpdatePackageService
                     }
                     // Create directory if it doesn't exist
                     $targetDir = dirname($targetPath);
-                    if (! is_dir($targetDir)) {
-                        if (! mkdir($targetDir, 0755, true)) {
-                            throw new \Exception("Failed to create directory: {$targetDir}");
-                        }
+                    if (! Storage::disk('local')->exists($targetDir)) {
+                        Storage::disk('local')->makeDirectory($targetDir);
                     }
                     // Copy file
                     if (! copy($file->getRealPath(), $targetPath)) {
@@ -522,11 +520,11 @@ class UpdatePackageService
         ];
         try {
             $versionFile = $extractPath.'/version.json';
-            if (file_exists($versionFile)) {
+            if (Storage::disk('local')->exists($versionFile)) {
                 if (! is_readable($versionFile)) {
                     throw new \Exception('Version file is not readable');
                 }
-                $versionContent = file_get_contents($versionFile);
+                $versionContent = Storage::disk('local')->get($versionFile);
                 if ($versionContent === false) {
                     throw new \Exception('Failed to read version file');
                 }

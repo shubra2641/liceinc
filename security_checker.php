@@ -4,6 +4,13 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
+ * Escape output to prevent XSS attacks
+ */
+function escapeOutput($string) {
+    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+}
+
+/**
  * Comprehensive Security Checker for Laravel Application
  * * This script performs complete static analysis security checks including:
  * - Input validation
@@ -184,7 +191,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -234,7 +241,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -282,7 +289,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -338,7 +345,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -395,7 +402,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -442,7 +449,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -474,7 +481,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -502,7 +509,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -533,7 +540,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -576,7 +583,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -612,7 +619,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -649,7 +656,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -697,7 +704,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -735,7 +742,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -765,7 +772,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**
@@ -802,7 +809,7 @@ class SecurityChecker
         }
         
         echo "   ✅ Files checked: $filesChecked\n";
-        echo "   ❌ Issues found: $issues\n\n";
+        echo "   ❌ Issues found: " . escapeOutput($issues) . "\n\n";
     }
 
     /**

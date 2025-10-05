@@ -189,12 +189,15 @@ class ProgrammingLanguage extends Model
     {
         $templateDir = resource_path('templates/licenses');
         $templates = [];
-        if (is_dir($templateDir)) {
+        if (Storage::disk('local')->exists($templateDir)) {
             // Look for both .php and .blade.php files
             $files = array_merge(
-                glob($templateDir.'/*.php'),
-                glob($templateDir.'/*.blade.php'),
+                Storage::disk('local')->files($templateDir, true),
+                Storage::disk('local')->files($templateDir, true)
             );
+            $files = array_filter($files, function($file) {
+                return preg_match('/\.(php|blade\.php)$/', $file);
+            });
             foreach ($files as $file) {
                 $filename = basename($file);
                 // Remove both .php and .blade.php extensions
@@ -202,7 +205,7 @@ class ProgrammingLanguage extends Model
                 $templates[$cleanName] = [
                     'file_path' => $file,
                     'file_size' => filesize($file),
-                    'last_modified' => date('Y-m-d H:i:s', filemtime($file)),
+                    'last_modified' => date('Y-m-d H:i:s', Storage::disk('local')->lastModified($file)),
                 ];
             }
         }

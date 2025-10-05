@@ -9,6 +9,13 @@
  * @author License Management System
  */
 
+/**
+ * Escape output to prevent XSS attacks
+ */
+function escapeOutput($string) {
+    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+}
+
 echo "🛡️  Envato Compliance Checker\n";
 echo "================================\n\n";
 
@@ -312,16 +319,16 @@ if (empty($issues)) {
     }
     
     foreach ($groupedIssues as $type => $typeIssues) {
-        echo "📁 $type Issues (" . count($typeIssues) . "):\n";
+        echo "📁 " . escapeOutput($type) . " Issues (" . count($typeIssues) . "):\n";
         echo str_repeat('-', 50) . "\n";
         
         foreach ($typeIssues as $issue) {
             $severity = strtoupper($issue['severity']);
             $severityIcon = $issue['severity'] === 'HIGH' ? '🔴' : ($issue['severity'] === 'MEDIUM' ? '🟡' : '🟢');
             
-            echo "$severityIcon [$severity] {$issue['file']}\n";
-            echo "   Issue: {$issue['issue']}\n";
-            echo "   Solution: {$issue['solution']}\n\n";
+            echo escapeOutput($severityIcon) . " [" . escapeOutput($severity) . "] " . escapeOutput($issue['file']) . "\n";
+            echo "   Issue: " . escapeOutput($issue['issue']) . "\n";
+            echo "   Solution: " . escapeOutput($issue['solution']) . "\n\n";
         }
     }
 }

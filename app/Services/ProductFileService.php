@@ -622,13 +622,12 @@ class ProductFileService
         if (! $update->file_path || ! Storage::disk('private')->exists($update->file_path)) {
             throw new \Exception('Update file not found');
         }
-        $filePath = Storage::disk('private')->path($update->file_path);
         $fileName = $update->title.'_v'.$update->version.'.zip';
         return [
-            'content' => file_get_contents($filePath),
+            'content' => Storage::disk('private')->get($update->file_path),
             'filename' => $fileName,
             'mime_type' => 'application/zip',
-            'size' => filesize($filePath),
+            'size' => Storage::disk('private')->size($update->file_path),
         ];
     }
 }

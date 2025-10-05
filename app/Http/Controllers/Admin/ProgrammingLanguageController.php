@@ -87,7 +87,7 @@ class ProgrammingLanguageController extends Controller
                 if (! empty($files)) {
                     $file = $files[0];
                     if (file_exists($file)) {
-                        $content = file_get_contents($file);
+                        $content = Storage::disk('local')->get($file);
                     } else {
                         return response()->json([
                             'success' => false,
