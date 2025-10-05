@@ -846,7 +846,7 @@ class EmailService
      */
     private function validateEmail(string $email): string
     {
-        if (empty($email)) {
+        if (empty($email) === true) {
             throw new \InvalidArgumentException('Email address cannot be empty');
         }
         $sanitized = filter_var(trim($email), FILTER_SANITIZE_EMAIL);

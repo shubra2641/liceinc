@@ -535,7 +535,7 @@ class ProductUpdateController extends Controller
     public function download(ProductUpdate $product_update)
     {
         try {
-            if (! $product_update->file_path || ! Storage::exists($product_update->file_path)) {
+            if ($product_update->file_path === false || Storage::exists($product_update->file_path) === false) {
                 return redirect()->back()
                     ->withErrors(['error' => 'Update file not found']);
             }

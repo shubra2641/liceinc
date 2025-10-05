@@ -185,7 +185,7 @@ class TicketController extends Controller
                     $dueDate = $request->input('invoice_due_date')
                         ?: ($duration ? now()->addDays($duration)->toDateString() : null);
                     $metadata = [];
-                    if ($billingType && $billingType !== 'one_time') {
+                    if ($billingType === true && $billingType !== 'one_time') {
                         $map = [
                             'monthly' => 30,
                             'quarterly' => 90,

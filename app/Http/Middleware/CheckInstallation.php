@@ -96,7 +96,7 @@ class CheckInstallation
     {
         try {
             $route = $request->route();
-            if (! $route) {
+            if ($route === false) {
                 return '';
             }
             $routeName = $route->getName();

@@ -203,7 +203,7 @@ class KbPublicController extends Controller
             $providedRawCode = request()->query('raw_code');
             $error = null;
             // If user is logged in, first check their licenses (no raw code needed)
-            if ($this->checkArticleAccess($article, $user)) {
+            if ($this->checkArticleAccess($article, $user) === true) {
                 $hasAccess = true;
                 $accessSource = 'user_license';
             }

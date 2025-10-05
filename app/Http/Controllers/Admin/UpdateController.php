@@ -342,7 +342,7 @@ class UpdateController extends Controller
             \RecursiveIteratorIterator::LEAVES_ONLY,
         );
         foreach ($iterator as $file) {
-            if ($file->isFile()) {
+            if ($file->isFile() === true) {
                 $filePath = $file->getRealPath();
                 $relativePath = $zipPath.DIRECTORY_SEPARATOR.
                     substr($filePath, strlen($dir) + 1);
@@ -1229,7 +1229,7 @@ class UpdateController extends Controller
         );
         $fileCount = 0;
         foreach ($iterator as $file) {
-            if ($file->isFile()) {
+            if ($file->isFile() === true) {
                 $filePath = $file->getRealPath();
                 $relativePath = substr($filePath, strlen($source) + 1);
                 $targetPath = $destination.DIRECTORY_SEPARATOR.$relativePath;

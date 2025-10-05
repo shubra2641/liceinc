@@ -174,7 +174,7 @@ class ProductFileController extends Controller
             if (! $update || ! $update->is_active) {
                 abort(404, 'Update not found or not available');
             }
-            if (! $update->file_path) {
+            if ($update->file_path === false) {
                 abort(404, 'Update file not available');
             }
             $fileData = $this->productFileService->downloadUpdateFile($update, auth()->id());

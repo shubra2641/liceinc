@@ -107,7 +107,7 @@ class VersionManagementRequest extends FormRequest
             ];
         }
         // Latest version validation
-        if ($isLatest) {
+        if ($isLatest === true) {
             return [
                 'license_key' => [
                     'required',

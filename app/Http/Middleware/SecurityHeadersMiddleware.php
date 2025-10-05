@@ -140,7 +140,7 @@ class SecurityHeadersMiddleware
     {
         try {
             $csp = config('security.content_security_policy', []);
-            if (! is_array($csp)) {
+            if (is_array($csp) === false) {
                 Log::warning('Invalid CSP configuration, using defaults');
                 return $this->getDefaultCspConfiguration();
             }
@@ -170,7 +170,7 @@ class SecurityHeadersMiddleware
                 $this->setSecurityHeader($response, 'X-Content-Type-Options', $headers['x_content_type_options']);
             }
             // X-XSS-Protection: Enables XSS filtering
-            if (isset($headers['x_xss_protection']) && ! empty($headers['x_xss_protection'])) {
+            if (isset($headers['x_xss_protection']) && empty($headers['x_xss_protection']) === false) {
                 $this->setSecurityHeader($response, 'X-XSS-Protection', $headers['x_xss_protection']);
             }
             // Referrer-Policy: Controls referrer information
@@ -202,7 +202,7 @@ class SecurityHeadersMiddleware
             // Strict-Transport-Security: Enforces HTTPS
             if ($request->secure() &&
                 isset($headers['strict_transport_security']) &&
-                ! empty($headers['strict_transport_security'])) {
+                empty($headers['strict_transport_security']) === false) {
                 $this->setSecurityHeader($response, 'Strict-Transport-Security', $headers['strict_transport_security']);
             }
         } catch (\Exception $e) {

@@ -142,7 +142,7 @@ class TicketController extends Controller
                 return redirect()->route('login')->with('error', __('app.You must login to create a ticket.'));
             }
             // Get user's licenses for the related license dropdown
-            $licenses = auth()->check() ? auth()->user()->licenses()->with('product')->get() : collect();
+            $licenses = auth()->check() === true ? auth()->user()->licenses()->with('product')->get() : collect();
             DB::commit();
             return view('user.tickets.create', compact('categories', 'licenses'));
         } catch (Exception $e) {
@@ -216,7 +216,7 @@ class TicketController extends Controller
             }
             $ticketData = $this->prepareTicketData($validated, $category, $license);
             // If created from an invoice, attach invoice and link license/product
-            if (! empty($validated['invoice_id'])) {
+            if (empty($validated['invoice_id']) === false) {
                 $ticketData = $this->attachInvoiceData($ticketData, $validated['invoice_id']);
             }
             if (! empty($validated['purchase_code'])) {
@@ -580,7 +580,7 @@ class TicketController extends Controller
     private function prepareTicketData(array $validated, TicketCategory $category, ?License $license): array
     {
         return [
-            'user_id' => Auth::check() ? Auth::id() : null, // Can be null for guests
+            'user_id' => Auth::check() === true ? Auth::id() : null, // Can be null for guests
             'subject' => $validated['subject'],
             'priority' => $validated['priority'],
             'status' => 'open',

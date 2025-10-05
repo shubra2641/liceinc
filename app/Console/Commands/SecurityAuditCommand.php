@@ -497,7 +497,7 @@ class SecurityAuditCommand extends Command
     $serverSoftware = $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown'; // security-ignore: RAW_SUPERGLOBAL (informational only)
         if (stripos($serverSoftware, 'apache') !== false) {
             // Check for .htaccess files
-            if (! File::exists(public_path('.htaccess'))) {
+            if (File::exists(public_path('.htaccess')) === false) {
                 $this->addIssue(
                     'medium',
                     'Environment',

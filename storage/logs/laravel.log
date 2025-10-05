@@ -1,0 +1,8 @@
+[2025-10-05 19:32:14] local.ERROR: Access level to App\Http\Controllers\InstallController::sanitizeInput() must be protected (as in class App\Http\Controllers\Controller) or weaker {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Access level to App\\Http\\Controllers\\InstallController::sanitizeInput() must be protected (as in class App\\Http\\Controllers\\Controller) or weaker at D:\\xampp\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php:1001)
+[stacktrace]
+#0 {main}
+"} 
+[2025-10-05 19:32:55] local.ERROR: Access level to App\Http\Controllers\InstallController::sanitizeInput() must be protected (as in class App\Http\Controllers\Controller) or weaker {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Access level to App\\Http\\Controllers\\InstallController::sanitizeInput() must be protected (as in class App\\Http\\Controllers\\Controller) or weaker at D:\\xampp\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php:1001)
+[stacktrace]
+#0 {main}
+"} 

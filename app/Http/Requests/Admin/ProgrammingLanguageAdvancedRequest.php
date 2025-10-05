@@ -230,7 +230,7 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
                 ? $this->sanitizeInput($this->template_description)
                 : null,
             'template_name' => $this->template_name ? $this->sanitizeInput($this->template_name) : null,
-            'version' => $this->version ? $this->sanitizeInput($this->version) : null,
+            'version' => $this->version === true ? $this->sanitizeInput($this->version) : null,
             'compatibility' => $this->compatibility ? $this->sanitizeInput($this->compatibility) : null,
             'author' => $this->author ? $this->sanitizeInput($this->author) : null,
             'license' => $this->license ? $this->sanitizeInput($this->license) : null,

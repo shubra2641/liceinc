@@ -66,7 +66,7 @@ class AdvancedWebhookService
      */
     public function sendWebhookEvent(string $eventType, array $payload, ?int $webhookId = null): void
     {
-        $webhooks = $webhookId
+        $webhooks = $webhookId === true
             ? Webhook::where('id', $webhookId)->get()
             : Webhook::where('is_active', true)
                 ->whereJsonContains('events', $eventType)

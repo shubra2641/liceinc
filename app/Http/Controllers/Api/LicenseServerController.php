@@ -900,7 +900,7 @@ class LicenseServerController extends Controller
      */
     private function checkDomainLimit(License $license, string $domain): void
     {
-        if ($license->hasReachedDomainLimit()) {
+        if ($license->hasReachedDomainLimit() === true) {
             Log::warning('Domain limit exceeded for license', [
                 'license_id' => $license->id,
                 'purchase_code' => substr($license->purchase_code, 0, 8).'...',

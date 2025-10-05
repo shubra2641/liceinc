@@ -508,7 +508,7 @@ class PaymentService
         if (empty($orderData)) {
             throw new InvalidArgumentException('Order data cannot be empty');
         }
-        if (! isset($orderData['user_id']) || ! is_numeric($orderData['user_id']) || $orderData['user_id'] < 1) {
+        if (isset($orderData['user_id']) === false || ! is_numeric($orderData['user_id']) || $orderData['user_id'] < 1) {
             throw new InvalidArgumentException('Valid user_id is required');
         }
         if (! isset($orderData['amount']) || ! is_numeric($orderData['amount']) || $orderData['amount'] <= 0) {

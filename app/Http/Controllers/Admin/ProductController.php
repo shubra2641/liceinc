@@ -312,7 +312,7 @@ class ProductController extends Controller
             // Handle main image upload
             if ($request->hasFile('image')) {
                 // Delete old image
-                if ($product->image) {
+                if ($product->image === true) {
                     Storage::disk('public')->delete($product->image);
                 }
                 $validated['image'] = $request->file('image')->store('products', 'public');
@@ -365,7 +365,7 @@ class ProductController extends Controller
             DB::beginTransaction();
             // Delete integration file if exists
             $filePath = "integration/{$product->slug}.php";
-            if (Storage::disk('public')->exists($filePath)) {
+            if (Storage::disk('public')->exists($filePath) === true) {
                 Storage::disk('public')->delete($filePath);
             }
             $product->delete();

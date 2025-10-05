@@ -198,7 +198,7 @@ if (! function_exists('get_navigation_tree')) {
         ];
     }
 }
-if (! function_exists('get_available_languages')) {
+if (function_exists('get_available_languages') === false) {
     /**
      * Get available languages from the lang directory with enhanced security.
      *
@@ -220,7 +220,7 @@ if (! function_exists('get_available_languages')) {
         try {
             $languages = [];
             $langPath = resource_path('lang');
-            if (! is_dir($langPath)) {
+            if (is_dir($langPath) === false) {
                 return $languages;
             }
             $directories = array_diff(scandir($langPath), ['.', '..']);

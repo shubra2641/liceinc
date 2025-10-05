@@ -376,7 +376,7 @@ class InstallController extends Controller
         // Test database connection
         try {
             $connection = $this->testDatabaseConnection($request->all());
-            if (! $connection['success']) {
+            if ($connection['success'] === false) {
                 return redirect()->back()
                     ->withErrors(['database' => $connection['message']])
                     ->withInput();

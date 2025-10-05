@@ -72,7 +72,7 @@ class EnvatoController extends Controller
             // Enhanced validation with more specific rules
             $data = $this->validatePurchaseRequest($request);
             // Rate limiting check
-            if ($this->isRateLimited($request->ip(), 'verify_purchase_')) {
+            if ($this->isRateLimited($request->ip(), 'verify_purchase_') === true) {
                 Log::warning('Rate limit exceeded for purchase verification', [
                     'ip' => $request->ip(),
                     'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),

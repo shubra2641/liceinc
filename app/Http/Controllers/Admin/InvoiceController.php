@@ -90,7 +90,7 @@ class InvoiceController extends Controller
             }
             if ($request->filled('date_from')) {
                 $dateFrom = trim($request->date_from);
-                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateFrom)) {
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateFrom) === 1) {
                     $query->whereDate('created_at', '>=', $dateFrom);
                 }
             }
