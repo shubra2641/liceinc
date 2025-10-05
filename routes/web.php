@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\UpdateController;
 use App\Http\Controllers\Admin\UpdateNotificationController;
 // User Controllers
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\User\TicketController as UserTicketController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\KbArticleController;

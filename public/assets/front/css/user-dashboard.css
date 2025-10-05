@@ -4830,7 +4830,6 @@ input:checked + .slider:before {
 }
 
 .user-kb-article-title a {
-    color: var(--text-primary);
     text-decoration: none;
     transition: color 0.2s ease;
 }

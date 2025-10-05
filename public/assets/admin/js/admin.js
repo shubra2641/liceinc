@@ -8,9 +8,20 @@ function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show`;
     
+    // Sanitize message to prevent XSS
+    const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
+        return {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+        }[match];
+    });
+    
     notification.innerHTML = `
         <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
-        ${message}
+        ${sanitizedMessage}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
     
@@ -88,6 +99,17 @@ class ToastManager {
             info: title || 'Information'
         };
 
+        // Sanitize message to prevent XSS
+        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
+            return {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+            }[match];
+        });
+        
         toast.innerHTML = `
             <div class="toast-header">
                 <i class="${icons[type]} toast-icon"></i>
@@ -97,7 +119,7 @@ class ToastManager {
                 </button>
             </div>
             <div class="toast-body">
-                ${message}
+                ${sanitizedMessage}
             </div>
         `;
 
@@ -542,7 +564,18 @@ class AdminDashboard {
                     preview.className = 'image-preview mt-2';
                     event.target.parentNode.appendChild(preview);
                 }
-                preview.innerHTML = `<img src="${e.target.result}" class="img-thumbnail image-preview">`;
+                // Sanitize image source to prevent XSS
+        const sanitizedSrc = e.target.result.replace(/[<>&"']/g, function(match) {
+            return {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+            }[match];
+        });
+        
+        preview.innerHTML = `<img src="${sanitizedSrc}" class="img-thumbnail image-preview">`;
             };
             reader.readAsDataURL(file);
         }
@@ -720,7 +753,18 @@ class AdminDashboard {
         if (iconInput && iconPreview) {
             iconInput.addEventListener('input', function() {
                 const iconClass = this.value || 'fas fa-ticket-alt';
-                iconPreview.innerHTML = `<i class="${iconClass}"></i>`;
+                // Sanitize icon class to prevent XSS
+        const sanitizedIconClass = iconClass.replace(/[<>&"']/g, function(match) {
+            return {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+            }[match];
+        });
+        
+        iconPreview.innerHTML = `<i class="${sanitizedIconClass}"></i>`;
             });
         }
     }
@@ -960,7 +1004,18 @@ class AdminDashboard {
             
             if (previewContent && bodyTextarea) {
                 const content = bodyTextarea.value || '{{ trans("app.Email content will appear here") }}';
-                previewContent.innerHTML = content;
+                // Sanitize content to prevent XSS
+        const sanitizedContent = content.replace(/[<>&"']/g, function(match) {
+            return {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+            }[match];
+        });
+        
+        previewContent.innerHTML = sanitizedContent;
             }
 
             if (previewTemplateId && nameInput) {
@@ -1023,9 +1078,20 @@ class AdminDashboard {
 
     // Show alert message
     showAlert(message, type = 'info') {
+        // Sanitize message to prevent XSS
+        const sanitizedMessage = message.replace(/[<>&"']/g, function(match) {
+            return {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+            }[match];
+        });
+        
         const alertHtml = `
             <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${message}
+                ${sanitizedMessage}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         `;

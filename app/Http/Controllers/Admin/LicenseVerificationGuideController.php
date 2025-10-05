@@ -23,7 +23,7 @@ use Illuminate\View\View;
  * - Rate limiting and authorization checks
  * - Proper logging for errors and warnings only
  * - Database transaction support for future enhancements
-/
+ */
 class LicenseVerificationGuideController extends Controller
 {
     /**

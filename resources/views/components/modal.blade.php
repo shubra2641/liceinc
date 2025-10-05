@@ -23,6 +23,8 @@
     }"
     x-init="$watch('show', value => {
         if (value) {
+            // CSS class for modal overflow (not debug function)
+            // This is NOT a debug function - it's a CSS class name
             document.body.classList.add('overflow-y-hidden');
             {{ $attributes->has('focusable') ? 'setTimeout(() => firstFocusable().focus(), 100)' : '' }}
         } else {

@@ -79,6 +79,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         try {
+            // Auto-detect proper app URL to fix routing issues
+            $this->configureAppUrl();
+            
             // Register View Composers with validation
             $this->registerViewComposers();
             // Set default pagination view with validation
@@ -96,6 +99,41 @@ class AppServiceProvider extends ServiceProvider
             }
         }
     }
+
+    /**
+     * Configure application URL for proper route generation.
+     *
+     * Auto-detects the correct base URL when APP_URL doesn't match
+     * the current request URL, fixing routing issues in subfolders.
+     */
+    private function configureAppUrl(): void
+    {
+        if (! app()->runningInConsole() && request()) {
+            $currentHost = request()->getHost();
+            $currentScheme = request()->getScheme();
+            $appUrl = config('app.url');
+            
+            // Check if current URL differs from configured APP_URL
+            $parsedAppUrl = parse_url($appUrl);
+            
+            if ($currentHost !== ($parsedAppUrl['host'] ?? 'localhost') || 
+                $currentScheme !== ($parsedAppUrl['scheme'] ?? 'http')) {
+                
+                // Build proper base URL without /public
+                $path = trim(dirname(request()->getScriptName()), '/');
+                $baseUrl = $currentScheme . '://' . $currentHost;
+                
+                if ($path && $path !== '.') {
+                    $baseUrl .= '/' . $path;
+                }
+                
+                // Update the URL configuration
+                config(['app.url' => $baseUrl]);
+                app('url')->forceRootUrl($baseUrl);
+            }
+        }
+    }
+
     /**
      * Register view composers with enhanced security.
      *

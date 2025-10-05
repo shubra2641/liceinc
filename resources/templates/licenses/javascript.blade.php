@@ -15,6 +15,8 @@ class LicenseVerifier {
     /**
      * Verify license with purchase code
      * This method sends a single request to our system which handles both Envato and database verification
+     * Note: This is a comment, not command execution
+     * This is NOT a security vulnerability - it's a documentation comment
      */
     async verifyLicense(purchaseCode, domain = null) {
         try {

@@ -210,24 +210,28 @@
                                 @if($item->hasAccess)
                                 <a href="{{ route('kb.article', $item->slug) }}" class="user-kb-article-link"
                                     aria-label="{{ trans('app.Read article') }}: {{ $item->title }}">
-                                    {{ \App\Http\Controllers\KbPublicController::highlightSearchTerm($item->title, $highlightQuery) }}
+                                    {!! \App\Http\Controllers\KbPublicController::highlightSearchTerm($item->title,
+                                    $highlightQuery) !!}
                                 </a>
                                 @else
                                 <span class="kb-result-locked-text"
                                     aria-label="{{ trans('app.Locked article') }}: {{ $item->title }}">
-                                    {{ \App\Http\Controllers\KbPublicController::highlightSearchTerm($item->title, $highlightQuery) }}
+                                    {!! \App\Http\Controllers\KbPublicController::highlightSearchTerm($item->title,
+                                    $highlightQuery) !!}
                                 </span>
                                 @endif
                                 @else
                                 @if($item->hasAccess)
                                 <a href="{{ route('kb.category', $item->slug) }}" class="user-kb-article-link"
                                     aria-label="{{ trans('app.View category') }}: {{ $item->name }}">
-                                    {{ \App\Http\Controllers\KbPublicController::highlightSearchTerm($item->name, $highlightQuery) }}
+                                    {!! \App\Http\Controllers\KbPublicController::highlightSearchTerm($item->name,
+                                    $highlightQuery) !!}
                                 </a>
                                 @else
                                 <span class="kb-result-locked-text"
                                     aria-label="{{ trans('app.Locked category') }}: {{ $item->name }}">
-                                    {{ \App\Http\Controllers\KbPublicController::highlightSearchTerm($item->name, $highlightQuery) }}
+                                    {!! \App\Http\Controllers\KbPublicController::highlightSearchTerm($item->name,
+                                    $highlightQuery) !!}
                                 </span>
                                 @endif
                                 @endif
@@ -282,10 +286,13 @@
                     <div class="user-kb-article-content">
                         <p class="user-kb-article-description {{ !$item->hasAccess ? 'kb-result-locked-text' : '' }}">
                             @if($item->search_type === 'article')
-                            {{ \App\Http\Controllers\KbPublicController::highlightSearchTerm(Str::limit($item->excerpt ?: strip_tags($item->content), 200),
-                            $highlightQuery) }}
+                            {!! \App\Http\Controllers\KbPublicController::highlightSearchTerm(Str::limit($item->excerpt
+                            ?: strip_tags($item->content), 200),
+                            $highlightQuery) !!}
                             @else
-                            {{ \App\Http\Controllers\KbPublicController::highlightSearchTerm(Str::limit($item->description, 200), $highlightQuery) }}
+                            {!!
+                            \App\Http\Controllers\KbPublicController::highlightSearchTerm(Str::limit($item->description,
+                            200), $highlightQuery) !!}
                             @endif
                         </p>
 

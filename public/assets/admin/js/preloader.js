@@ -1,6 +1,9 @@
 /**
- * Professional Preloader System
- * High-quality, customizable preloader with multiple styles
+ * Professional Admin Preloader System
+ * High-quality, customizable preloader with intelligent timing
+ * - Hides immediately when page is ready, not after fixed duration
+ * - Settings duration acts as maximum limit, not minimum requirement
+ * - Optimized for admin interface responsiveness
  * Envato-compliant JavaScript with validation and best practices
  */
 
@@ -9,6 +12,7 @@ class PreloaderManager {
         this.container = document.getElementById('preloader-container');
         this.settings = window.preloaderSettings || {};
         this.isVisible = true;
+        this.pageReadyChecked = false;
         this.init();
     }
 
@@ -45,30 +49,81 @@ class PreloaderManager {
         document.head.appendChild(style);
     }
 
+    checkPageReadiness() {
+        // Check if page is actually ready by looking at document state and rendered content
+        if (document.readyState === 'complete' || 
+            (document.readyState === 'interactive' && document.body && document.body.children.length > 0)) {
+            return true;
+        }
+        return false;
+    }
+
     setupEventListeners() {
+        let pageReadyHidden = false;
+        let settingsTimeReached = false;
+        
         // Hide preloader when DOM is ready (faster than window.load)
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                this.hidePreloader();
-            }, 500); // Small delay to show preloader briefly
+            // Use requestAnimationFrame to ensure page is visually ready
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (!pageReadyHidden && this.checkPageReadiness()) {
+                        pageReadyHidden = true;
+                        this.hidePreloader();
+                    }
+                });
+            });
         });
 
         // Hide preloader when page is fully loaded (fallback)
         window.addEventListener('load', () => {
-            this.hidePreloader();
+            if (!pageReadyHidden) {
+                pageReadyHidden = true;
+                this.hidePreloader();
+            }
         });
 
-        // Fallback: Hide preloader after maximum duration
-        if (this.settings.duration) {
-            setTimeout(() => {
+        // Hide on first user interaction for admin
+        const hideOnInteraction = () => {
+            if (this.isVisible && !pageReadyHidden) {
+                pageReadyHidden = true;
                 this.hidePreloader();
+            }
+        };
+
+        document.addEventListener('click', hideOnInteraction, { once: true });
+        document.addEventListener('keydown', hideOnInteraction, { once: true });
+
+        // Settings-based timer: Only hide if page hasn't loaded yet
+        // This acts as a maximum duration, not minimum
+        if (this.settings.duration && this.settings.duration > 500) {
+            setTimeout(() => {
+                settingsTimeReached = true;
+                if (!pageReadyHidden) {
+                    // Page still not ready after settings duration - force hide
+                    this.hidePreloader();
+                }
             }, this.settings.duration);
         }
 
-        // Additional fallback: Hide after 1.5 seconds maximum
+        // Minimum display time for admin (shorter for better UX)
+        const minDisplayTime = this.container ? 
+                               parseInt(this.container.dataset.minDuration || '0') : 0;
+        
+        if (minDisplayTime > 0) {
+            setTimeout(() => {
+                // Allow hiding after minimum time has passed
+                if (this.checkPageReadiness() && !pageReadyHidden) {
+                    pageReadyHidden = true;
+                    this.hidePreloader();
+                }
+            }, minDisplayTime);
+        }
+
+        // Safety fallback: Force hide after maximum duration
         setTimeout(() => {
             this.hidePreloader();
-        }, 1500);
+        }, Math.max(this.settings.duration || 2000, 2500)); // Max 2.5 seconds for admin
 
         // Handle page visibility changes
         document.addEventListener('visibilitychange', () => {
@@ -177,14 +232,14 @@ document.addEventListener('DOMContentLoaded', () => {
     new PreloaderManager();
 });
 
-// Additional fallback: Force hide preloader after 1 second maximum
+// Emergency fallback: Force hide preloader if nothing else worked
 setTimeout(() => {
     const preloader = document.getElementById('preloader-container');
-    if (preloader) {
+    if (preloader && preloader.style.display !== 'none') {
         preloader.style.display = 'none';
         preloader.remove();
     }
-}, 1000);
+}, 4000); // Emergency only - 4 seconds max
 
 // Export for global access
 window.PreloaderManager = PreloaderManager;

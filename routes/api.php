@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\LicenseController;
 use App\Http\Controllers\Api\LicenseServerController;
 use App\Http\Controllers\Api\ProductApiController;
 use App\Http\Controllers\Api\ProductUpdateApiController;
+use App\Http\Controllers\Api\TicketApiController;
 use App\Http\Controllers\KbArticleController;
 use App\Http\Controllers\KbCategoryController;
 use Illuminate\Support\Facades\Route;

@@ -214,13 +214,15 @@
                                 <?php if($item->hasAccess): ?>
                                 <a href="<?php echo e(route('kb.article', $item->slug)); ?>" class="user-kb-article-link"
                                     aria-label="<?php echo e(trans('app.Read article')); ?>: <?php echo e($item->title); ?>">
-                                    <?php echo e(\App\Http\Controllers\KbPublicController::highlightSearchTerm($item->title, $highlightQuery)); ?>
+                                    <?php echo \App\Http\Controllers\KbPublicController::highlightSearchTerm($item->title,
+                                    $highlightQuery); ?>
 
                                 </a>
                                 <?php else: ?>
                                 <span class="kb-result-locked-text"
                                     aria-label="<?php echo e(trans('app.Locked article')); ?>: <?php echo e($item->title); ?>">
-                                    <?php echo e(\App\Http\Controllers\KbPublicController::highlightSearchTerm($item->title, $highlightQuery)); ?>
+                                    <?php echo \App\Http\Controllers\KbPublicController::highlightSearchTerm($item->title,
+                                    $highlightQuery); ?>
 
                                 </span>
                                 <?php endif; ?>
@@ -228,13 +230,15 @@
                                 <?php if($item->hasAccess): ?>
                                 <a href="<?php echo e(route('kb.category', $item->slug)); ?>" class="user-kb-article-link"
                                     aria-label="<?php echo e(trans('app.View category')); ?>: <?php echo e($item->name); ?>">
-                                    <?php echo e(\App\Http\Controllers\KbPublicController::highlightSearchTerm($item->name, $highlightQuery)); ?>
+                                    <?php echo \App\Http\Controllers\KbPublicController::highlightSearchTerm($item->name,
+                                    $highlightQuery); ?>
 
                                 </a>
                                 <?php else: ?>
                                 <span class="kb-result-locked-text"
                                     aria-label="<?php echo e(trans('app.Locked category')); ?>: <?php echo e($item->name); ?>">
-                                    <?php echo e(\App\Http\Controllers\KbPublicController::highlightSearchTerm($item->name, $highlightQuery)); ?>
+                                    <?php echo \App\Http\Controllers\KbPublicController::highlightSearchTerm($item->name,
+                                    $highlightQuery); ?>
 
                                 </span>
                                 <?php endif; ?>
@@ -296,11 +300,13 @@
                     <div class="user-kb-article-content">
                         <p class="user-kb-article-description <?php echo e(!$item->hasAccess ? 'kb-result-locked-text' : ''); ?>">
                             <?php if($item->search_type === 'article'): ?>
-                            <?php echo e(\App\Http\Controllers\KbPublicController::highlightSearchTerm(Str::limit($item->excerpt ?: strip_tags($item->content), 200),
-                            $highlightQuery)); ?>
+                            <?php echo \App\Http\Controllers\KbPublicController::highlightSearchTerm(Str::limit($item->excerpt
+                            ?: strip_tags($item->content), 200),
+                            $highlightQuery); ?>
 
                             <?php else: ?>
-                            <?php echo e(\App\Http\Controllers\KbPublicController::highlightSearchTerm(Str::limit($item->description, 200), $highlightQuery)); ?>
+                            <?php echo \App\Http\Controllers\KbPublicController::highlightSearchTerm(Str::limit($item->description,
+                            200), $highlightQuery); ?>
 
                             <?php endif; ?>
                         </p>
@@ -591,5 +597,4 @@
 </div>
 
 <?php $__env->stopSection(); ?>
-
 <?php echo $__env->make('layouts.user', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\my-logos\resources\views/kb/search.blade.php ENDPATH**/ ?>

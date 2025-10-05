@@ -242,6 +242,7 @@ class LayoutComposer
             'preloaderColor' => $settings->preloader_color ?? '#3b82f6',
             'preloaderBgColor' => $settings->preloader_background_color ?? '#ffffff',
             'preloaderDuration' => $settings->preloader_duration ?? 2000,
+            'preloaderMinDuration' => $settings->preloader_min_duration ?? 0, // 0 means hide as soon as ready
             'preloaderText' => trans('app.Loading...'),
             'siteLogo' => $settings->site_logo ?? null,
             'logoText' => $settings->logo_text ?? config('app.name'),

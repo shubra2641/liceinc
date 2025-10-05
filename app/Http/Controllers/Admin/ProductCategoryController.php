@@ -29,7 +29,7 @@ use Illuminate\View\View;
  * - Model scope integration for optimized queries
  * - Request class compatibility with comprehensive validation
  * - Authorization checks and middleware protection
-/
+ */
 class ProductCategoryController extends Controller
 {
     /**

@@ -26,7 +26,7 @@ use Illuminate\View\View;
  * - Proper logging for errors and warnings only
  * - Request class compatibility with comprehensive validation
  * - Authorization checks and middleware protection
-/
+ */
 class SettingController extends Controller
 {
     /**

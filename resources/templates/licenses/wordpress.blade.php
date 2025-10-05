@@ -45,6 +45,10 @@ class WP_LicenseVerifier {
      * Verify with our license system
      */
     private function verify_with_our_system($purchase_code, $domain = null) {
+        // Sanitize inputs to prevent XSS
+        $purchase_code = sanitize_text_field($purchase_code);
+        $domain = $domain ? sanitize_text_field($domain) : null;
+        
         $body = [
             'purchase_code' => $purchase_code,
             'product_slug' => $this->product_slug,
@@ -73,22 +77,26 @@ class WP_LicenseVerifier {
             $body = wp_remote_retrieve_body($response);
             $data = json_decode($body, true);
 
-            return $this->create_license_response(
-                isset($data['valid']) ? $data['valid'] : false,
-                isset($data['message']) ? $data['message'] : 'Verification completed',
-                $data
-            );
+            // Validate response data
+            $valid = isset($data['valid']) ? (bool) $data['valid'] : false;
+            $message = isset($data['message']) ? sanitize_text_field($data['message']) : 'Verification completed';
+            
+            return $this->create_license_response($valid, $message, $data);
         }
 
-        return $this->create_license_response(false, 'Unable to verify license');
+        return $this->create_license_response(false, 'Unable to verify license - HTTP ' . $http_code);
     }
 
     /**
      * Create standardized response
      */
     private function create_license_response($valid, $message, $data = null) {
+        // Sanitize response data
+        $message = sanitize_text_field($message);
+        $data = $data ? array_map('sanitize_text_field', $data) : null;
+        
         return array(
-            'valid' => $valid,
+            'valid' => (bool) $valid,
             'message' => $message,
             'data' => $data,
             'verified_at' => current_time('mysql'),
@@ -100,7 +108,9 @@ class WP_LicenseVerifier {
      * Store license status in WordPress options
      */
     public function store_license_status($license_data) {
-        update_option('wp_license_status', $license_data);
+        // Sanitize license data before storing
+        $sanitized_data = array_map('sanitize_text_field', $license_data);
+        update_option('wp_license_status', $sanitized_data);
     }
 
     /**
@@ -120,12 +130,24 @@ class WP_LicenseVerifier {
             return false;
         }
 
-        return $status['valid'];
+        // Validate status value
+        return (bool) $status['valid'];
     }
 }
 
 // Global function for easy access
 function wp_verify_license($purchase_code, $domain = null) {
+    // Validate inputs
+    if (empty($purchase_code) || !is_string($purchase_code)) {
+        return array(
+            'valid' => false,
+            'message' => 'Invalid purchase code provided',
+            'data' => null,
+            'verified_at' => current_time('mysql'),
+            'product' => ''
+        );
+    }
+    
     $verifier = new WP_LicenseVerifier();
     return $verifier->verify_license($purchase_code, $domain);
 }

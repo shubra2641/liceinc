@@ -3,15 +3,18 @@
 
 
 @if($preloaderSettings['preloaderEnabled'])
-<div class="preloader-container" id="preloader-container" data-enabled="1"     data-type="{{ $preloaderSettings['preloaderType'] }}"
-    data-color="{{ $preloaderSettings['preloaderColor'] }}" data-bg="{{ $preloaderSettings['preloaderBgColor'] }}" data-duration="{{ $preloaderSettings['preloaderDuration'] }}"
+<div class="preloader-container" id="preloader-container" data-enabled="1"
+    data-type="{{ $preloaderSettings['preloaderType'] }}" data-color="{{ $preloaderSettings['preloaderColor'] }}"
+    data-bg="{{ $preloaderSettings['preloaderBgColor'] }}" data-duration="{{ $preloaderSettings['preloaderDuration'] }}"
+    data-min-duration="{{ $preloaderSettings['preloaderMinDuration'] ?? 0 }}"
     data-text="{{ $preloaderSettings['preloaderText'] }}" data-logo="{{ $preloaderSettings['siteLogo'] }}">
     <div class="preloader-content">
         {{-- Logo Section --}}
         @if($preloaderSettings['siteLogo'] || $preloaderSettings['logoShowText'])
         <div class="preloader-logo">
             @if($preloaderSettings['siteLogo'])
-            <img src="{{ asset('storage/' . $preloaderSettings['siteLogo']) }}" alt="{{ $preloaderSettings['logoText'] }}" class="preloader-logo-img"
+            <img src="{{ asset('storage/' . $preloaderSettings['siteLogo']) }}"
+                alt="{{ $preloaderSettings['logoText'] }}" class="preloader-logo-img"
                 class="max-w-[150px] max-h-[50px]">
             @elseif($preloaderSettings['logoShowText'])
             <div class="preloader-logo-text" class="text-gray-800 text-2xl font-semibold">

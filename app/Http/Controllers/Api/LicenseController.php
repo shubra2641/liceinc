@@ -490,12 +490,17 @@ class LicenseManager
      */
     private function getCurrentDomain()
     {
-        if (isset(\$_SERVER['HTTP_HOST'])) {
-            return \$_SERVER['HTTP_HOST'];
+        // Use Laravel Request facade instead of direct $_SERVER access
+        $request = request();
+        
+        if ($request->hasHeader('Host')) {
+            return $request->header('Host');
         }
-        if (isset(\$_SERVER['SERVER_NAME'])) {
-            return \$_SERVER['SERVER_NAME'];
+        
+        if ($request->server('SERVER_NAME')) {
+            return $request->server('SERVER_NAME');
         }
+        
         return 'localhost';
     }
     /**

@@ -1,10 +1,10 @@
-@extends('layouts.user')
 
-@section('title', $article->title)
-@section('page-title', $article->title)
-@section('page-subtitle', trans('app.Knowledge Base Article'))
 
-@section('content')
+<?php $__env->startSection('title', $article->title); ?>
+<?php $__env->startSection('page-title', $article->title); ?>
+<?php $__env->startSection('page-subtitle', trans('app.Knowledge Base Article')); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="user-dashboard-container">
     <!-- Article Header -->
     <div class="user-card">
@@ -15,8 +15,8 @@
                         <i class="fas fa-file-alt"></i>
                     </div>
                     <div>
-                        <h1 class="user-card-title">{{ $article->title }}</h1>
-                        <p class="user-card-subtitle">{{ trans('app.Knowledge Base Article') }}</p>
+                        <h1 class="user-card-title"><?php echo e($article->title); ?></h1>
+                        <p class="user-card-subtitle"><?php echo e(trans('app.Knowledge Base Article')); ?></p>
                     </div>
                 </div>
             </div>
@@ -30,23 +30,24 @@
             <div class="user-kb-article-meta">
                 <div class="user-kb-article-meta-item">
                     <i class="fas fa-calendar"></i>
-                    <span>{{ trans('app.Updated') }} {{ $article->updated_at->format('M d, Y') }}</span>
+                    <span><?php echo e(trans('app.Updated')); ?> <?php echo e($article->updated_at->format('M d, Y')); ?></span>
                 </div>
                 <div class="user-kb-article-meta-item">
                     <i class="fas fa-eye"></i>
-                    <span>{{ trans('app.Views') }}: {{ $article->views }}</span>
+                    <span><?php echo e(trans('app.Views')); ?>: <?php echo e($article->views); ?></span>
                 </div>
-                @if($article->category)
+                <?php if($article->category): ?>
                 <div class="user-kb-article-meta-item">
                     <i class="fas fa-folder"></i>
-                    <span>{{ $article->category->name }}</span>
+                    <span><?php echo e($article->category->name); ?></span>
                 </div>
-                @endif
+                <?php endif; ?>
             </div>
 
             <!-- Article Content -->
             <div class="article-content">
-                {!! $article->content !!}
+                <?php echo $article->content; ?>
+
             </div>
         </div>
     </div>
@@ -60,8 +61,8 @@
                         <i class="fas fa-info-circle"></i>
                     </div>
                     <div>
-                        <h3 class="user-section-title-text">{{ trans('app.Article Information') }}</h3>
-                        <p class="user-section-subtitle">{{ trans('app.About this article') }}</p>
+                        <h3 class="user-section-title-text"><?php echo e(trans('app.Article Information')); ?></h3>
+                        <p class="user-section-subtitle"><?php echo e(trans('app.About this article')); ?></p>
                     </div>
                 </div>
             </div>
@@ -74,8 +75,9 @@
                         <i class="fas fa-folder"></i>
                     </div>
                     <div class="info-content">
-                        <div class="info-label">{{ trans('app.Category') }}</div>
-                        <div class="info-value">{{ optional($article->category)->name ?? trans('app.Uncategorized') }}
+                        <div class="info-label"><?php echo e(trans('app.Category')); ?></div>
+                        <div class="info-value"><?php echo e(optional($article->category)->name ?? trans('app.Uncategorized')); ?>
+
                         </div>
                     </div>
                 </div>
@@ -85,8 +87,8 @@
                         <i class="fas fa-calendar"></i>
                     </div>
                     <div class="info-content">
-                        <div class="info-label">{{ trans('app.Created') }}</div>
-                        <div class="info-value">{{ $article->created_at->format('M d, Y') }}</div>
+                        <div class="info-label"><?php echo e(trans('app.Created')); ?></div>
+                        <div class="info-value"><?php echo e($article->created_at->format('M d, Y')); ?></div>
                     </div>
                 </div>
 
@@ -95,8 +97,8 @@
                         <i class="fas fa-clock"></i>
                     </div>
                     <div class="info-content">
-                        <div class="info-label">{{ trans('app.Last Updated') }}</div>
-                        <div class="info-value">{{ $article->updated_at->format('M d, Y') }}</div>
+                        <div class="info-label"><?php echo e(trans('app.Last Updated')); ?></div>
+                        <div class="info-value"><?php echo e($article->updated_at->format('M d, Y')); ?></div>
                     </div>
                 </div>
 
@@ -105,8 +107,8 @@
                         <i class="fas fa-eye"></i>
                     </div>
                     <div class="info-content">
-                        <div class="info-label">{{ trans('app.Views') }}</div>
-                        <div class="info-value">{{ $article->views }}</div>
+                        <div class="info-label"><?php echo e(trans('app.Views')); ?></div>
+                        <div class="info-value"><?php echo e($article->views); ?></div>
                     </div>
                 </div>
             </div>
@@ -114,19 +116,21 @@
             <div class="user-form-actions">
                 <button class="user-action-button" data-action="print">
                     <i class="fas fa-print"></i>
-                    {{ trans('app.Print Article') }}
+                    <?php echo e(trans('app.Print Article')); ?>
+
                 </button>
 
                 <button class="user-action-button secondary" data-action="share">
                     <i class="fas fa-share-alt"></i>
-                    {{ trans('app.Share') }}
+                    <?php echo e(trans('app.Share')); ?>
+
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Related Articles Section -->
-    @if(isset($relatedArticles) && $relatedArticles->count() > 0)
+    <?php if(isset($relatedArticles) && $relatedArticles->count() > 0): ?>
     <div class="user-card">
         <div class="user-card-header">
             <div class="user-section-header">
@@ -135,52 +139,56 @@
                         <i class="fas fa-newspaper"></i>
                     </div>
                     <div>
-                        <h3 class="user-section-title-text">{{ trans('app.Related Articles') }}</h3>
-                        <p class="user-section-subtitle">{{ trans('app.Similar articles you might find helpful') }}</p>
+                        <h3 class="user-section-title-text"><?php echo e(trans('app.Related Articles')); ?></h3>
+                        <p class="user-section-subtitle"><?php echo e(trans('app.Similar articles you might find helpful')); ?></p>
                     </div>
                 </div>
-                <a href="{{ route('kb.index') }}" class="user-section-link">
+                <a href="<?php echo e(route('kb.index')); ?>" class="user-section-link">
                     <i class="fas fa-arrow-right"></i>
-                    <span>{{ trans('app.View All Articles') }}</span>
+                    <span><?php echo e(trans('app.View All Articles')); ?></span>
                 </a>
             </div>
         </div>
         <div class="user-card-content">
             <div class="user-kb-articles-grid">
-                @foreach($relatedArticles as $relatedArticle)
-                <div class="user-kb-article-card" data-article="{{ $relatedArticle->slug }}">
+                <?php $__currentLoopData = $relatedArticles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $relatedArticle): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <div class="user-kb-article-card" data-article="<?php echo e($relatedArticle->slug); ?>">
                     <div class="user-kb-article-header">
                         <div class="user-kb-article-icon">
                             <i class="fas fa-file-alt"></i>
                         </div>
                         <div class="user-kb-article-info">
                             <h3 class="user-kb-article-title">
-                                <a href="{{ route('kb.article', $relatedArticle->slug) }}">
-                                    {{ $relatedArticle->title }}
+                                <a href="<?php echo e(route('kb.article', $relatedArticle->slug)); ?>">
+                                    <?php echo e($relatedArticle->title); ?>
+
                                 </a>
                             </h3>
                             <div class="user-kb-article-badges">
-                                @if($relatedArticle->requires_serial || ($relatedArticle->category &&
-                                $relatedArticle->category->requires_serial) || $relatedArticle->product_id)
-                                @if(auth()->check())
-                                @if($relatedArticle->hasAccess)
+                                <?php if($relatedArticle->requires_serial || ($relatedArticle->category &&
+                                $relatedArticle->category->requires_serial) || $relatedArticle->product_id): ?>
+                                <?php if(auth()->check()): ?>
+                                <?php if($relatedArticle->hasAccess): ?>
                                 <span class="user-kb-badge user-kb-badge-success">
                                     <i class="fas fa-check-circle"></i>
-                                    {{ trans('app.Accessible') }}
+                                    <?php echo e(trans('app.Accessible')); ?>
+
                                 </span>
-                                @else
+                                <?php else: ?>
                                 <span class="user-kb-badge user-kb-badge-warning">
                                     <i class="fas fa-lock"></i>
-                                    {{ trans('app.Locked') }}
+                                    <?php echo e(trans('app.Locked')); ?>
+
                                 </span>
-                                @endif
-                                @else
+                                <?php endif; ?>
+                                <?php else: ?>
                                 <span class="user-kb-badge user-kb-badge-info">
                                     <i class="fas fa-user-lock"></i>
-                                    {{ trans('app.Login Required') }}
+                                    <?php echo e(trans('app.Login Required')); ?>
+
                                 </span>
-                                @endif
-                                @endif
+                                <?php endif; ?>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="user-kb-article-arrow">
@@ -190,39 +198,41 @@
 
                     <div class="user-kb-article-content">
                         <p class="user-kb-article-description">
-                            {{ Str::limit($relatedArticle->excerpt ?: strip_tags($relatedArticle->content), 120) }}
+                            <?php echo e(Str::limit($relatedArticle->excerpt ?: strip_tags($relatedArticle->content), 120)); ?>
+
                         </p>
 
                         <div class="user-kb-article-meta">
                             <div class="user-kb-article-meta-item">
                                 <i class="fas fa-calendar-alt"></i>
-                                <span>{{ $relatedArticle->created_at->format('M d, Y') }}</span>
+                                <span><?php echo e($relatedArticle->created_at->format('M d, Y')); ?></span>
                             </div>
-                            @if($relatedArticle->category)
+                            <?php if($relatedArticle->category): ?>
                             <div class="user-kb-article-meta-item">
                                 <i class="fas fa-folder"></i>
-                                <span>{{ $relatedArticle->category->name }}</span>
+                                <span><?php echo e($relatedArticle->category->name); ?></span>
                             </div>
-                            @endif
+                            <?php endif; ?>
                             <div class="user-kb-article-meta-item">
                                 <i class="fas fa-clock"></i>
-                                <span>{{ $relatedArticle->created_at->diffForHumans() }}</span>
+                                <span><?php echo e($relatedArticle->created_at->diffForHumans()); ?></span>
                             </div>
                         </div>
                     </div>
 
                     <div class="user-kb-article-footer">
-                        <a href="{{ route('kb.article', $relatedArticle->slug) }}" class="user-kb-article-btn">
+                        <a href="<?php echo e(route('kb.article', $relatedArticle->slug)); ?>" class="user-kb-article-btn">
                             <i class="fas fa-arrow-right"></i>
-                            <span>{{ trans('app.Read More') }}</span>
+                            <span><?php echo e(trans('app.Read More')); ?></span>
                         </a>
                     </div>
                 </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.user', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\my-logos\resources\views/kb/article.blade.php ENDPATH**/ ?>

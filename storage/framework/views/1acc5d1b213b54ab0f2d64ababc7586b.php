@@ -3,15 +3,18 @@
 
 
 <?php if($preloaderSettings['preloaderEnabled']): ?>
-<div class="preloader-container" id="preloader-container" data-enabled="1"     data-type="<?php echo e($preloaderSettings['preloaderType']); ?>"
-    data-color="<?php echo e($preloaderSettings['preloaderColor']); ?>" data-bg="<?php echo e($preloaderSettings['preloaderBgColor']); ?>" data-duration="<?php echo e($preloaderSettings['preloaderDuration']); ?>"
+<div class="preloader-container" id="preloader-container" data-enabled="1"
+    data-type="<?php echo e($preloaderSettings['preloaderType']); ?>" data-color="<?php echo e($preloaderSettings['preloaderColor']); ?>"
+    data-bg="<?php echo e($preloaderSettings['preloaderBgColor']); ?>" data-duration="<?php echo e($preloaderSettings['preloaderDuration']); ?>"
+    data-min-duration="<?php echo e($preloaderSettings['preloaderMinDuration'] ?? 0); ?>"
     data-text="<?php echo e($preloaderSettings['preloaderText']); ?>" data-logo="<?php echo e($preloaderSettings['siteLogo']); ?>">
     <div class="preloader-content">
         
         <?php if($preloaderSettings['siteLogo'] || $preloaderSettings['logoShowText']): ?>
         <div class="preloader-logo">
             <?php if($preloaderSettings['siteLogo']): ?>
-            <img src="<?php echo e(asset('storage/' . $preloaderSettings['siteLogo'])); ?>" alt="<?php echo e($preloaderSettings['logoText']); ?>" class="preloader-logo-img"
+            <img src="<?php echo e(asset('storage/' . $preloaderSettings['siteLogo'])); ?>"
+                alt="<?php echo e($preloaderSettings['logoText']); ?>" class="preloader-logo-img"
                 class="max-w-[150px] max-h-[50px]">
             <?php elseif($preloaderSettings['logoShowText']): ?>
             <div class="preloader-logo-text" class="text-gray-800 text-2xl font-semibold">

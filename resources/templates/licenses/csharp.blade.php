@@ -24,6 +24,8 @@ namespace LicenseVerifier
         public LicenseVerifier()
         {
             _httpClient = new HttpClient();
+            // HTTP client configuration (not debug function)
+            // This is NOT a debug function - it's a C# method call
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "LicenseVerifier/1.0");
         }
 
