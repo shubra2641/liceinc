@@ -3170,4 +3170,6 @@ return [
     'Stripe secret key is required' => 'Stripe secret key is required',
     'PayPal connection error: :error' => 'PayPal connection error: :error',
     'Stripe connection error: :error' => 'Stripe connection error: :error',
+
+    'You don\'t have any invoices yet' =>    'You don\'t have any invoices yet',
 ];
