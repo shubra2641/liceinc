@@ -1,0 +1,145 @@
+// Admin Dashboard Layout
+.admin-dashboard {
+    .dashboard-header {
+        background: #fff;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1.5rem 2rem;
+        
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #111827;
+            margin: 0;
+        }
+        
+        .dashboard-subtitle {
+            color: #6b7280;
+            margin: 0.5rem 0 0 0;
+            font-size: 1rem;
+        }
+    }
+    
+    .dashboard-content {
+        padding: 2rem;
+        background: #f9fafb;
+        min-height: calc(100vh - 200px);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        
+        .stat-card {
+            background: #fff;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            
+            .stat-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 1rem;
+                
+                .stat-title {
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                    color: #6b7280;
+                    margin: 0;
+                }
+                
+                .stat-icon {
+                    width: 2.5rem;
+                    height: 2.5rem;
+                    border-radius: 0.5rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.25rem;
+                }
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #111827;
+                margin: 0;
+            }
+            
+            .stat-change {
+                font-size: 0.875rem;
+                margin-top: 0.5rem;
+                
+                &.positive {
+                    color: #059669;
+                }
+                
+                &.negative {
+                    color: #dc2626;
+                }
+            }
+        }
+    }
+    
+    .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        
+        .main-content {
+            .content-card {
+                background: #fff;
+                border-radius: 0.5rem;
+                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+                border: 1px solid #e5e7eb;
+                
+                .card-header {
+                    padding: 1.5rem;
+                    border-bottom: 1px solid #e5e7eb;
+                    
+                    .card-title {
+                        font-size: 1.25rem;
+                        font-weight: 600;
+                        color: #111827;
+                        margin: 0;
+                    }
+                }
+                
+                .card-body {
+                    padding: 1.5rem;
+                }
+            }
+        }
+        
+        .sidebar-content {
+            .sidebar-card {
+                background: #fff;
+                border-radius: 0.5rem;
+                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+                border: 1px solid #e5e7eb;
+                margin-bottom: 1.5rem;
+                
+                .card-header {
+                    padding: 1rem 1.5rem;
+                    border-bottom: 1px solid #e5e7eb;
+                    background: #f9fafb;
+                    
+                    .card-title {
+                        font-size: 1rem;
+                        font-weight: 600;
+                        color: #111827;
+                        margin: 0;
+                    }
+                }
+                
+                .card-body {
+                    padding: 1.5rem;
+                }
+            }
+        }
+    }
+}
+

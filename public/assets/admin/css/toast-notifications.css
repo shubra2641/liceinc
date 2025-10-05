@@ -1,0 +1,244 @@
+/* Toast Notifications CSS - نظام الإشعارات المنبثقة */
+
+/* Toast Container */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    max-width: 400px;
+}
+
+/* RTL Support for Toast Container */
+[dir="rtl"] .toast-container {
+    right: auto;
+    left: 20px;
+}
+
+/* Toast Base Styles */
+.toast {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+    max-width: 100%;
+    min-width: 300px;
+}
+
+/* RTL Support for Toast */
+[dir="rtl"] .toast {
+    transform: translateX(-100%);
+}
+
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* Toast Header */
+.toast-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+    border-radius: 8px 8px 0 0;
+}
+
+.toast-icon {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+[dir="rtl"] .toast-icon {
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+.toast-title {
+    flex: 1;
+    font-weight: 600;
+    font-size: 14px;
+    margin: 0;
+    color: #374151;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+}
+
+[dir="rtl"] .toast-close {
+    margin-left: 0;
+    margin-right: 8px;
+}
+
+.toast-close:hover {
+    color: #374151;
+    background: #e5e7eb;
+}
+
+/* Toast Body */
+.toast-body {
+    padding: 12px 16px;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Toast Types */
+.toast-success {
+    border-left: 4px solid #10b981;
+}
+
+[dir="rtl"] .toast-success {
+    border-left: none;
+    border-right: 4px solid #10b981;
+}
+
+.toast-success .toast-icon {
+    color: #10b981;
+}
+
+.toast-error {
+    border-left: 4px solid #ef4444;
+}
+
+[dir="rtl"] .toast-error {
+    border-left: none;
+    border-right: 4px solid #ef4444;
+}
+
+.toast-error .toast-icon {
+    color: #ef4444;
+}
+
+.toast-warning {
+    border-left: 4px solid #f59e0b;
+}
+
+[dir="rtl"] .toast-warning {
+    border-left: none;
+    border-right: 4px solid #f59e0b;
+}
+
+.toast-warning .toast-icon {
+    color: #f59e0b;
+}
+
+.toast-info {
+    border-left: 4px solid #3b82f6;
+}
+
+[dir="rtl"] .toast-info {
+    border-left: none;
+    border-right: 4px solid #3b82f6;
+}
+
+.toast-info .toast-icon {
+    color: #3b82f6;
+}
+
+/* Dark Mode Support */
+.dark .toast {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+}
+
+.dark .toast-header {
+    background: #374151;
+    border-bottom-color: #4b5563;
+}
+
+.dark .toast-title {
+    color: #e5e7eb;
+}
+
+.dark .toast-body {
+    color: #d1d5db;
+}
+
+.dark .toast-close {
+    color: #9ca3af;
+}
+
+.dark .toast-close:hover {
+    color: #e5e7eb;
+    background: #4b5563;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .toast-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    [dir="rtl"] .toast-container {
+        right: 10px;
+        left: 10px;
+    }
+    
+    .toast {
+        margin-bottom: 0.75rem;
+        min-width: auto;
+    }
+    
+    .toast-header {
+        padding: 0.75rem 1rem 0.5rem;
+    }
+    
+    .toast-body {
+        padding: 0.5rem 1rem 0.75rem;
+    }
+}
+
+/* Animation Keyframes */
+@keyframes toastSlideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes toastSlideInRTL {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast.show {
+    animation: toastSlideIn 0.3s ease;
+}
+
+[dir="rtl"] .toast.show {
+    animation: toastSlideInRTL 0.3s ease;
+}
+
+/* Flash Message Hidden */
+.flash-message-hidden {
+    display: none !important;
+}
+

@@ -1,0 +1,142 @@
+<?php
+/**
+ * License Verification System for WordPress
+ * Product: {{product}}
+ * Generated: {{date}}
+ *
+ * Usage: Add this file to your WordPress theme/plugin and call verify_license() function
+ */
+
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly
+}
+
+class WP_LicenseVerifier {
+    private $api_url = '{{license_api_url}}';
+    private $product_slug = '{{product_slug}}';
+    private $verification_key = '{{verification_key}}';
+    private $api_token = '{{api_token}}';
+
+    /**
+     * Verify license with purchase code
+     * This method sends a single request to our system which handles both Envato and database verification
+     */
+    public function verify_license($purchase_code, $domain = null) {
+        try {
+            // Send single request to our system
+            return $this->verify_with_our_system($purchase_code, $domain);
+
+        } catch (Exception $e) {
+            return $this->create_license_response(false, 'Verification failed: ' . $e->getMessage());
+        }
+    }
+
+
+    /**
+     * Verify with our license system
+     */
+    private function verify_with_our_system($purchase_code, $domain = null) {
+        $body = [
+            'purchase_code' => $purchase_code,
+            'product_slug' => $this->product_slug,
+            'domain' => $domain,
+            'verification_key' => $this->verification_key
+        ];
+
+        $args = [
+            'body' => $body,
+            'headers' => [
+                'Content-Type' => 'application/x-www-form-urlencoded',
+                'User-Agent' => 'LicenseVerifier/1.0'
+            ],
+            'timeout' => 15
+        ];
+
+        $response = wp_remote_post($this->api_url, $args);
+
+        if (is_wp_error($response)) {
+            return $this->create_license_response(false, 'Network error: ' . $response->get_error_message());
+        }
+
+        $http_code = wp_remote_retrieve_response_code($response);
+
+        if ($http_code === 200) {
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
+
+            return $this->create_license_response(
+                isset($data['valid']) ? $data['valid'] : false,
+                isset($data['message']) ? $data['message'] : 'Verification completed',
+                $data
+            );
+        }
+
+        return $this->create_license_response(false, 'Unable to verify license');
+    }
+
+    /**
+     * Create standardized response
+     */
+    private function create_license_response($valid, $message, $data = null) {
+        return array(
+            'valid' => $valid,
+            'message' => $message,
+            'data' => $data,
+            'verified_at' => current_time('mysql'),
+            'product' => $this->product_slug
+        );
+    }
+
+    /**
+     * Store license status in WordPress options
+     */
+    public function store_license_status($license_data) {
+        update_option('wp_license_status', $license_data);
+    }
+
+    /**
+     * Get stored license status
+     */
+    public function get_license_status() {
+        return get_option('wp_license_status', null);
+    }
+
+    /**
+     * Check if license is active
+     */
+    public function is_license_active() {
+        $status = $this->get_license_status();
+
+        if (!$status || !isset($status['valid'])) {
+            return false;
+        }
+
+        return $status['valid'];
+    }
+}
+
+// Global function for easy access
+function wp_verify_license($purchase_code, $domain = null) {
+    $verifier = new WP_LicenseVerifier();
+    return $verifier->verify_license($purchase_code, $domain);
+}
+
+// Usage example:
+/*
+// In your theme/plugin
+$verifier = new WP_LicenseVerifier();
+$result = $verifier->verify_license('YOUR_PURCHASE_CODE', home_url());
+
+if ($result['valid']) {
+    // License is valid
+    $verifier->store_license_status($result);
+    echo "License is valid!";
+} else {
+    // License invalid
+    echo "License verification failed: " . $result['message'];
+}
+
+// Or use the global function
+$result = wp_verify_license('YOUR_PURCHASE_CODE');
+*/
+?>

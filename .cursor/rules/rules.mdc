@@ -1,0 +1,375 @@
+---
+description: Envato PHP Compliance Rules - Complete set of requirements for Laravel projects to meet Envato marketplace standards with UserController.php coding pattern
+alwaysApply: false
+autoRead: false
+priority: high
+---
+
+# Envato PHP Compliance Rules
+
+## ⚡ **AUTO-APPLY INSTRUCTIONS**
+**This file should be automatically read and applied to every file processing request.**
+**Follow these rules EXACTLY as specified below.**
+
+## 🎯 **Core Requirements**
+
+### **1. PHP Standards (PSR-12)**
+- Follow modern PHP standards (PSR-12)
+- Use proper type hints and return types
+- Implement clean code structure
+- Use proper namespacing and autoloading
+
+### **2. Security Measures**
+- Implement robust security measures
+- Input validation for all user inputs
+- SQL injection prevention (use Eloquent ORM properly)
+- XSS protection and sanitization
+- CSRF protection for forms
+- Rate limiting for API endpoints
+- Secure password handling
+
+### **3. Logging Rules (CRITICAL)**
+- **NO Log::info for successful operations** - Delete them completely
+- **Log::error for errors only** - With complete details
+- **Log::warning for warnings only** - Like unauthorized attempts
+- In success cases, we don't need to log anything
+- No unnetrueary lPHP Rejections
+Ensure your code follows modern PHP standards (PSR-12)
+Implement robust security measures (input validation, SQL injection prevention, XSS protection)
+Too General: With an abundance of open source solutions available we strive for unique functionality or a unique twist on existing functionality.
+Implementation: Code should be well written, secure and well commented. A clean application design and proper abstraction is implicitly expected.
+في حالة النجاح لا نحتاج لتسجيل شيء. الشروط تقول: "Delete any Log::info or similar only if there is an actual error"
+Lack of features: Items need to have more than one focus, a single simple feature provides little attraction for buyers.
+Ease of Integration: The code must be easy for the purchaser to include in existing projects. API should be intuitive and code should be documented clearly. Separate config files are an excellent place to start.
+Lack of documentation: Documentation should be well written and explain all the features provided. Pictorial guides are ideal.
+Lack of Market Prospects: Occasionally items are well written, but unfortunately lack sales prospects. Please consider whether purchasers will pay money for such a functionality.
+Commitment to Envato's termslent place to start
+- Easy installation and setup process
+
+### **4. PHPDoc Documentation Rules (CRITICAL)**
+- **File-level documentation ONLY**: `@version`, `@since`, `@author` tags should ONLY appear in the main class PHPDoc comment at the top of the file
+- **Method-level documentation**: Individual methods should NOT include `@version`, `@since`, `@author` tags
+- **Method documentation should include**: `@param`, `@return`, `@throws`, `@example` when applicable
+- **Class documentation should include**: `@package`, `@version`, `@since`, `@author` in the main class comment only
+- **NO duplicate version/author info**: Remove `@version`, `@since`, `@author` from all method-level PHPDoc comments
+- **Clean method documentation**: Keep method PHPDoc focused on functionality, parameters, and return values only
+- **MANDATORY**: The following tags should appear ONLY once per file in the main class comment:
+  ```
+  
+ 
+ 
+  ```
+- **FORBIDDEN**: These tags should NEVER appear in individual method PHPDoc comments
+
+### **8. Request Classes & Models Compatibility (CRITICAL)**
+- **Request Classes**: Must be reviewed and validated for compatibility with their corresponding Controllers
+- **Model Classes**: Must be reviewed and validated for compatibility with their corresponding Controllers
+- **Validation Rules**: Request classes must have comprehensive validation rules matching Controller requirements
+- **Model Relationships**: Models must have proper relationships and methods that Controllers expect
+- **Type Hints**: All Request and Model parameters must have proper type hints
+- **Method Signatures**: Request and Model methods must match Controller expectations
+- **Error Handling**: Request classes must handle validation errors properly
+- **Security Validation**: Request classes must implement proper security validation rules
+
+## 🔧 **Implementation Guidelines**
+
+### **AUTO-PROCESSING RULES:**
+**When ANY file is sent for processing, automatically apply these rules:**
+
+1. **AUTO-READ**: Always read and apply these rules to every file
+2. **AUTO-CHECK**: Check for Log::info for successful operations and remove them
+3. **AUTO-CLEAN**: Remove ALL duplicate code and unused functions (MANDATORY)
+4. **AUTO-REMOVE**: Remove ALL unused imports, variables, and dead code (MANDATORY)
+5. **AUTO-DOCUMENT**: Add comprehensive PHPDoc comments
+6. **AUTO-PHPDOC-CLEAN**: Remove @version, @since, @author from method-level PHPDoc (MANDATORY)
+7. **AUTO-VALIDATE**: Ensure PSR-12 compliance
+8. **AUTO-TEST**: Verify file works without errors
+9. **AUTO-COMPATIBILITY**: Review and validate Request/Model compatibility with Controllers
+
+### **File Processing Rules:**
+1. Work on ONE file at a time
+2. Don't move to another file until current file is completely finished
+3. Ensure file works without errors
+4. Follow Envato rules precisely
+5. **MANDATORY**: Remove ALL unused functions, imports, variables, and dead code
+6. **MANDATORY**: Remove ALL duplicate code and consolidate similar functionality
+7. Simplify complex code
+8. **CRITICAL**: When processing Controllers, automatically review and validate corresponding Request classes and Models
+9. **CRITICAL**: When processing Request classes, ensure they match Controller method signatures and validation requirements
+10. **CRITICAL**: When processing Models, ensure they have proper relationships and methods expected by Controllers
+
+### **When Processing Files:**
+1. Check for Log::info for successful operations and remove them
+2. **MANDATORY**: Remove ALL duplicate code and unused functions
+3. **MANDATORY**: Remove ALL unused imports, variables, and dead code
+4. Add comprehensive PHPDoc comments
+5. **MANDATORY**: Remove @version, @since, @author from method-level PHPDoc comments
+6. Ensure PSR-12 compliance
+7. Test file to ensure no errors
+8. **For Controllers**: Review and validate corresponding Request classes and Models
+9. **For Request Classes**: Ensure validation rules match Controller requirements
+10. **For Models**: Ensure relationships and methods match Controller expectations
+
+### **UserController.php Pattern to Follow:**
+- Use same PHPDoc comment structure
+- Follow same error handling pattern with try-catch
+- Use database transactions for data operations
+- Apply same logging rules (no success logging)
+- Use same method documentation style
+- Follow same code organization and structure
+
+### **Request Classes Pattern to Follow:**
+- Comprehensive validation rules matching Controller requirements
+- Proper type hints for all parameters
+- Security validation rules (XSS protection, SQL injection prevention)
+- Custom validation messages for better user experience
+- Authorization rules if needed
+- File upload validation for file-related requests
+- Proper error handling and custom error messages
+
+### **Model Classes Pattern to Follow:**
+- Proper relationships (hasMany, belongsTo, etc.) matching Controller usage
+- Fillable/guarded properties for mass assignment protection
+- Accessors and mutators for data transformation
+- Scopes for common queries used in Controllers
+- Proper type hints and return types
+- Event handling (creating, created, updating, updated, etc.)
+- Custom methods that Controllers expect
+
+### **Success Criteria:**
+- No Log::info for successful operations
+- Clean, well-documented code
+- **ZERO TOLERANCE**: No duplicate or unused functions
+- **ZERO TOLERANCE**: No unused imports, variables, or dead code
+- **ZERO TOLERANCE**: No duplicate code patterns
+- PSR-12 compliant
+- Security measures implemented
+- Easy to integrate and use
+- **CRITICAL**: Request classes and Models are fully compatible with Controllers
+- **CRITICAL**: All validation rules match Controller requirements
+- **CRITICAL**: All relationships and methods work seamlessly with Controllers
+
+## 📋 **Checklist for Each File:**
+- [ ] PSR-12 Standards applied
+- [ ] Security measures implemented
+- [ ] Log::info for success operations removed
+- [ ] **MANDATORY**: ALL duplicate code removed
+- [ ] **MANDATORY**: ALL unused functions removed
+- [ ] **MANDATORY**: ALL unused imports removed
+- [ ] **MANDATORY**: ALL unused variables removed
+- [ ] **MANDATORY**: ALL dead code removed
+- [ ] PHPDoc comments added
+- [ ] Code simplified and cleaned
+- [ ] No linter errors
+- [ ] File tested and working
+- [ ] **CRITICAL**: Request/Model compatibility with Controllers verified
+- [ ] **CRITICAL**: Validation rules match Controller requirements
+- [ ] **CRITICAL**: Relationships and methods work with Controllers
+
+## 🚫 **Common Rejections to Avoid:**
+- Too General functionality
+- Lack of features (single focus)
+- Poor documentation
+- Lack of market prospects
+- Security vulnerabilities
+- Poor code quality
+- Unnecessary complexity
+- Missing error handling
+- **CRITICAL**: Request classes not compatible with Controllers
+- **CRITICAL**: Models missing required relationships or methods
+- **CRITICAL**: Validation rules don't match Controller requirements
+- **CRITICAL**: Type hints and method signatures don't match
+- **ZERO TOLERANCE**: Any unused functions, imports, or variables
+- **ZERO TOLERANCE**: Any duplicate code or dead code
+- **ZERO TOLERANCE**: Any unreachable or unnecessary code
+- **ZERO TOLERANCE**: `@version`, `@since`, `@author` tags in method-level PHPDoc comments
+
+## ✅ **Commitment to Envato Terms**
+- Follow all Envato marketplace requirements
+- Ensure code meets professional standards
+- Provide value to potential buyers
+- Maintain high quality throughout the project
+
+## 🤖 **AUTO-EXECUTION COMMANDS**
+**These commands should be automatically executed for every file:**
+
+```bash
+# Auto-check for Log::info in success operations
+grep -r "Log::info.*success\|Log::info.*completed\|Log::info.*created\|Log::info.*updated\|Log::info.*deleted" --include="*.php" .
+
+# Auto-validate PSR-12 compliance
+./vendor/bin/phpcs --standard=PSR12 app/
+
+# Auto-check for linter errors
+./vendor/bin/phpstan analyse app/
+
+# Auto-check for unused imports
+grep -r "use " app/ --include="*.php" | grep -v "Illuminate\|App\|Carbon\|Exception"
+
+# Auto-check for unused functions
+grep -r "function " app/ --include="*.php" | grep -v "public\|private\|protected"
+
+# Auto-check for duplicate code patterns
+grep -r "DB::beginTransaction\|DB::commit\|DB::rollBack" app/ --include="*.php"
+
+# Auto-check Request/Model compatibility with Controllers
+# Check for missing validation rules in Request classes
+grep -r "validated()" app/Http/Controllers/ --include="*.php" | grep -v "Request"
+
+# Check for missing relationships in Models
+grep -r "->" app/Http/Controllers/ --include="*.php" | grep -E "(hasMany|belongsTo|hasOne|belongsToMany)"
+
+# Check for proper type hints in Request classes
+grep -r "public function" app/Http/Requests/ --include="*.php"
+
+# Auto-check for @version, @since, @author in method-level PHPDoc (should be removed)
+grep -r -A 5 -B 5 "@version\|@since\|@author" app/ --include="*.php" | grep -v "class\|interface\|trait"
+```
+
+## 📋 **AUTO-CHECKLIST (Execute for every file):**
+- [ ] **AUTO-READ**: Rules applied automatically
+- [ ] **AUTO-CHECK**: Log::info for success operations removed
+- [ ] **AUTO-CLEAN**: ALL duplicate code removed (MANDATORY)
+- [ ] **AUTO-REMOVE**: ALL unused functions removed (MANDATORY)
+- [ ] **AUTO-REMOVE**: ALL unused imports removed (MANDATORY)
+- [ ] **AUTO-REMOVE**: ALL unused variables removed (MANDATORY)
+- [ ] **AUTO-REMOVE**: ALL dead code removed (MANDATORY)
+- [ ] **AUTO-DOCUMENT**: PHPDoc comments added
+- [ ] **AUTO-PHPDOC-CLEAN**: @version, @since, @author removed from method-level PHPDoc (MANDATORY)
+- [ ] **AUTO-VALIDATE**: PSR-12 compliance verified
+- [ ] **AUTO-TEST**: File tested and working
+- [ ] **AUTO-SECURE**: Security measures implemented
+- [ ] **AUTO-OPTIMIZE**: Code simplified and cleaned
+- [ ] **AUTO-COMPATIBILITY**: Request/Model compatibility with Controllers verified
+- [ ] **AUTO-COMPATIBILITY**: Validation rules match Controller requirements
+- [ ] **AUTO-COMPATIBILITY**: Relationships and methods work with Controllers
+
+## 🧹 **Code Cleanup & Unused Code Detection**
+
+### **MANDATORY Code Cleanup Rules:**
+1. **Remove ALL Unused Imports**: Check every `use` statement and remove unused ones
+2. **Remove ALL Unused Functions**: Delete any function that is not called anywhere
+3. **Remove ALL Unused Variables**: Delete variables that are declared but never used
+4. **Remove ALL Dead Code**: Delete unreachable code after return statements
+5. **Remove ALL Duplicate Code**: Consolidate similar functionality into reusable methods
+6. **Remove ALL Unused Parameters**: Delete function parameters that are not used
+7. **Remove ALL Unused Properties**: Delete class properties that are never accessed
+
+### **Code Analysis Commands:**
+```bash
+# Find unused imports
+grep -r "use " app/ --include="*.php" | grep -v "Illuminate\|App\|Carbon\|Exception"
+
+# Find unused functions
+grep -r "function " app/ --include="*.php" | grep -v "public\|private\|protected"
+
+# Find duplicate patterns
+grep -r "DB::beginTransaction\|DB::commit\|DB::rollBack" app/ --include="*.php"
+
+# Find unused variables
+grep -r "\$[a-zA-Z_][a-zA-Z0-9_]*\s*=" app/ --include="*.php"
+```
+
+### **Cleanup Checklist:**
+- [ ] **ZERO TOLERANCE**: No unused imports remain
+- [ ] **ZERO TOLERANCE**: No unused functions remain
+- [ ] **ZERO TOLERANCE**: No unused variables remain
+- [ ] **ZERO TOLERANCE**: No dead code remains
+- [ ] **ZERO TOLERANCE**: No duplicate code patterns remain
+- [ ] **ZERO TOLERANCE**: No unused parameters remain
+- [ ] **ZERO TOLERANCE**: No unused properties remain
+
+## 🔍 **Request & Model Compatibility Validation**
+
+### **When Processing Controllers:**
+1. **Identify Request Classes**: Find all Request classes used in Controller methods
+2. **Validate Request Compatibility**: Ensure Request classes have proper validation rules
+3. **Check Method Signatures**: Verify Request class methods match Controller expectations
+4. **Validate Type Hints**: Ensure all Request parameters have proper type hints
+5. **Review Security Rules**: Check for proper security validation in Request classes
+
+### **When Processing Request Classes:**
+1. **Controller Method Analysis**: Review corresponding Controller methods
+2. **Validation Rules Check**: Ensure all required fields have validation rules
+3. **Security Validation**: Implement XSS protection, SQL injection prevention
+4. **Custom Messages**: Add user-friendly validation error messages
+5. **Authorization Rules**: Add authorization rules if needed
+6. **File Upload Validation**: Add proper file validation for upload requests
+
+### **When Processing Models:**
+1. **Controller Usage Analysis**: Review how Controllers use the Model
+2. **Relationship Validation**: Ensure all required relationships are defined
+3. **Method Compatibility**: Verify Model methods match Controller expectations
+4. **Fillable Properties**: Check mass assignment protection
+5. **Accessors/Mutators**: Add data transformation methods if needed
+6. **Scopes**: Add query scopes used by Controllers
+7. **Event Handling**: Add model events if needed
+
+### **Compatibility Checklist:**
+- [ ] Request class validation rules match Controller field requirements
+- [ ] Request class type hints match Controller method signatures
+- [ ] Model relationships match Controller usage patterns
+- [ ] Model methods return expected data types
+- [ ] All Controller dependencies are properly validated
+- [ ] Error handling is consistent across Request/Model/Controller
+- [ ] Security measures are implemented at all levels
+
+## 📝 **PHPDoc Documentation Examples**
+
+### **✅ CORRECT - File-level documentation:**
+```php
+/**
+ * Email Template Controller with enhanced security
+ * 
+ * This controller handles email template management in the admin panel,
+ * including CRUD operations, template testing, and email sending functionality.
+ * 
+ * @package App\Http\Controllers\Admin
+ 
+
+
+ */
+class EmailTemplateController extends Controller
+{
+    /**
+     * Store a newly created email template with enhanced security.
+     * 
+     * Creates a new email template with comprehensive validation including
+     * XSS protection, input sanitization, and proper error handling.
+     * 
+     * @param EmailTemplateStoreRequest $request The validated request containing template data
+     * @return RedirectResponse Redirect to template view or back with error
+     * @throws \Exception When database operations fail
+     * 
+     * @example
+     * // Request:
+     * POST /admin/email-templates
+     * {
+     *     "name": "Welcome Email",
+     *     "subject": "Welcome to {{site_name}}",
+     *     "body": "Hello {{user_name}}, welcome to our platform!"
+     * }
+     */
+    public function store(EmailTemplateStoreRequest $request): RedirectResponse
+    {
+        // Method implementation
+    }
+}
+```
+
+### **❌ WRONG - Method-level version/author info:**
+```php
+/**
+ * Store a newly created email template with enhanced security.
+ * 
+ * @param EmailTemplateStoreRequest $request The validated request containing template data
+ * @return RedirectResponse Redirect to template view or back with error
+   ❌ WRONG - Should not be here
+    ❌ WRONG - Should not be here
+ ❌ WRONG - Should not be here
+ */
+public function store(EmailTemplateStoreRequest $request): RedirectResponse
+{
+    // Method implementation
+}
+```

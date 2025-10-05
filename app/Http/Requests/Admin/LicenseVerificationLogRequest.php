@@ -1,0 +1,392 @@
+<?php
+namespace App\Http\Requests\Admin;
+use Illuminate\Foundation\Http\FormRequest;
+/**
+ * License Verification Log Request with enhanced security.
+ *
+ * This unified request class handles validation for license verification log
+ * operations including filtering, statistics, suspicious activity detection,
+ * and cleanup with comprehensive security measures and input sanitization.
+ *
+ * Features:
+ * - Unified validation for all log operations
+ * - XSS protection and input sanitization
+ * - Custom validation messages for better user experience
+ * - Proper type hints and return types
+ * - Security validation rules (XSS protection, SQL injection prevention)
+ * - Date range validation
+ * - IP address validation
+ * - Domain validation
+/
+class LicenseVerificationLogRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return auth()->check() && (auth()->user()->is_admin || auth()->user()->hasRole('admin'));
+    }
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        $isStats = $this->isMethod('GET') && str_contains($this->route()->getName(), 'stats');
+        $isSuspicious = $this->isMethod('GET') && str_contains($this->route()->getName(), 'suspicious');
+        $isCleanup = $this->isMethod('POST') && str_contains($this->route()->getName(), 'clean');
+        // Statistics validation
+        if ($isStats) {
+            return [
+                'days' => [
+                    'nullable',
+                    'integer',
+                    'min:1',
+                    'max:365',
+                ],
+                'group_by' => [
+                    'nullable',
+                    'string',
+                    'max:50',
+                    'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
+                ],
+                'include_breakdown' => [
+                    'boolean',
+                ],
+                'include_trends' => [
+                    'boolean',
+                ],
+                'include_comparison' => [
+                    'boolean',
+                ],
+                'date_from' => [
+                    'nullable',
+                    'date',
+                ],
+                'date_to' => [
+                    'nullable',
+                    'date',
+                    'after_or_equal:date_from',
+                ],
+            ];
+        }
+        // Suspicious activity validation
+        if ($isSuspicious) {
+            return [
+                'hours' => [
+                    'nullable',
+                    'integer',
+                    'min:1',
+                    'max:168', // 1 week
+                ],
+                'min_attempts' => [
+                    'nullable',
+                    'integer',
+                    'min:1',
+                    'max:1000',
+                ],
+                'include_details' => [
+                    'boolean',
+                ],
+                'include_risk_assessment' => [
+                    'boolean',
+                ],
+                'include_geolocation' => [
+                    'boolean',
+                ],
+                'include_user_agents' => [
+                    'boolean',
+                ],
+                'threshold_type' => [
+                    'nullable',
+                    'string',
+                    'max:50',
+                    'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
+                ],
+                'risk_level' => [
+                    'nullable',
+                    'string',
+                    'max:20',
+                    'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
+                ],
+            ];
+        }
+        // Cleanup validation
+        if ($isCleanup) {
+            return [
+                'days' => [
+                    'required',
+                    'integer',
+                    'min:1',
+                    'max:3650', // 10 years
+                ],
+                'confirm' => [
+                    'required',
+                    'boolean',
+                    'accepted',
+                ],
+                'backup_before_cleanup' => [
+                    'boolean',
+                ],
+                'cleanup_type' => [
+                    'nullable',
+                    'string',
+                    'max:50',
+                    'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
+                ],
+                'include_failed_verifications' => [
+                    'boolean',
+                ],
+                'include_successful_verifications' => [
+                    'boolean',
+                ],
+                'include_suspicious_activity' => [
+                    'boolean',
+                ],
+                'dry_run' => [
+                    'boolean',
+                ],
+            ];
+        }
+        // Filter validation (default)
+        return [
+            'status' => [
+                'nullable',
+                'string',
+                'max:20',
+                'regex:/^[a-zA-Z0-9\s\-_.,!?@#$%&*()]+$/',
+            ],
+            'source' => [
+                'nullable',
+                'string',
+                'max:50',
+                'regex:/^[a-zA-Z0-9\s\-_.,!?@#$%&*()]+$/',
+            ],
+            'domain' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^[a-zA-Z0-9\-_.]+$/',
+            ],
+            'ip_address' => [
+                'nullable',
+                'ip',
+            ],
+            'license_key' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^[a-zA-Z0-9\-_]+$/',
+            ],
+            'date_from' => [
+                'nullable',
+                'date',
+            ],
+            'date_to' => [
+                'nullable',
+                'date',
+                'after_or_equal:date_from',
+            ],
+            'per_page' => [
+                'nullable',
+                'integer',
+                'min:1',
+                'max:100',
+            ],
+            'sort_by' => [
+                'nullable',
+                'string',
+                'max:50',
+                'regex:/^[a-zA-Z0-9\s\-_.,!?@#$%&*()]+$/',
+            ],
+            'sort_order' => [
+                'nullable',
+                'string',
+                'max:10',
+                'regex:/^[a-zA-Z0-9\s\-_.,!?@#$%&*()]+$/',
+            ],
+            'include_details' => [
+                'boolean',
+            ],
+            'include_metadata' => [
+                'boolean',
+            ],
+            'include_response_data' => [
+                'boolean',
+            ],
+            'include_error_details' => [
+                'boolean',
+            ],
+        ];
+    }
+    /**
+     * Get custom validation messages.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'days.required' => 'Days parameter is required.',
+            'days.min' => 'Days must be at least 1.',
+            'days.max' => 'Days cannot exceed 365.',
+            'hours.min' => 'Hours must be at least 1.',
+            'hours.max' => 'Hours cannot exceed 168 (1 week).',
+            'min_attempts.min' => 'Minimum attempts must be at least 1.',
+            'min_attempts.max' => 'Minimum attempts cannot exceed 1000.',
+            'confirm.required' => 'Confirmation is required for this operation.',
+            'confirm.accepted' => 'You must confirm this operation to proceed.',
+            'status.regex' => 'Status contains invalid characters.',
+            'source.regex' => 'Source contains invalid characters.',
+            'domain.regex' => 'Domain can only contain letters, numbers, hyphens, underscores, and dots.',
+            'ip_address.ip' => 'IP address must be a valid IP address.',
+            'license_key.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
+            'date_from.date' => 'Date from must be a valid date.',
+            'date_to.date' => 'Date to must be a valid date.',
+            'date_to.after_or_equal' => 'Date to must be after or equal to date from.',
+            'per_page.min' => 'Per page must be at least 1.',
+            'per_page.max' => 'Per page cannot exceed 100.',
+            'sort_by.regex' => 'Sort by contains invalid characters.',
+            'sort_order.regex' => 'Sort order contains invalid characters.',
+            'group_by.regex' => 'Group by contains invalid characters.',
+            'threshold_type.regex' => 'Threshold type contains invalid characters.',
+            'risk_level.regex' => 'Risk level contains invalid characters.',
+            'cleanup_type.regex' => 'Cleanup type contains invalid characters.',
+            'include_breakdown.boolean' => 'Include breakdown must be true or false.',
+            'include_trends.boolean' => 'Include trends must be true or false.',
+            'include_comparison.boolean' => 'Include comparison must be true or false.',
+            'include_details.boolean' => 'Include details must be true or false.',
+            'include_risk_assessment.boolean' => 'Include risk assessment must be true or false.',
+            'include_geolocation.boolean' => 'Include geolocation must be true or false.',
+            'include_user_agents.boolean' => 'Include user agents must be true or false.',
+            'backup_before_cleanup.boolean' => 'Backup before cleanup must be true or false.',
+            'include_failed_verifications.boolean' => 'Include failed verifications must be true or false.',
+            'include_successful_verifications.boolean' => 'Include successful verifications must be true or false.',
+            'include_suspicious_activity.boolean' => 'Include suspicious activity must be true or false.',
+            'dry_run.boolean' => 'Dry run must be true or false.',
+            'include_metadata.boolean' => 'Include metadata must be true or false.',
+            'include_response_data.boolean' => 'Include response data must be true or false.',
+            'include_error_details.boolean' => 'Include error details must be true or false.',
+        ];
+    }
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'days' => 'number of days',
+            'hours' => 'number of hours',
+            'min_attempts' => 'minimum attempts',
+            'confirm' => 'confirmation',
+            'status' => 'verification status',
+            'source' => 'verification source',
+            'domain' => 'domain',
+            'ip_address' => 'IP address',
+            'license_key' => 'license key',
+            'date_from' => 'date from',
+            'date_to' => 'date to',
+            'per_page' => 'per page',
+            'sort_by' => 'sort by',
+            'sort_order' => 'sort order',
+            'group_by' => 'group by',
+            'include_breakdown' => 'include breakdown',
+            'include_trends' => 'include trends',
+            'include_comparison' => 'include comparison',
+            'include_details' => 'include details',
+            'include_risk_assessment' => 'include risk assessment',
+            'include_geolocation' => 'include geolocation',
+            'include_user_agents' => 'include user agents',
+            'threshold_type' => 'threshold type',
+            'risk_level' => 'risk level',
+            'backup_before_cleanup' => 'backup before cleanup',
+            'cleanup_type' => 'cleanup type',
+            'include_failed_verifications' => 'include failed verifications',
+            'include_successful_verifications' => 'include successful verifications',
+            'include_suspicious_activity' => 'include suspicious activity',
+            'dry_run' => 'dry run',
+            'include_metadata' => 'include metadata',
+            'include_response_data' => 'include response data',
+            'include_error_details' => 'include error details',
+        ];
+    }
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        // Sanitize input to prevent XSS
+        $this->merge([
+            'status' => $this->status ? $this->sanitizeInput($this->status) : null,
+            'source' => $this->source ? $this->sanitizeInput($this->source) : null,
+            'domain' => $this->domain ? $this->sanitizeInput($this->domain) : null,
+            'license_key' => $this->license_key ? $this->sanitizeInput($this->license_key) : null,
+            'sort_by' => $this->sort_by ? $this->sanitizeInput($this->sort_by) : null,
+            'sort_order' => $this->sort_order ? $this->sanitizeInput($this->sort_order) : null,
+            'group_by' => $this->group_by ? $this->sanitizeInput($this->group_by) : null,
+            'threshold_type' => $this->threshold_type ? $this->sanitizeInput($this->threshold_type) : null,
+            'risk_level' => $this->risk_level ? $this->sanitizeInput($this->risk_level) : null,
+            'cleanup_type' => $this->cleanup_type ? $this->sanitizeInput($this->cleanup_type) : null,
+        ]);
+        // Handle checkbox values
+        $this->merge([
+            'confirm' => $this->has('confirm'),
+            'include_breakdown' => $this->has('include_breakdown'),
+            'include_trends' => $this->has('include_trends'),
+            'include_comparison' => $this->has('include_comparison'),
+            'include_details' => $this->has('include_details'),
+            'include_risk_assessment' => $this->has('include_risk_assessment'),
+            'include_geolocation' => $this->has('include_geolocation'),
+            'include_user_agents' => $this->has('include_user_agents'),
+            'backup_before_cleanup' => $this->has('backup_before_cleanup'),
+            'include_failed_verifications' => $this->has('include_failed_verifications'),
+            'include_successful_verifications' => $this->has('include_successful_verifications'),
+            'include_suspicious_activity' => $this->has('include_suspicious_activity'),
+            'dry_run' => $this->has('dry_run'),
+            'include_metadata' => $this->has('include_metadata'),
+            'include_response_data' => $this->has('include_response_data'),
+            'include_error_details' => $this->has('include_error_details'),
+        ]);
+        // Set default values
+        $this->merge([
+            'days' => $this->days ?? 30,
+            'hours' => $this->hours ?? 24,
+            'min_attempts' => $this->min_attempts ?? 3,
+            'per_page' => $this->per_page ?? 20,
+            'sort_by' => $this->sort_by ?? 'created_at',
+            'sort_order' => $this->sort_order ?? 'desc',
+            'include_breakdown' => $this->include_breakdown ?? true,
+            'include_trends' => $this->include_trends ?? true,
+            'include_comparison' => $this->include_comparison ?? false,
+            'include_details' => $this->include_details ?? true,
+            'include_risk_assessment' => $this->include_risk_assessment ?? true,
+            'include_geolocation' => $this->include_geolocation ?? false,
+            'include_user_agents' => $this->include_user_agents ?? false,
+            'backup_before_cleanup' => $this->backup_before_cleanup ?? true,
+            'include_failed_verifications' => $this->include_failed_verifications ?? true,
+            'include_successful_verifications' => $this->include_successful_verifications ?? true,
+            'include_suspicious_activity' => $this->include_suspicious_activity ?? true,
+            'include_metadata' => $this->include_metadata ?? false,
+            'include_response_data' => $this->include_response_data ?? false,
+            'include_error_details' => $this->include_error_details ?? false,
+        ]);
+    }
+    /**
+     * Sanitize input to prevent XSS attacks.
+     *
+     * @param  string|null  $input  The input to sanitize
+     *
+     * @return string|null The sanitized input
+     */
+    private function sanitizeInput(?string $input): ?string
+    {
+        if ($input === null) {
+            return null;
+        }
+        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+    }
+}

@@ -1,0 +1,455 @@
+/* ============================================================================
+   LICENSE VERIFICATION STYLES
+   ============================================================================ */
+
+/* License Verification Container */
+.license-verification {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* License Info Cards */
+.license-info-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.license-info-card {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: var(--text-white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-normal);
+}
+
+.license-info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+.license-info-card .icon {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--spacing-md);
+    opacity: 0.9;
+}
+
+.license-info-card h4 {
+    margin: 0 0 var(--spacing-sm) 0;
+    font-weight: 600;
+    font-size: var(--font-size-lg);
+}
+
+.license-info-card p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: var(--font-size-sm);
+}
+
+/* License Form */
+.license-form {
+    background: var(--bg-primary);
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--spacing-xl);
+    border: 1px solid var(--border-color);
+}
+
+.license-form-group {
+    margin-bottom: var(--spacing-xl);
+}
+
+.license-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-base);
+}
+
+.license-label i {
+    color: var(--primary-color);
+    width: 20px;
+}
+
+.license-input {
+    width: 100%;
+    padding: var(--spacing-lg);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    letter-spacing: 1px;
+    font-family: 'Courier New', monospace;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: all var(--transition-normal);
+}
+
+.license-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.license-input.is-invalid {
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.license-error {
+    color: var(--error-color);
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-weight: 500;
+}
+
+.license-error i {
+    font-size: var(--font-size-xs);
+}
+
+.license-hint {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.license-hint i {
+    color: var(--info-color);
+    font-size: var(--font-size-xs);
+}
+
+/* Security Notice */
+.license-security-notice {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+    border: 1px solid var(--info-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin: var(--spacing-xl) 0;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+
+.license-security-notice i {
+    color: var(--info-color);
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-lg);
+}
+
+.license-security-notice div {
+    flex: 1;
+}
+
+.license-security-notice strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.license-security-notice p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+}
+
+/* Success Message */
+.license-success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(34, 197, 94, 0.1) 100%);
+    border: 1px solid var(--success-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin: var(--spacing-lg) 0;
+    display: none;
+    align-items: center;
+    gap: var(--spacing-md);
+    animation: slideIn 0.3s ease-out;
+}
+
+.license-success.show {
+    display: flex;
+}
+
+.license-success i {
+    color: var(--success-color);
+    font-size: var(--font-size-xl);
+}
+
+.license-success-text {
+    color: var(--success-color);
+    font-weight: 600;
+    font-size: var(--font-size-base);
+}
+
+/* Action Buttons */
+.license-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+}
+
+.license-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-xl);
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-family: inherit;
+}
+
+.license-btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: var(--text-white);
+    box-shadow: var(--shadow-md);
+}
+
+.license-btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    color: var(--text-white);
+}
+
+.license-btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+}
+
+.license-btn-secondary:hover:not(:disabled) {
+    background: var(--bg-tertiary);
+    border-color: var(--border-dark);
+    color: var(--text-primary);
+}
+
+.license-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Continue Button */
+.license-continue-btn {
+    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+    color: var(--text-white);
+    display: none;
+    margin-top: var(--spacing-lg);
+    width: 100%;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+}
+
+.license-continue-btn.show {
+    display: inline-flex;
+    animation: slideIn 0.3s ease-out;
+}
+
+.license-continue-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    color: var(--text-white);
+}
+
+/* Help Section */
+.license-help {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    margin-top: var(--spacing-xl);
+    border: 1px solid var(--border-color);
+}
+
+.license-help h4 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+}
+
+.license-help h4 i {
+    color: var(--info-color);
+}
+
+.license-help-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+}
+
+.license-help-item h5 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+}
+
+.license-help-item p {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.license-btn.loading {
+    pointer-events: none;
+}
+
+.license-btn.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .license-info-cards {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    .license-help-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+    
+    .license-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-md);
+    }
+    
+    .license-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .license-form {
+        padding: var(--spacing-xl);
+    }
+    
+    .license-security-notice {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .license-security-notice i {
+        margin-top: 0;
+        margin-bottom: var(--spacing-sm);
+    }
+}
+
+@media (max-width: 480px) {
+    .license-info-card {
+        padding: var(--spacing-lg);
+    }
+    
+    .license-info-card .icon {
+        font-size: var(--font-size-2xl);
+    }
+    
+    .license-input {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-base);
+    }
+    
+    .license-help {
+        padding: var(--spacing-lg);
+    }
+}
+
+/* Focus Styles */
+.license-input:focus,
+.license-btn:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .license-info-card {
+        background: var(--primary-color);
+        border: 2px solid var(--text-white);
+    }
+    
+    .license-input {
+        border-width: 3px;
+    }
+    
+    .license-security-notice {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .license-info-card,
+    .license-btn,
+    .license-success,
+    .license-continue-btn {
+        transition: none;
+    }
+    
+    .license-info-card:hover,
+    .license-btn:hover:not(:disabled) {
+        transform: none;
+    }
+    
+    @keyframes slideIn {
+        from, to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+    
+    @keyframes spin {
+        from, to {
+            transform: none;
+        }
+    }
+}
