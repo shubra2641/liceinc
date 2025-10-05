@@ -30,9 +30,28 @@ if (typeof window.AdminCharts === 'undefined') {
                 return finalUrl;
             };
 
+            // Validate URL to prevent SSRF attacks
+            this.isValidUrl = (url) => {
+                try {
+                    const urlObj = new URL(url);
+                    const allowedOrigins = [
+                        window.location.origin,
+                        window.location.protocol + '//' + window.location.host
+                    ];
+                    return allowedOrigins.some(origin => url.startsWith(origin));
+                } catch (e) {
+                    return false;
+                }
+            };
+
             // Unified fetch with proper URL building and authentication
             this.apiFetch = async (path, options = {}) => {
                 const primaryUrl = this.buildUrl(path);
+                
+                // Validate URL to prevent SSRF attacks
+                if (!this.isValidUrl(primaryUrl)) {
+                    throw new Error('Invalid URL: SSRF protection activated');
+                }
                 
                 // Get CSRF token from meta tag
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
