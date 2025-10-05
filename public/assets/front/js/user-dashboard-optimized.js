@@ -871,7 +871,20 @@
                 }
                 
                 try {
-                    const response = await fetch(form.action, {
+                    // Validate form action URL to prevent SSRF attacks
+                    const formAction = form.action;
+                    const allowedOrigins = [
+                        window.location.origin,
+                        window.location.protocol + '//' + window.location.host
+                    ];
+                    
+                    // Check if the form action is from the same origin
+                    if (!allowedOrigins.some(origin => formAction.startsWith(origin))) {
+                        showErrorMessage('Invalid request URL');
+                        return;
+                    }
+                    
+                    const response = await fetch(formAction, {
                         method: 'POST',
                         body: formData,
                         headers: {
