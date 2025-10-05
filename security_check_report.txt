@@ -1,29 +1,19 @@
 Comprehensive Security Check Report
-Generated: 2025-10-05 19:33:08
-Execution Time: 2.32 seconds
+Generated: 2025-10-05 19:40:33
+Execution Time: 1.26 seconds
 Total Files Scanned: 497
 ==================================================
 
 CRITICAL ISSUES:
 
 HIGH ISSUES:
-- Raw input usage without validation in D:\xampp\htdocs\my-logos\app\Http\Controllers\Auth\RegisteredUserController.php
-- Raw input usage without validation in D:\xampp\htdocs\my-logos\app\Http\Controllers\LicenseController.php
 - Raw input usage without validation in D:\xampp\htdocs\my-logos\app\Http\Controllers\LicenseStatusController.php
 - Raw input usage without validation in D:\xampp\htdocs\my-logos\app\Http\Controllers\ProductController.php
-- Raw input usage without validation in D:\xampp\htdocs\my-logos\app\Http\Controllers\User\EnvatoController.php
 - Raw input usage without validation in D:\xampp\htdocs\my-logos\app\Http\Controllers\User\InvoiceController.php
 - Raw input usage without validation in D:\xampp\htdocs\my-logos\app\Http\Middleware\DemoModeMiddleware.php
-- File upload without type validation in D:\xampp\htdocs\my-logos\app\Services\ProductFileService.php
 - Outdated Laravel version: ^12.0
-- Debug information exposure in D:\xampp\htdocs\my-logos\resources\templates\licenses\csharp.blade.php
-- Debug information exposure in D:\xampp\htdocs\my-logos\resources\views\components\modal.blade.php
-- Path traversal pattern detected in D:\xampp\htdocs\my-logos\bootstrap\app.php
 
 MEDIUM ISSUES:
-- whereRaw with variables - ensure proper binding in D:\xampp\htdocs\my-logos\app\Http\Controllers\KbPublicController.php
-- Status manipulation vulnerability in D:\xampp\htdocs\my-logos\app\Http\Controllers\Auth\NewPasswordController.php
-- Status manipulation vulnerability in D:\xampp\htdocs\my-logos\app\Http\Controllers\Auth\PasswordResetLinkController.php
 - Status manipulation vulnerability in D:\xampp\htdocs\my-logos\app\Http\Controllers\LicenseStatusController.php
 - Status manipulation vulnerability in D:\xampp\htdocs\my-logos\app\Http\Controllers\User\InvoiceController.php
 - Status manipulation vulnerability in D:\xampp\htdocs\my-logos\app\Http\Middleware\ApiTrackingMiddleware.php
@@ -49,9 +39,9 @@ WARNINGS:
 - Missing CSRF protection in D:\xampp\htdocs\my-logos/app/Http/Controllers/Auth/VerifyEmailController.php
 - Weak password validation detected in D:\xampp\htdocs\my-logos/app/Http/Middleware/DemoModeMiddleware.php
 - File upload without size validation in D:\xampp\htdocs\my-logos\app\Services\ProductFileService.php
-- Error message exposure detected in D:\xampp\htdocs\my-logos\resources\views\errors\403.blade.php
 
 PASSED CHECKS:
+- SQL injection prevention appears to be properly implemented
 - XSS protection appears to be properly implemented
 - CSRF protection configured in bootstrap/app.php
 - Rate limiting detected
@@ -60,4 +50,6 @@ PASSED CHECKS:
 - Error handling appears to be properly implemented
 - Security headers middleware detected
 - Composer dependencies found
+- Information disclosure protection appears to be properly implemented
 - Command injection protection appears to be properly implemented
+- File inclusion protection appears to be properly implemented

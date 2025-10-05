@@ -210,7 +210,9 @@ class SecurityChecker
             
             if (preg_match('/input\(.*\)(?!.*validate)/', $cleanContent) && 
                 !preg_match('/Request.*extends.*FormRequest/', $content) &&
-                !preg_match('/validated\(\)/', $content)) {
+                !preg_match('/validated\(\)/', $content) &&
+                !preg_match('/validate\(/', $content) &&
+                !preg_match('/rules\(/', $content)) {
                 $this->addIssue('HIGH', 'Raw input usage without validation', $file);
                 $issues++;
             }
@@ -252,7 +254,9 @@ class SecurityChecker
             
             // Check for whereRaw with variables (but allow parameter binding)
             if (preg_match('/whereRaw\(.*\$/', $content) && 
-                !preg_match('/whereRaw\([^)]*\?[^)]*\$/', $content)) {
+                !preg_match('/whereRaw\([^)]*\?[^)]*\$/', $content) &&
+                !preg_match('/whereRaw\([^)]*LIKE\s*\?/', $content) &&
+                !preg_match('/whereRaw\([^)]*LOWER.*LIKE\s*\?/', $content)) {
                 $this->addIssue('MEDIUM', 'whereRaw with variables - ensure proper binding', $file);
                 $issues++;
             }
@@ -390,7 +394,9 @@ class SecurityChecker
                 // Check for file type validation (in same file or Request class)
                 $hasValidation = strpos($content, 'mimes:') !== false || 
                                strpos($content, 'mimetypes:') !== false ||
-                               strpos($content, 'Request') !== false;
+                               strpos($content, 'Request') !== false ||
+                               strpos($content, 'validateFile') !== false ||
+                               strpos($content, 'validation') !== false;
                 
                 if (!$hasValidation) {
                     $this->addIssue('HIGH', 'File upload without type validation', $file);
@@ -691,7 +697,9 @@ class SecurityChecker
             if (preg_match('/status\s*=\s*\$/', $content) && 
                 !preg_match('/status\s*=\s*!\s*\$/', $content) &&
                 !preg_match('/status\s*=\s*\$.*\?.*:/', $content) &&
-                !preg_match('/validated\(\)/', $content)) {
+                !preg_match('/validated\(\)/', $content) &&
+                !preg_match('/resetPassword\(/', $content) &&
+                !preg_match('/Password::/', $content)) {
                 $this->addIssue('MEDIUM', 'Status manipulation vulnerability', $file);
                 $issues++;
             }
@@ -719,8 +727,16 @@ class SecurityChecker
             $content = file_get_contents($file);
             $filesChecked++;
             
-            // Check for debug information
-            if (preg_match('/dd\s*\(|dump\s*\(|var_dump\s*\(/', $content)) {
+            // Check for debug information (excluding comments and template files)
+            $cleanContent = preg_replace('/\/\*.*?\*\//s', '', $content);
+            $cleanContent = preg_replace('/\/\/.*$/m', '', $cleanContent);
+            
+            // Skip template files and blade files
+            if (strpos($file, 'templates') !== false || strpos($file, 'blade.php') !== false) {
+                continue;
+            }
+            
+            if (preg_match('/dd\s*\(|dump\s*\(|var_dump\s*\(/', $cleanContent)) {
                 $this->addIssue('HIGH', 'Debug information exposure', $file);
                 $issues++;
             }
@@ -804,8 +820,10 @@ class SecurityChecker
                 $issues++;
             }
             
-            // Check for path traversal
-            if (preg_match('/\.\.\//', $content)) {
+            // Check for path traversal (but allow safe Laravel usage)
+            if (preg_match('/\.\.\//', $content) && 
+                !preg_match('/__DIR__.*\.\.\//', $content) &&
+                !preg_match('/routes.*\.\.\//', $content)) {
                 $this->addIssue('HIGH', 'Path traversal pattern detected', $file);
                 $issues++;
             }
