@@ -252,7 +252,7 @@ class LicenseStatusController extends Controller
                             'status' => $log->status,
                             'ip_address' => $log->ip_address,
                             'user_agent' => $log->user_agent,
-                            'created_at' => $log->created_at->format('Y-m-d H:i:s'),
+                            'created_at' => $log->created_at?->format('Y-m-d H:i:s'),
                             'message' => $log->message,
                         ];
                     });
@@ -324,7 +324,7 @@ class LicenseStatusController extends Controller
      *
      * @param  string  $purchaseCode  The purchase code to verify
      *
-     * @return array|null The Envato data or null if verification fails
+     * @return array<string, mixed>|null The Envato data or null if verification fails
      */
     private function verifyWithEnvato(string $purchaseCode): ?array
     {
@@ -346,10 +346,10 @@ class LicenseStatusController extends Controller
      * @param  License  $license  The license instance
      * @param  string  $status  The license status
      * @param  string  $licenseType  The license type
-     * @param  array|null  $envatoData  The Envato verification data
+     * @param  array<string, mixed>|null  $envatoData  The Envato verification data
      * @param  string  $email  The user email
      *
-     * @return array The license details array
+     * @return array<string, mixed> The license details array
      */
     private function buildLicenseDetails(
         License $license,
@@ -367,7 +367,7 @@ class LicenseStatusController extends Controller
             'product_name' => $license->product
                 ? $license->product->name
                 : 'Not specified',
-            'created_at' => $license->created_at->format('Y-m-d H:i:s'),
+            'created_at' => $license->created_at?->format('Y-m-d H:i:s'),
             'expires_at' => $license->license_expires_at ? $license->license_expires_at->format('Y-m-d H:i:s') : null,
             'is_expired' => $license->license_expires_at && $license->license_expires_at->isPast(),
             'days_remaining' => $license->license_expires_at

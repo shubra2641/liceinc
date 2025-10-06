@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Language Controller.
@@ -74,7 +75,7 @@ class LanguageController extends Controller
     /**
      * Get available languages with metadata for views.
      *
-     * @return array The available languages with metadata
+     * @return array<string, mixed> The available languages with metadata
      */
     public static function getAvailableLanguagesWithMetadata(): array
     {

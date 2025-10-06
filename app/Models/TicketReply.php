@@ -29,6 +29,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class TicketReply extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

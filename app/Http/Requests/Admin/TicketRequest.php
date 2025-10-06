@@ -28,7 +28,8 @@ class TicketRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && (auth()->user()->is_admin || auth()->user()->hasRole('admin'));
+        $user = auth()->user();
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -37,8 +38,11 @@ class TicketRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isReply = $this->isMethod('POST') && str_contains($this->route()->getName(), 'reply');
-        $isStatusUpdate = $this->isMethod('PATCH') && str_contains($this->route()->getName(), 'status');
+        $route = $this->route();
+        $routeName = $route?->getName() ?? '';
+        
+        $isReply = $this->isMethod('POST') && str_contains($routeName, 'reply');
+        $isStatusUpdate = $this->isMethod('PATCH') && str_contains($routeName, 'status');
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         // Reply validation
         if ($isReply) {

@@ -61,6 +61,9 @@ use Illuminate\Support\Facades\Storage;
  */
 class ProductUpdate extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

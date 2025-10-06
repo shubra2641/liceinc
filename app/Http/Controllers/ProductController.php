@@ -206,7 +206,8 @@ class ProductController extends Controller
             $downloadMessage = '';
             $userHasPurchasedBefore = false;
             if (Auth::check()) {
-                $userOwnsProduct = Auth::user()->licenses()
+                $user = Auth::user();
+                $userOwnsProduct = $user?->licenses()
                     ->where('product_id', $product->id)
                     ->where('status', 'active')
                     ->where(function ($q) {
@@ -215,7 +216,7 @@ class ProductController extends Controller
                     })
                     ->exists();
                 // Check if user has purchased this product before (any license, even expired)
-                $userHasPurchasedBefore = Auth::user()->licenses()
+                $userHasPurchasedBefore = $user?->licenses()
                     ->where('product_id', $product->id)
                     ->exists();
                 // Check download permissions if product is downloadable
@@ -333,7 +334,8 @@ class ProductController extends Controller
             $downloadMessage = '';
             $userHasPurchasedBefore = false;
             if (Auth::check()) {
-                $userOwnsProduct = Auth::user()->licenses()
+                $user = Auth::user();
+                $userOwnsProduct = $user?->licenses()
                     ->where('product_id', $product->id)
                     ->where('status', 'active')
                     ->where(function ($q) {
@@ -342,7 +344,7 @@ class ProductController extends Controller
                     })
                     ->exists();
                 // Check if user has purchased this product before (any license, even expired)
-                $userHasPurchasedBefore = Auth::user()->licenses()
+                $userHasPurchasedBefore = $user?->licenses()
                     ->where('product_id', $product->id)
                     ->exists();
                 // Check download permissions if product is downloadable

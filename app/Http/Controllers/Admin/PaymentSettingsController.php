@@ -194,6 +194,10 @@ class PaymentSettingsController extends Controller
      *
      * @throws \Exception When PayPal API operations fail
      */
+    /**
+     * @param array<string, mixed> $credentials
+     * @return array<string, mixed>
+     */
     protected function testPayPalConnection(array $credentials): array
     {
         try {
@@ -211,11 +215,12 @@ class PaymentSettingsController extends Controller
             };
             // Try to create a simple order to test connection
             $request = new class {
-                public function prefer(string $preference) {
+                public function prefer(string $preference): mixed {
                     // Mock implementation
                     return $this;
                 }
-                public $body = [];
+                /** @var array<string, mixed> */
+                public array $body = [];
             };
             $preferResult = $request->prefer('return=representation');
             // Store result to avoid unused method call warning
@@ -264,6 +269,10 @@ class PaymentSettingsController extends Controller
      * @return array Test result with success status and message
      *
      * @throws \Exception When Stripe API operations fail
+     */
+    /**
+     * @param array<string, mixed> $credentials
+     * @return array<string, mixed>
      */
     protected function testStripeConnection(array $credentials): array
     {

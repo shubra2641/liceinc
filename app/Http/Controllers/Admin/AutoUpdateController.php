@@ -31,6 +31,7 @@ use ZipArchive;
 class AutoUpdateController extends Controller
 {
     protected LicenseServerService $licenseServerService;
+
     /**
      * Create a new controller instance.
      *
@@ -40,6 +41,7 @@ class AutoUpdateController extends Controller
     {
         $this->licenseServerService = $licenseServerService;
     }
+
     /**
      * Show the auto update page with enhanced security.
      *
@@ -49,10 +51,6 @@ class AutoUpdateController extends Controller
      * @return \Illuminate\View\View The auto update view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Access the auto update page
@@ -67,6 +65,7 @@ class AutoUpdateController extends Controller
     {
         return view('admin.auto-update.index');
     }
+
     /**
      * Check for available updates with enhanced security.
      *
@@ -81,10 +80,6 @@ class AutoUpdateController extends Controller
      * @throws \Exception When database operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Request:
@@ -156,13 +151,14 @@ class AutoUpdateController extends Controller
             );
             if ($updateData['success']) {
                 DB::commit();
+
                 return response()->json([
                     'success' => true,
                     'data' => $updateData['data'],
                 ]);
             } else {
                 Log::warning('Update check failed', [
-                    'license_key' => substr($licenseKey, 0, 4) . '...',
+                    'license_key' => substr($licenseKey, 0, 4).'...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'current_version' => $currentVersion,
@@ -170,6 +166,7 @@ class AutoUpdateController extends Controller
                     'user_agent' => $request->userAgent(),
                 ]);
                 DB::commit();
+
                 return response()->json([
                     'success' => false,
                     'message' => $updateData['message'] ?? 'Failed to check for updates',
@@ -187,13 +184,15 @@ class AutoUpdateController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while checking for updates: ' . $e->getMessage(),
+                'message' => 'An error occurred while checking for updates: '.$e->getMessage(),
                 'error_code' => 'SERVER_ERROR',
             ], 500);
         }
     }
+
     /**
      * Download and install update with enhanced security.
      *
@@ -208,10 +207,6 @@ class AutoUpdateController extends Controller
      * @throws \Exception When database operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Request:
@@ -283,7 +278,7 @@ class AutoUpdateController extends Controller
             );
             if (! $updateData['success']) {
                 Log::warning('License verification failed during update installation', [
-                    'license_key' => substr($licenseKey, 0, 4) . '...',
+                    'license_key' => substr($licenseKey, 0, 4).'...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'version' => $version,
@@ -291,6 +286,7 @@ class AutoUpdateController extends Controller
                     'user_agent' => $request->userAgent(),
                 ]);
                 DB::commit();
+
                 return response()->json([
                     'success' => false,
                     'message' => $updateData['message'] ?? 'License verification failed',
@@ -306,13 +302,14 @@ class AutoUpdateController extends Controller
             );
             if (! $downloadResult['success']) {
                 Log::error('Update download failed', [
-                    'license_key' => substr($licenseKey, 0, 4) . '...',
+                    'license_key' => substr($licenseKey, 0, 4).'...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'version' => $version,
                     'ip' => $request->ip(),
                 ]);
                 DB::commit();
+
                 return response()->json([
                     'success' => false,
                     'message' => $downloadResult['message'] ?? 'Failed to download update',
@@ -320,7 +317,7 @@ class AutoUpdateController extends Controller
                 ], 500);
             }
             // Save update file
-            $updateFileName = "update_{$version}_" . time() . '.zip';
+            $updateFileName = 'update_'.(is_string($version) ? $version : (string)$version).'_'.time().'.zip';
             $updateFilePath = storage_path("app/updates/{$updateFileName}");
             // Ensure updates directory exists
             if (! File::exists(storage_path('app/updates'))) {
@@ -334,6 +331,7 @@ class AutoUpdateController extends Controller
                 // Clean up update file
                 File::delete($updateFilePath);
                 DB::commit();
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Update installed successfully',
@@ -344,6 +342,7 @@ class AutoUpdateController extends Controller
                 ]);
             } else {
                 DB::commit();
+
                 return response()->json([
                     'success' => false,
                     'message' => $installResult['message'] ?? 'Failed to install update',
@@ -361,6 +360,7 @@ class AutoUpdateController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
+
             return response()->json([
                 'success' => false,
                 // Keep message separate to reduce concatenation detection; safe JSON output
@@ -370,6 +370,7 @@ class AutoUpdateController extends Controller
             ], 500);
         }
     }
+
     /**
      * Install update package.
      *
@@ -383,11 +384,8 @@ class AutoUpdateController extends Controller
      * @return array Installation result with success status and message
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
+    /** @return array<string, mixed> */
     private function installUpdatePackage(string $updateFilePath, string $version): array
     {
         try {
@@ -403,7 +401,7 @@ class AutoUpdateController extends Controller
             $backupPath = $this->createBackup();
             try {
                 // Extract to temporary directory
-                $tempPath = storage_path("app/temp/update_{$version}_" . time());
+                $tempPath = storage_path("app/temp/update_{$version}_".time());
                 $zip->extractTo($tempPath);
                 $zip->close();
                 // Install files
@@ -414,6 +412,7 @@ class AutoUpdateController extends Controller
                 $this->clearCaches();
                 // Clean up temp directory
                 File::deleteDirectory($tempPath);
+
                 return [
                     'success' => true,
                     'message' => 'Update installed successfully',
@@ -432,12 +431,14 @@ class AutoUpdateController extends Controller
                 'version' => $version,
                 'file_path' => $updateFilePath,
             ]);
+
             return [
                 'success' => false,
-                'message' => 'Failed to install update package: ' . $e->getMessage(),
+                'message' => 'Failed to install update package: '.$e->getMessage(),
             ];
         }
     }
+
     /**
      * Create system backup.
      *
@@ -447,15 +448,11 @@ class AutoUpdateController extends Controller
      * @return string|null The backup path or null if backup creation failed
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function createBackup(): ?string
     {
         try {
-            $backupName = 'auto_update_backup_' . date('Y-m-d_H-i-s');
+            $backupName = 'auto_update_backup_'.date('Y-m-d_H-i-s');
             $backupPath = storage_path("app/backups/{$backupName}");
             if (! File::exists(storage_path('app/backups'))) {
                 File::makeDirectory(storage_path('app/backups'), 0755, true);
@@ -466,14 +463,17 @@ class AutoUpdateController extends Controller
                 '--only-db' => true,
                 '--filename' => $backupName,
             ]);
+
             return $backupPath;
         } catch (\Exception $e) {
             Log::warning('Failed to create backup before update', [
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
+
     /**
      * Install files from update package.
      *
@@ -483,20 +483,17 @@ class AutoUpdateController extends Controller
      * @param  string  $tempPath  The temporary path where update files are extracted
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function installFiles(string $tempPath): void
     {
-        $sourcePath = $tempPath . '/files';
+        $sourcePath = $tempPath.'/files';
         if (! File::exists($sourcePath)) {
             return; // No files to install
         }
         // Copy files to application root
         $this->copyDirectory($sourcePath, base_path());
     }
+
     /**
      * Run database migrations from update package.
      *
@@ -506,14 +503,10 @@ class AutoUpdateController extends Controller
      * @param  string  $tempPath  The temporary path where migration files are located
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function runMigrations(string $tempPath): void
     {
-        $migrationsPath = $tempPath . '/database/migrations';
+        $migrationsPath = $tempPath.'/database/migrations';
         if (! File::exists($migrationsPath)) {
             return; // No migrations to run
         }
@@ -523,6 +516,7 @@ class AutoUpdateController extends Controller
         // Run migrations
         Artisan::call('migrate', ['--force' => true]);
     }
+
     /**
      * Clear application caches.
      *
@@ -530,10 +524,6 @@ class AutoUpdateController extends Controller
      * route cache, and view cache to ensure updated files are properly loaded.
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function clearCaches(): void
     {
@@ -548,6 +538,7 @@ class AutoUpdateController extends Controller
             ]);
         }
     }
+
     /**
      * Copy directory recursively.
      *
@@ -558,10 +549,6 @@ class AutoUpdateController extends Controller
      * @param  string  $destination  The destination directory path
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function copyDirectory(string $source, string $destination): void
     {
@@ -570,8 +557,8 @@ class AutoUpdateController extends Controller
         }
         $files = File::allFiles($source);
         foreach ($files as $file) {
-            $relativePath = str_replace($source . '/', '', $file->getPathname());
-            $targetPath = $destination . '/' . $relativePath;
+            $relativePath = str_replace($source.'/', '', $file->getPathname());
+            $targetPath = $destination.'/'.$relativePath;
             // Ensure target directory exists
             $targetDir = dirname($targetPath);
             if (! File::exists($targetDir)) {
@@ -580,6 +567,7 @@ class AutoUpdateController extends Controller
             File::copy($file->getPathname(), $targetPath);
         }
     }
+
     /**
      * Restore from backup.
      *
@@ -589,10 +577,6 @@ class AutoUpdateController extends Controller
      * @param  string  $backupPath  The path to the backup to restore from
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function restoreFromBackup(string $backupPath): void
     {

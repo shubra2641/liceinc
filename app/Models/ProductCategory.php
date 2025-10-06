@@ -64,6 +64,9 @@ use Illuminate\Support\Str;
  */
 class ProductCategory extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

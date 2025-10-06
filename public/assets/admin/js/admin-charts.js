@@ -35,7 +35,8 @@ if (typeof window.AdminCharts === 'undefined') {
       // Validate URL to prevent SSRF attacks
       this.isValidUrl = url => {
         try {
-          const urlObj = new URL(url);
+          // eslint-disable-next-line no-new
+          new URL(url); // Validate URL format
           const allowedOrigins = [
             window.location.origin,
             `${window.location.protocol}//${window.location.host}`,
@@ -136,7 +137,8 @@ if (typeof window.AdminCharts === 'undefined') {
      */
     isValidUrl(url) {
       try {
-        const urlObj = new URL(url);
+        // eslint-disable-next-line no-new
+        new URL(url); // Validate URL format
         const allowedOrigins = [
           window.location.origin,
           `${window.location.protocol}//${window.location.host}`,
@@ -258,8 +260,10 @@ if (typeof window.AdminCharts === 'undefined') {
           };
 
           this.charts.systemOverview = new Chart(ctx, config);
+          return true;
         })
         .catch(error => {
+          console.warn('System overview API failed:', error);
           // Use fallback data if API fails
           const fallbackData = {
             labels: [
@@ -314,6 +318,7 @@ if (typeof window.AdminCharts === 'undefined') {
           };
 
           this.charts.systemOverview = new Chart(ctx, config);
+          return true;
         });
     }
 
@@ -417,8 +422,10 @@ if (typeof window.AdminCharts === 'undefined') {
           };
 
           this.charts.licenseDistribution = new Chart(ctx, config);
+          return true;
         })
         .catch(error => {
+          console.warn('License distribution API failed:', error);
           // Use fallback data when API fails
           const fallbackData = {
             labels: ['Regular', 'Extended'],
@@ -512,6 +519,7 @@ if (typeof window.AdminCharts === 'undefined') {
               );
             }
           }
+          return true;
         });
     }
 
@@ -636,8 +644,11 @@ if (typeof window.AdminCharts === 'undefined') {
           }
 
           this.charts.revenue = new Chart(this.revenueChartCtx, config);
+          // eslint-disable-next-line consistent-return
+          return true;
         })
         .catch(error => {
+          console.warn('Revenue API failed:', error);
           // Use fallback data when API fails
           const fallbackData = {
             labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -839,8 +850,10 @@ if (typeof window.AdminCharts === 'undefined') {
           };
 
           this.charts.activityTimeline = new Chart(ctx, config);
+          return true;
         })
         .catch(error => {
+          console.warn('Activity timeline API failed:', error);
           // Use fallback data if API fails
           const fallbackData = {
             labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -936,6 +949,7 @@ if (typeof window.AdminCharts === 'undefined') {
           };
 
           this.charts.activityTimeline = new Chart(ctx, config);
+          return true;
         });
     }
 
@@ -958,9 +972,11 @@ if (typeof window.AdminCharts === 'undefined') {
             this.charts.systemOverview.data.labels = apiData.labels;
             this.charts.systemOverview.data.datasets[0].data = apiData.data;
             this.charts.systemOverview.update('active');
+            return true;
           })
           .catch(err => {
             // System overview refresh failed silently
+            console.warn('System overview refresh failed:', err);
           });
       }
 
@@ -976,10 +992,12 @@ if (typeof window.AdminCharts === 'undefined') {
             this.charts.licenseDistribution.data.datasets[0].data =
               apiData.data;
             this.charts.licenseDistribution.update('active');
+            return true;
           })
           .catch(err => {
             // License distribution refresh failed - keep existing data
             // Don't update the chart to avoid disrupting user experience
+            console.warn('License distribution refresh failed:', err);
           });
       }
 
@@ -1003,10 +1021,12 @@ if (typeof window.AdminCharts === 'undefined') {
             this.charts.activityTimeline.data.labels = apiData.labels;
             this.charts.activityTimeline.data.datasets[0].data = apiData.data;
             this.charts.activityTimeline.update('active');
+            return true;
           })
           .catch(err => {
             // Activity timeline refresh failed - keep existing data
             // Don't update the chart to avoid disrupting user experience
+            console.warn('Activity timeline refresh failed:', err);
           });
       }
 
@@ -1045,9 +1065,11 @@ if (typeof window.AdminCharts === 'undefined') {
             this.charts.apiRequests.data.labels = apiData.labels;
             this.charts.apiRequests.data.datasets = apiData.datasets;
             this.charts.apiRequests.update('active');
+            return true;
           })
           .catch(err => {
             // API requests refresh failed - keep existing data
+            console.warn('API requests refresh failed:', err);
           });
       }
 
@@ -1068,9 +1090,11 @@ if (typeof window.AdminCharts === 'undefined') {
               apiData.yesterday.failed,
             ];
             this.charts.apiPerformance.update('active');
+            return true;
           })
           .catch(err => {
             // API performance refresh failed - keep existing data
+            console.warn('API performance refresh failed:', err);
           });
       }
     }
@@ -1177,9 +1201,8 @@ if (typeof window.AdminCharts === 'undefined') {
             );
 
             if (elements.length > 0) {
-              const element = elements[0];
-              const { datasetIndex } = element;
-              const { index } = element;
+              const [element] = elements;
+              const { datasetIndex, index } = element;
               const label = chart.data.labels[index];
               const value = chart.data.datasets[datasetIndex].data[index];
 
@@ -1193,15 +1216,13 @@ if (typeof window.AdminCharts === 'undefined') {
     changeChartPeriod(period) {
       if (this.fetchRevenueData) {
         this.fetchRevenueData(period);
-      } else {
+      } else if (window.adminDashboard) {
         // Here you would typically fetch new data from the server
-        if (window.adminDashboard) {
-          window.adminDashboard.showToast(
-            `Chart period changed to ${period}`,
-            'info',
-            2000,
-          );
-        }
+        window.adminDashboard.showToast(
+          `Chart period changed to ${period}`,
+          'info',
+          2000,
+        );
       }
     }
 
@@ -1355,6 +1376,7 @@ if (typeof window.AdminCharts === 'undefined') {
             apiRequestsChart.data.labels = data.labels;
             apiRequestsChart.data.datasets = data.datasets;
             apiRequestsChart.update();
+            return true;
           })
           .catch(error => {
             console.error('Error loading API requests data:', error);
@@ -1370,6 +1392,7 @@ if (typeof window.AdminCharts === 'undefined') {
               },
             ];
             apiRequestsChart.update();
+            return true;
           });
       };
 
@@ -1451,6 +1474,7 @@ if (typeof window.AdminCharts === 'undefined') {
             data.yesterday.failed,
           ];
           apiPerformanceChart.update();
+          return true;
         })
         .catch(error => {
           console.error('Error loading API performance data:', error);
@@ -1542,7 +1566,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Export for module usage
+// eslint-disable-next-line no-undef
 if (typeof module !== 'undefined' && module.exports) {
+  // eslint-disable-next-line no-undef
   module.exports = AdminCharts;
 }
 
@@ -1572,6 +1598,7 @@ function initReportsCharts() {
     );
     if (chartData.labels && chartData.datasets) {
       try {
+        // eslint-disable-next-line no-new
         new Chart(monthlyRevenueCanvas, {
           type: 'line',
           data: chartData,
@@ -1641,6 +1668,7 @@ function initReportsCharts() {
     );
     if (chartData.labels && chartData.datasets) {
       try {
+        // eslint-disable-next-line no-new
         new Chart(monthlyLicensesCanvas, {
           type: 'line',
           data: chartData,
@@ -1708,6 +1736,7 @@ function initReportsCharts() {
     );
     if (chartData.labels && chartData.datasets) {
       try {
+        // eslint-disable-next-line no-new
         new Chart(userRegistrationsCanvas, {
           type: 'line',
           data: chartData,
@@ -1770,6 +1799,7 @@ function initReportsCharts() {
     );
     if (chartData.labels && chartData.datasets) {
       try {
+        // eslint-disable-next-line no-new
         new Chart(systemOverviewCanvas, {
           type: 'doughnut',
           data: chartData,
@@ -1802,6 +1832,7 @@ function initReportsCharts() {
       licenseTypeCanvas.getAttribute('data-chart-data') || '{}',
     );
     if (chartData.labels && chartData.datasets) {
+      // eslint-disable-next-line no-new
       new Chart(licenseTypeCanvas, {
         type: 'pie',
         data: chartData,
@@ -1828,6 +1859,7 @@ function initReportsCharts() {
       activityTimelineCanvas.getAttribute('data-chart-data') || '{}',
     );
     if (chartData.labels && chartData.datasets) {
+      // eslint-disable-next-line no-new
       new Chart(activityTimelineCanvas, {
         type: 'bar',
         data: chartData,
@@ -1863,6 +1895,7 @@ function initReportsCharts() {
     );
     if (chartData.labels && chartData.datasets) {
       try {
+        // eslint-disable-next-line no-new
         new Chart(invoicesMonthlyCanvas, {
           type: 'line',
           data: chartData,

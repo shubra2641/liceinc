@@ -312,13 +312,16 @@ class EnvatoController extends Controller
                 ]);
                 return back()->withErrors(['envato' => 'This Envato account is already linked to another user.']);
             }
-            auth()->user()->update([
+            $user = auth()->user();
+            if ($user) {
+                $user->update([
                 'envato_username' => $envatoUser->getNickname() ?: data_get($userInfo, 'account.username'),
                 'envato_id' => $envatoUser->getId(),
                 'envato_token' => $envatoUser->token,
                 'envato_refresh_token' => $envatoUser->refreshToken,
                 'updated_at' => now(),
-            ]);
+                ]);
+            }
             DB::commit();
             return back()->with('success', 'Envato account linked successfully! You can now verify your purchases.');
         } catch (Exception $e) {

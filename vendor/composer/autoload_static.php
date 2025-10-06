@@ -1159,6 +1159,8 @@ class ComposerStaticInit86a52888e24497309ef32d852fc6f5ed
         'Database\\Factories\\TicketFactory' => __DIR__ . '/../..' . '/database/factories/TicketFactory.php',
         'Database\\Factories\\TicketReplyFactory' => __DIR__ . '/../..' . '/database/factories/TicketReplyFactory.php',
         'Database\\Factories\\UserFactory' => __DIR__ . '/../..' . '/database/factories/UserFactory.php',
+        'Database\\Factories\\WebhookFactory' => __DIR__ . '/../..' . '/database/factories/WebhookFactory.php',
+        'Database\\Factories\\WebhookLogFactory' => __DIR__ . '/../..' . '/database/factories/WebhookLogFactory.php',
         'Database\\Seeders\\AdminSeeder' => __DIR__ . '/../..' . '/database/seeders/AdminSeeder.php',
         'Database\\Seeders\\DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeders/DatabaseSeeder.php',
         'Database\\Seeders\\EmailTemplateSeeder' => __DIR__ . '/../..' . '/database/seeders/EmailTemplateSeeder.php',

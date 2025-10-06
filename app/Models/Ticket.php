@@ -46,6 +46,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Ticket extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

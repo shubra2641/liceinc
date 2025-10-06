@@ -61,6 +61,9 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class KbArticle extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

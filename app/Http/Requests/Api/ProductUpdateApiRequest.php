@@ -37,10 +37,13 @@ class ProductUpdateApiRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isCheck = $this->isMethod('POST') && str_contains($this->route()->getName(), 'check');
-        $isLatest = $this->isMethod('POST') && str_contains($this->route()->getName(), 'latest');
-        $isDownload = $this->isMethod('POST') && str_contains($this->route()->getName(), 'download');
-        $isChangelog = $this->isMethod('POST') && str_contains($this->route()->getName(), 'changelog');
+        $route = $this->route();
+        $routeName = $route?->getName() ?? '';
+        
+        $isCheck = $this->isMethod('POST') && str_contains($routeName, 'check');
+        $isLatest = $this->isMethod('POST') && str_contains($routeName, 'latest');
+        $isDownload = $this->isMethod('POST') && str_contains($routeName, 'download');
+        $isChangelog = $this->isMethod('POST') && str_contains($routeName, 'changelog');
         // Check updates validation
         if ($isCheck) {
             return [

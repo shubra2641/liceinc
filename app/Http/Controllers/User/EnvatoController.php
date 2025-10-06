@@ -284,18 +284,21 @@ class EnvatoController extends Controller
                     ]);
                     return back()->withErrors(['envato' => 'Could not retrieve user information from Envato.']);
                 }
-                auth()->user()->update([
+                $user = auth()->user();
+                if ($user) {
+                    $user->update([
                     'envato_username' => $envatoUser->getNickname() ?: data_get($userInfo, 'account.username'),
                     'envato_id' => $envatoUser->getId(),
                     'envato_token' => $envatoUser->token,
                     'envato_refresh_token' => $envatoUser->refreshToken,
-                ]);
-                Log::debug('Envato account linked successfully', [
+                    ]);
+                    Log::debug('Envato account linked successfully', [
                     'user_id' => auth()->id(),
                     'envato_username' => $envatoUser->getNickname(),
                     'envato_id' => $envatoUser->getId(),
-                ]);
-                return back()->with('success', 'Envato account linked successfully!');
+                    ]);
+                    return back()->with('success', 'Envato account linked successfully!');
+                }
             });
         } catch (Throwable $e) {
             Log::error('Envato account linking error', [

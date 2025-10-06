@@ -72,7 +72,8 @@ class KbArticleController extends Controller
             }
             RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
-            if (! Auth::user()->is_admin && ! Auth::user()->hasRole('admin')) {
+            $user = Auth::user();
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to KB articles', [
                     'user_id' => Auth::id(),
                     'ip' => request()->ip(),
@@ -124,7 +125,8 @@ class KbArticleController extends Controller
             }
             RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
-            if (! Auth::user()->is_admin && ! Auth::user()->hasRole('admin')) {
+            $user = Auth::user();
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to KB article creation form', [
                     'user_id' => Auth::id(),
                     'ip' => request()->ip(),
@@ -183,7 +185,8 @@ class KbArticleController extends Controller
             }
             RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
-            if (! Auth::user()->is_admin && ! Auth::user()->hasRole('admin')) {
+            $user = Auth::user();
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized attempt to create KB article', [
                     'user_id' => Auth::id(),
                     'ip' => request()->ip(),
@@ -284,7 +287,8 @@ class KbArticleController extends Controller
             }
             RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
-            if (! Auth::user()->is_admin && ! Auth::user()->hasRole('admin')) {
+            $user = Auth::user();
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to KB article editing form', [
                     'user_id' => Auth::id(),
                     'ip' => request()->ip(),
@@ -344,7 +348,8 @@ class KbArticleController extends Controller
             }
             RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
-            if (! Auth::user()->is_admin && ! Auth::user()->hasRole('admin')) {
+            $user = Auth::user();
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized attempt to update KB article', [
                     'user_id' => Auth::id(),
                     'ip' => request()->ip(),
@@ -444,7 +449,8 @@ class KbArticleController extends Controller
             }
             RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
-            if (! Auth::user()->is_admin && ! Auth::user()->hasRole('admin')) {
+            $user = Auth::user();
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized attempt to delete KB article', [
                     'user_id' => Auth::id(),
                     'ip' => request()->ip(),

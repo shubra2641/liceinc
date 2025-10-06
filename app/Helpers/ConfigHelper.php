@@ -23,14 +23,21 @@ class ConfigHelper
 {
     // Cache configuration
     private const CACHE_PREFIX = 'config_enterprise_';
+
     private const CACHE_TTL = 3600; // 1 hour
+
     private const CACHE_TAG = 'config_settings';
+
     // Security configuration
     private const MAX_KEY_LENGTH = 255;
+
     private const ALLOWED_KEY_PATTERN = '/^[a-zA-Z0-9_\.\-]+$/';
+
     // Performance configuration
     private const BATCH_SIZE = 50;
+
     private const QUERY_TIMEOUT = 5; // seconds
+
     /**
      * Get setting with advanced validation, caching, and security.
      *
@@ -62,15 +69,16 @@ class ConfigHelper
                 'user_agent' => request()->userAgent(),
             ]);
             throw new \InvalidArgumentException('Invalid configuration key: '
-                . implode(', ', $validationResult['errors']));
+                .implode(', ', $validationResult['errors']));
         }
         $sanitizedKey = $validationResult['sanitized'];
-        $cacheKey = self::CACHE_PREFIX . md5($sanitizedKey);
+        $cacheKey = self::CACHE_PREFIX.md5($sanitizedKey);
         // Try advanced cache first with compression
         if ($useCache) {
             $cachedValue = self::getFromAdvancedCache($cacheKey);
             if ($cachedValue !== null) {
                 self::logCacheHit($sanitizedKey);
+
                 return $validateType ? self::castValue($cachedValue, $default) : $cachedValue;
             }
         }
@@ -85,6 +93,7 @@ class ConfigHelper
                     self::storeInAdvancedCache($cacheKey, $value);
                 }
                 self::logSettingAccess($sanitizedKey, 'database');
+
                 return $validateType ? self::castValue($value, $default) : $value;
             }
             // Fallback to config with validation
@@ -93,8 +102,10 @@ class ConfigHelper
                 if ($useCache) {
                     self::storeInAdvancedCache($cacheKey, $configValue);
                 }
+
                 return $validateType ? self::castValue($configValue, $default) : $configValue;
             }
+
             return $validateType ? self::castValue($default, $default) : $default;
         } catch (\Exception $e) {
             Log::error('Failed to fetch setting', [
@@ -103,23 +114,26 @@ class ConfigHelper
                 'trace' => $e->getTraceAsString(),
                 'context' => [
                     'memory_usage' => memory_get_usage(true),
-                    'execution_time' => \App\Helpers\ServerHelper::getExecutionTime(),
+                    'execution_time' => ServerHelper::getExecutionTime(),
                 ],
             ]);
+
             // Graceful degradation with fallback
             return self::handleGracefulDegradation($configKey, $default, $validateType);
         }
     }
+
     /**
      * Advanced input validation and sanitization.
      */
+    /** @return array<string, mixed> */
     private static function validateSettingKey(string $key): array
     {
         $errors = [];
         $sanitized = trim($key);
         // Length validation
         if (strlen($sanitized) > self::MAX_KEY_LENGTH) {
-            $errors[] = 'Key length exceeds maximum of ' . self::MAX_KEY_LENGTH . ' characters';
+            $errors[] = 'Key length exceeds maximum of '.self::MAX_KEY_LENGTH.' characters';
         }
         // Pattern validation
         if (! preg_match(self::ALLOWED_KEY_PATTERN, $sanitized)) {
@@ -132,16 +146,18 @@ class ConfigHelper
         if (in_array(strtolower($sanitized), ['password', 'secret', 'token', 'key'])) {
             Log::warning('Sensitive key access attempt', ['key' => $sanitized]);
         }
+
         return [
             'valid' => empty($errors),
             'errors' => $errors,
             'sanitized' => $sanitized,
         ];
     }
+
     /**
      * Advanced caching with compression and tagging.
      */
-    private static function getFromAdvancedCache(string $cacheKey)
+    private static function getFromAdvancedCache(string $cacheKey): mixed
     {
         try {
             // Try multiple cache strategies
@@ -151,23 +167,26 @@ class ConfigHelper
                 // Fallback to regular cache without tags
                 $value = Cache::get($cacheKey);
             }
+
             return $value;
         } catch (\Exception $e) {
             Log::warning('Cache retrieval failed', ['key' => $cacheKey, 'error' => $e->getMessage()]);
+
             return null;
         }
     }
+
     /**
      * Store in advanced cache with compression.
      */
-    private static function storeInAdvancedCache(string $cacheKey, $value): void
+    private static function storeInAdvancedCache(string $cacheKey, mixed $value): void
     {
         try {
             // Compress large values
             if (is_string($value) && strlen($value) > 1024) {
                 $compressed = gzcompress($value);
                 if ($compressed !== false) {
-                    $value = base64_encode($compressed) . '|COMPRESSED';
+                    $value = base64_encode($compressed).'|COMPRESSED';
                 }
             }
             // Use regular cache if tagging is not supported
@@ -181,10 +200,11 @@ class ConfigHelper
             Log::warning('Cache storage failed', ['key' => $cacheKey, 'error' => $e->getMessage()]);
         }
     }
+
     /**
      * Optimized database fetch with query optimization.
      */
-    private static function fetchSettingFromDatabase(string $key)
+    private static function fetchSettingFromDatabase(string $key): mixed
     {
         try {
             // Check if the column exists in the settings table
@@ -205,6 +225,7 @@ class ConfigHelper
                 ->where('value', '!=', '')
                 ->select('value')
                 ->first();
+
             return $kv ? $kv->value : null;
         } catch (\Exception $e) {
             Log::debug('Column not found in settings table', [
@@ -217,11 +238,18 @@ class ConfigHelper
                 ->where('value', '!=', '')
                 ->select('value')
                 ->first();
+
             return $kv ? $kv->value : null;
         }
     }
+
     /**
      * Get multiple settings with batch optimization and advanced caching.
+     */
+    /**
+     * @param array<string> $keys
+     *
+     * @return array<string, mixed>
      */
     public static function getSettings(
         array $keys,
@@ -265,19 +293,26 @@ class ConfigHelper
             foreach ($fetchedSettings as $key => $value) {
                 $settings[$key] = $validateTypes ? self::castValue($value, null) : $value;
                 if ($useCache) {
-                    self::storeInAdvancedCache(self::CACHE_PREFIX . md5($key), $value);
+                    self::storeInAdvancedCache(self::CACHE_PREFIX.md5($key), $value);
                 }
             }
         }
+
         return $settings;
     }
+
     /**
      * Batch cache retrieval with optimization.
+     */
+    /**
+     * @param array<string> $keys
+     *
+     * @return array<string, mixed>
      */
     private static function getBatchFromCache(array $keys): array
     {
         $results = [];
-        $cacheKeys = array_map(fn ($key) => self::CACHE_PREFIX . md5($key), $keys);
+        $cacheKeys = array_map(fn ($key) => self::CACHE_PREFIX.md5($key), $keys);
         try {
             $cacheValues = Cache::tags([self::CACHE_TAG])->many($cacheKeys);
             foreach ($keys as $index => $key) {
@@ -290,10 +325,17 @@ class ConfigHelper
                 $results[$key] = null;
             }
         }
+
         return $results;
     }
+
     /**
      * Optimized multiple settings fetch with single query.
+     */
+    /**
+     * @param array<string> $keys
+     *
+     * @return array<string, mixed>
      */
     private static function fetchMultipleSettingsOptimized(array $keys): array
     {
@@ -331,12 +373,14 @@ class ConfigHelper
                 'error' => $e->getMessage(),
             ]);
         }
+
         return $settings;
     }
+
     /**
      * Advanced type casting and validation.
      */
-    private static function castValue($value, $default)
+    private static function castValue(mixed $value, mixed $default): mixed
     {
         if ($value === null) {
             return $default;
@@ -347,16 +391,19 @@ class ConfigHelper
                 $compressed = base64_decode(str_replace('|COMPRESSED', '', $value));
                 if ($compressed === false) {
                     Log::warning('Failed to decode compressed config value');
+
                     return $default;
                 }
                 $decompressed = gzuncompress($compressed);
                 if ($decompressed === false) {
                     Log::warning('Failed to decompress config value');
+
                     return $default;
                 }
                 $value = $decompressed;
             } catch (\Exception $e) {
                 Log::warning('Error handling compressed config value', ['error' => $e->getMessage()]);
+
                 return $default;
             }
         }
@@ -367,10 +414,10 @@ class ConfigHelper
                 case 'boolean':
                     return filter_var($value, FILTER_VALIDATE_BOOLEAN);
                 case 'integer':
-                    return (int)$value;
+                    return is_numeric($value) ? (int)(string)$value : (int)$default;
                 case 'double':
                 case 'float':
-                    return (float)$value;
+                    return is_numeric($value) ? (float)(string)$value : (float)$default;
                 case 'array':
                     if (is_array($value)) {
                         return $value;
@@ -378,37 +425,47 @@ class ConfigHelper
                     $decoded = json_decode($value, true);
                     if (json_last_error() !== JSON_ERROR_NONE) {
                         Log::warning('Invalid JSON in config value', ['error' => json_last_error_msg()]);
+
                         return $default;
                     }
+
                     return $decoded ?? $default;
             }
         }
+
         return $value;
     }
+
     /**
      * Get config value with validation.
      */
-    private static function getConfigValue(string $configKey, $default)
+    private static function getConfigValue(string $configKey, mixed $default): mixed
     {
         $value = config($configKey, $default);
         // Validate config key format
         if (! preg_match('/^[a-zA-Z0-9_\.]+$/', $configKey)) {
             Log::warning('Invalid config key format', ['key' => $configKey]);
+
             return $default;
         }
+
         return $value;
     }
+
     /**
      * Graceful degradation handler.
      */
-    private static function handleGracefulDegradation(?string $configKey, $default, bool $validateType)
+    private static function handleGracefulDegradation(?string $configKey, mixed $default, bool $validateType): mixed
     {
         if ($configKey) {
             $configValue = self::getConfigValue($configKey, $default);
+
             return $validateType ? self::castValue($configValue, $default) : $configValue;
         }
+
         return $validateType ? self::castValue($default, $default) : $default;
     }
+
     /**
      * Log cache hit for monitoring.
      */
@@ -416,6 +473,7 @@ class ConfigHelper
     {
         Log::debug('Config cache hit', ['key' => $key]);
     }
+
     /**
      * Log setting access for audit trail.
      */
@@ -424,12 +482,13 @@ class ConfigHelper
         // Audit logging removed for successful operations per Envato compliance rules
         // Only log errors and warnings, not successful operations
     }
+
     /**
      * Clear cache for specific setting.
      */
     public static function clearSettingCache(string $key): void
     {
-        $cacheKey = self::CACHE_PREFIX . md5($key);
+        $cacheKey = self::CACHE_PREFIX.md5($key);
         try {
             try {
                 Cache::tags([self::CACHE_TAG])->forget($cacheKey);
@@ -441,6 +500,7 @@ class ConfigHelper
             Log::warning('Failed to clear config cache', ['key' => $key, 'error' => $e->getMessage()]);
         }
     }
+
     /**
      * Clear all settings cache.
      */
@@ -457,9 +517,11 @@ class ConfigHelper
             Log::warning('Failed to clear all config cache', ['error' => $e->getMessage()]);
         }
     }
+
     /**
      * Get license-related settings with advanced caching.
      */
+    /** @return array<string, mixed> */
     public static function getLicenseSettings(): array
     {
         return self::getSettings([
@@ -525,9 +587,11 @@ class ConfigHelper
             'license_generate_fake_data',
         ]);
     }
+
     /**
      * Get Envato-related settings with advanced caching.
      */
+    /** @return array<string, mixed> */
     public static function getEnvatoSettings(): array
     {
         return self::getSettings([
@@ -540,6 +604,7 @@ class ConfigHelper
             'envato_username',
         ]);
     }
+
     /**
      * Get setting with type safety and validation.
      *
@@ -556,13 +621,13 @@ class ConfigHelper
                 return (string)$value;
             case 'int':
             case 'integer':
-                return (int)$value;
+                return is_numeric($value) ? (int)(string)$value : (int)$default;
             case 'bool':
             case 'boolean':
                 return filter_var($value, FILTER_VALIDATE_BOOLEAN);
             case 'float':
             case 'double':
-                return (float)$value;
+                return is_numeric($value) ? (float)(string)$value : (float)$default;
             case 'array':
                 if (is_array($value)) {
                     return $value;
@@ -570,13 +635,16 @@ class ConfigHelper
                 $decoded = json_decode($value, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     Log::warning('Invalid JSON in typed setting', ['key' => $key, 'error' => json_last_error_msg()]);
+
                     return [];
                 }
+
                 return $decoded ?? [];
             default:
                 return $value;
         }
     }
+
     /**
      * Check if setting exists and is not empty.
      */
@@ -584,15 +652,23 @@ class ConfigHelper
     {
         try {
             $value = self::getSetting($key, null, null, true, false);
+
             return $value !== null && $value !== '';
         } catch (\Exception $e) {
             return false;
         }
     }
+
     /**
      * Get settings with fallback to environment variables.
      *
      * @param  array  $envMappings  Mapping of setting keys to env variable names
+     */
+    /**
+     * @param array<string> $keys
+     * @param array<string, string> $envMappings
+     *
+     * @return array<string, mixed>
      */
     public static function getSettingsWithEnvFallback(array $keys, array $envMappings = []): array
     {
@@ -606,11 +682,14 @@ class ConfigHelper
                 }
             }
         }
+
         return $settings;
     }
+
     /**
      * Get cache statistics for monitoring.
      */
+    /** @return array<string, mixed> */
     public static function getCacheStats(): array
     {
         return [
@@ -621,9 +700,11 @@ class ConfigHelper
             'query_timeout' => self::QUERY_TIMEOUT,
         ];
     }
+
     /**
      * Warm up cache for frequently used settings.
      */
+    /** @param array<string> $keys */
     public static function warmUpCache(array $keys = []): void
     {
         if (empty($keys)) {

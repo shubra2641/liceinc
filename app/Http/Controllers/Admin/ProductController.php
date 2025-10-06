@@ -39,7 +39,8 @@ use Illuminate\View\View;
  */
 class ProductController extends Controller
 {
-    protected $licenseGenerator;
+    protected LicenseGeneratorService $licenseGenerator;
+
     /**
      * Constructor.
      */
@@ -47,6 +48,7 @@ class ProductController extends Controller
     {
         $this->licenseGenerator = $licenseGenerator;
     }
+
     /**
      * Get product data from Envato API.
      */
@@ -74,19 +76,21 @@ class ProductController extends Controller
                     'purchase_url_buy' => $itemData['url'] ?? null, // Same as purchase URL for now
                     'support_days' => $this->calculateSupportDays($itemData),
                     'version' => $itemData['version'] ?? null,
-                    'price' => $itemData['price_cents'] ? ($itemData['price_cents'] / 100) : null,
+                    'price' => isset($itemData['price_cents']) && is_numeric($itemData['price_cents']) ? ($itemData['price_cents'] / 100) : null,
                     'name' => $itemData['name'] ?? null,
                     'description' => $itemData['description'] ?? null,
                 ],
             ];
+
             return response()->json($productData);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => trans('app.Error fetching product data: ') . $e->getMessage(),
+                'message' => trans('app.Error fetching product data: ').$e->getMessage(),
             ], 500);
         }
     }
+
     /**
      * Get user's Envato items for selection.
      */
@@ -108,16 +112,19 @@ class ProductController extends Controller
                     'message' => trans('app.Unable to fetch user items from Envato'),
                 ], 404);
             }
-            $items = collect($userItems['matches'])->map(function ($item) {
+            /** @var array<int, array<string, mixed>> $matches */
+            $matches = $userItems['matches'];
+            $items = collect($matches)->map(function (array $item): array {
                 return [
                     'id' => $item['id'],
                     'name' => $item['name'],
                     'url' => $item['url'],
-                    'price' => $item['price_cents'] ? ($item['price_cents'] / 100) : 0,
+                    'price' => isset($item['price_cents']) && is_numeric($item['price_cents']) ? ($item['price_cents'] / 100) : 0,
                     'rating' => $item['rating'] ?? null,
                     'sales' => $item['number_of_sales'] ?? 0,
                 ];
             });
+
             return response()->json([
                 'success' => true,
                 'items' => $items,
@@ -125,35 +132,41 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => trans('app.Error fetching user items: ') . $e->getMessage(),
+                'message' => trans('app.Error fetching user items: ').$e->getMessage(),
             ], 500);
         }
     }
+
     /**
      * Calculate support days from Envato item data.
      */
+    /** @param array<string, mixed> $itemData */
     private function calculateSupportDays(array $itemData): int
     {
         // Envato typically provides 6 months support for most items
         // This can be adjusted based on the actual API response
-        if (isset($itemData['attributes'])) {
+        if (isset($itemData['attributes']) && is_array($itemData['attributes'])) {
             foreach ($itemData['attributes'] as $attribute) {
-                if (isset($attribute['name']) && $attribute['name'] === 'support') {
+                if (is_array($attribute) && isset($attribute['name']) && $attribute['name'] === 'support') {
                     // Parse support duration (e.g., "6 months", "1 year")
                     $value = strtolower($attribute['value'] ?? '');
                     if (strpos($value, 'month') !== false) {
                         preg_match('/(\d+)/', $value, $matches);
+
                         return isset($matches[1]) ? (int)$matches[1] * 30 : 180;
                     } elseif (strpos($value, 'year') !== false) {
                         preg_match('/(\d+)/', $value, $matches);
+
                         return isset($matches[1]) ? (int)$matches[1] * 365 : 365;
                     }
                 }
             }
         }
+
         // Default to 6 months (180 days) if not specified
         return 180;
     }
+
     /**
      * Get integration code template for product.
      */
@@ -162,6 +175,7 @@ class ProductController extends Controller
         // Return a minimal placeholder integration file to avoid complex embedded templates here.
         return "<?php\n// Integration placeholder for {$product->slug}\n// API: {$apiUrl}\n";
     }
+
     /**
      * Display a listing of the resource (admin).
      */
@@ -172,8 +186,9 @@ class ProductController extends Controller
         $search = request('q', request('search'));
         if (! empty($search)) {
             $productsQuery->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                $searchStr = is_string($search) ? $search : (string)$search;
+                $query->where('name', 'like', "%{$searchStr}%")
+                    ->orWhere('description', 'like', "%{$searchStr}%");
             });
         }
         // Show all products without any category filter
@@ -208,8 +223,10 @@ class ProductController extends Controller
         $programmingLanguages = \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get();
         // Provide all products collection for grouped/category displays in the admin index
         $allProducts = Product::with(['category', 'programmingLanguage'])->get();
+
         return view('admin.products.index', compact('products', 'categories', 'programmingLanguages', 'allProducts'));
     }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -222,6 +239,7 @@ class ProductController extends Controller
             ->with('category:id, name')
             ->orderBy('title')
             ->get(['id', 'title', 'slug', 'kb_category_id']);
+
         return view('admin.products.create', compact(
             'categories',
             'programmingLanguages',
@@ -229,6 +247,7 @@ class ProductController extends Controller
             'kbArticles',
         ));
     }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -273,20 +292,24 @@ class ProductController extends Controller
                         }
                     }
                 } catch (\Exception $e) {
-                    \Log::error('Product file upload error: ' . $e->getMessage());
-                    return back()->with('error', 'Error uploading files: ' . $e->getMessage())->withInput();
+                    \Log::error('Product file upload error: '.$e->getMessage());
+
+                    return back()->with('error', 'Error uploading files: '.$e->getMessage())->withInput();
                 }
             }
             // Generate integration file
             $this->generateIntegrationFile($product);
             DB::commit();
+
             return redirect()->route('admin.products.edit', $product)->with('success', 'Product created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Product creation error: ' . $e->getMessage());
-            return back()->with('error', 'Error creating product: ' . $e->getMessage())->withInput();
+            Log::error('Product creation error: '.$e->getMessage());
+
+            return back()->with('error', 'Error creating product: '.$e->getMessage())->withInput();
         }
     }
+
     /**
      * Display the specified resource (admin).
      */
@@ -294,8 +317,10 @@ class ProductController extends Controller
     {
         // Load the product with its relationships
         $product->load(['category', 'programmingLanguage', 'updates']);
+
         return view('admin.products.show', compact('product'));
     }
+
     /**
      * Update the specified resource in storage.
      *
@@ -343,8 +368,9 @@ class ProductController extends Controller
                         }
                     }
                 } catch (\Exception $e) {
-                    \Log::error('Product file upload error: ' . $e->getMessage());
-                    return back()->with('error', 'Error uploading files: ' . $e->getMessage())->withInput();
+                    \Log::error('Product file upload error: '.$e->getMessage());
+
+                    return back()->with('error', 'Error uploading files: '.$e->getMessage())->withInput();
                 }
             }
             // Regenerate file if programming language or envato settings changed
@@ -352,13 +378,16 @@ class ProductController extends Controller
                 $this->generateIntegrationFile($product);
             }
             DB::commit();
+
             return back()->with('success', 'Product updated successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Product update error: ' . $e->getMessage());
-            return back()->with('error', 'Error updating product: ' . $e->getMessage())->withInput();
+            Log::error('Product update error: '.$e->getMessage());
+
+            return back()->with('error', 'Error updating product: '.$e->getMessage())->withInput();
         }
     }
+
     /**
      * Remove the specified resource from storage.
      */
@@ -373,13 +402,16 @@ class ProductController extends Controller
             }
             $product->delete();
             DB::commit();
+
             return redirect()->route('admin.products.index')->with('success', 'Product deleted');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Product deletion error: ' . $e->getMessage());
-            return back()->with('error', 'Error deleting product: ' . $e->getMessage());
+            Log::error('Product deletion error: '.$e->getMessage());
+
+            return back()->with('error', 'Error deleting product: '.$e->getMessage());
         }
     }
+
     /**
      * Get product data for license forms (AJAX endpoint).
      */
@@ -396,6 +428,7 @@ class ProductController extends Controller
             'renewal_period' => $product->renewal_period,
         ]);
     }
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -405,8 +438,10 @@ class ProductController extends Controller
         $programmingLanguages = \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get();
         // Load product files
         $product->load('files');
+
         return view('admin.products.edit', compact('product', 'categories', 'programmingLanguages'));
     }
+
     /**
      * Generate integration file for a product.
      */
@@ -423,7 +458,7 @@ class ProductController extends Controller
             if ($programmingLanguage) {
                 $extensions = $this->getFileExtensionsForLanguage($programmingLanguage->slug);
                 foreach ($extensions as $ext) {
-                    $oldFileWithExt = "integration/{$product->slug}.{$ext}";
+                    $oldFileWithExt = "integration/{$product->slug}.{(is_string($ext) ? $ext : (string)$ext)}";
                     if (Storage::disk('public')->exists($oldFileWithExt)) {
                         Storage::disk('public')->delete($oldFileWithExt);
                     }
@@ -431,12 +466,13 @@ class ProductController extends Controller
             }
             // Use the new LicenseGeneratorService
             $filePath = $this->licenseGenerator->generateLicenseFile($product);
+
             return $filePath;
         } catch (\Exception $e) {
             // Fallback to old method if new service fails
             $apiDomain = rtrim(env('APP_URL', config('app.url')), '/');
             $verificationEndpoint = config('license.verification_endpoint', '/api/license/verify');
-            $apiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
+            $apiUrl = $apiDomain.'/'.ltrim($verificationEndpoint, '/');
             $integrationCode = $this->getIntegrationCodeTemplate($product, $apiUrl);
             // Save to storage/app/public/integration/
             $filePath = "integration/{$product->slug}.php";
@@ -445,9 +481,11 @@ class ProductController extends Controller
             $product->update([
                 'integration_file_path' => $filePath,
             ]);
+
             return $filePath;
         }
     }
+
     /**
      * Download file for a product.
      *
@@ -458,8 +496,10 @@ class ProductController extends Controller
         if (! $product->integration_file_path || ! Storage::disk('public')->exists($product->integration_file_path)) {
             return redirect()->back()->with('error', 'Integration file not found. Please regenerate it.');
         }
+
         return Storage::disk('public')->download($product->integration_file_path, "{$product->slug}.php");
     }
+
     /**
      * Regenerate file for a product.
      */
@@ -476,7 +516,7 @@ class ProductController extends Controller
             if ($programmingLanguage) {
                 $extensions = $this->getFileExtensionsForLanguage($programmingLanguage->slug);
                 foreach ($extensions as $ext) {
-                    $oldFileWithExt = "integration/{$product->slug}.{$ext}";
+                    $oldFileWithExt = "integration/{$product->slug}.{(is_string($ext) ? $ext : (string)$ext)}";
                     if (Storage::disk('public')->exists($oldFileWithExt)) {
                         Storage::disk('public')->delete($oldFileWithExt);
                     }
@@ -484,14 +524,17 @@ class ProductController extends Controller
             }
             // Generate new integration file
             $this->generateIntegrationFile($product);
+
             return redirect()->back()->with('success', 'Integration file regenerated successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to Regenerate file: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to Regenerate file: '.$e->getMessage());
         }
     }
+
     /**
      * Get file extensions for programming language.
      */
+    /** @return array<string, mixed> */
     private function getFileExtensionsForLanguage(string $languageSlug): array
     {
         $extensions = [
@@ -523,8 +566,10 @@ class ProductController extends Controller
             'html' => ['html'],
             'ruby' => ['rb'],
         ];
+
         return $extensions[$languageSlug] ?? ['php'];
     }
+
     /**
      * Generate a test license for the product.
      *
@@ -547,7 +592,7 @@ class ProductController extends Controller
                 ],
             );
             // Generate unique purchase code
-            $purchaseCode = 'TEST-' . strtoupper(Str::random(16));
+            $purchaseCode = 'TEST-'.strtoupper(Str::random(16));
             // Create license (license_key will be automatically set to same value as purchase_code)
             $license = License::create([
                 'product_id' => $product->id,
@@ -563,13 +608,16 @@ class ProductController extends Controller
                 'domain' => $validated['domain'],
             ]);
             DB::commit();
+
             return redirect()->back()->with('success', "Test license generated: {$purchaseCode}");
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Test license generation error: ' . $e->getMessage());
-            return back()->with('error', 'Error generating test license: ' . $e->getMessage())->withInput();
+            Log::error('Test license generation error: '.$e->getMessage());
+
+            return back()->with('error', 'Error generating test license: '.$e->getMessage())->withInput();
         }
     }
+
     /**
      * Show license verification logs for a product.
      */
@@ -580,8 +628,10 @@ class ProductController extends Controller
             ->orWhere('serial', 'like', '%TEST-%') // For test licenses without license_id
             ->latest()
             ->paginate(50);
+
         return view('admin.products.logs', compact('product', 'logs'));
     }
+
     /**
      * Get KB categories and articles for product form.
      */
@@ -596,12 +646,14 @@ class ProductController extends Controller
             ->get([
                 'id', 'title', 'slug', 'kb_category_id',
             ]);
+
         return response()->json([
             'success' => true,
             'categories' => $categories,
             'articles' => $articles,
         ]);
     }
+
     /**
      * Get KB articles for a specific category.
      */
@@ -614,6 +666,7 @@ class ProductController extends Controller
             ->get([
                 'id', 'title', 'slug', 'kb_category_id',
             ]);
+
         return response()->json([
             'success' => true,
             'articles' => $articles,

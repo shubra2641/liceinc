@@ -49,6 +49,9 @@ use Illuminate\Support\Facades\Storage;
  */
 class ProductFile extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

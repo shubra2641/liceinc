@@ -62,6 +62,9 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class KbCategory extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

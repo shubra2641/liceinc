@@ -81,7 +81,10 @@ class ProfileController extends Controller
                 ]);
                 return redirect()->route('login');
             }
-            $user = $request->user()->load(['licenses.product', 'licenses.domains', 'tickets']);
+            $user = $request->user();
+            if ($user) {
+                $user->load(['licenses.product', 'licenses.domains', 'tickets']);
+            }
             return view('profile.index', [
                 'user' => $user,
             ]);
@@ -202,17 +205,19 @@ class ProfileController extends Controller
             if (isset($validatedData['email'])) {
                 $validatedData['email'] = $this->sanitizeInput($validatedData['email']);
             }
-            $user->fill($validatedData);
-            if ($user->isDirty('email')) {
-                $user->email_verified_at = null;
-                Log::warning('User email changed, verification required', [
-                    'user_id' => $user->id,
-                    'old_email' => $user->getOriginal('email'),
-                    'new_email' => $user->email,
+            if ($user) {
+                $user->fill($validatedData);
+                if ($user->isDirty('email')) {
+                    $user->email_verified_at = null;
+                    Log::warning('User email changed, verification required', [
+                        'user_id' => $user->id,
+                        'old_email' => $user->getOriginal('email'),
+                        'new_email' => $user->email,
                     'ip' => request()->ip(),
                 ]);
+                }
+                $user->save();
             }
-            $user->save();
             DB::commit();
             return Redirect::route('profile.edit')->with('success', 'profile-updated');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -282,19 +287,21 @@ class ProfileController extends Controller
             ]);
             DB::beginTransaction();
             $user = $request->user();
-            Log::warning('User account deletion initiated', [
-                'user_id' => $user->id,
-                'user_email' => $user->email,
+            if ($user) {
+                Log::warning('User account deletion initiated', [
+                    'user_id' => $user->id,
+                    'user_email' => $user->email,
                 'ip' => request()->ip(),
                 'user_agent' => request()->userAgent(),
-            ]);
-            Auth::logout();
-            $user->delete();
+                ]);
+                Auth::logout();
+                $user->delete();
+            }
             $request->session()->invalidate();
             $request->session()->regenerateToken();
             DB::commit();
             Log::warning('User account deleted successfully', [
-                'deleted_user_id' => $user->id,
+                'deleted_user_id' => $user?->id,
                 'ip' => request()->ip(),
             ]);
             return Redirect::to('/');

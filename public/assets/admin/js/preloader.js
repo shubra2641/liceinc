@@ -235,7 +235,8 @@ class PreloaderManager {
 
 // Initialize preloader when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  const preloaderManager = new PreloaderManager();
+  // eslint-disable-next-line no-new
+  new PreloaderManager();
 });
 
 // Emergency fallback: Force hide preloader if nothing else worked

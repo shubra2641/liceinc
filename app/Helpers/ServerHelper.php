@@ -93,6 +93,7 @@ class ServerHelper
      * Get server information safely
      * @return array
      */
+    /** @return array<string, mixed> */
     public static function getServerInfo(): array
     {
         return [

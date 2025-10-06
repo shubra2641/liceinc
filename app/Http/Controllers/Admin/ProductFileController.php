@@ -33,7 +33,8 @@ use Illuminate\View\View;
  */
 class ProductFileController extends Controller
 {
-    protected $productFileService;
+    protected ProductFileService $productFileService;
+
     /**
      * Constructor with dependency injection.
      *
@@ -46,6 +47,7 @@ class ProductFileController extends Controller
     {
         $this->productFileService = $productFileService;
     }
+
     /**
      * Display files for a product with enhanced security.
      *
@@ -72,20 +74,23 @@ class ProductFileController extends Controller
     {
         try {
             $files = $this->productFileService->getProductFiles($product, false);
+
             return view('admin.products.files.index', compact('product', 'files'));
         } catch (\Exception $e) {
             Log::error('Product files listing failed', [
                 'product_id' => $product->id,
-                'error'  => $e->getMessage(),
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Return view with empty files collection
             return view('admin.products.files.index', [
                 'product' => $product,
-                'files'  => collect(),
+                'files' => collect(),
             ]);
         }
     }
+
     /**
      * Store a newly uploaded file with enhanced security.
      *
@@ -115,10 +120,10 @@ class ProductFileController extends Controller
     public function store(ProductFileRequest $request, Product $product): JsonResponse
     {
         // Rate limiting for file uploads
-        $key = 'product-file-upload:' . $request->ip();
+        $key = 'product-file-upload:'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, 10)) {
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'message' => 'Too many upload attempts. Please try again later.',
             ], 429);
         }
@@ -132,32 +137,35 @@ class ProductFileController extends Controller
                 $validated['description'],
             );
             DB::commit();
+
             return response()->json([
-                'success'  => true,
+                'success' => true,
                 'message' => 'File uploaded successfully',
-                'file'  => [
+                'file' => [
                     'id' => $file->id,
-                    'original_name'  => $file->original_name,
+                    'original_name' => $file->original_name,
                     'file_size' => $file->formatted_size,
-                    'file_type'  => $file->file_type,
+                    'file_type' => $file->file_type,
                     'description' => $file->description,
-                    'download_count'  => $file->download_count,
-                    'created_at' => $file->created_at->format('Y-m-d H:i:s'),
+                    'download_count' => $file->download_count,
+                    'created_at' => $file->created_at?->format('Y-m-d H:i:s'),
                 ],
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('File upload failed', [
                 'product_id' => $product->id,
-                'error'  => $e->getMessage(),
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'message' => 'File upload failed. Please try again.',
             ], 500);
         }
     }
+
     /**
      * Download a file with enhanced security and rate limiting.
      *
@@ -182,7 +190,7 @@ class ProductFileController extends Controller
     public function download(ProductFile $file)
     {
         // Rate limiting for file downloads
-        $key = 'product-file-download:' . request()->ip();
+        $key = 'product-file-download:'.request()->ip();
         if (RateLimiter::tooManyAttempts($key, 20)) {
             abort(429, 'Too many download attempts. Please try again later.');
         }
@@ -192,9 +200,10 @@ class ProductFileController extends Controller
             if (! $fileData) {
                 abort(404, 'File not found or access denied');
             }
+
             return response($fileData['content'])
                 ->header('Content-Type', $fileData['mime_type'])
-                ->header('Content-Disposition', 'attachment; filename="' . $fileData['filename'] . '"')
+                ->header('Content-Disposition', 'attachment; filename="'.(is_string($fileData['filename']) ? $fileData['filename'] : (string)$fileData['filename']).'"')
                 ->header('Content-Length', $fileData['size'])
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
@@ -202,12 +211,13 @@ class ProductFileController extends Controller
         } catch (\Exception $e) {
             Log::error('File download failed', [
                 'file_id' => $file->id,
-                'error'  => $e->getMessage(),
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
             abort(500, 'Download failed');
         }
     }
+
     /**
      * Update file status and description with enhanced security.
      *
@@ -244,12 +254,13 @@ class ProductFileController extends Controller
                 'description' => $validated['description'],
             ]);
             DB::commit();
+
             return response()->json([
-                'success'  => true,
+                'success' => true,
                 'message' => 'File updated successfully',
-                'file'  => [
+                'file' => [
                     'id' => $file->id,
-                    'is_active'  => $file->is_active,
+                    'is_active' => $file->is_active,
                     'description' => $file->description,
                 ],
             ]);
@@ -257,15 +268,17 @@ class ProductFileController extends Controller
             DB::rollBack();
             Log::error('File update failed', [
                 'file_id' => $file->id,
-                'error'  => $e->getMessage(),
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'message' => 'File update failed. Please try again.',
             ], 500);
         }
     }
+
     /**
      * Delete a file with enhanced security and rate limiting.
      *
@@ -290,7 +303,7 @@ class ProductFileController extends Controller
     public function destroy(ProductFile $file): JsonResponse
     {
         // Rate limiting for file deletions
-        $key = 'product-file-delete:' . request()->ip();
+        $key = 'product-file-delete:'.request()->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
             return response()->json([
                 'success' => false,
@@ -303,12 +316,14 @@ class ProductFileController extends Controller
             $success = $this->productFileService->deleteFile($file);
             if ($success) {
                 DB::commit();
+
                 return response()->json([
                     'success' => true,
                     'message' => 'File deleted successfully',
                 ]);
             } else {
                 DB::rollBack();
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to delete file',
@@ -317,16 +332,18 @@ class ProductFileController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('File deletion failed', [
-                'file_id'  => $file->id,
+                'file_id' => $file->id,
                 'error' => $e->getMessage(),
-                'trace'  => $e->getTraceAsString(),
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'File deletion failed. Please try again.',
             ], 500);
         }
     }
+
     /**
      * Get comprehensive file statistics for a product with enhanced security.
      *
@@ -361,22 +378,25 @@ class ProductFileController extends Controller
                 'total_size' => $files->sum('file_size'),
                 'formatted_total_size' => $this->formatBytes($files->sum('file_size')),
             ];
+
             return response()->json([
-                'success'  => true,
+                'success' => true,
                 'statistics' => $stats,
             ]);
         } catch (\Exception $e) {
             Log::error('File statistics retrieval failed', [
                 'product_id' => $product->id,
-                'error'  => $e->getMessage(),
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'message' => 'Failed to retrieve file statistics',
             ], 500);
         }
     }
+
     /**
      * Format bytes to human readable format with enhanced precision.
      *
@@ -401,6 +421,7 @@ class ProductFileController extends Controller
         for ($i = 0; $bytes > 1024 && $i < $unitsCount - 1; $i++) {
             $bytes /= 1024;
         }
-        return round($bytes, $precision) . ' ' . $units[$i];
+
+        return round($bytes, $precision).' '.$units[$i];
     }
 }

@@ -624,7 +624,7 @@ class ReportsController extends Controller
      * @param  string|null  $dateFrom  The start date for export
      * @param  string|null  $dateTo  The end date for export
      *
-     * @return array The export data array
+     * @return array<string, mixed> The export data array
      *
      * @throws \Exception When data retrieval fails
      */
@@ -655,7 +655,7 @@ class ReportsController extends Controller
     /**
      * Export data to CSV format with enhanced security and validation.
      *
-     * @param  array  $data  The data to export
+     * @param  array<string, mixed>  $data  The data to export
      *
      * @return \Illuminate\Http\Response The CSV file response
      *
@@ -691,7 +691,7 @@ class ReportsController extends Controller
     /**
      * Export data to PDF format with enhanced security and validation.
      *
-     * @param  array  $data  The data to export
+     * @param  array<string, mixed>  $data  The data to export
      *
      * @return \Illuminate\Http\Response The PDF file response
      *

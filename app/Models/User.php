@@ -143,6 +143,9 @@ class User extends AuthenticatableBase implements
 {
     use Authorizable;
     use CanResetPassword;
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

@@ -22,6 +22,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Webhook extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

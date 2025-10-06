@@ -408,7 +408,7 @@ class KbController extends Controller
      *
      * @param  Request  $request  The HTTP request
      *
-     * @return array The validated data
+     * @return array<string, mixed> The validated data
      */
     private function validateArticleData(Request $request): array
     {
@@ -428,7 +428,7 @@ class KbController extends Controller
      * @param  Request  $request  The HTTP request
      * @param  KbArticle  $article  The article instance
      *
-     * @return array The validated data
+     * @return array<string, mixed> The validated data
      */
     private function validateArticleUpdateData(Request $request, KbArticle $article): array
     {

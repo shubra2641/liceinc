@@ -45,6 +45,7 @@ class SettingController extends Controller
         $this->middleware('user');
         $this->middleware('verified');
     }
+
     /**
      * Display the settings management page with enhanced security.
      *
@@ -69,13 +70,14 @@ class SettingController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'settings-index:' . request()->ip() . ':' . Auth::id();
+            $key = 'settings-index:'.request()->ip().':'.Auth::id();
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for settings page access', [
                     'ip' => request()->ip(),
                     'user_id' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
+
                 return view('admin.settings.index', [
                     'error' => 'Too many requests. Please try again later.',
                     'rate_limited' => true,
@@ -91,6 +93,7 @@ class SettingController extends Controller
                     'is_admin' => $user ? $user->is_admin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
+
                 return view('admin.settings.index', [
                     'error' => 'Access denied. Admin privileges required.',
                     'unauthorized' => true,
@@ -115,7 +118,7 @@ class SettingController extends Controller
                     'envato_username' => '',
                     'envato_client_id' => '',
                     'envato_client_secret' => '',
-                    'envato_redirect_uri' => config('app.url') . '/auth/envato/callback',
+                    'envato_redirect_uri' => (is_string(config('app.url')) ? config('app.url') : (string)config('app.url')).'/auth/envato/callback',
                     'envato_oauth_enabled' => false,
                     'auto_generate_license' => true,
                     'default_license_length' => 32,
@@ -158,6 +161,7 @@ class SettingController extends Controller
                 $existingQuestions = old('human_questions');
             }
             DB::commit();
+
             return view('admin.settings.index', compact('settings', 'settingsArray', 'currentTimezone', 'existingQuestions'));
         } catch (\Exception $e) {
             DB::rollBack();
@@ -167,12 +171,14 @@ class SettingController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
+
             return view('admin.settings.index', [
                 'error' => 'Unable to load settings. Please try again later.',
                 'fallback' => true,
             ]);
         }
     }
+
     /**
      * Update system settings with enhanced security.
      *
@@ -207,6 +213,7 @@ class SettingController extends Controller
                     'user_id' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
+
                 return back()
                     ->withInput()
                     ->with('error', 'Too many requests. Please try again later.');
@@ -221,6 +228,7 @@ class SettingController extends Controller
                     'is_admin' => $user ? $user->is_admin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
+
                 return back()
                     ->withInput()
                     ->with('error', 'Access denied. Admin privileges required.');
@@ -262,8 +270,9 @@ class SettingController extends Controller
                             $decoded = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
                         } catch (\JsonException $e) {
                             DB::rollBack();
+
                             return back()->withErrors([
-                                'human_questions' => 'Invalid JSON: ' . $e->getMessage(),
+                                'human_questions' => 'Invalid JSON: '.$e->getMessage(),
                             ])->withInput();
                         }
                     } else {
@@ -272,6 +281,7 @@ class SettingController extends Controller
                     }
                     if (! is_array($decoded)) {
                         DB::rollBack();
+
                         return back()->withErrors([
                             'human_questions' => 'Human questions must be an array',
                         ])->withInput();
@@ -282,7 +292,7 @@ class SettingController extends Controller
                         if (! is_array($entry)) {
                             continue;
                         }
-                        $q = trim((string)($entry['question'] ?? ''));
+                        $q = trim((string)((is_array($entry) && isset($entry['question'])) ? $entry['question'] : ''));
                         $a = trim((string)($entry['answer'] ?? ''));
                         if ($q === '' || $a === '') {
                             continue;
@@ -303,6 +313,7 @@ class SettingController extends Controller
             if (empty($request->input('license_api_token')) || strlen($request->input('license_api_token')) < 32) {
                 $message .= ' A new API token has been automatically generated for you.';
             }
+
             return back()->with('success', $message);
         } catch (ValidationException $e) {
             DB::rollBack();
@@ -320,9 +331,11 @@ class SettingController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'ip' => $request->ip(),
             ]);
+
             return back()->withErrors(['general' => 'An error occurred while updating settings. Please try again.']);
         }
     }
+
     /**
      * Test Envato API connection with enhanced security.
      *
@@ -347,13 +360,14 @@ class SettingController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'settings-test-api:' . $request->ip() . ':' . Auth::id();
+            $key = 'settings-test-api:'.$request->ip().':'.Auth::id();
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for API testing', [
                     'ip' => $request->ip(),
                     'user_id' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Too many requests. Please try again later.',
@@ -369,6 +383,7 @@ class SettingController extends Controller
                     'is_admin' => $user ? $user->is_admin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Access denied. Admin privileges required.',
@@ -388,8 +403,9 @@ class SettingController extends Controller
                 Log::warning('Envato API test failed - invalid token', [
                     'user_id' => Auth::id(),
                     'ip' => $request->ip(),
-                    'token_prefix' => substr($token, 0, 8) . '...',
+                    'token_prefix' => substr($token, 0, 8).'...',
                 ]);
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid token or API connection failed. Please check your token and try again.',
@@ -401,9 +417,10 @@ class SettingController extends Controller
                 'errors' => $e->errors(),
                 'ip' => $request->ip(),
             ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed: ' . implode(', ', $e->errors()['token'] ?? ['Invalid input']),
+                'message' => 'Validation failed: '.implode(', ', $e->errors()['token'] ?? ['Invalid input']),
             ], 422);
         } catch (\Exception $e) {
             Log::error('Envato API test failed with exception', [
@@ -412,12 +429,14 @@ class SettingController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'ip' => $request->ip(),
             ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'API test failed: ' . $e->getMessage(),
+                'message' => 'API test failed: '.$e->getMessage(),
             ], 500);
         }
     }
+
     /**
      * Display Envato integration guide with enhanced security.
      *
@@ -442,13 +461,14 @@ class SettingController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'settings-envato-guide:' . request()->ip() . ':' . Auth::id();
+            $key = 'settings-envato-guide:'.request()->ip().':'.Auth::id();
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for Envato guide access', [
                     'ip' => request()->ip(),
                     'user_id' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
+
                 return view('admin.settings.envato-guide', [
                     'error' => 'Too many requests. Please try again later.',
                     'rate_limited' => true,
@@ -464,11 +484,13 @@ class SettingController extends Controller
                     'is_admin' => $user ? $user->is_admin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
+
                 return view('admin.settings.envato-guide', [
                     'error' => 'Access denied. Admin privileges required.',
                     'unauthorized' => true,
                 ]);
             }
+
             return view('admin.settings.envato-guide');
         } catch (\Exception $e) {
             Log::error('Envato guide view failed to load', [
@@ -477,6 +499,7 @@ class SettingController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
+
             return view('admin.settings.envato-guide', [
                 'error' => 'Unable to load the Envato guide. Please try again later.',
                 'fallback' => true,

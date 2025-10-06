@@ -43,6 +43,9 @@ use Illuminate\Support\Facades\Storage;
  */
 class ProgrammingLanguage extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

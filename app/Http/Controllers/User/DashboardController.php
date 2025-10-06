@@ -140,7 +140,7 @@ class DashboardController extends Controller
     /**
      * Get available products for suggestions.
      *
-     * @return \Illuminate\Database\Eloquent\Collection The available products
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> The available products
      *
      * @throws \Exception When database operations fail
      */
@@ -163,7 +163,7 @@ class DashboardController extends Controller
      *
      * @param  \App\Models\User  $user  The user instance
      *
-     * @return array The invoice statistics
+     * @return array<string, mixed> The invoice statistics
      *
      * @throws \Exception When database operations fail
      */
@@ -196,7 +196,7 @@ class DashboardController extends Controller
     /**
      * Get SEO data from settings.
      *
-     * @return array The SEO data
+     * @return array<string, mixed> The SEO data
      *
      * @throws \Exception When database operations fail
      */

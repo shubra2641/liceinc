@@ -91,7 +91,7 @@ class GenerateRenewalInvoices extends Command
                     if ($invoice) {
                         $generatedCount++;
                         $this->line("Generated renewal invoice for license {$license->license_key} "
-                            . "(Product: {$license->product->name})");
+                            . "(Product: " . ($license->product->name ?? 'Unknown Product') . ")");
                         // Send email notifications
                         if ($this->sendRenewalNotifications($license, $invoice)) {
                             $emailSentCount++;
@@ -149,7 +149,7 @@ class GenerateRenewalInvoices extends Command
      *
      * @param  Carbon  $expiryDate  The expiry date to check against
      *
-     * @return \Illuminate\Database\Eloquent\Collection The collection of expiring licenses
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\License> The collection of expiring licenses
      *
      * @throws \Exception When database query fails
      */

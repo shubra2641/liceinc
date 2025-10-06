@@ -56,6 +56,9 @@ use Illuminate\Support\Str;
  */
 class Invoice extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

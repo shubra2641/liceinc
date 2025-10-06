@@ -403,7 +403,7 @@ class TicketController extends Controller
      *
      * @param  Request  $request  The HTTP request
      *
-     * @return array The validated data
+     * @return array<string, mixed> The validated data
      *
      * @throws \InvalidArgumentException When validation fails
      */
@@ -422,7 +422,7 @@ class TicketController extends Controller
      *
      * @param  Request  $request  The HTTP request
      *
-     * @return array The validated data
+     * @return array<string, mixed> The validated data
      *
      * @throws \InvalidArgumentException When validation fails
      */
@@ -440,7 +440,7 @@ class TicketController extends Controller
      *
      * @param  Request  $request  The HTTP request
      *
-     * @return array The validated data
+     * @return array<string, mixed> The validated data
      */
     private function validateReplyData(Request $request): array
     {
@@ -453,7 +453,7 @@ class TicketController extends Controller
     /**
      * Handle license registration for ticket.
      *
-     * @param  array  $validated  The validated request data
+     * @param  array<string, mixed>  $validated  The validated request data
      * @param  LicenseAutoRegistrationService  $licenseService  The license service
      *
      * @return mixed The license instance or null

@@ -3,7 +3,7 @@ module.exports = {
   env: {
     browser: true,
     node: true,
-    es2021: true
+    es2021: true,
   },
   globals: {
     Chart: 'readonly',
@@ -27,7 +27,7 @@ module.exports = {
     module: 'readonly',
     require: 'readonly',
     process: 'readonly',
-    __dirname: 'readonly'
+    __dirname: 'readonly',
   },
   plugins: ['promise', 'n', 'import'],
   rules: {
@@ -37,12 +37,12 @@ module.exports = {
       args: 'none',
       caughtErrors: 'none',
       ignoreRestSiblings: true,
-      vars: 'all'
+      vars: 'all',
     }],
     'no-undef': 'error',
-    'semi': ['error', 'always'],
-    'quotes': ['error', 'single'],
-    'indent': ['error', 2],
+    semi: ['error', 'always'],
+    quotes: ['error', 'single'],
+    indent: ['error', 2],
     'comma-dangle': ['error', 'always-multiline'],
     'space-before-function-paren': ['error', 'never'],
     'object-curly-spacing': ['error', 'always'],
@@ -50,8 +50,8 @@ module.exports = {
     'key-spacing': ['error', { beforeColon: false, afterColon: true }],
     'keyword-spacing': ['error', { before: true, after: true }],
     'space-infix-ops': 'error',
-    'eqeqeq': ['error', 'always'],
-    'curly': ['error', 'all'],
+    eqeqeq: ['error', 'always'],
+    curly: ['error', 'all'],
     'brace-style': ['error', '1tbs'],
     'no-trailing-spaces': 'error',
     'eol-last': 'error',
@@ -94,7 +94,7 @@ module.exports = {
       distinctGroup: true,
       sortTypesGroup: false,
       named: false,
-      warnOnUnassignedImports: false
+      warnOnUnassignedImports: false,
     }],
     'import/newline-after-import': 'error',
     'import/no-unresolved': 'off',
@@ -115,7 +115,7 @@ module.exports = {
     'promise/valid-params': 'error',
     'accessor-pairs': ['error', { setWithoutGet: true, enforceForClassMembers: true, getWithoutSet: false }],
     'array-callback-return': ['error', { allowImplicit: false, checkForEach: false, allowVoid: false }],
-    'camelcase': ['error', { allow: ['^UNSAFE_'], properties: 'never', ignoreGlobals: true, ignoreDestructuring: false, ignoreImports: false }],
+    camelcase: ['error', { allow: ['^UNSAFE_'], properties: 'never', ignoreGlobals: true, ignoreDestructuring: false, ignoreImports: false }],
     'comma-style': ['error', 'last'],
     'constructor-super': 'error',
     'default-case-last': 'error',
@@ -218,7 +218,7 @@ module.exports = {
     'use-isnan': ['error', { enforceForSwitchCase: true, enforceForIndexOf: true }],
     'valid-typeof': ['error', { requireStringLiterals: true }],
     'wrap-iife': ['error', 'any', { functionPrototypeMethods: true }],
-    'yoda': ['error', 'never'],
+    yoda: ['error', 'never'],
     'import/export': 'error',
     'import/first': 'error',
     'import/no-duplicates': 'error',
@@ -229,39 +229,39 @@ module.exports = {
     'n/no-exports-assign': 'error',
     'n/no-new-require': 'error',
     'n/no-path-concat': 'error',
-    'n/process-exit-as-throw': 'error'
+    'n/process-exit-as-throw': 'error',
   },
   overrides: [
     {
       files: ['.eslintrc.js'],
       env: {
         node: true,
-        browser: false
+        browser: false,
       },
       globals: {
         module: 'readonly',
         require: 'readonly',
         process: 'readonly',
-        __dirname: 'readonly'
-      }
+        __dirname: 'readonly',
+      },
     },
     {
       files: ['webpack.mix.js'],
       env: {
         node: true,
-        browser: false
+        browser: false,
       },
       globals: {
         require: 'readonly',
         process: 'readonly',
-        __dirname: 'readonly'
-      }
+        __dirname: 'readonly',
+      },
     },
     {
       files: ['**/admin-charts.js'],
       env: {
         browser: true,
-        node: false
+        node: false,
       },
       globals: {
         Chart: 'readonly',
@@ -281,15 +281,15 @@ module.exports = {
         sessionStorage: 'readonly',
         navigator: 'readonly',
         location: 'readonly',
-        FormData: 'readonly'
-      }
-    }
+        FormData: 'readonly',
+      },
+    },
   ],
   ignorePatterns: [
     'vendor/**',
     'node_modules/**',
     'public/assets/vendor/**',
     '*.min.js',
-    '*.min.css'
-  ]
+    '*.min.css',
+  ],
 };

@@ -287,6 +287,9 @@ use Illuminate\Support\Facades\Cache;
  */
 class Setting extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

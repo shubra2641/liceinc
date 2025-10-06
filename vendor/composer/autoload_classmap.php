@@ -463,6 +463,8 @@ return array(
     'Database\\Factories\\TicketFactory' => $baseDir . '/database/factories/TicketFactory.php',
     'Database\\Factories\\TicketReplyFactory' => $baseDir . '/database/factories/TicketReplyFactory.php',
     'Database\\Factories\\UserFactory' => $baseDir . '/database/factories/UserFactory.php',
+    'Database\\Factories\\WebhookFactory' => $baseDir . '/database/factories/WebhookFactory.php',
+    'Database\\Factories\\WebhookLogFactory' => $baseDir . '/database/factories/WebhookLogFactory.php',
     'Database\\Seeders\\AdminSeeder' => $baseDir . '/database/seeders/AdminSeeder.php',
     'Database\\Seeders\\DatabaseSeeder' => $baseDir . '/database/seeders/DatabaseSeeder.php',
     'Database\\Seeders\\EmailTemplateSeeder' => $baseDir . '/database/seeders/EmailTemplateSeeder.php',

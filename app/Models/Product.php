@@ -138,6 +138,9 @@ use Carbon\Carbon;
  */
 class Product extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

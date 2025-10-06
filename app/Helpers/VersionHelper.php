@@ -43,6 +43,7 @@ class VersionHelper
                     $setting = Setting::where('key', 'site_name')->first() ?? Setting::first();
                     $version = $setting->version ?? '1.0.1';
                     DB::commit();
+
                     return $version;
                 } catch (\Exception $e) {
                     DB::rollBack();
@@ -50,6 +51,7 @@ class VersionHelper
                         'error' => $e->getMessage(),
                         'trace' => $e->getTraceAsString(),
                     ]);
+
                     return '1.0.1';
                 }
             });
@@ -58,9 +60,11 @@ class VersionHelper
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return '1.0.1';
         }
     }
+
     /**
      * Get latest version from version.json file with enhanced security.
      *
@@ -80,6 +84,7 @@ class VersionHelper
                 Log::warning('Version file not found or not readable', [
                     'file' => $versionFile,
                 ]);
+
                 return '1.0.1';
             }
             // Read and validate file content
@@ -88,6 +93,7 @@ class VersionHelper
                 Log::error('Failed to read version file content', [
                     'file' => $versionFile,
                 ]);
+
                 return '1.0.1';
             }
             $versionData = json_decode($fileContent, true);
@@ -96,17 +102,20 @@ class VersionHelper
                     'file' => $versionFile,
                     'json_error' => json_last_error_msg(),
                 ]);
+
                 return '1.0.1';
             }
-            $version = $versionData['current_version'] ?? '1.0.1';
+            $version = (is_array($versionData) && isset($versionData['current_version'])) ? $versionData['current_version'] : '1.0.1';
             // Validate version format
             if (! self::isValidVersion($version)) {
                 Log::error('Invalid version format in version file', [
                     'file' => $versionFile,
                     'version' => $version,
                 ]);
+
                 return '1.0.1';
             }
+
             return $version;
         } catch (\Exception $e) {
             Log::error('Failed to read version file', [
@@ -114,9 +123,11 @@ class VersionHelper
                 'file' => storage_path('version.json'),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return '1.0.1';
         }
     }
+
     /**
      * Check if update is available with enhanced validation.
      *
@@ -138,17 +149,21 @@ class VersionHelper
                     'current_version' => $currentVersion,
                     'latest_version' => $latestVersion,
                 ]);
+
                 return false;
             }
+
             return version_compare($latestVersion, $currentVersion, '>');
         } catch (\Exception $e) {
             Log::error('Failed to check update availability', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return false;
         }
     }
+
     /**
      * Compare two version numbers with enhanced validation.
      *
@@ -177,6 +192,7 @@ class VersionHelper
             if (! self::isValidVersion($version2)) {
                 throw new \InvalidArgumentException("Invalid version format: {$version2}");
             }
+
             return version_compare($version1, $version2);
         } catch (\Exception $e) {
             Log::error('Failed to compare versions', [
@@ -188,6 +204,7 @@ class VersionHelper
             throw $e;
         }
     }
+
     /**
      * Update application version in database with enhanced security and validation.
      *
@@ -227,7 +244,7 @@ class VersionHelper
                     'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
                 ]);
                 throw new \InvalidArgumentException('Cannot update to older or same version. '
-                    . "Current: {$currentVersion}, Target: {$newVersion}");
+                    ."Current: {$currentVersion}, Target: {$newVersion}");
             }
             // Update existing setting or create new one
             $setting = Setting::where('key', 'site_name')->first() ?? Setting::first();
@@ -247,6 +264,7 @@ class VersionHelper
             // Clear version cache
             Cache::forget('app_version');
             DB::commit();
+
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -259,6 +277,7 @@ class VersionHelper
             throw $e;
         }
     }
+
     /**
      * Get version information from version.json with enhanced security.
      *
@@ -271,6 +290,7 @@ class VersionHelper
      *
      * @throws \Exception When file operations fail
      */
+    /** @return array<string, mixed> */
     public static function getVersionInfo(?string $version = null): array
     {
         try {
@@ -280,6 +300,7 @@ class VersionHelper
                 Log::warning('Version file not found or not readable', [
                     'file' => $versionFile,
                 ]);
+
                 return [];
             }
             // Read and validate file content
@@ -288,6 +309,7 @@ class VersionHelper
                 Log::error('Failed to read version file content', [
                     'file' => $versionFile,
                 ]);
+
                 return [];
             }
             $versionData = json_decode($fileContent, true);
@@ -296,6 +318,7 @@ class VersionHelper
                     'file' => $versionFile,
                     'json_error' => json_last_error_msg(),
                 ]);
+
                 return [];
             }
             if ($version) {
@@ -304,10 +327,13 @@ class VersionHelper
                     Log::error('Invalid version format requested', [
                         'version' => $version,
                     ]);
+
                     return [];
                 }
-                return $versionData['changelog'][$version] ?? [];
+
+                return (is_array($versionData) && isset($versionData['changelog']) && is_array($versionData['changelog']) && isset($versionData['changelog'][$version])) ? $versionData['changelog'][$version] : [];
             }
+
             return $versionData;
         } catch (\Exception $e) {
             Log::error('Failed to get version info', [
@@ -315,9 +341,11 @@ class VersionHelper
                 'version' => $version,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return [];
         }
     }
+
     /**
      * Get update instructions for a version with enhanced security.
      *
@@ -331,6 +359,7 @@ class VersionHelper
      * @throws \InvalidArgumentException When version format is invalid
      * @throws \Exception When file operations fail
      */
+    /** @return array<string, mixed> */
     public static function getUpdateInstructions(string $version): array
     {
         try {
@@ -347,6 +376,7 @@ class VersionHelper
                 Log::warning('Version file not found or not readable', [
                     'file' => $versionFile,
                 ]);
+
                 return [];
             }
             // Read and validate file content
@@ -355,6 +385,7 @@ class VersionHelper
                 Log::error('Failed to read version file content', [
                     'file' => $versionFile,
                 ]);
+
                 return [];
             }
             $versionData = json_decode($fileContent, true);
@@ -363,9 +394,11 @@ class VersionHelper
                     'file' => $versionFile,
                     'json_error' => json_last_error_msg(),
                 ]);
+
                 return [];
             }
-            return $versionData['update_instructions'][$version] ?? [];
+
+            return (is_array($versionData) && isset($versionData['update_instructions']) && is_array($versionData['update_instructions']) && isset($versionData['update_instructions'][$version])) ? $versionData['update_instructions'][$version] : [];
         } catch (\Exception $e) {
             Log::error('Failed to get update instructions', [
                 'error' => $e->getMessage(),
@@ -375,6 +408,7 @@ class VersionHelper
             throw $e;
         }
     }
+
     /**
      * Check if version is valid format with enhanced validation.
      *
@@ -403,15 +437,18 @@ class VersionHelper
                     }
                 }
             }
+
             return $isValid;
         } catch (\Exception $e) {
             Log::error('Error validating version format', [
                 'error' => $e->getMessage(),
                 'version' => $version,
             ]);
+
             return false;
         }
     }
+
     /**
      * Get version status for admin dashboard with enhanced security.
      *
@@ -422,6 +459,7 @@ class VersionHelper
      *
      * @throws \Exception When version operations fail
      */
+    /** @return array<string, mixed> */
     public static function getVersionStatus(): array
     {
         try {
@@ -436,6 +474,7 @@ class VersionHelper
                 ]);
                 throw new \Exception('Invalid version format detected');
             }
+
             return [
                 'current_version' => $currentVersion,
                 'latest_version' => $latestVersion,
@@ -452,6 +491,7 @@ class VersionHelper
             throw $e;
         }
     }
+
     /**
      * Check if target version is newer than current version with enhanced validation.
      *
@@ -483,6 +523,7 @@ class VersionHelper
                 ]);
                 throw new \InvalidArgumentException("Invalid current version format: {$currentVersion}");
             }
+
             // Check if target version is newer than current
             return version_compare($targetVersion, $currentVersion, '>');
         } catch (\Exception $e) {
@@ -494,6 +535,7 @@ class VersionHelper
             throw $e;
         }
     }
+
     /**
      * Get current version from database settings with enhanced security.
      *
@@ -519,6 +561,7 @@ class VersionHelper
                     $version = '1.0.0';
                 }
                 DB::commit();
+
                 return $version;
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -529,9 +572,11 @@ class VersionHelper
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return '1.0.0';
         }
     }
+
     /**
      * Update current version in database settings with enhanced security.
      *
@@ -570,7 +615,7 @@ class VersionHelper
                     'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
                 ]);
                 throw new \InvalidArgumentException("Cannot update to older version. Current: {$currentVersion}, "
-                    . "Target: {$newVersion}");
+                    ."Target: {$newVersion}");
             }
             // Update or create setting
             $setting = Setting::updateOrCreate(
@@ -583,6 +628,7 @@ class VersionHelper
             // Clear cache
             Cache::forget('app_version');
             DB::commit();
+
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -595,6 +641,7 @@ class VersionHelper
             throw $e;
         }
     }
+
     /**
      * Get version history from database with enhanced security.
      *
@@ -605,6 +652,7 @@ class VersionHelper
      *
      * @throws \Exception When database operations fail
      */
+    /** @return array<string, mixed> */
     public static function getVersionHistory(): array
     {
         try {
@@ -621,8 +669,10 @@ class VersionHelper
                             'version' => $version,
                             'setting_key' => $setting->key,
                         ]);
+
                         return null;
                     }
+
                     return [
                         'version' => $version,
                         'updated_at' => $setting->created_at,
@@ -630,6 +680,7 @@ class VersionHelper
                     ];
                 })->filter()->values()->toArray();
                 DB::commit();
+
                 return $history;
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -640,9 +691,11 @@ class VersionHelper
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return [];
         }
     }
+
     /**
      * Record version update in history with enhanced security.
      *
@@ -680,6 +733,7 @@ class VersionHelper
                 ],
             );
             DB::commit();
+
             return true;
         } catch (\Exception $e) {
             DB::rollBack();

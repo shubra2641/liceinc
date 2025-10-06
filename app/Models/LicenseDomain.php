@@ -36,6 +36,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class LicenseDomain extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

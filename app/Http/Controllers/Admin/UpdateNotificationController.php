@@ -174,6 +174,9 @@ class UpdateNotificationController extends Controller
      *
      *
      */
+    /**
+     * @param array<string, mixed> $versionStatus
+     */
     private function sendUpdateNotification(array $versionStatus): void
     {
         // Store notification in cache

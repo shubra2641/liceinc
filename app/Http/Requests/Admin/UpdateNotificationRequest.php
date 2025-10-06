@@ -27,7 +27,8 @@ class UpdateNotificationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && (auth()->user()->is_admin || auth()->user()->hasRole('admin'));
+        $user = auth()->user();
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -36,7 +37,10 @@ class UpdateNotificationRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isDismiss = $this->isMethod('POST') && str_contains($this->route()->getName(), 'dismiss');
+        $route = $this->route();
+        $routeName = $route?->getName() ?? '';
+        
+        $isDismiss = $this->isMethod('POST') && str_contains($routeName, 'dismiss');
         // Dismiss notification validation
         if ($isDismiss) {
             return [

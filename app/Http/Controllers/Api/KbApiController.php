@@ -286,7 +286,7 @@ class KbApiController extends Controller
      * @param  KbArticle  $article  The article to validate against
      * @param  string  $serial  The serial code to validate
      *
-     * @return array Validation result with 'valid' and 'source' keys
+     * @return array<string, mixed> Validation result with 'valid' and 'source' keys
      */
     private function validateSerial(KbArticle $article, string $serial): array
     {

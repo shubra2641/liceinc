@@ -215,12 +215,12 @@ class RegisteredUserController extends Controller
     /**
      * @param array<string, mixed> $humanQuestions
      */
-    private function isValidHumanAnswer(string $given, $index, array $humanQuestions): bool
+    private function isValidHumanAnswer(string $given, int $index, array $humanQuestions): bool
     {
         if ($given === '') {
             return false;
         }
-        if ($index === null || ! isset($humanQuestions[$index])) {
+        if (! isset($humanQuestions[$index])) {
             $expected = ConfigHelper::getSetting('human_question_answer', '5');
             return strtolower(trim((string)$expected)) === $given;
         }

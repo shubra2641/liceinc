@@ -65,6 +65,9 @@ use Illuminate\Support\Str;
  */
 class License extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

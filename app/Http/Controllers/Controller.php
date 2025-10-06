@@ -70,14 +70,15 @@ class Controller extends BaseController
      * });
      */
     /**
-     * @template TCallbackReturnType
-     * @param callable(): TCallbackReturnType $callback
-     * @return TCallbackReturnType
+     * @param callable(): mixed $callback
+     * @return mixed
      */
-    protected function transaction(callable $callback): mixed
+    protected function transaction(callable $callback)
     {
         try {
-            return DB::transaction($callback);
+            return DB::transaction(function () use ($callback) {
+                return $callback();
+            });
         } catch (Throwable $e) {
             Log::error('Database transaction failed', [
                 'error' => $e->getMessage(),

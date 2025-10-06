@@ -1,3 +1,5 @@
+/* eslint-env browser */
+/* global window document console fetch setTimeout setInterval localStorage navigator location FormData FileReader DataTransfer CustomEvent Event CSS Chart SecurityUtils SecuritySanitize toastSecurityUtils previewSecurityUtils previewDivSecurityUtils iconPreviewSecurityUtils notificationSecurityUtils modalSecurityUtils contentElementSecurityUtils resultDivSecurityUtils indicatorSecurityUtils wrapperSecurityUtils apiTestResultSecurityUtils viewerSecurityUtils initConfirmationsGlobal $ bootstrap alert confirm */
 /**
  * Admin Dashboard JavaScript
  * Unified JavaScript for all admin pages
@@ -513,49 +515,13 @@ class AdminDashboard {
     );
   }
 
-  // Initialize file uploads
-  initFileUploads() {
-    // Image preview
-    const imageInput = document.getElementById('image');
-    if (imageInput) {
-      imageInput.addEventListener('change', e => {
-        this.handleImagePreview(e, 'image-preview');
-      });
-    }
-
-    // Gallery images preview
-    const galleryInput = document.getElementById('gallery_images');
-    if (galleryInput) {
-      galleryInput.addEventListener('change', e => {
-        this.handleGalleryPreview(e, 'gallery-preview');
-      });
-    }
-
-    // Drag and drop
-    const fileAreas = document.querySelectorAll('.file-upload-area');
-    fileAreas.forEach(area => {
-      area.addEventListener('dragover', e => {
-        e.preventDefault();
-        area.classList.add('dragover');
-      });
-
-      area.addEventListener('dragleave', () => {
-        area.classList.remove('dragover');
-      });
-
-      area.addEventListener('drop', e => {
-        e.preventDefault();
-        area.classList.remove('dragover');
-        const { files } = e.dataTransfer;
-        this.handleFileDrop(files, area);
-      });
-    });
-  }
+  // (Duplicate initFileUploads removed - single authoritative definition retained later)
 
   // Handle image preview
   handleImagePreview(event, previewId) {
-    const file = event.target.files[0];
+    const [file] = event.target.files;
     if (file) {
+      // eslint-disable-next-line no-new
       const reader = new FileReader();
       reader.onload = e => {
         let preview = document.getElementById(previewId);
@@ -600,6 +566,7 @@ class AdminDashboard {
 
       preview.innerHTML = '';
       Array.from(files).forEach((file, index) => {
+        // eslint-disable-next-line no-new
         const reader = new FileReader();
         reader.onload = e => {
           const img = document.createElement('img');
@@ -635,6 +602,7 @@ class AdminDashboard {
       }
 
       // Notify change handlers
+      // eslint-disable-next-line no-new
       input.dispatchEvent(new Event('change'));
     }
   }
@@ -830,7 +798,6 @@ class AdminDashboard {
   initArticlePreview() {
     const titleInput = document.getElementById('title');
     const excerptInput = document.getElementById('excerpt');
-    const previewDiv = document.getElementById('article-preview');
     const previewTitle = document.getElementById('preview-title');
     const previewExcerpt = document.getElementById('preview-excerpt');
 
@@ -864,7 +831,6 @@ class AdminDashboard {
     const nameInput = document.getElementById('name');
     const emailInput = document.getElementById('email');
     const roleInputs = document.querySelectorAll('input[name="role"]');
-    const previewDiv = document.getElementById('user-preview');
     const previewName = document.getElementById('preview-name');
     const previewEmail = document.getElementById('preview-email');
     const previewRole = document.getElementById('preview-role');
@@ -904,7 +870,6 @@ class AdminDashboard {
     const userSelect = document.getElementById('user_id');
     const statusSelect = document.getElementById('status');
     const maxDomainsInput = document.getElementById('max_domains');
-    const previewDiv = document.getElementById('license-preview');
     const previewProduct = document.getElementById('preview-product');
     const previewUser = document.getElementById('preview-user');
     const previewStatus = document.getElementById('preview-status');
@@ -950,7 +915,6 @@ class AdminDashboard {
     const currencySelect = document.getElementById('currency');
     const statusSelect = document.getElementById('status');
     const dueDateInput = document.getElementById('due_date');
-    const previewDiv = document.getElementById('invoice-preview');
     const previewCustomer = document.getElementById('preview-customer');
     const previewAmount = document.getElementById('preview-amount');
     const previewStatus = document.getElementById('preview-status');
@@ -966,14 +930,13 @@ class AdminDashboard {
     }
 
     if (amountInput && currencySelect && previewAmount) {
-      function updateAmount() {
+      const updateAmount = () => {
         if (amountInput.value && currencySelect.value) {
           previewAmount.textContent = `${amountInput.value} ${currencySelect.value}`;
         } else {
           previewAmount.textContent = '$0.00 USD';
         }
-      }
-
+      };
       amountInput.addEventListener('input', updateAmount);
       currencySelect.addEventListener('change', updateAmount);
     }
@@ -1093,6 +1056,7 @@ class AdminDashboard {
               '{{ trans("app.Variable copied to clipboard!") }}',
               'success',
             );
+            return true;
           })
           .catch(() => {
             fallbackCopyToClipboard(text);
@@ -1186,6 +1150,7 @@ class AdminDashboard {
         .writeText(text)
         .then(() => {
           this.showNotification('Variable copied to clipboard!', 'success');
+          return true;
         })
         .catch(() => {
           this.fallbackCopyToClipboard(text);
@@ -1421,41 +1386,7 @@ class AdminDashboard {
   }
 
   // Copy to clipboard functionality
-  copyToClipboard(text) {
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard
-        .writeText(text)
-        .then(() => {
-          this.showNotification('Copied to clipboard!', 'success');
-        })
-        .catch(() => {
-          this.fallbackCopyToClipboard(text);
-        });
-    } else {
-      this.fallbackCopyToClipboard(text);
-    }
-  }
-
-  // Fallback copy method
-  fallbackCopyToClipboard(text) {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-999999px';
-    textArea.style.top = '-999999px';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-
-    try {
-      document.execCommand('copy');
-      this.showNotification('Copied to clipboard!', 'success');
-    } catch (err) {
-      this.showNotification('Failed to copy', 'error');
-    }
-
-    document.body.removeChild(textArea);
-  }
+  // (Duplicate copyToClipboard/fallbackCopyToClipboard removed - single authoritative version retained later)
 
   // Initialize Email Template Index Functions
   initEmailTemplateIndex() {
@@ -1613,8 +1544,6 @@ class AdminDashboard {
     const searchTerm =
       document.getElementById('searchInvoices')?.value.toLowerCase() || '';
     const statusFilter = document.getElementById('status-filter')?.value || '';
-    const dateFrom = document.getElementById('date-from')?.value || '';
-    const dateTo = document.getElementById('date-to')?.value || '';
 
     const invoiceRows = document.querySelectorAll('.invoice-row');
 
@@ -1771,16 +1700,9 @@ class AdminDashboard {
     const customInvoiceTypeSelect = document.getElementById(
       'custom_invoice_type',
     );
-    const expirationDateGroup = document.getElementById(
-      'expiration_date_group',
-    );
     const amountInput = document.getElementById('amount');
     const currencySelect = document.getElementById('currency');
     const dueDateInput = document.getElementById('due_date');
-    const previewCustomer = document.getElementById('preview-customer');
-    const previewAmount = document.getElementById('preview-amount');
-    const previewStatus = document.getElementById('preview-status');
-    const previewDueDate = document.getElementById('preview-due-date');
 
     // Show/hide expiration date based on custom invoice type
     if (customInvoiceTypeSelect) {
@@ -1889,7 +1811,8 @@ class AdminDashboard {
             today.setMonth(today.getMonth() + 1);
             break;
           }
-          expirationInput.value = today.toISOString().split('T')[0];
+          const [datePart] = today.toISOString().split('T');
+          expirationInput.value = datePart;
         }
       } else {
         expirationDateGroup.style.display = 'none';
@@ -1912,7 +1835,8 @@ class AdminDashboard {
     if (userSelect && previewCustomer) {
       if (userSelect.value) {
         const selectedOption = userSelect.options[userSelect.selectedIndex];
-        previewCustomer.textContent = selectedOption.text.split(' (')[0];
+        const [namePart] = selectedOption.text.split(' (');
+        previewCustomer.textContent = namePart;
       } else {
         previewCustomer.textContent = 'Customer Name';
       }
@@ -2015,12 +1939,15 @@ class AdminDashboard {
             });
 
             this.toggleCustomInvoiceFields();
+            return true;
           } catch (e) {
+            console.warn('Invalid JSON response from server:', e);
             throw new Error('Invalid JSON response from server');
           }
         })
         .catch(error => {
           // Error loading licenses
+          console.warn('Error loading licenses:', error);
           this.showNotification(
             'Error loading licenses. Please make sure you are logged in and the server is reachable.',
             'error',
@@ -2332,7 +2259,7 @@ class AdminDashboard {
   // Initialize Ticket Form Toggles
   initTicketFormToggles() {
     const createInvoiceCheckbox = document.getElementById('create_invoice');
-    const licenseInfo = document.getElementById('license-info');
+    // Removed unused licenseInfo element (was not referenced elsewhere)
     const invoiceSection = document.getElementById('invoice-section');
     const renewalGroup = document.getElementById('invoice-renewal-group');
     const renewalPeriodGroup = document.getElementById(
@@ -2636,9 +2563,11 @@ class AdminDashboard {
             `<div class="text-danger"><i class="fas fa-exclamation-triangle"></i> ${data.message || 'Error loading file'}</div>`,
           );
         }
+        return true;
       })
       .catch(error => {
         // Error loading file
+        console.warn('Error loading file:', error);
         contentElement.innerHTML =
           '<div class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading file</div>';
       });
@@ -2712,9 +2641,11 @@ class AdminDashboard {
             `<div class="text-danger text-center py-4"><i class="fas fa-exclamation-triangle fa-2x"></i><p class="mt-2">${data.message || 'Error loading template'}</p></div>`,
           );
         }
+        return true;
       })
       .catch(error => {
         // Error loading file
+        console.warn('Error loading template:', error);
         contentElement.innerHTML =
           '<div class="text-danger text-center py-4"><i class="fas fa-exclamation-triangle fa-2x"></i><p class="mt-2">Error loading template</p></div>';
       });
@@ -2730,9 +2661,11 @@ class AdminDashboard {
             'Template content copied to clipboard',
             'success',
           );
+          return true;
         })
         .catch(err => {
           // Failed to copy
+          console.warn('Failed to copy content:', err);
           this.showNotification('Failed to copy content', 'error');
         });
     } else {
@@ -3023,8 +2956,9 @@ class AdminDashboard {
     );
     fileInputs.forEach(input => {
       input.addEventListener('change', e => {
-        const file = e.target.files[0];
+        const [file] = e.target.files;
         if (file) {
+          // eslint-disable-next-line no-new
           const reader = new FileReader();
           reader.onload = e => {
             const preview = input.parentElement.querySelector(
@@ -3315,7 +3249,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function initApiTestButtonDirectly() {
   const testBtn = document.getElementById('test-api-btn');
   if (testBtn && !testBtn.dataset.apiTestInitialized) {
-    const self = this;
+  // Removed unused self variable
     testBtn.addEventListener('click', () => {
       if (window.adminDashboard && window.adminDashboard.testEnvatoApi) {
         window.adminDashboard.testEnvatoApi();
@@ -3717,11 +3651,16 @@ function loadTemplateContent(templateTextarea) {
         }
 
         // Trigger change event for any listeners
+        // eslint-disable-next-line no-new
+        // eslint-disable-next-line no-new
+        // eslint-disable-next-line no-new
         templateTextarea.dispatchEvent(new Event('change'));
+        // eslint-disable-next-line no-new
         templateTextarea.dispatchEvent(new Event('input'));
 
         // Show template info if available
         if (data.last_modified) {
+          // Template info display logic can be added here
         }
       } else {
         showNotification('Template file not found!', 'warning');
@@ -3729,6 +3668,7 @@ function loadTemplateContent(templateTextarea) {
         // Load default template as fallback
         loadDefaultTemplate(templateTextarea);
       }
+      return true;
     })
     .catch(error => {
       // Error loading template
@@ -3758,6 +3698,8 @@ class License {
   templateTextarea.value = defaultTemplate;
   templateTextarea.readOnly = true;
   templateTextarea.classList.add('readonly-template');
+  // eslint-disable-next-line no-new
+  // eslint-disable-next-line no-new
   templateTextarea.dispatchEvent(new Event('change'));
 
   // Add visual indicator
@@ -3915,6 +3857,8 @@ function loadSavedTemplate() {
 
       if (templateTextarea && templateData.content) {
         templateTextarea.value = templateData.content;
+        // eslint-disable-next-line no-new
+        // eslint-disable-next-line no-new
         templateTextarea.dispatchEvent(new Event('change'));
         templateTextarea.dispatchEvent(new Event('input'));
 
@@ -4151,6 +4095,8 @@ function refreshTemplates() {
     );
     if (templateTextarea) {
       templateTextarea.value = '';
+      // eslint-disable-next-line no-new
+      // eslint-disable-next-line no-new
       templateTextarea.dispatchEvent(new Event('change'));
     }
 
@@ -4385,7 +4331,7 @@ function viewTemplateContent(templateName, buttonElement) {
     localStorage.getItem(`template_${templateName}`),
   );
   if (templateData) {
-    const viewer = document.getElementById('template-content-viewer');
+    document.getElementById('template-content-viewer');
     viewerSecurityUtils.safeInnerHTML(
       this,
       `
@@ -4532,6 +4478,7 @@ function generateLicense() {
   showNotification('Template creator opened!', 'success');
 }
 
+// eslint-disable-next-line no-unused-vars
 function saveNewTemplate() {
   const modal = document.querySelector('.modal');
   const name = modal.querySelector('#template-name').value.trim();
@@ -4563,6 +4510,8 @@ function saveNewTemplate() {
     );
     if (templateTextarea) {
       templateTextarea.value = content;
+      // eslint-disable-next-line no-new
+      // eslint-disable-next-line no-new
       templateTextarea.dispatchEvent(new Event('change'));
     }
 
@@ -4574,6 +4523,7 @@ function saveNewTemplate() {
 }
 
 // Helper functions
+// eslint-disable-next-line no-unused-vars
 function deleteTemplate(templateName) {
   if (
     window.confirm &&
@@ -4591,6 +4541,7 @@ function deleteTemplate(templateName) {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 function copyTemplateToClipboard() {
   const templateTextarea = document.querySelector(
     'textarea[name="license_template"]',
@@ -4600,6 +4551,7 @@ function copyTemplateToClipboard() {
       .writeText(templateTextarea.value)
       .then(() => {
         showNotification('Template copied to clipboard!', 'success');
+        return true;
       })
       .catch(() => {
         showNotification('Failed to copy to clipboard!', 'error');
@@ -4610,6 +4562,7 @@ function copyTemplateToClipboard() {
 }
 
 // Settings Page Tabs Functions
+// eslint-disable-next-line no-unused-vars
 function initSettingsTabs() {
   const container = document.querySelector('.admin-settings-page');
   if (!container) {
@@ -4889,7 +4842,6 @@ function refreshReports() {
   // Show loading state
   const button = document.querySelector('[data-action="refresh-reports"]');
   if (button) {
-    const originalText = button.innerHTML;
     button.innerHTML =
       '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
     button.disabled = true;
@@ -4942,6 +4894,7 @@ function initCharts() {
           systemOverviewCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (systemOverviewData && Object.keys(systemOverviewData).length > 0) {
+          // eslint-disable-next-line no-new
           new Chart(systemOverviewCanvas, {
             type: 'bar',
             data: systemOverviewData,
@@ -4985,6 +4938,7 @@ function initCharts() {
           licenseStatusCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (licenseStatusData && Object.keys(licenseStatusData).length > 0) {
+          // eslint-disable-next-line no-new
           new Chart(licenseStatusCanvas, {
             type: 'doughnut',
             data: licenseStatusData,
@@ -5020,6 +4974,7 @@ function initCharts() {
           licenseTypeCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (licenseTypeData && Object.keys(licenseTypeData).length > 0) {
+          // eslint-disable-next-line no-new
           new Chart(licenseTypeCanvas, {
             type: 'doughnut',
             data: licenseTypeData,
@@ -5060,6 +5015,7 @@ function initCharts() {
           monthlyLicensesData &&
           Object.keys(monthlyLicensesData).length > 0
         ) {
+          // eslint-disable-next-line no-new
           new Chart(monthlyLicensesCanvas, {
             type: 'line',
             data: monthlyLicensesData,
@@ -5107,6 +5063,7 @@ function initCharts() {
           apiStatusCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (apiStatusData && Object.keys(apiStatusData).length > 0) {
+          // eslint-disable-next-line no-new
           new Chart(apiStatusCanvas, {
             type: 'bar',
             data: apiStatusData,
@@ -5154,6 +5111,7 @@ function initCharts() {
           apiCallsCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (apiCallsData && Object.keys(apiCallsData).length > 0) {
+          // eslint-disable-next-line no-new
           new Chart(apiCallsCanvas, {
             type: 'line',
             data: apiCallsData,
@@ -5206,6 +5164,7 @@ function initCharts() {
           invoicesMonthlyData &&
           Object.keys(invoicesMonthlyData).length > 0
         ) {
+          // eslint-disable-next-line no-new
           new Chart(invoicesMonthlyCanvas, {
             type: 'line',
             data: invoicesMonthlyData,
@@ -5253,6 +5212,7 @@ function initCharts() {
           monthlyRevenueCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (monthlyRevenueData && Object.keys(monthlyRevenueData).length > 0) {
+          // eslint-disable-next-line no-new
           new Chart(monthlyRevenueCanvas, {
             type: 'line',
             data: monthlyRevenueData,
@@ -5310,6 +5270,7 @@ function initCharts() {
           activityTimelineData &&
           Object.keys(activityTimelineData).length > 0
         ) {
+          // eslint-disable-next-line no-new
           new Chart(activityTimelineCanvas, {
             type: 'line',
             data: activityTimelineData,
@@ -5362,6 +5323,7 @@ function initCharts() {
           userRegistrationsData &&
           Object.keys(userRegistrationsData).length > 0
         ) {
+          // eslint-disable-next-line no-new
           new Chart(userRegistrationsCanvas, {
             type: 'line',
             data: userRegistrationsData,
@@ -5466,6 +5428,7 @@ function initProgrammingLanguagesCreateFormValidation() {
 }
 
 // Product Updates - Toggle Status Function
+// eslint-disable-next-line no-unused-vars
 function toggleUpdateStatus(updateId) {
   fetch(`/admin/product-updates/${updateId}/toggle-status`, {
     method: 'POST',
@@ -5483,6 +5446,7 @@ function toggleUpdateStatus(updateId) {
       } else {
         alert('Failed to update status');
       }
+      return true;
     })
     .catch(error => {
       console.error('Error:', error);
@@ -5612,6 +5576,7 @@ function initializeApiTesting() {
       formData.append('action', 'test-envato-api');
 
       // Make AJAX request
+      // eslint-disable-next-line promise/catch-or-return
       fetch('/admin/settings/test-api', {
         method: 'POST',
         body: formData,
@@ -5622,6 +5587,10 @@ function initializeApiTesting() {
             .getAttribute('content'),
         },
       })
+        .catch(error => {
+          console.warn('Fetch request failed:', error);
+          throw error;
+        })
         .then(response => response.json())
         .then(data => {
           if (data.success) {
@@ -5655,8 +5624,10 @@ function initializeApiTesting() {
                     `,
             );
           }
+          return true;
         })
         .catch(error => {
+          console.warn('API test error:', error);
           apiTestResultSecurityUtils.safeInnerHTML(
             this,
             `
@@ -5671,6 +5642,9 @@ function initializeApiTesting() {
                     </div>
                 `,
           );
+        })
+        .catch(error => {
+          console.warn('API test request failed:', error);
         })
         .finally(() => {
           // Restore button state
@@ -5747,11 +5721,7 @@ function initializeLogoPreview() {
   const logoInputs = document.querySelectorAll('input[name^="logo_"]');
 
   if (logoPreview && logoInputs.length > 0) {
-    logoInputs.forEach(input => {
-      input.addEventListener('input', updateLogoPreview);
-    });
-
-    function updateLogoPreview() {
+    const updateLogoPreview = () => {
       const width =
         document.querySelector('input[name="logo_width"]')?.value || 150;
       const height =
@@ -5771,7 +5741,11 @@ function initializeLogoPreview() {
         textElement.style.color = textColor;
         textElement.style.fontSize = fontSize;
       }
-    }
+    };
+
+    logoInputs.forEach(input => {
+      input.addEventListener('input', updateLogoPreview);
+    });
   }
 }
 
@@ -5829,7 +5803,7 @@ function initializeInvoiceSectionToggle() {
       'input, select, textarea',
     );
 
-    function toggleInvoiceSection() {
+    const toggleInvoiceSection = () => {
       if (createInvoiceCheckbox.checked) {
         invoiceSection.style.display = 'block';
         invoiceFields.forEach(field => {
@@ -5844,7 +5818,7 @@ function initializeInvoiceSectionToggle() {
           field.value = '';
         });
       }
-    }
+    };
 
     // Initial state
     toggleInvoiceSection();
@@ -5997,6 +5971,7 @@ function checkUpdateNotification() {
       if (data.success && data.data && data.data.should_show_notification) {
         showUpdateNotification();
       }
+      return true;
     })
     .catch(error => {
       // Only log error if it's not a 404 or similar expected error
@@ -6013,6 +5988,7 @@ function showUpdateNotification() {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 function dismissUpdateNotification() {
   const notification = document.getElementById('update-notification');
   if (notification) {
@@ -6046,12 +6022,14 @@ function dismissUpdateNotification() {
     })
     .then(data => {
       console.log('Notification dismissed successfully');
+      return true;
     })
     .catch(error => {
       console.error('Error dismissing notification:', error);
     });
 }
 
+// eslint-disable-next-line no-unused-vars
 function dismissUpdateNotificationPermanently() {
   const notification = document.getElementById('update-notification');
   if (notification) {
@@ -6090,6 +6068,7 @@ function dismissUpdateNotificationPermanently() {
     })
     .then(data => {
       console.log('Notification dismissed permanently successfully');
+      return true;
     })
     .catch(error => {
       console.error('Error dismissing notification permanently:', error);

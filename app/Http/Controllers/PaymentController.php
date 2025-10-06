@@ -382,7 +382,7 @@ class PaymentController extends Controller
                     }
                     // Create order data
                     $orderData = [
-                        'user_id' => $user->id,
+                        'user_id' => $user?->id,
                         'product_id' => $product->id,
                         'amount' => $existingInvoice ? $existingInvoice->amount : $product->price,
                         'currency' => 'USD',
@@ -722,9 +722,9 @@ class PaymentController extends Controller
     /**
      * Sanitize data for logging (remove sensitive information).
      *
-     * @param  array  $data  The data to sanitize
+     * @param  array<string, mixed>  $data  The data to sanitize
      *
-     * @return array The sanitized data
+     * @return array<string, mixed> The sanitized data
      */
     private function sanitizeLogData(array $data): array
     {

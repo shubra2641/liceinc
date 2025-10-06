@@ -1,4 +1,6 @@
+/* global module */
 module.exports = {
+  root: true,
   ignorePatterns: [
     'vendor/**',
     'node_modules/**',
@@ -8,12 +10,12 @@ module.exports = {
     'public/assets/front/js/front-consolidated.js',
     'public/assets/js/chart.js',
     '**/chart.js',
-    '**/front-consolidated.js'
+    '**/front-consolidated.js',
   ],
   env: {
     browser: true,
     es2021: true,
-    node: true
+    node: true,
   },
   globals: {
     window: 'readonly',
@@ -73,47 +75,47 @@ module.exports = {
     checkAutoUpdates: 'readonly',
     installAutoUpdate: 'readonly',
     checkForUpdatesManually: 'readonly',
-    contentSecurityUtils: 'readonly'
+    contentSecurityUtils: 'readonly',
   },
   extends: [
-    'standard'
+    'standard',
   ],
   parserOptions: {
     ecmaVersion: 'latest',
-    sourceType: 'module'
+    sourceType: 'module',
   },
   overrides: [
     {
       files: ['.eslintrc.js'],
       env: {
         node: true,
-        browser: false
+        browser: false,
       },
       globals: {
         module: 'readonly',
         require: 'readonly',
         process: 'readonly',
-        __dirname: 'readonly'
-      }
+        __dirname: 'readonly',
+      },
     },
     {
       files: ['webpack.mix.js'],
       env: {
         node: true,
-        browser: false
+        browser: false,
       },
       globals: {
         require: 'readonly',
         module: 'readonly',
         process: 'readonly',
-        __dirname: 'readonly'
-      }
+        __dirname: 'readonly',
+      },
     },
     {
       files: ['**/admin-charts.js'],
       env: {
         browser: true,
-        node: false
+        node: false,
       },
       globals: {
         Chart: 'readonly',
@@ -127,18 +129,18 @@ module.exports = {
         clearTimeout: 'readonly',
         clearInterval: 'readonly',
         Blob: 'readonly',
-        MutationObserver: 'readonly'
-      }
-    }
+        MutationObserver: 'readonly',
+      },
+    },
   ],
   rules: {
     'no-console': 'off',
     'no-debugger': 'off',
     'no-unused-vars': 'error',
     'no-undef': 'error',
-    'semi': ['error', 'always'],
-    'quotes': ['error', 'single'],
-    'indent': ['error', 2],
+    semi: ['error', 'always'],
+    quotes: ['error', 'single'],
+    indent: ['error', 2],
     'comma-dangle': ['error', 'always-multiline'],
     'space-before-function-paren': ['error', 'never'],
     'object-curly-spacing': ['error', 'always'],
@@ -146,8 +148,8 @@ module.exports = {
     'key-spacing': ['error', { beforeColon: false, afterColon: true }],
     'keyword-spacing': ['error', { before: true, after: true }],
     'space-infix-ops': 'error',
-    'eqeqeq': ['error', 'always'],
-    'curly': ['error', 'all'],
+    eqeqeq: ['error', 'always'],
+    curly: ['error', 'all'],
     'brace-style': ['error', '1tbs'],
     'no-trailing-spaces': 'error',
     'eol-last': 'error',
@@ -185,7 +187,7 @@ module.exports = {
     'no-useless-escape': 'error',
     'prefer-destructuring': 'error',
     'no-duplicate-imports': 'error',
-    'import/order': ['error', { 'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'] }],
+    'import/order': ['error', { groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'] }],
     'import/newline-after-import': 'error',
     'import/no-unresolved': 'off',
     'import/no-absolute-path': 'error',
@@ -202,6 +204,6 @@ module.exports = {
     'promise/avoid-new': 'off',
     'promise/no-new-statics': 'error',
     'promise/no-return-in-finally': 'error',
-    'promise/valid-params': 'error'
-  }
+    'promise/valid-params': 'error',
+  },
 };

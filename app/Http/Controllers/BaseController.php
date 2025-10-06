@@ -342,9 +342,10 @@ abstract class BaseController extends Controller
      * return $this->jsonResponse($users, 'Users retrieved', 200, $meta);
      */
     /**
+     * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, mixed> $paginator
      * @return array<string, mixed>
      */
-    protected function getPaginationMeta($paginator): array
+    protected function getPaginationMeta(\Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator): array
     {
         try {
             return [

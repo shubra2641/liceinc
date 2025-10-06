@@ -37,10 +37,12 @@ use Illuminate\View\View;
 class TicketController extends Controller
 {
     protected EmailService $emailService;
+
     public function __construct(EmailService $emailService)
     {
         $this->emailService = $emailService;
     }
+
     /**
      * Display a listing of tickets with enhanced security.
      *
@@ -66,6 +68,7 @@ class TicketController extends Controller
             DB::beginTransaction();
             $tickets = Ticket::with(['user', 'category', 'invoice.product'])->latest()->paginate(10);
             DB::commit();
+
             return view('admin.tickets.index', compact('tickets'));
         } catch (\Exception $e) {
             DB::rollBack();
@@ -73,12 +76,14 @@ class TicketController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Return empty results on error
             return view('admin.tickets.index', [
                 'tickets' => collect()->paginate(10),
             ]);
         }
     }
+
     /**
      * Show the form for creating a new ticket.
      *
@@ -102,8 +107,10 @@ class TicketController extends Controller
         $users = User::with(['licenses.product'])->get();
         $categories = TicketCategory::active()->ordered()->get();
         $products = Product::all();
+
         return view('admin.tickets.create', compact('users', 'categories', 'products'));
     }
+
     /**
      * Store a newly created ticket with enhanced security.
      *
@@ -172,7 +179,7 @@ class TicketController extends Controller
                                 'annual' => 365,
                             ];
                             $metadata['recurrence'] = $billingType;
-                            $metadata['renewal_period_days'] = $map[$billingType] ?? $duration;
+                            $metadata['renewal_period_days'] = (is_string($billingType) && isset($map[$billingType])) ? $map[$billingType] : $duration;
                             $metadata['renewal_price'] = $amount;
                         }
                     }
@@ -181,6 +188,7 @@ class TicketController extends Controller
                     $product = Product::find($invoiceProductId);
                     if (! $product) {
                         DB::rollBack();
+
                         return back()->withErrors(['invoice_product_id' => 'Invalid product selected'])->withInput();
                     }
                     $amount = $request->input('invoice_amount') ?: $product->price;
@@ -203,7 +211,7 @@ class TicketController extends Controller
                                 ?: $product->renewal_period ?: ($duration ?: 30);
                         } else {
                             $metadata['recurrence'] = $billingType;
-                            $metadata['renewal_period_days'] = (is_string($billingType) && array_key_exists($billingType, $map)) 
+                            $metadata['renewal_period_days'] = (is_string($billingType) && array_key_exists($billingType, $map))
                                 ? $map[$billingType] : ($product->renewal_period ?? $duration);
                             $metadata['renewal_price'] = $product->renewal_price ?? $amount;
                         }
@@ -226,6 +234,7 @@ class TicketController extends Controller
             }
             Ticket::create($ticketData);
             DB::commit();
+
             return redirect()->route('admin.tickets.index')->with('success', 'Ticket created successfully for user');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -234,11 +243,13 @@ class TicketController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['content']),
             ]);
+
             return redirect()->back()
                 ->withErrors(['error' => 'Failed to create ticket. Please try again.'])
                 ->withInput();
         }
     }
+
     /**
      * Display the specified ticket.
      *
@@ -262,8 +273,10 @@ class TicketController extends Controller
     public function show(Ticket $ticket): View
     {
         $ticket->load(['user.licenses.product', 'replies.user', 'category', 'invoice.product']);
+
         return view('admin.tickets.show', compact('ticket'));
     }
+
     /**
      * Show the form for editing the specified ticket.
      *
@@ -287,8 +300,10 @@ class TicketController extends Controller
     public function edit(Ticket $ticket): View
     {
         $categories = TicketCategory::active()->ordered()->get();
+
         return view('admin.tickets.edit', compact('ticket', 'categories'));
     }
+
     /**
      * Update the specified ticket with enhanced security.
      *
@@ -322,6 +337,7 @@ class TicketController extends Controller
             $validated = $request->validated();
             $ticket->update($validated);
             DB::commit();
+
             return back()->with('success', 'Ticket updated');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -331,9 +347,11 @@ class TicketController extends Controller
                 'ticket_id' => $ticket->id,
                 'request_data' => $request->except(['content']),
             ]);
+
             return back()->withErrors(['error' => 'Failed to update ticket. Please try again.']);
         }
     }
+
     /**
      * Remove the specified ticket with enhanced security.
      *
@@ -362,6 +380,7 @@ class TicketController extends Controller
             DB::beginTransaction();
             $ticket->delete();
             DB::commit();
+
             return redirect()->route('admin.tickets.index')->with('success', 'Ticket deleted');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -370,10 +389,12 @@ class TicketController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'ticket_id' => $ticket->id,
             ]);
+
             return redirect()->back()
                 ->withErrors(['error' => 'Failed to delete ticket. Please try again.']);
         }
     }
+
     /**
      * Add a reply to the specified ticket with enhanced security.
      *
@@ -402,11 +423,14 @@ class TicketController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $reply = TicketReply::create([
-                'ticket_id' => $ticket->id,
-                'user_id' => $request->user()->id,
-                'message' => $validated['message'],
-            ]);
+            $user = $request->user();
+            if ($user) {
+                $reply = TicketReply::create([
+                    'ticket_id' => $ticket->id,
+                    'user_id' => $user->id,
+                    'message' => $validated['message'],
+                ]);
+            }
             // Send email notification to user when admin replies
             try {
                 if ($ticket->user) {
@@ -414,7 +438,7 @@ class TicketController extends Controller
                         'ticket_id' => $ticket->id,
                         'ticket_subject' => $ticket->subject,
                         'reply_message' => $validated['message'],
-                        'replied_by' => $request->user()->name,
+                        'replied_by' => $user->name ?? 'Admin',
                     ]);
                 }
             } catch (\Exception $e) {
@@ -425,6 +449,7 @@ class TicketController extends Controller
                 ]);
             }
             DB::commit();
+
             return back()->with('success', 'Reply added');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -434,9 +459,11 @@ class TicketController extends Controller
                 'ticket_id' => $ticket->id,
                 'request_data' => $request->except(['message']),
             ]);
+
             return back()->withErrors(['error' => 'Failed to add reply. Please try again.']);
         }
     }
+
     /**
      * Update ticket status with enhanced security.
      *
@@ -470,6 +497,7 @@ class TicketController extends Controller
             $saved = $ticket->save();
             if (! $saved) {
                 DB::rollBack();
+
                 return back()->withErrors(['status' => 'Failed to update ticket status']);
             }
             // Send email notification to user when status is updated
@@ -490,7 +518,8 @@ class TicketController extends Controller
                 ]);
             }
             DB::commit();
-            return back()->with('success', 'Ticket status updated to ' . ucfirst($ticket->status));
+
+            return back()->with('success', 'Ticket status updated to '.ucfirst($ticket->status));
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to update ticket status', [
@@ -499,7 +528,8 @@ class TicketController extends Controller
                 'ticket_id' => $ticket->id,
                 'request_data' => $request->all(),
             ]);
-            return back()->withErrors(['status' => 'Error updating ticket status: ' . $e->getMessage()]);
+
+            return back()->withErrors(['status' => 'Error updating ticket status: '.$e->getMessage()]);
         }
     }
 }

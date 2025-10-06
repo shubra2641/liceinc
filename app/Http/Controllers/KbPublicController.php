@@ -444,7 +444,7 @@ class KbPublicController extends Controller
     /**
      * Get active categories with enhanced security and error handling.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory>
      *
      * @throws \Exception When category retrieval fails
      */
@@ -467,7 +467,7 @@ class KbPublicController extends Controller
     /**
      * Get latest articles with enhanced security and error handling.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle>
      *
      * @throws \Exception When article retrieval fails
      */
@@ -530,7 +530,7 @@ class KbPublicController extends Controller
      *
      * @param  KbCategory  $category  The category
      *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, \App\Models\KbArticle>
      *
      * @throws \Exception When article retrieval fails
      */
@@ -559,7 +559,7 @@ class KbPublicController extends Controller
      *
      * @param  KbCategory  $category  The category
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory>
      *
      * @throws \Exception When category retrieval fails
      */
@@ -587,7 +587,7 @@ class KbPublicController extends Controller
      * @param  KbCategory  $category  The category
      * @param  string  $rawCode  The raw code
      *
-     * @return array Access result
+     * @return array<string, mixed> Access result
      *
      * @throws \Exception When access handling fails
      */
@@ -647,7 +647,7 @@ class KbPublicController extends Controller
      * @param  string  $accessToken  The access token
      * @param  int  $categoryId  The category ID
      *
-     * @return array Token validation result
+     * @return array<string, mixed> Token validation result
      */
     private function validateAccessToken(string $accessToken, int $categoryId): array
     {
@@ -738,7 +738,7 @@ class KbPublicController extends Controller
      *
      * @param  KbArticle  $article  The article
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle>
      *
      * @throws \Exception When article retrieval fails
      */
@@ -770,7 +770,7 @@ class KbPublicController extends Controller
      * @param  KbArticle  $article  The article
      * @param  string  $rawCode  The raw code
      *
-     * @return array Access result
+     * @return array<string, mixed> Access result
      *
      * @throws \Exception When access handling fails
      */
@@ -834,7 +834,7 @@ class KbPublicController extends Controller
      * @param  string  $accessToken  The access token
      * @param  int  $articleId  The article ID
      *
-     * @return array Token validation result
+     * @return array<string, mixed> Token validation result
      */
     private function validateArticleAccessToken(string $accessToken, int $articleId): array
     {
@@ -878,7 +878,7 @@ class KbPublicController extends Controller
     /**
      * Get all categories with access information for display.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory>
      *
      * @throws \Exception When category retrieval fails
      */
@@ -906,7 +906,7 @@ class KbPublicController extends Controller
      *
      * @param  string  $q  The search query
      *
-     * @return array Search results
+     * @return array<string, mixed> Search results
      *
      * @throws \Exception When search fails
      */

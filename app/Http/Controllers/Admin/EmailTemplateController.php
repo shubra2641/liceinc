@@ -32,16 +32,13 @@ use Illuminate\View\View;
 class EmailTemplateController extends Controller
 {
     protected EmailService $emailService;
+
     /**
      * Create a new controller instance.
      *
      * @param  EmailService  $emailService  The email service for sending emails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function __construct(EmailService $emailService)
     {
@@ -49,6 +46,7 @@ class EmailTemplateController extends Controller
         $this->middleware('admin');
         $this->emailService = $emailService;
     }
+
     /**
      * Display a listing of email templates with enhanced security.
      *
@@ -63,10 +61,6 @@ class EmailTemplateController extends Controller
      * @throws \Exception When database operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Request with filters:
@@ -102,9 +96,10 @@ class EmailTemplateController extends Controller
             if ($request->filled('search')) {
                 $search = $this->sanitizeInput($request->search);
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('subject', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
+                    $searchStr = is_string($search) ? $search : (string)$search;
+                    $q->where('name', 'like', "%{$searchStr}%")
+                        ->orWhere('subject', 'like', "%{$searchStr}%")
+                        ->orWhere('description', 'like', "%{$searchStr}%");
                 });
             }
             $templates = $query->orderBy('type')
@@ -114,6 +109,7 @@ class EmailTemplateController extends Controller
             $types = EmailTemplate::distinct()->pluck('type')->sort();
             $categories = EmailTemplate::distinct()->pluck('category')->sort();
             DB::commit();
+
             return view('admin.email-templates.index', compact(
                 'templates',
                 'types',
@@ -125,6 +121,7 @@ class EmailTemplateController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Return empty results on error
             return view('admin.email-templates.index', [
                 'templates' => collect()->paginate(20),
@@ -133,6 +130,7 @@ class EmailTemplateController extends Controller
             ]);
         }
     }
+
     /**
      * Show the form for creating a new email template.
      *
@@ -142,10 +140,6 @@ class EmailTemplateController extends Controller
      * @return View The email template creation form view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Access the create form:
@@ -162,8 +156,10 @@ class EmailTemplateController extends Controller
     {
         $types = ['user', 'admin'];
         $categories = ['registration', 'license', 'product', 'ticket', 'invoice'];
+
         return view('admin.email-templates.create', compact('types', 'categories'));
     }
+
     /**
      * Store a newly created email template with enhanced security.
      *
@@ -177,10 +173,6 @@ class EmailTemplateController extends Controller
      * @throws \Exception When database operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Request:
@@ -204,6 +196,7 @@ class EmailTemplateController extends Controller
             $validated = $request->validated();
             $template = EmailTemplate::create($validated);
             DB::commit();
+
             return redirect()
                 ->route('admin.email-templates.show', $template)
                 ->with('success', 'Email template created successfully.');
@@ -214,12 +207,14 @@ class EmailTemplateController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['body']),
             ]);
+
             return redirect()
                 ->back()
                 ->withInput()
                 ->with('error', 'Failed to create email template. Please try again.');
         }
     }
+
     /**
      * Display the specified email template.
      *
@@ -231,10 +226,6 @@ class EmailTemplateController extends Controller
      * @return View The email template show view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Access template details:
@@ -250,6 +241,7 @@ class EmailTemplateController extends Controller
     {
         return view('admin.email-templates.show', compact('email_template'));
     }
+
     /**
      * Show the form for editing the specified email template.
      *
@@ -261,10 +253,6 @@ class EmailTemplateController extends Controller
      * @return View The email template edit form view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Access the edit form:
@@ -281,8 +269,10 @@ class EmailTemplateController extends Controller
     {
         $types = ['user', 'admin'];
         $categories = ['registration', 'license', 'product', 'ticket', 'invoice'];
+
         return view('admin.email-templates.edit', compact('email_template', 'types', 'categories'));
     }
+
     /**
      * Update the specified email template with enhanced security.
      *
@@ -297,10 +287,6 @@ class EmailTemplateController extends Controller
      * @throws \Exception When database operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Update template:
@@ -324,6 +310,7 @@ class EmailTemplateController extends Controller
             $validated = $request->validated();
             $email_template->update($validated);
             DB::commit();
+
             return redirect()
                 ->route('admin.email-templates.show', $email_template)
                 ->with('success', 'Email template updated successfully.');
@@ -335,12 +322,14 @@ class EmailTemplateController extends Controller
                 'template_id' => $email_template->id,
                 'request_data' => $request->except(['body']),
             ]);
+
             return redirect()
                 ->back()
                 ->withInput()
                 ->with('error', 'Failed to update email template. Please try again.');
         }
     }
+
     /**
      * Remove the specified email template with enhanced security.
      *
@@ -354,10 +343,6 @@ class EmailTemplateController extends Controller
      * @throws \Exception When database operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Delete template:
@@ -375,6 +360,7 @@ class EmailTemplateController extends Controller
             DB::beginTransaction();
             $email_template->delete();
             DB::commit();
+
             return redirect()
                 ->route('admin.email-templates.index')
                 ->with('success', 'Email template deleted successfully.');
@@ -385,11 +371,13 @@ class EmailTemplateController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'template_id' => $email_template->id,
             ]);
+
             return redirect()
                 ->back()
                 ->with('error', 'Failed to delete email template. Please try again.');
         }
     }
+
     /**
      * Toggle template active status with enhanced security.
      *
@@ -403,10 +391,6 @@ class EmailTemplateController extends Controller
      * @throws \Exception When database operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Toggle template status:
@@ -425,6 +409,7 @@ class EmailTemplateController extends Controller
             $email_template->update(['is_active' => ! $email_template->is_active]);
             $status = $email_template->is_active ? 'activated' : 'deactivated';
             DB::commit();
+
             return redirect()
                 ->back()
                 ->with('success', "Email template {$status} successfully.");
@@ -435,11 +420,13 @@ class EmailTemplateController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'template_id' => $email_template->id,
             ]);
+
             return redirect()
                 ->back()
                 ->with('error', 'Failed to toggle email template status. Please try again.');
         }
     }
+
     /**
      * Test email template rendering with enhanced security.
      *
@@ -454,10 +441,6 @@ class EmailTemplateController extends Controller
      * @throws \Exception When template rendering fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Test template rendering:
@@ -484,9 +467,10 @@ class EmailTemplateController extends Controller
                 ]);
                 $rendered = [
                     'subject' => 'Error rendering template',
-                    'body' => 'Error: ' . $e->getMessage(),
+                    'body' => 'Error: '.$e->getMessage(),
                 ];
             }
+
             return view('admin.email-templates.test', compact(
                 'email_template',
                 'testData',
@@ -498,6 +482,7 @@ class EmailTemplateController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'template_id' => $email_template->id,
             ]);
+
             // Return error view
             return view('admin.email-templates.test', [
                 'email_template' => $email_template,
@@ -509,6 +494,7 @@ class EmailTemplateController extends Controller
             ]);
         }
     }
+
     /**
      * Send test email with enhanced security.
      *
@@ -523,10 +509,6 @@ class EmailTemplateController extends Controller
      * @throws \Exception When email sending fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Send test email:
@@ -560,6 +542,7 @@ class EmailTemplateController extends Controller
             );
             if ($success) {
                 DB::commit();
+
                 return redirect()
                     ->back()
                     ->with('success', 'Test email sent successfully.');
@@ -569,6 +552,7 @@ class EmailTemplateController extends Controller
                     'recipient' => $validated['test_email'],
                 ]);
                 DB::commit();
+
                 return redirect()
                     ->back()
                     ->with('error', 'Failed to send test email. Please check the logs for more details.');
@@ -581,11 +565,13 @@ class EmailTemplateController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return redirect()
                 ->back()
-                ->with('error', 'Error sending test email: ' . $e->getMessage());
+                ->with('error', 'Error sending test email: '.$e->getMessage());
         }
     }
+
     /**
      * Prepare test data for email template testing.
      *
@@ -597,10 +583,11 @@ class EmailTemplateController extends Controller
      * @return array The prepared test data
      *
      * @version 1.0.6
+     */
+    /**
+     * @param array<string, mixed> $validated
      *
-     *
-     *
-     *
+     * @return array<string, mixed>
      */
     private function prepareTestData(array $validated): array
     {
@@ -612,9 +599,9 @@ class EmailTemplateController extends Controller
             'site_name' => config('app.name'),
             'site_url' => config('app.url'),
             'current_year' => date('Y'),
-            'verification_url' => config('app.url') . '/verify-email?token=test-token',
-            'reset_url' => config('app.url') . '/reset-password?token=test-token',
-            'license_key' => 'LIC-' . strtoupper(substr(md5(time()), 0, 8)),
+            'verification_url' => (is_string(config('app.url')) ? config('app.url') : (string)config('app.url')).'/verify-email?token=test-token',
+            'reset_url' => (is_string(config('app.url')) ? config('app.url') : (string)config('app.url')).'/reset-password?token=test-token',
+            'license_key' => 'LIC-'.strtoupper(substr(md5(time()), 0, 8)),
             'product_name' => 'Test Product',
             'expires_at' => now()->addYear()->format('M d, Y'),
             'days_remaining' => 30,
@@ -626,6 +613,7 @@ class EmailTemplateController extends Controller
             'payment_date' => now()->format('M d, Y'),
             'payment_method' => 'Credit Card',
         ];
+
         return array_merge($defaultData, $testData);
     }
 }

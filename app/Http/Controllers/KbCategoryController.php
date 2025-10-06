@@ -371,9 +371,9 @@ class KbCategoryController extends Controller
     /**
      * Sanitize category data to prevent XSS attacks.
      *
-     * @param  array  $data  The category data to sanitize
+     * @param  array<string, mixed>  $data  The category data to sanitize
      *
-     * @return array The sanitized category data
+     * @return array<string, mixed> The sanitized category data
      */
     private function sanitizeCategoryData(array $data): array
     {

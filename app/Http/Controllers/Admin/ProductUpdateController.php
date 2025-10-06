@@ -70,6 +70,7 @@ class ProductUpdateController extends Controller
             $updates = $query->orderBy('created_at', 'desc')->paginate(20);
             $products = Product::where('is_active', true)->get();
             DB::commit();
+
             return view('admin.product-updates.index', compact('updates', 'products', 'productId', 'product'));
         } catch (\Exception $e) {
             DB::rollBack();
@@ -77,6 +78,7 @@ class ProductUpdateController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Return empty results on error
             return view('admin.product-updates.index', [
                 'updates' => collect()->paginate(20),
@@ -86,6 +88,7 @@ class ProductUpdateController extends Controller
             ]);
         }
     }
+
     /**
      * Show the form for creating a new product update.
      *
@@ -111,11 +114,14 @@ class ProductUpdateController extends Controller
         $productId = $request->get('product_id');
         if ($productId) {
             $product = Product::findOrFail($productId);
+
             return view('admin.product-updates.create', compact('product'));
         }
         $products = Product::where('is_active', true)->get();
+
         return view('admin.product-updates.create', compact('products'));
     }
+
     /**
      * Store a newly created product update with enhanced security.
      *
@@ -156,13 +162,14 @@ class ProductUpdateController extends Controller
                 ->first();
             if ($existingUpdate) {
                 DB::rollBack();
+
                 return redirect()->back()
                     ->withErrors(['version' => 'This version already exists for this product'])
                     ->withInput();
             }
             // Handle file upload
             $file = $request->file('update_file');
-            $fileName = 'update_' . $product->slug . '_' . $validated['version'] . '_' . time() . '.zip';
+            $fileName = 'update_'.$product->slug.'_'.(is_string($validated['version']) ? $validated['version'] : (string)$validated['version']).'_'.time().'.zip';
             $filePath = $file->storeAs('product-updates', $fileName);
             $fileHash = hash_file('sha256', $file->getRealPath());
             // Convert changelog text to array
@@ -187,6 +194,7 @@ class ProductUpdateController extends Controller
                 'is_active' => true,
             ]);
             DB::commit();
+
             return redirect()->route('admin.product-updates.index')
                 ->with('success', 'Product update created successfully');
         } catch (\Exception $e) {
@@ -196,11 +204,13 @@ class ProductUpdateController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['update_file']),
             ]);
+
             return redirect()->back()
                 ->withErrors(['error' => 'Failed to create product update'])
                 ->withInput();
         }
     }
+
     /**
      * Display the specified product update.
      *
@@ -224,8 +234,10 @@ class ProductUpdateController extends Controller
     public function show(ProductUpdate $product_update): View
     {
         $product_update->load('product');
+
         return view('admin.product-updates.show', compact('product_update'));
     }
+
     /**
      * Show the form for editing the specified product update.
      *
@@ -250,8 +262,10 @@ class ProductUpdateController extends Controller
     public function edit(ProductUpdate $product_update): View
     {
         $products = Product::where('is_active', true)->get();
+
         return view('admin.product-updates.edit', compact('product_update', 'products'));
     }
+
     /**
      * Update the specified product update with enhanced security.
      *
@@ -292,6 +306,7 @@ class ProductUpdateController extends Controller
                 ->first();
             if ($existingUpdate) {
                 DB::rollBack();
+
                 return redirect()->back()
                     ->withErrors(['version' => 'This version already exists for this product'])
                     ->withInput();
@@ -315,7 +330,7 @@ class ProductUpdateController extends Controller
             // Handle file upload if provided
             if ($request->hasFile('update_file')) {
                 $file = $request->file('update_file');
-                $fileName = 'update_' . $product_update->product->slug . '_' . $validated['version'] . '_' . time() . '.zip';
+                $fileName = 'update_'.$product_update->product->slug.'_'.(is_string($validated['version']) ? $validated['version'] : (string)$validated['version']).'_'.time().'.zip';
                 $filePath = $file->storeAs('product-updates', $fileName);
                 $fileHash = hash_file('sha256', $file->getRealPath());
                 // Delete old file
@@ -329,6 +344,7 @@ class ProductUpdateController extends Controller
             }
             $product_update->update($updateData);
             DB::commit();
+
             return redirect()->route('admin.product-updates.index')
                 ->with('success', 'Product update updated successfully');
         } catch (\Exception $e) {
@@ -339,11 +355,13 @@ class ProductUpdateController extends Controller
                 'update_id' => $product_update->id,
                 'request_data' => $request->except(['update_file']),
             ]);
+
             return redirect()->back()
                 ->withErrors(['error' => 'Failed to update product update'])
                 ->withInput();
         }
     }
+
     /**
      * Remove the specified product update with enhanced security.
      *
@@ -376,6 +394,7 @@ class ProductUpdateController extends Controller
             }
             $product_update->delete();
             DB::commit();
+
             return redirect()->route('admin.product-updates.index')
                 ->with('success', 'Product update deleted successfully');
         } catch (\Exception $e) {
@@ -385,10 +404,12 @@ class ProductUpdateController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'update_id' => $product_update->id,
             ]);
+
             return redirect()->back()
                 ->withErrors(['error' => 'Failed to delete product update']);
         }
     }
+
     /**
      * Toggle update status with enhanced security.
      *
@@ -424,6 +445,7 @@ class ProductUpdateController extends Controller
             DB::beginTransaction();
             $product_update->update(['is_active' => ! $product_update->is_active]);
             DB::commit();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Update status updated successfully',
@@ -436,12 +458,14 @@ class ProductUpdateController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'update_id' => $product_update->id,
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update status',
             ], 500);
         }
     }
+
     /**
      * Get product updates for AJAX with enhanced security.
      *
@@ -500,6 +524,7 @@ class ProductUpdateController extends Controller
                         'file_size' => $update->formatted_file_size,
                     ];
                 });
+
             return response()->json([
                 'success' => true,
                 'updates' => $updates,
@@ -510,12 +535,14 @@ class ProductUpdateController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'product_id' => $request->input('product_id'),
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to get product updates',
             ], 500);
         }
     }
+
     /**
      * Download the update file with enhanced security.
      *
@@ -542,6 +569,7 @@ class ProductUpdateController extends Controller
                 return redirect()->back()
                     ->withErrors(['error' => 'Update file not found']);
             }
+
             return Storage::download($product_update->file_path, $product_update->file_name);
         } catch (\Exception $e) {
             Log::error('Failed to download product update file', [
@@ -550,6 +578,7 @@ class ProductUpdateController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return redirect()->back()
                 ->withErrors(['error' => 'Failed to download update file']);
         }

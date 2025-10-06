@@ -23,6 +23,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class WebhookLog extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

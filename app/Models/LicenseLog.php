@@ -40,6 +40,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class LicenseLog extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

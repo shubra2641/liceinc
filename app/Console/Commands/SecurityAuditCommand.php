@@ -62,19 +62,22 @@ class SecurityAuditCommand extends Command
                             {--fix : Attempt to fix found issues automatically}
                             {--email = : Send report to specific email address}
                             {--severity = : Filter issues by severity level (critical, high, medium, low)}';
+
     /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Perform comprehensive security audit of the application with advanced '
-        . 'reporting and auto-fix capabilities';
+        .'reporting and auto-fix capabilities';
+
     /**
      * Security issues found during audit.
      *
      * @var array<int, array{severity: string, category: string, description: string, timestamp: string}>
      */
     private array $issues = [];
+
     /**
      * Statistics for audit performance tracking.
      *
@@ -86,6 +89,7 @@ class SecurityAuditCommand extends Command
         'checks_performed' => 0,
         'issues_found' => 0,
     ];
+
     /**
      * Execute the console command with enhanced error handling.
      *
@@ -126,6 +130,7 @@ class SecurityAuditCommand extends Command
             $this->auditStats['end_time'] = microtime(true);
             $this->auditStats['issues_found'] = count($this->issues);
             $this->displaySummary();
+
             // Return appropriate exit code based on severity
             return $this->getExitCode();
         } catch (\Exception $e) {
@@ -133,10 +138,12 @@ class SecurityAuditCommand extends Command
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $this->error('Security audit failed: ' . $e->getMessage());
+            $this->error('Security audit failed: '.$e->getMessage());
+
             return 1;
         }
     }
+
     /**
      * Perform all security checks with error handling.
      *
@@ -170,11 +177,12 @@ class SecurityAuditCommand extends Command
                 $this->addIssue(
                     'high',
                     $checkName,
-                    'Failed to perform security check: ' . $e->getMessage(),
+                    'Failed to perform security check: '.$e->getMessage(),
                 );
             }
         }
     }
+
     /**
      * Check database security with enhanced validation.
      *
@@ -237,10 +245,11 @@ class SecurityAuditCommand extends Command
             $this->addIssue(
                 'high',
                 'Database Security',
-                'Failed to check database security: ' . $e->getMessage(),
+                'Failed to check database security: '.$e->getMessage(),
             );
         }
     }
+
     /**
      * Check file permissions.
      */
@@ -261,8 +270,8 @@ class SecurityAuditCommand extends Command
                     $this->addIssue(
                         'high',
                         'File Permissions',
-                        "File {$file} has permissions " . decoct($currentPerms) .
-                        ' but should have ' . decoct($expectedPerms),
+                        "File {$file} has permissions ".decoct($currentPerms).
+                        ' but should have '.decoct($expectedPerms),
                     );
                 }
             } else {
@@ -280,10 +289,11 @@ class SecurityAuditCommand extends Command
             $this->addIssue(
                 'medium',
                 'File Permissions',
-                'Found ' . count($writableFiles) . ' world-writable files',
+                'Found '.count($writableFiles).' world-writable files',
             );
         }
     }
+
     /**
      * Check configuration security.
      */
@@ -309,14 +319,14 @@ class SecurityAuditCommand extends Command
         // Check database credentials
         if (config('database.default') === 'mysql') {
             $dbConfig = config('database.connections.mysql');
-            if ($dbConfig['username'] === 'root') {
+            if (is_array($dbConfig) && isset($dbConfig['username']) && $dbConfig['username'] === 'root') {
                 $this->addIssue(
                     'high',
                     'Configuration',
                     'Database is using root user',
                 );
             }
-            if (empty($dbConfig['password'])) {
+            if (is_array($dbConfig) && isset($dbConfig['password']) && empty($dbConfig['password'])) {
                 $this->addIssue(
                     'critical',
                     'Configuration',
@@ -341,6 +351,7 @@ class SecurityAuditCommand extends Command
             );
         }
     }
+
     /**
      * Check user account security.
      */
@@ -372,6 +383,7 @@ class SecurityAuditCommand extends Command
         // Check for users with multiple failed login attempts
         // This would require implementing a failed login tracking system
     }
+
     /**
      * Check license system security.
      */
@@ -411,6 +423,7 @@ class SecurityAuditCommand extends Command
             );
         }
     }
+
     /**
      * Check log files.
      */
@@ -429,7 +442,7 @@ class SecurityAuditCommand extends Command
                 $this->addIssue(
                     'low',
                     'Log Files',
-                    'Log files are consuming ' . round($totalSize / 1024 / 1024, 2) . 'MB of space',
+                    'Log files are consuming '.round($totalSize / 1024 / 1024, 2).'MB of space',
                 );
             }
             // Check for publicly accessible log files
@@ -438,12 +451,13 @@ class SecurityAuditCommand extends Command
                     $this->addIssue(
                         'medium',
                         'Log Files',
-                        'Log file ' . basename($file) . ' is world-readable',
+                        'Log file '.basename($file).' is world-readable',
                     );
                 }
             }
         }
     }
+
     /**
      * Check dependencies.
      */
@@ -461,7 +475,7 @@ class SecurityAuditCommand extends Command
         // Check for development dependencies in production
         if (config('app.env') === 'production') {
             $composerJson = json_decode(File::get(base_path('composer.json')), true);
-            if (isset($composerJson['require-dev']) && ! empty($composerJson['require-dev'])) {
+            if (is_array($composerJson) && isset($composerJson['require-dev']) && ! empty($composerJson['require-dev'])) {
                 // This is a simplified check - in practice, you'd need to check if dev deps are actually installed
                 $this->addIssue(
                     'low',
@@ -471,6 +485,7 @@ class SecurityAuditCommand extends Command
             }
         }
     }
+
     /**
      * Check environment security.
      */
@@ -482,7 +497,7 @@ class SecurityAuditCommand extends Command
             $this->addIssue(
                 'high',
                 'Environment',
-                'PHP version ' . PHP_VERSION . ' is outdated and may have security vulnerabilities',
+                'PHP version '.PHP_VERSION.' is outdated and may have security vulnerabilities',
             );
         }
         // Check for dangerous PHP functions
@@ -509,6 +524,7 @@ class SecurityAuditCommand extends Command
             }
         }
     }
+
     /**
      * Add security issue to the list.
      */
@@ -529,9 +545,11 @@ class SecurityAuditCommand extends Command
         };
         $this->$color("[{$severity}] {$category}: {$description}");
     }
+
     /**
      * Check for world-writable files recursively.
      */
+    /** @param array<string, mixed> $writableFiles */
     private function checkWorldWritableFiles(string $directory, array &$writableFiles): void
     {
         $files = File::allFiles($directory);
@@ -541,6 +559,7 @@ class SecurityAuditCommand extends Command
             }
         }
     }
+
     /**
      * Generate security report.
      */
@@ -558,10 +577,11 @@ class SecurityAuditCommand extends Command
             ],
             'issues' => $this->issues,
         ];
-        $reportPath = storage_path('logs/security-audit-' . now()->format('Y-m-d-H-i-s') . '.json');
+        $reportPath = storage_path('logs/security-audit-'.now()->format('Y-m-d-H-i-s').'.json');
         File::put($reportPath, json_encode($report, JSON_PRETTY_PRINT));
         $this->info("Security report saved to: {$reportPath}");
     }
+
     /**
      * Attempt to fix security issues automatically.
      */
@@ -579,9 +599,11 @@ class SecurityAuditCommand extends Command
         }
         $this->info("Automatically fixed {$fixedCount} security issues.");
     }
+
     /**
      * Check if an issue can be automatically fixed.
      */
+    /** @param array<string, mixed> $issue */
     private function canAutoFix(array $issue): bool
     {
         // Define which types of issues can be automatically fixed
@@ -595,32 +617,40 @@ class SecurityAuditCommand extends Command
                 return true;
             }
         }
+
         return false;
     }
+
     /**
      * Automatically fix a security issue.
      */
+    /** @param array<string, mixed> $issue */
     private function autoFix(array $issue): bool
     {
         try {
             if (str_contains($issue['description'], 'Log files are consuming')) {
                 // Rotate log files
                 $this->call('log:clear');
+
                 return true;
             }
             if (str_contains($issue['description'], 'Missing .htaccess file')) {
                 // Create basic .htaccess file
                 $htaccessContent = "RewriteEngine On\nRewriteRule ^(.*)$ index.php [QSA, L]\n";
                 File::put(public_path('.htaccess'), $htaccessContent);
+
                 return true;
             }
             // Add more auto-fix logic as needed
         } catch (\Exception $e) {
             $this->error("Failed to fix issue: {$e->getMessage()}");
+
             return false;
         }
+
         return false;
     }
+
     /**
      * Send email report.
      */
@@ -631,6 +661,7 @@ class SecurityAuditCommand extends Command
         // This is a placeholder for the actual email sending logic
         $this->info('Email report sent successfully.');
     }
+
     /**
      * Display audit summary.
      */
@@ -660,6 +691,7 @@ class SecurityAuditCommand extends Command
         }
         // Security audit completed - no logging needed for successful operations
     }
+
     /**
      * Check for users with default passwords.
      *
@@ -679,8 +711,10 @@ class SecurityAuditCommand extends Command
         foreach ($defaultPasswords as $password) {
             $count += User::where('password', bcrypt($password))->count();
         }
+
         return $count;
     }
+
     /**
      * Check admin users with proper role validation.
      *
@@ -692,6 +726,7 @@ class SecurityAuditCommand extends Command
             $query->where('name', 'admin');
         })->count();
     }
+
     /**
      * Check for orphaned licenses.
      *
@@ -701,6 +736,7 @@ class SecurityAuditCommand extends Command
     {
         return License::whereDoesntHave('user')->count();
     }
+
     /**
      * Check for suspicious license activity.
      *
@@ -714,6 +750,7 @@ class SecurityAuditCommand extends Command
             ->havingRaw('COUNT(*) > 100')
             ->count();
     }
+
     /**
      * Get appropriate exit code based on issue severity.
      *
@@ -723,6 +760,7 @@ class SecurityAuditCommand extends Command
     {
         $criticalCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'critical'));
         $highCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'high'));
+
         return ($criticalCount > 0 || $highCount > 0) ? 1 : 0;
     }
 }

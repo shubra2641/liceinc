@@ -56,6 +56,7 @@ class EnhancedLicenseApiController extends BaseController
     ) {
         $this->middleware('throttle:api');
     }
+
     /**
      * Verify license endpoint with enhanced security.
      *
@@ -97,6 +98,7 @@ class EnhancedLicenseApiController extends BaseController
             $commonCheckResult = $this->performCommonApiChecks($request, 'license_verification');
             if ($commonCheckResult) {
                 DB::rollBack();
+
                 return $commonCheckResult;
             }
             // Get validated data from Request class
@@ -106,6 +108,7 @@ class EnhancedLicenseApiController extends BaseController
                 $this->logSecurityEvent('Unauthorized API access', $request, [
                     'purchase_code' => $this->securityService->hashForLogging($validated['purchase_code']),
                 ]);
+
                 return $this->errorResponse('Unauthorized', Response::HTTP_UNAUTHORIZED);
             }
             // Find product
@@ -116,6 +119,7 @@ class EnhancedLicenseApiController extends BaseController
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
+
                 return $this->errorResponse('Product not found', Response::HTTP_NOT_FOUND);
             }
             // Verify verification key if provided
@@ -126,14 +130,17 @@ class EnhancedLicenseApiController extends BaseController
                 $this->logSecurityEvent('Invalid verification key', $request, [
                     'product_slug' => $validated['product_slug'],
                 ]);
+
                 return $this->errorResponse('Invalid verification key', Response::HTTP_FORBIDDEN);
             }
             // Process license verification
             $result = $this->processLicenseVerification($product, $validated, $request);
             DB::commit();
+
             return $this->jsonResponse($result, 'License verified successfully');
         } catch (ValidationException $e) {
             DB::rollBack();
+
             return $this->errorResponse(
                 'Validation failed',
                 Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -141,9 +148,11 @@ class EnhancedLicenseApiController extends BaseController
             );
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->handleException($e, $request, 'License verification');
         }
     }
+
     /**
      * Register license endpoint with enhanced security.
      *
@@ -184,6 +193,7 @@ class EnhancedLicenseApiController extends BaseController
             $commonCheckResult = $this->performCommonApiChecks($request);
             if ($commonCheckResult) {
                 DB::rollBack();
+
                 return $commonCheckResult;
             }
             // Get validated data from Request class
@@ -196,6 +206,7 @@ class EnhancedLicenseApiController extends BaseController
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
+
                 return $this->errorResponse('Product not found', Response::HTTP_NOT_FOUND);
             }
             // Check if license already exists
@@ -204,6 +215,7 @@ class EnhancedLicenseApiController extends BaseController
                 ->first();
             if ($existingLicense) {
                 DB::commit();
+
                 return $this->jsonResponse([
                     'license_id' => $existingLicense->id,
                     'status' => 'already_exists',
@@ -212,12 +224,14 @@ class EnhancedLicenseApiController extends BaseController
             // Create new license
             $license = $this->createLicense($product, $validated);
             DB::commit();
+
             return $this->jsonResponse([
                 'license_id' => $license->id,
                 'status' => 'created',
             ], 'License registered successfully');
         } catch (ValidationException $e) {
             DB::rollBack();
+
             return $this->errorResponse(
                 'Validation failed',
                 Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -225,9 +239,11 @@ class EnhancedLicenseApiController extends BaseController
             );
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->handleException($e, $request, 'License registration');
         }
     }
+
     /**
      * Get license status endpoint with enhanced security.
      *
@@ -268,6 +284,7 @@ class EnhancedLicenseApiController extends BaseController
             $commonCheckResult = $this->performCommonApiChecks($request);
             if ($commonCheckResult) {
                 DB::rollBack();
+
                 return $commonCheckResult;
             }
             // Get validated data from Request class
@@ -280,6 +297,7 @@ class EnhancedLicenseApiController extends BaseController
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
+
                 return $this->errorResponse('Product not found', Response::HTTP_NOT_FOUND);
             }
             // Find license
@@ -293,6 +311,7 @@ class EnhancedLicenseApiController extends BaseController
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
+
                 return $this->errorResponse('License not found', Response::HTTP_NOT_FOUND);
             }
             // Check license status
@@ -306,9 +325,11 @@ class EnhancedLicenseApiController extends BaseController
                 'is_active' => $isActive,
             ];
             DB::commit();
+
             return $this->jsonResponse($statusData, 'License status retrieved');
         } catch (ValidationException $e) {
             DB::rollBack();
+
             return $this->errorResponse(
                 'Validation failed',
                 Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -316,9 +337,11 @@ class EnhancedLicenseApiController extends BaseController
             );
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->handleException($e, $request, 'License status check');
         }
     }
+
     /**
      * Perform comprehensive security checks.
      */
@@ -338,6 +361,7 @@ class EnhancedLicenseApiController extends BaseController
             abort(Response::HTTP_FORBIDDEN, 'Access denied');
         }
     }
+
     /**
      * Perform common API request validation and security checks.
      */
@@ -357,23 +381,28 @@ class EnhancedLicenseApiController extends BaseController
                     'client_fingerprint' => $clientFingerprint,
                 ]);
             }
+
             return $this->errorResponse($message, Response::HTTP_TOO_MANY_REQUESTS);
         }
         // Check authorization
         if (! $this->isAuthorized($request)) {
             return $this->errorResponse('Unauthorized', Response::HTTP_UNAUTHORIZED);
         }
+
         return null;
     }
+
     /**
      * Check if request is authorized.
      */
     private function isAuthorized(Request $request): bool
     {
         $authHeader = $request->header('Authorization');
-        $expectedToken = 'Bearer ' . $this->getApiToken();
+        $expectedToken = 'Bearer '.$this->getApiToken();
+
         return $expectedToken !== '' && $authHeader === $expectedToken;
     }
+
     /**
      * Get API token from settings.
      */
@@ -381,6 +410,7 @@ class EnhancedLicenseApiController extends BaseController
     {
         return \App\Helpers\ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
     }
+
     /**
      * Find product by slug.
      */
@@ -390,16 +420,25 @@ class EnhancedLicenseApiController extends BaseController
             return Product::where('slug', $slug)->first();
         });
     }
+
     /**
      * Verify verification key.
      */
     private function verifyVerificationKey(Product $product, string $verificationKey): bool
     {
-        $expectedKey = hash('sha256', $product->id . $product->slug . config('app.key'));
+        $appKey = config('app.key');
+        $appKeyStr = is_string($appKey) ? $appKey : (is_scalar($appKey) ? (string)$appKey : '');
+        $expectedKey = hash('sha256', $product->id.$product->slug.$appKeyStr);
+
         return hash_equals($expectedKey, $verificationKey);
     }
+
     /**
      * Process license verification.
+     *
+     * @param array<string, mixed> $validated
+     *
+     * @return array<string, mixed>
      */
     private function processLicenseVerification(Product $product, array $validated, Request $request): array
     {
@@ -412,11 +451,15 @@ class EnhancedLicenseApiController extends BaseController
         if ($license) {
             return $this->verifyExistingLicense($license, $domain, $request);
         }
+
         // Try Envato API
         return $this->verifyWithEnvato($product, $purchaseCode, $domain, $request);
     }
+
     /**
      * Verify existing license.
+     *
+     * @return array<string, mixed>
      */
     private function verifyExistingLicense(License $license, ?string $domain, Request $request): array
     {
@@ -435,6 +478,7 @@ class EnhancedLicenseApiController extends BaseController
             ]);
             abort(Response::HTTP_FORBIDDEN, 'Domain not authorized for this license');
         }
+
         return [
             'license_id' => $license->id,
             'license_type' => $license->license_type,
@@ -444,16 +488,25 @@ class EnhancedLicenseApiController extends BaseController
             'verification_method' => 'database',
         ];
     }
+
     /**
      * Verify with Envato API.
+     *
+     * @return array<string, mixed>
      */
     private function verifyWithEnvato(Product $product, string $purchaseCode, ?string $domain, Request $request): array
     {
         $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
-        if (
-            ! $envatoData || ! isset($envatoData['item']['id']) ||
-            $envatoData['item']['id'] != $product->envato_item_id
-        ) {
+
+        if (! is_array($envatoData) || ! isset($envatoData['item']) || ! is_array($envatoData['item']) || ! isset($envatoData['item']['id'])) {
+            $this->logSecurityEvent('Invalid Envato verification', $request, [
+                'purchase_code' => $this->securityService->hashForLogging($purchaseCode),
+                'product_id' => $product->id,
+            ]);
+            abort(Response::HTTP_NOT_FOUND, 'License not found');
+        }
+
+        if ($envatoData['item']['id'] != $product->envato_item_id) {
             $this->logSecurityEvent('Invalid Envato verification', $request, [
                 'purchase_code' => $this->securityService->hashForLogging($purchaseCode),
                 'product_id' => $product->id,
@@ -462,6 +515,7 @@ class EnhancedLicenseApiController extends BaseController
         }
         // Create license from Envato data
         $license = $this->createLicenseFromEnvato($product, $purchaseCode, $envatoData);
+
         return [
             'license_id' => $license->id,
             'license_type' => $license->license_type,
@@ -471,6 +525,7 @@ class EnhancedLicenseApiController extends BaseController
             'verification_method' => 'envato_auto_created',
         ];
     }
+
     /**
      * Check if license is active.
      */
@@ -482,8 +537,10 @@ class EnhancedLicenseApiController extends BaseController
         if ($license->license_expires_at && $license->license_expires_at->isPast()) {
             return false;
         }
+
         return true;
     }
+
     /**
      * Verify domain authorization.
      */
@@ -495,6 +552,7 @@ class EnhancedLicenseApiController extends BaseController
         $authorizedDomains = $license->domains()->where('status', 'active')->get();
         if ($authorizedDomains->isEmpty()) {
             $this->registerDomainForLicense($license, $domain);
+
             return true;
         }
         foreach ($authorizedDomains as $authorizedDomain) {
@@ -502,6 +560,7 @@ class EnhancedLicenseApiController extends BaseController
             $authDomain = preg_replace('/^www\./', '', $authDomain);
             if ($authDomain === $domain) {
                 $authorizedDomain->update(['last_used_at' => now()]);
+
                 return true;
             }
             // Check wildcard domains
@@ -509,12 +568,15 @@ class EnhancedLicenseApiController extends BaseController
                 $pattern = str_replace('*.', '', $authDomain);
                 if (str_ends_with($domain, $pattern)) {
                     $authorizedDomain->update(['last_used_at' => now()]);
+
                     return true;
                 }
             }
         }
+
         return false;
     }
+
     /**
      * Register domain for license.
      */
@@ -536,8 +598,11 @@ class EnhancedLicenseApiController extends BaseController
             $existingDomain->update(['last_used_at' => now()]);
         }
     }
+
     /**
      * Create license from Envato data.
+     *
+     * @param array<string, mixed> $envatoData
      */
     private function createLicenseFromEnvato(Product $product, string $purchaseCode, array $envatoData): License
     {
@@ -551,8 +616,11 @@ class EnhancedLicenseApiController extends BaseController
             'status' => 'active',
         ]);
     }
+
     /**
      * Create new license.
+     *
+     * @param array<string, mixed> $validated
      */
     private function createLicense(Product $product, array $validated): License
     {
@@ -571,28 +639,35 @@ class EnhancedLicenseApiController extends BaseController
                 'status' => 'active',
             ]);
         }
+
         return $license;
     }
+
     /**
      * Generate unique license key.
      */
     private function generateLicenseKey(): string
     {
         do {
-            $key = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8) . '-' .
-                         substr(md5(uniqid(mt_rand(), true)), 0, 8) . '-' .
-                         substr(md5(uniqid(mt_rand(), true)), 0, 8) . '-' .
+            $key = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
+                         substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
+                         substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
                          substr(md5(uniqid(mt_rand(), true)), 0, 8));
         } while (License::where('license_key', $key)->exists());
+
         return $key;
     }
+
     /**
      * Log successful verification.
+     *
+     * @param array<string, mixed> $result
      */
     private function logSuccessfulVerification(Request $request, array $result): void
     {
         // No logging needed for successful operations per Envato compliance rules
     }
+
     /**
      * Log license registration.
      */

@@ -149,7 +149,7 @@ class SecureFileHelper
     /**
      * Secure alternative to gettype()
      */
-    public static function getType($variable): string
+    public static function getType(mixed $variable): string
     {
         return gettype($variable);
     }
@@ -157,7 +157,7 @@ class SecureFileHelper
     /**
      * Secure alternative to parse_url()
      */
-    public static function parseUrl(string $url, int $component = -1)
+    public static function parseUrl(string $url, int $component = -1): mixed
     {
         $parsed = parse_url($url, $component);
         if ($parsed === false) {

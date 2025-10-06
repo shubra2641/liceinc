@@ -54,8 +54,10 @@ class ProfileController extends Controller
         // Get Envato integration settings
         $settings = \App\Models\Setting::first();
         $hasApiConfig = $settings && $settings->envato_personal_token;
+
         return view('admin.profile.edit', compact('user', 'hasApiConfig'));
     }
+
     /**
      * Update the user's profile information.
      *
@@ -90,30 +92,36 @@ class ProfileController extends Controller
             $validated = $request->validated();
             // Remove password fields from fillable data (password updates are handled separately)
             unset($validated['current_password'], $validated['password'], $validated['password_confirmation']);
-            $user->fill($validated);
-            if ($user->isDirty('email')) {
-                $user->email_verified_at = null;
+            if ($user) {
+                $user->fill($validated);
+                if ($user->isDirty('email')) {
+                    $user->email_verified_at = null;
+                    $user->save();
+                    $user->sendEmailVerificationNotification();
+                    DB::commit();
+
+                    return Redirect::route('verification.notice')
+                        ->with('success', 'Please verify your email address. A verification link has been sent to your '
+                            .'email.');
+                }
                 $user->save();
-                $user->sendEmailVerificationNotification();
-                DB::commit();
-                return Redirect::route('verification.notice')
-                    ->with('success', 'Please verify your email address. A verification link has been sent to your '
-                        . 'email.');
             }
-            $user->save();
             DB::commit();
+
             return Redirect::route('admin.profile.edit')->with('success', 'Profile updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Profile update failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => $request->user()->id,
+                'user_id' => $request->user()?->id,
             ]);
+
             return Redirect::route('admin.profile.edit')
                 ->with('error', 'Failed to update profile. Please try again.');
         }
     }
+
     /**
      * Update the user's password.
      *
@@ -144,21 +152,26 @@ class ProfileController extends Controller
             DB::beginTransaction();
             $user = $request->user();
             $validated = $request->validated();
-            $user->password = Hash::make($validated['password']);
-            $user->save();
+            if ($user) {
+                $user->password = Hash::make($validated['password']);
+                $user->save();
+            }
             DB::commit();
+
             return Redirect::route('admin.profile.edit')->with('success', 'Password updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Password update failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => $request->user()->id,
+                'user_id' => $request->user()?->id,
             ]);
+
             return Redirect::route('admin.profile.edit')
                 ->with('error', 'Failed to update password. Please try again.');
         }
     }
+
     /**
      * Connect user's Envato account.
      *
@@ -187,6 +200,7 @@ class ProfileController extends Controller
             $settings = \App\Models\Setting::first();
             if (! $settings || ! $settings->envato_personal_token) {
                 DB::rollBack();
+
                 return Redirect::route('admin.profile.edit')
                     ->with('error', 'Envato API is not configured. Please configure it in Settings first.');
             }
@@ -198,14 +212,18 @@ class ProfileController extends Controller
             if ($response->successful()) {
                 $data = $response->json();
                 // Update user with Envato info
-                $user->envato_username = $data['username'] ?? null;
-                $user->envato_id = $data['id'] ?? null;
-                $user->save();
+                if ($user) {
+                    $user->envato_username = (is_array($data) && isset($data['username'])) ? $data['username'] : null;
+                    $user->envato_id = (is_array($data) && isset($data['id'])) ? $data['id'] : null;
+                    $user->save();
+                }
                 DB::commit();
+
                 return Redirect::route('admin.profile.edit')
-                    ->with('success', 'Successfully connected to Envato account: ' . ($data['username'] ?? 'Unknown'));
+                    ->with('success', 'Successfully connected to Envato account: '.((is_array($data) && isset($data['username'])) ? $data['username'] : 'Unknown'));
             } else {
                 DB::rollBack();
+
                 return Redirect::route('admin.profile.edit')
                     ->with('error', 'Failed to connect to Envato. Please check your API token.');
             }
@@ -214,12 +232,14 @@ class ProfileController extends Controller
             Log::error('Envato connection failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => $request->user()->id,
+                'user_id' => $request->user()?->id,
             ]);
+
             return Redirect::route('admin.profile.edit')
-                ->with('error', 'Failed to connect to Envato: ' . $e->getMessage());
+                ->with('error', 'Failed to connect to Envato: '.$e->getMessage());
         }
     }
+
     /**
      * Disconnect user's Envato account.
      *
@@ -244,13 +264,16 @@ class ProfileController extends Controller
         try {
             DB::beginTransaction();
             $user = $request->user();
-            $user->envato_username = null;
-            $user->envato_id = null;
-            $user->envato_token = null;
-            $user->envato_refresh_token = null;
-            $user->envato_token_expires_at = null;
-            $user->save();
+            if ($user) {
+                $user->envato_username = null;
+                $user->envato_id = null;
+                $user->envato_token = null;
+                $user->envato_refresh_token = null;
+                $user->envato_token_expires_at = null;
+                $user->save();
+            }
             DB::commit();
+
             return Redirect::route('admin.profile.edit')
                 ->with('success', 'Successfully disconnected from Envato account.');
         } catch (\Exception $e) {
@@ -258,8 +281,9 @@ class ProfileController extends Controller
             Log::error('Envato disconnection failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => $request->user()->id,
+                'user_id' => $request->user()?->id,
             ]);
+
             return Redirect::route('admin.profile.edit')
                 ->with('error', 'Failed to disconnect from Envato account. Please try again.');
         }

@@ -205,7 +205,7 @@ class LicenseController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(License $license)
+    public function show(License $license): \Illuminate\View\View
     {
         $license->load(['user', 'product', 'logs']);
         return view('admin.licenses.show', compact('license'));
@@ -213,7 +213,7 @@ class LicenseController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(License $license)
+    public function edit(License $license): \Illuminate\View\View
     {
         $users = \App\Models\User::all();
         $products = Product::all();
@@ -222,7 +222,7 @@ class LicenseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(LicenseRequest $request, License $license)
+    public function update(LicenseRequest $request, License $license): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users, id',
@@ -254,7 +254,7 @@ class LicenseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(License $license)
+    public function destroy(License $license): \Illuminate\Http\RedirectResponse
     {
         $license->delete();
         return redirect()->route('admin.licenses.index')

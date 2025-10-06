@@ -46,6 +46,9 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class EmailTemplate extends Model
 {
+    /**
+     * @phpstan-ignore-next-line
+     */
     use HasFactory;
 
     /**

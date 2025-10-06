@@ -90,6 +90,7 @@ if (! function_exists('get_breadcrumbs')) {
      *
      *
      */
+    /** @return array<int, array<string, mixed>> */
     function get_breadcrumbs(): array
     {
         try {
@@ -139,6 +140,7 @@ if (! function_exists('get_navigation_tree')) {
      *
      *
      */
+    /** @return array<int, array<string, mixed>> */
     function get_navigation_tree(): array
     {
         return [
@@ -215,6 +217,7 @@ if (function_exists('get_available_languages') === false) {
      *
      *
      */
+    /** @return array<int, array<string, string>> */
     function get_available_languages(): array
     {
         try {

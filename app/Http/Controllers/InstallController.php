@@ -105,7 +105,7 @@ class InstallController extends Controller
     {
         $steps = $this->getInstallationSteps();
         return array_map(function ($index, $stepData) use ($currentStep) {
-            $stepNumber = $index + 1;
+            $stepNumber = (int) $index + 1;
             $isCompleted = $stepNumber < $currentStep;
             $isCurrent = $stepNumber == $currentStep;
             $isPending = $stepNumber > $currentStep;
@@ -562,7 +562,7 @@ class InstallController extends Controller
             // Step 4: Run database seeders
             $this->runDatabaseSeeders();
             // Step 5: Create admin user
-            $adminUser = $this->createAdminUser($adminConfig);
+            $this->createAdminUser($adminConfig);
             // Step 6: Create default settings
             $this->createDefaultSettings($settingsConfig);
             // Step 7: Store license information
@@ -748,8 +748,11 @@ class InstallController extends Controller
     }
     /**
      * Update .env file.
+     *
+     * @param array<string, mixed> $databaseConfig
+     * @param array<string, mixed> $settingsConfig
      */
-    private function updateEnvFile($databaseConfig, $settingsConfig)
+    private function updateEnvFile(array $databaseConfig, array $settingsConfig): void
     {
         $envPath = base_path('.env');
         $envContent = File::get($envPath);
@@ -834,7 +837,7 @@ class InstallController extends Controller
     /**
      * Update session and cache drivers to database after migrations.
      */
-    private function updateSessionDrivers()
+    private function updateSessionDrivers(): void
     {
         $envPath = base_path('.env');
         $envContent = File::get($envPath);
@@ -847,7 +850,7 @@ class InstallController extends Controller
     /**
      * Create roles and permissions.
      */
-    private function createRolesAndPermissions()
+    private function createRolesAndPermissions(): void
     {
         try {
             // Create permissions
@@ -872,8 +875,10 @@ class InstallController extends Controller
     }
     /**
      * Create admin user.
+     *
+     * @param array<string, mixed> $adminConfig
      */
-    private function createAdminUser($adminConfig)
+    private function createAdminUser(array $adminConfig): void
     {
         try {
             $user = User::create([
@@ -886,7 +891,6 @@ class InstallController extends Controller
             ]);
             $user->assignRole('admin');
             // Admin user created successfully
-            return $user;
         } catch (\Exception $e) {
             // Failed to create admin user
             throw $e;
@@ -894,8 +898,10 @@ class InstallController extends Controller
     }
     /**
      * Create default settings.
+     *
+     * @param array<string, mixed> $settingsConfig
      */
-    private function createDefaultSettings($settingsConfig)
+    private function createDefaultSettings(array $settingsConfig): void
     {
         try {
             Setting::create([
@@ -925,7 +931,7 @@ class InstallController extends Controller
     /**
      * Test database connection.
      */
-    public function testDatabase(Request $request)
+    public function testDatabase(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'db_host' => 'required|string',
@@ -947,7 +953,7 @@ class InstallController extends Controller
     /**
      * Run specific database seeders.
      */
-    private function runDatabaseSeeders()
+    private function runDatabaseSeeders(): void
     {
         try {
             // Run only the required seeders
@@ -976,8 +982,10 @@ class InstallController extends Controller
     }
     /**
      * Store license information in database.
+     *
+     * @param array<string, mixed> $licenseConfig
      */
-    private function storeLicenseInformation($licenseConfig)
+    private function storeLicenseInformation(array $licenseConfig): void
     {
         try {
             // Store license information in settings table

@@ -37,10 +37,13 @@ class ApiUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isCheck = $this->isMethod('POST') && str_contains($this->route()->getName(), 'check');
-        $isHistory = $this->isMethod('POST') && str_contains($this->route()->getName(), 'history');
-        $isLatest = $this->isMethod('POST') && str_contains($this->route()->getName(), 'latest');
-        $isInfo = $this->isMethod('POST') && str_contains($this->route()->getName(), 'info');
+        $route = $this->route();
+        $routeName = $route?->getName() ?? '';
+        
+        $isCheck = $this->isMethod('POST') && str_contains($routeName, 'check');
+        $isHistory = $this->isMethod('POST') && str_contains($routeName, 'history');
+        $isLatest = $this->isMethod('POST') && str_contains($routeName, 'latest');
+        $isInfo = $this->isMethod('POST') && str_contains($routeName, 'info');
         // Check updates validation
         if ($isCheck) {
             return [

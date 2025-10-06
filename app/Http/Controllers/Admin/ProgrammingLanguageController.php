@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\SecureFileHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProgrammingLanguageAdvancedRequest;
 use App\Http\Requests\Admin\ProgrammingLanguageRequest;
@@ -11,9 +12,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Symfony\Component\Process\Process;
 use Illuminate\View\View;
-use App\Helpers\SecureFileHelper;
+use Symfony\Component\Process\Process;
 
 /**
  * Admin Programming Language Controller with enhanced security.
@@ -44,15 +44,12 @@ class ProgrammingLanguageController extends Controller
      * @return View The programming languages index view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function index(): View
     {
         $languages = ProgrammingLanguage::orderBy('sort_order')->orderBy('name')->paginate(15);
         $availableTemplates = ProgrammingLanguage::getAvailableTemplateFiles();
+
         // Some views expect $programming_languages, others expect $languages — provide both aliases
         return view('admin.programming-languages.index', [
             'programmingLanguages' => $languages,
@@ -60,6 +57,7 @@ class ProgrammingLanguageController extends Controller
             'availableTemplates' => $availableTemplates,
         ]);
     }
+
     /**
      * Get license file content for viewing with enhanced security.
      *
@@ -74,10 +72,6 @@ class ProgrammingLanguageController extends Controller
      * @throws \Exception When file operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function getLicenseFileContent(Request $request, string $language): JsonResponse
     {
@@ -87,7 +81,7 @@ class ProgrammingLanguageController extends Controller
             if ($type === 'default') {
                 // Get default template file
                 $templateDir = resource_path('templates/licenses');
-                $files = glob($templateDir . '/' . $language . '.{php, blade.php}', GLOB_BRACE);
+                $files = glob($templateDir.'/'.$language.'.{php, blade.php}', GLOB_BRACE);
                 if (! empty($files)) {
                     $file = $files[0];
                     if (file_exists($file)) {
@@ -101,7 +95,7 @@ class ProgrammingLanguageController extends Controller
                 } else {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Default template file not found for language: ' . $language,
+                        'message' => 'Default template file not found for language: '.$language,
                     ], 404);
                 }
             } else {
@@ -123,6 +117,7 @@ class ProgrammingLanguageController extends Controller
                     ], 404);
                 }
             }
+
             return response()->json([
                 'success' => true,
                 'content' => $content,
@@ -133,10 +128,11 @@ class ProgrammingLanguageController extends Controller
             // License file content error
             return response()->json([
                 'success' => false,
-                'message' => 'Error reading file: ' . $e->getMessage(),
+                'message' => 'Error reading file: '.$e->getMessage(),
             ], 500);
         }
     }
+
     /**
      * Show the form for creating a new programming language.
      *
@@ -146,15 +142,12 @@ class ProgrammingLanguageController extends Controller
      * @return View The programming language creation form view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function create(): View
     {
         return view('admin.programming-languages.create');
     }
+
     /**
      * Store a newly created programming language with enhanced security.
      *
@@ -168,10 +161,6 @@ class ProgrammingLanguageController extends Controller
      * @throws \Exception When database operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function store(ProgrammingLanguageRequest $request): RedirectResponse
     {
@@ -181,6 +170,7 @@ class ProgrammingLanguageController extends Controller
             $validated['slug'] = $validated['slug'] ?? Str::slug($validated['name']);
             ProgrammingLanguage::create($validated);
             DB::commit();
+
             return redirect()->route('admin.programming-languages.index')
                 ->with('success', 'Programming language created successfully.');
         } catch (\Exception $e) {
@@ -190,12 +180,14 @@ class ProgrammingLanguageController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['license_template']),
             ]);
+
             return redirect()
                 ->back()
                 ->withInput()
                 ->with('error', 'Failed to create programming language. Please try again.');
         }
     }
+
     /**
      * Display the specified programming language with template information.
      *
@@ -207,16 +199,14 @@ class ProgrammingLanguageController extends Controller
      * @return View The programming language details view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function show(ProgrammingLanguage $programming_language): View
     {
         $availableTemplates = ProgrammingLanguage::getAvailableTemplateFiles();
+
         return view('admin.programming-languages.show', compact('programming_language', 'availableTemplates'));
     }
+
     /**
      * Show the form for editing the specified programming language.
      *
@@ -228,15 +218,12 @@ class ProgrammingLanguageController extends Controller
      * @return View The programming language edit form view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function edit(ProgrammingLanguage $programming_language): View
     {
         return view('admin.programming-languages.edit', compact('programming_language'));
     }
+
     /**
      * Update the specified programming language with enhanced security.
      *
@@ -251,10 +238,6 @@ class ProgrammingLanguageController extends Controller
      * @throws \Exception When database operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function update(
         ProgrammingLanguageRequest $request,
@@ -266,6 +249,7 @@ class ProgrammingLanguageController extends Controller
             $validated['slug'] = $validated['slug'] ?? Str::slug($validated['name']);
             $programming_language->update($validated);
             DB::commit();
+
             return redirect()->route('admin.programming-languages.index')
                 ->with('success', 'Programming language updated successfully.');
         } catch (\Exception $e) {
@@ -276,12 +260,14 @@ class ProgrammingLanguageController extends Controller
                 'programming_language_id' => $programming_language->id,
                 'request_data' => $request->except(['license_template']),
             ]);
+
             return redirect()
                 ->back()
                 ->withInput()
                 ->with('error', 'Failed to update programming language. Please try again.');
         }
     }
+
     /**
      * Remove the specified programming language with enhanced security.
      *
@@ -295,10 +281,6 @@ class ProgrammingLanguageController extends Controller
      * @throws \Exception When database operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function destroy(ProgrammingLanguage $programming_language): RedirectResponse
     {
@@ -307,11 +289,13 @@ class ProgrammingLanguageController extends Controller
             // Check if language is being used by products
             if ($programming_language->products()->count() > 0) {
                 DB::rollBack();
+
                 return redirect()->route('admin.programming-languages.index')
                     ->with('error', 'Cannot delete programming language that is being used by products.');
             }
             $programming_language->delete();
             DB::commit();
+
             return redirect()->route('admin.programming-languages.index')
                 ->with('success', 'Programming language deleted successfully.');
         } catch (\Exception $e) {
@@ -321,11 +305,13 @@ class ProgrammingLanguageController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'programming_language_id' => $programming_language->id,
             ]);
+
             return redirect()
                 ->back()
                 ->with('error', 'Failed to delete programming language. Please try again.');
         }
     }
+
     /**
      * Toggle active status of the programming language with enhanced security.
      *
@@ -339,10 +325,6 @@ class ProgrammingLanguageController extends Controller
      * @throws \Exception When database operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function toggle(ProgrammingLanguage $programming_language): RedirectResponse
     {
@@ -353,6 +335,7 @@ class ProgrammingLanguageController extends Controller
             ]);
             $status = $programming_language->is_active ? 'activated' : 'deactivated';
             DB::commit();
+
             return redirect()->route('admin.programming-languages.index')
                 ->with('success', "Programming language {$status} successfully.");
         } catch (\Exception $e) {
@@ -362,11 +345,13 @@ class ProgrammingLanguageController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'programming_language_id' => $programming_language->id,
             ]);
+
             return redirect()
                 ->back()
                 ->with('error', 'Failed to update programming language status. Please try again.');
         }
     }
+
     /**
      * Get license template information for the programming language.
      *
@@ -378,10 +363,6 @@ class ProgrammingLanguageController extends Controller
      * @return JsonResponse JSON response with template information
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function getTemplateInfo(ProgrammingLanguage $programming_language): JsonResponse
     {
@@ -393,8 +374,10 @@ class ProgrammingLanguageController extends Controller
             'size' => $templateExists ? filesize($templatePath) : 0,
             'last_modified' => $templateExists ? date('Y-m-d H:i:s', filemtime($templatePath)) : null,
         ];
+
         return response()->json($templateInfo);
     }
+
     /**
      * Get all available license templates with file information.
      *
@@ -404,29 +387,29 @@ class ProgrammingLanguageController extends Controller
      * @return JsonResponse JSON response with available templates
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function getAvailableTemplates(): JsonResponse
     {
         $templateDir = resource_path('templates/licenses');
         $templates = [];
         if (is_dir($templateDir)) {
-            $files = glob($templateDir . '/*.blade.php');
-            foreach ($files as $file) {
-                $filename = basename($file, '.blade.php');
-                $templates[] = [
-                    'name' => $filename,
-                    'path' => $file,
-                    'size' => filesize($file),
-                    'last_modified' => date('Y-m-d H:i:s', filemtime($file)),
-                ];
+            $files = glob($templateDir.'/*.blade.php');
+            if ($files !== false) {
+                foreach ($files as $file) {
+                    $filename = basename($file, '.blade.php');
+                    $templates[] = [
+                        'name' => $filename,
+                        'path' => $file,
+                        'size' => filesize($file),
+                        'last_modified' => date('Y-m-d H:i:s', filemtime($file)),
+                    ];
+                }
             }
         }
+
         return response()->json($templates);
     }
+
     /**
      * Validate template files with comprehensive syntax checking.
      *
@@ -436,10 +419,6 @@ class ProgrammingLanguageController extends Controller
      * @return JsonResponse JSON response with validation results
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function validateTemplates(): JsonResponse
     {
@@ -447,7 +426,7 @@ class ProgrammingLanguageController extends Controller
             $availableTemplates = ProgrammingLanguage::getAvailableTemplateFiles();
             $validationResults = [];
             foreach ($availableTemplates as $templateName => $templateInfo) {
-                $templatePath = $templateInfo['file_path'];
+                $templatePath = (is_array($templateInfo) && isset($templateInfo['file_path'])) ? $templateInfo['file_path'] : '';
                 $content = file_get_contents($templatePath);
                 $result = [
                     'template' => $templateName,
@@ -472,9 +451,9 @@ class ProgrammingLanguageController extends Controller
                 // Basic syntax validation for PHP templates
                 if (pathinfo($templatePath, PATHINFO_EXTENSION) === 'php') {
                     $syntaxCheck = $this->validatePHPSyntax($content);
-                    if (! $syntaxCheck['valid']) {
+                    if (! $syntaxCheck) {
                         $result['is_valid'] = false;
-                        $result['errors'][] = $syntaxCheck['error'];
+                        $result['errors'][] = 'PHP syntax error detected';
                     }
                 }
                 // Check file permissions
@@ -486,6 +465,7 @@ class ProgrammingLanguageController extends Controller
                 }
                 $validationResults[] = $result;
             }
+
             return response()->json([
                 'success' => true,
                 'validation_results' => $validationResults,
@@ -505,22 +485,23 @@ class ProgrammingLanguageController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed: ' . $e->getMessage(),
+                'message' => 'Validation failed: '.$e->getMessage(),
             ], 500);
         }
     }
+
     /**
      * Validate PHP syntax.
      */
-    private function validatePHPSyntax($code)
+    private function validatePHPSyntax(string $code): bool
     {
         // Create a temporary file for syntax checking
         $tempFile = tempnam(sys_get_temp_dir(), 'php_syntax_check');
         SecureFileHelper::putContents($tempFile, $code);
-    // Run PHP syntax check using Symfony Process (safer than shell_exec)
+        // Run PHP syntax check using Symfony Process (safer than shell_exec)
         $process = new Process(['php', '-l', $tempFile]);
         $process->run();
-        $output = $process->getOutput() . $process->getErrorOutput();
+        $output = $process->getOutput().$process->getErrorOutput();
         // Clean up
         SecureFileHelper::deleteFile($tempFile);
         if (strpos($output, 'No syntax errors detected') === false) {
@@ -529,11 +510,13 @@ class ProgrammingLanguageController extends Controller
                 'error' => trim($output),
             ];
         }
+
         return [
             'valid' => true,
             'error' => null,
         ];
     }
+
     /**
      * Upload template file with enhanced security.
      *
@@ -548,10 +531,6 @@ class ProgrammingLanguageController extends Controller
      * @throws \Exception When file operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function uploadTemplate(
         ProgrammingLanguageTemplateRequest $request,
@@ -564,20 +543,22 @@ class ProgrammingLanguageController extends Controller
             if (! is_dir($templateDir)) {
                 mkdir($templateDir, 0755, true);
             }
-            $filename = $programming_language->slug . '.php';
+            $filename = $programming_language->slug.'.php';
             $file->move($templateDir, $filename);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Template file uploaded successfully',
-                'file_path' => $templateDir . '/' . $filename,
+                'file_path' => $templateDir.'/'.$filename,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to upload template file: ' . $e->getMessage(),
+                'message' => 'Failed to upload template file: '.$e->getMessage(),
             ], 500);
         }
     }
+
     /**
      * Create template file from textarea content with enhanced security.
      *
@@ -592,10 +573,6 @@ class ProgrammingLanguageController extends Controller
      * @throws \Exception When file operations fail
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function createTemplateFile(
         ProgrammingLanguageAdvancedRequest $request,
@@ -607,9 +584,10 @@ class ProgrammingLanguageController extends Controller
             if (! is_dir($templateDir)) {
                 mkdir($templateDir, 0755, true);
             }
-            $filename = $programming_language->slug . '.php';
-            $filePath = $templateDir . '/' . $filename;
+            $filename = $programming_language->slug.'.php';
+            $filePath = $templateDir.'/'.$filename;
             SecureFileHelper::putContents($filePath, $request->template_content);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Template file created successfully',
@@ -618,10 +596,11 @@ class ProgrammingLanguageController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create template file: ' . $e->getMessage(),
+                'message' => 'Failed to create template file: '.$e->getMessage(),
             ], 500);
         }
     }
+
     /**
      * Export programming languages to CSV format with comprehensive data.
      *
@@ -631,18 +610,14 @@ class ProgrammingLanguageController extends Controller
      * @return \Illuminate\Http\Response The CSV download response
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function export(): \Illuminate\Http\Response
     {
         $languages = ProgrammingLanguage::orderBy('sort_order')->orderBy('name')->get();
-        $filename = 'programming_languages_' . date('Y-m-d_H-i-s') . '.csv';
+        $filename = 'programming_languages_'.date('Y-m-d_H-i-s').'.csv';
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
         $callback = function () use ($languages) {
             $file = fopen('php://output', 'w');
@@ -670,14 +645,16 @@ class ProgrammingLanguageController extends Controller
                     $language->file_extension,
                     $language->is_active ? 'Yes' : 'No',
                     $language->sort_order,
-                    $language->created_at->format('Y-m-d H:i:s'),
-                    $language->updated_at->format('Y-m-d H:i:s'),
+                    $language->created_at?->format('Y-m-d H:i:s'),
+                    $language->updated_at?->format('Y-m-d H:i:s'),
                 ]);
             }
             fclose($file);
         };
+
         return response()->stream($callback, 200, $headers);
     }
+
     /**
      * Get template content for a programming language with file information.
      *
@@ -689,16 +666,13 @@ class ProgrammingLanguageController extends Controller
      * @return JsonResponse JSON response with template content or error
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function getTemplateContent(ProgrammingLanguage $programming_language): JsonResponse
     {
         $templatePath = resource_path("templates/licenses/{$programming_language->slug}.blade.php");
         if (file_exists($templatePath)) {
             $content = file_get_contents($templatePath);
+
             return response()->json([
                 'success' => true,
                 'content' => $content,
@@ -707,6 +681,7 @@ class ProgrammingLanguageController extends Controller
                 'last_modified' => date('Y-m-d H:i:s', filemtime($templatePath)),
             ]);
         }
+
         return response()->json([
             'success' => false,
             'message' => 'Template file not found',

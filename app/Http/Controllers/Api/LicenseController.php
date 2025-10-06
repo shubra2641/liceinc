@@ -34,6 +34,7 @@ use Illuminate\Validation\ValidationException;
  * - Model scope integration for optimized queries
  * - Request class compatibility with comprehensive validation
  * - Authorization checks and middleware protection
+ *
  * @example
  * // Verify a license
  * POST /api/license/verify
@@ -46,6 +47,7 @@ use Illuminate\Validation\ValidationException;
 class LicenseController extends Controller
 {
     protected EnvatoService $envatoService;
+
     /**
      * Create a new controller instance.
      *
@@ -57,6 +59,7 @@ class LicenseController extends Controller
     {
         $this->envatoService = $envatoService;
     }
+
     /**
      * Verify license with enhanced security - checks local database first, then Envato as fallback.
      *
@@ -101,18 +104,18 @@ class LicenseController extends Controller
             $productSlug = $validated['product_slug'];
             $domain = $validated['domain'];
             // Enhanced rate limiting with multiple keys
-            $rateLimitKey = 'license-verify:' . $request->ip() . ':' . substr($purchaseCode, 0, 8);
-            $globalRateLimitKey = 'license-verify-global:' . $request->ip();
+            $rateLimitKey = 'license-verify:'.$request->ip().':'.substr($purchaseCode, 0, 8);
+            $globalRateLimitKey = 'license-verify-global:'.$request->ip();
             if (
                 RateLimiter::tooManyAttempts($rateLimitKey, 10) ||
                 RateLimiter::tooManyAttempts($globalRateLimitKey, 50)
             ) {
                 Log::warning('Rate limit exceeded for license verification', [
-                    'purchase_code' => substr($purchaseCode, 0, 4) . '...',
+                    'purchase_code' => substr($purchaseCode, 0, 4).'...',
                     'ip' => $request->ip(),
-                    'user_agent'  => $request->userAgent(),
+                    'user_agent' => $request->userAgent(),
                     'rate_limit_key_attempts' => RateLimiter::attempts($rateLimitKey),
-                    'global_rate_limit_attempts'  => RateLimiter::attempts($globalRateLimitKey),
+                    'global_rate_limit_attempts' => RateLimiter::attempts($globalRateLimitKey),
                 ]);
                 $response = [
                     'valid' => false,
@@ -121,6 +124,7 @@ class LicenseController extends Controller
                 ];
                 $this->logLicenseVerification(null, $domain, $request, $response, 'rate_limited');
                 DB::commit();
+
                 return response()->json($response, 429);
             }
             // Hit rate limiters
@@ -133,22 +137,23 @@ class LicenseController extends Controller
                     'valid' => true,
                     'source' => 'local',
                     'license_type' => 'system_generated',
-                    'purchase_code'  => $localLicense->purchase_code,
+                    'purchase_code' => $localLicense->purchase_code,
                     'product' => $localLicense->product->only(['id', 'name', 'slug', 'envato_item_id']),
-                    'domain_allowed'  => $localLicense->domain_allowed,
+                    'domain_allowed' => $localLicense->domain_allowed,
                     'status' => $localLicense->status,
-                    'support_expires_at'  => optional($localLicense->support_expires_at)->toDateString(),
-                    'license_expires_at' => optional($localLicense->license_expires_at)->toDateString(),
+                    'support_expires_at' => $localLicense->support_expires_at?->toDateString(),
+                    'license_expires_at' => $localLicense->license_expires_at?->toDateString(),
                 ];
                 $this->logLicenseVerification($localLicense->license, $domain, $request, $response, 'success');
                 DB::commit();
+
                 return response()->json($response);
             }
             // If not found locally, check Envato
             $envatoResult = $this->checkEnvatoLicense($purchaseCode, $productSlug, $domain);
             if ($envatoResult['valid']) {
                 $response = [
-                    'valid'  => true,
+                    'valid' => true,
                     'source' => 'envato',
                     'license_type' => 'envato_market',
                     'purchase_code' => $purchaseCode,
@@ -160,16 +165,18 @@ class LicenseController extends Controller
                 ];
                 $this->logLicenseVerification(null, $domain, $request, $response, 'success');
                 DB::commit();
+
                 return response()->json($response);
             }
             // License not found in either source
             $response = [
-                'valid'  => false,
+                'valid' => false,
                 'reason' => 'license_not_found',
                 'message' => 'License not found in local database or Envato Market',
             ];
             $this->logLicenseVerification(null, $domain, $request, $response, 'failed');
             DB::commit();
+
             return response()->json($response, 404);
         } catch (ValidationException $e) {
             DB::rollBack();
@@ -178,10 +185,11 @@ class LicenseController extends Controller
             DB::rollBack();
             Log::error('License verification failed', [
                 'error' => $e->getMessage(),
-                'trace'  => $e->getTraceAsString(),
+                'trace' => $e->getTraceAsString(),
                 'ip' => $request->ip(),
-                'user_agent'  => $request->userAgent(),
+                'user_agent' => $request->userAgent(),
             ]);
+
             return response()->json([
                 'valid' => false,
                 'reason' => 'internal_error',
@@ -189,6 +197,7 @@ class LicenseController extends Controller
             ], 500);
         }
     }
+
     /**
      * Check license in local database with enhanced security.
      *
@@ -215,25 +224,27 @@ class LicenseController extends Controller
                 return null;
             }
             $domainAllowed = $license->domains()->where('domain', $domain)->exists();
+
             return (object)[
-                'license'  => $license,
+                'license' => $license,
                 'domain_allowed' => $domainAllowed,
-                'purchase_code'  => $license->purchase_code,
+                'purchase_code' => $license->purchase_code,
                 'product' => $license->product,
-                'status'  => $license->status,
+                'status' => $license->status,
                 'support_expires_at' => $license->support_expires_at,
-                'license_expires_at'  => $license->license_expires_at,
+                'license_expires_at' => $license->license_expires_at,
             ];
         } catch (\Exception $e) {
             Log::error('Error checking local license', [
-                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
+                'purchase_code' => substr($purchaseCode, 0, 4).'...',
                 'product_slug' => $productSlug,
-                'domain'  => $domain,
+                'domain' => $domain,
                 'error' => $e->getMessage(),
             ]);
             throw $e;
         }
     }
+
     /**
      * Check license with Envato API with enhanced security.
      *
@@ -256,32 +267,37 @@ class LicenseController extends Controller
             if (! $product || ! $product->envato_item_id) {
                 Log::warning('Product not found or missing Envato item ID', [
                     'product_slug' => $productSlug,
-                    'has_envato_id'  => $product ? (bool)$product->envato_item_id : false,
+                    'has_envato_id' => $product ? (bool)$product->envato_item_id : false,
                 ]);
+
                 return ['valid' => false];
             }
             // Verify with Envato
             $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
             if (! $envatoData) {
                 Log::warning('Envato verification failed', [
-                    'purchase_code' => substr($purchaseCode, 0, 4) . '...',
-                    'product_slug'  => $productSlug,
+                    'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                    'product_slug' => $productSlug,
                 ]);
+
                 return ['valid' => false];
             }
             // Check if the purchase belongs to the correct product
-            $envatoItemId = (string)data_get($envatoData, 'item.id');
-            if (!empty($product->envato_item_id) && $product->envato_item_id !== $envatoItemId) {
+            $envatoItemIdValue = data_get($envatoData, 'item.id');
+            $envatoItemId = is_string($envatoItemIdValue) ? $envatoItemIdValue : (is_scalar($envatoItemIdValue) ? (string)$envatoItemIdValue : '');
+            if (! empty($product->envato_item_id) && $product->envato_item_id !== $envatoItemId) {
                 Log::warning('Envato item ID mismatch', [
-                    'expected_item_id'  => $product->envato_item_id,
+                    'expected_item_id' => $product->envato_item_id,
                     'actual_item_id' => $envatoItemId,
-                    'product_slug'  => $productSlug,
+                    'product_slug' => $productSlug,
                 ]);
+
                 return ['valid' => false];
             }
+
             // For Envato licenses, domain is always allowed (no domain restrictions)
             return [
-                'valid'  => true,
+                'valid' => true,
                 'product' => $product->only(['id', 'name', 'slug', 'envato_item_id']),
                 'domain_allowed' => true, // Envato licenses don't restrict domains
                 'support_expires_at' => $envatoData['supported_until'] ?? null,
@@ -289,13 +305,15 @@ class LicenseController extends Controller
             ];
         } catch (\Exception $e) {
             Log::error('Envato license verification failed', [
-                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
+                'purchase_code' => substr($purchaseCode, 0, 4).'...',
                 'product_slug' => $productSlug,
-                'error'  => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
+
             return ['valid' => false];
         }
     }
+
     /**
      * Log license verification attempt.
      *
@@ -323,19 +341,20 @@ class LicenseController extends Controller
         // Mask sensitive fields
         if (isset($allowed['purchase_code']) && is_string($allowed['purchase_code'])) {
             $allowed['purchase_code'] = substr($allowed['purchase_code'], 0, 4)
-                . str_repeat('*', max(0, strlen($allowed['purchase_code']) - 4));
+                .str_repeat('*', max(0, strlen($allowed['purchase_code']) - 4));
         }
         LicenseLog::create([
-            'license_id'  => $license?->id,
+            'license_id' => $license?->id,
             'domain' => $domain,
-            'ip_address'  => $request->ip(),
+            'ip_address' => $request->ip(),
             'serial' => $request->input('purchase_code'),
-            'status'  => $status,
+            'status' => $status,
             'user_agent' => $request->userAgent(),
-            'request_data'  => $allowed,
+            'request_data' => $allowed,
             'response_data' => $response,
         ]);
     }
+
     /**
      * Generate integration file for a product with enhanced security.
      *
@@ -371,15 +390,16 @@ class LicenseController extends Controller
             // Extract sanitized input (already sanitized in Request class)
             $productSlug = $validated['product_slug'];
             // Rate limiting for integration file generation
-            $rateLimitKey = 'license-integration:' . $request->ip();
+            $rateLimitKey = 'license-integration:'.$request->ip();
             if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
                 Log::warning('Rate limit exceeded for integration file generation', [
                     'ip' => $request->ip(),
-                    'user_agent'  => $request->userAgent(),
+                    'user_agent' => $request->userAgent(),
                     'product_slug' => $productSlug,
-                    'attempts'  => RateLimiter::attempts($rateLimitKey),
+                    'attempts' => RateLimiter::attempts($rateLimitKey),
                 ]);
                 DB::commit();
+
                 return response()->json([
                     'error' => 'Too many requests. Please try again later.',
                 ], 429);
@@ -388,21 +408,23 @@ class LicenseController extends Controller
             $product = Product::where('slug', $productSlug)->first();
             if (! $product) {
                 Log::warning('Product not found for integration file generation', [
-                    'product_slug'  => $productSlug,
+                    'product_slug' => $productSlug,
                     'ip' => $request->ip(),
-                    'user_agent'  => $request->userAgent(),
+                    'user_agent' => $request->userAgent(),
                 ]);
+
                 return response()->json(['error' => 'Product not found'], 404);
             }
             $integrationCode = $this->generateIntegrationCode($product);
             DB::commit();
+
             return response()->json([
-                'product'  => [
+                'product' => [
                     'name' => $product->name,
-                    'slug'  => $product->slug,
+                    'slug' => $product->slug,
                 ],
                 'integration_file' => $integrationCode,
-                'filename' => 'license_integration_' . $product->slug . '.php',
+                'filename' => 'license_integration_'.$product->slug.'.php',
             ]);
         } catch (ValidationException $e) {
             DB::rollBack();
@@ -410,14 +432,16 @@ class LicenseController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Integration file generation failed', [
-                'error'  => $e->getMessage(),
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'ip'  => $request->ip(),
+                'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
+
             return response()->json(['error' => 'An error occurred while generating the integration file'], 500);
         }
     }
+
     /**
      * Generate PHP integration code for a product.
      *
@@ -432,11 +456,12 @@ class LicenseController extends Controller
     {
         $apiDomain = rtrim(env('APP_URL', config('app.url')), '/');
         $verificationEndpoint = config('license.verification_endpoint', '/api/license/verify');
-        $apiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
+        $apiUrl = $apiDomain.'/'.ltrim($verificationEndpoint, '/');
+
         return "<?php
 /**
  * License Integration for {$product->name}
- * Generated on " . now()->format('Y-m-d H:i:s') . "
+ * Generated on ".now()->format('Y-m-d H:i:s')."
  *
  * This file provides license verification functionality for {$product->name}
  * It supports both local system licenses and Envato Market licenses

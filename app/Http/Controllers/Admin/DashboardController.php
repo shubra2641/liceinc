@@ -284,14 +284,14 @@ class DashboardController extends Controller
                 $data = [];
                 $labels = [];
                 for ($month = 1; $month <= 12; $month++) {
-                    $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-                    $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+                    $startDate = Carbon::create($year, $month, 1)?->startOfMonth();
+                    $endDate = Carbon::create($year, $month, 1)?->endOfMonth();
                     // Calculate revenue from licenses created in this month
                     $monthlyRevenue = License::join('products', 'licenses.product_id', '=', 'products.id')
                         ->whereBetween('licenses.created_at', [$startDate, $endDate])
                         ->sum('products.price');
                     $data[] = (float)$monthlyRevenue;
-                    $labels[] = Carbon::create($year, $month, 1)->format('M');
+                    $labels[] = Carbon::create($year, $month, 1)?->format('M');
                 }
             } elseif ($period === 'quarterly') {
                 $data = [];
@@ -299,8 +299,8 @@ class DashboardController extends Controller
                 for ($quarter = 1; $quarter <= 4; $quarter++) {
                     $startMonth = ($quarter - 1) * 3 + 1;
                     $endMonth = $quarter * 3;
-                    $startDate = Carbon::create($year, $startMonth, 1)->startOfMonth();
-                    $endDate = Carbon::create($year, $endMonth, 1)->endOfMonth();
+                    $startDate = Carbon::create($year, $startMonth, 1)?->startOfMonth();
+                    $endDate = Carbon::create($year, $endMonth, 1)?->endOfMonth();
                     $quarterlyRevenue = License::join('products', 'licenses.product_id', '=', 'products.id')
                         ->whereBetween('licenses.created_at', [$startDate, $endDate])
                         ->sum('products.price');
@@ -311,8 +311,8 @@ class DashboardController extends Controller
                 $data = [];
                 $labels = [];
                 for ($y = $currentYear - 4; $y <= $currentYear; $y++) {
-                    $startDate = Carbon::create($y, 1, 1)->startOfYear();
-                    $endDate = Carbon::create($y, 12, 31)->endOfYear();
+                    $startDate = Carbon::create($y, 1, 1)?->startOfYear();
+                    $endDate = Carbon::create($y, 12, 31)?->endOfYear();
                     $yearlyRevenue = License::join('products', 'licenses.product_id', '=', 'products.id')
                         ->whereBetween('licenses.created_at', [$startDate, $endDate])
                         ->sum('products.price');

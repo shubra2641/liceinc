@@ -28,7 +28,8 @@ class VersionManagementRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && (auth()->user()->is_admin || auth()->user()->hasRole('admin'));
+        $user = auth()->user();
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -37,8 +38,11 @@ class VersionManagementRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isHistory = $this->isMethod('POST') && str_contains($this->route()->getName(), 'history');
-        $isLatest = $this->isMethod('POST') && str_contains($this->route()->getName(), 'latest');
+        $route = $this->route();
+        $routeName = $route?->getName() ?? '';
+        
+        $isHistory = $this->isMethod('POST') && str_contains($routeName, 'history');
+        $isLatest = $this->isMethod('POST') && str_contains($routeName, 'latest');
         // Version history validation
         if ($isHistory) {
             return [

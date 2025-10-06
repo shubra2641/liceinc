@@ -43,21 +43,19 @@ use Illuminate\Support\Facades\Log;
 class TicketApiController extends Controller
 {
     protected EnvatoService $envatoService;
+
     /**
      * Create a new controller instance.
      *
      * @param  EnvatoService  $envatoService  The Envato service for API integration
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function __construct(EnvatoService $envatoService)
     {
         $this->envatoService = $envatoService;
     }
+
     /**
      * Display a listing of tickets with enhanced security.
      *
@@ -118,12 +116,13 @@ class TicketApiController extends Controller
             // Search with sanitized input
             if (isset($validated['search'])) {
                 $search = $this->sanitizeInput($validated['search']);
-                $query->where(function ($q) use ($search) {
-                    $q->where('subject', 'like', "%{$search}%")
-                        ->orWhere('content', 'like', "%{$search}%")
-                        ->orWhereHas('user', function ($userQuery) use ($search) {
-                            $userQuery->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%");
+                $searchStr = is_string($search) ? $search : (string)$search;
+                $query->where(function ($q) use ($searchStr) {
+                    $q->where('subject', 'like', "%{$searchStr}%")
+                        ->orWhere('content', 'like', "%{$searchStr}%")
+                        ->orWhereHas('user', function ($userQuery) use ($searchStr) {
+                            $userQuery->where('name', 'like', "%{$searchStr}%")
+                                ->orWhere('email', 'like', "%{$searchStr}%");
                         });
                 });
             }
@@ -131,6 +130,7 @@ class TicketApiController extends Controller
             $perPage = $validated['per_page'] ?? 15;
             $tickets = $query->latest()->paginate($perPage);
             DB::commit();
+
             return response()->json([
                 'success' => true,
                 'data' => $tickets->items(),
@@ -151,12 +151,14 @@ class TicketApiController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Unable to fetch tickets. Please try again later.',
             ], 500);
         }
     }
+
     /**
      * Verify purchase code for ticket creation with enhanced security.
      *
@@ -218,6 +220,7 @@ class TicketApiController extends Controller
             $existingLicense = License::with('product')->where('purchase_code', $purchaseCode)->first();
             if ($existingLicense && $existingLicense->product) {
                 DB::commit();
+
                 return response()->json([
                     'success' => true,
                     'product' => [
@@ -236,6 +239,7 @@ class TicketApiController extends Controller
                     $productSlug = $this->sanitizeOutput(data_get($sale, 'item.slug'));
                     $productName = $this->sanitizeOutput(data_get($sale, 'item.name'));
                     DB::commit();
+
                     return response()->json([
                         'success' => true,
                         'product' => [
@@ -249,14 +253,15 @@ class TicketApiController extends Controller
                 }
             } catch (\Throwable $envatoError) {
                 Log::warning('Envato API error during purchase code verification', [
-                    'purchase_code' => substr($purchaseCode, 0, 4) . '...',
+                    'purchase_code' => substr($purchaseCode, 0, 4).'...',
                     'error' => $envatoError->getMessage(),
                 ]);
             }
             Log::warning('Purchase code not found in ticket verification', [
-                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
+                'purchase_code' => substr($purchaseCode, 0, 4).'...',
             ]);
             DB::commit();
+
             return response()->json([
                 'success' => false,
                 'message' => 'Purchase code not found or invalid',
@@ -266,14 +271,16 @@ class TicketApiController extends Controller
             Log::error('Purchase code verification failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
+                'purchase_code' => substr($purchaseCode, 0, 4).'...',
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Unable to verify purchase code. Please try again later.',
             ], 500);
         }
     }
+
     /**
      * Sanitize output to prevent XSS attacks.
      *
@@ -286,6 +293,7 @@ class TicketApiController extends Controller
         if ($output === null) {
             return '';
         }
+
         return htmlspecialchars($output, ENT_QUOTES, 'UTF-8');
     }
 }

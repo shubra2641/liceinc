@@ -124,7 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const licenseExpiry = new Date(
         today.getTime() + data.duration_days * 24 * 60 * 60 * 1000,
       );
-      licenseExpiresAtInput.value = licenseExpiry.toISOString().split('T')[0];
+      const [datePart] = licenseExpiry.toISOString().split('T');
+      licenseExpiresAtInput.value = datePart;
     }
 
     // Calculate support expiry date
@@ -132,7 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const supportExpiry = new Date(
         today.getTime() + data.support_days * 24 * 60 * 60 * 1000,
       );
-      supportExpiresAtInput.value = supportExpiry.toISOString().split('T')[0];
+      const [datePart] = supportExpiry.toISOString().split('T');
+      supportExpiresAtInput.value = datePart;
     }
   }
 
@@ -168,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (userSelect && userSelect.value) {
       const { selectedIndex } = userSelect;
       const selectedOption = userSelect.options[selectedIndex];
-      const userName = selectedOption.text.split(' (')[0];
+      const [userName] = selectedOption.text.split(' (');
       document.getElementById('preview-user').textContent = userName;
     }
 

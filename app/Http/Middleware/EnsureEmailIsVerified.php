@@ -84,13 +84,16 @@ class EnsureEmailIsVerified
      *
      * @return bool True if email is verified
      */
+    /**
+     * @param \Illuminate\Contracts\Auth\Authenticatable|null $user
+     */
     private function isEmailVerified($user): bool
     {
         try {
             if (! $user || ! method_exists($user, 'hasVerifiedEmail')) {
                 return false;
             }
-            return $user && $user->hasVerifiedEmail();
+            return $user->hasVerifiedEmail();
         } catch (Exception $e) {
             Log::error('Failed to check email verification status: ' . $e->getMessage());
             return false;

@@ -137,7 +137,7 @@ class LicenseController extends Controller
      *
      * @param  mixed  $user  The user object
      *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, \App\Models\License>
      *
      * @throws \Exception When license retrieval fails
      */
@@ -162,7 +162,7 @@ class LicenseController extends Controller
      *
      * @param  mixed  $user  The user object
      *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, \App\Models\Invoice>
      *
      * @throws \Exception When invoice retrieval fails
      */
