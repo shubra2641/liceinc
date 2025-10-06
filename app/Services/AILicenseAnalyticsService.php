@@ -378,8 +378,9 @@ class AILicenseAnalyticsService
         $smoothed = [];
         $values = array_values($data);
         $keys = array_keys($data);
-        for ($i = 0; $i < count($values); $i++) {
-            if ($i === 0 || $i === count($values) - 1) {
+        $valuesCount = count($values);
+        for ($i = 0; $i < $valuesCount; $i++) {
+            if ($i === 0 || $i === $valuesCount - 1) {
                 $smoothed[$keys[$i]] = $values[$i];
             } else {
                 // Simple moving average with AI weighting

@@ -394,7 +394,8 @@ class ProductFileController extends Controller
     private function formatBytes(int $bytes, int $precision = 2): string
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
+        $unitsCount = count($units);
+        for ($i = 0; $bytes > 1024 && $i < $unitsCount - 1; $i++) {
             $bytes /= 1024;
         }
         return round($bytes, $precision).' '.$units[$i];
