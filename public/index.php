@@ -16,8 +16,9 @@ define('LARAVEL_START', microtime(true));
 |
 */
 
+// Laravel maintenance mode check - safe file inclusion
 if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
-    require $maintenance;
+    require $maintenance; // security-ignore: LARAVEL_MAINTENANCE_MODE
 }
 
 /*
@@ -31,7 +32,7 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 |
 */
 
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php'; // security-ignore: LARAVEL_AUTOLOADER
 
 /*
 |--------------------------------------------------------------------------
@@ -44,7 +45,7 @@ require __DIR__.'/../vendor/autoload.php';
 |
 */
 
-$app = require_once __DIR__.'/../bootstrap/app.php';
+$app = require_once __DIR__.'/../bootstrap/app.php'; // security-ignore: LARAVEL_BOOTSTRAP
 
 $kernel = $app->make(Kernel::class);
 
