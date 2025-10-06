@@ -199,7 +199,7 @@ class FrontendPreloaderManager {
 
         let progress = 0;
         const interval = setInterval(() => {
-            progress += Math.random() * 20; // Faster progress
+            progress += Math.random() * 20; // security-ignore: NON_CRYPTO_RANDOM (UI animation only)
             if (progress >= 100) {
                 progress = 100;
                 clearInterval(interval);

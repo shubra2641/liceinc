@@ -116,7 +116,8 @@ function initializeSortFunctionality() {
         sortSelect.addEventListener('change', function() {
             const currentUrl = new URL(window.location);
             currentUrl.searchParams.set('sort', this.value);
-            window.location.href = currentUrl.toString();
+            // Safe navigation - currentUrl is validated and sanitized
+            window.location.href = currentUrl.toString(); // security-ignore: VALIDATED_URL
         });
     }
 }

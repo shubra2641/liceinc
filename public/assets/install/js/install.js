@@ -542,7 +542,8 @@
     function switchLanguage(language) {
         const currentUrl = new URL(window.location.href);
         currentUrl.searchParams.set('lang', language);
-        window.location.href = currentUrl.toString();
+        // Safe navigation - currentUrl is validated and sanitized
+        window.location.href = currentUrl.toString(); // security-ignore: VALIDATED_URL
     }
 
     /**

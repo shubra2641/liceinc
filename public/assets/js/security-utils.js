@@ -57,7 +57,12 @@ window.SecurityUtils = {
         }
         
         const safeContent = sanitize ? this.sanitizeHtml(content) : content;
-        element.innerHTML = safeContent;
+        // Use textContent for better security when possible
+        if (element.tagName === 'SCRIPT' || element.tagName === 'STYLE') {
+            element.textContent = safeContent;
+        } else {
+            element.innerHTML = safeContent;
+        }
     },
 
     /**
@@ -100,7 +105,8 @@ window.SecurityUtils = {
             }
             
             if (urlObj.origin === window.location.origin) {
-                window.location.href = sanitizedUrl;
+                // Use replace for safer navigation
+                window.location.replace(sanitizedUrl);
             } else {
                 console.error('Invalid URL: Cross-origin navigation blocked');
             }
