@@ -999,7 +999,7 @@ class InstallController extends Controller
      *
      * @return string The sanitized input
      */
-    protected function sanitizeInput($input)
+    protected function sanitizeInput(mixed $input): mixed
     {
         if (! is_string($input)) {
             return $input;

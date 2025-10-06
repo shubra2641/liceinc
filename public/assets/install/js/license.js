@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Optionally redirect after a delay
             setTimeout(() => {
                 if (data.redirect) {
-                    SecurityUtils.safeNavigate(data.redirect);
+                    window.SecurityUtils.safeNavigate(data.redirect);
                 }
             }, 2000);
         } else {

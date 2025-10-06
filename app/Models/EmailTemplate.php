@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 /**
  * EmailTemplate Model.
- *
+ * 
  * Manages email templates for the system with support for both user and admin notifications.
  * Templates are categorized and support variable substitution for dynamic content.
  *
@@ -20,6 +20,25 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $description Template description
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
+ * @method static Builder<static>|EmailTemplate active()
+ * @method static \Database\Factories\EmailTemplateFactory factory($count = null, $state = [])
+ * @method static Builder<static>|EmailTemplate forCategory(string $category)
+ * @method static Builder<static>|EmailTemplate forType(string $type)
+ * @method static Builder<static>|EmailTemplate newModelQuery()
+ * @method static Builder<static>|EmailTemplate newQuery()
+ * @method static Builder<static>|EmailTemplate query()
+ * @method static Builder<static>|EmailTemplate whereBody($value)
+ * @method static Builder<static>|EmailTemplate whereCategory($value)
+ * @method static Builder<static>|EmailTemplate whereCreatedAt($value)
+ * @method static Builder<static>|EmailTemplate whereDescription($value)
+ * @method static Builder<static>|EmailTemplate whereId($value)
+ * @method static Builder<static>|EmailTemplate whereIsActive($value)
+ * @method static Builder<static>|EmailTemplate whereName($value)
+ * @method static Builder<static>|EmailTemplate whereSubject($value)
+ * @method static Builder<static>|EmailTemplate whereType($value)
+ * @method static Builder<static>|EmailTemplate whereUpdatedAt($value)
+ * @method static Builder<static>|EmailTemplate whereVariables($value)
+ * @mixin \Eloquent
  */
 class EmailTemplate extends Model
 {

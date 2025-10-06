@@ -3,6 +3,52 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+/**
+ * @property int $id
+ * @property string $invoice_number
+ * @property int $user_id
+ * @property int|null $license_id
+ * @property int|null $product_id
+ * @property string $type
+ * @property numeric $amount
+ * @property string $currency
+ * @property string $status
+ * @property \Illuminate\Support\Carbon $due_date
+ * @property \Illuminate\Support\Carbon|null $paid_at
+ * @property string|null $notes
+ * @property array<array-key, mixed>|null $metadata
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read mixed $days_until_due
+ * @property-read mixed $remaining_amount
+ * @property-read \App\Models\License|null $license
+ * @property-read \App\Models\Product|null $product
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice dueSoon($days = 7)
+ * @method static \Database\Factories\InvoiceFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice overdue()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice paid()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice pending()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereCurrency($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereDueDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereInvoiceNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereLicenseId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereMetadata($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice wherePaidAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereProductId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereUserId($value)
+ * @mixin \Eloquent
+ */
 class Invoice extends Model
 {
     use HasFactory;

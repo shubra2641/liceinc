@@ -1,4 +1,24 @@
 // Admin Actions JavaScript
+// Utility function for showing notifications
+const showNotification = (message, type = 'info') => {
+    const notification = document.createElement('div');
+    notification.className = `user-notification user-notification-${type} show`;
+    notification.innerHTML = `
+        <div class="user-notification-content">
+            <div class="user-notification-icon">
+                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
+            </div>
+            <div class="user-notification-message">${message}</div>
+            <button class="user-notification-close" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 5000);
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     // Handle maintenance page reload
     document.querySelectorAll('[data-action="reload"]').forEach(button => {
@@ -498,7 +518,7 @@ class ProductShowManager {
         const notification = document.createElement('div');
         notification.className = `alert alert-${type} alert-dismissible fade show`;
         // Sanitize message to prevent XSS
-        SecurityUtils.safeInnerHTML(notification, `
+        window.SecurityUtils.safeInnerHTML(notification, `
             <div class="d-flex align-items-center">
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
                 <span>${message}</span>
@@ -536,25 +556,6 @@ window.ProductShowManager = ProductShowManager;
     const $ = (selector, context = document) => context.querySelector(selector);
     const $$ = (selector, context = document) => context.querySelectorAll(selector);
     
-    const showNotification = (message, type = 'info') => {
-        const notification = document.createElement('div');
-        notification.className = `user-notification user-notification-${type} show`;
-        notificationSecurityUtils.safeInnerHTML(this, `
-            <div class="user-notification-content">
-                <div class="user-notification-icon">
-                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
-                </div>
-                <div class="user-notification-message">${message}</div>
-                <button class="user-notification-close" onclick="this.parentElement.parentElement.remove()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `);
-        
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 5000);
-    };
-
     const setButtonLoading = (button, isLoading) => {
         const text = button.querySelector('.button-text, .user-btn-text');
         const spinner = button.querySelector('.button-loading, .user-btn-spinner');
@@ -600,7 +601,7 @@ window.ProductShowManager = ProductShowManager;
         const errorDiv = document.createElement('div');
         errorDiv.className = 'form-error';
         // Sanitize message to prevent XSS
-        SecurityUtils.safeInnerHTML(errorDiv, `<i class="fas fa-exclamation-circle"></i> ${message}`);
+        window.SecurityUtils.safeInnerHTML(errorDiv, `<i class="fas fa-exclamation-circle"></i> ${message}`);
         
         inputGroup.appendChild(errorDiv);
         input.classList.add('form-input-error');
@@ -823,7 +824,7 @@ window.ProductShowManager = ProductShowManager;
         button.style.background = '#10b981';
         
         setTimeout(() => {
-            SecurityUtils.safeInnerHTML(button, originalText);
+            window.SecurityUtils.safeInnerHTML(button, originalText);
             button.style.background = '';
         }, 2000);
     };
@@ -1733,7 +1734,7 @@ class UserTickets {
         productSlugInput.style.borderColor = '#ffc107';
         productSlugInput.placeholder = 'Verifying purchase code...';
         
-        SecurityUtils.safeFetch(`/verify-purchase-code/${encodeURIComponent(purchaseCode)}`)
+        window.SecurityUtils.safeFetch(`/verify-purchase-code/${encodeURIComponent(purchaseCode)}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -1882,7 +1883,7 @@ class MaintenanceManager {
                 minute: '2-digit'
             });
             // Use global security utility for safe HTML assignment
-            SecurityUtils.safeInnerHTML(lastUpdated, `<i class="fas fa-clock me-2"></i>Last updated: ${timeString}`);
+            window.SecurityUtils.safeInnerHTML(lastUpdated, `<i class="fas fa-clock me-2"></i>Last updated: ${timeString}`);
         }
     }
 }

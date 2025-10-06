@@ -5,6 +5,60 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+/**
+ * @property int $id
+ * @property int|null $parent_id
+ * @property string $name
+ * @property string $slug
+ * @property string|null $description
+ * @property string|null $meta_title
+ * @property string|null $meta_keywords
+ * @property string|null $meta_description
+ * @property string|null $color
+ * @property string|null $text_color
+ * @property string|null $icon
+ * @property string|null $image
+ * @property bool $is_active
+ * @property bool $show_in_menu
+ * @property bool $is_featured
+ * @property bool $allow_subcategories
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductCategory> $children
+ * @property-read int|null $children_count
+ * @property-read ProductCategory|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
+ * @property-read int|null $products_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory active()
+ * @method static \Database\Factories\ProductCategoryFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory featured()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory menuVisible()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory roots()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereAllowSubcategories($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereColor($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereIcon($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereImage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereIsFeatured($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereMetaDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereMetaKeywords($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereMetaTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereParentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereShowInMenu($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereTextColor($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class ProductCategory extends Model
 {
     use HasFactory;

@@ -2,6 +2,29 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+/**
+ * @property int $id
+ * @property string $gateway
+ * @property bool $is_enabled
+ * @property bool $is_sandbox
+ * @property array<array-key, mixed>|null $credentials
+ * @property string|null $webhook_url
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Database\Factories\PaymentSettingFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting whereCredentials($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting whereGateway($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting whereIsEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting whereIsSandbox($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting whereWebhookUrl($value)
+ * @mixin \Eloquent
+ */
 class PaymentSetting extends Model
 {
     use HasFactory;

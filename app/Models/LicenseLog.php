@@ -3,6 +3,38 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+/**
+ * @property int $id
+ * @property int $license_id
+ * @property string $domain
+ * @property string $ip_address
+ * @property string $serial
+ * @property string $status
+ * @property string|null $user_agent
+ * @property array<array-key, mixed>|null $request_data
+ * @property array<array-key, mixed>|null $response_data
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read string|null $action
+ * @property-read string|null $message
+ * @property-read \App\Models\License $license
+ * @method static \Database\Factories\LicenseLogFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereDomain($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereIpAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereLicenseId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereRequestData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereResponseData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereSerial($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereUserAgent($value)
+ * @mixin \Eloquent
+ */
 class LicenseLog extends Model
 {
     use HasFactory;

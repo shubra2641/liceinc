@@ -2,6 +2,49 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+/**
+ * @property int $id
+ * @property string $purchase_code_hash
+ * @property string $domain
+ * @property string $ip_address
+ * @property string|null $user_agent
+ * @property bool $is_valid
+ * @property string|null $response_message
+ * @property array<array-key, mixed>|null $response_data
+ * @property string $verification_source
+ * @property string $status
+ * @property string|null $error_details
+ * @property \Illuminate\Support\Carbon|null $verified_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read string $masked_purchase_code
+ * @property-read string $source_badge_class
+ * @property-read string $status_badge_class
+ * @method static Builder<static>|LicenseVerificationLog failed()
+ * @method static Builder<static>|LicenseVerificationLog forDomain(string $domain)
+ * @method static Builder<static>|LicenseVerificationLog forIp(string $ip)
+ * @method static Builder<static>|LicenseVerificationLog fromSource(string $source)
+ * @method static Builder<static>|LicenseVerificationLog newModelQuery()
+ * @method static Builder<static>|LicenseVerificationLog newQuery()
+ * @method static Builder<static>|LicenseVerificationLog query()
+ * @method static Builder<static>|LicenseVerificationLog recent(int $hours = 24)
+ * @method static Builder<static>|LicenseVerificationLog successful()
+ * @method static Builder<static>|LicenseVerificationLog whereCreatedAt($value)
+ * @method static Builder<static>|LicenseVerificationLog whereDomain($value)
+ * @method static Builder<static>|LicenseVerificationLog whereErrorDetails($value)
+ * @method static Builder<static>|LicenseVerificationLog whereId($value)
+ * @method static Builder<static>|LicenseVerificationLog whereIpAddress($value)
+ * @method static Builder<static>|LicenseVerificationLog whereIsValid($value)
+ * @method static Builder<static>|LicenseVerificationLog wherePurchaseCodeHash($value)
+ * @method static Builder<static>|LicenseVerificationLog whereResponseData($value)
+ * @method static Builder<static>|LicenseVerificationLog whereResponseMessage($value)
+ * @method static Builder<static>|LicenseVerificationLog whereStatus($value)
+ * @method static Builder<static>|LicenseVerificationLog whereUpdatedAt($value)
+ * @method static Builder<static>|LicenseVerificationLog whereUserAgent($value)
+ * @method static Builder<static>|LicenseVerificationLog whereVerificationSource($value)
+ * @method static Builder<static>|LicenseVerificationLog whereVerifiedAt($value)
+ * @mixin \Eloquent
+ */
 class LicenseVerificationLog extends Model
 {
     protected $fillable = [

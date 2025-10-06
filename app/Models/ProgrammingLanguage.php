@@ -5,6 +5,39 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property string|null $description
+ * @property string $status
+ * @property string|null $icon
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property string|null $file_extension
+ * @property string|null $license_template
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
+ * @property-read int|null $products_count
+ * @method static \Database\Factories\ProgrammingLanguageFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereFileExtension($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereIcon($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereLicenseTemplate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class ProgrammingLanguage extends Model
 {
     use HasFactory;

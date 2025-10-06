@@ -3,6 +3,131 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property int|null $envato_item_id
+ * @property string|null $purchase_url_envato
+ * @property string|null $purchase_url_buy
+ * @property string|null $description
+ * @property float $price
+ * @property string $status
+ * @property string $license_type
+ * @property int $support_days
+ * @property \Illuminate\Support\Carbon|null $supported_until
+ * @property float|null $extended_support_price
+ * @property int|null $extended_support_days
+ * @property \Illuminate\Support\Carbon|null $extended_supported_until
+ * @property array<array-key, mixed>|null $kb_categories Array of KB category IDs linked to this product
+ * @property array<array-key, mixed>|null $kb_articles Array of KB article IDs linked to this product
+ * @property bool $kb_access_required Whether KB access is required for this product
+ * @property string|null $kb_access_message Custom message for KB access requirement
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int|null $category_id
+ * @property int|null $kb_category_id
+ * @property int|null $programming_language
+ * @property string|null $integration_file_path
+ * @property float|null $renewal_price
+ * @property string|null $renewal_period
+ * @property float $tax_rate
+ * @property int $stock_quantity
+ * @property bool $requires_domain
+ * @property array<array-key, mixed>|null $features
+ * @property array<array-key, mixed>|null $requirements
+ * @property array<array-key, mixed>|null $installation_guide
+ * @property string|null $meta_title
+ * @property string|null $meta_description
+ * @property array<array-key, mixed>|null $tags
+ * @property string|null $version
+ * @property bool $is_featured
+ * @property bool $is_popular
+ * @property bool $is_downloadable
+ * @property string|null $image
+ * @property array<array-key, mixed>|null $gallery_images
+ * @property int|null $stock
+ * @property int $duration_days
+ * @property bool $auto_renewal
+ * @property int $renewal_reminder_days
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ProductFile> $activeFiles
+ * @property-read int|null $active_files_count
+ * @property-read \App\Models\ProductCategory|null $category
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ProductFile> $files
+ * @property-read int|null $files_count
+ * @property-read string $current_version
+ * @property-read mixed $formatted_extended_support_price
+ * @property-read mixed $formatted_price
+ * @property-read mixed $formatted_renewal_price
+ * @property-read string $latest_version
+ * @property-read mixed $renewal_period_label
+ * @property-read mixed $stock_status
+ * @property-read mixed $tax_amount
+ * @property-read mixed $total_price
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
+ * @property-read int|null $invoices_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle> $kbArticles
+ * @property-read int|null $kb_articles_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory> $kbCategories
+ * @property-read int|null $kb_categories_count
+ * @property-read \App\Models\ProductUpdate|null $latestUpdate
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\License> $licenses
+ * @property-read int|null $licenses_count
+ * @property-read \App\Models\ProgrammingLanguage|null $programmingLanguage
+ * @method static \Database\Factories\ProductFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereAutoRenewal($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereCategoryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereDurationDays($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereEnvatoItemId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereExtendedSupportDays($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereExtendedSupportPrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereExtendedSupportedUntil($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereFeatures($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereGalleryImages($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereImage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereInstallationGuide($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereIntegrationFilePath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereIsDownloadable($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereIsFeatured($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereIsPopular($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereKbAccessMessage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereKbAccessRequired($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereKbArticles($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereKbCategories($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereKbCategoryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereLicenseType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereMetaDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereMetaTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product wherePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereProgrammingLanguage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product wherePurchaseUrlBuy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product wherePurchaseUrlEnvato($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereRenewalPeriod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereRenewalPrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereRenewalReminderDays($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereRequirements($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereRequiresDomain($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereStock($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereStockQuantity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereSupportDays($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereSupportedUntil($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereTags($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereTaxRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereVersion($value)
+ * @mixin \Eloquent
+ */
 class Product extends Model
 {
     use HasFactory;

@@ -3,6 +3,8 @@
  * Interactive charts and data visualization for the admin dashboard
  */
 
+// Assume Chart.js and Bootstrap are loaded globally
+
 if (typeof window.AdminCharts === 'undefined') {
     class AdminCharts {
         constructor() {
@@ -1405,6 +1407,9 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = AdminCharts;
 }
 
+// Make AdminCharts globally available
+window.AdminCharts = AdminCharts;
+
 /**
  * Initialize Reports Page Charts
  */
@@ -1761,7 +1766,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         "'": '&#x27;'
                     }[match];
                 });
-                modalContentSecurityUtils.safeInnerHTML(this, `
+                window.SecurityUtils.safeInnerHTML(this, `
                     <div class="row">
                         <div class="col-md-6">
                             <p><strong>Log ID:</strong> ${sanitizedLogId}</p>

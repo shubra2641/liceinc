@@ -10,6 +10,20 @@ final class GeneratedConfig
 {
 
 	public const EXTENSIONS = array (
+  'composer/pcre' => 
+  array (
+    'install_path' => 'D:\\xampp\\htdocs\\my-logos\\vendor/composer/pcre',
+    'relative_install_path' => '../../../composer/pcre',
+    'extra' => 
+    array (
+      'includes' => 
+      array (
+        0 => 'extension.neon',
+      ),
+    ),
+    'version' => '3.3.2',
+    'phpstanVersionConstraint' => NULL,
+  ),
   'nesbot/carbon' => 
   array (
     'install_path' => 'D:\\xampp\\htdocs\\my-logos\\vendor/nesbot/carbon',

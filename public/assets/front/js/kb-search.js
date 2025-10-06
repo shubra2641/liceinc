@@ -40,7 +40,7 @@ function initializeSearchResults() {
                     try {
                         const urlObj = new URL(url, window.location.origin);
                         // Use SecurityUtils for safe navigation
-                        SecurityUtils.safeNavigate(url);
+                        window.SecurityUtils.safeNavigate(url);
                     } catch (e) {
                         console.error('Invalid URL format:', e);
                     }

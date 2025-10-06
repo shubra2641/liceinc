@@ -4,6 +4,58 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
+/**
+ * @property int $id
+ * @property int $product_id
+ * @property string $version
+ * @property string $title
+ * @property string|null $description
+ * @property array<array-key, mixed>|null $changelog
+ * @property string|null $file_path
+ * @property string|null $file_name
+ * @property int|null $file_size
+ * @property string|null $file_hash
+ * @property bool $is_major
+ * @property bool $is_required
+ * @property bool $is_active
+ * @property array<array-key, mixed>|null $requirements
+ * @property array<array-key, mixed>|null $compatibility
+ * @property \Illuminate\Support\Carbon|null $released_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read string $changelog_text
+ * @property-read string|null $download_url
+ * @property-read string|null $file_url
+ * @property-read string $formatted_file_size
+ * @property-read \App\Models\Product $product
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate active()
+ * @method static \Database\Factories\ProductUpdateFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate major()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate newerThan(string $version)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate required()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereChangelog($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereCompatibility($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereFileHash($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereFileName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereFilePath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereFileSize($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereIsMajor($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereIsRequired($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereProductId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereReleasedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereRequirements($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereVersion($value)
+ * @mixin \Eloquent
+ */
 class ProductUpdate extends Model
 {
     use HasFactory;

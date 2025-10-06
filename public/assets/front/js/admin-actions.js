@@ -1,4 +1,24 @@
 // Admin Actions JavaScript
+// Utility function for showing notifications
+const showNotification = (message, type = 'info') => {
+    const notification = document.createElement('div');
+    notification.className = `user-notification user-notification-${type} show`;
+    notification.innerHTML = `
+        <div class="user-notification-content">
+            <div class="user-notification-icon">
+                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
+            </div>
+            <div class="user-notification-message">${message}</div>
+            <button class="user-notification-close" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 5000);
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     // Handle maintenance page reload
     document.querySelectorAll('[data-action="reload"]').forEach(button => {

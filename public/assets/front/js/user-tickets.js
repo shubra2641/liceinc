@@ -122,7 +122,7 @@ class UserTickets {
         productSlugInput.style.borderColor = '#ffc107';
         productSlugInput.placeholder = 'Verifying purchase code...';
         
-        SecurityUtils.safeFetch(`/verify-purchase-code/${encodeURIComponent(purchaseCode)}`)
+        window.SecurityUtils.safeFetch(`/verify-purchase-code/${encodeURIComponent(purchaseCode)}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);

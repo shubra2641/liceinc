@@ -81,7 +81,7 @@ class ProductShowManager {
         notification.className = `alert alert-${type} alert-dismissible fade show`;
         // Sanitize message to prevent XSS
         // Message will be sanitized by SecurityUtils
-        notificationSecurityUtils.safeInnerHTML(this, `
+        window.SecurityUtils.safeInnerHTML(this, `
             <div class="d-flex align-items-center">
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
                 <span>${sanitizedMessage}</span>

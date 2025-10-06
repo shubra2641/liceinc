@@ -116,9 +116,9 @@ abstract class BaseController extends Controller
      * return $this->errorResponse('Internal server error', 500);
      */
     protected function errorResponse(
-        string $message = 'An error occurred',
-        int $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR,
-        array $errors = [],
+        string $message = 'Error',
+        mixed $errors = null,
+        int $statusCode = 400,
     ): JsonResponse {
         $response = [
             'success' => false,
@@ -274,7 +274,7 @@ abstract class BaseController extends Controller
      *     // Allow editing
      * }
      */
-    protected function hasPermission(string $permission): bool
+    protected function hasPermission(string $permission, mixed $resource = null): bool
     {
         return Auth::check() && Auth::user()->can($permission);
     }

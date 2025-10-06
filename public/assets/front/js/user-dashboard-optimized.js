@@ -13,7 +13,7 @@
         notification.className = `user-notification user-notification-${type} show`;
         // Sanitize message to prevent XSS
         // Message will be sanitized by SecurityUtils
-        notificationSecurityUtils.safeInnerHTML(this, `
+        notificationwindow.SecurityUtils.safeInnerHTML(this, `
             <div class="user-notification-content">
                 <div class="user-notification-icon">
                     <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
@@ -75,7 +75,7 @@
         errorDiv.className = 'form-error';
         // Sanitize message to prevent XSS
         // Message will be sanitized by SecurityUtils
-        SecurityUtils.safeInnerHTML(errorDiv, `<i class="fas fa-exclamation-circle"></i> ${message}`);
+        window.SecurityUtils.safeInnerHTML(errorDiv, `<i class="fas fa-exclamation-circle"></i> ${message}`);
         
         inputGroup.appendChild(errorDiv);
         input.classList.add('form-input-error');

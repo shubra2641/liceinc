@@ -74,6 +74,7 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.6",
         "fakerphp/faker": "^1.24",
         "laravel/pint": "^1.25",
         "mockery/mockery": "^1.6",

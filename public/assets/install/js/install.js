@@ -311,7 +311,7 @@
         resultDiv.className = 'connection-result ' + (success ? 'success' : 'error');
         // Sanitize message to prevent XSS
         // Message will be sanitized by SecurityUtils
-        resultDiv.innerHTML = '<i class="fas ' + (success ? 'fa-check-circle' : 'fa-times-circle') + '"></i> ' + sanitizedMessage;
+        resultDiv.innerHTML = '<i class="fas ' + (success ? 'fa-check-circle' : 'fa-times-circle') + '"></i> ' + message;
         resultDiv.style.display = 'flex';
     }
 
@@ -503,9 +503,9 @@
         notification.className = `install-notification install-alert-${type}`;
         // Sanitize message to prevent XSS
         // Message will be sanitized by SecurityUtils
-        notificationSecurityUtils.safeInnerHTML(this, `
+        window.SecurityUtils.safeInnerHTML(this, `
             <i class="fas ${getIconForType(type)}"></i>
-            <span>${sanitizedMessage}</span>
+            <span>${message}</span>
             <button class="notification-close" onclick="this.parentElement.remove()">
                 <i class="fas fa-times"></i>
             </button>
