@@ -998,7 +998,7 @@ class InstallController extends Controller
      *
      * @return string The sanitized input
      */
-    private function sanitizeInput($input)
+    protected function sanitizeInput($input)
     {
         if (! is_string($input)) {
             return $input;

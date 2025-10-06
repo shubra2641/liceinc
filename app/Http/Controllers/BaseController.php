@@ -349,6 +349,9 @@ abstract class BaseController extends Controller
         if ($input === null) {
             return null;
         }
-        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+        if (is_string($input)) {
+            return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+        }
+        return $input;
     }
 }

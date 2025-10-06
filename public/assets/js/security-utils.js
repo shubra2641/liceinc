@@ -61,8 +61,34 @@ window.SecurityUtils = {
         if (element.tagName === 'SCRIPT' || element.tagName === 'STYLE') {
             element.textContent = safeContent;
         } else {
-            element.innerHTML = safeContent;
+            // Additional validation for dangerous content
+            if (this.containsDangerousContent(safeContent)) {
+                console.error('Dangerous content detected, using textContent instead');
+                element.textContent = safeContent;
+            } else {
+                element.innerHTML = safeContent;
+            }
         }
+    },
+
+    /**
+     * Check if content contains dangerous patterns
+     * @param {string} content - The content to check
+     * @returns {boolean} - True if dangerous content is found
+     */
+    containsDangerousContent: function(content) {
+        const dangerousPatterns = [
+            /<script[^>]*>/i,
+            /javascript:/i,
+            /on\w+\s*=/i,
+            /<iframe[^>]*>/i,
+            /<object[^>]*>/i,
+            /<embed[^>]*>/i,
+            /<form[^>]*>/i,
+            /<input[^>]*>/i
+        ];
+        
+        return dangerousPatterns.some(pattern => pattern.test(content));
     },
 
     /**
@@ -105,8 +131,13 @@ window.SecurityUtils = {
             }
             
             if (urlObj.origin === window.location.origin) {
-                // Use replace for safer navigation
-                window.location.replace(sanitizedUrl);
+                // Use replace for safer navigation with additional validation
+                const escapedUrl = encodeURIComponent(sanitizedUrl);
+                if (escapedUrl === sanitizedUrl) {
+                    window.location.replace(sanitizedUrl);
+                } else {
+                    console.error('Invalid URL: Contains dangerous characters');
+                }
             } else {
                 console.error('Invalid URL: Cross-origin navigation blocked');
             }

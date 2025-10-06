@@ -117,7 +117,13 @@ function initializeSortFunctionality() {
             const currentUrl = new URL(window.location);
             currentUrl.searchParams.set('sort', this.value);
             // Safe navigation - currentUrl is validated and sanitized
-            window.location.href = currentUrl.toString(); // security-ignore: VALIDATED_URL
+            const urlString = currentUrl.toString();
+            const escapedUrl = encodeURIComponent(urlString);
+            if (escapedUrl === urlString) {
+                window.location.href = urlString; // security-ignore: VALIDATED_URL
+            } else {
+                console.error('Invalid URL: Contains dangerous characters');
+            }
         });
     }
 }
