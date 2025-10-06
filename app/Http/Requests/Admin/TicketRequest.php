@@ -17,7 +17,7 @@ use Illuminate\Validation\Rule;
  * - Priority and status validation
  * - Invoice creation validation
  * - User and category validation
-/
+ */
 class TicketRequest extends FormRequest
 {
     /**

@@ -18,7 +18,7 @@ use Illuminate\Validation\Rule;
  * - Unique validation with ignore for current record on updates
  * - SEO metadata validation
  * - Pricing and licensing validation
-/
+ */
 class ProductRequest extends FormRequest
 {
     /**

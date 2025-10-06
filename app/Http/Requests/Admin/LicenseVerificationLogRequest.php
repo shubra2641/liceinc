@@ -17,7 +17,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * - Date range validation
  * - IP address validation
  * - Domain validation
-/
+ */
 class LicenseVerificationLogRequest extends FormRequest
 {
     /**

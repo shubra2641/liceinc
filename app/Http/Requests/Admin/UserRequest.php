@@ -17,7 +17,7 @@ use Illuminate\Validation\Rule;
  * - Unique validation with ignore for current record on updates
  * - Role validation and password confirmation
  * - Profile information validation
-/
+ */
 class UserRequest extends FormRequest
 {
     /**

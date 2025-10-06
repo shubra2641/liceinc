@@ -16,7 +16,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * - Security validation rules (XSS protection, SQL injection prevention)
  * - Time-based dismissal validation
  * - Notification type validation
-/
+ */
 class UpdateNotificationRequest extends FormRequest
 {
     /**

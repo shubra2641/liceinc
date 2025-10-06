@@ -17,7 +17,7 @@ use Illuminate\Validation\Rule;
  * - Unique validation with ignore for current record on updates
  * - Payment and billing validation
  * - Invoice status management
-/
+ */
 class InvoiceRequest extends FormRequest
 {
     /**

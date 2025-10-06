@@ -15,7 +15,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * - Security validation rules (XSS protection, SQL injection prevention)
  * - Version format validation
  * - Confirmation requirement for critical operations
-/
+ */
 class SystemUpdateRequest extends FormRequest
 {
     /**

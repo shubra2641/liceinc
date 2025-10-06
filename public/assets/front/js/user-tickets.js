@@ -96,6 +96,24 @@ class UserTickets {
     }
 
     verifyPurchaseCode(purchaseCode) {
+        // Validate purchase code format to prevent path traversal attacks
+        if (!purchaseCode || typeof purchaseCode !== 'string') {
+            return;
+        }
+        
+        // Basic validation - purchase codes should be alphanumeric with some special chars
+        const purchaseCodeRegex = /^[a-zA-Z0-9\-_\.]+$/;
+        if (!purchaseCodeRegex.test(purchaseCode)) {
+            console.error('Invalid purchase code format');
+            return;
+        }
+        
+        // Prevent path traversal attacks
+        if (purchaseCode.includes('..') || purchaseCode.includes('/') || purchaseCode.includes('\\')) {
+            console.error('Invalid purchase code: path traversal detected');
+            return;
+        }
+        
         const productSlugInput = document.getElementById('product_slug');
         const productNameSpan = document.getElementById('product-name');
         const productNameDisplay = document.getElementById('product-name-display');
@@ -104,7 +122,7 @@ class UserTickets {
         productSlugInput.style.borderColor = '#ffc107';
         productSlugInput.placeholder = 'Verifying purchase code...';
         
-        fetch(`/verify-purchase-code/${encodeURIComponent(purchaseCode)}`)
+        SecurityUtils.safeFetch(`/verify-purchase-code/${encodeURIComponent(purchaseCode)}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);

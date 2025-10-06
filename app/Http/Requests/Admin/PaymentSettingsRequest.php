@@ -17,7 +17,7 @@ use Illuminate\Validation\Rule;
  * - Payment gateway configuration validation
  * - API key and credential validation
  * - Test connection functionality
-/
+ */
 class PaymentSettingsRequest extends FormRequest
 {
     /**

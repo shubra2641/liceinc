@@ -16,7 +16,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * - Proper type hints and return types
  * - Security validation rules (XSS protection, SQL injection prevention)
  * - Template file validation and content management
-/
+ */
 class ProgrammingLanguageAdvancedRequest extends FormRequest
 {
     /**

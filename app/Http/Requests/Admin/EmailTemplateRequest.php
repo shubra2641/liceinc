@@ -17,7 +17,7 @@ use Illuminate\Validation\Rule;
  * - Template type and category validation
  * - Test email functionality validation
  * - Template variable validation
-/
+ */
 class EmailTemplateRequest extends FormRequest
 {
     /**

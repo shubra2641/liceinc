@@ -17,7 +17,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * - License key validation
  * - Version format validation
  * - Domain validation
-/
+ */
 class VersionManagementRequest extends FormRequest
 {
     /**

@@ -18,7 +18,7 @@ use Illuminate\Validation\Rule;
  * - Unique validation with ignore for current record on updates
  * - Template file validation
  * - Language configuration validation
-/
+ */
 class ProgrammingLanguageRequest extends FormRequest
 {
     /**

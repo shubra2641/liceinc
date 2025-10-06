@@ -17,7 +17,7 @@ use Illuminate\Validation\Rule;
  * - Security validation rules (XSS protection, SQL injection prevention)
  * - Version validation and file security
  * - Update type and status management
-/
+ */
 class ProductUpdateRequest extends FormRequest
 {
     /**

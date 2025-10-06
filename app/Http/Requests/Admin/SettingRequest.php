@@ -15,7 +15,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * - Security validation rules (XSS protection, SQL injection prevention)
  * - File upload validation with security checks
  * - API token validation and testing
-/
+ */
 class SettingRequest extends FormRequest
 {
     /**

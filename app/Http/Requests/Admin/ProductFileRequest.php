@@ -17,7 +17,7 @@ use Illuminate\Validation\Rule;
  * - Security validation rules (XSS protection, SQL injection prevention)
  * - File type and size validation
  * - Version and release management
-/
+ */
 class ProductFileRequest extends FormRequest
 {
     /**

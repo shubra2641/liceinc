@@ -16,7 +16,7 @@ use Illuminate\Validation\Rules\Password;
  * - Security validation rules (XSS protection, SQL injection prevention)
  * - Password strength validation
  * - Email uniqueness validation
-/
+ */
 class ProfileAdvancedRequest extends FormRequest
 {
     /**

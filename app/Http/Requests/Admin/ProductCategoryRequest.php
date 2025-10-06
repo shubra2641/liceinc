@@ -18,7 +18,7 @@ use Illuminate\Validation\Rule;
  * - Security validation rules (XSS protection, SQL injection prevention)
  * - Unique validation with ignore for current record on updates
  * - Auto-slug generation and checkbox handling
-/
+ */
 class ProductCategoryRequest extends FormRequest
 {
     /**

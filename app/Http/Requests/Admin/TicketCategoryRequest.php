@@ -17,7 +17,7 @@ use Illuminate\Validation\Rule;
  * - Unique validation with ignore for current record on updates
  * - Color and icon validation
  * - Category organization validation
-/
+ */
 class TicketCategoryRequest extends FormRequest
 {
     /**
