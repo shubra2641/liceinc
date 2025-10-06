@@ -5,60 +5,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const overlay = document.getElementById('admin-sidebar-overlay');
     const layout = document.querySelector('.admin-layout');
     
-    if (menuToggle && sidebar && overlay && layout) {
-        // Get direction from layout
+    // Apply RTL/LTR specific styles
+    function applyDirectionStyles() {
+        if (!sidebar || !layout) return;
+        
         const isRTL = layout.getAttribute('dir') === 'rtl';
         
-        // Toggle sidebar
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('show');
-            document.body.classList.toggle('sidebar-open');
-        });
-        
-        // Close sidebar when clicking overlay
-        overlay.addEventListener('click', function() {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('show');
-            document.body.classList.remove('sidebar-open');
-        });
-        
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(e) {
-            if (window.innerWidth < 1024) {
-                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                    sidebar.classList.remove('open');
-                    overlay.classList.remove('show');
-                    document.body.classList.remove('sidebar-open');
-                }
-            }
-        });
-        
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 1024) {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('show');
-                document.body.classList.remove('sidebar-open');
-            }
-        });
-        
-        // Apply RTL/LTR specific styles
-        function applyDirectionStyles() {
-            if (window.innerWidth < 1024) {
-                if (isRTL) {
-                    // RTL: Sidebar slides from right
-                    sidebar.style.right = '0';
-                    sidebar.style.left = 'auto';
-                    sidebar.style.transform = 'translateX(100%)';
-                } else {
-                    // LTR: Sidebar slides from left
-                    sidebar.style.left = '0';
-                    sidebar.style.right = 'auto';
-                    sidebar.style.transform = 'translateX(-100%)';
-                }
+        if (window.innerWidth < 1024) {
+            if (isRTL) {
+                // RTL: Sidebar slides from right
+                sidebar.style.right = '0';
+                sidebar.style.left = 'auto';
+                sidebar.style.transform = 'translateX(100%)';
+            } else {
+                // LTR: Sidebar slides from left
+                sidebar.style.left = '0';
+                sidebar.style.right = 'auto';
+                sidebar.style.transform = 'translateX(-100%)';
             }
         }
+    }
+    
+    if (menuToggle && sidebar && overlay && layout) {
         
         // Apply styles on load
         applyDirectionStyles();

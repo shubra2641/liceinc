@@ -518,7 +518,7 @@ class ProductShowManager {
         const notification = document.createElement('div');
         notification.className = `alert alert-${type} alert-dismissible fade show`;
         // Sanitize message to prevent XSS
-        window.window.SecurityUtils.safeInnerHTML(notification, `
+        window.SecurityUtils.safeInnerHTML(notification, `
             <div class="d-flex align-items-center">
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
                 <span>${message}</span>

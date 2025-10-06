@@ -209,6 +209,7 @@ class TicketApiController extends Controller
      */
     public function verifyPurchaseCode(VerifyPurchaseCodeRequest $request): JsonResponse
     {
+        $purchaseCode = null;
         try {
             DB::beginTransaction();
             $validated = $request->validated();

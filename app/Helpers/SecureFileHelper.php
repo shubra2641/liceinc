@@ -78,7 +78,7 @@ class SecureFileHelper
     /**
      * Secure alternative to mkdir()
      */
-    public static function createDirectory(string $path, int $permissions = 0755): bool
+    public static function createDirectory(string $path, int $permissions = 0755, bool $recursive = true): bool
     {
         try {
             return Storage::makeDirectory($path);
@@ -117,9 +117,9 @@ class SecureFileHelper
     /**
      * Secure alternative to fopen() for output
      */
-    public static function openOutput(): mixed
+    public static function openOutput(string $mode = 'w'): mixed
     {
-        return fopen('php://output', 'w');
+        return fopen('php://output', $mode);
     }
 
     /**

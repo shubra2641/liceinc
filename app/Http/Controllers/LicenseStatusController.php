@@ -380,7 +380,8 @@ class LicenseStatusController extends Controller
                     'created_at' => $domain->created_at->format('Y-m-d H:i:s'),
                 ];
             }),
-            'supported_until' => $license->supported_until ? $license->supported_until->format('Y-m-d H:i:s') : null,
+            'supported_until' => $license->supported_until ? 
+                (is_string($license->supported_until) ? $license->supported_until : $license->supported_until->format('Y-m-d H:i:s')) : null,
             'max_domains' => $license->max_domains ?? 1,
             'used_domains' => $license->domains->count(),
             // Attach envato verification results when available

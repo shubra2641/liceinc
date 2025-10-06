@@ -224,7 +224,7 @@ class ProductUpdateController extends Controller
     public function show(ProductUpdate $product_update): View
     {
         $product_update->load('product');
-        return view('admin.product-updates.show', compact('productUpdate'));
+        return view('admin.product-updates.show', compact('product_update'));
     }
     /**
      * Show the form for editing the specified product update.
@@ -250,7 +250,7 @@ class ProductUpdateController extends Controller
     public function edit(ProductUpdate $product_update): View
     {
         $products = Product::where('is_active', true)->get();
-        return view('admin.product-updates.edit', compact('productUpdate', 'products'));
+        return view('admin.product-updates.edit', compact('product_update', 'products'));
     }
     /**
      * Update the specified product update with enhanced security.

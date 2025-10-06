@@ -730,9 +730,10 @@ class EmailService
     /**
      * Send license creation notification to user.
      */
-    public function sendLicenseCreated($license): bool
+    public function sendLicenseCreated($license, $user = null): bool
     {
-        return $this->sendToUser($license->user, 'license_created', [
+        $targetUser = $user ?? $license->user;
+        return $this->sendToUser($targetUser, 'license_created', [
             'customer_name' => $license->user->name,
             'customer_email' => $license->user->email,
             'product_name' => $license->product->name,
