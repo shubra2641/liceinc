@@ -1,7 +1,10 @@
 <?php
+
 namespace App\Http\Requests\Admin;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
+
 /**
  * Profile Advanced Request with enhanced security.
  *
@@ -66,7 +69,7 @@ class ProfileAdvancedRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
-                'unique:users,email,'.$userId,
+                'unique:users,email,' . $userId,
             ],
             'firstname' => [
                 'nullable',

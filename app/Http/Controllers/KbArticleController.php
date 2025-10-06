@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers;
+
 use App\Models\KbArticle;
 use App\Models\KbCategory;
 use Illuminate\Http\RedirectResponse;
@@ -11,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+
 /**
  * Knowledge Base Article Controller with enhanced security.
  *
@@ -57,7 +61,7 @@ class KbArticleController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'kb-articles-index:'.(Auth::id() ?? request()->ip());
+            $key = 'kb-articles-index:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 20)) {
                 Log::warning('Rate limit exceeded for KB articles index', [
                     'user_id' => Auth::id(),
@@ -109,7 +113,7 @@ class KbArticleController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'kb-articles-create:'.(Auth::id() ?? request()->ip());
+            $key = 'kb-articles-create:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for KB article creation form', [
                     'user_id' => Auth::id(),
@@ -168,7 +172,7 @@ class KbArticleController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'kb-articles-store:'.(Auth::id() ?? request()->ip());
+            $key = 'kb-articles-store:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for KB article creation', [
                     'user_id' => Auth::id(),
@@ -269,7 +273,7 @@ class KbArticleController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'kb-articles-edit:'.(Auth::id() ?? request()->ip());
+            $key = 'kb-articles-edit:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for KB article editing form', [
                     'user_id' => Auth::id(),
@@ -329,7 +333,7 @@ class KbArticleController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'kb-articles-update:'.(Auth::id() ?? request()->ip());
+            $key = 'kb-articles-update:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for KB article update', [
                     'user_id' => Auth::id(),
@@ -352,7 +356,7 @@ class KbArticleController extends Controller
             $validated = $request->validate([
                 'kb_category_id' => ['required', 'exists:kb_categories, id'],
                 'title' => ['required', 'string', 'max:255'],
-                'slug' => ['required', 'string', 'max:255', 'unique:kb_articles, slug, '.$kbArticle->id],
+                'slug' => ['required', 'string', 'max:255', 'unique:kb_articles, slug, ' . $kbArticle->id],
                 'excerpt' => ['nullable', 'string'],
                 'content' => ['required', 'string'],
                 'image' => ['nullable', 'image', 'max:2048'],
@@ -429,7 +433,7 @@ class KbArticleController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'kb-articles-destroy:'.(Auth::id() ?? request()->ip());
+            $key = 'kb-articles-destroy:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 3)) {
                 Log::warning('Rate limit exceeded for KB article deletion', [
                     'user_id' => Auth::id(),

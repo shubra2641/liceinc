@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LicenseRequest;
 use App\Models\License;
@@ -12,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use App\Helpers\SecureFileHelper;
+
 /**
  * Admin License Controller with enhanced security.
  *
@@ -393,10 +396,10 @@ class LicenseController extends Controller
     public function export(): \Illuminate\Http\Response
     {
         $licenses = License::with(['user', 'product'])->get();
-        $filename = 'licenses_'.date('Y-m-d_H-i-s').'.csv';
+        $filename = 'licenses_' . date('Y-m-d_H-i-s') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
         $callback = function () use ($licenses) {
             $file = SecureFileHelper::openOutput('php://output', 'w');

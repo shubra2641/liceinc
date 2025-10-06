@@ -828,7 +828,7 @@ window.ProductShowManager = ProductShowManager;
         button.style.background = '#10b981';
         
         setTimeout(() => {
-            button.innerHTML = sanitizedOriginalText;
+            button.innerHTML = originalText;
             button.style.background = '';
         }, 2000);
     };

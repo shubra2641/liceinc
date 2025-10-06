@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProgrammingLanguageAdvancedRequest;
 use App\Http\Requests\Admin\ProgrammingLanguageRequest;
@@ -12,6 +14,7 @@ use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 use Illuminate\View\View;
 use App\Helpers\SecureFileHelper;
+
 /**
  * Admin Programming Language Controller with enhanced security.
  *
@@ -84,7 +87,7 @@ class ProgrammingLanguageController extends Controller
             if ($type === 'default') {
                 // Get default template file
                 $templateDir = resource_path('templates/licenses');
-                $files = glob($templateDir.'/'.$language.'.{php, blade.php}', GLOB_BRACE);
+                $files = glob($templateDir . '/' . $language . '.{php, blade.php}', GLOB_BRACE);
                 if (! empty($files)) {
                     $file = $files[0];
                     if (file_exists($file)) {
@@ -98,7 +101,7 @@ class ProgrammingLanguageController extends Controller
                 } else {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Default template file not found for language: '.$language,
+                        'message' => 'Default template file not found for language: ' . $language,
                     ], 404);
                 }
             } else {
@@ -130,7 +133,7 @@ class ProgrammingLanguageController extends Controller
             // License file content error
             return response()->json([
                 'success' => false,
-                'message' => 'Error reading file: '.$e->getMessage(),
+                'message' => 'Error reading file: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -411,7 +414,7 @@ class ProgrammingLanguageController extends Controller
         $templateDir = resource_path('templates/licenses');
         $templates = [];
         if (is_dir($templateDir)) {
-            $files = glob($templateDir.'/*.blade.php');
+            $files = glob($templateDir . '/*.blade.php');
             foreach ($files as $file) {
                 $filename = basename($file, '.blade.php');
                 $templates[] = [
@@ -502,7 +505,7 @@ class ProgrammingLanguageController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed: '.$e->getMessage(),
+                'message' => 'Validation failed: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -515,9 +518,9 @@ class ProgrammingLanguageController extends Controller
         $tempFile = tempnam(sys_get_temp_dir(), 'php_syntax_check');
         SecureFileHelper::putContents($tempFile, $code);
     // Run PHP syntax check using Symfony Process (safer than shell_exec)
-    $process = new Process(['php', '-l', $tempFile]);
-    $process->run();
-    $output = $process->getOutput().$process->getErrorOutput();
+        $process = new Process(['php', '-l', $tempFile]);
+        $process->run();
+        $output = $process->getOutput() . $process->getErrorOutput();
         // Clean up
         SecureFileHelper::deleteFile($tempFile);
         if (strpos($output, 'No syntax errors detected') === false) {
@@ -561,17 +564,17 @@ class ProgrammingLanguageController extends Controller
             if (! is_dir($templateDir)) {
                 mkdir($templateDir, 0755, true);
             }
-            $filename = $programming_language->slug.'.php';
+            $filename = $programming_language->slug . '.php';
             $file->move($templateDir, $filename);
             return response()->json([
                 'success' => true,
                 'message' => 'Template file uploaded successfully',
-                'file_path' => $templateDir.'/'.$filename,
+                'file_path' => $templateDir . '/' . $filename,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to upload template file: '.$e->getMessage(),
+                'message' => 'Failed to upload template file: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -604,8 +607,8 @@ class ProgrammingLanguageController extends Controller
             if (! is_dir($templateDir)) {
                 mkdir($templateDir, 0755, true);
             }
-            $filename = $programming_language->slug.'.php';
-            $filePath = $templateDir.'/'.$filename;
+            $filename = $programming_language->slug . '.php';
+            $filePath = $templateDir . '/' . $filename;
             SecureFileHelper::putContents($filePath, $request->template_content);
             return response()->json([
                 'success' => true,
@@ -615,7 +618,7 @@ class ProgrammingLanguageController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create template file: '.$e->getMessage(),
+                'message' => 'Failed to create template file: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -636,10 +639,10 @@ class ProgrammingLanguageController extends Controller
     public function export(): \Illuminate\Http\Response
     {
         $languages = ProgrammingLanguage::orderBy('sort_order')->orderBy('name')->get();
-        $filename = 'programming_languages_'.date('Y-m-d_H-i-s').'.csv';
+        $filename = 'programming_languages_' . date('Y-m-d_H-i-s') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
         $callback = function () use ($languages) {
             $file = fopen('php://output', 'w');

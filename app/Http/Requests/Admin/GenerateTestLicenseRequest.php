@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Http\Requests\Admin;
+
 use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * Generate Test License Request with comprehensive validation.
  *

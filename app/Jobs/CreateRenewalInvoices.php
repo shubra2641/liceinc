@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Jobs;
+
 use App\Services\InvoiceService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Create Renewal Invoices Job with enhanced security and error handling.
  *
@@ -22,6 +25,7 @@ use Illuminate\Support\Facades\Log;
 class CreateRenewalInvoices implements ShouldQueue
 {
     use Queueable;
+
     /**
      * The number of times the job may be attempted.
      *

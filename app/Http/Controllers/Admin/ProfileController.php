@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProfileAdvancedRequest;
 use Illuminate\Http\RedirectResponse;
@@ -9,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+
 /**
  * Profile Controller with enhanced security.
  *
@@ -95,7 +98,7 @@ class ProfileController extends Controller
                 DB::commit();
                 return Redirect::route('verification.notice')
                     ->with('success', 'Please verify your email address. A verification link has been sent to your '
-                        .'email.');
+                        . 'email.');
             }
             $user->save();
             DB::commit();
@@ -200,7 +203,7 @@ class ProfileController extends Controller
                 $user->save();
                 DB::commit();
                 return Redirect::route('admin.profile.edit')
-                    ->with('success', 'Successfully connected to Envato account: '.($data['username'] ?? 'Unknown'));
+                    ->with('success', 'Successfully connected to Envato account: ' . ($data['username'] ?? 'Unknown'));
             } else {
                 DB::rollBack();
                 return Redirect::route('admin.profile.edit')
@@ -214,7 +217,7 @@ class ProfileController extends Controller
                 'user_id' => $request->user()->id,
             ]);
             return Redirect::route('admin.profile.edit')
-                ->with('error', 'Failed to connect to Envato: '.$e->getMessage());
+                ->with('error', 'Failed to connect to Envato: ' . $e->getMessage());
         }
     }
     /**

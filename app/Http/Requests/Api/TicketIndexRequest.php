@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Http\Requests\Api;
+
 use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * Ticket Index Request with comprehensive validation.
  *

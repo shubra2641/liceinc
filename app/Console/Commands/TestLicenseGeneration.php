@@ -1,11 +1,14 @@
 <?php
+
 namespace App\Console\Commands;
+
 use App\Models\Product;
 use App\Models\Setting;
 use App\Services\LicenseGeneratorService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Test License Generation Command with enhanced security.
  *
@@ -98,8 +101,8 @@ class TestLicenseGeneration extends Command
                 'trace' => $e->getTraceAsString(),
                 'command' => 'test:license-generation',
             ]);
-            $this->error('Error: '.$e->getMessage());
-            $this->error("Stack trace:\n".$e->getTraceAsString());
+            $this->error('Error: ' . $e->getMessage());
+            $this->error("Stack trace:\n" . $e->getTraceAsString());
             return 1;
         }
         $this->info("\n=== Test Complete ===");
@@ -121,7 +124,7 @@ class TestLicenseGeneration extends Command
             }
             return $setting;
         } catch (\Exception $e) {
-            $this->error('Failed to retrieve settings: '.$e->getMessage());
+            $this->error('Failed to retrieve settings: ' . $e->getMessage());
             Log::error('Failed to retrieve settings during license generation test', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -136,8 +139,8 @@ class TestLicenseGeneration extends Command
      */
     private function displayTokenStatus(Setting $setting): void
     {
-        $this->info('API Token from DB: '.($setting->license_api_token ? 'Found' : 'Not found'));
-        $this->info('Envato Token from DB: '.($setting->envato_personal_token ? 'Found' : 'Not found'));
+        $this->info('API Token from DB: ' . ($setting->license_api_token ? 'Found' : 'Not found'));
+        $this->info('Envato Token from DB: ' . ($setting->envato_personal_token ? 'Found' : 'Not found'));
     }
     /**
      * Validate and get product with security checks.
@@ -162,7 +165,7 @@ class TestLicenseGeneration extends Command
             }
             return $product;
         } catch (\Exception $e) {
-            $this->error('Failed to retrieve product: '.$e->getMessage());
+            $this->error('Failed to retrieve product: ' . $e->getMessage());
             Log::error('Failed to retrieve product during license generation test', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -207,7 +210,7 @@ class TestLicenseGeneration extends Command
             $this->info("Generated file: {$filePath}");
             return $filePath;
         } catch (\Exception $e) {
-            $this->error('Failed to generate license file: '.$e->getMessage());
+            $this->error('Failed to generate license file: ' . $e->getMessage());
             Log::error('Failed to generate license file', [
                 'product_id' => $product->id,
                 'error' => $e->getMessage(),
@@ -252,7 +255,7 @@ class TestLicenseGeneration extends Command
             $this->validateTokenInclusion($content, $setting);
             return true;
         } catch (\Exception $e) {
-            $this->error('Failed to validate generated file: '.$e->getMessage());
+            $this->error('Failed to validate generated file: ' . $e->getMessage());
             Log::error('Failed to validate generated license file', [
                 'file_path' => $filePath,
                 'error' => $e->getMessage(),
@@ -274,7 +277,7 @@ class TestLicenseGeneration extends Command
         $linesCount = count($lines);
         $maxLines = min(10, $linesCount);
         for ($i = 0; $i < $maxLines; $i++) {
-            $this->line(($i + 1).': '.$lines[$i]);
+            $this->line(($i + 1) . ': ' . $lines[$i]);
         }
     }
     /**

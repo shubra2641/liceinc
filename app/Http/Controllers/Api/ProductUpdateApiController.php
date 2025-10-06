@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ProductUpdateApiRequest;
 use App\Models\License;
@@ -10,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+
 /**
  * Product Update API Controller.
  *
@@ -417,7 +420,7 @@ class ProductUpdateApiController extends Controller
                 ->active()
                 ->orderBy('version', 'desc')
                 ->get();
-            $changelog = $updates->map(function($update) {
+            $changelog = $updates->map(function ($update) {
                 return [
                     'version' => $update->version,
                     'title'  => $update->title,

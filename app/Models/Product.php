@@ -1,8 +1,11 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 /**
  * @property int $id
  * @property string $name
@@ -131,6 +134,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Product extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'name',
         'slug',
@@ -369,21 +373,21 @@ class Product extends Model
      */
     public function getFormattedExtendedSupportPriceAttribute()
     {
-        return '$'.number_format($this->extended_support_price, 2);
+        return '$' . number_format($this->extended_support_price, 2);
     }
     /**
      * Get formatted price.
      */
     public function getFormattedPriceAttribute()
     {
-        return '$'.number_format($this->price, 2);
+        return '$' . number_format($this->price, 2);
     }
     /**
      * Get formatted renewal price.
      */
     public function getFormattedRenewalPriceAttribute()
     {
-        return $this->renewal_price ? '$'.number_format($this->renewal_price, 2) : 'N/A';
+        return $this->renewal_price ? '$' . number_format($this->renewal_price, 2) : 'N/A';
     }
     /**
      * Get renewal period label.
@@ -454,7 +458,7 @@ class Product extends Model
         if (is_null($this->stock)) {
             return 'Unlimited';
         }
-        return $this->stock > 0 ? 'In Stock ('.$this->stock.')' : 'Out of Stock';
+        return $this->stock > 0 ? 'In Stock (' . $this->stock . ')' : 'Out of Stock';
     }
     /**
      * Get renewal price (fallback to regular price if not set).

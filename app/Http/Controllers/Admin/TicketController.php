@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\TicketRequest;
 use App\Models\Invoice;
@@ -14,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+
 /**
  * Ticket Controller with enhanced security.
  *
@@ -487,7 +490,7 @@ class TicketController extends Controller
                 ]);
             }
             DB::commit();
-            return back()->with('success', 'Ticket status updated to '.ucfirst($ticket->status));
+            return back()->with('success', 'Ticket status updated to ' . ucfirst($ticket->status));
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to update ticket status', [
@@ -496,7 +499,7 @@ class TicketController extends Controller
                 'ticket_id' => $ticket->id,
                 'request_data' => $request->all(),
             ]);
-            return back()->withErrors(['status' => 'Error updating ticket status: '.$e->getMessage()]);
+            return back()->withErrors(['status' => 'Error updating ticket status: ' . $e->getMessage()]);
         }
     }
 }

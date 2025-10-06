@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers\User;
+
 use App\Http\Controllers\Controller;
 use App\Models\License;
 use Illuminate\Http\RedirectResponse;
@@ -10,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use InvalidArgumentException;
+
 /**
  * License Controller with enhanced security and comprehensive license management.
  *

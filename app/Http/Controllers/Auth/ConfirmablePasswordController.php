@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ConfirmPasswordRequest;
 use Illuminate\Http\RedirectResponse;
@@ -10,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use App\Helpers\SecurityHelper;
+
 /**
  * Controller for handling password confirmation requests with enhanced security.
  *

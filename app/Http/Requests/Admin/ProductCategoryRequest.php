@@ -1,8 +1,11 @@
 <?php
+
 namespace App\Http\Requests\Admin;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+
 /**
  * Product Category Request with enhanced security.
  *
@@ -80,7 +83,7 @@ class ProductCategoryRequest extends FormRequest
             'parent_id' => [
                 'nullable',
                 'exists:product_categories, id',
-                'not_in:'.($categoryId ?? ''),
+                'not_in:' . ($categoryId ?? ''),
             ],
             'meta_title' => [
                 'nullable',
@@ -138,7 +141,7 @@ class ProductCategoryRequest extends FormRequest
     {
         return [
             'name.regex' => 'Category name contains invalid characters. Only letters, numbers, '
-                .'spaces, hyphens, underscores, and ampersands are allowed.',
+                . 'spaces, hyphens, underscores, and ampersands are allowed.',
             'name.unique' => 'A category with this name already exists.',
             'slug.regex' => 'Slug can only contain lowercase letters, numbers, hyphens, and underscores.',
             'slug.unique' => 'A category with this slug already exists.',

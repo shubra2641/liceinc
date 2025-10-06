@@ -103,7 +103,7 @@ class ToastManager {
                 </button>
             </div>
             <div class="toast-body">
-                ${sanitizedMessage}
+                ${message}
             </div>
         `);
 
@@ -1067,7 +1067,7 @@ class AdminDashboard {
         
         const alertHtml = `
             <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${sanitizedMessage}
+                ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         `;

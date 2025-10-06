@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\TicketCategoryRequest;
 use App\Models\TicketCategory;
@@ -9,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+
 /**
  * Admin Ticket Category Controller with enhanced security and compliance.
  *
@@ -111,7 +114,7 @@ class TicketCategoryController extends Controller
     public function store(TicketCategoryRequest $request): RedirectResponse
     {
         // Rate limiting for category creation
-        $key = 'ticket-category-create:'.$request->ip();
+        $key = 'ticket-category-create:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
             return redirect()->back()
                 ->with('error', 'Too many creation attempts. Please try again later.');
@@ -229,7 +232,7 @@ class TicketCategoryController extends Controller
     public function update(TicketCategoryRequest $request, TicketCategory $ticket_category): RedirectResponse
     {
         // Rate limiting for category updates
-    $key = sprintf('ticket-category-update:%s', $request->ip()); // security-ignore: SQL_STRING_CONCAT
+        $key = sprintf('ticket-category-update:%s', $request->ip()); // security-ignore: SQL_STRING_CONCAT
         if (RateLimiter::tooManyAttempts($key, 10)) {
             return redirect()->back()
                 ->with('error', 'Too many update attempts. Please try again later.');
@@ -280,7 +283,7 @@ class TicketCategoryController extends Controller
     public function destroy(TicketCategory $ticket_category): RedirectResponse
     {
         // Rate limiting for category deletions
-        $key = 'ticket-category-delete:'.request()->ip();
+        $key = 'ticket-category-delete:' . request()->ip();
         if (RateLimiter::tooManyAttempts($key, 3)) {
             return redirect()->back()
                 ->with('error', 'Too many deletion attempts. Please try again later.');

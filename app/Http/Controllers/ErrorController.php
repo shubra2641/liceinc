@@ -1,7 +1,10 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use Exception;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Error Controller.
  *

@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers;
+
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -11,6 +14,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+
 /**
  * Base Controller with enhanced security and comprehensive functionality.
  *
@@ -46,6 +50,7 @@ class Controller extends BaseController
     use AuthorizesRequests;
     use DispatchesJobs;
     use ValidatesRequests;
+
     /**
      * Execute a database transaction with enhanced error handling.
      *
@@ -192,7 +197,7 @@ class Controller extends BaseController
      */
     protected function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data.config('app.key')), 0, 8).'...';
+        return substr(hash('sha256', $data . config('app.key')), 0, 8) . '...';
     }
     /**
      * Log security event with comprehensive context.
@@ -210,7 +215,7 @@ class Controller extends BaseController
     protected function logSecurityEvent(string $event, Request $request, array $context = []): void
     {
         try {
-            Log::warning('Security event: '.$event, array_merge([
+            Log::warning('Security event: ' . $event, array_merge([
                 'event' => $event,
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
@@ -278,7 +283,7 @@ class Controller extends BaseController
      */
     protected function handleError(Throwable $e, Request $request, string $context = ''): JsonResponse
     {
-        Log::error('Controller error: '.$context, [
+        Log::error('Controller error: ' . $context, [
             'error' => $e->getMessage(),
             'context' => $context,
             'url' => $request->fullUrl(),

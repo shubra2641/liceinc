@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers;
+
 use App\Models\Invoice;
 use App\Models\License;
 use App\Models\Product;
@@ -11,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use InvalidArgumentException;
+
 /**
  * Home Controller with enhanced security and comprehensive home page management.
  *

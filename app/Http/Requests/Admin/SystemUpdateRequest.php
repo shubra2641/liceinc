@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Http\Requests\Admin;
+
 use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * System Update Request with enhanced security.
  *

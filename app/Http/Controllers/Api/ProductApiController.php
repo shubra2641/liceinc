@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ProductLookupRequest;
 use App\Models\License;
@@ -8,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Product API Controller.
  *
@@ -129,7 +132,7 @@ class ProductApiController extends Controller
                 ]);
             }
             Log::warning('Invalid purchase code lookup attempt', [
-                'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);

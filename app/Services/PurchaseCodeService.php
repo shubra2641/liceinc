@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Services;
+
 use App\Models\License;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Purchase Code Service with enhanced security and validation.
  *
@@ -426,7 +429,7 @@ class PurchaseCodeService
         $licenseData = [
             'user_id' => $user->id,
             'purchase_code' => $purchaseCode,
-            'license_key' => 'envato_'.$purchaseCode,
+            'license_key' => 'envato_' . $purchaseCode,
             'license_type' => 'regular',
             'status' => 'active',
             'purchase_date' => data_get($envatoData, 'sold_at')

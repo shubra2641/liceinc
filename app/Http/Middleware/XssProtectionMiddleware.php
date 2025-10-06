@@ -1,11 +1,15 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Middleware;
+
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
+
 /**
  * XSS Protection Middleware with enhanced security and comprehensive input sanitization.
  *
@@ -400,6 +404,6 @@ class XssProtectionMiddleware
      */
     private function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data.config('app.key')), 0, 8).'...';
+        return substr(hash('sha256', $data . config('app.key')), 0, 8) . '...';
     }
 }

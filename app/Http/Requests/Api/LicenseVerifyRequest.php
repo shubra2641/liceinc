@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Http\Requests\Api;
+
 use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * License Verify Request with enhanced security.
  *
@@ -68,12 +71,12 @@ class LicenseVerifyRequest extends FormRequest
     {
         return [
             'purchase_code.required' => 'Purchase code is required.',
-            'purchase_code.regex' => 'Purchase code contains invalid characters. '.
+            'purchase_code.regex' => 'Purchase code contains invalid characters. ' .
                 'Only uppercase letters, numbers, and hyphens are allowed.',
             'purchase_code.min' => 'Purchase code must be at least 10 characters long.',
             'purchase_code.max' => 'Purchase code may not be greater than 100 characters.',
             'product_slug.required' => 'Product slug is required.',
-            'product_slug.regex' => 'Product slug contains invalid characters. '.
+            'product_slug.regex' => 'Product slug contains invalid characters. ' .
                 'Only lowercase letters, numbers, and hyphens are allowed.',
             'domain.required' => 'Domain is required.',
             'domain.regex' => 'Domain contains invalid characters.',

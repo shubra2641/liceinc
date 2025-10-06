@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Console\Commands;
+
 use App\Jobs\CreateRenewalInvoices;
 use App\Jobs\ProcessOverdueInvoices;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Process Invoices Command with enhanced security.
  *
@@ -93,7 +96,7 @@ class ProcessInvoicesCommand extends Command
                     'dry_run' => $this->option('dry-run'),
                 ],
             ]);
-            $this->error('Failed to process invoices: '.$e->getMessage());
+            $this->error('Failed to process invoices: ' . $e->getMessage());
             return Command::FAILURE;
         }
     }

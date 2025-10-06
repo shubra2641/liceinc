@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers;
+
 use App\Models\Invoice;
 use App\Models\License;
 use App\Models\PaymentSetting;
@@ -15,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
+
 /**
  * Payment Controller with enhanced security.
  *
@@ -71,7 +75,7 @@ class PaymentController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'payment-gateways:'.(Auth::id() ?? request()->ip());
+            $key = 'payment-gateways:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for payment gateways', [
                     'user_id' => Auth::id(),
@@ -150,7 +154,7 @@ class PaymentController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'payment-process:'.(Auth::id() ?? request()->ip());
+            $key = 'payment-process:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for payment processing', [
                     'user_id' => Auth::id(),
@@ -267,7 +271,7 @@ class PaymentController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'payment-success:'.(Auth::id() ?? request()->ip());
+            $key = 'payment-success:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for payment success callback', [
                     'gateway' => $gateway,
@@ -462,7 +466,7 @@ class PaymentController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'payment-cancel:'.(Auth::id() ?? request()->ip());
+            $key = 'payment-cancel:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for payment cancellation', [
                     'gateway' => $gateway,
@@ -510,7 +514,7 @@ class PaymentController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'payment-failure:'.(Auth::id() ?? request()->ip());
+            $key = 'payment-failure:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for payment failure handling', [
                     'gateway' => $gateway,
@@ -568,7 +572,7 @@ class PaymentController extends Controller
     {
         try {
             // Rate limiting for webhooks
-            $key = 'payment-webhook:'.request()->ip();
+            $key = 'payment-webhook:' . request()->ip();
             if (RateLimiter::tooManyAttempts($key, 100)) {
                 Log::warning('Rate limit exceeded for payment webhook', [
                     'gateway' => $gateway,
@@ -625,7 +629,7 @@ class PaymentController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'payment-custom:'.(Auth::id() ?? request()->ip());
+            $key = 'payment-custom:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for custom payment processing', [
                     'invoice_id' => $invoice->id,

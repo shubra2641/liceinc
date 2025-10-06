@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
+
 /**
  * @property int $id
  * @property int $product_id
@@ -59,6 +62,7 @@ use Illuminate\Support\Facades\Storage;
 class ProductUpdate extends Model
 {
     use HasFactory;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -198,7 +202,7 @@ class ProductUpdate extends Model
         for ($i = 0; $bytes > 1024 && $i < $unitsCount - 1; $i++) {
             $bytes /= 1024;
         }
-        return round($bytes, 2).' '.$units[$i];
+        return round($bytes, 2) . ' ' . $units[$i];
     }
     /**
      * Scope for active updates.

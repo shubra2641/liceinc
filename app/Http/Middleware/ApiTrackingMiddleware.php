@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Middleware;
+
 use App\Models\License;
 use App\Models\LicenseLog;
 use Closure;
@@ -7,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+
 /**
  * API Tracking Middleware with enhanced security.
  *

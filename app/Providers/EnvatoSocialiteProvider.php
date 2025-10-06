@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Providers;
+
 use App\Services\EnvatoProvider;
 use App\Services\EnvatoService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
+
 /**
  * Envato Socialite Provider with enhanced security and error handling.
  *

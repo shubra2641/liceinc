@@ -1,7 +1,10 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 /**
  * @property int $id
  * @property string $name
@@ -57,6 +60,7 @@ use Illuminate\Database\Eloquent\Model;
 class KbCategory extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'name', 'slug', 'description', 'parent_id', 'serial', 'requires_serial', 'serial_message',
         'sort_order', 'product_id', 'meta_title', 'meta_description', 'meta_keywords', 'icon',

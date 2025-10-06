@@ -1,8 +1,11 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+
 /**
  * @property int $id
  * @property string $invoice_number
@@ -52,6 +55,7 @@ use Illuminate\Support\Str;
 class Invoice extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'invoice_number',
         'user_id',
@@ -119,7 +123,7 @@ class Invoice extends Model
     public static function generateInvoiceNumber()
     {
         do {
-            $number = 'INV-'.date('Y').'-'.strtoupper(Str::random(8));
+            $number = 'INV-' . date('Y') . '-' . strtoupper(Str::random(8));
         } while (static::where('invoice_number', $number)->exists());
         return $number;
     }

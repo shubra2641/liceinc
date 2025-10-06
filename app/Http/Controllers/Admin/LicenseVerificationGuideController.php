@@ -1,11 +1,14 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
+
 /**
  * License Verification Guide Controller with enhanced security.
  *
@@ -68,7 +71,7 @@ class LicenseVerificationGuideController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'license-guide:'.$request->ip().':'.Auth::id();
+            $key = 'license-guide:' . $request->ip() . ':' . Auth::id();
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for license verification guide access', [
                     'ip' => $request->ip(),

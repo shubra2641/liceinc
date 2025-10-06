@@ -1,7 +1,10 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\LicenseDomain;
 use Illuminate\Http\Request;
+
 class LicenseDomainController extends Controller
 {
     /**

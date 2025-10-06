@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PaymentSettingsRequest;
 use App\Models\PaymentSetting;
@@ -8,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+
 /**
  * Payment Settings Controller with enhanced security.
  *
@@ -233,7 +236,7 @@ class PaymentSettingsController extends Controller
         } catch (\Exception $e) {
             Log::warning('PayPal connection test failed', [
                 'error' => $e->getMessage(),
-                'client_id' => substr($credentials['client_id'] ?? '', 0, 8).'...',
+                'client_id' => substr($credentials['client_id'] ?? '', 0, 8) . '...',
             ]);
             return [
                 'success' => false,
@@ -282,7 +285,7 @@ class PaymentSettingsController extends Controller
         } catch (\Exception $e) {
             Log::warning('Stripe connection test failed', [
                 'error' => $e->getMessage(),
-                'secret_key' => substr($credentials['secret_key'] ?? '', 0, 8).'...',
+                'secret_key' => substr($credentials['secret_key'] ?? '', 0, 8) . '...',
             ]);
             return [
                 'success' => false,

@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\User;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
@@ -9,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+
 /**
  * User Profile Controller with enhanced security.
  *

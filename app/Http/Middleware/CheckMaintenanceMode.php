@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Http\Middleware;
+
 use App\Models\Setting;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Check Maintenance Mode Middleware with enhanced security and error handling.
  *

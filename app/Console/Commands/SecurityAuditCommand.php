@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Console\Commands;
+
 use App\Models\License;
 use App\Models\LicenseLog;
 use App\Models\User;
@@ -7,6 +9,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Security Audit Command with enhanced security and performance.
  *
@@ -65,7 +68,7 @@ class SecurityAuditCommand extends Command
      * @var string
      */
     protected $description = 'Perform comprehensive security audit of the application with advanced '
-        .'reporting and auto-fix capabilities';
+        . 'reporting and auto-fix capabilities';
     /**
      * Security issues found during audit.
      *
@@ -130,7 +133,7 @@ class SecurityAuditCommand extends Command
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $this->error('Security audit failed: '.$e->getMessage());
+            $this->error('Security audit failed: ' . $e->getMessage());
             return 1;
         }
     }
@@ -167,7 +170,7 @@ class SecurityAuditCommand extends Command
                 $this->addIssue(
                     'high',
                     $checkName,
-                    'Failed to perform security check: '.$e->getMessage(),
+                    'Failed to perform security check: ' . $e->getMessage(),
                 );
             }
         }
@@ -234,7 +237,7 @@ class SecurityAuditCommand extends Command
             $this->addIssue(
                 'high',
                 'Database Security',
-                'Failed to check database security: '.$e->getMessage(),
+                'Failed to check database security: ' . $e->getMessage(),
             );
         }
     }
@@ -258,8 +261,8 @@ class SecurityAuditCommand extends Command
                     $this->addIssue(
                         'high',
                         'File Permissions',
-                        "File {$file} has permissions ".decoct($currentPerms).
-                        ' but should have '.decoct($expectedPerms),
+                        "File {$file} has permissions " . decoct($currentPerms) .
+                        ' but should have ' . decoct($expectedPerms),
                     );
                 }
             } else {
@@ -277,7 +280,7 @@ class SecurityAuditCommand extends Command
             $this->addIssue(
                 'medium',
                 'File Permissions',
-                'Found '.count($writableFiles).' world-writable files',
+                'Found ' . count($writableFiles) . ' world-writable files',
             );
         }
     }
@@ -426,7 +429,7 @@ class SecurityAuditCommand extends Command
                 $this->addIssue(
                     'low',
                     'Log Files',
-                    'Log files are consuming '.round($totalSize / 1024 / 1024, 2).'MB of space',
+                    'Log files are consuming ' . round($totalSize / 1024 / 1024, 2) . 'MB of space',
                 );
             }
             // Check for publicly accessible log files
@@ -435,7 +438,7 @@ class SecurityAuditCommand extends Command
                     $this->addIssue(
                         'medium',
                         'Log Files',
-                        'Log file '.basename($file).' is world-readable',
+                        'Log file ' . basename($file) . ' is world-readable',
                     );
                 }
             }
@@ -479,7 +482,7 @@ class SecurityAuditCommand extends Command
             $this->addIssue(
                 'high',
                 'Environment',
-                'PHP version '.PHP_VERSION.' is outdated and may have security vulnerabilities',
+                'PHP version ' . PHP_VERSION . ' is outdated and may have security vulnerabilities',
             );
         }
         // Check for dangerous PHP functions
@@ -555,7 +558,7 @@ class SecurityAuditCommand extends Command
             ],
             'issues' => $this->issues,
         ];
-        $reportPath = storage_path('logs/security-audit-'.now()->format('Y-m-d-H-i-s').'.json');
+        $reportPath = storage_path('logs/security-audit-' . now()->format('Y-m-d-H-i-s') . '.json');
         File::put($reportPath, json_encode($report, JSON_PRETTY_PRINT));
         $this->info("Security report saved to: {$reportPath}");
     }

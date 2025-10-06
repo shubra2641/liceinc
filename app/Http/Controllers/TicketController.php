@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\Product;
 use App\Models\Ticket;
 use App\Models\TicketReply;
@@ -11,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+
 /**
  * Ticket Controller with enhanced security.
  *
@@ -79,7 +82,7 @@ class TicketController extends Controller
             return view('tickets.index', compact('tickets'));
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load user tickets: '.$e->getMessage(), [
+            Log::error('Failed to load user tickets: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -109,7 +112,7 @@ class TicketController extends Controller
         try {
             return view('tickets.create');
         } catch (Exception $e) {
-            Log::error('Failed to load ticket creation form: '.$e->getMessage(), [
+            Log::error('Failed to load ticket creation form: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -161,7 +164,7 @@ class TicketController extends Controller
             return redirect()->route('tickets.show', $ticket)->with('success', 'Ticket created successfully');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to create ticket: '.$e->getMessage(), [
+            Log::error('Failed to create ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
@@ -212,7 +215,7 @@ class TicketController extends Controller
             return view('tickets.show', compact('ticket'));
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load ticket details: '.$e->getMessage(), [
+            Log::error('Failed to load ticket details: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
@@ -275,7 +278,7 @@ class TicketController extends Controller
             return back()->with('success', 'Ticket updated');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to update ticket: '.$e->getMessage(), [
+            Log::error('Failed to update ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
@@ -320,7 +323,7 @@ class TicketController extends Controller
             return redirect()->route('tickets.index')->with('success', 'Ticket deleted');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to delete ticket: '.$e->getMessage(), [
+            Log::error('Failed to delete ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
@@ -386,7 +389,7 @@ class TicketController extends Controller
             return back()->with('success', $message);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to add ticket reply: '.$e->getMessage(), [
+            Log::error('Failed to add ticket reply: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
@@ -408,7 +411,7 @@ class TicketController extends Controller
     {
         return $request->validate([
             'subject' => ['required', 'string', 'max:255'],
-            'priority' => ['required', 'in:'.implode(', ', self::VALID_PRIORITIES)],
+            'priority' => ['required', 'in:' . implode(', ', self::VALID_PRIORITIES)],
             'content' => ['required', 'string'],
             'purchase_code' => ['nullable', 'string'],
             'product_slug' => ['nullable', 'string'],
@@ -427,8 +430,8 @@ class TicketController extends Controller
     {
         return $request->validate([
             'subject' => ['sometimes', 'string', 'max:255'],
-            'priority' => ['sometimes', 'in:'.implode(', ', self::VALID_PRIORITIES)],
-            'status' => ['sometimes', 'in:'.implode(', ', self::VALID_STATUSES)],
+            'priority' => ['sometimes', 'in:' . implode(', ', self::VALID_PRIORITIES)],
+            'status' => ['sometimes', 'in:' . implode(', ', self::VALID_STATUSES)],
             'content' => ['sometimes', 'string'],
         ]);
     }

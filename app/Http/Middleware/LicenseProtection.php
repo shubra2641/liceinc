@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Middleware;
+
 use App\Models\Setting;
 use Carbon\Carbon;
 use Closure;
@@ -9,6 +11,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use LicenseProtection\LicenseVerifier;
 use Symfony\Component\HttpFoundation\Response;
+
 /**
  * License Protection Middleware with enhanced security.
  *
@@ -307,6 +310,6 @@ class LicenseProtection
         if (strlen($purchaseCode) <= 8) {
             return str_repeat('*', strlen($purchaseCode));
         }
-        return substr($purchaseCode, 0, 8).'...';
+        return substr($purchaseCode, 0, 8) . '...';
     }
 }

@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SettingRequest;
 use App\Models\Setting;
@@ -11,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+
 /**
  * Setting Controller with enhanced security.
  *
@@ -66,7 +69,7 @@ class SettingController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'settings-index:'.request()->ip().':'.Auth::id();
+            $key = 'settings-index:' . request()->ip() . ':' . Auth::id();
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for settings page access', [
                     'ip' => request()->ip(),
@@ -112,7 +115,7 @@ class SettingController extends Controller
                     'envato_username' => '',
                     'envato_client_id' => '',
                     'envato_client_secret' => '',
-                    'envato_redirect_uri' => config('app.url').'/auth/envato/callback',
+                    'envato_redirect_uri' => config('app.url') . '/auth/envato/callback',
                     'envato_oauth_enabled' => false,
                     'auto_generate_license' => true,
                     'default_license_length' => 32,
@@ -260,7 +263,7 @@ class SettingController extends Controller
                         } catch (\JsonException $e) {
                             DB::rollBack();
                             return back()->withErrors([
-                                'human_questions' => 'Invalid JSON: '.$e->getMessage(),
+                                'human_questions' => 'Invalid JSON: ' . $e->getMessage(),
                             ])->withInput();
                         }
                     } else {
@@ -344,7 +347,7 @@ class SettingController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'settings-test-api:'.$request->ip().':'.Auth::id();
+            $key = 'settings-test-api:' . $request->ip() . ':' . Auth::id();
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for API testing', [
                     'ip' => $request->ip(),
@@ -385,7 +388,7 @@ class SettingController extends Controller
                 Log::warning('Envato API test failed - invalid token', [
                     'user_id' => Auth::id(),
                     'ip' => $request->ip(),
-                    'token_prefix' => substr($token, 0, 8).'...',
+                    'token_prefix' => substr($token, 0, 8) . '...',
                 ]);
                 return response()->json([
                     'success' => false,
@@ -400,7 +403,7 @@ class SettingController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed: '.implode(', ', $e->errors()['token'] ?? ['Invalid input']),
+                'message' => 'Validation failed: ' . implode(', ', $e->errors()['token'] ?? ['Invalid input']),
             ], 422);
         } catch (\Exception $e) {
             Log::error('Envato API test failed with exception', [
@@ -411,7 +414,7 @@ class SettingController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'API test failed: '.$e->getMessage(),
+                'message' => 'API test failed: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -439,7 +442,7 @@ class SettingController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'settings-envato-guide:'.request()->ip().':'.Auth::id();
+            $key = 'settings-envato-guide:' . request()->ip() . ':' . Auth::id();
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for Envato guide access', [
                     'ip' => request()->ip(),

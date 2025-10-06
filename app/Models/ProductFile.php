@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
+
 /**
  * @property int $id
  * @property int $product_id
@@ -47,6 +50,7 @@ use Illuminate\Support\Facades\Storage;
 class ProductFile extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'product_id',
         'original_name',
@@ -87,7 +91,7 @@ class ProductFile extends Model
         for ($i = 0; $bytes > 1024 && $i < $unitsCount - 1; $i++) {
             $bytes /= 1024;
         }
-        return round($bytes, 2).' '.$units[$i];
+        return round($bytes, 2) . ' ' . $units[$i];
     }
     /**
      * Get file extension.
@@ -122,7 +126,7 @@ class ProductFile extends Model
                 substr(hash('sha256', $decryptionKey), 0, 16),
             );
         } catch (\Exception $e) {
-            \Log::error('Failed to decrypt file: '.$e->getMessage());
+            \Log::error('Failed to decrypt file: ' . $e->getMessage());
             return null;
         }
     }

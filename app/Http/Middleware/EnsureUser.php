@@ -1,11 +1,15 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Middleware;
+
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
+
 /**
  * Ensure User Middleware with enhanced security and comprehensive user validation.
  *
@@ -160,11 +164,11 @@ class EnsureUser
             $domain = $parts[1];
             // Mask part of username for privacy
             if (strlen($username) > 2) {
-                $maskedUsername = substr($username, 0, 2).str_repeat('*', strlen($username) - 2);
+                $maskedUsername = substr($username, 0, 2) . str_repeat('*', strlen($username) - 2);
             } else {
                 $maskedUsername = str_repeat('*', strlen($username));
             }
-            return $maskedUsername.'@'.$domain;
+            return $maskedUsername . '@' . $domain;
         }
         return '***@***';
     }

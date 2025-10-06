@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Services;
+
 use App\Models\Product;
 use App\Models\ProductFile;
 use Illuminate\Http\UploadedFile;
@@ -7,6 +9,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+
 /**
  * Product File Service with enhanced security and encryption.
  *
@@ -70,10 +73,10 @@ class ProductFileService
             // Generate unique filename
             $originalName = $this->sanitizeInput($file->getClientOriginalName());
             $extension = $this->sanitizeInput($file->getClientOriginalExtension());
-            $encryptedName = Str::uuid().'.'.$extension;
+            $encryptedName = Str::uuid() . '.' . $extension;
             // Create directory path with validation
-            $directory = 'product-files/'.$product->id;
-            $filePath = $directory.'/'.$encryptedName;
+            $directory = 'product-files/' . $product->id;
+            $filePath = $directory . '/' . $encryptedName;
             // Validate file path
             if (strpos($filePath, '..') !== false) {
                 throw new \InvalidArgumentException('Invalid file path detected');
@@ -346,7 +349,7 @@ class ProductFileService
             ];
             $mimeType = $file->getMimeType();
             if (! in_array($mimeType, $allowedTypes)) {
-                throw new \Exception('File type not allowed: '.$mimeType);
+                throw new \Exception('File type not allowed: ' . $mimeType);
             }
             // Check for malicious content
             $this->scanFileForMaliciousContent($file);
@@ -594,9 +597,9 @@ class ProductFileService
     {
         // Create a temporary ProductFile record for the update
         $file = new ProductFile();
-        $file->id = 'update_'.$update->id; // Temporary ID
+        $file->id = 'update_' . $update->id; // Temporary ID
         $file->product_id = $update->product_id;
-        $file->original_name = $update->title.'_v'.$update->version.'.zip';
+        $file->original_name = $update->title . '_v' . $update->version . '.zip';
         $file->file_path = $update->file_path;
         $file->file_size = $update->file_size ?? 0;
         $file->file_extension = 'zip';
@@ -607,7 +610,7 @@ class ProductFileService
         $file->updated_at = $update->updated_at;
         // Add formatted_size for display
         $file->formatted_size = $file->file_size > 0 ?
-            number_format($file->file_size / 1024 / 1024, 2).' MB' :
+            number_format($file->file_size / 1024 / 1024, 2) . ' MB' :
             'Unknown';
         // Add update_info for the view
         $file->update_info = $update;
@@ -622,7 +625,7 @@ class ProductFileService
         if (! $update->file_path || ! Storage::disk('private')->exists($update->file_path)) {
             throw new \Exception('Update file not found');
         }
-        $fileName = $update->title.'_v'.$update->version.'.zip';
+        $fileName = $update->title . '_v' . $update->version . '.zip';
         return [
             'content' => Storage::disk('private')->get($update->file_path),
             'filename' => $fileName,

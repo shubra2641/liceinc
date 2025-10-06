@@ -1,9 +1,13 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Services;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+
 /**
  * Enhanced Security Service with comprehensive security features.
  *
@@ -140,7 +144,7 @@ class EnhancedSecurityService
             }
             $config = self::RATE_LIMITS[$action] ?? self::RATE_LIMITS['api_requests'];
             return RateLimiter::attempt(
-                $action.':'.$identifier,
+                $action . ':' . $identifier,
                 $config['max_attempts'],
                 function () {
                     // Rate limit not exceeded
@@ -173,7 +177,7 @@ class EnhancedSecurityService
                 throw new \InvalidArgumentException('Action and identifier cannot be empty');
             }
             $config = self::RATE_LIMITS[$action] ?? self::RATE_LIMITS['api_requests'];
-            $key = $action.':'.$identifier;
+            $key = $action . ':' . $identifier;
             return RateLimiter::remaining($key, $config['max_attempts']);
         } catch (\Exception $e) {
             Log::error('Failed to get remaining attempts', [
@@ -198,7 +202,7 @@ class EnhancedSecurityService
             if (empty($action) || empty($identifier)) {
                 throw new \InvalidArgumentException('Action and identifier cannot be empty');
             }
-            RateLimiter::clear($action.':'.$identifier);
+            RateLimiter::clear($action . ':' . $identifier);
         } catch (\Exception $e) {
             Log::error('Failed to clear rate limit', [
                 'error' => $e->getMessage(),
@@ -404,7 +408,7 @@ class EnhancedSecurityService
     public function hashForLogging(string $data): string
     {
         try {
-            return hash('sha256', $data.config('app.key'));
+            return hash('sha256', $data . config('app.key'));
         } catch (\Exception $e) {
             Log::error('Data hashing failed', [
                 'error' => $e->getMessage(),
@@ -422,7 +426,7 @@ class EnhancedSecurityService
     public function logSecurityEvent(string $event, Request $request, array $context = []): void
     {
         try {
-            Log::warning('Security event: '.$event, array_merge([
+            Log::warning('Security event: ' . $event, array_merge([
                 'event' => $event,
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),

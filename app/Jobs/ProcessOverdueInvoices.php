@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Jobs;
+
 use App\Models\Invoice;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Process Overdue Invoices Job with enhanced security and performance.
  *
@@ -32,6 +35,7 @@ use Illuminate\Support\Facades\Log;
 class ProcessOverdueInvoices implements ShouldQueue
 {
     use Queueable;
+
     /**
      * The number of times the job may be attempted.
      */

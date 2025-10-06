@@ -1,8 +1,11 @@
 <?php
+
 namespace App\View\Components;
+
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\Component;
 use Illuminate\View\View;
+
 /**
  * Application Layout Component with Enhanced Security.
  *

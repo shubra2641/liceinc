@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
+
 /**
  * Controller for handling email verification requests.
  *
@@ -53,6 +56,6 @@ class VerifyEmailController extends Controller
      */
     private function redirectToDashboard(): RedirectResponse
     {
-        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        return redirect()->intended(route('dashboard', absolute: false) . '?verified=1');
     }
 }

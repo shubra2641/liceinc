@@ -1,7 +1,10 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+
 /**
  * @property int $id
  * @property string $purchase_code_hash
@@ -115,7 +118,7 @@ class LicenseVerificationLog extends Model
         // Show first 4 and last 4 characters, mask the middle
         $hash = $this->purchase_code_hash;
         if (strlen($hash) > 8) {
-            return substr($hash, 0, 4).'****'.substr($hash, -4);
+            return substr($hash, 0, 4) . '****' . substr($hash, -4);
         }
         return '****';
     }

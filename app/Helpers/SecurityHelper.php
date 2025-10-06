@@ -4,7 +4,7 @@ namespace App\Helpers;
 
 /**
  * Security Helper
- * 
+ *
  * Provides secure output escaping and XSS protection
  */
 class SecurityHelper

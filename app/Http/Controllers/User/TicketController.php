@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\User;
+
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\License;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+
 /**
  * User Ticket Controller with enhanced security.
  *
@@ -96,7 +99,7 @@ class TicketController extends Controller
             return view('user.tickets.index', compact('tickets'));
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load user tickets: '.$e->getMessage(), [
+            Log::error('Failed to load user tickets: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -147,7 +150,7 @@ class TicketController extends Controller
             return view('user.tickets.create', compact('categories', 'licenses'));
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load ticket creation form: '.$e->getMessage(), [
+            Log::error('Failed to load ticket creation form: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -232,11 +235,11 @@ class TicketController extends Controller
             } else {
                 // For guests, redirect to support ticket view
                 return redirect()->route('support.tickets.show', $ticket)
-                    ->with('success', 'Ticket created successfully. You can view it using the ticket ID: '.$ticket->id);
+                    ->with('success', 'Ticket created successfully. You can view it using the ticket ID: ' . $ticket->id);
             }
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to create ticket: '.$e->getMessage(), [
+            Log::error('Failed to create ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
@@ -289,7 +292,7 @@ class TicketController extends Controller
             return view('user.tickets.show', compact('ticket'));
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load ticket details: '.$e->getMessage(), [
+            Log::error('Failed to load ticket details: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
@@ -352,7 +355,7 @@ class TicketController extends Controller
             return back()->with('success', 'Ticket updated');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to update ticket: '.$e->getMessage(), [
+            Log::error('Failed to update ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
@@ -397,7 +400,7 @@ class TicketController extends Controller
             return redirect()->route('tickets.index')->with('success', 'Ticket deleted');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to delete ticket: '.$e->getMessage(), [
+            Log::error('Failed to delete ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
@@ -453,7 +456,7 @@ class TicketController extends Controller
             return back()->with('success', 'Reply added');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to add ticket reply: '.$e->getMessage(), [
+            Log::error('Failed to add ticket reply: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
@@ -475,7 +478,7 @@ class TicketController extends Controller
     {
         return $request->validate([
             'subject' => ['required', 'string', 'max:255'],
-            'priority' => ['required', 'in:'.implode(', ', self::VALID_PRIORITIES)],
+            'priority' => ['required', 'in:' . implode(', ', self::VALID_PRIORITIES)],
             'content' => ['required', 'string'],
             'purchase_code' => ['nullable', 'string'],
             'product_slug' => ['nullable', 'string'],
@@ -498,8 +501,8 @@ class TicketController extends Controller
     {
         return $request->validate([
             'subject' => ['sometimes', 'string', 'max:255'],
-            'priority' => ['sometimes', 'in:'.implode(', ', self::VALID_PRIORITIES)],
-            'status' => ['sometimes', 'in:'.implode(', ', self::VALID_STATUSES)],
+            'priority' => ['sometimes', 'in:' . implode(', ', self::VALID_PRIORITIES)],
+            'status' => ['sometimes', 'in:' . implode(', ', self::VALID_STATUSES)],
             'content' => ['sometimes', 'string'],
         ]);
     }
@@ -536,7 +539,7 @@ class TicketController extends Controller
                     $envatoService = app(EnvatoService::class);
                     $sale = $envatoService->verifyPurchase($validated['purchase_code']);
                 } catch (\Throwable $e) {
-                    Log::error('Envato verification failed: '.$e->getMessage());
+                    Log::error('Envato verification failed: ' . $e->getMessage());
                     $sale = null;
                 }
                 if (! $sale) {
@@ -564,7 +567,7 @@ class TicketController extends Controller
             }
             return $license;
         } catch (Exception $e) {
-            Log::error('Failed to validate and create license: '.$e->getMessage());
+            Log::error('Failed to validate and create license: ' . $e->getMessage());
             return null;
         }
     }
@@ -640,7 +643,7 @@ class TicketController extends Controller
                 'ticket_priority' => $ticket->priority,
             ]);
         } catch (Exception $e) {
-            Log::error('Failed to send ticket notifications: '.$e->getMessage());
+            Log::error('Failed to send ticket notifications: ' . $e->getMessage());
         }
     }
     /**
@@ -660,7 +663,7 @@ class TicketController extends Controller
                 'reply_message' => $message,
             ]);
         } catch (Exception $e) {
-            Log::error('Failed to send reply notification: '.$e->getMessage());
+            Log::error('Failed to send reply notification: ' . $e->getMessage());
         }
     }
     /**

@@ -1,8 +1,11 @@
 <?php
+
 namespace App\View\Components;
+
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\Component;
 use Illuminate\View\View;
+
 /**
  * Guest Layout Component with enhanced security and performance.
  *

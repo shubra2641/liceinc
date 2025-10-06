@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Services;
+
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+
 /**
  * Security Service with enhanced security.
  *
@@ -75,7 +78,7 @@ class SecurityService
             }
             return $sanitized;
         } catch (Exception $e) {
-            Log::error('Failed to validate and sanitize input: '.$e->getMessage());
+            Log::error('Failed to validate and sanitize input: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -115,7 +118,7 @@ class SecurityService
             $content = $this->removeDangerousPatterns($content);
             return $content;
         } catch (Exception $e) {
-            Log::error('Failed to sanitize HTML content: '.$e->getMessage());
+            Log::error('Failed to sanitize HTML content: ' . $e->getMessage());
             return '';
         }
     }
@@ -160,13 +163,13 @@ class SecurityService
                 try {
                     $content = preg_replace($pattern, '', $content);
                 } catch (Exception $e) {
-                    Log::error('Failed to apply dangerous pattern filter: '.$e->getMessage());
+                    Log::error('Failed to apply dangerous pattern filter: ' . $e->getMessage());
                     continue;
                 }
             }
             return $content;
         } catch (Exception $e) {
-            Log::error('Failed to remove dangerous patterns: '.$e->getMessage());
+            Log::error('Failed to remove dangerous patterns: ' . $e->getMessage());
             return $content;
         }
     }
@@ -194,7 +197,7 @@ class SecurityService
         try {
             $allowedRules = ['email', 'url', 'int', 'float', 'string'];
             if (! in_array($rule, $allowedRules, true)) {
-                throw new \InvalidArgumentException('Invalid validation rule: '.$rule);
+                throw new \InvalidArgumentException('Invalid validation rule: ' . $rule);
             }
             switch ($rule) {
                 case 'email':
@@ -211,7 +214,7 @@ class SecurityService
                     return $value;
             }
         } catch (Exception $e) {
-            Log::error('Failed to apply validation rule: '.$e->getMessage());
+            Log::error('Failed to apply validation rule: ' . $e->getMessage());
             return $value;
         }
     }
@@ -257,7 +260,7 @@ class SecurityService
             }
             return $isSuspicious;
         } catch (Exception $e) {
-            Log::error('Failed to check suspicious request: '.$e->getMessage());
+            Log::error('Failed to check suspicious request: ' . $e->getMessage());
             return false;
         }
     }
@@ -266,7 +269,7 @@ class SecurityService
      */
     private function hasHighRequestRate(Request $request): bool
     {
-        $key = 'rate_limit:'.$request->ip();
+        $key = 'rate_limit:' . $request->ip();
         $maxRequests = config('security.rate_limiting.api_requests_per_minute', 60);
         return RateLimiter::tooManyAttempts($key, $maxRequests);
     }
@@ -390,7 +393,7 @@ class SecurityService
             }
             $allowedLevels = ['warning', 'error', 'info'];
             if (! in_array($level, $allowedLevels, true)) {
-                throw new \InvalidArgumentException('Invalid log level: '.$level);
+                throw new \InvalidArgumentException('Invalid log level: ' . $level);
             }
             $logData = array_merge([
                 'event' => $event,
@@ -400,9 +403,9 @@ class SecurityService
                 'url' => request()->fullUrl(),
                 'method' => request()->method(),
             ], $data);
-            Log::channel('single')->$level('Security event: '.$event, $logData);
+            Log::channel('single')->$level('Security event: ' . $event, $logData);
         } catch (Exception $e) {
-            Log::error('Failed to log security event: '.$e->getMessage());
+            Log::error('Failed to log security event: ' . $e->getMessage());
         }
     }
     /**
@@ -434,7 +437,7 @@ class SecurityService
             }
             return bin2hex(random_bytes($length / 2));
         } catch (Exception $e) {
-            Log::error('Failed to generate secure token: '.$e->getMessage());
+            Log::error('Failed to generate secure token: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -510,7 +513,7 @@ class SecurityService
             }
             return $result;
         } catch (Exception $e) {
-            Log::error('Failed to validate file upload: '.$e->getMessage());
+            Log::error('Failed to validate file upload: ' . $e->getMessage());
             return [
                 'valid' => false,
                 'errors' => ['File validation failed'],
@@ -556,7 +559,7 @@ class SecurityService
             ];
             return in_array($mimeType, $allowedMimeTypes, true);
         } catch (Exception $e) {
-            Log::error('Failed to validate MIME type: '.$e->getMessage());
+            Log::error('Failed to validate MIME type: ' . $e->getMessage());
             return false;
         }
     }
@@ -605,13 +608,13 @@ class SecurityService
                         return true;
                     }
                 } catch (Exception $e) {
-                    Log::error('Failed to check malicious pattern: '.$e->getMessage());
+                    Log::error('Failed to check malicious pattern: ' . $e->getMessage());
                     continue;
                 }
             }
             return false;
         } catch (Exception $e) {
-            Log::error('Failed to scan content for malicious patterns: '.$e->getMessage());
+            Log::error('Failed to scan content for malicious patterns: ' . $e->getMessage());
             return true; // Fail safe - assume malicious if scan fails
         }
     }
@@ -649,7 +652,7 @@ class SecurityService
             }
             return RateLimiter::tooManyAttempts($key, $maxAttempts);
         } catch (Exception $e) {
-            Log::error('Failed to check rate limit: '.$e->getMessage());
+            Log::error('Failed to check rate limit: ' . $e->getMessage());
             return false;
         }
     }
@@ -677,7 +680,7 @@ class SecurityService
             }
             RateLimiter::clear($key);
         } catch (Exception $e) {
-            Log::error('Failed to clear rate limit: '.$e->getMessage());
+            Log::error('Failed to clear rate limit: ' . $e->getMessage());
         }
     }
 }

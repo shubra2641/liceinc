@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Http\Requests\Api;
+
 use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * License Integration File Request with enhanced security.
  *
@@ -49,7 +52,7 @@ class LicenseIntegrationFileRequest extends FormRequest
     {
         return [
             'product_slug.required' => 'Product slug is required.',
-            'product_slug.regex' => 'Product slug contains invalid characters. '.
+            'product_slug.regex' => 'Product slug contains invalid characters. ' .
                 'Only lowercase letters, numbers, and hyphens are allowed.',
             'product_slug.max' => 'Product slug may not be greater than 255 characters.',
         ];

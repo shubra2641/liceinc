@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\VerifyArticleSerialRequest;
 use App\Models\KbArticle;
@@ -8,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Knowledge Base API Controller.
  *
@@ -290,8 +293,10 @@ class KbApiController extends Controller
         if ($article->requires_serial && $article->serial === $serial) {
             return ['valid' => true, 'source' => 'article'];
         }
-        if ($article->category && $article->category->requires_serial &&
-            $article->category->serial === $serial) {
+        if (
+            $article->category && $article->category->requires_serial &&
+            $article->category->serial === $serial
+        ) {
             return ['valid' => true, 'source' => 'category'];
         }
         return ['valid' => false, 'source' => ''];

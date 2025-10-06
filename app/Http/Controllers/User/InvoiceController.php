@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\User;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\InvoiceFilterRequest;
 use App\Models\Invoice;
@@ -9,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+
 /**
  * User Invoice Controller with enhanced security.
  *
@@ -79,7 +82,7 @@ class InvoiceController extends Controller
             return view('user.invoices.index', compact('invoices'));
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load user invoices: '.$e->getMessage(), [
+            Log::error('Failed to load user invoices: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'request_url' => $request->fullUrl(),
                 'trace' => $e->getTraceAsString(),
@@ -153,7 +156,7 @@ class InvoiceController extends Controller
             );
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load invoice details: '.$e->getMessage(), [
+            Log::error('Failed to load invoice details: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'invoice_id' => $invoice->id ?? null,
                 'trace' => $e->getTraceAsString(),
@@ -174,7 +177,7 @@ class InvoiceController extends Controller
     {
         $validStatuses = ['pending', 'paid', 'overdue', 'cancelled'];
         if (! in_array($status, $validStatuses, true)) {
-            throw new \InvalidArgumentException('Invalid invoice status: '.$status);
+            throw new \InvalidArgumentException('Invalid invoice status: ' . $status);
         }
         return $status;
     }

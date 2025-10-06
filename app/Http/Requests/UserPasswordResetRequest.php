@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Http\Requests;
+
 use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * User Password Reset Request with enhanced security.
  *

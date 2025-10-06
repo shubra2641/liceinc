@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Services;
+
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\SecureFileHelper;
+
 /**
  * License Server Service with enhanced security and performance.
  *
@@ -166,7 +169,7 @@ class LicenseServerService
                 'product_slug' => $productSlug,
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
+            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
         }
     }
     /**
@@ -217,7 +220,7 @@ class LicenseServerService
                 'product_slug' => $productSlug,
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
+            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
         }
     }
     /**
@@ -246,7 +249,7 @@ class LicenseServerService
             if ($cached) {
                 return $cached;
             }
-            $url = $this->getBaseUrl().'/license/update-info';
+            $url = $this->getBaseUrl() . '/license/update-info';
             $ch = curl_init();
             curl_setopt_array($ch, [
                 CURLOPT_URL => $url,
@@ -275,7 +278,7 @@ class LicenseServerService
                     'error' => $curlError,
                     'url' => $url,
                 ]);
-                return $this->createErrorResponse('Network error: '.$curlError, 'NETWORK_ERROR');
+                return $this->createErrorResponse('Network error: ' . $curlError, 'NETWORK_ERROR');
             }
             if ($httpCode === 200) {
                 $data = json_decode($responseBody, true);
@@ -299,7 +302,7 @@ class LicenseServerService
                 'trace' => $e->getTraceAsString(),
             ]);
             return $this->createErrorResponse(
-                'An error occurred while fetching update info: '.$e->getMessage(),
+                'An error occurred while fetching update info: ' . $e->getMessage(),
                 'EXCEPTION_ERROR',
             );
         }
@@ -351,7 +354,7 @@ class LicenseServerService
                 'product_slug' => $productSlug,
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
+            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
         }
     }
     /**
@@ -380,7 +383,7 @@ class LicenseServerService
     ): array {
         try {
             $this->validateDownloadParameters($licenseKey, $version, $productSlug, $domain);
-            $url = "{$this->getBaseUrl()}/license/download-update/".
+            $url = "{$this->getBaseUrl()}/license/download-update/" .
                 "{$this->sanitizeInput($licenseKey)}/{$this->sanitizeInput($version)}";
             $params = [
                 'product_slug' => $this->sanitizeInput($productSlug),
@@ -403,7 +406,7 @@ class LicenseServerService
                     }
                 }
                 // Save file to temporary location with security validation
-                $tempPath = $tempDir.'/update_'.$this->sanitizeFilename($version).'_'.time().'.zip';
+                $tempPath = $tempDir . '/update_' . $this->sanitizeFilename($version) . '_' . time() . '.zip';
                 if (file_put_contents($tempPath, $response->body()) === false) {
                     Log::error('Failed to save update file', [
                         'temp_path' => $tempPath,
@@ -432,7 +435,7 @@ class LicenseServerService
                 'version' => $version,
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->createErrorResponse('Download error: '.$e->getMessage(), 'NETWORK_ERROR');
+            return $this->createErrorResponse('Download error: ' . $e->getMessage(), 'NETWORK_ERROR');
         }
     }
     /**
@@ -455,7 +458,7 @@ class LicenseServerService
             if ($cached) {
                 return $cached;
             }
-            $url = $this->getBaseUrl().'/license/products';
+            $url = $this->getBaseUrl() . '/license/products';
             // Use cURL directly for better control
             $ch = curl_init();
             curl_setopt_array($ch, [
@@ -480,7 +483,7 @@ class LicenseServerService
                     'error' => $curlError,
                     'url' => $url,
                 ]);
-                return $this->createErrorResponse('Network error: '.$curlError, 'NETWORK_ERROR');
+                return $this->createErrorResponse('Network error: ' . $curlError, 'NETWORK_ERROR');
             }
             if ($httpCode === 200) {
                 $data = json_decode($responseBody, true);
@@ -501,7 +504,7 @@ class LicenseServerService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
+            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
         }
     }
     /**
@@ -742,7 +745,7 @@ class LicenseServerService
      */
     private function hashForCache(string $data): string
     {
-        return hash('sha256', $data.config('app.key'));
+        return hash('sha256', $data . config('app.key'));
     }
     /**
      * Hash data for logging.
@@ -753,6 +756,6 @@ class LicenseServerService
      */
     private function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data.config('app.key')), 0, 8).'...';
+        return substr(hash('sha256', $data . config('app.key')), 0, 8) . '...';
     }
 }

@@ -1,7 +1,10 @@
 <?php
+
 namespace App\Http\Requests\Admin;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+
 /**
  * Ticket Category Request with enhanced security.
  *

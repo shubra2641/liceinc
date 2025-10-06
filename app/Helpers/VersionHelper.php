@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Helpers;
+
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Version Helper with Enhanced Security.
  *
@@ -224,7 +227,7 @@ class VersionHelper
                     'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
                 ]);
                 throw new \InvalidArgumentException('Cannot update to older or same version. '
-                    ."Current: {$currentVersion}, Target: {$newVersion}");
+                    . "Current: {$currentVersion}, Target: {$newVersion}");
             }
             // Update existing setting or create new one
             $setting = Setting::where('key', 'site_name')->first() ?? Setting::first();
@@ -567,7 +570,7 @@ class VersionHelper
                     'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
                 ]);
                 throw new \InvalidArgumentException("Cannot update to older version. Current: {$currentVersion}, "
-                    ."Target: {$newVersion}");
+                    . "Target: {$newVersion}");
             }
             // Update or create setting
             $setting = Setting::updateOrCreate(

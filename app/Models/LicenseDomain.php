@@ -1,7 +1,10 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 /**
  * @property int $id
  * @property int $license_id
@@ -33,6 +36,7 @@ use Illuminate\Database\Eloquent\Model;
 class LicenseDomain extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'license_id', 'domain', 'status', 'is_verified', 'verified_at', 'added_at', 'last_used_at',
     ];

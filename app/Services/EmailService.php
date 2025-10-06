@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Services;
+
 use App\Mail\DynamicEmail;
 use App\Models\EmailTemplate;
 use App\Models\Setting;
@@ -8,6 +10,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+
 /**
  * Email Service with enhanced security.
  *
@@ -64,7 +67,7 @@ class EmailService
             $data = $this->sanitizeData($data);
             $template = EmailTemplate::getByName($templateName);
             if (! $template) {
-                Log::error('Email template not found: '.$templateName);
+                Log::error('Email template not found: ' . $templateName);
                 return false;
             }
             // Add common variables with sanitization
@@ -79,7 +82,7 @@ class EmailService
             Mail::to($recipientEmail, $recipientName)->send(new DynamicEmail($template, $data));
             return true;
         } catch (Exception $e) {
-            Log::error('Failed to send email: '.$e->getMessage(), [
+            Log::error('Failed to send email: ' . $e->getMessage(), [
                 'template' => $templateName,
                 'recipient' => $recipientEmail,
                 'exception' => $e->getTraceAsString(),
@@ -202,7 +205,7 @@ class EmailService
             } catch (Exception $e) {
                 $results['failed']++;
                 $results['errors'][] = $user instanceof User ? $user->email : $user;
-                Log::error('Failed to send bulk email to user: '.$e->getMessage());
+                Log::error('Failed to send bulk email to user: ' . $e->getMessage());
             }
         }
         return $results;
@@ -879,7 +882,7 @@ class EmailService
         $sanitized = htmlspecialchars(trim($type), ENT_QUOTES, 'UTF-8');
         if (! in_array($sanitized, $allowedTypes, true)) {
             throw new \InvalidArgumentException(
-                'Invalid template type. Allowed values: '.implode(', ', $allowedTypes),
+                'Invalid template type. Allowed values: ' . implode(', ', $allowedTypes),
             );
         }
         return $sanitized;

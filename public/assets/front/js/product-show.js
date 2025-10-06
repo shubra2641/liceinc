@@ -84,7 +84,7 @@ class ProductShowManager {
         window.SecurityUtils.safeInnerHTML(this, `
             <div class="d-flex align-items-center">
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
-                <span>${sanitizedMessage}</span>
+                <span>${message}</span>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         `);

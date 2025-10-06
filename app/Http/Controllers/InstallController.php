@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -13,6 +15,7 @@ use LicenseProtection\LicenseVerifier;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use App\Helpers\SecureFileHelper;
+
 /**
  * Installation Controller with enhanced security and comprehensive setup.
  *
@@ -271,11 +274,11 @@ class InstallController extends Controller
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'License verification failed: '.$e->getMessage(),
+                    'message' => 'License verification failed: ' . $e->getMessage(),
                 ], 500);
             }
             return redirect()->back()
-                ->withErrors(['license' => 'License verification failed: '.$e->getMessage()])
+                ->withErrors(['license' => 'License verification failed: ' . $e->getMessage()])
                 ->withInput();
         }
     }
@@ -384,7 +387,7 @@ class InstallController extends Controller
             }
         } catch (\Exception $e) {
             return redirect()->back()
-                ->withErrors(['database' => 'Database connection failed: '.$e->getMessage()])
+                ->withErrors(['database' => 'Database connection failed: ' . $e->getMessage()])
                 ->withInput();
         }
         // Store database configuration
@@ -576,7 +579,7 @@ class InstallController extends Controller
             // Installation failed
             return response()->json([
                 'success' => false,
-                'message' => 'Installation failed: '.$e->getMessage(),
+                'message' => 'Installation failed: ' . $e->getMessage(),
             ], 500);
         }
     }

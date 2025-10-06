@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\BaseController;
 use App\Http\Requests\Api\LicenseRegisterRequest;
 use App\Http\Requests\Api\LicenseStatusRequest;
@@ -16,6 +19,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+
 /**
  * Enhanced License API Controller.
  *
@@ -115,8 +119,10 @@ class EnhancedLicenseApiController extends BaseController
                 return $this->errorResponse('Product not found', Response::HTTP_NOT_FOUND);
             }
             // Verify verification key if provided
-            if (isset($validated['verification_key']) &&
-                ! $this->verifyVerificationKey($product, $validated['verification_key'])) {
+            if (
+                isset($validated['verification_key']) &&
+                ! $this->verifyVerificationKey($product, $validated['verification_key'])
+            ) {
                 $this->logSecurityEvent('Invalid verification key', $request, [
                     'product_slug' => $validated['product_slug'],
                 ]);
@@ -365,7 +371,7 @@ class EnhancedLicenseApiController extends BaseController
     private function isAuthorized(Request $request): bool
     {
         $authHeader = $request->header('Authorization');
-        $expectedToken = 'Bearer '.$this->getApiToken();
+        $expectedToken = 'Bearer ' . $this->getApiToken();
         return $expectedToken && $authHeader === $expectedToken;
     }
     /**
@@ -389,7 +395,7 @@ class EnhancedLicenseApiController extends BaseController
      */
     private function verifyVerificationKey(Product $product, string $verificationKey): bool
     {
-        $expectedKey = hash('sha256', $product->id.$product->slug.config('app.key'));
+        $expectedKey = hash('sha256', $product->id . $product->slug . config('app.key'));
         return hash_equals($expectedKey, $verificationKey);
     }
     /**
@@ -444,8 +450,10 @@ class EnhancedLicenseApiController extends BaseController
     private function verifyWithEnvato(Product $product, string $purchaseCode, ?string $domain, Request $request): array
     {
         $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
-        if (! $envatoData || ! isset($envatoData['item']['id']) ||
-            $envatoData['item']['id'] != $product->envato_item_id) {
+        if (
+            ! $envatoData || ! isset($envatoData['item']['id']) ||
+            $envatoData['item']['id'] != $product->envato_item_id
+        ) {
             $this->logSecurityEvent('Invalid Envato verification', $request, [
                 'purchase_code' => $this->securityService->hashForLogging($purchaseCode),
                 'product_id' => $product->id,
@@ -571,9 +579,9 @@ class EnhancedLicenseApiController extends BaseController
     private function generateLicenseKey(): string
     {
         do {
-            $key = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
+            $key = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8) . '-' .
+                         substr(md5(uniqid(mt_rand(), true)), 0, 8) . '-' .
+                         substr(md5(uniqid(mt_rand(), true)), 0, 8) . '-' .
                          substr(md5(uniqid(mt_rand(), true)), 0, 8));
         } while (License::where('license_key', $key)->exists());
         return $key;

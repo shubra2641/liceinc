@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers;
+
 use App\Models\KbArticle;
 use App\Models\KbCategory;
 use App\Models\License;
@@ -13,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use InvalidArgumentException;
+
 /**
  * Knowledge Base Public Controller with enhanced security and comprehensive KB management.
  *
@@ -599,7 +603,7 @@ class KbPublicController extends Controller
                 $productId = $rawResult['product_id'] ?? ($license->product_id ?? null);
                 $product = $productId ? Product::find($productId) : null;
                 if ($product && $product->id == $category->product_id) {
-                    $accessToken = 'kb_access_'.$category->id.'_'.time().'_'.substr(md5($license->license_key), 0, 8);
+                    $accessToken = 'kb_access_' . $category->id . '_' . time() . '_' . substr(md5($license->license_key), 0, 8);
                     session([$accessToken => [
                         'license_id' => $license->id,
                         'product_id' => $product->id,
@@ -785,7 +789,7 @@ class KbPublicController extends Controller
                 $articleProductId = $article->product_id ?:
                     ($article->category ? $article->category->product_id : null);
                 if ($product && $product->id == $articleProductId) {
-                    $accessToken = 'kb_article_access_'.$article->id.'_'.time().'_'.
+                    $accessToken = 'kb_article_access_' . $article->id . '_' . time() . '_' .
                         substr(md5($license->license_key), 0, 8);
                     session([$accessToken => [
                         'license_id' => $license->id,
@@ -909,7 +913,7 @@ class KbPublicController extends Controller
     private function performSecureSearch(string $q): array
     {
         try {
-            $searchTerm = '%'.strtolower($q).'%';
+            $searchTerm = '%' . strtolower($q) . '%';
             $user = auth()->user();
             // Search articles with case-insensitive search (secure)
             $articles = KbArticle::where('is_published', true)
@@ -989,6 +993,6 @@ class KbPublicController extends Controller
         if (empty($query)) {
             return $text;
         }
-        return preg_replace('/('.preg_quote($query, '/').')/i', '<mark class="search-highlight">$1</mark>', $text);
+        return preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark class="search-highlight">$1</mark>', $text);
     }
 }

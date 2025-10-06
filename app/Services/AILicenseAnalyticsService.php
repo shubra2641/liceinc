@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Services;
+
 use App\Models\License;
 use App\Models\LicenseAnalytics;
 use App\Models\Product;
@@ -10,6 +13,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+
 /**
  * AI License Analytics Service with enhanced security and comprehensive analytics.
  *
@@ -545,8 +549,9 @@ class AILicenseAnalyticsService
     public function getRealTimeUpdates(): array
     {
         try {
-            $cacheKey = 'realtime_analytics_'.now()->format('Y-m-d-H');
-            return Cache::remember($cacheKey, 300, function () { // 5 minutes cache
+            $cacheKey = 'realtime_analytics_' . now()->format('Y-m-d-H');
+            return Cache::remember($cacheKey, 300, function () {
+ // 5 minutes cache
                 return DB::transaction(function () {
                     return [
                         'active_licenses_now' => $this->getActiveLicenses(),

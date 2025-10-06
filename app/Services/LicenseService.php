@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Services;
+
 use App\Models\License;
 use App\Models\Product;
 use App\Models\User;
@@ -9,6 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+
 /**
  * License Service with enhanced security and comprehensive license management.
  *
@@ -586,6 +590,6 @@ class LicenseService
      */
     private function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data.config('app.key')), 0, 8).'...';
+        return substr(hash('sha256', $data . config('app.key')), 0, 8) . '...';
     }
 }

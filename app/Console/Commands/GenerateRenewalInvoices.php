@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Console\Commands;
+
 use App\Models\License;
 use App\Models\Product;
 use App\Services\EmailService;
@@ -9,6 +11,7 @@ use Illuminate\Console\Command;
 use App\Helpers\SecurityHelper;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Generate Renewal Invoices Command with Enhanced Security.
  *
@@ -32,7 +35,7 @@ class GenerateRenewalInvoices extends Command
      * @var string
      */
     protected $signature = 'licenses:generate-renewal-invoices '
-        .'{--days=7 : Number of days before expiry to generate invoices}';
+        . '{--days=7 : Number of days before expiry to generate invoices}';
     /**
      * The console command description.
      *
@@ -88,7 +91,7 @@ class GenerateRenewalInvoices extends Command
                     if ($invoice) {
                         $generatedCount++;
                         $this->line("Generated renewal invoice for license {$license->license_key} "
-                            ."(Product: {$license->product->name})");
+                            . "(Product: {$license->product->name})");
                         // Send email notifications
                         if ($this->sendRenewalNotifications($license, $invoice)) {
                             $emailSentCount++;
@@ -107,11 +110,11 @@ class GenerateRenewalInvoices extends Command
                         'trace' => $e->getTraceAsString(),
                     ]);
                     $this->error("Failed to generate renewal invoice for license {$license->license_key}: "
-                        .$e->getMessage());
+                        . $e->getMessage());
                 }
             }
             $this->info("Generated {$generatedCount} renewal invoices and sent {$emailSentCount} "
-                .'email notifications.');
+                . 'email notifications.');
             if ($errorCount > 0) {
                 $this->warn("Encountered {$errorCount} errors during processing. Check logs for details.");
             }
@@ -121,7 +124,7 @@ class GenerateRenewalInvoices extends Command
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $this->error('Command failed: '.$e->getMessage());
+            $this->error('Command failed: ' . $e->getMessage());
             return Command::FAILURE;
         }
     }
@@ -204,7 +207,7 @@ class GenerateRenewalInvoices extends Command
                     'license_key' => $license->license_key ?? 'unknown',
                 ]);
                 $this->warn("No renewal price set for product {$product->name}, "
-                    .'skipping invoice generation.');
+                    . 'skipping invoice generation.');
                 return null;
             }
             // Validate renewal price
@@ -215,7 +218,7 @@ class GenerateRenewalInvoices extends Command
                     'license_key' => $license->license_key ?? 'unknown',
                 ]);
                 throw new \InvalidArgumentException('Renewal price exceeds maximum allowed value: '
-                    .$renewalPrice);
+                    . $renewalPrice);
             }
             // Calculate new expiry date based on renewal period
             $newExpiryDate = $this->calculateNewExpiryDate($license, $product);
@@ -428,7 +431,7 @@ class GenerateRenewalInvoices extends Command
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $this->error("Failed to send renewal notifications for license {$license->license_key}: ".$e->getMessage());
+            $this->error("Failed to send renewal notifications for license {$license->license_key}: " . $e->getMessage());
             return false;
         }
     }

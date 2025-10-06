@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Helpers;
+
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Enterprise-Grade Configuration Management System.
  *
@@ -59,10 +62,10 @@ class ConfigHelper
                 'user_agent' => request()->userAgent(),
             ]);
             throw new \InvalidArgumentException('Invalid configuration key: '
-                .implode(', ', $validationResult['errors']));
+                . implode(', ', $validationResult['errors']));
         }
         $sanitizedKey = $validationResult['sanitized'];
-        $cacheKey = self::CACHE_PREFIX.md5($sanitizedKey);
+        $cacheKey = self::CACHE_PREFIX . md5($sanitizedKey);
         // Try advanced cache first with compression
         if ($useCache) {
             $cachedValue = self::getFromAdvancedCache($cacheKey);
@@ -116,7 +119,7 @@ class ConfigHelper
         $sanitized = trim($key);
         // Length validation
         if (strlen($sanitized) > self::MAX_KEY_LENGTH) {
-            $errors[] = 'Key length exceeds maximum of '.self::MAX_KEY_LENGTH.' characters';
+            $errors[] = 'Key length exceeds maximum of ' . self::MAX_KEY_LENGTH . ' characters';
         }
         // Pattern validation
         if (! preg_match(self::ALLOWED_KEY_PATTERN, $sanitized)) {
@@ -164,7 +167,7 @@ class ConfigHelper
             if (is_string($value) && strlen($value) > 1024) {
                 $compressed = gzcompress($value);
                 if ($compressed !== false) {
-                    $value = base64_encode($compressed).'|COMPRESSED';
+                    $value = base64_encode($compressed) . '|COMPRESSED';
                 }
             }
             // Use regular cache if tagging is not supported
@@ -262,7 +265,7 @@ class ConfigHelper
             foreach ($fetchedSettings as $key => $value) {
                 $settings[$key] = $validateTypes ? self::castValue($value, null) : $value;
                 if ($useCache) {
-                    self::storeInAdvancedCache(self::CACHE_PREFIX.md5($key), $value);
+                    self::storeInAdvancedCache(self::CACHE_PREFIX . md5($key), $value);
                 }
             }
         }
@@ -274,7 +277,7 @@ class ConfigHelper
     private static function getBatchFromCache(array $keys): array
     {
         $results = [];
-        $cacheKeys = array_map(fn ($key) => self::CACHE_PREFIX.md5($key), $keys);
+        $cacheKeys = array_map(fn ($key) => self::CACHE_PREFIX . md5($key), $keys);
         try {
             $cacheValues = Cache::tags([self::CACHE_TAG])->many($cacheKeys);
             foreach ($keys as $index => $key) {
@@ -426,7 +429,7 @@ class ConfigHelper
      */
     public static function clearSettingCache(string $key): void
     {
-        $cacheKey = self::CACHE_PREFIX.md5($key);
+        $cacheKey = self::CACHE_PREFIX . md5($key);
         try {
             try {
                 Cache::tags([self::CACHE_TAG])->forget($cacheKey);

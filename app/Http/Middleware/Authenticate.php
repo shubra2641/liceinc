@@ -1,10 +1,14 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Middleware;
+
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+
 /**
  * Authentication Middleware with enhanced security and comprehensive error handling.
  *
@@ -174,6 +178,6 @@ class Authenticate extends Middleware
      */
     private function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data.config('app.key')), 0, 8).'...';
+        return substr(hash('sha256', $data . config('app.key')), 0, 8) . '...';
     }
 }

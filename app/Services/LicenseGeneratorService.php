@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Services;
+
 use App\Models\Product;
 use App\Models\ProgrammingLanguage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+
 /**
  * License Generator Service with enhanced security and performance.
  *
@@ -110,7 +113,7 @@ class LicenseGeneratorService
             $product->refresh();
             $language = $product->programmingLanguage;
             if (! $language) {
-                throw new \Exception('Programming language not found for product: '.$product->id);
+                throw new \Exception('Programming language not found for product: ' . $product->id);
             }
             // Delete old files for this product first
             $this->deleteOldLicenseFiles($product);
@@ -233,7 +236,7 @@ class LicenseGeneratorService
             }
             $content = file_get_contents($templatePath);
             if ($content === false) {
-                throw new \Exception('Failed to read template file: '.$templatePath);
+                throw new \Exception('Failed to read template file: ' . $templatePath);
             }
             return $content;
         } catch (\Exception $e) {
@@ -272,7 +275,7 @@ class LicenseGeneratorService
             // Build the license API URL from environment/app url and the configured verification endpoint
             $apiDomain = rtrim(env('APP_URL', config('app.url')), '/');
             $verificationEndpoint = config('license.verification_endpoint', '/api/license/verify');
-            $licenseApiUrl = $apiDomain.'/'.ltrim($verificationEndpoint, '/');
+            $licenseApiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
             // Validate and sanitize data
             $data = [
                 'product' => $this->sanitizeInput($product->name),
@@ -329,7 +332,7 @@ class LicenseGeneratorService
             if (empty($appKey)) {
                 throw new \Exception('Application key not configured');
             }
-            $keyData = $product->id.$product->slug.$appKey;
+            $keyData = $product->id . $product->slug . $appKey;
             return hash('sha256', $keyData);
         } catch (\Exception $e) {
             Log::error('Error generating verification key', [

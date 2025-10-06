@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LicenseVerificationLogRequest;
 use App\Models\LicenseVerificationLog;
@@ -10,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 use App\Helpers\SecureFileHelper;
+
 /**
  * Admin License Verification Log Controller with enhanced security.
  *
@@ -229,7 +232,7 @@ class LicenseVerificationLogController extends Controller
     public function cleanOldLogs(LicenseVerificationLogRequest $request): JsonResponse
     {
         // Rate limiting for cleanup functionality
-        $key = 'license-logs-cleanup:'.$request->ip();
+        $key = 'license-logs-cleanup:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 3)) {
             return response()->json([
                 'error' => 'Too many cleanup attempts. Please try again later.',
@@ -283,7 +286,7 @@ class LicenseVerificationLogController extends Controller
     public function export(LicenseVerificationLogFilterRequest $request)
     {
         // Rate limiting for export functionality
-        $key = 'license-logs-export:'.$request->ip();
+        $key = 'license-logs-export:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
             return response()->json([
                 'error' => 'Too many export attempts. Please try again later.',
@@ -294,10 +297,10 @@ class LicenseVerificationLogController extends Controller
             DB::beginTransaction();
             $query = $this->applyFilters(LicenseVerificationLog::query(), $request);
             $logs = $query->orderBy('created_at', 'desc')->get();
-            $filename = 'license_verification_logs_'.date('Y-m-d_H-i-s').'.csv';
+            $filename = 'license_verification_logs_' . date('Y-m-d_H-i-s') . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             ];
             $callback = function () use ($logs) {
                 $file = SecureFileHelper::openOutput('php://output', 'w');
@@ -372,11 +375,11 @@ class LicenseVerificationLogController extends Controller
         }
         // Apply domain filter
         if (! empty($validated['domain'])) {
-            $query->where('domain', 'like', '%'.$validated['domain'].'%');
+            $query->where('domain', 'like', '%' . $validated['domain'] . '%');
         }
         // Apply IP address filter
         if (! empty($validated['ip'])) {
-            $query->where('ip_address', 'like', '%'.$validated['ip'].'%');
+            $query->where('ip_address', 'like', '%' . $validated['ip'] . '%');
         }
         // Apply date from filter
         if (! empty($validated['date_from'])) {

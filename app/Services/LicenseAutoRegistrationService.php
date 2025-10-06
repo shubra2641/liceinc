@@ -1,12 +1,16 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Services;
+
 use App\Models\License;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+
 /**
  * License Auto Registration Service with enhanced security and comprehensive license management.
  *

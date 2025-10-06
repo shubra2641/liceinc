@@ -18,7 +18,7 @@
                 <div class="user-notification-icon">
                     <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
                 </div>
-                <div class="user-notification-message">${sanitizedMessage}</div>
+                <div class="user-notification-message">${message}</div>
                 <button class="user-notification-close" onclick="this.parentElement.parentElement.remove()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -300,7 +300,7 @@
         button.style.background = '#10b981';
         
         setTimeout(() => {
-            button.innerHTML = sanitizedOriginalText;
+            button.innerHTML = originalText;
             button.style.background = '';
         }, 2000);
     };

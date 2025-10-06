@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers;
+
 use App\Models\KbCategory;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
@@ -9,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Throwable;
+
 /**
  * Knowledge Base Category Controller with enhanced security and comprehensive category management.
  *
@@ -262,7 +266,7 @@ class KbCategoryController extends Controller
             return $this->transaction(function () use ($request, $kbCategory) {
                 $validated = $this->validateRequest($request, [
                     'name' => ['required', 'string', 'max:255'],
-                    'slug' => ['required', 'string', 'max:255', 'unique:kb_categories, slug, '.$kbCategory->id],
+                    'slug' => ['required', 'string', 'max:255', 'unique:kb_categories, slug, ' . $kbCategory->id],
                     'description' => ['nullable', 'string'],
                     'parent_id' => ['nullable', 'exists:kb_categories, id'],
                     'product_id' => ['nullable', 'exists:products, id'],

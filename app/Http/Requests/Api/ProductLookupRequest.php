@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Http\Requests\Api;
+
 use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * Product Lookup Request with comprehensive validation.
  *
@@ -52,7 +55,7 @@ class ProductLookupRequest extends FormRequest
             'purchase_code.string' => 'Purchase code must be a valid string.',
             'purchase_code.min' => 'Purchase code must be at least 10 characters long.',
             'purchase_code.max' => 'Purchase code cannot exceed 100 characters.',
-            'purchase_code.regex' => 'Purchase code contains invalid characters. '.
+            'purchase_code.regex' => 'Purchase code contains invalid characters. ' .
                 'Only uppercase letters, numbers, and hyphens are allowed.',
         ];
     }

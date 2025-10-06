@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\License;
 use App\Models\Product;
 use App\Models\User;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+
 /**
  * Envato Controller with enhanced security.
  *
@@ -78,7 +81,7 @@ class EnvatoController extends Controller
                     'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
                 ]);
                 return back()->withErrors(['purchase_code' => 'Too many verification attempts. '
-                    .'Please try again later.']);
+                    . 'Please try again later.']);
             }
             $this->setRateLimit($request->ip(), 'verify_purchase_');
             DB::beginTransaction();
@@ -91,7 +94,7 @@ class EnvatoController extends Controller
                     'ip' => $request->ip(),
                 ]);
                 return back()->withErrors(['purchase_code' => 'Could not verify purchase code. '
-                    .'Please check and try again.']);
+                    . 'Please check and try again.']);
             }
             // Find product by slug
             $product = Product::where('slug', $data['product_slug'])->firstOrFail();
@@ -113,7 +116,7 @@ class EnvatoController extends Controller
             }
             // Create or find user by email
             $user = User::firstOrCreate(
-                ['email' => $buyerEmail ?: Str::uuid().'@envato-temp.local'],
+                ['email' => $buyerEmail ?: Str::uuid() . '@envato-temp.local'],
                 [
                     'name' => $buyerName,
                     'password' => Hash::make(Str::random(32)),
@@ -148,7 +151,7 @@ class EnvatoController extends Controller
                 'ip' => $request->ip(),
             ]);
             return back()->withErrors(['purchase_code' => 'An error occurred while verifying your purchase. '
-                .'Please try again.']);
+                . 'Please try again.']);
         }
     }
     /**
@@ -227,7 +230,7 @@ class EnvatoController extends Controller
             // Check if we have a real email, if not, create a temporary one
             $email = $envatoUser->getEmail();
             if (! $email || str_contains($email, '@envato.temp')) {
-                $email = 'temp_'.$username.'@envato.local';
+                $email = 'temp_' . $username . '@envato.local';
             }
             $user = User::updateOrCreate(
                 ['email' => $email],
@@ -367,7 +370,7 @@ class EnvatoController extends Controller
             // Enhanced validation
             $data = $this->validateAjaxPurchaseRequest($request);
             // Rate limiting for AJAX requests
-            $rateLimitKey = 'ajax_verify_'.auth()->id().'_'.$request->ip();
+            $rateLimitKey = 'ajax_verify_' . auth()->id() . '_' . $request->ip();
             if ($this->isRateLimited($rateLimitKey, 'ajax_verify_')) {
                 Log::warning('Rate limit exceeded for AJAX purchase verification', [
                     'user_id' => auth()->id(),
@@ -533,7 +536,7 @@ class EnvatoController extends Controller
      */
     private function isRateLimited(string $key, string $prefix = ''): bool
     {
-        return cache()->has($prefix.$key);
+        return cache()->has($prefix . $key);
     }
     /**
      * Set rate limit for request.
@@ -543,7 +546,7 @@ class EnvatoController extends Controller
      */
     private function setRateLimit(string $key, string $prefix = ''): void
     {
-        cache()->put($prefix.$key, true, now()->addMinutes(self::RATE_LIMIT_DURATION));
+        cache()->put($prefix . $key, true, now()->addMinutes(self::RATE_LIMIT_DURATION));
     }
     /**
      * Mask purchase code for logging.
@@ -554,6 +557,6 @@ class EnvatoController extends Controller
      */
     private function maskPurchaseCode(string $purchaseCode): string
     {
-        return substr($purchaseCode, 0, 8).'...';
+        return substr($purchaseCode, 0, 8) . '...';
     }
 }

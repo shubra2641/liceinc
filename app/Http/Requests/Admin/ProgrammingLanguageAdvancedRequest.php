@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Http\Requests\Admin;
+
 use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * Programming Language Advanced Request with enhanced security.
  *

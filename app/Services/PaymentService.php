@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Services;
+
 use App\Models\Invoice;
 use App\Models\License;
 use App\Models\PaymentSetting;
@@ -19,6 +22,7 @@ use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Rest\ApiContext;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
+
 /**
  * Payment Service with enhanced security and comprehensive payment processing.
  *
@@ -123,8 +127,8 @@ class PaymentService
             $transaction->setCustom("user_id:{$orderData['user_id']}, product_id:{$orderData['product_id']}");
             // Create redirect URLs
             $redirectUrls = new RedirectUrls();
-            $redirectUrls->setReturnUrl(config('app.url').'/payment/success/paypal')
-                ->setCancelUrl(config('app.url').'/payment/cancel/paypal');
+            $redirectUrls->setReturnUrl(config('app.url') . '/payment/success/paypal')
+                ->setCancelUrl(config('app.url') . '/payment/cancel/paypal');
             // Create payment with proper structure
             $payment = new Payment();
             $payment->setIntent('sale');
@@ -155,7 +159,7 @@ class PaymentService
             ]);
             return [
                 'success' => false,
-                'message' => 'PayPal payment processing failed: '.$e->getMessage(),
+                'message' => 'PayPal payment processing failed: ' . $e->getMessage(),
             ];
         }
     }
@@ -195,8 +199,8 @@ class PaymentService
                     ],
                 ],
                 'mode' => 'payment',
-                'success_url' => config('app.url').'/payment/success/stripe',
-                'cancel_url' => config('app.url').'/payment/cancel/stripe',
+                'success_url' => config('app.url') . '/payment/success/stripe',
+                'cancel_url' => config('app.url') . '/payment/cancel/stripe',
                 'metadata' => [
                     'user_id' => $orderData['user_id'],
                     'product_id' => $orderData['product_id'],
@@ -216,7 +220,7 @@ class PaymentService
             ]);
             return [
                 'success' => false,
-                'message' => 'Stripe payment processing failed: '.$e->getMessage(),
+                'message' => 'Stripe payment processing failed: ' . $e->getMessage(),
             ];
         }
     }
@@ -602,7 +606,7 @@ class PaymentService
     {
         try {
             do {
-                $invoiceNumber = 'INV-'.strtoupper(\Illuminate\Support\Str::random(8));
+                $invoiceNumber = 'INV-' . strtoupper(\Illuminate\Support\Str::random(8));
             } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
             return $invoiceNumber;
         } catch (\Exception $e) {

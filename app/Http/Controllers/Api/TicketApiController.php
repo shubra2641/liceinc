@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\TicketIndexRequest;
 use App\Http\Requests\Api\VerifyPurchaseCodeRequest;
@@ -11,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Ticket API Controller.
  *
@@ -245,12 +248,12 @@ class TicketApiController extends Controller
                 }
             } catch (\Throwable $envatoError) {
                 Log::warning('Envato API error during purchase code verification', [
-                    'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                    'purchase_code' => substr($purchaseCode, 0, 4) . '...',
                     'error' => $envatoError->getMessage(),
                 ]);
             }
             Log::warning('Purchase code not found in ticket verification', [
-                'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
             ]);
             DB::commit();
             return response()->json([
@@ -262,7 +265,7 @@ class TicketApiController extends Controller
             Log::error('Purchase code verification failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
             ]);
             return response()->json([
                 'success' => false,

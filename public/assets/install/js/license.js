@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
         errorDiv.className = 'license-error';
     // Sanitize message to prevent XSS
     // Message will be sanitized by SecurityUtils
-    errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + sanitizedMessage;
+    errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + message;
         
         // Insert after the input field
         const inputGroup = purchaseCodeInput.closest('.license-form-group');

@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\EmailTemplateRequest;
 use App\Models\EmailTemplate;
@@ -9,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+
 /**
  * Email Template Controller with enhanced security.
  *
@@ -481,7 +484,7 @@ class EmailTemplateController extends Controller
                 ]);
                 $rendered = [
                     'subject' => 'Error rendering template',
-                    'body' => 'Error: '.$e->getMessage(),
+                    'body' => 'Error: ' . $e->getMessage(),
                 ];
             }
             return view('admin.email-templates.test', compact(
@@ -580,7 +583,7 @@ class EmailTemplateController extends Controller
             ]);
             return redirect()
                 ->back()
-                ->with('error', 'Error sending test email: '.$e->getMessage());
+                ->with('error', 'Error sending test email: ' . $e->getMessage());
         }
     }
     /**
@@ -609,9 +612,9 @@ class EmailTemplateController extends Controller
             'site_name' => config('app.name'),
             'site_url' => config('app.url'),
             'current_year' => date('Y'),
-            'verification_url' => config('app.url').'/verify-email?token=test-token',
-            'reset_url' => config('app.url').'/reset-password?token=test-token',
-            'license_key' => 'LIC-'.strtoupper(substr(md5(time()), 0, 8)),
+            'verification_url' => config('app.url') . '/verify-email?token=test-token',
+            'reset_url' => config('app.url') . '/reset-password?token=test-token',
+            'license_key' => 'LIC-' . strtoupper(substr(md5(time()), 0, 8)),
             'product_name' => 'Test Product',
             'expires_at' => now()->addYear()->format('M d, Y'),
             'days_remaining' => 30,

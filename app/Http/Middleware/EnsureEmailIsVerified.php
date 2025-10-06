@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Http\Middleware;
+
 use Closure;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+
 /**
  * Ensure Email Is Verified Middleware with enhanced security.
  *
@@ -64,7 +67,7 @@ class EnsureEmailIsVerified
             }
             return $next($request);
         } catch (Exception $e) {
-            Log::error('Email verification middleware failed: '.$e->getMessage(), [
+            Log::error('Email verification middleware failed: ' . $e->getMessage(), [
                 'request_url' => $request->fullUrl(),
                 'request_method' => $request->method(),
                 'user_id' => $request->user()?->id,
@@ -89,7 +92,7 @@ class EnsureEmailIsVerified
             }
             return $user->hasVerifiedEmail();
         } catch (Exception $e) {
-            Log::error('Failed to check email verification status: '.$e->getMessage());
+            Log::error('Failed to check email verification status: ' . $e->getMessage());
             return false;
         }
     }
@@ -157,7 +160,7 @@ class EnsureEmailIsVerified
                 'message' => $message,
             ], $status);
         } catch (Exception $e) {
-            Log::error('Failed to create JSON response: '.$e->getMessage());
+            Log::error('Failed to create JSON response: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Internal server error',
                 'message' => 'An error occurred while processing your request',

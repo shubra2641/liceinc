@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Services;
+
 use App\Models\Invoice;
 use App\Models\License;
 use App\Models\Product;
@@ -8,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\SecurityHelper;
 use Illuminate\Support\Str;
+
 /**
  * Invoice Service with enhanced security and performance.
  *
@@ -104,10 +107,10 @@ class InvoiceService
             $maxAttempts = 10;
             $attempts = 0;
             do {
-                $invoiceNumber = 'INV-'.strtoupper(Str::random(8));
+                $invoiceNumber = 'INV-' . strtoupper(Str::random(8));
                 $attempts++;
                 if ($attempts > $maxAttempts) {
-                    throw new \Exception('Failed to generate unique invoice number after '.$maxAttempts.' attempts');
+                    throw new \Exception('Failed to generate unique invoice number after ' . $maxAttempts . ' attempts');
                 }
             } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
             return $invoiceNumber;

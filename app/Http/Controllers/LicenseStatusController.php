@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers;
+
 use App\Http\Requests\LicenseStatusRequest;
 use App\Models\License;
 use App\Models\Setting;
@@ -12,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use Throwable;
+
 /**
  * License Status Controller with enhanced security and comprehensive license verification.
  *
@@ -93,7 +97,7 @@ class LicenseStatusController extends Controller
                 $settings = Setting::first();
                 $maxAttempts = $settings->license_max_attempts ?? 5;
                 $decayMinutes = $settings->license_lockout_minutes ?? 15;
-                $key = 'license_check_'.md5($ip);
+                $key = 'license_check_' . md5($ip);
                 $attempts = Cache::get($key, 0);
                 if ($attempts >= $maxAttempts) {
                     Log::warning('License check rate limit exceeded', [
@@ -103,7 +107,7 @@ class LicenseStatusController extends Controller
                         'user_agent' => $request->userAgent(),
                     ]);
                     return $this->errorResponse(
-                        __('license_status.verification_error').': Too many attempts. Please try again later.',
+                        __('license_status.verification_error') . ': Too many attempts. Please try again later.',
                         null,
                         429,
                     );

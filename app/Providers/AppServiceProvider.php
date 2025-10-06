@@ -1,11 +1,14 @@
 <?php
+
 namespace App\Providers;
+
 use App\Http\ViewComposers\LayoutComposer;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+
 /**
  * Application Service Provider with enhanced security.
  *
@@ -53,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Exception $e) {
             // Log error but don't break the application
             if (app()->bound('log')) {
-                app('log')->error('Failed to register EnvatoSocialiteProvider: '.$e->getMessage());
+                app('log')->error('Failed to register EnvatoSocialiteProvider: ' . $e->getMessage());
             }
             // Re-throw if it's a critical error
             if ($e instanceof \InvalidArgumentException) {
@@ -81,7 +84,7 @@ class AppServiceProvider extends ServiceProvider
         try {
             // Auto-detect proper app URL to fix routing issues
             $this->configureAppUrl();
-            
+
             // Register View Composers with validation
             $this->registerViewComposers();
             // Set default pagination view with validation
@@ -91,7 +94,7 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Exception $e) {
             // Log error but don't break the application
             if (app()->bound('log')) {
-                app('log')->error('Failed to bootstrap AppServiceProvider: '.$e->getMessage());
+                app('log')->error('Failed to bootstrap AppServiceProvider: ' . $e->getMessage());
             }
             // Re-throw if it's a critical error
             if ($e instanceof \InvalidArgumentException) {
@@ -112,21 +115,22 @@ class AppServiceProvider extends ServiceProvider
             $currentHost = request()->getHost();
             $currentScheme = request()->getScheme();
             $appUrl = config('app.url');
-            
+
             // Check if current URL differs from configured APP_URL
             $parsedAppUrl = parse_url($appUrl);
-            
-            if ($currentHost !== ($parsedAppUrl['host'] ?? 'localhost') || 
-                $currentScheme !== ($parsedAppUrl['scheme'] ?? 'http')) {
-                
+
+            if (
+                $currentHost !== ($parsedAppUrl['host'] ?? 'localhost') ||
+                $currentScheme !== ($parsedAppUrl['scheme'] ?? 'http')
+            ) {
                 // Build proper base URL without /public
                 $path = trim(dirname(request()->getScriptName()), '/');
                 $baseUrl = $currentScheme . '://' . $currentHost;
-                
+
                 if ($path && $path !== '.') {
                     $baseUrl .= '/' . $path;
                 }
-                
+
                 // Update the URL configuration
                 config(['app.url' => $baseUrl]);
                 app('url')->forceRootUrl($baseUrl);
@@ -154,7 +158,7 @@ class AppServiceProvider extends ServiceProvider
         // Validate view paths
         foreach ($viewPaths as $path) {
             if (empty($path) || ! is_string($path)) {
-                throw new \InvalidArgumentException('Invalid view path provided: '.$path);
+                throw new \InvalidArgumentException('Invalid view path provided: ' . $path);
             }
         }
         // Validate LayoutComposer class

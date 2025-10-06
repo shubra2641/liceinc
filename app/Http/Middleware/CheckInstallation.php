@@ -1,11 +1,14 @@
 <?php
+
 namespace App\Http\Middleware;
+
 use Closure;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+
 /**
  * Check Installation Middleware with enhanced security.
  *
@@ -76,7 +79,7 @@ class CheckInstallation
             }
             return $next($request);
         } catch (Exception $e) {
-            Log::error('Installation check middleware failed: '.$e->getMessage(), [
+            Log::error('Installation check middleware failed: ' . $e->getMessage(), [
                 'request_url' => $request->fullUrl(),
                 'request_method' => $request->method(),
                 'trace' => $e->getTraceAsString(),
@@ -102,7 +105,7 @@ class CheckInstallation
             $routeName = $route->getName();
             return $routeName ?? '';
         } catch (Exception $e) {
-            Log::error('Failed to get current route name: '.$e->getMessage());
+            Log::error('Failed to get current route name: ' . $e->getMessage());
             return '';
         }
     }
@@ -129,7 +132,7 @@ class CheckInstallation
         try {
             return File::exists($installedFile);
         } catch (Exception $e) {
-            Log::error('Failed to check installation file: '.$e->getMessage());
+            Log::error('Failed to check installation file: ' . $e->getMessage());
             return false;
         }
     }
@@ -215,7 +218,7 @@ class CheckInstallation
                 'redirect' => $redirect,
             ], $status);
         } catch (Exception $e) {
-            Log::error('Failed to create JSON response: '.$e->getMessage());
+            Log::error('Failed to create JSON response: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Internal server error',

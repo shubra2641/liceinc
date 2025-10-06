@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers;
+
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+
 /**
  * Profile Controller with enhanced security.
  *
@@ -59,7 +63,7 @@ class ProfileController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'profile-index:'.(Auth::id() ?? request()->ip());
+            $key = 'profile-index:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 20)) {
                 Log::warning('Rate limit exceeded for profile index', [
                     'user_id' => Auth::id(),
@@ -113,7 +117,7 @@ class ProfileController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'profile-edit:'.(Auth::id() ?? request()->ip());
+            $key = 'profile-edit:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for profile edit form', [
                     'user_id' => Auth::id(),
@@ -170,7 +174,7 @@ class ProfileController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'profile-update:'.(Auth::id() ?? request()->ip());
+            $key = 'profile-update:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for profile update', [
                     'user_id' => Auth::id(),
@@ -255,7 +259,7 @@ class ProfileController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'profile-destroy:'.(Auth::id() ?? request()->ip());
+            $key = 'profile-destroy:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 3)) {
                 Log::warning('Rate limit exceeded for profile deletion', [
                     'user_id' => Auth::id(),

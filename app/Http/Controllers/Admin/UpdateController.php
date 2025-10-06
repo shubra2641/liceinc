@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Helpers\VersionHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AutoUpdateRequest;
@@ -14,6 +16,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\SecureFileHelper;
+
 /**
  * Update Controller with enhanced security.
  *
@@ -126,7 +129,7 @@ class UpdateController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to check for updates: '.$e->getMessage(),
+                'message' => 'Failed to check for updates: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -182,7 +185,7 @@ class UpdateController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Target version must be newer than current version. Current: '
-                        .$currentVersion.', Target: '.$targetVersion,
+                        . $currentVersion . ', Target: ' . $targetVersion,
                 ], 400);
             }
             // Check if target version exists in version.json
@@ -201,7 +204,7 @@ class UpdateController extends Controller
             DB::commit();
             return response()->json([
                 'success' => true,
-                'message' => 'System updated successfully from '.$currentVersion.' to '.$targetVersion,
+                'message' => 'System updated successfully from ' . $currentVersion . ' to ' . $targetVersion,
                 'data' => [
                     'from_version' => $currentVersion,
                     'to_version' => $targetVersion,
@@ -218,7 +221,7 @@ class UpdateController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Update failed: '.$e->getMessage(),
+                'message' => 'Update failed: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -231,7 +234,7 @@ class UpdateController extends Controller
         try {
             // Step 1: Create backup before update
             $backupPath = $this->createSystemBackup($currentVersion);
-            $steps[] = 'System backup created: '.basename($backupPath);
+            $steps[] = 'System backup created: ' . basename($backupPath);
             // Step 2: Run database migrations
             Artisan::call('migrate', ['--force' => true]);
             $steps[] = 'Database migrations completed';
@@ -255,7 +258,7 @@ class UpdateController extends Controller
             if (! empty($instructions)) {
                 foreach ($instructions as $instruction) {
                     // Here you could add custom update logic based on instructions
-                    $steps[] = 'Custom instruction: '.$instruction;
+                    $steps[] = 'Custom instruction: ' . $instruction;
                 }
             }
             // Step 9: Optimize application (if not in debug mode)
@@ -293,8 +296,8 @@ class UpdateController extends Controller
         if (! SecureFileHelper::isDirectory($backupDir) && ! SecureFileHelper::createDirectory($backupDir, 0755, true)) {
             throw new \Exception('Failed to create backup directory');
         }
-        $backupName = 'backup_'.$version.'_'.date('Y-m-d_H-i-s').'.zip';
-        $backupPath = $backupDir.DIRECTORY_SEPARATOR.$backupName;
+        $backupName = 'backup_' . $version . '_' . date('Y-m-d_H-i-s') . '.zip';
+        $backupPath = $backupDir . DIRECTORY_SEPARATOR . $backupName;
         // Define files to backup with validation
         $filesToBackup = [
             '.env',
@@ -305,7 +308,7 @@ class UpdateController extends Controller
         $zip = new \ZipArchive();
         $result = $zip->open($backupPath, \ZipArchive::CREATE);
         if ($result !== true) {
-            throw new \Exception('Failed to create backup ZIP file: '.$result);
+            throw new \Exception('Failed to create backup ZIP file: ' . $result);
         }
         try {
             foreach ($filesToBackup as $file) {
@@ -345,7 +348,7 @@ class UpdateController extends Controller
         foreach ($iterator as $file) {
             if ($file->isFile() === true) {
                 $filePath = $file->getRealPath();
-                $relativePath = $zipPath.DIRECTORY_SEPARATOR.
+                $relativePath = $zipPath . DIRECTORY_SEPARATOR .
                     substr($filePath, strlen($dir) + 1);
                 // Normalize path separators for ZIP
                 $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
@@ -417,7 +420,7 @@ class UpdateController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get version information: '.$e->getMessage(),
+                'message' => 'Failed to get version information: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -481,7 +484,7 @@ class UpdateController extends Controller
                 DB::rollBack();
                 return response()->json([
                     'success' => false,
-                    'message' => 'No backup found for version '.$targetVersion.'. Rollback not possible.',
+                    'message' => 'No backup found for version ' . $targetVersion . '. Rollback not possible.',
                 ], 400);
             }
             // Perform rollback
@@ -495,7 +498,7 @@ class UpdateController extends Controller
             ]);
             return response()->json([
                 'success' => true,
-                'message' => 'System rolled back successfully from '.$currentVersion.' to '.$targetVersion,
+                'message' => 'System rolled back successfully from ' . $currentVersion . ' to ' . $targetVersion,
                 'data' => [
                     'from_version' => $currentVersion,
                     'to_version' => $targetVersion,
@@ -512,7 +515,7 @@ class UpdateController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Rollback failed: '.$e->getMessage(),
+                'message' => 'Rollback failed: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -527,7 +530,7 @@ class UpdateController extends Controller
             $backupDir = storage_path('app/backups');
             $backups = [];
             if (SecureFileHelper::isDirectory($backupDir)) {
-                $files = glob($backupDir.'/backup_*.zip');
+                $files = glob($backupDir . '/backup_*.zip');
                 foreach ($files as $file) {
                     $backups[] = [
                         'filename' => basename($file),
@@ -552,7 +555,7 @@ class UpdateController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get backups: '.$e->getMessage(),
+                'message' => 'Failed to get backups: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -597,9 +600,9 @@ class UpdateController extends Controller
             if (! SecureFileHelper::isDirectory($uploadDir)) {
                 SecureFileHelper::createDirectory($uploadDir, 0755, true);
             }
-            $filename = 'update_'.date('Y-m-d_H-i-s').'.zip';
+            $filename = 'update_' . date('Y-m-d_H-i-s') . '.zip';
             $filePath = $file->storeAs('updates', $filename);
-            $fullPath = storage_path('app/'.$filePath);
+            $fullPath = storage_path('app/' . $filePath);
             // Process the update package
             $updateService = new UpdatePackageService();
             $processResult = $updateService->processUpdatePackage($fullPath);
@@ -618,7 +621,7 @@ class UpdateController extends Controller
                 DB::rollBack();
                 return response()->json([
                     'success' => false,
-                    'message' => 'Update package uploaded but processing failed: '.$processResult['message'],
+                    'message' => 'Update package uploaded but processing failed: ' . $processResult['message'],
                 ], 422);
             }
         } catch (\Exception $e) {
@@ -630,7 +633,7 @@ class UpdateController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to upload update package: '.$e->getMessage(),
+                'message' => 'Failed to upload update package: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -640,7 +643,7 @@ class UpdateController extends Controller
     private function findBackupForVersion(string $version): ?string
     {
         $backupDir = storage_path('app/backups');
-        $pattern = $backupDir.'/backup_'.$version.'_*.zip';
+        $pattern = $backupDir . '/backup_' . $version . '_*.zip';
         $files = glob($pattern);
         if (! empty($files)) {
             // Return the most recent backup for this version
@@ -667,10 +670,10 @@ class UpdateController extends Controller
         try {
             // Step 1: Restore from backup
             $this->restoreFromBackup($backupPath);
-            $steps[] = 'System restored from backup: '.basename($backupPath);
+            $steps[] = 'System restored from backup: ' . basename($backupPath);
             // Step 2: Update version in database
             VersionHelper::updateVersion($targetVersion);
-            $steps[] = 'Version updated to '.$targetVersion;
+            $steps[] = 'Version updated to ' . $targetVersion;
             // Step 3: Clear all caches
             Artisan::call('cache:clear');
             Artisan::call('config:clear');
@@ -699,7 +702,7 @@ class UpdateController extends Controller
         $zip = new \ZipArchive();
         if ($zip->open($backupPath) === true) {
             // Extract to temporary directory first
-            $tempDir = storage_path('app/temp/restore_'.time());
+            $tempDir = storage_path('app/temp/restore_' . time());
             SecureFileHelper::createDirectory($tempDir, 0755, true);
             $zip->extractTo($tempDir);
             $zip->close();
@@ -742,7 +745,7 @@ class UpdateController extends Controller
         }
         $files = array_diff(scandir($dir), ['.', '..']);
         foreach ($files as $file) {
-            $path = $dir.'/'.$file;
+            $path = $dir . '/' . $file;
             SecureFileHelper::isDirectory($path) ? $this->deleteDirectory($path) : unlink($path);
         }
         rmdir($dir);
@@ -813,7 +816,7 @@ class UpdateController extends Controller
                             return response()->json([
                                 'success' => true,
                                 'message' => 'Auto update completed successfully! System updated to version '
-                                    .$nextVersion,
+                                    . $nextVersion,
                                 'data' => [
                                     'update_available' => $isUpdateAvailable,
                                     'current_version' => $currentVersion,
@@ -826,7 +829,7 @@ class UpdateController extends Controller
                             DB::rollBack();
                             return response()->json([
                                 'success' => false,
-                                'message' => 'Auto update failed: '.$updateResult['message'],
+                                'message' => 'Auto update failed: ' . $updateResult['message'],
                                 'error_code' => $updateResult['error_code'] ?? 'UPDATE_FAILED',
                             ], 500);
                         }
@@ -855,7 +858,7 @@ class UpdateController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while checking for updates: '.$e->getMessage(),
+                'message' => 'An error occurred while checking for updates: ' . $e->getMessage(),
                 'error_code' => 'SERVER_ERROR',
             ], 500);
         }
@@ -884,7 +887,7 @@ class UpdateController extends Controller
                 return [
                     'success' => false,
                     'message' => "Cannot update to version {$version}. Current version is {$currentVersion}. "
-                        .'Only newer versions are allowed.',
+                        . 'Only newer versions are allowed.',
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
                     'current_version' => $currentVersion,
                     'target_version' => $version,
@@ -900,7 +903,7 @@ class UpdateController extends Controller
                 ]);
                 return [
                     'success' => false,
-                    'message' => 'Download failed: '.($downloadResult['message'] ?? 'Unknown error'),
+                    'message' => 'Download failed: ' . ($downloadResult['message'] ?? 'Unknown error'),
                     'error_code' => 'DOWNLOAD_FAILED',
                 ];
             }
@@ -930,7 +933,7 @@ class UpdateController extends Controller
                 }
                 return [
                     'success' => true,
-                    'message' => 'Update installed successfully! System updated to version '.$version,
+                    'message' => 'Update installed successfully! System updated to version ' . $version,
                     'data' => [
                         'version' => $version,
                         'files_installed' => $installResult['data']['files_installed'] ?? 0,
@@ -945,7 +948,7 @@ class UpdateController extends Controller
                 ]);
                 return [
                     'success' => false,
-                    'message' => 'Installation failed: '.($installResult['message'] ?? 'Unknown error'),
+                    'message' => 'Installation failed: ' . ($installResult['message'] ?? 'Unknown error'),
                     'error_code' => 'INSTALLATION_FAILED',
                 ];
             }
@@ -958,7 +961,7 @@ class UpdateController extends Controller
             ]);
             return [
                 'success' => false,
-                'message' => 'Auto update failed: '.$e->getMessage(),
+                'message' => 'Auto update failed: ' . $e->getMessage(),
                 'error_code' => 'PROCESS_FAILED',
             ];
         }
@@ -1024,7 +1027,7 @@ class UpdateController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => "Cannot update to version {$version}. Current version is {$currentVersion}. "
-                        .'Only newer versions are allowed.',
+                        . 'Only newer versions are allowed.',
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
                     'current_version' => $currentVersion,
                     'target_version' => $version,
@@ -1051,7 +1054,7 @@ class UpdateController extends Controller
                 ], 500);
             }
             // Save update file
-            $updateFileName = "auto_update_{$version}_".time().'.zip';
+            $updateFileName = "auto_update_{$version}_" . time() . '.zip';
             $updateFilePath = storage_path("app/updates/{$updateFileName}");
             // Ensure updates directory exists
             if (! SecureFileHelper::isDirectory(storage_path('app/updates'))) {
@@ -1130,9 +1133,9 @@ class UpdateController extends Controller
             }
             // Create backup before installation
             $backupPath = $this->createSystemBackup(VersionHelper::getCurrentVersion());
-            $steps[] = 'System backup created: '.basename($backupPath);
+            $steps[] = 'System backup created: ' . basename($backupPath);
             // Extract to temporary directory
-            $tempPath = storage_path("app/temp/auto_update_{$version}_".time());
+            $tempPath = storage_path("app/temp/auto_update_{$version}_" . time());
             if (! SecureFileHelper::isDirectory($tempPath)) {
                 SecureFileHelper::createDirectory($tempPath, 0755, true);
             }
@@ -1166,7 +1169,7 @@ class UpdateController extends Controller
             ]);
             return [
                 'success' => false,
-                'message' => 'Failed to install update package: '.$e->getMessage(),
+                'message' => 'Failed to install update package: ' . $e->getMessage(),
             ];
         }
     }
@@ -1176,7 +1179,7 @@ class UpdateController extends Controller
     private function installUpdateFiles(string $tempPath): void
     {
         // Check if files are in a 'files' subdirectory or directly in temp path
-        $sourcePath = $tempPath.'/files';
+        $sourcePath = $tempPath . '/files';
         if (! SecureFileHelper::isDirectory($sourcePath)) {
             // Files are directly in temp path
             $sourcePath = $tempPath;
@@ -1189,7 +1192,7 @@ class UpdateController extends Controller
      */
     private function runUpdateMigrations(string $tempPath): void
     {
-        $migrationsPath = $tempPath.'/database/migrations';
+        $migrationsPath = $tempPath . '/database/migrations';
         if (! SecureFileHelper::isDirectory($migrationsPath)) {
             return; // No migrations to run
         }
@@ -1233,7 +1236,7 @@ class UpdateController extends Controller
             if ($file->isFile() === true) {
                 $filePath = $file->getRealPath();
                 $relativePath = substr($filePath, strlen($source) + 1);
-                $targetPath = $destination.DIRECTORY_SEPARATOR.$relativePath;
+                $targetPath = $destination . DIRECTORY_SEPARATOR . $relativePath;
                 // Ensure target directory exists
                 $targetDir = dirname($targetPath);
                 if (! SecureFileHelper::isDirectory($targetDir)) {
@@ -1394,7 +1397,7 @@ class UpdateController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get current version: '.$e->getMessage(),
+                'message' => 'Failed to get current version: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -1464,7 +1467,7 @@ class UpdateController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while getting version history: '.$e->getMessage(),
+                'message' => 'An error occurred while getting version history: ' . $e->getMessage(),
                 'error_code' => 'SERVER_ERROR',
             ], 500);
         }
@@ -1535,7 +1538,7 @@ class UpdateController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while getting latest version: '.$e->getMessage(),
+                'message' => 'An error occurred while getting latest version: ' . $e->getMessage(),
                 'error_code' => 'SERVER_ERROR',
             ], 500);
         }

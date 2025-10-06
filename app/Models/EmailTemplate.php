@@ -1,11 +1,14 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 /**
  * EmailTemplate Model.
- * 
+ *
  * Manages email templates for the system with support for both user and admin notifications.
  * Templates are categorized and support variable substitution for dynamic content.
  *
@@ -43,6 +46,7 @@ use Illuminate\Database\Eloquent\Model;
 class EmailTemplate extends Model
 {
     use HasFactory;
+
     /**
      * The attributes that are mass assignable.
      *

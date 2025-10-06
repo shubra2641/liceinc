@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Http\Requests\Admin;
+
 use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * Version Management Request with enhanced security.
  *
@@ -208,11 +211,11 @@ class VersionManagementRequest extends FormRequest
             'domain.required' => 'Domain is required.',
             'domain.regex' => 'Domain can only contain letters, numbers, hyphens, underscores, and dots.',
             'version.required' => 'Version is required.',
-            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix '.
+            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
-            'current_version.regex' => 'Current version must be in format: x.y or x.y.z or x.y.z-suffix '.
+            'current_version.regex' => 'Current version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
-            'filter_version.regex' => 'Filter version must be in format: x.y or x.y.z or x.y.z-suffix '.
+            'filter_version.regex' => 'Filter version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
             'include_changelog.boolean' => 'Include changelog must be true or false.',
             'include_dependencies.boolean' => 'Include dependencies must be true or false.',

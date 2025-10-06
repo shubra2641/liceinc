@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductFileRequest;
 use App\Models\Product;
@@ -10,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
+
 /**
  * Product File Controller with enhanced security and compliance.
  *
@@ -112,7 +115,7 @@ class ProductFileController extends Controller
     public function store(ProductFileRequest $request, Product $product): JsonResponse
     {
         // Rate limiting for file uploads
-        $key = 'product-file-upload:'.$request->ip();
+        $key = 'product-file-upload:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 10)) {
             return response()->json([
                 'success'  => false,
@@ -179,7 +182,7 @@ class ProductFileController extends Controller
     public function download(ProductFile $file)
     {
         // Rate limiting for file downloads
-        $key = 'product-file-download:'.request()->ip();
+        $key = 'product-file-download:' . request()->ip();
         if (RateLimiter::tooManyAttempts($key, 20)) {
             abort(429, 'Too many download attempts. Please try again later.');
         }
@@ -191,7 +194,7 @@ class ProductFileController extends Controller
             }
             return response($fileData['content'])
                 ->header('Content-Type', $fileData['mime_type'])
-                ->header('Content-Disposition', 'attachment; filename="'.$fileData['filename'].'"')
+                ->header('Content-Disposition', 'attachment; filename="' . $fileData['filename'] . '"')
                 ->header('Content-Length', $fileData['size'])
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
@@ -287,7 +290,7 @@ class ProductFileController extends Controller
     public function destroy(ProductFile $file): JsonResponse
     {
         // Rate limiting for file deletions
-        $key = 'product-file-delete:'.request()->ip();
+        $key = 'product-file-delete:' . request()->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
             return response()->json([
                 'success' => false,
@@ -398,6 +401,6 @@ class ProductFileController extends Controller
         for ($i = 0; $bytes > 1024 && $i < $unitsCount - 1; $i++) {
             $bytes /= 1024;
         }
-        return round($bytes, $precision).' '.$units[$i];
+        return round($bytes, $precision) . ' ' . $units[$i];
     }
 }

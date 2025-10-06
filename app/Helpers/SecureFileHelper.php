@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Secure File Helper
- * 
+ *
  * Provides secure alternatives to discouraged PHP functions
  * for file operations and system interactions.
  */

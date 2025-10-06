@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\KbArticle;
@@ -18,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use App\Helpers\SecureFileHelper;
+
 /**
  * Admin Dashboard Controller with enhanced security.
  *
@@ -501,8 +504,10 @@ class DashboardController extends Controller
         $handle = fopen($logFile, 'r');
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
-                if (strpos($line, $today) !== false &&
-                    strpos($line, 'License verification error') !== false) {
+                if (
+                    strpos($line, $today) !== false &&
+                    strpos($line, 'License verification error') !== false
+                ) {
                     $errorCount++;
                 }
             }
@@ -535,8 +540,10 @@ class DashboardController extends Controller
         $handle = fopen($logFile, 'r');
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
-                if (strpos($line, $month) !== false &&
-                    strpos($line, 'License verification error') !== false) {
+                if (
+                    strpos($line, $month) !== false &&
+                    strpos($line, 'License verification error') !== false
+                ) {
                     $errorCount++;
                 }
             }

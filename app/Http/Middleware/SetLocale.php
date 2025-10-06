@@ -1,11 +1,15 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Middleware;
+
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
+
 /**
  * Set Locale Middleware with enhanced security and comprehensive locale management.
  *

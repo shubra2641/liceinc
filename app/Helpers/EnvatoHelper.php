@@ -1,8 +1,11 @@
 <?php
+
 namespace App\Helpers;
+
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Envato Helper with enhanced security and performance.
  *

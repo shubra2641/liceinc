@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Services;
+
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\ProviderInterface;
 use Laravel\Socialite\Two\User;
+
 /**
  * Envato OAuth Provider with enhanced security and error handling.
  *
@@ -90,19 +93,19 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
             }
             // Sanitize token to prevent injection attacks
             $sanitizedToken = htmlspecialchars($token, ENT_QUOTES, 'UTF-8');
-            $response = $this->getHttpClient()->get($this->baseUrl.'/v1/market/private/user/account.json', [
+            $response = $this->getHttpClient()->get($this->baseUrl . '/v1/market/private/user/account.json', [
                 'headers' => [
-                    'Authorization' => 'Bearer '.$sanitizedToken,
+                    'Authorization' => 'Bearer ' . $sanitizedToken,
                     'User-Agent' => 'Sekuret-License-Management/1.0',
                 ],
                 'timeout' => 30,
             ]);
             if (! $response->successful()) {
-                throw new \Exception('Failed to retrieve user data from Envato API: HTTP '.$response->status());
+                throw new \Exception('Failed to retrieve user data from Envato API: HTTP ' . $response->status());
             }
             $data = json_decode($response->getBody(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception('Invalid JSON response from Envato API: '.json_last_error_msg());
+                throw new \Exception('Invalid JSON response from Envato API: ' . json_last_error_msg());
             }
             if (! is_array($data)) {
                 throw new \Exception('Invalid response format from Envato API');
@@ -146,17 +149,17 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
             $id = $this->sanitizeInput($id);
             // Generate username from firstname and surname if not provided
             $username = $account['username']
-                ?? strtolower(($account['firstname'] ?? 'user').($account['surname'] ?? ''));
+                ?? strtolower(($account['firstname'] ?? 'user') . ($account['surname'] ?? ''));
             $username = $this->sanitizeInput($username);
             // For OAuth, we might not get email from this endpoint
             // We'll need to get it from somewhere else or generate one
-            $email = $account['email'] ?? ($username.'@envato.temp');
+            $email = $account['email'] ?? ($username . '@envato.temp');
             $email = $this->sanitizeInput($email);
             // Validate email format
             if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $email = $username.'@envato.temp';
+                $email = $username . '@envato.temp';
             }
-            $name = trim(($account['firstname'] ?? '').' '.($account['surname'] ?? ''));
+            $name = trim(($account['firstname'] ?? '') . ' ' . ($account['surname'] ?? ''));
             $name = $this->sanitizeInput($name);
             // Sanitize avatar URL if provided
             $avatar = $account['image'] ?? null;

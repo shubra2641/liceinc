@@ -1,11 +1,14 @@
 <?php
+
 namespace App\Http\Controllers\User;
+
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductFile;
 use App\Services\ProductFileService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Product File Controller with enhanced security and file management.
  *
@@ -94,7 +97,7 @@ class ProductFileController extends Controller
             return response($fileData['content'])
                 ->header('Content-Type', $fileData['mime_type'])
                 ->header('Content-Disposition', 'attachment; filename="'
-                    .$this->sanitizeFilename($fileData['filename']).'"')
+                    . $this->sanitizeFilename($fileData['filename']) . '"')
                 ->header('Content-Length', $fileData['size'])
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
@@ -181,7 +184,7 @@ class ProductFileController extends Controller
             // Return file download response
             return response($fileData['content'])
                 ->header('Content-Type', $fileData['mime_type'])
-                ->header('Content-Disposition', 'attachment; filename="'.$fileData['filename'].'"')
+                ->header('Content-Disposition', 'attachment; filename="' . $fileData['filename'] . '"')
                 ->header('Content-Length', $fileData['size'])
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
@@ -239,7 +242,7 @@ class ProductFileController extends Controller
             // Return file download response
             return response($fileData['content'])
                 ->header('Content-Type', $fileData['mime_type'])
-                ->header('Content-Disposition', 'attachment; filename="'.$fileData['filename'].'"')
+                ->header('Content-Disposition', 'attachment; filename="' . $fileData['filename'] . '"')
                 ->header('Content-Length', $fileData['size'])
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
@@ -277,8 +280,8 @@ class ProductFileController extends Controller
         }
         try {
             // Create temporary ZIP file
-            $zipFileName = $product->slug.'_files_'.now()->format('Y-m-d_H-i-s').'.zip';
-            $zipPath = storage_path('app/temp/'.$zipFileName);
+            $zipFileName = $product->slug . '_files_' . now()->format('Y-m-d_H-i-s') . '.zip';
+            $zipPath = storage_path('app/temp/' . $zipFileName);
             // Ensure temp directory exists
             if (! file_exists(dirname($zipPath))) {
                 mkdir(dirname($zipPath), 0755, true);
@@ -335,7 +338,7 @@ class ProductFileController extends Controller
             if (strlen($filename) > 255) {
                 $extension = pathinfo($filename, PATHINFO_EXTENSION);
                 $name = pathinfo($filename, PATHINFO_FILENAME);
-                $filename = substr($name, 0, 255 - strlen($extension) - 1).'.'.$extension;
+                $filename = substr($name, 0, 255 - strlen($extension) - 1) . '.' . $extension;
             }
             return $filename;
         } catch (\Exception $e) {

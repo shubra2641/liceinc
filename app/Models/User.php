@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
@@ -11,6 +13,7 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Foundation\Auth\User as AuthenticatableBase;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+
 /**
  * @property int $id
  * @property string $name
@@ -143,6 +146,7 @@ class User extends AuthenticatableBase implements
     use HasRoles;
     use MustVerifyEmail;
     use Notifiable;
+
     /**
      * The attributes that are mass assignable.
      *

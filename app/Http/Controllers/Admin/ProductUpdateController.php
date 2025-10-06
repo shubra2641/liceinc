@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductUpdateRequest;
 use App\Models\Product;
@@ -11,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+
 /**
  * Product Update Controller with enhanced security.
  *
@@ -159,7 +162,7 @@ class ProductUpdateController extends Controller
             }
             // Handle file upload
             $file = $request->file('update_file');
-            $fileName = 'update_'.$product->slug.'_'.$validated['version'].'_'.time().'.zip';
+            $fileName = 'update_' . $product->slug . '_' . $validated['version'] . '_' . time() . '.zip';
             $filePath = $file->storeAs('product-updates', $fileName);
             $fileHash = hash_file('sha256', $file->getRealPath());
             // Convert changelog text to array
@@ -312,7 +315,7 @@ class ProductUpdateController extends Controller
             // Handle file upload if provided
             if ($request->hasFile('update_file')) {
                 $file = $request->file('update_file');
-                $fileName = 'update_'.$product_update->product->slug.'_'.$validated['version'].'_'.time().'.zip';
+                $fileName = 'update_' . $product_update->product->slug . '_' . $validated['version'] . '_' . time() . '.zip';
                 $filePath = $file->storeAs('product-updates', $fileName);
                 $fileHash = hash_file('sha256', $file->getRealPath());
                 // Delete old file

@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Http\Middleware;
+
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+
 /**
  * Security Headers Middleware with enhanced security and validation.
  *
@@ -200,9 +203,11 @@ class SecurityHeadersMiddleware
     {
         try {
             // Strict-Transport-Security: Enforces HTTPS
-            if ($request->secure() &&
+            if (
+                $request->secure() &&
                 isset($headers['strict_transport_security']) &&
-                empty($headers['strict_transport_security']) === false) {
+                empty($headers['strict_transport_security']) === false
+            ) {
                 $this->setSecurityHeader($response, 'Strict-Transport-Security', $headers['strict_transport_security']);
             }
         } catch (\Exception $e) {
@@ -369,7 +374,7 @@ class SecurityHeadersMiddleware
                     Log::warning('Invalid CSP directive name format', ['directive' => $directive]);
                     continue;
                 }
-                $policy[] = $directive.' '.$value;
+                $policy[] = $directive . ' ' . $value;
             }
             if (empty($policy)) {
                 Log::warning('No valid CSP directives found, using default policy');

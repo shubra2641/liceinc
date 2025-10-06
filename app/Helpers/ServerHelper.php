@@ -20,7 +20,7 @@ class ServerHelper
         if (defined('LARAVEL_START')) {
             return LARAVEL_START;
         }
-        
+
         // Fallback to microtime for timing calculations
         return microtime(true);
     }
@@ -32,15 +32,15 @@ class ServerHelper
     public static function getServerSoftware(): string
     {
         $request = request();
-        
+
         // Try to get from request headers first
         $serverSoftware = $request->header('Server', 'Unknown');
-        
+
         // If not available, use a safe default
         if ($serverSoftware === 'Unknown') {
             $serverSoftware = 'Web Server';
         }
-        
+
         return $serverSoftware;
     }
 
@@ -81,11 +81,11 @@ class ServerHelper
     public static function getCurrentDomain(): string
     {
         $request = request();
-        
+
         // Use Laravel's request methods
         $host = $request->getHost();
         $scheme = $request->getScheme();
-        
+
         return $scheme . '://' . $host;
     }
 

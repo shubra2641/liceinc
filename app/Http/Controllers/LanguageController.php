@@ -1,7 +1,10 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Language Controller.
  *
@@ -58,7 +61,7 @@ class LanguageController extends Controller
         if (Storage::disk('local')->exists($langPath)) {
             $directories = array_diff(scandir($langPath), ['.', '..']);
             foreach ($directories as $dir) {
-                if (Storage::disk('local')->exists($langPath.DIRECTORY_SEPARATOR.$dir)) {
+                if (Storage::disk('local')->exists($langPath . DIRECTORY_SEPARATOR . $dir)) {
                     $available[] = $dir;
                 }
             }
@@ -80,7 +83,7 @@ class LanguageController extends Controller
         if (is_dir($langPath)) {
             $directories = array_diff(scandir($langPath), ['.', '..']);
             foreach ($directories as $dir) {
-                if (is_dir($langPath.DIRECTORY_SEPARATOR.$dir)) {
+                if (is_dir($langPath . DIRECTORY_SEPARATOR . $dir)) {
                     $languages[] = [
                         'code' => $dir,
                         'name' => ucfirst($dir),

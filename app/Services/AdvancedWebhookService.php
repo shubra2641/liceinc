@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Services;
+
 use App\Models\Webhook;
 use App\Models\WebhookLog;
 use Illuminate\Http\Client\Response;
@@ -9,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use App\Helpers\SecureFileHelper;
+
 /**
  * Advanced Webhook Service with enhanced security and performance.
  *
@@ -156,7 +160,7 @@ class AdvancedWebhookService
     private function generateSignature(string $secret, array $data): string
     {
         $payload = json_encode($data);
-        return 'sha256='.hash_hmac('sha256', $payload, $secret);
+        return 'sha256=' . hash_hmac('sha256', $payload, $secret);
     }
     /**
      * Send secure HTTP request to webhook endpoint with proper headers.
@@ -330,7 +334,7 @@ class AdvancedWebhookService
      */
     public function verifyWebhookSignature(string $signature, string $payload, string $secret): bool
     {
-        $expectedSignature = 'sha256='.hash_hmac('sha256', $payload, $secret);
+        $expectedSignature = 'sha256=' . hash_hmac('sha256', $payload, $secret);
         return hash_equals($expectedSignature, $signature);
     }
     /**
@@ -609,8 +613,10 @@ class AdvancedWebhookService
         if (! in_array(SecureFileHelper::parseUrl($url, PHP_URL_SCHEME), ['http', 'https'])) {
             $errors[] = 'URL must use HTTP or HTTPS protocol';
         }
-        if (SecureFileHelper::parseUrl($url, PHP_URL_HOST) === 'localhost' ||
-            SecureFileHelper::parseUrl($url, PHP_URL_HOST) === '127.0.0.1') {
+        if (
+            SecureFileHelper::parseUrl($url, PHP_URL_HOST) === 'localhost' ||
+            SecureFileHelper::parseUrl($url, PHP_URL_HOST) === '127.0.0.1'
+        ) {
             $errors[] = 'Localhost URLs are not allowed for webhooks';
         }
         return [

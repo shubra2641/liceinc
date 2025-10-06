@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers;
+
 use App\Http\Requests\ProductSearchRequest;
 use App\Models\License;
 use App\Models\Product;
@@ -12,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
+
 /**
  * Product Controller with enhanced security.
  *
@@ -82,7 +86,7 @@ class ProductController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'products-index:'.(Auth::id() ?? request()->ip());
+            $key = 'products-index:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 30)) {
                 Log::warning('Rate limit exceeded for products index', [
                     'user_id' => Auth::id(),
@@ -177,7 +181,7 @@ class ProductController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'product-show:'.(Auth::id() ?? request()->ip()).':'.$product->id;
+            $key = 'product-show:' . (Auth::id() ?? request()->ip()) . ':' . $product->id;
             if (RateLimiter::tooManyAttempts($key, 20)) {
                 Log::warning('Rate limit exceeded for product show', [
                     'product_id' => $product->id,
@@ -299,7 +303,7 @@ class ProductController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'product-public-show:'.(Auth::id() ?? request()->ip()).':'.$slug;
+            $key = 'product-public-show:' . (Auth::id() ?? request()->ip()) . ':' . $slug;
             if (RateLimiter::tooManyAttempts($key, 20)) {
                 Log::warning('Rate limit exceeded for public product show', [
                     'slug' => $slug,

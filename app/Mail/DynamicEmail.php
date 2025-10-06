@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Mail;
+
 use App\Models\EmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -7,6 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Dynamic Email Mailable with enhanced security.
  *
@@ -27,6 +30,7 @@ class DynamicEmail extends Mailable
 {
     use Queueable;
     use SerializesModels;
+
     /**
      * The email template instance.
      */

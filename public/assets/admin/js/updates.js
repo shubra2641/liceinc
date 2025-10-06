@@ -74,7 +74,7 @@ function checkForUpdates() {
     .finally(() => {
         // Sanitize original text to prevent XSS
         // Text will be sanitized by SecurityUtils
-        btn.innerHTML = sanitizedOriginalText;
+        btn.innerHTML = originalText;
         btn.disabled = false;
     });
 }
@@ -124,7 +124,7 @@ function performUpdate(version) {
     .finally(() => {
         // Sanitize original text to prevent XSS
         // Text will be sanitized by SecurityUtils
-        btn.innerHTML = sanitizedOriginalText;
+        btn.innerHTML = originalText;
         btn.disabled = false;
         bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
     });

@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers\User;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\EnvatoVerificationRequest;
 use App\Models\License;
@@ -18,6 +21,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Throwable;
+
 /**
  * Envato Controller with enhanced security and comprehensive Envato integration.
  *
@@ -104,7 +108,7 @@ class EnvatoController extends Controller
                     return back()->withErrors(['purchase_code' => 'Purchase does not belong to this product.']);
                 }
                 $user = User::firstOrCreate(
-                    ['email' => $buyerEmail ?: Str::uuid().'@example.com'],
+                    ['email' => $buyerEmail ?: Str::uuid() . '@example.com'],
                     ['name' => $buyerName ?: 'Envato Buyer'],
                 );
                 $license = License::updateOrCreate(
@@ -209,7 +213,7 @@ class EnvatoController extends Controller
                 $email = $envatoUser->getEmail();
                 if (! $email || str_contains($email, '@envato.temp')) {
                     // If we don't have a real email, create a temporary one
-                    $email = 'temp_'.$username.'@envato.local';
+                    $email = 'temp_' . $username . '@envato.local';
                 }
                 $user = User::updateOrCreate(
                     ['email' => $email],

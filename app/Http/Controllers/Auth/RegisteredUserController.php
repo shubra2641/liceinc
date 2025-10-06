@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
+
 use App\Helpers\ConfigHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+
 /**
  * Controller for handling user registration requests with enhanced security.
  *
@@ -106,7 +109,7 @@ class RegisteredUserController extends Controller
         $request->validate([
             'firstname' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
             'lastname' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'phonenumber' => ['nullable', 'string', 'max:50', 'regex:/^[\+]?[0-9\s\-\(\)]+$/'],
             'country' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-Z\s]+$/'],
@@ -228,7 +231,7 @@ class RegisteredUserController extends Controller
     private function createUser(Request $request): User
     {
         return User::create([
-            'name' => $this->sanitizeInput($request->firstname).' '.$this->sanitizeInput($request->lastname),
+            'name' => $this->sanitizeInput($request->firstname) . ' ' . $this->sanitizeInput($request->lastname),
             'firstname' => $this->sanitizeInput($request->firstname),
             'lastname' => $this->sanitizeInput($request->lastname),
             'email' => $this->sanitizeInput($request->email),

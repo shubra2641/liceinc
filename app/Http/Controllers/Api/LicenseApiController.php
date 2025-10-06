@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LicenseRegisterRequest;
 use App\Http\Requests\Api\LicenseStatusRequest;
@@ -10,6 +12,7 @@ use App\Services\EnvatoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 /**
  * License API Controller.
  *
@@ -76,7 +79,7 @@ class LicenseApiController extends Controller
             DB::beginTransaction();
             // Check authorization header
             $authHeader = $request->header('Authorization');
-            $expectedToken = 'Bearer '.$this->getApiToken();
+            $expectedToken = 'Bearer ' . $this->getApiToken();
             if (! $expectedToken || $authHeader !== $expectedToken) {
                 Log::warning('Unauthorized license verification attempt', [
                     'ip' => $request->ip(),
@@ -165,8 +168,10 @@ class LicenseApiController extends Controller
             } else {
                 // Step 3: If not in database, try Envato API
                 $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
-                if ($envatoData && isset($envatoData['item']['id'])
-                    && $envatoData['item']['id'] == $product->envato_item_id) {
+                if (
+                    $envatoData && isset($envatoData['item']['id'])
+                    && $envatoData['item']['id'] == $product->envato_item_id
+                ) {
                     $envatoValid = true;
                     // Create license automatically from Envato
                     $license = $this->createLicenseFromEnvato($product, $purchaseCode, $envatoData);
@@ -271,7 +276,7 @@ class LicenseApiController extends Controller
             ]);
             return response()->json([
                 'valid' => false,
-                'message' => 'Verification failed: '.$e->getMessage(),
+                'message' => 'Verification failed: ' . $e->getMessage(),
                 'error_code' => 'INTERNAL_ERROR',
             ], 500);
         }
@@ -281,7 +286,7 @@ class LicenseApiController extends Controller
      */
     private function verifyVerificationKey(Product $product, string $verificationKey): bool
     {
-        $expectedKey = hash('sha256', $product->id.$product->slug.config('app.key'));
+        $expectedKey = hash('sha256', $product->id . $product->slug . config('app.key'));
         return hash_equals($expectedKey, $verificationKey);
     }
     /**
@@ -409,7 +414,7 @@ class LicenseApiController extends Controller
         if ($license->hasReachedDomainLimit()) {
             \Log::warning('Domain limit exceeded for license', [
                 'license_id' => $license->id,
-                'purchase_code' => substr($license->purchase_code, 0, 8).'...',
+                'purchase_code' => substr($license->purchase_code, 0, 8) . '...',
                 'domain' => $domain,
                 'current_domains' => $license->active_domains_count,
                 'max_domains' => $license->max_domains ?? 1,
@@ -417,8 +422,8 @@ class LicenseApiController extends Controller
                 'ip' => request()->ip(),
             ]);
             $maxDomains = $license->max_domains ?? 1;
-            throw new \Exception("License has reached its maximum domain limit ({$maxDomains} domain".
-                ($maxDomains > 1 ? 's' : '')."). Cannot register new domain: {$domain}");
+            throw new \Exception("License has reached its maximum domain limit ({$maxDomains} domain" .
+                ($maxDomains > 1 ? 's' : '') . "). Cannot register new domain: {$domain}");
         }
     }
     /**
@@ -440,9 +445,9 @@ class LicenseApiController extends Controller
      */
     private function generateLicenseKey(): string
     {
-        return strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
+        return strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8) . '-' .
+                         substr(md5(uniqid(mt_rand(), true)), 0, 8) . '-' .
+                         substr(md5(uniqid(mt_rand(), true)), 0, 8) . '-' .
                          substr(md5(uniqid(mt_rand(), true)), 0, 8));
     }
     /**
@@ -538,7 +543,7 @@ class LicenseApiController extends Controller
             DB::beginTransaction();
             // Check authorization header
             $authHeader = $request->header('Authorization');
-            $expectedToken = 'Bearer '.$this->getApiToken();
+            $expectedToken = 'Bearer ' . $this->getApiToken();
             if (! $expectedToken || $authHeader !== $expectedToken) {
                 Log::warning('Unauthorized license registration attempt', [
                     'ip' => $request->ip(),
@@ -618,7 +623,7 @@ class LicenseApiController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Registration failed: '.$e->getMessage(),
+                'message' => 'Registration failed: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -705,7 +710,7 @@ class LicenseApiController extends Controller
             ]);
             return response()->json([
                 'valid' => false,
-                'message' => 'Status check failed: '.$e->getMessage(),
+                'message' => 'Status check failed: ' . $e->getMessage(),
             ], 500);
         }
     }

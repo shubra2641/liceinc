@@ -1,7 +1,10 @@
 <?php
+
 namespace App\Console\Controllers;
+
 use Exception;
 use Illuminate\Support\Facades\Log;
+
 /**
  * Console Controller.
  *
@@ -23,7 +26,7 @@ class ConsoleController
         try {
             $this->comment(\Illuminate\Foundation\Inspiring::quote());
         } catch (Exception $e) {
-            Log::error('Failed to display inspiring quote: '.$e->getMessage());
+            Log::error('Failed to display inspiring quote: ' . $e->getMessage());
             $this->error('Failed to display inspiring quote.');
         }
     }

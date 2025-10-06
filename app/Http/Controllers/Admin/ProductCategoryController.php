@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductCategoryRequest;
 use App\Models\ProductCategory;
@@ -11,6 +13,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+
 /**
  * Product Category Controller with enhanced security.
  *
@@ -135,7 +138,7 @@ class ProductCategoryController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'product-category-store:'.$request->ip().':'.Auth::id();
+            $key = 'product-category-store:' . $request->ip() . ':' . Auth::id();
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for product category creation', [
                     'ip' => $request->ip(),
@@ -374,7 +377,7 @@ class ProductCategoryController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'product-category-delete:'.request()->ip().':'.Auth::id();
+            $key = 'product-category-delete:' . request()->ip() . ':' . Auth::id();
             if (RateLimiter::tooManyAttempts($key, 3)) {
                 Log::warning('Rate limit exceeded for product category deletion', [
                     'ip' => request()->ip(),

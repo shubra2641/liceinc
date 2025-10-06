@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Http\ViewComposers;
+
 use App\Http\Controllers\LanguageController;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+
 /**
  * Layout Composer with enhanced security and performance.
  *
@@ -81,7 +84,7 @@ class LayoutComposer
     private function getLayoutData(): array
     {
         return Cache::remember(
-            self::CACHE_PREFIX.'layout_data',
+            self::CACHE_PREFIX . 'layout_data',
             self::CACHE_DURATION,
             function () {
                 return [
@@ -286,7 +289,7 @@ class LayoutComposer
     public static function clearCache(): void
     {
         try {
-            Cache::forget(self::CACHE_PREFIX.'layout_data');
+            Cache::forget(self::CACHE_PREFIX . 'layout_data');
         } catch (\Exception $e) {
             Log::error('Failed to clear layout composer cache', [
                 'error' => $e->getMessage(),
