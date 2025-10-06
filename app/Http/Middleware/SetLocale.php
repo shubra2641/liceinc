@@ -69,14 +69,11 @@ class SetLocale
      * Validate request with enhanced security and comprehensive validation.
      *
      * @param  Request  $request  The request to validate
-     *
-     * @throws InvalidArgumentException When request is invalid
      */
     private function validateRequest(Request $request): void
     {
-        if (! $request instanceof Request) {
-            throw new InvalidArgumentException('Invalid request object');
-        }
+        // Request is already typed as Request, no need to check instanceof
+        // This method is kept for future validation logic
     }
     /**
      * Get locale from session or configuration with enhanced security.

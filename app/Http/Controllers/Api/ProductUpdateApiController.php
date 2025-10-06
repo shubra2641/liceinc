@@ -117,7 +117,7 @@ class ProductUpdateApiController extends Controller
                 'success' => true,
                 'product_id'  => $productId,
                 'current_version' => $currentVersion,
-                'latest_version'  => $updates->first()?->version ?? $currentVersion,
+                'latest_version'  => $updates->first()->version ?? $currentVersion,
                 'updates_available' => $updates->count(),
                 'updates' => $updates->map(function ($update) {
                     return [

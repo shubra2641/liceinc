@@ -36,7 +36,7 @@ class AppLayout extends Component
     {
         try {
             // Validate view exists and is accessible
-            if (! view()->exists('layouts.app')) {
+            if (! file_exists(resource_path('views/layouts/app.blade.php'))) {
                 Log::error('Application layout view not found', [
                     'view' => 'layouts.app',
                     'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),

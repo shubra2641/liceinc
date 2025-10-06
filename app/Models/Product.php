@@ -257,7 +257,7 @@ class Product extends Model
      */
     public function getCurrentVersionAttribute(): string
     {
-        return $this->latestUpdate?->version ?? $this->version ?? '1.0.0';
+        return $this->latestUpdate->version ?? $this->version ?? '1.0.0';
     }
     /**
      * Get active product files.

@@ -271,7 +271,7 @@ class LicenseController extends Controller
             }
             // Check if the purchase belongs to the correct product
             $envatoItemId = (string)data_get($envatoData, 'item.id');
-            if ($product->envato_item_id && $product->envato_item_id !== $envatoItemId) {
+            if (!empty($product->envato_item_id) && $product->envato_item_id !== $envatoItemId) {
                 Log::warning('Envato item ID mismatch', [
                     'expected_item_id'  => $product->envato_item_id,
                     'actual_item_id' => $envatoItemId,

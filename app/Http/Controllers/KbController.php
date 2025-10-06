@@ -409,8 +409,6 @@ class KbController extends Controller
      * @param  Request  $request  The HTTP request
      *
      * @return array The validated data
-     *
-     * @throws \InvalidArgumentException When validation fails
      */
     private function validateArticleData(Request $request): array
     {
@@ -431,8 +429,6 @@ class KbController extends Controller
      * @param  KbArticle  $article  The article instance
      *
      * @return array The validated data
-     *
-     * @throws \InvalidArgumentException When validation fails
      */
     private function validateArticleUpdateData(Request $request, KbArticle $article): array
     {

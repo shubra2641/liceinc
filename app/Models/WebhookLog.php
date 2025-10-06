@@ -30,6 +30,9 @@ class WebhookLog extends Model
      *
      * @var array<int, string>
      */
+    /**
+     * @var list<string>
+     */
     protected $fillable = [
         'webhook_id',
         'event_type',

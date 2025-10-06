@@ -84,8 +84,6 @@ if (! function_exists('get_breadcrumbs')) {
      *
      * @return array Array of breadcrumb items with name, url, and active status
      *
-     * @throws Exception When route generation fails
-     *
      * @version 1.0.6
      *
      *
@@ -210,8 +208,6 @@ if (function_exists('get_available_languages') === false) {
      * error handling and security measures.
      *
      * @return array Array of language information with code, name, flag, and native name
-     *
-     * @throws Exception When directory scanning fails
      *
      * @version 1.0.6
      *

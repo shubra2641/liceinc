@@ -514,8 +514,6 @@ class LicenseService
      *
      * @param  User  $user  The user
      * @param  Product  $product  The product
-     *
-     * @throws \InvalidArgumentException When validation fails
      */
     private function validateCanPurchaseParameters(User $user, Product $product): void
     {

@@ -118,7 +118,7 @@ class NavLink extends Component
     {
         try {
             // Validate view exists and is accessible
-            if (! view()->exists('components.nav-link')) {
+            if (! file_exists(resource_path('views/components/nav-link.blade.php'))) {
                 Log::error('NavLink component view not found', [
                     'view' => 'components.nav-link',
                     'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),

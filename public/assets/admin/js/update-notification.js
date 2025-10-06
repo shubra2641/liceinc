@@ -4,57 +4,60 @@
  */
 
 class UpdateNotification {
-    constructor() {
-        this.init();
-    }
+  constructor() {
+    this.init();
+  }
 
-    init() {
-        this.bindEvents();
-        this.checkForUpdates();
-    }
+  init() {
+    this.bindEvents();
+    this.checkForUpdates();
+  }
 
-    bindEvents() {
-        // Bind global functions
-        window.dismissUpdateNotification = () => this.dismiss();
-        window.dismissUpdateNotificationPermanently = () => this.dismissPermanently();
-    }
+  bindEvents() {
+    // Bind global functions
+    window.dismissUpdateNotification = () => this.dismiss();
+    window.dismissUpdateNotificationPermanently = () =>
+      this.dismissPermanently();
+  }
 
-    checkForUpdates() {
-        // Check if update notification should be shown
-        const dismissed = localStorage.getItem('update-notification-dismissed');
-        const dismissedPermanently = localStorage.getItem('update-notification-dismissed-permanently');
-        
-        if (!dismissedPermanently && !dismissed) {
-            this.show();
-        }
-    }
+  checkForUpdates() {
+    // Check if update notification should be shown
+    const dismissed = localStorage.getItem("update-notification-dismissed");
+    const dismissedPermanently = localStorage.getItem(
+      "update-notification-dismissed-permanently",
+    );
 
-    show() {
-        const notification = document.getElementById('update-notification');
-        if (notification) {
-            notification.style.display = 'block';
-            notification.classList.add('show');
-        }
+    if (!dismissedPermanently && !dismissed) {
+      this.show();
     }
+  }
 
-    dismiss() {
-        const notification = document.getElementById('update-notification');
-        if (notification) {
-            notification.style.display = 'none';
-            localStorage.setItem('update-notification-dismissed', 'true');
-        }
+  show() {
+    const notification = document.getElementById("update-notification");
+    if (notification) {
+      notification.style.display = "block";
+      notification.classList.add("show");
     }
+  }
 
-    dismissPermanently() {
-        const notification = document.getElementById('update-notification');
-        if (notification) {
-            notification.style.display = 'none';
-            localStorage.setItem('update-notification-dismissed-permanently', 'true');
-        }
+  dismiss() {
+    const notification = document.getElementById("update-notification");
+    if (notification) {
+      notification.style.display = "none";
+      localStorage.setItem("update-notification-dismissed", "true");
     }
+  }
+
+  dismissPermanently() {
+    const notification = document.getElementById("update-notification");
+    if (notification) {
+      notification.style.display = "none";
+      localStorage.setItem("update-notification-dismissed-permanently", "true");
+    }
+  }
 }
 
 // Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    new UpdateNotification();
+document.addEventListener("DOMContentLoaded", function () {
+  new UpdateNotification();
 });

@@ -29,6 +29,9 @@ class Webhook extends Model
      *
      * @var array<int, string>
      */
+    /**
+     * @var list<string>
+     */
     protected $fillable = [
         'name',
         'url',

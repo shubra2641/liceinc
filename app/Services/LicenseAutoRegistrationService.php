@@ -32,8 +32,6 @@ class LicenseAutoRegistrationService
      *
      * @param  PurchaseCodeService  $purchaseCodeService  Service for purchase code verification
      * @param  InvoiceService  $invoiceService  Service for invoice management
-     *
-     * @throws \Exception When dependency injection fails
      */
     public function __construct(PurchaseCodeService $purchaseCodeService, InvoiceService $invoiceService)
     {

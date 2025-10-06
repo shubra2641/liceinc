@@ -225,7 +225,10 @@ class AILicenseAnalyticsService
             ];
         }
         // Sort by AI score
-        usort($performance, fn ($a, $b) => $b['ai_score'] <=> $a['ai_score']);
+        /** @var array<int, array<string, mixed>> $performance */
+        usort($performance, function (array $a, array $b): int {
+            return (int)$b['ai_score'] <=> (int)$a['ai_score'];
+        });
         return $performance;
     }
     /**
@@ -298,7 +301,10 @@ class AILicenseAnalyticsService
             ];
         }
         // Sort by renewal probability (lowest first - highest risk)
-        usort($predictions, fn ($a, $b) => $a['renewal_probability'] <=> $b['renewal_probability']);
+        /** @var array<int, array<string, mixed>> $predictions */
+        usort($predictions, function (array $a, array $b): int {
+            return (float)$a['renewal_probability'] <=> (float)$b['renewal_probability'];
+        });
         return $predictions;
     }
     /**
@@ -337,7 +343,10 @@ class AILicenseAnalyticsService
             ];
         }
         // Sort by churn score (highest first - highest risk)
-        usort($churnPredictions, fn ($a, $b) => $b['churn_score'] <=> $a['churn_score']);
+        /** @var array<int, array<string, mixed>> $churnPredictions */
+        usort($churnPredictions, function (array $a, array $b): int {
+            return (float)$b['churn_score'] <=> (float)$a['churn_score'];
+        });
         return array_slice($churnPredictions, 0, 20); // Top 20 at risk
     }
     /**
@@ -708,8 +717,6 @@ class AILicenseAnalyticsService
      * @param  Carbon  $startDate  Start date for revenue calculation
      *
      * @return float Calculated revenue amount
-     *
-     * @throws \Exception When revenue calculation fails
      */
     private function calculateRevenue(Carbon $startDate): float
     {
@@ -786,8 +793,6 @@ class AILicenseAnalyticsService
      * Calculate customer lifetime value with enhanced error handling.
      *
      * @return float Customer lifetime value
-     *
-     * @throws \Exception When CLV calculation fails
      */
     private function calculateCustomerLifetimeValue(): float
     {

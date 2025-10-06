@@ -508,7 +508,7 @@ class Setting extends Model
             return $setting;
         } catch (\Illuminate\Database\QueryException $e) {
             // If DB is not migrated yet, return a new Setting instance with the key set (not persisted)
-            $s = new static();
+            $s = new self();
             $s->$key = $value;
             return $s;
         }
@@ -520,10 +520,10 @@ class Setting extends Model
     {
         try {
             return Cache::remember('all_settings', 3600, function () {
-                return static::first() ?? new static();
+                return static::first() ?? new self();
             });
         } catch (\Illuminate\Database\QueryException $e) {
-            return new static();
+            return new self();
         }
     }
     /**

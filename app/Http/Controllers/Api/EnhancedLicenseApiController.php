@@ -372,7 +372,7 @@ class EnhancedLicenseApiController extends BaseController
     {
         $authHeader = $request->header('Authorization');
         $expectedToken = 'Bearer ' . $this->getApiToken();
-        return $expectedToken && $authHeader === $expectedToken;
+        return $expectedToken !== '' && $authHeader === $expectedToken;
     }
     /**
      * Get API token from settings.

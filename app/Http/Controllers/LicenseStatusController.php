@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LicenseStatusRequest;
 use App\Models\License;
+use App\Models\LicenseDomain;
 use App\Models\Setting;
 use App\Services\EnvatoService;
 use Illuminate\Http\JsonResponse;
@@ -245,7 +246,7 @@ class LicenseStatusController extends Controller
                     ->orderBy('created_at', 'desc')
                     ->limit(50)
                     ->get()
-                    ->map(function ($log) {
+                    ->map(function (\App\Models\LicenseLog $log): array {
                         return [
                             'action' => $log->action,
                             'status' => $log->status,
@@ -372,14 +373,7 @@ class LicenseStatusController extends Controller
             'days_remaining' => $license->license_expires_at
                 ? max(0, now()->diffInDays($license->license_expires_at, false))
                 : null,
-            'domains' => $license->domains->map(function ($domain) {
-                return [
-                    'domain' => $domain->domain,
-                    'status' => $domain->status,
-                    'ip_address' => $domain->ip_address,
-                    'created_at' => $domain->created_at->format('Y-m-d H:i:s'),
-                ];
-            }),
+            'domains' => $license->domains->toArray(),
             'supported_until' => $license->supported_until ? 
                 (is_string($license->supported_until) ? $license->supported_until : $license->supported_until->format('Y-m-d H:i:s')) : null,
             'max_domains' => $license->max_domains ?? 1,

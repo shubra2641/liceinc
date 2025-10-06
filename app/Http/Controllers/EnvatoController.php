@@ -475,8 +475,6 @@ class EnvatoController extends Controller
      * @param  Request  $request  The HTTP request
      *
      * @return array The validated data
-     *
-     * @throws \InvalidArgumentException When validation fails
      */
     private function validatePurchaseRequest(Request $request): array
     {
@@ -504,8 +502,6 @@ class EnvatoController extends Controller
      * @param  Request  $request  The HTTP request
      *
      * @return array The validated data
-     *
-     * @throws \InvalidArgumentException When validation fails
      */
     private function validateAjaxPurchaseRequest(Request $request): array
     {

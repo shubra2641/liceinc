@@ -402,7 +402,7 @@ class LicenseController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
         $callback = function () use ($licenses) {
-            $file = SecureFileHelper::openOutput('php://output', 'w');
+            $file = SecureFileHelper::openOutput('w');
             // CSV Headers
             fputcsv($file, [
                 'ID',

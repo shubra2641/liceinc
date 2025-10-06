@@ -188,7 +188,7 @@ class TicketController extends Controller
                     $dueDate = $request->input('invoice_due_date')
                         ?: ($duration ? now()->addDays($duration)->toDateString() : null);
                     $metadata = [];
-                    if ($billingType === true && $billingType !== 'one_time') {
+                    if ($billingType !== 'one_time') {
                         $map = [
                             'monthly' => 30,
                             'quarterly' => 90,
@@ -203,8 +203,8 @@ class TicketController extends Controller
                                 ?: $product->renewal_period ?: ($duration ?: 30);
                         } else {
                             $metadata['recurrence'] = $billingType;
-                            $metadata['renewal_period_days'] = $map[$billingType]
-                                ?? ($product->renewal_period ?? $duration);
+                            $metadata['renewal_period_days'] = (is_string($billingType) && array_key_exists($billingType, $map)) 
+                                ? $map[$billingType] : ($product->renewal_period ?? $duration);
                             $metadata['renewal_price'] = $product->renewal_price ?? $amount;
                         }
                     }

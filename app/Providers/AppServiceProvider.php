@@ -133,7 +133,7 @@ class AppServiceProvider extends ServiceProvider
 
                 // Update the URL configuration
                 config(['app.url' => $baseUrl]);
-                app('url')->forceRootUrl($baseUrl);
+                app('url')->useOrigin($baseUrl);
             }
         }
     }
@@ -157,7 +157,7 @@ class AppServiceProvider extends ServiceProvider
         $viewPaths = ['layouts.*', 'welcome'];
         // Validate view paths
         foreach ($viewPaths as $path) {
-            if (empty($path) || ! is_string($path)) {
+            if (! is_string($path) || $path === '') {
                 throw new \InvalidArgumentException('Invalid view path provided: ' . $path);
             }
         }
@@ -188,10 +188,10 @@ class AppServiceProvider extends ServiceProvider
         $defaultView = 'pagination::bootstrap-5';
         $defaultSimpleView = 'pagination::simple-bootstrap-5';
         // Validate pagination view names
-        if (empty($defaultView) || ! is_string($defaultView)) {
+        if (! is_string($defaultView) || $defaultView === '') {
             throw new \InvalidArgumentException('Invalid default pagination view provided');
         }
-        if (empty($defaultSimpleView) || ! is_string($defaultSimpleView)) {
+        if (! is_string($defaultSimpleView) || $defaultSimpleView === '') {
             throw new \InvalidArgumentException('Invalid default simple pagination view provided');
         }
         Paginator::defaultView($defaultView);
@@ -202,9 +202,6 @@ class AppServiceProvider extends ServiceProvider
      *
      * Sets up rate limiters for authentication and API endpoints
      * with proper validation and security measures.
-     *
-     *
-     * @throws \InvalidArgumentException When rate limiter configuration fails
      */
     private function configureRateLimiters(): void
     {

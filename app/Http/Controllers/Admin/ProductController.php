@@ -132,7 +132,7 @@ class ProductController extends Controller
     /**
      * Calculate support days from Envato item data.
      */
-    private function calculateSupportDays(array $itemData): ?int
+    private function calculateSupportDays(array $itemData): int
     {
         // Envato typically provides 6 months support for most items
         // This can be adjusted based on the actual API response

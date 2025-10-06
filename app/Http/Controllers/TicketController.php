@@ -441,8 +441,6 @@ class TicketController extends Controller
      * @param  Request  $request  The HTTP request
      *
      * @return array The validated data
-     *
-     * @throws \InvalidArgumentException When validation fails
      */
     private function validateReplyData(Request $request): array
     {
