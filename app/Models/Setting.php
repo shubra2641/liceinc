@@ -482,7 +482,7 @@ class Setting extends Model
     /**
      * Get setting value by key with caching.
      */
-    public static function get($key, $default = null)
+    public static function get(string $key, mixed $default = null): mixed
     {
         try {
             return Cache::remember("setting_{$key}", 3600, function () use ($key, $default) {
@@ -497,7 +497,7 @@ class Setting extends Model
     /**
      * Set setting value by key.
      */
-    public static function set($key, $value)
+    public static function set(string $key, mixed $value): static
     {
         try {
             $setting = static::firstOrCreate([]);
@@ -516,7 +516,7 @@ class Setting extends Model
     /**
      * Get all settings as array.
      */
-    public static function allSettings()
+    public static function allSettings(): static
     {
         try {
             return Cache::remember('all_settings', 3600, function () {
@@ -529,7 +529,7 @@ class Setting extends Model
     /**
      * Clear all settings cache.
      */
-    public static function clearCache()
+    public static function clearCache(): void
     {
         Cache::forget('all_settings');
         // Clear individual caches

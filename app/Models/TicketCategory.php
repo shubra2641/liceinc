@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -78,6 +79,9 @@ class TicketCategory extends Model
     /**
      * Get the tickets for this category.
      */
+    /**
+     * @return HasMany<Ticket, TicketCategory>
+     */
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class, 'category_id');
@@ -85,14 +89,22 @@ class TicketCategory extends Model
     /**
      * Scope to get only active categories.
      */
-    public function scopeActive($query)
+    /**
+     * @param Builder<TicketCategory> $query
+     * @return Builder<TicketCategory>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
     /**
      * Scope to order by sort_order.
      */
-    public function scopeOrdered($query)
+    /**
+     * @param Builder<TicketCategory> $query
+     * @return Builder<TicketCategory>
+     */
+    public function scopeOrdered(Builder $query): Builder
     {
         return $query->orderBy('sort_order');
     }

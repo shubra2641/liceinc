@@ -2,6 +2,8 @@
    INSTALLATION WIZARD STYLES
    ============================================================================ */
 
+/* stylelint-disable no-duplicate-selectors, no-descending-specificity */
+
 /* CSS Variables */
 :root {
     /* Colors */
@@ -1053,6 +1055,7 @@ body.install-body {
 }
 
 /* High Contrast Mode */
+/* stylelint-disable-next-line media-feature-name-value-no-unknown */
 @media (prefers-contrast: high) {
     :root {
         --border-color: #000;

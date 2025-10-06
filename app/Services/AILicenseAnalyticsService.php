@@ -46,6 +46,9 @@ class AILicenseAnalyticsService
      * $overview = $analytics['overview'];
      * $trends = $analytics['trends'];
      */
+    /**
+     * @return array<string, mixed>
+     */
     public function getDashboardAnalytics(int $days = 30): array
     {
         try {
@@ -88,6 +91,9 @@ class AILicenseAnalyticsService
      * @return array Overview statistics with AI insights
      *
      * @throws \Exception When statistics retrieval fails
+     */
+    /**
+     * @return array<string, mixed>
      */
     private function getOverviewStats(int $days): array
     {

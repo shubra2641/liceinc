@@ -175,7 +175,7 @@
     border: 1px solid var(--success-color);
     border-radius: var(--radius-lg);
     background: linear-gradient(135deg, rgb(16 185 129 / 10%) 0%, rgb(34 197 94 / 10%) 100%);
-    animation: slideIn 0.3s ease-out;
+    animation: slide-in 0.3s ease-out;
 }
 
 .license-success.show {
@@ -260,7 +260,7 @@
 
 .license-continue-btn.show {
     display: inline-flex;
-    animation: slideIn 0.3s ease-out;
+    animation: slide-in 0.3s ease-out;
 }
 
 .license-continue-btn:hover:not(:disabled) {
@@ -313,7 +313,7 @@
 }
 
 /* Animations */
-@keyframes slideIn {
+@keyframes slide-in {
     from {
         opacity: 0;
         transform: translateY(-10px);
@@ -413,6 +413,7 @@
 }
 
 /* High Contrast Mode */
+/* stylelint-disable-next-line media-feature-name-value-no-unknown */
 @media (prefers-contrast: high) {
     .license-info-card {
         border: 2px solid var(--text-white);
@@ -442,7 +443,7 @@
         transform: none;
     }
     
-    @keyframes slideIn {
+    @keyframes slide-in {
         from, to {
             opacity: 1;
             transform: none;

@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Foundation\Auth\User as AuthenticatableBase;
 use Illuminate\Notifications\Notifiable;
@@ -242,27 +243,39 @@ class User extends AuthenticatableBase implements
         'status' => 'string',
         'email_preferences' => 'array',
     ];
-    public function licenses()
+    /**
+     * @return HasMany<License, User>
+     */
+    public function licenses(): HasMany
     {
         return $this->hasMany(License::class);
     }
-    public function tickets()
+    /**
+     * @return HasMany<Ticket, User>
+     */
+    public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class);
     }
     /**
      * Invoices belonging to the user.
      */
-    public function invoices()
+    /**
+     * @return HasMany<Invoice, User>
+     */
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
-    public function hasEnvatoAccount()
+    public function hasEnvatoAccount(): bool
     {
         return ! empty($this->envato_username) && ! empty($this->envato_token);
     }
     /**
      * License logs that belong to the user through licenses.
+     */
+    /**
+     * @return HasManyThrough<LicenseLog, License, User>
      */
     public function licenseLogs(): HasManyThrough
     {

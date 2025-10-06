@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
@@ -39,11 +40,17 @@ class TicketReply extends Model
         'ticket_id' => 'integer',
         'user_id' => 'integer',
     ];
-    public function ticket()
+    /**
+     * @return BelongsTo<Ticket, TicketReply>
+     */
+    public function ticket(): BelongsTo
     {
         return $this->belongsTo(Ticket::class);
     }
-    public function user()
+    /**
+     * @return BelongsTo<User, TicketReply>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

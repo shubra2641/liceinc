@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -62,23 +64,38 @@ class Ticket extends Model
         'license_id' => 'integer',
         'category_id' => 'integer',
     ];
-    public function user()
+    /**
+     * @return BelongsTo<User, Ticket>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-    public function license()
+    /**
+     * @return BelongsTo<License, Ticket>
+     */
+    public function license(): BelongsTo
     {
         return $this->belongsTo(License::class);
     }
-    public function invoice()
+    /**
+     * @return BelongsTo<Invoice, Ticket>
+     */
+    public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
-    public function category()
+    /**
+     * @return BelongsTo<TicketCategory, Ticket>
+     */
+    public function category(): BelongsTo
     {
         return $this->belongsTo(TicketCategory::class, 'category_id');
     }
-    public function replies()
+    /**
+     * @return HasMany<TicketReply, Ticket>
+     */
+    public function replies(): HasMany
     {
         return $this->hasMany(TicketReply::class);
     }
