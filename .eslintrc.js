@@ -4,7 +4,11 @@ module.exports = {
     'node_modules/**',
     'public/assets/vendor/**',
     '*.min.js',
-    '*.min.css'
+    '*.min.css',
+    'public/assets/front/js/front-consolidated.js',
+    'public/assets/js/chart.js',
+    '**/chart.js',
+    '**/front-consolidated.js'
   ],
   env: {
     browser: true,

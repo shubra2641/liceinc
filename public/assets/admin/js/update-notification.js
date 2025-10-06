@@ -59,5 +59,5 @@ class UpdateNotification {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  new UpdateNotification();
+  const updateNotification = new UpdateNotification();
 });

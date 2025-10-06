@@ -3,89 +3,88 @@
  * Handles update checking, installation, and rollback functionality
  */
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', () => {
   // Check for updates button
   document
-    .getElementById("check-updates-btn")
-    .addEventListener("click", function () {
+    .getElementById('check-updates-btn')
+    .addEventListener('click', () => {
       checkForUpdates();
     });
 
   // Update system button
   document
-    .getElementById("update-system-btn")
-    .addEventListener("click", function () {
-      const version = this.dataset.version;
+    .getElementById('update-system-btn')
+    .addEventListener('click', function() {
+      const { version } = this.dataset;
       showUpdateModal(version);
     });
 
   // Confirm update checkbox
   document
-    .getElementById("confirmUpdate")
-    .addEventListener("change", function () {
-      document.getElementById("confirm-update-btn").disabled = !this.checked;
+    .getElementById('confirmUpdate')
+    .addEventListener('change', function() {
+      document.getElementById('confirm-update-btn').disabled = !this.checked;
     });
 
   // Confirm update button
   document
-    .getElementById("confirm-update-btn")
-    .addEventListener("click", function () {
-      const version =
-        document.getElementById("update-system-btn").dataset.version;
+    .getElementById('confirm-update-btn')
+    .addEventListener('click', () => {
+      const { version } = document.getElementById('update-system-btn').dataset;
       performUpdate(version);
     });
 
   // Confirm upload button
   document
-    .getElementById("confirm-upload-btn")
-    .addEventListener("click", function () {
+    .getElementById('confirm-upload-btn')
+    .addEventListener('click', () => {
       uploadUpdatePackage();
     });
 
   // Confirm rollback checkbox
   document
-    .getElementById("confirmRollback")
-    .addEventListener("change", function () {
-      document.getElementById("confirm-rollback-btn").disabled = !this.checked;
+    .getElementById('confirmRollback')
+    .addEventListener('change', function() {
+      document.getElementById('confirm-rollback-btn').disabled = !this.checked;
     });
 
   // Confirm rollback button
   document
-    .getElementById("confirm-rollback-btn")
-    .addEventListener("click", function () {
-      const version = this.dataset.version;
+    .getElementById('confirm-rollback-btn')
+    .addEventListener('click', function() {
+      const { version } = this.dataset;
       performRollback(version);
     });
 });
 
 function checkForUpdates() {
-  const btn = document.getElementById("check-updates-btn");
+  const btn = document.getElementById('check-updates-btn');
   const originalText = btn.innerHTML;
 
   btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking...';
   btn.disabled = true;
 
   fetch(window.location.href, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN": document
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
         .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content"),
+        .getAttribute('content'),
     },
   })
-    .then((response) => response.json())
-    .then((data) => {
+    .then(response => response.json())
+    .then(data => {
       if (data.success) {
         // Reload page to show updated status
         window.location.reload();
       } else {
-        showAlert("error", data.message || "Failed to check for updates");
+        showAlert('error', data.message || 'Failed to check for updates');
       }
     })
-    .catch((error) => {
-      console.error("Error:", error);
-      showAlert("error", "An error occurred while checking for updates");
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', 'An error occurred while checking for updates');
     })
     .finally(() => {
       // Sanitize original text to prevent XSS
@@ -96,48 +95,48 @@ function checkForUpdates() {
 }
 
 function showUpdateModal(version) {
-  document.getElementById("update-system-btn").dataset.version = version;
-  document.getElementById("confirmUpdate").checked = false;
-  document.getElementById("confirm-update-btn").disabled = true;
+  document.getElementById('update-system-btn').dataset.version = version;
+  document.getElementById('confirmUpdate').checked = false;
+  document.getElementById('confirm-update-btn').disabled = true;
 
-  const modal = new bootstrap.Modal(document.getElementById("updateModal"));
+  const modal = new bootstrap.Modal(document.getElementById('updateModal'));
   modal.show();
 }
 
 function performUpdate(version) {
-  const btn = document.getElementById("confirm-update-btn");
+  const btn = document.getElementById('confirm-update-btn');
   const originalText = btn.innerHTML;
 
   btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
   btn.disabled = true;
 
   fetch(window.location.href, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN": document
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
         .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content"),
+        .getAttribute('content'),
     },
     body: JSON.stringify({
-      version: version,
+      version,
       confirm: true,
     }),
   })
-    .then((response) => response.json())
-    .then((data) => {
+    .then(response => response.json())
+    .then(data => {
       if (data.success) {
-        showAlert("success", data.message);
+        showAlert('success', data.message);
         setTimeout(() => {
           window.location.reload();
         }, 2000);
       } else {
-        showAlert("error", data.message || "Update failed");
+        showAlert('error', data.message || 'Update failed');
       }
     })
-    .catch((error) => {
-      console.error("Error:", error);
-      showAlert("error", "An error occurred during update");
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', 'An error occurred during update');
     })
     .finally(() => {
       // Sanitize original text to prevent XSS
@@ -145,29 +144,27 @@ function performUpdate(version) {
       btn.innerHTML = originalText;
       btn.disabled = false;
       bootstrap.Modal.getInstance(
-        document.getElementById("updateModal"),
+        document.getElementById('updateModal'),
       ).hide();
     });
 }
 
 function showVersionDetails(version) {
   fetch(`/admin/updates/version-info/${version}`)
-    .then((response) => response.json())
-    .then((data) => {
+    .then(response => response.json())
+    .then(data => {
       if (data.success) {
         // Sanitize version to prevent XSS
-        const sanitizedVersion = version.replace(/[<>&"']/g, function (match) {
-          return {
-            "<": "&lt;",
-            ">": "&gt;",
-            "&": "&amp;",
-            '"': "&quot;",
-            "'": "&#x27;",
-          }[match];
-        });
-        document.getElementById("versionDetailsTitle").innerHTML =
-          '<i class="fas fa-info-circle me-2"></i>Version Details - ' +
-          sanitizedVersion;
+        const sanitizedVersion = version.replace(/[<>&"']/g, match => ({
+          '<': '&lt;',
+          '>': '&gt;',
+          '&': '&amp;',
+          '"': '&quot;',
+          '\'': '&#x27;',
+        }[match]));
+        document.getElementById('versionDetailsTitle').innerHTML =
+          `<i class="fas fa-info-circle me-2"></i>Version Details - ${
+            sanitizedVersion}`;
 
         let content = '<div class="version-details">';
 
@@ -175,43 +172,39 @@ function showVersionDetails(version) {
           content +=
             '<h6 class="text-success mb-3"><i class="fas fa-plus me-2"></i>New Features</h6>';
           content += '<ul class="list-group list-group-flush mb-4">';
-          data.data.info.features.forEach((feature) => {
+          data.data.info.features.forEach(feature => {
             // Sanitize feature to prevent XSS
             const sanitizedFeature = feature.replace(
               /[<>&"']/g,
-              function (match) {
-                return {
-                  "<": "&lt;",
-                  ">": "&gt;",
-                  "&": "&amp;",
-                  '"': "&quot;",
-                  "'": "&#x27;",
-                }[match];
-              },
+              match => ({
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                '\'': '&#x27;',
+              }[match]),
             );
             content += `<li class="list-group-item"><i class="fas fa-check text-success me-2"></i>${sanitizedFeature}</li>`;
           });
-          content += "</ul>";
+          content += '</ul>';
         }
 
         if (data.data.info.fixes && data.data.info.fixes.length > 0) {
           content +=
             '<h6 class="text-warning mb-3"><i class="fas fa-wrench me-2"></i>Bug Fixes</h6>';
           content += '<ul class="list-group list-group-flush mb-4">';
-          data.data.info.fixes.forEach((fix) => {
+          data.data.info.fixes.forEach(fix => {
             // Sanitize fix to prevent XSS
-            const sanitizedFix = fix.replace(/[<>&"']/g, function (match) {
-              return {
-                "<": "&lt;",
-                ">": "&gt;",
-                "&": "&amp;",
-                '"': "&quot;",
-                "'": "&#x27;",
-              }[match];
-            });
+            const sanitizedFix = fix.replace(/[<>&"']/g, match => ({
+              '<': '&lt;',
+              '>': '&gt;',
+              '&': '&amp;',
+              '"': '&quot;',
+              '\'': '&#x27;',
+            }[match]));
             content += `<li class="list-group-item"><i class="fas fa-check text-warning me-2"></i>${sanitizedFix}</li>`;
           });
-          content += "</ul>";
+          content += '</ul>';
         }
 
         if (
@@ -221,141 +214,139 @@ function showVersionDetails(version) {
           content +=
             '<h6 class="text-info mb-3"><i class="fas fa-arrow-up me-2"></i>Improvements</h6>';
           content += '<ul class="list-group list-group-flush mb-4">';
-          data.data.info.improvements.forEach((improvement) => {
+          data.data.info.improvements.forEach(improvement => {
             // Sanitize improvement to prevent XSS
             const sanitizedImprovement = improvement.replace(
               /[<>&"']/g,
-              function (match) {
-                return {
-                  "<": "&lt;",
-                  ">": "&gt;",
-                  "&": "&amp;",
-                  '"': "&quot;",
-                  "'": "&#x27;",
-                }[match];
-              },
+              match => ({
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                '\'': '&#x27;',
+              }[match]),
             );
             content += `<li class="list-group-item"><i class="fas fa-check text-info me-2"></i>${sanitizedImprovement}</li>`;
           });
-          content += "</ul>";
+          content += '</ul>';
         }
 
         if (data.data.instructions && data.data.instructions.length > 0) {
           content +=
             '<h6 class="text-primary mb-3"><i class="fas fa-list me-2"></i>Update Instructions</h6>';
           content += '<ul class="list-group list-group-flush">';
-          data.data.instructions.forEach((instruction) => {
+          data.data.instructions.forEach(instruction => {
             // Sanitize instruction to prevent XSS
             const sanitizedInstruction = instruction.replace(
               /[<>&"']/g,
-              function (match) {
-                return {
-                  "<": "&lt;",
-                  ">": "&gt;",
-                  "&": "&amp;",
-                  '"': "&quot;",
-                  "'": "&#x27;",
-                }[match];
-              },
+              match => ({
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                '\'': '&#x27;',
+              }[match]),
             );
             content += `<li class="list-group-item"><i class="fas fa-arrow-right text-primary me-2"></i>${sanitizedInstruction}</li>`;
           });
-          content += "</ul>";
+          content += '</ul>';
         }
 
-        content += "</div>";
-        document.getElementById("versionDetailsContent").innerHTML = content;
+        content += '</div>';
+        document.getElementById('versionDetailsContent').innerHTML = content;
 
         const modal = new bootstrap.Modal(
-          document.getElementById("versionDetailsModal"),
+          document.getElementById('versionDetailsModal'),
         );
         modal.show();
       } else {
-        showAlert("error", data.message || "Failed to load version details");
+        showAlert('error', data.message || 'Failed to load version details');
       }
     })
-    .catch((error) => {
-      console.error("Error:", error);
-      showAlert("error", "An error occurred while loading version details");
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', 'An error occurred while loading version details');
     });
 }
 
 function showRollbackModal(version) {
-  document.getElementById("confirm-rollback-btn").dataset.version = version;
-  document.getElementById("confirmRollback").checked = false;
-  document.getElementById("confirm-rollback-btn").disabled = true;
+  document.getElementById('confirm-rollback-btn').dataset.version = version;
+  document.getElementById('confirmRollback').checked = false;
+  document.getElementById('confirm-rollback-btn').disabled = true;
 
-  const modal = new bootstrap.Modal(document.getElementById("rollbackModal"));
+  const modal = new bootstrap.Modal(document.getElementById('rollbackModal'));
   modal.show();
 }
 
 function performRollback(version) {
-  const btn = document.getElementById("confirm-rollback-btn");
+  const btn = document.getElementById('confirm-rollback-btn');
   const originalText = btn.innerHTML;
 
   btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Rolling back...';
   btn.disabled = true;
 
-  fetch("/admin/updates/rollback", {
-    method: "POST",
+  fetch('/admin/updates/rollback', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN": document
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
         .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content"),
+        .getAttribute('content'),
     },
     body: JSON.stringify({
-      version: version,
+      version,
       confirm: true,
     }),
   })
-    .then((response) => response.json())
-    .then((data) => {
+    .then(response => response.json())
+    .then(data => {
       if (data.success) {
-        showAlert("success", data.message);
+        showAlert('success', data.message);
         setTimeout(() => {
           window.location.reload();
         }, 2000);
       } else {
-        showAlert("error", data.message || "Rollback failed");
+        showAlert('error', data.message || 'Rollback failed');
       }
     })
-    .catch((error) => {
-      console.error("Error:", error);
-      showAlert("error", "An error occurred during rollback");
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', 'An error occurred during rollback');
     })
     .finally(() => {
       btn.innerHTML = originalText;
       btn.disabled = false;
       bootstrap.Modal.getInstance(
-        document.getElementById("rollbackModal"),
+        document.getElementById('rollbackModal'),
       ).hide();
     });
 }
 
 function formatFileSize(bytes) {
-  if (bytes === 0) return "0 Bytes";
+  if (bytes === 0) {
+    return '0 Bytes';
+  }
 
   const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 // Auto Update functionality
 document
-  .getElementById("auto-update-btn")
-  .addEventListener("click", function () {
+  .getElementById('auto-update-btn')
+  .addEventListener('click', () => {
     const modal = new bootstrap.Modal(
-      document.getElementById("autoUpdateModal"),
+      document.getElementById('autoUpdateModal'),
     );
     modal.show();
   });
 
 // Check for updates function (refresh page to get latest data)
-function checkForUpdates() {
-  showAlert("info", "Checking for updates...");
+function checkForUpdatesManually() {
+  showAlert('info', 'Checking for updates...');
 
   // Simply reload the page to get fresh data from the server
   setTimeout(() => {
@@ -365,56 +356,54 @@ function checkForUpdates() {
 
 // Display update information
 function displayUpdateInfo(updateData) {
-  document.getElementById("update-title").textContent =
-    updateData.update_info.title || "Update";
-  document.getElementById("update-version").textContent =
+  document.getElementById('update-title').textContent =
+    updateData.update_info.title || 'Update';
+  document.getElementById('update-version').textContent =
     updateData.latest_version;
-  document.getElementById("update-major").innerHTML = updateData.update_info
-    .is_major
-    ? '<span class="badge bg-warning">Yes</span>'
-    : '<span class="badge bg-info">No</span>';
-  document.getElementById("update-required").innerHTML = updateData.update_info
-    .is_required
-    ? '<span class="badge bg-danger">Yes</span>'
-    : '<span class="badge bg-success">No</span>';
-  document.getElementById("update-status").innerHTML =
+  document.getElementById('update-major').innerHTML = updateData.update_info
+    .is_major ?
+    '<span class="badge bg-warning">Yes</span>' :
+    '<span class="badge bg-info">No</span>';
+  document.getElementById('update-required').innerHTML = updateData.update_info
+    .is_required ?
+    '<span class="badge bg-danger">Yes</span>' :
+    '<span class="badge bg-success">No</span>';
+  document.getElementById('update-status').innerHTML =
     '<span class="badge bg-success">Available</span>';
-  document.getElementById("update-release-date").textContent =
-    updateData.update_info.release_date || "Not specified";
-  document.getElementById("update-file-size").textContent = formatFileSize(
+  document.getElementById('update-release-date').textContent =
+    updateData.update_info.release_date || 'Not specified';
+  document.getElementById('update-file-size').textContent = formatFileSize(
     updateData.update_info.file_size,
   );
-  document.getElementById("update-description").textContent =
-    updateData.update_info.description || "No description available";
+  document.getElementById('update-description').textContent =
+    updateData.update_info.description || 'No description available';
 
   // Display changelog
-  const changelogElement = document.getElementById("update-changelog");
+  const changelogElement = document.getElementById('update-changelog');
   if (
     updateData.update_info.changelog &&
     updateData.update_info.changelog.length > 0
   ) {
     // Sanitize changelog items to prevent XSS
-    const sanitizedChangelog = updateData.update_info.changelog.map((item) => {
-      const sanitizedItem = item.replace(/[<>&"']/g, function (match) {
-        return {
-          "<": "&lt;",
-          ">": "&gt;",
-          "&": "&amp;",
-          '"': "&quot;",
-          "'": "&#x27;",
-        }[match];
-      });
+    const sanitizedChangelog = updateData.update_info.changelog.map(item => {
+      const sanitizedItem = item.replace(/[<>&"']/g, match => ({
+        '<': '&lt;',
+        '>': '&gt;',
+        '&': '&amp;',
+        '"': '&quot;',
+        '\'': '&#x27;',
+      }[match]));
       return `<li><i class="fas fa-check text-success me-2"></i>${sanitizedItem}</li>`;
     });
     changelogElement.innerHTML =
-      '<ul class="list-unstyled">' + sanitizedChangelog.join("") + "</ul>";
+      `<ul class="list-unstyled">${sanitizedChangelog.join('')}</ul>`;
   } else {
-    changelogElement.textContent = "No changelog available";
+    changelogElement.textContent = 'No changelog available';
   }
 
   // Show update info section
-  document.getElementById("update-info-section").style.display = "block";
-  document.getElementById("no-updates-section").style.display = "none";
+  document.getElementById('update-info-section').style.display = 'block';
+  document.getElementById('no-updates-section').style.display = 'none';
 
   // Store update data for download
   window.currentUpdateData = updateData;
@@ -422,20 +411,20 @@ function displayUpdateInfo(updateData) {
 
 // Show no updates available
 function showNoUpdatesAvailable() {
-  document.getElementById("update-info-section").style.display = "none";
-  document.getElementById("no-updates-section").style.display = "block";
+  document.getElementById('update-info-section').style.display = 'none';
+  document.getElementById('no-updates-section').style.display = 'block';
 }
 
 // Show auto update modal
 function showAutoUpdateModal() {
-  const modal = new bootstrap.Modal(document.getElementById("autoUpdateModal"));
+  const modal = new bootstrap.Modal(document.getElementById('autoUpdateModal'));
   modal.show();
 }
 
 // Show upload update modal
 function showUploadUpdateModal() {
   const modal = new bootstrap.Modal(
-    document.getElementById("uploadPackageModal"),
+    document.getElementById('uploadPackageModal'),
   );
   modal.show();
 }
@@ -458,16 +447,16 @@ function showProductUpdateInfo(updateData, productName) {
                                 <p><strong>Current Version:</strong> ${updateData.current_version}</p>
                                 <p><strong>Latest Version:</strong> ${updateData.latest_version}</p>
                                 <p><strong>Update Type:</strong> 
-                                    <span class="badge ${updateData.update_info.is_major ? "bg-warning" : "bg-info"}">
-                                        ${updateData.update_info.is_major ? "Major" : "Minor"}
+                                    <span class="badge ${updateData.update_info.is_major ? 'bg-warning' : 'bg-info'}">
+                                        ${updateData.update_info.is_major ? 'Major' : 'Minor'}
                                     </span>
                                 </p>
                             </div>
                             <div class="col-md-6">
                                 <p><strong>File Size:</strong> ${formatFileSize(updateData.update_info.file_size)}</p>
                                 <p><strong>Required:</strong> 
-                                    <span class="badge ${updateData.update_info.is_required ? "bg-danger" : "bg-success"}">
-                                        ${updateData.update_info.is_required ? "Yes" : "No"}
+                                    <span class="badge ${updateData.update_info.is_required ? 'bg-danger' : 'bg-success'}">
+                                        ${updateData.update_info.is_required ? 'Yes' : 'No'}
                                     </span>
                                 </p>
                             </div>
@@ -475,7 +464,7 @@ function showProductUpdateInfo(updateData, productName) {
                         <div class="mt-3">
                             <h6>Changelog:</h6>
                             <ul class="list-unstyled">
-                                ${updateData.update_info.changelog.map((item) => `<li><i class="fas fa-check text-success me-2"></i>${item}</li>`).join("")}
+                                ${updateData.update_info.changelog.map(item => `<li><i class="fas fa-check text-success me-2"></i>${item}</li>`).join('')}
                             </ul>
                         </div>
                         <div class="mt-3">
@@ -491,91 +480,91 @@ function showProductUpdateInfo(updateData, productName) {
     `;
 
   // Remove existing modal if any
-  const existingModal = document.getElementById("productUpdateModal");
+  const existingModal = document.getElementById('productUpdateModal');
   if (existingModal) {
     existingModal.remove();
   }
 
   // Add modal to body
-  document.body.insertAdjacentHTML("beforeend", modalHtml);
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
 
   // Show modal
   const modal = new bootstrap.Modal(
-    document.getElementById("productUpdateModal"),
+    document.getElementById('productUpdateModal'),
   );
   modal.show();
 }
 
 function installProductUpdate(version, downloadUrl) {
-  if (!confirm("Are you sure you want to install this update?")) {
+  if (!confirm('Are you sure you want to install this update?')) {
     return;
   }
 
-  showAlert("info", "Downloading and installing update...");
+  showAlert('info', 'Downloading and installing update...');
 
   // Here you would implement the actual download and installation
   // For now, we'll just show a success message
   setTimeout(() => {
-    showAlert("success", "Update installed successfully!");
+    showAlert('success', 'Update installed successfully!');
     bootstrap.Modal.getInstance(
-      document.getElementById("productUpdateModal"),
+      document.getElementById('productUpdateModal'),
     ).hide();
   }, 3000);
 }
 
 function checkAutoUpdates() {
-  const licenseKey = document.getElementById("auto-license-key").value;
-  const productSlug = document.getElementById("auto-product-slug").value;
-  const domain = document.getElementById("auto-domain").value;
-  const currentVersion = document.getElementById("auto-current-version").value;
+  const licenseKey = document.getElementById('auto-license-key').value;
+  const productSlug = document.getElementById('auto-product-slug').value;
+  const domain = document.getElementById('auto-domain').value;
+  const currentVersion = document.getElementById('auto-current-version').value;
 
   if (!licenseKey || !productSlug || !currentVersion) {
-    showAlert("error", "Please fill all required fields");
+    showAlert('error', 'Please fill all required fields');
     return;
   }
 
-  const btn = document.getElementById("check-auto-updates-btn");
+  const btn = document.getElementById('check-auto-updates-btn');
   const originalText = btn.innerHTML;
 
   btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking...';
   btn.disabled = true;
 
-  fetch("/admin/updates/auto-check", {
-    method: "POST",
+  fetch('/admin/updates/auto-check', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN": document
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
         .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content"),
+        .getAttribute('content'),
     },
     body: JSON.stringify({
       license_key: licenseKey,
       product_slug: productSlug,
-      domain: domain,
+      domain,
       current_version: currentVersion,
     }),
   })
-    .then((response) => {
+    .then(response => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     })
-    .then((data) => {
+    .then(data => {
       if (data.success) {
         // Check if auto update was completed
         if (
           data.message &&
-          data.message.includes("Auto update completed successfully")
+          data.message.includes('Auto update completed successfully')
         ) {
           // Auto update was completed
-          showAlert("success", data.message);
+          showAlert('success', data.message);
 
           // Show additional info if available
           if (data.data && data.data.files_installed) {
             setTimeout(() => {
               showAlert(
-                "info",
+                'info',
                 `Files installed: ${data.data.files_installed}. Please refresh the page to see the new version.`,
               );
             }, 2000);
@@ -590,16 +579,16 @@ function checkAutoUpdates() {
           showAutoUpdateInfo(data.data);
         } else {
           // No updates available
-          showAlert("info", "No updates available");
+          showAlert('info', 'No updates available');
         }
       } else {
         // Update failed
-        showAlert("error", data.message || "Update failed");
+        showAlert('error', data.message || 'Update failed');
       }
     })
-    .catch((error) => {
-      console.error("Error:", error);
-      showAlert("error", "An error occurred during update: " + error.message);
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', `An error occurred during update: ${error.message}`);
     })
     .finally(() => {
       btn.innerHTML = originalText;
@@ -608,31 +597,27 @@ function checkAutoUpdates() {
 }
 
 function showAutoUpdateInfo(updateData) {
-  const updateInfoDiv = document.getElementById("auto-update-info");
+  const updateInfoDiv = document.getElementById('auto-update-info');
   // Sanitize update data to prevent XSS
   const sanitizedCurrentVersion = updateData.current_version.replace(
     /[<>&"']/g,
-    function (match) {
-      return {
-        "<": "&lt;",
-        ">": "&gt;",
-        "&": "&amp;",
-        '"': "&quot;",
-        "'": "&#x27;",
-      }[match];
-    },
+    match => ({
+      '<': '&lt;',
+      '>': '&gt;',
+      '&': '&amp;',
+      '"': '&quot;',
+      '\'': '&#x27;',
+    }[match]),
   );
   const sanitizedLatestVersion = updateData.latest_version.replace(
     /[<>&"']/g,
-    function (match) {
-      return {
-        "<": "&lt;",
-        ">": "&gt;",
-        "&": "&amp;",
-        '"': "&quot;",
-        "'": "&#x27;",
-      }[match];
-    },
+    match => ({
+      '<': '&lt;',
+      '>': '&gt;',
+      '&': '&amp;',
+      '"': '&quot;',
+      '\'': '&#x27;',
+    }[match]),
   );
   updateInfoDiv.innerHTML = `
         <div class="card">
@@ -648,16 +633,16 @@ function showAutoUpdateInfo(updateData) {
                         <p><strong>Current Version:</strong> ${sanitizedCurrentVersion}</p>
                         <p><strong>Latest Version:</strong> ${sanitizedLatestVersion}</p>
                         <p><strong>Update Type:</strong> 
-                            <span class="badge ${updateData.update_info.is_major ? "bg-warning" : "bg-info"}">
-                                ${updateData.update_info.is_major ? "Major" : "Minor"}
+                            <span class="badge ${updateData.update_info.is_major ? 'bg-warning' : 'bg-info'}">
+                                ${updateData.update_info.is_major ? 'Major' : 'Minor'}
                             </span>
                         </p>
                     </div>
                     <div class="col-md-6">
                         <p><strong>File Size:</strong> ${formatFileSize(updateData.update_info.file_size)}</p>
                         <p><strong>Required:</strong> 
-                            <span class="badge ${updateData.update_info.is_required ? "bg-danger" : "bg-success"}">
-                                ${updateData.update_info.is_required ? "Yes" : "No"}
+                            <span class="badge ${updateData.update_info.is_required ? 'bg-danger' : 'bg-success'}">
+                                ${updateData.update_info.is_required ? 'Yes' : 'No'}
                             </span>
                         </p>
                     </div>
@@ -665,7 +650,7 @@ function showAutoUpdateInfo(updateData) {
                 <div class="mt-3">
                     <h6>Changelog:</h6>
                     <ul class="list-unstyled">
-                        ${updateData.update_info.changelog.map((item) => `<li><i class="fas fa-check text-success me-2"></i>${item}</li>`).join("")}
+                        ${updateData.update_info.changelog.map(item => `<li><i class="fas fa-check text-success me-2"></i>${item}</li>`).join('')}
                     </ul>
                 </div>
                 <div class="mt-3">
@@ -677,54 +662,54 @@ function showAutoUpdateInfo(updateData) {
             </div>
         </div>
     `;
-  updateInfoDiv.style.display = "block";
+  updateInfoDiv.style.display = 'block';
 }
 
 function installAutoUpdate(version) {
-  const licenseKey = document.getElementById("auto-license-key").value;
-  const productSlug = document.getElementById("auto-product-slug").value;
-  const domain = document.getElementById("auto-domain").value;
+  const licenseKey = document.getElementById('auto-license-key').value;
+  const productSlug = document.getElementById('auto-product-slug').value;
+  const domain = document.getElementById('auto-domain').value;
 
-  if (!confirm("Are you sure you want to install this update?")) {
+  if (!confirm('Are you sure you want to install this update?')) {
     return;
   }
 
-  const btn = document.querySelector("#auto-update-info .btn-primary");
+  const btn = document.querySelector('#auto-update-info .btn-primary');
   const originalText = btn.innerHTML;
 
   btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Installing...';
   btn.disabled = true;
 
-  fetch("/admin/updates/auto-install", {
-    method: "POST",
+  fetch('/admin/updates/auto-install', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN": document
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
         .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content"),
+        .getAttribute('content'),
     },
     body: JSON.stringify({
       license_key: licenseKey,
       product_slug: productSlug,
-      domain: domain,
-      version: version,
+      domain,
+      version,
       confirm: true,
     }),
   })
-    .then((response) => response.json())
-    .then((data) => {
+    .then(response => response.json())
+    .then(data => {
       if (data.success) {
-        showAlert("success", data.message);
+        showAlert('success', data.message);
         setTimeout(() => {
           window.location.reload();
         }, 3000);
       } else {
-        showAlert("error", data.message || "Installation failed");
+        showAlert('error', data.message || 'Installation failed');
       }
     })
-    .catch((error) => {
-      console.error("Error:", error);
-      showAlert("error", "An error occurred during installation");
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', 'An error occurred during installation');
     })
     .finally(() => {
       btn.innerHTML = originalText;
@@ -734,17 +719,17 @@ function installAutoUpdate(version) {
 
 function showAlert(type, message) {
   const alertClass =
-    type === "success"
-      ? "alert-success"
-      : type === "info"
-        ? "alert-info"
-        : "alert-danger";
+    type === 'success' ?
+      'alert-success' :
+      type === 'info' ?
+        'alert-info' :
+        'alert-danger';
   const iconClass =
-    type === "success"
-      ? "fa-check-circle"
-      : type === "info"
-        ? "fa-info-circle"
-        : "fa-exclamation-triangle";
+    type === 'success' ?
+      'fa-check-circle' :
+      type === 'info' ?
+        'fa-info-circle' :
+        'fa-exclamation-triangle';
 
   const alertHtml = `
         <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
@@ -755,12 +740,12 @@ function showAlert(type, message) {
     `;
 
   // Insert at the top of the page
-  const container = document.querySelector(".admin-page-header").parentNode;
-  container.insertAdjacentHTML("afterbegin", alertHtml);
+  const container = document.querySelector('.admin-page-header').parentNode;
+  container.insertAdjacentHTML('afterbegin', alertHtml);
 
   // Auto-dismiss after 5 seconds
   setTimeout(() => {
-    const alert = container.querySelector(".alert");
+    const alert = container.querySelector('.alert');
     if (alert) {
       bootstrap.Alert.getOrCreateInstance(alert).close();
     }
@@ -769,18 +754,18 @@ function showAlert(type, message) {
 
 // Load version history
 function loadVersionHistory() {
-  fetch("/admin/updates/current-version", {
-    method: "GET",
+  fetch('/admin/updates/current-version', {
+    method: 'GET',
     headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN": document
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
         .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content"),
+        .getAttribute('content'),
     },
   })
-    .then((response) => response.json())
-    .then((data) => {
-      const content = document.getElementById("version-history-content");
+    .then(response => response.json())
+    .then(data => {
+      const content = document.getElementById('version-history-content');
 
       if (
         data.success &&
@@ -789,14 +774,14 @@ function loadVersionHistory() {
       ) {
         let html = '<div class="timeline">';
 
-        data.data.version_history.forEach((history) => {
+        data.data.version_history.forEach(history => {
           const isCurrent = history.version === data.data.current_version;
-          const badgeClass = isCurrent ? "bg-success" : "bg-secondary";
-          const badgeText = isCurrent ? "Current" : "Previous";
+          const badgeClass = isCurrent ? 'bg-success' : 'bg-secondary';
+          const badgeText = isCurrent ? 'Current' : 'Previous';
 
           html += `
                     <div class="timeline-item">
-                        <div class="timeline-marker bg-${isCurrent ? "success" : "secondary"}"></div>
+                        <div class="timeline-marker bg-${isCurrent ? 'success' : 'secondary'}"></div>
                         <div class="timeline-content">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
@@ -808,14 +793,14 @@ function loadVersionHistory() {
                                 </div>
                             </div>
                             <div class="mt-2">
-                                <p class="small text-muted">${history.value || "Auto update"}</p>
+                                <p class="small text-muted">${history.value || 'Auto update'}</p>
                             </div>
                         </div>
                     </div>
                 `;
         });
 
-        html += "</div>";
+        html += '</div>';
         content.innerHTML = html;
       } else {
         contentSecurityUtils.safeInnerHTML(
@@ -830,10 +815,10 @@ function loadVersionHistory() {
         );
       }
     })
-    .catch((error) => {
-      console.error("Error loading version history:", error);
+    .catch(error => {
+      console.error('Error loading version history:', error);
       window.SecurityUtils.safeInnerHTML(
-        document.getElementById("version-history-content"),
+        document.getElementById('version-history-content'),
         `
             <div class="text-center py-4">
                 <i class="fas fa-exclamation-triangle text-warning fs-1 mb-3"></i>
@@ -846,7 +831,7 @@ function loadVersionHistory() {
 }
 
 // Initialize page
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', () => {
   // Load version history on page load
   loadVersionHistory();
 });
