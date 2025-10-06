@@ -145,7 +145,8 @@ class TicketController extends Controller
                 return redirect()->route('login')->with('error', __('app.You must login to create a ticket.'));
             }
             // Get user's licenses for the related license dropdown
-            $licenses = auth()->check() === true ? auth()->user()->licenses()->with('product')->get() : collect();
+            $user = auth()->user();
+            $licenses = $user ? $user->licenses()->with('product')->get() : collect();
             DB::commit();
             return view('user.tickets.create', compact('categories', 'licenses'));
         } catch (Exception $e) {
@@ -213,7 +214,8 @@ class TicketController extends Controller
                 }
             } else {
                 // If purchase_code provided for non-requiring category, still attempt verification (optional)
-                if (! empty($validated['purchase_code']) && Auth::check() && Auth::user()->hasEnvatoAccount()) {
+                $user = Auth::user();
+                if (! empty($validated['purchase_code']) && Auth::check() && $user && $user->hasEnvatoAccount()) {
                     $license = $this->validateAndCreateLicense($validated);
                 }
             }
@@ -470,7 +472,7 @@ class TicketController extends Controller
      *
      * @param  Request  $request  The HTTP request
      *
-     * @return array The validated data
+     * @return array<string, mixed> The validated data
      *
      * @throws \InvalidArgumentException When validation fails
      */
@@ -493,7 +495,7 @@ class TicketController extends Controller
      *
      * @param  Request  $request  The HTTP request
      *
-     * @return array The validated data
+     * @return array<string, mixed> The validated data
      *
      * @throws \InvalidArgumentException When validation fails
      */
@@ -511,7 +513,7 @@ class TicketController extends Controller
      *
      * @param  Request  $request  The HTTP request
      *
-     * @return array The validated data
+     * @return array<string, mixed> The validated data
      */
     private function validateReplyData(Request $request): array
     {
@@ -522,7 +524,7 @@ class TicketController extends Controller
     /**
      * Validate and create license from purchase code.
      *
-     * @param  array  $validated  The validated request data
+     * @param  array<string, mixed>  $validated  The validated request data
      *
      * @return License|null The created or existing license
      */
@@ -572,11 +574,11 @@ class TicketController extends Controller
     /**
      * Prepare ticket data for creation.
      *
-     * @param  array  $validated  The validated request data
+     * @param  array<string, mixed>  $validated  The validated request data
      * @param  TicketCategory  $category  The ticket category
      * @param  License|null  $license  The license instance
      *
-     * @return array The prepared ticket data
+     * @return array<string, mixed> The prepared ticket data
      */
     private function prepareTicketData(array $validated, TicketCategory $category, ?License $license): array
     {
@@ -595,10 +597,10 @@ class TicketController extends Controller
     /**
      * Attach invoice data to ticket data.
      *
-     * @param  array  $ticketData  The ticket data
+     * @param  array<string, mixed>  $ticketData  The ticket data
      * @param  int  $invoiceId  The invoice ID
      *
-     * @return array The updated ticket data
+     * @return array<string, mixed> The updated ticket data
      */
     private function attachInvoiceData(array $ticketData, int $invoiceId): array
     {
@@ -673,8 +675,9 @@ class TicketController extends Controller
      */
     private function canViewTicket(Ticket $ticket): bool
     {
+        $user = Auth::user();
         return ! $ticket->user_id || // Guest ticket
-               (Auth::check() && ($ticket->user_id === Auth::id() || Auth::user()->hasRole('admin'))); // Logged in user
+               (Auth::check() && ($ticket->user_id === Auth::id() || ($user && $user->hasRole('admin')))); // Logged in user
     }
     /**
      * Check if user can modify ticket.

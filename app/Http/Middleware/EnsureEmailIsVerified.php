@@ -90,7 +90,7 @@ class EnsureEmailIsVerified
             if (! $user || ! method_exists($user, 'hasVerifiedEmail')) {
                 return false;
             }
-            return $user->hasVerifiedEmail();
+            return $user && $user->hasVerifiedEmail();
         } catch (Exception $e) {
             Log::error('Failed to check email verification status: ' . $e->getMessage());
             return false;

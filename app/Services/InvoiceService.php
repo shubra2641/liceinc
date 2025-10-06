@@ -144,6 +144,9 @@ class InvoiceService
      *     'due_date' => now()->addDays(15),
      * ]);
      */
+    /**
+     * @param array<string, mixed> $options
+     */
     public function createRenewalInvoice(License $license, array $options = []): Invoice
     {
         try {

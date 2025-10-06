@@ -28,7 +28,8 @@ class ProductFileRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && (auth()->user()->is_admin || auth()->user()->hasRole('admin'));
+        $user = auth()->user();
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.

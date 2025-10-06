@@ -22,9 +22,9 @@ class UpdateNotification {
 
   checkForUpdates() {
     // Check if update notification should be shown
-    const dismissed = localStorage.getItem("update-notification-dismissed");
+    const dismissed = localStorage.getItem('update-notification-dismissed');
     const dismissedPermanently = localStorage.getItem(
-      "update-notification-dismissed-permanently",
+      'update-notification-dismissed-permanently',
     );
 
     if (!dismissedPermanently && !dismissed) {
@@ -33,31 +33,31 @@ class UpdateNotification {
   }
 
   show() {
-    const notification = document.getElementById("update-notification");
+    const notification = document.getElementById('update-notification');
     if (notification) {
-      notification.style.display = "block";
-      notification.classList.add("show");
+      notification.style.display = 'block';
+      notification.classList.add('show');
     }
   }
 
   dismiss() {
-    const notification = document.getElementById("update-notification");
+    const notification = document.getElementById('update-notification');
     if (notification) {
-      notification.style.display = "none";
-      localStorage.setItem("update-notification-dismissed", "true");
+      notification.style.display = 'none';
+      localStorage.setItem('update-notification-dismissed', 'true');
     }
   }
 
   dismissPermanently() {
-    const notification = document.getElementById("update-notification");
+    const notification = document.getElementById('update-notification');
     if (notification) {
-      notification.style.display = "none";
-      localStorage.setItem("update-notification-dismissed-permanently", "true");
+      notification.style.display = 'none';
+      localStorage.setItem('update-notification-dismissed-permanently', 'true');
     }
   }
 }
 
 // Initialize when DOM is ready
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', () => {
   new UpdateNotification();
 });

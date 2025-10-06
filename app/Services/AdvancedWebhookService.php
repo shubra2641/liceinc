@@ -69,6 +69,9 @@ class AdvancedWebhookService
      * // Send to specific webhook
      * $webhookService->sendWebhookEvent('license.activated', $licenseData, 456);
      */
+    /**
+     * @param array<string, mixed> $payload
+     */
     public function sendWebhookEvent(string $eventType, array $payload, ?int $webhookId = null): void
     {
         $webhooks = $webhookId === true
@@ -92,6 +95,9 @@ class AdvancedWebhookService
      * @param  array  $payload  The event data payload
      *
      * @throws \Exception When webhook processing fails and retry is not possible
+     */
+    /**
+     * @param array<string, mixed> $payload
      */
     private function processWebhook(Webhook $webhook, string $eventType, array $payload): void
     {
@@ -128,6 +134,10 @@ class AdvancedWebhookService
      *
      * @throws \Exception When data preparation fails
      */
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
     private function prepareWebhookData(Webhook $webhook, string $eventType, array $payload): array
     {
         $timestamp = now()->timestamp;
@@ -157,6 +167,9 @@ class AdvancedWebhookService
      *
      * @return string The HMAC-SHA256 signature in 'sha256=hash' format
      */
+    /**
+     * @param array<string, mixed> $data
+     */
     private function generateSignature(string $secret, array $data): string
     {
         $payload = json_encode($data);
@@ -175,6 +188,9 @@ class AdvancedWebhookService
      * @return Response The HTTP response from the webhook endpoint
      *
      * @throws \Exception When HTTP request fails or times out
+     */
+    /**
+     * @param array<string, mixed> $data
      */
     private function sendHttpRequest(Webhook $webhook, array $data): Response
     {
@@ -205,6 +221,9 @@ class AdvancedWebhookService
      * @param  Response|null  $response  The HTTP response (null if request failed)
      * @param  bool  $success  Whether the webhook delivery was successful
      * @param  string|null  $errorMessage  Error message if delivery failed
+     */
+    /**
+     * @param array<string, mixed> $payload
      */
     private function logWebhookAttempt(
         Webhook $webhook,
@@ -258,6 +277,9 @@ class AdvancedWebhookService
      * @param  Webhook  $webhook  The webhook configuration to retry
      * @param  string  $eventType  The type of event being retried
      * @param  array  $payload  The event payload to retry
+     */
+    /**
+     * @param array<string, mixed> $payload
      */
     private function queueWebhookRetry(Webhook $webhook, string $eventType, array $payload): void
     {
@@ -356,6 +378,9 @@ class AdvancedWebhookService
      *     echo "Webhook test failed: " . $result['error'];
      * }
      */
+    /**
+     * @return array<string, mixed>
+     */
     public function testWebhook(Webhook $webhook): array
     {
         $testPayload = [
@@ -401,6 +426,9 @@ class AdvancedWebhookService
      * $stats = $webhookService->getWebhookStats($webhook, 7);
      * echo "Success rate: " . $stats['success_rate'] . "%";
      * echo "Average response time: " . $stats['average_response_time'] . "s";
+     */
+    /**
+     * @return array<string, mixed>
      */
     public function getWebhookStats(Webhook $webhook, int $days = 30): array
     {
@@ -464,6 +492,9 @@ class AdvancedWebhookService
      * echo "Health Status: " . $health['status']; // excellent, good, fair, poor
      * echo "Health Score: " . $health['health_score'] . "%";
      */
+    /**
+     * @return array<string, mixed>
+     */
     public function getWebhookHealth(Webhook $webhook): array
     {
         $recentLogs = WebhookLog::where('webhook_id', $webhook->id)
@@ -505,6 +536,10 @@ class AdvancedWebhookService
      * );
      * echo "Updated $updatedCount webhooks";
      */
+    /**
+     * @param array<int> $webhookIds
+     * @param array<string, mixed> $updates
+     */
     public function bulkUpdateWebhooks(array $webhookIds, array $updates): int
     {
         return Webhook::whereIn('id', $webhookIds)->update($updates);
@@ -525,6 +560,9 @@ class AdvancedWebhookService
      * foreach ($report as $webhookReport) {
      *     echo "Webhook {$webhookReport['name']}: {$webhookReport['success_rate']}% success rate";
      * }
+     */
+    /**
+     * @return array<string, mixed>
      */
     public function getDeliveryReport(int $days = 7): array
     {
@@ -579,6 +617,9 @@ class AdvancedWebhookService
      * // Queue webhook for async processing
      * $webhookService->sendWebhookEventAsync('user.created', $userData);
      */
+    /**
+     * @param array<string, mixed> $payload
+     */
     public function sendWebhookEventAsync(string $eventType, array $payload, ?int $webhookId = null): void
     {
         Queue::push(function () use ($eventType, $payload, $webhookId) {
@@ -603,6 +644,9 @@ class AdvancedWebhookService
      *         echo "Validation error: $error";
      *     }
      * }
+     */
+    /**
+     * @return array<string, mixed>
      */
     public function validateWebhookUrl(string $url): array
     {

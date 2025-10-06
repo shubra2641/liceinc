@@ -10,17 +10,17 @@ import 'bootstrap';
 console.log('Admin app.js loaded successfully');
 
 // Admin specific functionality
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize admin-specific features
-    console.log('Admin DOM content loaded');
-    
-    // Add any admin-specific JavaScript initialization here
-    initializeAdminFeatures();
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize admin-specific features
+  console.log('Admin DOM content loaded');
+
+  // Add any admin-specific JavaScript initialization here
+  initializeAdminFeatures();
 });
 
 function initializeAdminFeatures() {
-    // Admin dashboard specific JavaScript features
-    console.log('Admin features initialized');
-    
-    // You can add more admin-specific functions here
+  // Admin dashboard specific JavaScript features
+  console.log('Admin features initialized');
+
+  // You can add more admin-specific functions here
 }

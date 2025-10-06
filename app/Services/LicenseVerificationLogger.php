@@ -53,6 +53,9 @@ class LicenseVerificationLogger
      *
      *
      */
+    /**
+     * @param array<string, mixed>|null $responseData
+     */
     public static function log(
         string $purchaseCode,
         string $domain,
@@ -141,6 +144,9 @@ class LicenseVerificationLogger
      *
      *
      */
+    /**
+     * @return array<string, mixed>
+     */
     public static function getStats(int $days = 30): array
     {
         try {
@@ -190,6 +196,9 @@ class LicenseVerificationLogger
      *
      *
      */
+    /**
+     * @return array<string, mixed>
+     */
     public static function getSuspiciousActivity(int $hours = 24, int $minAttempts = 5): array
     {
         try {
@@ -225,6 +234,9 @@ class LicenseVerificationLogger
      *
      *
      *
+     */
+    /**
+     * @return Collection<int, LicenseVerificationLog>
      */
     public static function getRecentAttempts(int $limit = 50): Collection
     {

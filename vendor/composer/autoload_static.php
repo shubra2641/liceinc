@@ -856,6 +856,8 @@ class ComposerStaticInit86a52888e24497309ef32d852fc6f5ed
         'App\\Models\\TicketCategory' => __DIR__ . '/../..' . '/app/Models/TicketCategory.php',
         'App\\Models\\TicketReply' => __DIR__ . '/../..' . '/app/Models/TicketReply.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
+        'App\\Models\\Webhook' => __DIR__ . '/../..' . '/app/Models/Webhook.php',
+        'App\\Models\\WebhookLog' => __DIR__ . '/../..' . '/app/Models/WebhookLog.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Providers\\EnvatoSocialiteProvider' => __DIR__ . '/../..' . '/app/Providers/EnvatoSocialiteProvider.php',
         'App\\Services\\AILicenseAnalyticsService' => __DIR__ . '/../..' . '/app/Services/AILicenseAnalyticsService.php',

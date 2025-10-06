@@ -36,7 +36,8 @@ class ProfileAdvancedRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isPasswordUpdate = $this->isMethod('POST') && str_contains($this->route()->getName(), 'password');
+        $route = $this->route();
+        $isPasswordUpdate = $this->isMethod('POST') && $route && str_contains($route->getName() ?? '', 'password');
         $userId = auth()->id();
         // Password update validation
         if ($isPasswordUpdate) {

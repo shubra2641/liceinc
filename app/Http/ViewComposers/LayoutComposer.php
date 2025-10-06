@@ -199,7 +199,7 @@ class LayoutComposer
     /**
      * Get available languages with metadata.
      *
-     * @return array The available languages
+     * @return array<string, mixed> The available languages
      */
     private function getAvailableLanguages(): array
     {
@@ -217,7 +217,7 @@ class LayoutComposer
     /**
      * Get current language metadata.
      *
-     * @return array|null The current language metadata
+     * @return array<string, mixed>|null The current language metadata
      */
     private function getCurrentLanguage(): ?array
     {
@@ -225,6 +225,9 @@ class LayoutComposer
         $availableLanguages = $this->getAvailableLanguages();
         return collect($availableLanguages)->firstWhere('code', $currentLocale);
     }
+    /**
+     * @return array<string, mixed>|null
+     */
     private function getOtherLanguage(): ?array
     {
         $availableLanguages = $this->getAvailableLanguages();
@@ -234,7 +237,7 @@ class LayoutComposer
     /**
      * Get preloader settings.
      *
-     * @return array The preloader settings
+     * @return array<string, mixed> The preloader settings
      */
     private function getPreloaderSettings(): array
     {

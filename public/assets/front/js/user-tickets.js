@@ -2,6 +2,7 @@
  * User Tickets JavaScript
  * Handles ticket creation form functionality
  */
+/* eslint-disable no-useless-escape, promise/always-return, n/handle-callback-err, no-unused-vars, no-undef */
 
 class UserTickets {
   constructor() {
@@ -10,26 +11,28 @@ class UserTickets {
 
   init() {
     // Progressive enhancement - ensure form works without JavaScript
-    if (typeof document === "undefined") return;
+    if (typeof document === 'undefined') {
+      return;
+    }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener('DOMContentLoaded', () => {
       this.setupTicketCreation();
     });
   }
 
   setupTicketCreation() {
-    const categorySelect = document.getElementById("category_id");
+    const categorySelect = document.getElementById('category_id');
     const purchaseCodeSection = document.getElementById(
-      "purchase-code-section",
+      'purchase-code-section',
     );
-    const productSlugSection = document.getElementById("product-slug-section");
+    const productSlugSection = document.getElementById('product-slug-section');
     const purchaseCodeRequired = document.getElementById(
-      "purchase-code-required",
+      'purchase-code-required',
     );
-    const purchaseCodeInput = document.getElementById("purchase_code");
-    const productSlugInput = document.getElementById("product_slug");
-    const productNameDisplay = document.getElementById("product-name-display");
-    const productNameSpan = document.getElementById("product-name");
+    const purchaseCodeInput = document.getElementById('purchase_code');
+    const productSlugInput = document.getElementById('product_slug');
+    const productNameDisplay = document.getElementById('product-name-display');
+    const productNameSpan = document.getElementById('product-name');
 
     // Debug: Check if elements exist
     if (!productSlugInput) {
@@ -44,23 +47,23 @@ class UserTickets {
 
     // Handle category change
     if (categorySelect) {
-      categorySelect.addEventListener("change", () => {
+      categorySelect.addEventListener('change', () => {
         const selectedOption =
           categorySelect.options[categorySelect.selectedIndex];
         const requiresPurchaseCode =
-          selectedOption.dataset.requiresPurchaseCode === "true";
+          selectedOption.dataset.requiresPurchaseCode === 'true';
 
         if (requiresPurchaseCode) {
-          purchaseCodeSection.classList.remove("hidden");
-          purchaseCodeRequired.style.display = "inline";
+          purchaseCodeSection.classList.remove('hidden');
+          purchaseCodeRequired.style.display = 'inline';
           purchaseCodeInput.required = true;
-          productSlugSection.classList.remove("hidden");
+          productSlugSection.classList.remove('hidden');
         } else {
-          purchaseCodeSection.classList.add("hidden");
-          purchaseCodeRequired.style.display = "none";
+          purchaseCodeSection.classList.add('hidden');
+          purchaseCodeRequired.style.display = 'none';
           purchaseCodeInput.required = false;
-          productSlugSection.classList.add("hidden");
-          productNameDisplay.classList.add("hidden");
+          productSlugSection.classList.add('hidden');
+          productNameDisplay.classList.add('hidden');
         }
       });
     }
@@ -68,17 +71,17 @@ class UserTickets {
     // Handle purchase code verification
     let verificationTimeout;
     if (purchaseCodeInput) {
-      purchaseCodeInput.addEventListener("input", () => {
+      purchaseCodeInput.addEventListener('input', () => {
         clearTimeout(verificationTimeout);
         const purchaseCode = purchaseCodeInput.value.trim();
 
         // Reset visual feedback
-        productSlugInput.style.borderColor = "";
-        productSlugInput.placeholder = "Product identifier from URL";
+        productSlugInput.style.borderColor = '';
+        productSlugInput.placeholder = 'Product identifier from URL';
 
         if (purchaseCode.length < 10) {
-          productNameDisplay.classList.add("hidden");
-          productSlugInput.value = "";
+          productNameDisplay.classList.add('hidden');
+          productSlugInput.value = '';
           return;
         }
 
@@ -90,94 +93,94 @@ class UserTickets {
 
     // Set browser info
     const browserInfo =
-      navigator.userAgent +
-      " | " +
-      navigator.language +
-      " | " +
-      screen.width +
-      "x" +
-      screen.height;
-    const browserInfoInput = document.getElementById("browser_info");
+      `${navigator.userAgent
+      } | ${
+        navigator.language
+      } | ${
+        screen.width
+      }x${
+        screen.height}`;
+    const browserInfoInput = document.getElementById('browser_info');
     if (browserInfoInput) {
       browserInfoInput.value = browserInfo;
     }
 
     // Initialize form state
     if (categorySelect && categorySelect.value) {
-      categorySelect.dispatchEvent(new Event("change"));
+      categorySelect.dispatchEvent(new Event('change'));
     }
   }
 
   verifyPurchaseCode(purchaseCode) {
     // Validate purchase code format to prevent path traversal attacks
-    if (!purchaseCode || typeof purchaseCode !== "string") {
+    if (!purchaseCode || typeof purchaseCode !== 'string') {
       return;
     }
 
     // Basic validation - purchase codes should be alphanumeric with some special chars
     const purchaseCodeRegex = /^[a-zA-Z0-9\-_\.]+$/;
     if (!purchaseCodeRegex.test(purchaseCode)) {
-      console.error("Invalid purchase code format");
+      console.error('Invalid purchase code format');
       return;
     }
 
     // Prevent path traversal attacks
     if (
-      purchaseCode.includes("..") ||
-      purchaseCode.includes("/") ||
-      purchaseCode.includes("\\")
+      purchaseCode.includes('..') ||
+      purchaseCode.includes('/') ||
+      purchaseCode.includes('\\')
     ) {
-      console.error("Invalid purchase code: path traversal detected");
+      console.error('Invalid purchase code: path traversal detected');
       return;
     }
 
-    const productSlugInput = document.getElementById("product_slug");
-    const productNameSpan = document.getElementById("product-name");
-    const productNameDisplay = document.getElementById("product-name-display");
+    const productSlugInput = document.getElementById('product_slug');
+    const productNameSpan = document.getElementById('product-name');
+    const productNameDisplay = document.getElementById('product-name-display');
 
     // Add visual feedback
-    productSlugInput.style.borderColor = "#ffc107";
-    productSlugInput.placeholder = "Verifying purchase code...";
+    productSlugInput.style.borderColor = '#ffc107';
+    productSlugInput.placeholder = 'Verifying purchase code...';
 
     window.SecurityUtils.safeFetch(
       `/verify-purchase-code/${encodeURIComponent(purchaseCode)}`,
     )
-      .then((response) => {
+      .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
       })
-      .then((data) => {
+      .then(data => {
         if (data.success && data.product) {
           // Set values
           productSlugInput.value = data.product.slug;
           productNameSpan.textContent = data.product.name;
-          productNameDisplay.classList.remove("hidden");
+          productNameDisplay.classList.remove('hidden');
 
           // Visual feedback
-          productSlugInput.style.borderColor = "#28a745";
-          productSlugInput.placeholder = "Product slug filled automatically";
+          productSlugInput.style.borderColor = '#28a745';
+          productSlugInput.placeholder = 'Product slug filled automatically';
 
           // Force update the display
-          productSlugInput.dispatchEvent(new Event("input"));
+          productSlugInput.dispatchEvent(new Event('input'));
         } else {
-          productSlugInput.value = "";
-          productNameDisplay.classList.add("hidden");
-          productSlugInput.style.borderColor = "#dc3545";
-          productSlugInput.placeholder = "Invalid purchase code";
+          productSlugInput.value = '';
+          productNameDisplay.classList.add('hidden');
+          productSlugInput.style.borderColor = '#dc3545';
+          productSlugInput.placeholder = 'Invalid purchase code';
         }
       })
-      .catch((error) => {
-        productSlugInput.value = "";
-        productNameDisplay.classList.add("hidden");
-        productSlugInput.style.borderColor = "#dc3545";
-        productSlugInput.placeholder = "Error verifying purchase code";
+      .catch(error => {
+        productSlugInput.value = '';
+        productNameDisplay.classList.add('hidden');
+        productSlugInput.style.borderColor = '#dc3545';
+        productSlugInput.placeholder = 'Error verifying purchase code';
       });
   }
 }
 
 // Initialize when DOM is ready
-if (typeof document !== "undefined") {
-  new UserTickets();
+if (typeof document !== 'undefined') {
+  const userTickets = new UserTickets(); // eslint-disable-line no-new
 }

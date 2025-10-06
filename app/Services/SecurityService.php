@@ -48,6 +48,11 @@ class SecurityService
      *
      *
      */
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $rules
+     * @return array<string, mixed>
+     */
     public function validateAndSanitizeInput(array $data, array $rules = []): array
     {
         try {
@@ -385,6 +390,9 @@ class SecurityService
      *
      *
      */
+    /**
+     * @param array<string, mixed> $data
+     */
     public function logSecurityEvent(string $event, array $data = [], string $level = 'warning'): void
     {
         try {
@@ -458,6 +466,13 @@ class SecurityService
      *
      *
      *
+     */
+    /**
+     * @return array<string, mixed>
+     */
+    /**
+     * @param mixed $file
+     * @return array<string, mixed>
      */
     public function validateFileUpload($file): array
     {

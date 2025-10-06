@@ -1,25 +1,25 @@
 /* ===== USER DASHBOARD OPTIMIZED JS ===== */
 /* Optimized and compressed version - Removed duplicates and unused code */
 
-(function () {
-  "use strict";
+(function() {
+  'use strict';
 
   // ===== UTILITY FUNCTIONS =====
   const $ = (selector, context = document) => context.querySelector(selector);
   const $$ = (selector, context = document) =>
     context.querySelectorAll(selector);
 
-  const showNotification = (message, type = "info") => {
-    const notification = document.createElement("div");
+  const showNotification = (message, type = 'info') => {
+    const notification = document.createElement('div');
     notification.className = `user-notification user-notification-${type} show`;
     // Sanitize message to prevent XSS
     // Message will be sanitized by SecurityUtils
-    notificationwindow.SecurityUtils.safeInnerHTML(
+    window.SecurityUtils.safeInnerHTML(
       this,
       `
             <div class="user-notification-content">
                 <div class="user-notification-icon">
-                    <i class="fas fa-${type === "success" ? "check" : type === "error" ? "times" : type === "warning" ? "exclamation" : "info"}-circle"></i>
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
                 </div>
                 <div class="user-notification-message">${message}</div>
                 <button class="user-notification-close" onclick="this.parentElement.parentElement.remove()">
@@ -34,55 +34,67 @@
   };
 
   const setButtonLoading = (button, isLoading) => {
-    const text = button.querySelector(".button-text, .user-btn-text");
-    const spinner = button.querySelector(".button-loading, .user-btn-spinner");
+    const text = button.querySelector('.button-text, .user-btn-text');
+    const spinner = button.querySelector('.button-loading, .user-btn-spinner');
 
     if (isLoading) {
       button.disabled = true;
-      if (text) text.style.opacity = "0";
-      if (spinner) spinner.style.display = "inline-block";
+      if (text) {
+        text.style.opacity = '0';
+      }
+      if (spinner) {
+        spinner.style.display = 'inline-block';
+      }
     } else {
       button.disabled = false;
-      if (text) text.style.opacity = "1";
-      if (spinner) spinner.style.display = "none";
+      if (text) {
+        text.style.opacity = '1';
+      }
+      if (spinner) {
+        spinner.style.display = 'none';
+      }
     }
   };
 
-  const validateInput = (input) => {
+  const validateInput = input => {
     const value = input.value.trim();
-    const type = input.type;
-    const required = input.hasAttribute("required");
+    const { type } = input;
+    const required = input.hasAttribute('required');
 
     if (required && !value) {
-      return "This field is required";
+      return 'This field is required';
     }
 
     if (
-      type === "email" &&
+      type === 'email' &&
       value &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
     ) {
-      return "Please enter a valid email address";
+      return 'Please enter a valid email address';
     }
 
-    if (type === "password" && value && value.length < 6) {
-      return "Password must be at least 6 characters";
+    if (type === 'password' && value && value.length < 6) {
+      return 'Password must be at least 6 characters';
     }
 
     return null;
   };
 
   const showInputError = (input, message) => {
-    const inputGroup = input.closest(".form-field-group, .form-group");
-    if (!inputGroup) return;
+    const inputGroup = input.closest('.form-field-group, .form-group');
+    if (!inputGroup) {
+      return;
+    }
 
     const existingError = inputGroup.querySelector(
-      ".form-error, .user-form-error",
+      '.form-error, .user-form-error',
     );
-    if (existingError) existingError.remove();
+    if (existingError) {
+      existingError.remove();
+    }
 
-    const errorDiv = document.createElement("div");
-    errorDiv.className = "form-error";
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'form-error';
     // Sanitize message to prevent XSS
     // Message will be sanitized by SecurityUtils
     window.SecurityUtils.safeInnerHTML(
@@ -91,19 +103,23 @@
     );
 
     inputGroup.appendChild(errorDiv);
-    input.classList.add("form-input-error");
+    input.classList.add('form-input-error');
   };
 
-  const clearInputError = (input) => {
-    const inputGroup = input.closest(".form-field-group, .form-group");
-    if (!inputGroup) return;
+  const clearInputError = input => {
+    const inputGroup = input.closest('.form-field-group, .form-group');
+    if (!inputGroup) {
+      return;
+    }
 
     const existingError = inputGroup.querySelector(
-      ".form-error, .user-form-error",
+      '.form-error, .user-form-error',
     );
-    if (existingError) existingError.remove();
+    if (existingError) {
+      existingError.remove();
+    }
 
-    input.classList.remove("form-input-error");
+    input.classList.remove('form-input-error');
   };
 
   // ===== INITIALIZATION FUNCTIONS =====
@@ -129,14 +145,14 @@
   };
 
   const initializePasswordToggles = () => {
-    const toggles = $$("[data-password-toggle]");
-    toggles.forEach((toggle) => {
+    const toggles = $$('[data-password-toggle]');
+    toggles.forEach(toggle => {
       const input = $(toggle.dataset.passwordToggle);
       const showIcon = $(toggle.dataset.showIcon);
       const hideIcon = $(toggle.dataset.hideIcon);
 
       if (input && showIcon && hideIcon) {
-        toggle.addEventListener("click", () =>
+        toggle.addEventListener('click', () =>
           togglePasswordVisibility(input, showIcon, hideIcon),
         );
       }
@@ -144,44 +160,49 @@
   };
 
   const togglePasswordVisibility = (input, showIcon, hideIcon) => {
-    if (input.type === "password") {
-      input.type = "text";
-      showIcon.style.display = "none";
-      hideIcon.style.display = "inline";
+    if (input.type === 'password') {
+      input.type = 'text';
+      showIcon.style.display = 'none';
+      hideIcon.style.display = 'inline';
     } else {
-      input.type = "password";
-      showIcon.style.display = "inline";
-      hideIcon.style.display = "none";
+      input.type = 'password';
+      showIcon.style.display = 'inline';
+      hideIcon.style.display = 'none';
     }
   };
 
   const initializeFormValidation = () => {
-    const forms = $$(".user-form, .register-form, .login-form");
-    forms.forEach((form) => {
-      const inputs = $$("input, textarea, select", form);
-      inputs.forEach((input) => {
-        input.addEventListener("blur", () => {
+    const forms = $$('.user-form, .register-form, .login-form');
+    forms.forEach(form => {
+      const inputs = $$('input, textarea, select', form);
+      inputs.forEach(input => {
+        input.addEventListener('blur', () => {
           const error = validateInput(input);
-          if (error) showInputError(input, error);
-          else clearInputError(input);
+          if (error) {
+            showInputError(input, error);
+          } else {
+            clearInputError(input);
+          }
         });
 
-        input.addEventListener("input", () => {
-          if (input.classList.contains("form-input-error")) {
+        input.addEventListener('input', () => {
+          if (input.classList.contains('form-input-error')) {
             const error = validateInput(input);
-            if (!error) clearInputError(input);
+            if (!error) {
+              clearInputError(input);
+            }
           }
         });
       });
 
-      form.addEventListener("submit", (e) => {
+      form.addEventListener('submit', e => {
         const inputs = $$(
-          "input[required], textarea[required], select[required]",
+          'input[required], textarea[required], select[required]',
           form,
         );
         let isValid = true;
 
-        inputs.forEach((input) => {
+        inputs.forEach(input => {
           const error = validateInput(input);
           if (error) {
             showInputError(input, error);
@@ -189,92 +210,107 @@
           }
         });
 
-        if (!isValid) e.preventDefault();
+        if (!isValid) {
+          e.preventDefault();
+        }
       });
     });
   };
 
   const initializeFormLoading = () => {
-    const forms = $$(".user-form, .register-form, .login-form");
-    forms.forEach((form) => {
-      form.addEventListener("submit", () => {
+    const forms = $$('.user-form, .register-form, .login-form');
+    forms.forEach(form => {
+      form.addEventListener('submit', () => {
         const submitBtn = form.querySelector(
           'button[type="submit"], input[type="submit"]',
         );
-        if (submitBtn) setButtonLoading(submitBtn, true);
+        if (submitBtn) {
+          setButtonLoading(submitBtn, true);
+        }
       });
     });
   };
 
   const initializeFormAnimations = () => {
-    const cards = $$(".user-card, .user-stat-card, .user-action-card");
+    const cards = $$('.user-card, .user-stat-card, .user-action-card');
     cards.forEach((card, index) => {
       card.style.animationDelay = `${index * 0.1}s`;
     });
   };
 
   const initializeTables = () => {
-    const containers = $$(".table-container");
+    const containers = $$('.table-container');
     containers.forEach(addScrollIndicator);
   };
 
-  const addScrollIndicator = (container) => {
-    const table = $(".user-table", container);
-    if (!table) return;
+  const addScrollIndicator = container => {
+    const table = $('.user-table', container);
+    if (!table) {
+      return;
+    }
 
     const checkScrollable = () => {
       const isScrollable = table.scrollWidth > container.clientWidth;
-      container.classList.toggle("scrollable", isScrollable);
+      container.classList.toggle('scrollable', isScrollable);
     };
 
     checkScrollable();
-    window.addEventListener("resize", checkScrollable);
+    window.addEventListener('resize', checkScrollable);
   };
 
   const initializeForms = () => {
-    const forms = $$("form");
+    const forms = $$('form');
     forms.forEach(addFormValidation);
   };
 
-  const addFormValidation = (form) => {
-    const inputs = $$("input, textarea, select", form);
-    inputs.forEach((input) => {
-      input.addEventListener("blur", () => {
+  const addFormValidation = form => {
+    const inputs = $$('input, textarea, select', form);
+    inputs.forEach(input => {
+      input.addEventListener('blur', () => {
         const error = validateInput(input);
-        if (error) showInputError(input, error);
-        else clearInputError(input);
+        if (error) {
+          showInputError(input, error);
+        } else {
+          clearInputError(input);
+        }
       });
     });
   };
 
   const initializeTabs = () => {
-    const tabButtons = $$(".tab-button");
-    tabButtons.forEach((button) => {
-      button.addEventListener("click", () => {
+    const tabButtons = $$('.tab-button');
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
         const tabId = button.dataset.tab;
-        if (tabId) showTab(tabId);
+        if (tabId) {
+          showTab(tabId);
+        }
       });
     });
   };
 
-  const showTab = (tabId) => {
-    const tabs = $$(".tab-content");
-    const buttons = $$(".tab-button");
+  const showTab = tabId => {
+    const tabs = $$('.tab-content');
+    const buttons = $$('.tab-button');
 
-    tabs.forEach((tab) => tab.classList.remove("active"));
-    buttons.forEach((btn) => btn.classList.remove("active"));
+    tabs.forEach(tab => tab.classList.remove('active'));
+    buttons.forEach(btn => btn.classList.remove('active'));
 
     const activeTab = $(`#${tabId}`);
     const activeButton = $(`[data-tab="${tabId}"]`);
 
-    if (activeTab) activeTab.classList.add("active");
-    if (activeButton) activeButton.classList.add("active");
+    if (activeTab) {
+      activeTab.classList.add('active');
+    }
+    if (activeButton) {
+      activeButton.classList.add('active');
+    }
   };
 
   const initializeCopyButtons = () => {
-    const copyButtons = $$(".copy-btn, [data-copy]");
-    copyButtons.forEach((button) => {
-      button.addEventListener("click", (e) => {
+    const copyButtons = $$('.copy-btn, [data-copy]');
+    copyButtons.forEach(button => {
+      button.addEventListener('click', e => {
         e.preventDefault();
         const text = button.dataset.copy || button.textContent.trim();
         copyToClipboard(text, button);
@@ -288,6 +324,7 @@
         .writeText(text)
         .then(() => {
           showCopySuccess(button);
+          return undefined;
         })
         .catch(() => {
           fallbackCopyTextToClipboard(text, button);
@@ -298,17 +335,17 @@
   };
 
   const fallbackCopyTextToClipboard = (text, button) => {
-    const textArea = document.createElement("textarea");
+    const textArea = document.createElement('textarea');
     textArea.value = text;
-    textArea.style.position = "fixed";
-    textArea.style.left = "-999999px";
-    textArea.style.top = "-999999px";
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
 
     try {
-      document.execCommand("copy");
+      document.execCommand('copy');
       showCopySuccess(button);
     } catch (err) {
       showCopyError(button);
@@ -317,27 +354,27 @@
     document.body.removeChild(textArea);
   };
 
-  const showCopySuccess = (button) => {
+  const showCopySuccess = button => {
     const originalText = button.innerHTML;
     // Sanitize original text to prevent XSS
     // Text will be sanitized by SecurityUtils
     button.innerHTML = '<i class="fas fa-check"></i> Copied!';
-    button.style.background = "#10b981";
+    button.style.background = '#10b981';
 
     setTimeout(() => {
       button.innerHTML = originalText;
-      button.style.background = "";
+      button.style.background = '';
     }, 2000);
   };
 
-  const showCopyError = (button) => {
+  const showCopyError = button => {
     const originalText = button.innerHTML;
     button.innerHTML = '<i class="fas fa-times"></i> Failed';
-    button.style.background = "#ef4444";
+    button.style.background = '#ef4444';
 
     setTimeout(() => {
       button.innerHTML = originalText;
-      button.style.background = "";
+      button.style.background = '';
     }, 2000);
   };
 
@@ -348,102 +385,108 @@
   };
 
   const initializeLicenseFilters = () => {
-    const statusFilter = $("#licenseStatusFilter");
-    const searchInput = $("#licenseSearchInput");
+    const statusFilter = $('#licenseStatusFilter');
+    const searchInput = $('#licenseSearchInput');
 
     if (statusFilter && searchInput) {
       const filterFunction = () =>
         filterLicenseTable(statusFilter, searchInput);
-      statusFilter.addEventListener("change", filterFunction);
-      searchInput.addEventListener("input", filterFunction);
+      statusFilter.addEventListener('change', filterFunction);
+      searchInput.addEventListener('input', filterFunction);
     }
   };
 
   const filterLicenseTable = (statusFilter, searchInput) => {
-    const table = $(".user-table");
-    if (!table) return;
+    const table = $('.user-table');
+    if (!table) {
+      return;
+    }
 
-    const rows = $$("tbody tr", table);
+    const rows = $$('tbody tr', table);
     const statusValue = statusFilter.value.toLowerCase();
     const searchValue = searchInput.value.toLowerCase();
 
-    rows.forEach((row) => {
+    rows.forEach(row => {
       const status =
-        row.querySelector(".license-status-badge")?.textContent.toLowerCase() ||
-        "";
+        row.querySelector('.license-status-badge')?.textContent.toLowerCase() ||
+        '';
       const text = row.textContent.toLowerCase();
 
       const statusMatch = !statusValue || status.includes(statusValue);
       const searchMatch = !searchValue || text.includes(searchValue);
 
-      row.style.display = statusMatch && searchMatch ? "" : "none";
+      row.style.display = statusMatch && searchMatch ? '' : 'none';
     });
   };
 
   const initializeInvoiceFilters = () => {
-    const statusFilter = $("#invoiceStatusFilter");
-    const searchInput = $("#invoiceSearchInput");
+    const statusFilter = $('#invoiceStatusFilter');
+    const searchInput = $('#invoiceSearchInput');
 
     if (statusFilter && searchInput) {
       const filterFunction = () =>
         filterInvoiceTable(statusFilter, searchInput);
-      statusFilter.addEventListener("change", filterFunction);
-      searchInput.addEventListener("input", filterFunction);
+      statusFilter.addEventListener('change', filterFunction);
+      searchInput.addEventListener('input', filterFunction);
     }
   };
 
   const filterInvoiceTable = (statusFilter, searchInput) => {
-    const table = $(".user-table");
-    if (!table) return;
+    const table = $('.user-table');
+    if (!table) {
+      return;
+    }
 
-    const rows = $$("tbody tr", table);
+    const rows = $$('tbody tr', table);
     const statusValue = statusFilter.value.toLowerCase();
     const searchValue = searchInput.value.toLowerCase();
 
-    rows.forEach((row) => {
+    rows.forEach(row => {
       const status =
-        row.querySelector(".invoice-status-badge")?.textContent.toLowerCase() ||
-        "";
+        row.querySelector('.invoice-status-badge')?.textContent.toLowerCase() ||
+        '';
       const text = row.textContent.toLowerCase();
 
       const statusMatch = !statusValue || status.includes(statusValue);
       const searchMatch = !searchValue || text.includes(searchValue);
 
-      row.style.display = statusMatch && searchMatch ? "" : "none";
+      row.style.display = statusMatch && searchMatch ? '' : 'none';
     });
   };
 
   const initializeTicketFilters = () => {
-    const statusFilter = $("#ticketStatusFilter");
-    const priorityFilter = $("#ticketPriorityFilter");
-    const searchInput = $("#ticketSearchInput");
+    const statusFilter = $('#ticketStatusFilter');
+    const priorityFilter = $('#ticketPriorityFilter');
+    const searchInput = $('#ticketSearchInput');
 
     if (statusFilter && priorityFilter && searchInput) {
       const filterFunction = () =>
         filterTicketTable(statusFilter, priorityFilter, searchInput);
-      statusFilter.addEventListener("change", filterFunction);
-      priorityFilter.addEventListener("change", filterFunction);
-      searchInput.addEventListener("input", filterFunction);
+      statusFilter.addEventListener('change', filterFunction);
+      priorityFilter.addEventListener('change', filterFunction);
+      searchInput.addEventListener('input', filterFunction);
     }
   };
 
   const filterTicketTable = (statusFilter, priorityFilter, searchInput) => {
-    const table = $(".user-table");
-    if (!table) return;
+    const table = $('.user-table');
+    if (!table) {
+      return;
+    }
 
-    const rows = $$("tbody tr", table);
+    const rows = $$('tbody tr', table);
     const statusValue = statusFilter.value.toLowerCase();
     const priorityValue = priorityFilter.value.toLowerCase();
     const searchValue = searchInput.value.toLowerCase();
 
-    rows.forEach((row) => {
+    rows.forEach(row => {
       const status =
-        row.querySelector(".ticket-status-badge")?.textContent.toLowerCase() ||
-        "";
+        row.querySelector('.ticket-status-badge')?.textContent.toLowerCase() ||
+        '';
       const priority =
         row
-          .querySelector(".ticket-priority-badge")
-          ?.textContent.toLowerCase() || "";
+          .querySelector('.ticket-priority-badge')
+          ?.textContent.toLowerCase() || '';
       const text = row.textContent.toLowerCase();
 
       const statusMatch = !statusValue || status.includes(statusValue);
@@ -451,58 +494,66 @@
       const searchMatch = !searchValue || text.includes(searchValue);
 
       row.style.display =
-        statusMatch && priorityMatch && searchMatch ? "" : "none";
+        statusMatch && priorityMatch && searchMatch ? '' : 'none';
     });
   };
 
   const initializeTicketForm = () => {
-    const form = $("#ticketForm");
-    if (!form) return;
+    const form = $('#ticketForm');
+    if (!form) {
+      return;
+    }
 
     const submitBtn = $('button[type="submit"]', form);
     if (submitBtn) {
-      form.addEventListener("submit", () => {
+      form.addEventListener('submit', () => {
         setButtonLoading(submitBtn, true);
       });
     }
   };
 
   const initializeHashScrolling = () => {
-    const hash = window.location.hash;
+    const { hash } = window.location;
     if (hash) {
       const element = $(hash);
       if (element) {
-        setTimeout(() => element.scrollIntoView({ behavior: "smooth" }), 100);
+        setTimeout(() => element.scrollIntoView({ behavior: 'smooth' }), 100);
       }
     }
   };
 
   const generateTableOfContents = () => {
-    const content = $(".article-content, .user-article-content");
-    if (!content) return;
+    const content = $('.article-content, .user-article-content');
+    if (!content) {
+      return;
+    }
 
-    const headings = $$("h1, h2, h3, h4, h5, h6", content);
-    if (headings.length === 0) return;
+    const headings = $$('h1, h2, h3, h4, h5, h6', content);
+    if (headings.length === 0) {
+      return;
+    }
 
-    const toc = $(".article-toc-content, .user-toc");
-    if (!toc) return;
+    const toc = $('.article-toc-content, .user-toc');
+    if (!toc) {
+      return;
+    }
 
-    const tocList = document.createElement("ul");
-    tocList.className = "toc-list";
+    const tocList = document.createElement('ul');
+    tocList.className = 'toc-list';
 
     headings.forEach((heading, index) => {
       const id = heading.id || `heading-${index}`;
       heading.id = id;
 
-      const li = document.createElement("li");
+      const li = document.createElement('li');
       li.className = `toc-item ${heading.tagName.toLowerCase()}`;
 
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = `#${id}`;
       a.textContent = heading.textContent;
-      a.addEventListener("click", (e) => {
+      a.addEventListener('click', e => {
         e.preventDefault();
-        heading.scrollIntoView({ behavior: "smooth" });
+        heading.scrollIntoView({ behavior: 'smooth' });
       });
 
       li.appendChild(a);
@@ -513,28 +564,32 @@
   };
 
   const addScrollSpy = () => {
-    const tocItems = $$(".toc-item a");
-    if (tocItems.length === 0) return;
+    const tocItems = $$('.toc-item a');
+    if (tocItems.length === 0) {
+      return;
+    }
 
     const removeActiveClass = () => {
-      tocItems.forEach((item) => item.classList.remove("active"));
+      tocItems.forEach(item => item.classList.remove('active'));
     };
 
     const addActiveClass = () => {
       const scrollPos = window.scrollY + 100;
-      const headings = $$("h1, h2, h3, h4, h5, h6");
+      const headings = $$('h1, h2, h3, h4, h5, h6');
 
       headings.forEach((heading, index) => {
         const nextHeading = headings[index + 1];
         const headingTop = heading.offsetTop;
-        const headingBottom = nextHeading
-          ? nextHeading.offsetTop
-          : headingTop + heading.offsetHeight;
+        const headingBottom = nextHeading ?
+          nextHeading.offsetTop :
+          headingTop + heading.offsetHeight;
 
         if (scrollPos >= headingTop && scrollPos < headingBottom) {
           removeActiveClass();
           const tocItem = $(`.toc-item a[href="#${heading.id}"]`);
-          if (tocItem) tocItem.classList.add("active");
+          if (tocItem) {
+            tocItem.classList.add('active');
+          }
         }
       });
     };
@@ -543,23 +598,23 @@
       requestAnimationFrame(addActiveClass);
     };
 
-    window.addEventListener("scroll", updateActiveSection);
+    window.addEventListener('scroll', updateActiveSection);
     updateActiveSection();
   };
 
   const handlePrintFunctionality = () => {
-    const printBtn = $(".print-btn, [data-print]");
+    const printBtn = $('.print-btn, [data-print]');
     if (printBtn) {
-      printBtn.addEventListener("click", () => {
+      printBtn.addEventListener('click', () => {
         window.print();
       });
     }
   };
 
   const handleShareFunctionality = () => {
-    const shareBtn = $(".share-btn, [data-share]");
+    const shareBtn = $('.share-btn, [data-share]');
     if (shareBtn) {
-      shareBtn.addEventListener("click", () => {
+      shareBtn.addEventListener('click', () => {
         if (navigator.share) {
           navigator.share({
             title: document.title,
@@ -567,7 +622,10 @@
           });
         } else {
           navigator.clipboard.writeText(window.location.href).then(() => {
-            showNotification("Link copied to clipboard!", "success");
+            showNotification('Link copied to clipboard!', 'success');
+            return undefined;
+          }).catch(() => {
+            showNotification('Failed to copy link', 'error');
           });
         }
       });
@@ -585,53 +643,56 @@
   };
 
   const initializeLicenseStatus = () => {
-    const form = $("#licenseCheckForm");
-    if (!form) return;
+    const form = $('#licenseCheckForm');
+    if (!form) {
+      return;
+    }
 
     const submitBtn = $('button[type="submit"]', form);
-    const formCard = $("#licenseCheckFormCard");
-    const loadingSpinner = $("#loadingSpinner");
-    const licenseDetails = $("#licenseDetails");
-    const errorMessage = $("#errorMessage");
-
-    const showLicenseForm = () => {
-      hideAllStates();
-      if (formCard) formCard.classList.remove("hidden");
-    };
+    const formCard = $('#licenseCheckFormCard');
+    const loadingSpinner = $('#loadingSpinner');
+    const licenseDetails = $('#licenseDetails');
+    const errorMessage = $('#errorMessage');
 
     const showLoadingState = () => {
       hideAllStates();
-      if (loadingSpinner) loadingSpinner.classList.add("show");
-      if (submitBtn) setButtonLoading(submitBtn, true);
-    };
-
-    const showLicenseDetails = (data) => {
-      hideAllStates();
-      if (licenseDetails) {
-        populateLicenseDetails(data);
-        licenseDetails.classList.add("show");
+      if (loadingSpinner) {
+        loadingSpinner.classList.add('show');
+      }
+      if (submitBtn) {
+        setButtonLoading(submitBtn, true);
       }
     };
 
-    const showErrorMessage = (message) => {
+    const showLicenseDetails = data => {
+      hideAllStates();
+      if (licenseDetails) {
+        populateLicenseDetails(data);
+        licenseDetails.classList.add('show');
+      }
+    };
+
+    const showErrorMessage = message => {
       hideAllStates();
       if (errorMessage) {
         errorMessage.textContent = message;
-        errorMessage.classList.add("show");
+        errorMessage.classList.add('show');
       }
     };
 
     const hideAllStates = () => {
-      [formCard, loadingSpinner, licenseDetails, errorMessage].forEach((el) => {
+      [formCard, loadingSpinner, licenseDetails, errorMessage].forEach(el => {
         if (el) {
-          el.classList.add("hidden");
-          el.classList.remove("show");
+          el.classList.add('hidden');
+          el.classList.remove('show');
         }
       });
-      if (submitBtn) setButtonLoading(submitBtn, false);
+      if (submitBtn) {
+        setButtonLoading(submitBtn, false);
+      }
     };
 
-    const populateLicenseDetails = (data) => {
+    const populateLicenseDetails = data => {
       const elements = {
         licenseKey: data.license_key,
         licenseStatus: data.status,
@@ -647,7 +708,9 @@
 
       Object.entries(elements).forEach(([id, value]) => {
         const element = $(`#${id}`);
-        if (element) element.textContent = value;
+        if (element) {
+          element.textContent = value;
+        }
       });
 
       if (data.domains && data.domains.length > 0) {
@@ -659,36 +722,26 @@
       }
     };
 
-    const updateStatCard = (elementId, value) => {
-      const element = $(elementId);
-      if (element) element.textContent = value;
-    };
-
-    const updateElement = (elementId, value) => {
-      const element = $(elementId);
-      if (element) element.textContent = value;
-    };
-
-    const updateDomainsList = (domains) => {
-      const domainsList = $(".domains-list");
-      if (!domainsList) return;
+    const updateDomainsList = domains => {
+      const domainsList = $('.domains-list');
+      if (!domainsList) {
+        return;
+      }
 
       // Sanitize domains to prevent XSS
-      const sanitizedDomains = domains.map((domain) => ({
+      const sanitizedDomains = domains.map(domain => ({
         ...domain,
-        domain: domain.domain.replace(/[<>&"']/g, function (match) {
-          return {
-            "<": "&lt;",
-            ">": "&gt;",
-            "&": "&amp;",
-            '"': "&quot;",
-            "'": "&#x27;",
-          }[match];
-        }),
+        domain: domain.domain.replace(/[<>&"']/g, match => ({
+          '<': '&lt;',
+          '>': '&gt;',
+          '&': '&amp;',
+          '"': '&quot;',
+          '\'': '&#x27;',
+        }[match])),
       }));
       domainsList.innerHTML = sanitizedDomains
         .map(
-          (domain) => `
+          domain => `
                 <div class="domain-item">
                     <div class="domain-info">
                         <div class="domain-name">
@@ -709,21 +762,21 @@
                 </div>
             `,
         )
-        .join("");
+        .join('');
     };
 
-    const updateEnvatoStatus = (envatoData) => {
-      const envatoSection = $(".envato-data-section");
-      const envatoNaSection = $(".envato-na-section");
+    const updateEnvatoStatus = envatoData => {
+      const envatoSection = $('.envato-data-section');
+      const envatoNaSection = $('.envato-na-section');
 
       if (envatoData && Object.keys(envatoData).length > 0) {
         if (envatoSection) {
-          envatoSection.classList.remove("hide");
-          envatoSection.classList.add("show");
+          envatoSection.classList.remove('hide');
+          envatoSection.classList.add('show');
         }
         if (envatoNaSection) {
-          envatoNaSection.classList.add("hide");
-          envatoNaSection.classList.remove("show");
+          envatoNaSection.classList.add('hide');
+          envatoNaSection.classList.remove('show');
         }
 
         const elements = {
@@ -735,40 +788,42 @@
 
         Object.entries(elements).forEach(([id, value]) => {
           const element = $(`#${id}`);
-          if (element) element.textContent = value;
+          if (element) {
+            element.textContent = value;
+          }
         });
       } else {
         if (envatoSection) {
-          envatoSection.classList.add("hide");
-          envatoSection.classList.remove("show");
+          envatoSection.classList.add('hide');
+          envatoSection.classList.remove('show');
         }
         if (envatoNaSection) {
-          envatoNaSection.classList.remove("hide");
-          envatoNaSection.classList.add("show");
+          envatoNaSection.classList.remove('hide');
+          envatoNaSection.classList.add('show');
         }
       }
     };
 
     const showHistoryModal = () => {
-      const modal = $(".license-history-modal");
+      const modal = $('.license-history-modal');
       if (modal) {
-        modal.style.display = "block";
-        document.body.classList.add("modal-open");
+        modal.style.display = 'block';
+        document.body.classList.add('modal-open');
         loadLicenseHistory();
       }
     };
 
     const hideHistoryModal = () => {
-      const modal = $(".license-history-modal");
+      const modal = $('.license-history-modal');
       if (modal) {
-        modal.style.display = "none";
-        document.body.classList.remove("modal-open");
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
       }
     };
 
     const loadLicenseHistory = () => {
       // Simulate loading license history
-      const historyContent = $(".user-history-content");
+      const historyContent = $('.user-history-content');
       if (historyContent) {
         historyContent.innerHTML =
           '<div class="text-center p-4">Loading history...</div>';
@@ -777,65 +832,57 @@
         setTimeout(() => {
           const mockHistory = [
             {
-              type: "activation",
-              title: "License Activated",
-              description: "License was activated on example.com",
-              date: "2024-01-15 10:30:00",
-              ip: "192.168.1.1",
+              type: 'activation',
+              title: 'License Activated',
+              description: 'License was activated on example.com',
+              date: '2024-01-15 10:30:00',
+              ip: '192.168.1.1',
             },
             {
-              type: "deactivation",
-              title: "License Deactivated",
-              description: "License was deactivated from example.com",
-              date: "2024-01-14 15:45:00",
-              ip: "192.168.1.1",
+              type: 'deactivation',
+              title: 'License Deactivated',
+              description: 'License was deactivated from example.com',
+              date: '2024-01-14 15:45:00',
+              ip: '192.168.1.1',
             },
           ];
 
           // Sanitize mock history data to prevent XSS
-          const sanitizedHistory = mockHistory.map((item) => ({
+          const sanitizedHistory = mockHistory.map(item => ({
             ...item,
-            title: item.title.replace(/[<>&"']/g, function (match) {
-              return {
-                "<": "&lt;",
-                ">": "&gt;",
-                "&": "&amp;",
-                '"': "&quot;",
-                "'": "&#x27;",
-              }[match];
-            }),
-            description: item.description.replace(/[<>&"']/g, function (match) {
-              return {
-                "<": "&lt;",
-                ">": "&gt;",
-                "&": "&amp;",
-                '"': "&quot;",
-                "'": "&#x27;",
-              }[match];
-            }),
-            date: item.date.replace(/[<>&"']/g, function (match) {
-              return {
-                "<": "&lt;",
-                ">": "&gt;",
-                "&": "&amp;",
-                '"': "&quot;",
-                "'": "&#x27;",
-              }[match];
-            }),
-            ip: item.ip.replace(/[<>&"']/g, function (match) {
-              return {
-                "<": "&lt;",
-                ">": "&gt;",
-                "&": "&amp;",
-                '"': "&quot;",
-                "'": "&#x27;",
-              }[match];
-            }),
+            title: item.title.replace(/[<>&"']/g, match => ({
+              '<': '&lt;',
+              '>': '&gt;',
+              '&': '&amp;',
+              '"': '&quot;',
+              '\'': '&#x27;',
+            }[match])),
+            description: item.description.replace(/[<>&"']/g, match => ({
+              '<': '&lt;',
+              '>': '&gt;',
+              '&': '&amp;',
+              '"': '&quot;',
+              '\'': '&#x27;',
+            }[match])),
+            date: item.date.replace(/[<>&"']/g, match => ({
+              '<': '&lt;',
+              '>': '&gt;',
+              '&': '&amp;',
+              '"': '&quot;',
+              '\'': '&#x27;',
+            }[match])),
+            ip: item.ip.replace(/[<>&"']/g, match => ({
+              '<': '&lt;',
+              '>': '&gt;',
+              '&': '&amp;',
+              '"': '&quot;',
+              '\'': '&#x27;',
+            }[match])),
           }));
 
           historyContent.innerHTML = sanitizedHistory
             .map(
-              (item) => `
+              item => `
                         <div class="history-item">
                             <div class="history-item-icon ${item.type}">
                                 <i class="fas fa-${getHistoryIcon(item.type)}"></i>
@@ -851,48 +898,52 @@
                         </div>
                     `,
             )
-            .join("");
+            .join('');
         }, 1000);
       }
     };
 
     const populateHistorySummary = () => {
       const summaryStats = {
-        totalActivations: "5",
-        totalDeactivations: "2",
-        activeDomains: "3",
+        totalActivations: '5',
+        totalDeactivations: '2',
+        activeDomains: '3',
       };
 
       Object.entries(summaryStats).forEach(([id, value]) => {
         const element = $(`#${id}`);
-        if (element) element.textContent = value;
+        if (element) {
+          element.textContent = value;
+        }
       });
     };
 
-    const getHistoryIcon = (type) => {
+    const getHistoryIcon = type => {
       const icons = {
-        activation: "check-circle",
-        deactivation: "times-circle",
-        suspension: "exclamation-circle",
-        renewal: "refresh",
+        activation: 'check-circle',
+        deactivation: 'times-circle',
+        suspension: 'exclamation-circle',
+        renewal: 'refresh',
       };
-      return icons[type] || "info-circle";
+      return icons[type] || 'info-circle';
     };
 
     const exportHistory = () => {
-      const historyData = $(".user-history-content").textContent;
-      const blob = new Blob([historyData], { type: "text/plain" });
+      const historyData = $('.user-history-content').textContent;
+      const blob = new Blob([historyData], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
-      a.download = "license-history.txt";
+      a.download = 'license-history.txt';
       a.click();
       URL.revokeObjectURL(url);
     };
 
-    const copyToClipboard = (elementId) => {
+    const copyToClipboard = elementId => {
       const element = $(elementId);
-      if (!element) return;
+      if (!element) {
+        return;
+      }
 
       const text = element.textContent || element.value;
       if (navigator.clipboard) {
@@ -900,6 +951,7 @@
           .writeText(text)
           .then(() => {
             showCopySuccess(element);
+            return undefined;
           })
           .catch(() => {
             fallbackCopyTextToClipboard(text, element);
@@ -910,17 +962,17 @@
     };
 
     const fallbackCopyTextToClipboard = (text, element) => {
-      const textArea = document.createElement("textarea");
+      const textArea = document.createElement('textarea');
       textArea.value = text;
-      textArea.style.position = "fixed";
-      textArea.style.left = "-999999px";
-      textArea.style.top = "-999999px";
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
 
       try {
-        document.execCommand("copy");
+        document.execCommand('copy');
         showCopySuccess(element);
       } catch (err) {
         showCopyError(element);
@@ -929,56 +981,62 @@
       document.body.removeChild(textArea);
     };
 
-    const showCopySuccess = (element) => {
+    const showCopySuccess = element => {
       const originalText = element.textContent;
-      element.textContent = "Copied!";
-      element.style.color = "#10b981";
+      element.textContent = 'Copied!';
+      element.style.color = '#10b981';
 
       setTimeout(() => {
         element.textContent = originalText;
-        element.style.color = "";
+        element.style.color = '';
       }, 2000);
     };
 
-    const showCopyError = (element) => {
+    const showCopyError = element => {
       const originalText = element.textContent;
-      element.textContent = "Failed to copy";
-      element.style.color = "#ef4444";
+      element.textContent = 'Failed to copy';
+      element.style.color = '#ef4444';
 
       setTimeout(() => {
         element.textContent = originalText;
-        element.style.color = "";
+        element.style.color = '';
       }, 2000);
     };
 
-    const handleEnvatoStatus = (licenseData) => {
+    const handleEnvatoStatus = licenseData => {
       if (licenseData.envato_data) {
         updateEnvatoStatus(licenseData.envato_data);
       } else {
-        const envatoSection = $(".envato-data-section");
-        const envatoNaSection = $(".envato-na-section");
+        const envatoSection = $('.envato-data-section');
+        const envatoNaSection = $('.envato-na-section');
 
-        if (envatoSection) envatoSection.classList.add("hide");
-        if (envatoNaSection) envatoNaSection.classList.remove("hide");
+        if (envatoSection) {
+          envatoSection.classList.add('hide');
+        }
+        if (envatoNaSection) {
+          envatoNaSection.classList.remove('hide');
+        }
       }
     };
 
-    const viewDomainHistory = (domain) => {
-      showNotification(`Viewing history for ${domain}`, "info");
+    const viewDomainHistory = domain => {
+      showNotification(`Viewing history for ${domain}`, 'info');
     };
 
     const handleLicenseCheck = () => {
-      if (!form) return;
+      if (!form) {
+        return;
+      }
 
-      form.addEventListener("submit", async (e) => {
+      form.addEventListener('submit', async e => {
         e.preventDefault();
         showLoadingState();
 
         const formData = new FormData(form);
-        const licenseKey = formData.get("license_key");
+        const licenseKey = formData.get('license_key');
 
         if (!licenseKey) {
-          showErrorMessage("Please enter a license key");
+          showErrorMessage('Please enter a license key');
           return;
         }
 
@@ -987,20 +1045,20 @@
           const formAction = form.action;
           const allowedOrigins = [
             window.location.origin,
-            window.location.protocol + "//" + window.location.host,
+            `${window.location.protocol}//${window.location.host}`,
           ];
 
           // Check if the form action is from the same origin
-          if (!allowedOrigins.some((origin) => formAction.startsWith(origin))) {
-            showErrorMessage("Invalid request URL");
+          if (!allowedOrigins.some(origin => formAction.startsWith(origin))) {
+            showErrorMessage('Invalid request URL');
             return;
           }
 
           const response = await fetch(formAction, {
-            method: "POST",
+            method: 'POST',
             body: formData,
             headers: {
-              "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
                 .content,
             },
           });
@@ -1012,16 +1070,12 @@
             handleEnvatoStatus(data.license);
             populateHistorySummary();
           } else {
-            showErrorMessage(data.message || "License not found");
+            showErrorMessage(data.message || 'License not found');
           }
         } catch (error) {
-          showErrorMessage("An error occurred while checking the license");
+          showErrorMessage('An error occurred while checking the license');
         }
       });
-    };
-
-    const isValidEmail = (email) => {
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     };
 
     // Initialize license check functionality
@@ -1031,21 +1085,23 @@
     window.showLicenseHistory = showHistoryModal;
     window.hideLicenseHistory = hideHistoryModal;
     window.exportLicenseHistory = exportHistory;
-    window.copyLicenseKey = () => copyToClipboard("#licenseKey");
-    window.copyPurchaseCode = () => copyToClipboard("#purchaseCode");
+    window.copyLicenseKey = () => copyToClipboard('#licenseKey');
+    window.copyPurchaseCode = () => copyToClipboard('#purchaseCode');
     window.viewDomainHistory = viewDomainHistory;
   };
 
   const initializeMobileMenu = () => {
-    const toggleBtn = $("[data-mobile-menu-toggle]");
-    const menu = $("[data-mobile-menu]");
-    const backdrop = $(".mobile-menu-backdrop");
-    const closeBtn = $(".mobile-menu-close");
+    const toggleBtn = $('[data-mobile-menu-toggle]');
+    const menu = $('[data-mobile-menu]');
+    const backdrop = $('.mobile-menu-backdrop');
+    const closeBtn = $('.mobile-menu-close');
 
-    if (!toggleBtn || !menu) return;
+    if (!toggleBtn || !menu) {
+      return;
+    }
 
     const toggleMobileMenu = () => {
-      const isOpen = menu.classList.contains("active");
+      const isOpen = menu.classList.contains('active');
       if (isOpen) {
         closeMobileMenu();
       } else {
@@ -1054,65 +1110,79 @@
     };
 
     const openMobileMenu = () => {
-      menu.classList.add("active");
+      menu.classList.add('active');
       // Some CSS uses .show for visibility (legacy rules). Keep both in sync.
-      menu.classList.add("show");
+      menu.classList.add('show');
       // Remove any utility 'hidden' class so CSS display rules don't override visibility
-      menu.classList.remove("hidden");
+      menu.classList.remove('hidden');
       // Mark the toggle button as active for styling consistency
-      if (toggleBtn) toggleBtn.classList.add("active");
-      if (backdrop) backdrop.classList.add("active");
-      document.body.classList.add("mobile-menu-open");
-      document.addEventListener("keydown", handleEscapeKey);
+      if (toggleBtn) {
+        toggleBtn.classList.add('active');
+      }
+      if (backdrop) {
+        backdrop.classList.add('active');
+      }
+      document.body.classList.add('mobile-menu-open');
+      document.addEventListener('keydown', handleEscapeKey);
     };
 
     const closeMobileMenu = () => {
-      menu.classList.remove("active");
+      menu.classList.remove('active');
       // Keep legacy .show class in sync when closing
-      menu.classList.remove("show");
+      menu.classList.remove('show');
       // Re-apply the utility 'hidden' class to return to initial state
-      menu.classList.add("hidden");
-      if (toggleBtn) toggleBtn.classList.remove("active");
-      if (backdrop) backdrop.classList.remove("active");
-      document.body.classList.remove("mobile-menu-open");
-      document.removeEventListener("keydown", handleEscapeKey);
+      menu.classList.add('hidden');
+      if (toggleBtn) {
+        toggleBtn.classList.remove('active');
+      }
+      if (backdrop) {
+        backdrop.classList.remove('active');
+      }
+      document.body.classList.remove('mobile-menu-open');
+      document.removeEventListener('keydown', handleEscapeKey);
     };
 
-    const handleEscapeKey = (e) => {
-      if (e.key === "Escape") {
+    const handleEscapeKey = e => {
+      if (e.key === 'Escape') {
         closeMobileMenu();
       }
     };
 
-    toggleBtn.addEventListener("click", toggleMobileMenu);
-    if (closeBtn) closeBtn.addEventListener("click", closeMobileMenu);
-    if (backdrop) backdrop.addEventListener("click", closeMobileMenu);
+    toggleBtn.addEventListener('click', toggleMobileMenu);
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeMobileMenu);
+    }
+    if (backdrop) {
+      backdrop.addEventListener('click', closeMobileMenu);
+    }
 
     // Close menu when clicking on nav links
-    const navLinks = $$(".mobile-nav-link");
-    navLinks.forEach((link) => {
-      link.addEventListener("click", closeMobileMenu);
+    const navLinks = $$('.mobile-nav-link');
+    navLinks.forEach(link => {
+      link.addEventListener('click', closeMobileMenu);
     });
   };
 
   const initializeProfileTabs = () => {
-    const tabButtons = $$(".tab-button");
-    tabButtons.forEach((button) => {
-      button.addEventListener("click", () => {
+    const tabButtons = $$('.tab-button');
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
         const tabId = button.dataset.tab;
-        if (tabId) showTab(tabId);
+        if (tabId) {
+          showTab(tabId);
+        }
       });
     });
   };
 
   // ===== INITIALIZATION =====
-  document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener('DOMContentLoaded', () => {
     // Check if we're on dashboard or auth pages
-    if ($(".user-dashboard-container")) {
+    if ($('.user-dashboard-container')) {
       initializeDashboard();
     }
 
-    if ($(".user-form, .register-form, .login-form")) {
+    if ($('.user-form, .register-form, .login-form')) {
       initializeAuth();
     }
 
@@ -1125,10 +1195,18 @@
     const flashWarning = document.querySelector('meta[name="flash-warning"]');
     const flashInfo = document.querySelector('meta[name="flash-info"]');
 
-    if (flashSuccess) showNotification(flashSuccess.content, "success");
-    if (flashError) showNotification(flashError.content, "error");
-    if (flashWarning) showNotification(flashWarning.content, "warning");
-    if (flashInfo) showNotification(flashInfo.content, "info");
+    if (flashSuccess) {
+      showNotification(flashSuccess.content, 'success');
+    }
+    if (flashError) {
+      showNotification(flashError.content, 'error');
+    }
+    if (flashWarning) {
+      showNotification(flashWarning.content, 'warning');
+    }
+    if (flashInfo) {
+      showNotification(flashInfo.content, 'info');
+    }
   });
 
   // ===== GLOBAL FUNCTIONS =====

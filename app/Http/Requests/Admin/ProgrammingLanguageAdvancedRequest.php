@@ -27,7 +27,8 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && (auth()->user()->is_admin || auth()->user()->hasRole('admin'));
+        $user = auth()->user();
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -36,8 +37,9 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isTemplate = $this->isMethod('POST') && str_contains($this->route()->getName(), 'template');
-        $isContent = $this->isMethod('POST') && str_contains($this->route()->getName(), 'content');
+        $route = $this->route();
+        $isTemplate = $this->isMethod('POST') && $route && str_contains($route->getName() ?? '', 'template');
+        $isContent = $this->isMethod('POST') && $route && str_contains($route->getName() ?? '', 'content');
         // Template file validation
         if ($isTemplate) {
             return [

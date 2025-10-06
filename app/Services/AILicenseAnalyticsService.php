@@ -130,6 +130,9 @@ class AILicenseAnalyticsService
     /**
      * Get trend analysis with predictive elements.
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function getTrendAnalysis(int $days): array
     {
         $startDate = now()->subDays($days);
@@ -170,6 +173,9 @@ class AILicenseAnalyticsService
     /**
      * Get predictive insights using machine learning algorithms.
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function getPredictiveInsights(int $days): array
     {
         $insights = [];
@@ -187,6 +193,9 @@ class AILicenseAnalyticsService
     }
     /**
      * Get customer insights with behavioral analysis.
+     */
+    /**
+     * @return array<string, mixed>
      */
     private function getCustomerInsights(int $days): array
     {
@@ -209,6 +218,9 @@ class AILicenseAnalyticsService
     }
     /**
      * Get product performance with AI analysis.
+     */
+    /**
+     * @return array<string, mixed>
      */
     private function getProductPerformance(int $days): array
     {
@@ -240,6 +252,9 @@ class AILicenseAnalyticsService
     /**
      * Get geographic distribution with heatmap data.
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function getGeographicDistribution(int $days): array
     {
         $startDate = now()->subDays($days);
@@ -265,6 +280,9 @@ class AILicenseAnalyticsService
     /**
      * Detect anomalies in license patterns.
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function detectAnomalies(int $days): array
     {
         $startDate = now()->subDays($days);
@@ -288,6 +306,9 @@ class AILicenseAnalyticsService
     }
     /**
      * Predict license expirations with confidence scores.
+     */
+    /**
+     * @return array<string, mixed>
      */
     private function predictLicenseExpirations(): array
     {
@@ -316,6 +337,9 @@ class AILicenseAnalyticsService
     /**
      * Forecast revenue using time series analysis.
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function forecastRevenue(int $days): array
     {
         $startDate = now()->subDays($days);
@@ -331,6 +355,9 @@ class AILicenseAnalyticsService
     }
     /**
      * Predict customer churn using behavioral patterns.
+     */
+    /**
+     * @return array<string, mixed>
      */
     private function predictCustomerChurn(): array
     {
@@ -389,6 +416,10 @@ class AILicenseAnalyticsService
     /**
      * Apply AI smoothing to trend data.
      */
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private function applyAISmoothing(array $data): array
     {
         if (count($data) < 3) {
@@ -411,6 +442,10 @@ class AILicenseAnalyticsService
     }
     /**
      * Predict future trends using linear regression.
+     */
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
      */
     private function predictFutureTrends(array $data, int $days): array
     {
@@ -448,6 +483,9 @@ class AILicenseAnalyticsService
     /**
      * Calculate health score for the business.
      */
+    /**
+     * @param array<string, mixed> $stats
+     */
     private function calculateHealthScore(array $stats): float
     {
         $factors = [
@@ -470,6 +508,10 @@ class AILicenseAnalyticsService
     }
     /**
      * Generate intelligent recommendations.
+     */
+    /**
+     * @param array<string, mixed> $stats
+     * @return array<string, mixed>
      */
     private function generateRecommendations(array $stats): array
     {
@@ -519,6 +561,9 @@ class AILicenseAnalyticsService
      * @example
      * $service->logAnalyticsEvent('dashboard_viewed', ['user_id' => 123]);
      */
+    /**
+     * @param array<string, mixed> $eventData
+     */
     public function logAnalyticsEvent(string $eventType, array $eventData = []): void
     {
         try {
@@ -560,6 +605,9 @@ class AILicenseAnalyticsService
      * @example
      * $realtimeData = $service->getRealTimeUpdates();
      * $activeLicenses = $realtimeData['active_licenses_now'];
+     */
+    /**
+     * @return array<string, mixed>
      */
     public function getRealTimeUpdates(): array
     {
@@ -823,6 +871,9 @@ class AILicenseAnalyticsService
      *
      * @throws \Exception When risk assessment fails
      */
+    /**
+     * @param array<string, mixed> $stats
+     */
     private function assessRiskLevel(array $stats): string
     {
         try {
@@ -843,10 +894,17 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
+    /**
+     * @param array<string, mixed> $trends
+     */
     private function analyzeTrendDirection(array $trends): string
     {
         return 'stable';
     }
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private function detectSeasonality(array $data): array
     {
         return [];
@@ -859,6 +917,9 @@ class AILicenseAnalyticsService
     {
         return 0;
     }
+    /**
+     * @return array<string, mixed>
+     */
     private function getSystemHealthMetrics(): array
     {
         return [];
@@ -872,6 +933,10 @@ class AILicenseAnalyticsService
      * @param  array  $eventData  The event data to sanitize
      *
      * @return array The sanitized event data
+     */
+    /**
+     * @param array<string, mixed> $eventData
+     * @return array<string, mixed>
      */
     private function sanitizeEventData(array $eventData): array
     {

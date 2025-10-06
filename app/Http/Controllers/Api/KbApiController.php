@@ -308,6 +308,9 @@ class KbApiController extends Controller
      *
      * @return array Serial information with 'message' and 'source' keys
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function getSerialInfo(KbArticle $article): array
     {
         if ($article->requires_serial) {
@@ -351,6 +354,9 @@ class KbApiController extends Controller
      * @param  array  $data  The response data
      *
      * @return JsonResponse The success response
+     */
+    /**
+     * @param array<string, mixed>|null $data
      */
     protected function successResponse(
         mixed $data = null,

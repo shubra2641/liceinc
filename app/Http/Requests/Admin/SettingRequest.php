@@ -26,7 +26,8 @@ class SettingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && (auth()->user()->is_admin || auth()->user()->hasRole('admin'));
+        $user = auth()->user();
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -35,7 +36,8 @@ class SettingRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isTest = $this->isMethod('POST') && str_contains($this->route()->getName(), 'test');
+        $route = $this->route();
+        $isTest = $this->isMethod('POST') && $route && str_contains($route->getName() ?? '', 'test');
         // Test API validation
         if ($isTest) {
             return [

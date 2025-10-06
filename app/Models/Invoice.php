@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 /**
@@ -56,6 +58,11 @@ class Invoice extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = InvoiceFactory::class;
+
     protected $fillable = [
         'invoice_number',
         'user_id',
@@ -77,32 +84,57 @@ class Invoice extends Model
         'metadata' => 'array',
     ];
     // العلاقات
-    public function user()
+    /**
+     * @return BelongsTo<User, Invoice>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-    public function license()
+    /**
+     * @return BelongsTo<License, Invoice>
+     */
+    public function license(): BelongsTo
     {
         return $this->belongsTo(License::class);
     }
-    public function product()
+    /**
+     * @return BelongsTo<Product, Invoice>
+     */
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
     // Scopes
-    public function scopePending($query)
+    /**
+     * @param Builder<Invoice> $query
+     * @return Builder<Invoice>
+     */
+    public function scopePending(Builder $query): Builder
     {
         return $query->where('status', 'pending');
     }
-    public function scopePaid($query)
+    /**
+     * @param Builder<Invoice> $query
+     * @return Builder<Invoice>
+     */
+    public function scopePaid(Builder $query): Builder
     {
         return $query->where('status', 'paid');
     }
-    public function scopeOverdue($query)
+    /**
+     * @param Builder<Invoice> $query
+     * @return Builder<Invoice>
+     */
+    public function scopeOverdue(Builder $query): Builder
     {
         return $query->where('status', 'overdue');
     }
-    public function scopeDueSoon($query, $days = 7)
+    /**
+     * @param Builder<Invoice> $query
+     * @return Builder<Invoice>
+     */
+    public function scopeDueSoon(Builder $query, int $days = 7): Builder
     {
         return $query->where('due_date', '<=', now()->addDays($days))
             ->where('status', 'pending');
@@ -120,7 +152,7 @@ class Invoice extends Model
     /**
      * توليد رقم فاتورة فريد.
      */
-    public static function generateInvoiceNumber()
+    public static function generateInvoiceNumber(): string
     {
         do {
             $number = 'INV-' . date('Y') . '-' . strtoupper(Str::random(8));
@@ -130,14 +162,14 @@ class Invoice extends Model
     /**
      * التحقق من انتهاء صلاحية الفاتورة.
      */
-    public function isOverdue()
+    public function isOverdue(): bool
     {
         return $this->status === 'pending' && $this->due_date->isPast();
     }
     /**
      * تحديث حالة الفاتورة إلى مدفوعة.
      */
-    public function markAsPaid()
+    public function markAsPaid(): void
     {
         $this->update([
             'status' => 'paid',
@@ -147,28 +179,28 @@ class Invoice extends Model
     /**
      * تحديث حالة الفاتورة إلى متأخرة.
      */
-    public function markAsOverdue()
+    public function markAsOverdue(): void
     {
         $this->update(['status' => 'overdue']);
     }
     /**
      * إلغاء الفاتورة.
      */
-    public function cancel()
+    public function cancel(): void
     {
         $this->update(['status' => 'cancelled']);
     }
     /**
      * الحصول على المبلغ المتبقي.
      */
-    public function getRemainingAmountAttribute()
+    public function getRemainingAmountAttribute(): float
     {
         return $this->status === 'paid' ? 0 : $this->amount;
     }
     /**
      * الحصول على عدد الأيام المتبقية حتى تاريخ الاستحقاق
      */
-    public function getDaysUntilDueAttribute()
+    public function getDaysUntilDueAttribute(): int
     {
         return now()->diffInDays($this->due_date, false);
     }

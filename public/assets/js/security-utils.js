@@ -4,26 +4,24 @@
  */
 
 // Global security utilities
-window.SecurityUtils = {
+const SecurityUtils = {
   /**
    * Sanitize HTML content to prevent XSS attacks
    * @param {string} content - The content to sanitize
    * @returns {string} - Sanitized content
    */
-  sanitizeHtml: function (content) {
-    if (typeof content !== "string") {
-      return "";
+  sanitizeHtml(content) {
+    if (typeof content !== 'string') {
+      return '';
     }
 
-    return content.replace(/[<>&"']/g, function (match) {
-      return {
-        "<": "&lt;",
-        ">": "&gt;",
-        "&": "&amp;",
-        '"': "&quot;",
-        "'": "&#x27;",
-      }[match];
-    });
+    return content.replace(/[<>&"']/g, match => ({
+      '<': '&lt;',
+      '>': '&gt;',
+      '&': '&amp;',
+      '"': '&quot;',
+      '\'': '&#x27;',
+    }[match]));
   },
 
   /**
@@ -31,15 +29,14 @@ window.SecurityUtils = {
    * @param {string} url - The URL to validate
    * @returns {boolean} - True if URL is safe
    */
-  isValidUrl: function (url) {
+  isValidUrl(url) {
     try {
-      const urlObj = new URL(url);
       const allowedOrigins = [
         window.location.origin,
-        window.location.protocol + "//" + window.location.host,
-        window.location.protocol + "//" + window.location.hostname,
+        `${window.location.protocol}//${window.location.host}`,
+        `${window.location.protocol}//${window.location.hostname}`,
       ];
-      return allowedOrigins.some((origin) => url.startsWith(origin));
+      return allowedOrigins.some(origin => url.startsWith(origin));
     } catch (e) {
       return false;
     }
@@ -51,23 +48,20 @@ window.SecurityUtils = {
    * @param {string} content - The content to set
    * @param {boolean} sanitize - Whether to sanitize the content (default: true)
    */
-  safeInnerHTML: function (element, content, sanitize = true) {
-    if (!element || typeof content !== "string") {
+  safeInnerHTML(element, content, sanitize = true) {
+    if (!element || typeof content !== 'string') {
       return;
     }
 
     const safeContent = sanitize ? this.sanitizeHtml(content) : content;
     // Use textContent for better security when possible
-    if (element.tagName === "SCRIPT" || element.tagName === "STYLE") {
+    if (element.tagName === 'SCRIPT' || element.tagName === 'STYLE') {
+      element.textContent = safeContent;
+    } else if (this.containsDangerousContent(safeContent)) {
+      console.error('Dangerous content detected, using textContent instead');
       element.textContent = safeContent;
     } else {
-      // Additional validation for dangerous content
-      if (this.containsDangerousContent(safeContent)) {
-        console.error("Dangerous content detected, using textContent instead");
-        element.textContent = safeContent;
-      } else {
-        element.innerHTML = safeContent;
-      }
+      element.innerHTML = safeContent;
     }
   },
 
@@ -76,7 +70,7 @@ window.SecurityUtils = {
    * @param {string} content - The content to check
    * @returns {boolean} - True if dangerous content is found
    */
-  containsDangerousContent: function (content) {
+  containsDangerousContent(content) {
     const dangerousPatterns = [
       /<script[^>]*>/i,
       /javascript:/i,
@@ -88,7 +82,7 @@ window.SecurityUtils = {
       /<input[^>]*>/i,
     ];
 
-    return dangerousPatterns.some((pattern) => pattern.test(content));
+    return dangerousPatterns.some(pattern => pattern.test(content));
   },
 
   /**
@@ -97,9 +91,9 @@ window.SecurityUtils = {
    * @param {object} options - Fetch options
    * @returns {Promise} - Fetch promise
    */
-  safeFetch: function (url, options = {}) {
+  safeFetch(url, options = {}) {
     if (!this.isValidUrl(url)) {
-      throw new Error("Invalid URL: SSRF protection activated");
+      throw new Error('Invalid URL: SSRF protection activated');
     }
     return fetch(url, options);
   },
@@ -108,16 +102,16 @@ window.SecurityUtils = {
    * Safe navigation with URL validation
    * @param {string} url - The URL to navigate to
    */
-  safeNavigate: function (url) {
-    if (!url || typeof url !== "string") {
-      console.error("Invalid URL: URL must be a non-empty string");
+  safeNavigate(url) {
+    if (!url || typeof url !== 'string') {
+      console.error('Invalid URL: URL must be a non-empty string');
       return;
     }
 
     // Sanitize URL to prevent XSS and open redirects
     const sanitizedUrl = this.sanitizeUrl(url);
     if (!sanitizedUrl) {
-      console.error("Invalid URL: URL failed sanitization");
+      console.error('Invalid URL: URL failed sanitization');
       return;
     }
 
@@ -125,8 +119,8 @@ window.SecurityUtils = {
       const urlObj = new URL(sanitizedUrl, window.location.origin);
 
       // Additional security checks
-      if (urlObj.protocol === "javascript:" || urlObj.protocol === "data:") {
-        console.error("Invalid URL: Dangerous protocol blocked");
+      if (urlObj.protocol === 'javascript:' || urlObj.protocol === 'data:') {
+        console.error('Invalid URL: Dangerous protocol blocked');
         return;
       }
 
@@ -136,13 +130,13 @@ window.SecurityUtils = {
         if (escapedUrl === sanitizedUrl) {
           window.location.replace(sanitizedUrl);
         } else {
-          console.error("Invalid URL: Contains dangerous characters");
+          console.error('Invalid URL: Contains dangerous characters');
         }
       } else {
-        console.error("Invalid URL: Cross-origin navigation blocked");
+        console.error('Invalid URL: Cross-origin navigation blocked');
       }
     } catch (e) {
-      console.error("Invalid URL format:", e);
+      console.error('Invalid URL format:', e);
     }
   },
 
@@ -151,16 +145,16 @@ window.SecurityUtils = {
    * @param {string} url - The URL to sanitize
    * @returns {string|null} - Sanitized URL or null if invalid
    */
-  sanitizeUrl: function (url) {
-    if (!url || typeof url !== "string") {
+  sanitizeUrl(url) {
+    if (!url || typeof url !== 'string') {
       return null;
     }
 
     // Remove any potential XSS attempts
-    const cleanUrl = url.replace(/[<>'"]/g, "");
+    const cleanUrl = url.replace(/[<>'"]/g, '');
 
     // Check for dangerous protocols
-    const dangerousProtocols = ["javascript:", "data:", "vbscript:", "file:"];
+    const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:'];
     for (const protocol of dangerousProtocols) {
       if (cleanUrl.toLowerCase().startsWith(protocol)) {
         return null;
@@ -169,9 +163,9 @@ window.SecurityUtils = {
 
     // Only allow http, https, and relative URLs
     if (
-      !cleanUrl.startsWith("/") &&
-      !cleanUrl.startsWith("http://") &&
-      !cleanUrl.startsWith("https://")
+      !cleanUrl.startsWith('/') &&
+      !cleanUrl.startsWith('http://') &&
+      !cleanUrl.startsWith('https://')
     ) {
       return null;
     }
@@ -184,10 +178,10 @@ window.SecurityUtils = {
    * @param {object} data - Object with properties to sanitize
    * @returns {object} - Object with sanitized properties
    */
-  sanitizeObject: function (data) {
+  sanitizeObject(data) {
     const sanitized = {};
     for (const key in data) {
-      if (typeof data[key] === "string") {
+      if (typeof data[key] === 'string') {
         sanitized[key] = this.sanitizeHtml(data[key]);
       } else {
         sanitized[key] = data[key];
@@ -198,6 +192,6 @@ window.SecurityUtils = {
 };
 
 // Make it available globally
-if (typeof window !== "undefined") {
-  window.SecurityUtils = window.SecurityUtils;
+if (typeof window !== 'undefined') {
+  window.SecurityUtils = SecurityUtils;
 }

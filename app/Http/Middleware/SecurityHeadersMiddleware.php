@@ -116,7 +116,7 @@ class SecurityHeadersMiddleware
     /**
      * Get security headers configuration with validation.
      *
-     * @return array The validated security headers configuration
+     * @return array<string, mixed> The validated security headers configuration
      */
     private function getSecurityHeaders(): array
     {
@@ -137,7 +137,7 @@ class SecurityHeadersMiddleware
     /**
      * Get Content Security Policy configuration with validation.
      *
-     * @return array The validated CSP configuration
+     * @return array<string, mixed> The validated CSP configuration
      */
     private function getContentSecurityPolicy(): array
     {
@@ -159,7 +159,7 @@ class SecurityHeadersMiddleware
      * Apply standard security headers to response.
      *
      * @param  Response  $response  The HTTP response
-     * @param  array  $headers  The security headers configuration
+     * @param  array<string, mixed>  $headers  The security headers configuration
      */
     private function applyStandardHeaders(Response $response, array $headers): void
     {
@@ -197,7 +197,7 @@ class SecurityHeadersMiddleware
      *
      * @param  Request  $request  The HTTP request
      * @param  Response  $response  The HTTP response
-     * @param  array  $headers  The security headers configuration
+     * @param  array<string, mixed>  $headers  The security headers configuration
      */
     private function applyHttpsHeaders(Request $request, Response $response, array $headers): void
     {
@@ -222,7 +222,7 @@ class SecurityHeadersMiddleware
      * Apply Content Security Policy headers.
      *
      * @param  Response  $response  The HTTP response
-     * @param  array  $csp  The CSP configuration
+     * @param  array<string, mixed>  $csp  The CSP configuration
      */
     private function applyContentSecurityPolicy(Response $response, array $csp): void
     {
@@ -292,7 +292,7 @@ class SecurityHeadersMiddleware
     /**
      * Get default security headers configuration.
      *
-     * @return array Default security headers
+     * @return array<string, mixed> Default security headers
      */
     private function getDefaultSecurityHeaders(): array
     {
@@ -308,7 +308,7 @@ class SecurityHeadersMiddleware
     /**
      * Get default Content Security Policy configuration.
      *
-     * @return array Default CSP configuration
+     * @return array<string, mixed> Default CSP configuration
      */
     private function getDefaultCspConfiguration(): array
     {
@@ -332,7 +332,7 @@ class SecurityHeadersMiddleware
      * Constructs a properly formatted Content Security Policy header value
      * from configuration directives with proper validation and error handling.
      *
-     * @param  array  $csp  The CSP configuration array
+     * @param  array<string, mixed>  $csp  The CSP configuration array
      *
      * @return string The formatted CSP header value
      *

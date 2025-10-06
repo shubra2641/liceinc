@@ -188,6 +188,9 @@ class RegisteredUserController extends Controller
      *
      * @return array The human questions array
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function getHumanQuestions(): array
     {
         $humanQuestionsJson = ConfigHelper::getSetting('human_questions', null);
@@ -208,6 +211,9 @@ class RegisteredUserController extends Controller
      * @param  array  $humanQuestions  The human questions array
      *
      * @return bool True if answer is valid, false otherwise
+     */
+    /**
+     * @param array<string, mixed> $humanQuestions
      */
     private function isValidHumanAnswer(string $given, $index, array $humanQuestions): bool
     {
@@ -309,6 +315,9 @@ class RegisteredUserController extends Controller
      * Get registration settings for the view.
      *
      * @return array The registration settings
+     */
+    /**
+     * @return array<string, mixed>
      */
     private function getRegistrationSettings(): array
     {

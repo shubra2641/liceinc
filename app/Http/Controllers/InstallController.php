@@ -49,7 +49,7 @@ class InstallController extends Controller
      * Returns the installation steps array with proper localization
      * and route information for the installation wizard.
      *
-     * @return array The installation steps configuration
+     * @return array<string, mixed> The installation steps configuration
      */
     private function getInstallationSteps()
     {
@@ -68,7 +68,7 @@ class InstallController extends Controller
      *
      * Returns the timezones array with proper labels for the settings form.
      *
-     * @return array The timezones configuration
+     * @return array<string, mixed> The timezones configuration
      */
     private function getTimezones()
     {
@@ -99,7 +99,7 @@ class InstallController extends Controller
      *
      * @param  int  $currentStep  The current step number
      *
-     * @return array The installation steps with status information
+     * @return array<string, mixed> The installation steps with status information
      */
     private function getInstallationStepsWithStatus($currentStep = 1)
     {
@@ -231,6 +231,9 @@ class InstallController extends Controller
             $purchaseCode = $this->sanitizeInput($request->purchase_code);
             $domain = $this->sanitizeInput($request->getHost());
              $licenseVerifier = new class {
+                /**
+                 * @return array<string, mixed>
+                 */
                 public function verifyLicense(string $purchaseCode, string $domain): array {
                     // Mock implementation for development
                     return ['valid' => true, 'message' => 'License verified'];
@@ -335,7 +338,7 @@ class InstallController extends Controller
     /**
      * Show system requirements check.
      */
-    public function requirements()
+    public function requirements(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if license is verified
         $licenseConfig = session('install.license');
@@ -354,7 +357,7 @@ class InstallController extends Controller
     /**
      * Show database configuration form.
      */
-    public function database()
+    public function database(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if license is verified
         $licenseConfig = session('install.license');
@@ -368,7 +371,7 @@ class InstallController extends Controller
     /**
      * Process database configuration.
      */
-    public function databaseStore(Request $request)
+    public function databaseStore(Request $request): \Illuminate\Http\RedirectResponse
     {
         $validator = Validator::make($request->all(), [
             'db_host' => 'required|string',
@@ -402,7 +405,7 @@ class InstallController extends Controller
     /**
      * Show admin account creation form.
      */
-    public function admin()
+    public function admin(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if license is verified
         $licenseConfig = session('install.license');
@@ -421,7 +424,7 @@ class InstallController extends Controller
     /**
      * Process admin account creation.
      */
-    public function adminStore(Request $request)
+    public function adminStore(Request $request): \Illuminate\Http\RedirectResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -440,7 +443,7 @@ class InstallController extends Controller
     /**
      * Show system settings form.
      */
-    public function settings()
+    public function settings(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if license is verified
         $licenseConfig = session('install.license');
@@ -470,7 +473,7 @@ class InstallController extends Controller
     /**
      * Process system settings.
      */
-    public function settingsStore(Request $request)
+    public function settingsStore(Request $request): \Illuminate\Http\RedirectResponse
     {
         $validator = Validator::make($request->all(), [
             'site_name' => 'required|string|max:255',
@@ -500,7 +503,7 @@ class InstallController extends Controller
     /**
      * Show installation progress.
      */
-    public function install()
+    public function install(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if all required configuration is available
         $licenseConfig = session('install.license');
@@ -533,7 +536,7 @@ class InstallController extends Controller
     /**
      * Process installation.
      */
-    public function installProcess(Request $request)
+    public function installProcess(Request $request): \Illuminate\Http\JsonResponse
     {
         // Installation process started
         try {
@@ -591,7 +594,7 @@ class InstallController extends Controller
     /**
      * Show installation completion page.
      */
-    public function completion()
+    public function completion(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if system is installed
         $installedFile = storage_path('.installed');
@@ -623,6 +626,9 @@ class InstallController extends Controller
     }
     /**
      * Check system requirements.
+     */
+    /**
+     * @return array<string, mixed>
      */
     public function checkRequirements()
     {
@@ -721,6 +727,10 @@ class InstallController extends Controller
     }
     /**
      * Test database connection.
+     */
+    /**
+     * @param mixed $config
+     * @return array<string, mixed>
      */
     private function testDatabaseConnection($config)
     {

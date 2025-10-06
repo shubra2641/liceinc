@@ -166,7 +166,7 @@ class SetLocale
     /**
      * Get supported locales with enhanced security and validation.
      *
-     * @return array Array of supported locale codes
+     * @return array<string> Array of supported locale codes
      */
     private function getSupportedLocales(): array
     {

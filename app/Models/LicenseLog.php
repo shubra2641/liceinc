@@ -42,6 +42,11 @@ class LicenseLog extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = LicenseLogFactory::class;
+
     protected $fillable = [
         'license_id',
         'domain',
@@ -56,6 +61,9 @@ class LicenseLog extends Model
         'request_data' => 'array',
         'response_data' => 'array',
     ];
+    /**
+     * @return BelongsTo<License, LicenseLog>
+     */
     public function license(): BelongsTo
     {
         return $this->belongsTo(License::class);
@@ -78,8 +86,9 @@ class LicenseLog extends Model
     }
     /**
      * Get API calls grouped by date for the last N days.
+     * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
      */
-    public static function getApiCallsByDate($days = 30)
+    public static function getApiCallsByDate(int $days = 30): \Illuminate\Database\Eloquent\Collection
     {
         return static::selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->where('created_at', '>=', now()->subDays($days))
@@ -89,8 +98,9 @@ class LicenseLog extends Model
     }
     /**
      * Get API status distribution for the last N days.
+     * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
      */
-    public static function getApiStatusDistribution($days = 30)
+    public static function getApiStatusDistribution(int $days = 30): \Illuminate\Database\Eloquent\Collection
     {
         return static::selectRaw('status, COUNT(*) as count')
             ->where('created_at', '>=', now()->subDays($days))
@@ -99,8 +109,9 @@ class LicenseLog extends Model
     }
     /**
      * Get top domains by API calls.
+     * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
      */
-    public static function getTopDomainsByCalls($limit = 10)
+    public static function getTopDomainsByCalls(int $limit = 10): \Illuminate\Database\Eloquent\Collection
     {
         return static::selectRaw('domain, COUNT(*) as calls')
             ->whereNotNull('domain')
@@ -111,8 +122,9 @@ class LicenseLog extends Model
     }
     /**
      * Get API calls by hour for today.
+     * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
      */
-    public static function getApiCallsByHour()
+    public static function getApiCallsByHour(): \Illuminate\Database\Eloquent\Collection
     {
         return static::selectRaw('HOUR(created_at) as hour, COUNT(*) as count')
             ->whereDate('created_at', today())

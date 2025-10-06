@@ -27,7 +27,8 @@ class AutoUpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && (auth()->user()->is_admin || auth()->user()->hasRole('admin'));
+        $user = auth()->user();
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -36,7 +37,8 @@ class AutoUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isInstall = $this->isMethod('POST') && str_contains($this->route()->getName(), 'install');
+        $route = $this->route();
+        $isInstall = $this->isMethod('POST') && $route && str_contains($route->getName() ?? '', 'install');
         // Install update validation
         if ($isInstall) {
             return [

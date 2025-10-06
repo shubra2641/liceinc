@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -61,6 +63,11 @@ class KbArticle extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = KbArticleFactory::class;
+
     protected $fillable = [
         'kb_category_id', 'title', 'slug', 'excerpt', 'content', 'views', 'is_published',
         'serial', 'requires_serial', 'serial_message', 'image', 'meta_title', 'meta_description', 'meta_keywords',
@@ -71,15 +78,25 @@ class KbArticle extends Model
         'allow_comments' => 'boolean',
         'is_featured' => 'boolean',
     ];
-    public function category()
+    /**
+     * @return BelongsTo<KbCategory, KbArticle>
+     */
+    public function category(): BelongsTo
     {
         return $this->belongsTo(KbCategory::class, 'kb_category_id');
     }
-    public function product()
+    /**
+     * @return BelongsTo<Product, KbArticle>
+     */
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
-    public function scopePublished($query)
+    /**
+     * @param Builder<KbArticle> $query
+     * @return Builder<KbArticle>
+     */
+    public function scopePublished(Builder $query): Builder
     {
         return $query->where('is_published', true);
     }

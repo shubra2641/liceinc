@@ -78,6 +78,9 @@ class HomeController extends Controller
      *
      * @throws \Exception When product retrieval fails
      */
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Product>
+     */
     private function getActiveProducts()
     {
         try {
@@ -96,7 +99,7 @@ class HomeController extends Controller
     /**
      * Get system statistics with enhanced security and error handling.
      *
-     * @return array System statistics array
+     * @return array<string, mixed> System statistics array
      *
      * @throws \Exception When statistics retrieval fails
      */
@@ -124,7 +127,7 @@ class HomeController extends Controller
     /**
      * Get default statistics for error fallback.
      *
-     * @return array Default statistics array
+     * @return array<string, mixed> Default statistics array
      */
     private function getDefaultStats(): array
     {

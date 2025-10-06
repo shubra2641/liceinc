@@ -48,6 +48,9 @@ class EnvatoService
      *
      *
      */
+    /**
+     * @return array<string, mixed>
+     */
     public function getEnvatoSettings(): array
     {
         try {
@@ -94,6 +97,9 @@ class EnvatoService
      *
      *
      *
+     */
+    /**
+     * @return array<string, mixed>|null
      */
     public function verifyPurchase(string $purchaseCode): ?array
     {
@@ -151,6 +157,9 @@ class EnvatoService
      *
      *
      */
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getUserInfo(string $username): ?array
     {
         try {
@@ -204,6 +213,9 @@ class EnvatoService
      *
      *
      *
+     */
+    /**
+     * @return array<string, mixed>|null
      */
     public function getOAuthUserInfo(string $accessToken): ?array
     {
@@ -273,6 +285,9 @@ class EnvatoService
             return false;
         }
     }
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getItemInfo(int $itemId): ?array
     {
         $settings = $this->getEnvatoSettings();
@@ -293,6 +308,9 @@ class EnvatoService
             return $response->json();
         });
     }
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getUserItems(string $username): ?array
     {
         $settings = $this->getEnvatoSettings();

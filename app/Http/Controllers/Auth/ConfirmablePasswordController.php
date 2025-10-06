@@ -58,9 +58,13 @@ class ConfirmablePasswordController extends Controller
     {
         try {
             DB::beginTransaction();
+            $user = $request->user();
+            if ($user === null) {
+                throw new \Illuminate\Auth\AuthenticationException('User not authenticated');
+            }
             if (! $this->validatePassword($request)) {
                 Log::warning('Password confirmation failed', [
-                    'user_id' => $request->user()->id,
+                    'user_id' => $user->id,
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
@@ -76,10 +80,11 @@ class ConfirmablePasswordController extends Controller
             throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
+            $user = $request->user();
             Log::error('Password confirmation failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => $request->user()->id,
+                'user_id' => $user?->id,
                 'ip' => $request->ip(),
             ]);
             throw ValidationException::withMessages([
@@ -96,8 +101,12 @@ class ConfirmablePasswordController extends Controller
      */
     private function validatePassword(Request $request): bool
     {
+        $user = $request->user();
+        if ($user === null) {
+            return false;
+        }
         return Auth::guard('web')->validate([
-            'email' => $request->user()->email,
+            'email' => $user->email,
             'password' => $request->password,
         ]);
     }

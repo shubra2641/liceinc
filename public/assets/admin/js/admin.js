@@ -4,9 +4,9 @@
  */
 
 // Global notification function
-function showNotification(message, type = "info") {
-  const notification = document.createElement("div");
-  notification.className = `alert alert-${type === "success" ? "success" : type === "error" ? "danger" : "info"} alert-dismissible fade show`;
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show`;
 
   // Sanitize message to prevent XSS
   // Message will be sanitized by SecurityUtils
@@ -14,7 +14,7 @@ function showNotification(message, type = "info") {
   SecurityUtils.safeInnerHTML(
     this,
     `
-        <i class="fas fa-${type === "success" ? "check-circle" : type === "error" ? "exclamation-circle" : "info-circle"} me-2"></i>
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `,
@@ -31,7 +31,7 @@ function showNotification(message, type = "info") {
   document.body.appendChild(notification);
 
   // Remove after 4 seconds
-  setTimeout(function () {
+  setTimeout(() => {
     if (notification.parentNode) {
       notification.remove();
     }
@@ -47,23 +47,23 @@ class ToastManager {
 
   init() {
     // Create toast container if it doesn't exist
-    if (!document.getElementById("toast-container")) {
-      this.container = document.createElement("div");
-      this.container.id = "toast-container";
-      this.container.className = "toast-container";
+    if (!document.getElementById('toast-container')) {
+      this.container = document.createElement('div');
+      this.container.id = 'toast-container';
+      this.container.className = 'toast-container';
       document.body.appendChild(this.container);
     } else {
-      this.container = document.getElementById("toast-container");
+      this.container = document.getElementById('toast-container');
     }
   }
 
-  show(message, type = "info", title = null, duration = 5000) {
+  show(message, type = 'info', title = null, duration = 5000) {
     const toast = this.createToast(message, type, title);
     this.container.appendChild(toast);
 
     // Trigger animation
     setTimeout(() => {
-      toast.classList.add("show");
+      toast.classList.add('show');
     }, 100);
 
     // Auto remove
@@ -77,21 +77,21 @@ class ToastManager {
   }
 
   createToast(message, type, title) {
-    const toast = document.createElement("div");
+    const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
 
     const icons = {
-      success: "fas fa-check-circle",
-      error: "fas fa-exclamation-circle",
-      warning: "fas fa-exclamation-triangle",
-      info: "fas fa-info-circle",
+      success: 'fas fa-check-circle',
+      error: 'fas fa-exclamation-circle',
+      warning: 'fas fa-exclamation-triangle',
+      info: 'fas fa-info-circle',
     };
 
     const titles = {
-      success: title || "Success",
-      error: title || "Error",
-      warning: title || "Warning",
-      info: title || "Information",
+      success: title || 'Success',
+      error: title || 'Error',
+      warning: title || 'Warning',
+      info: title || 'Information',
     };
 
     // Sanitize message to prevent XSS
@@ -117,7 +117,7 @@ class ToastManager {
   }
 
   hide(toast) {
-    toast.classList.remove("show");
+    toast.classList.remove('show');
     setTimeout(() => {
       if (toast.parentNode) {
         toast.parentNode.removeChild(toast);
@@ -126,19 +126,19 @@ class ToastManager {
   }
 
   success(message, title = null, duration = 5000) {
-    return this.show(message, "success", title, duration);
+    return this.show(message, 'success', title, duration);
   }
 
   error(message, title = null, duration = 7000) {
-    return this.show(message, "error", title, duration);
+    return this.show(message, 'error', title, duration);
   }
 
   warning(message, title = null, duration = 6000) {
-    return this.show(message, "warning", title, duration);
+    return this.show(message, 'warning', title, duration);
   }
 
   info(message, title = null, duration = 5000) {
-    return this.show(message, "info", title, duration);
+    return this.show(message, 'info', title, duration);
   }
 }
 
@@ -149,14 +149,14 @@ const toastManager = new ToastManager();
 window.toastManager = toastManager;
 
 // Session flash messages handler
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', () => {
   // Add a small delay to ensure toastManager is ready
   setTimeout(() => {
     // Check for session flash messages
-    const successMessage = document.querySelector("[data-flash-success]");
-    const errorMessage = document.querySelector("[data-flash-error]");
-    const warningMessage = document.querySelector("[data-flash-warning]");
-    const infoMessage = document.querySelector("[data-flash-info]");
+    const successMessage = document.querySelector('[data-flash-success]');
+    const errorMessage = document.querySelector('[data-flash-error]');
+    const warningMessage = document.querySelector('[data-flash-warning]');
+    const infoMessage = document.querySelector('[data-flash-info]');
 
     if (successMessage && window.toastManager) {
       window.toastManager.success(successMessage.textContent);
@@ -188,18 +188,18 @@ class AdminDashboard {
   }
 
   // Toast notification method for compatibility with existing code
-  showToast(message, type = "info", duration = 5000) {
-    if (typeof window.toastManager !== "undefined") {
+  showToast(message, type = 'info', duration = 5000) {
+    if (typeof window.toastManager !== 'undefined') {
       switch (type) {
-        case "success":
-          return window.toastManager.success(message, null, duration);
-        case "error":
-          return window.toastManager.error(message, null, duration);
-        case "warning":
-          return window.toastManager.warning(message, null, duration);
-        case "info":
-        default:
-          return window.toastManager.info(message, null, duration);
+      case 'success':
+        return window.toastManager.success(message, null, duration);
+      case 'error':
+        return window.toastManager.error(message, null, duration);
+      case 'warning':
+        return window.toastManager.warning(message, null, duration);
+      case 'info':
+      default:
+        return window.toastManager.info(message, null, duration);
       }
     }
     return null;
@@ -208,37 +208,37 @@ class AdminDashboard {
   // Initialize Tabs
   initTabs() {
     const tabButtons = document.querySelectorAll('[data-action="show-tab"]');
-    const tabPanels = document.querySelectorAll(".admin-tab-panel");
+    const tabPanels = document.querySelectorAll('.admin-tab-panel');
 
-    tabButtons.forEach((button) => {
-      button.addEventListener("click", (e) => {
+    tabButtons.forEach(button => {
+      button.addEventListener('click', e => {
         e.preventDefault();
 
-        const targetTab = button.getAttribute("data-tab");
+        const targetTab = button.getAttribute('data-tab');
 
         // Remove active class from all buttons
-        tabButtons.forEach((btn) => {
-          btn.classList.remove("admin-tab-btn-active");
-          btn.setAttribute("aria-selected", "false");
-          btn.setAttribute("tabindex", "-1");
+        tabButtons.forEach(btn => {
+          btn.classList.remove('admin-tab-btn-active');
+          btn.setAttribute('aria-selected', 'false');
+          btn.setAttribute('tabindex', '-1');
         });
 
         // Add active class to clicked button
-        button.classList.add("admin-tab-btn-active");
-        button.setAttribute("aria-selected", "true");
-        button.setAttribute("tabindex", "0");
+        button.classList.add('admin-tab-btn-active');
+        button.setAttribute('aria-selected', 'true');
+        button.setAttribute('tabindex', '0');
 
         // Hide all tab panels
-        tabPanels.forEach((panel) => {
-          panel.classList.add("admin-tab-panel-hidden");
-          panel.setAttribute("aria-hidden", "true");
+        tabPanels.forEach(panel => {
+          panel.classList.add('admin-tab-panel-hidden');
+          panel.setAttribute('aria-hidden', 'true');
         });
 
         // Show target tab panel
         const targetPanel = document.getElementById(targetTab);
         if (targetPanel) {
-          targetPanel.classList.remove("admin-tab-panel-hidden");
-          targetPanel.setAttribute("aria-hidden", "false");
+          targetPanel.classList.remove('admin-tab-panel-hidden');
+          targetPanel.setAttribute('aria-hidden', 'false');
         }
       });
     });
@@ -298,7 +298,7 @@ class AdminDashboard {
     this.initProgrammingLanguagesFunctions();
 
     // Initialize programming languages edit functions
-    if (document.querySelector(".admin-programming-languages-edit")) {
+    if (document.querySelector('.admin-programming-languages-edit')) {
       initProgrammingLanguagesEditFunctions();
     }
 
@@ -306,22 +306,22 @@ class AdminDashboard {
     // if an .admin-settings-page exists, the class method initSettingsTabs will initialize tabs
 
     // Initialize programming languages create functions
-    if (document.querySelector(".admin-programming-languages-create")) {
+    if (document.querySelector('.admin-programming-languages-create')) {
       initProgrammingLanguagesCreateFunctions();
     }
 
     // Initialize programming languages show tabs
-    if (document.querySelector(".admin-programming-languages-show")) {
+    if (document.querySelector('.admin-programming-languages-show')) {
       initProgrammingLanguagesShowTabs();
     }
 
     // Initialize programming languages index tabs
-    if (document.querySelector(".admin-programming-languages-index")) {
+    if (document.querySelector('.admin-programming-languages-index')) {
       initProgrammingLanguagesIndexTabs();
     }
 
     // Initialize reports functions
-    if (document.querySelector(".admin-reports-page")) {
+    if (document.querySelector('.admin-reports-page')) {
       initReportsFunctions();
     }
 
@@ -329,16 +329,16 @@ class AdminDashboard {
     this.initProfileFunctions();
 
     // Initialize settings functions
-    const settingsPage = document.querySelector(".admin-settings-page");
-    const testApiBtn = document.getElementById("test-api-btn");
-    console.log("Settings page check:", settingsPage);
-    console.log("Test API button check:", testApiBtn);
+    const settingsPage = document.querySelector('.admin-settings-page');
+    const testApiBtn = document.getElementById('test-api-btn');
+    console.log('Settings page check:', settingsPage);
+    console.log('Test API button check:', testApiBtn);
 
     if (settingsPage || testApiBtn) {
-      console.log("Settings page detected, initializing settings functions");
+      console.log('Settings page detected, initializing settings functions');
       this.initSettingsFunctions();
     } else {
-      console.log("Settings page not detected");
+      console.log('Settings page not detected');
     }
 
     // Settings functions are initialized conditionally above
@@ -347,7 +347,7 @@ class AdminDashboard {
   // Initialize Summernote Editor
   initSummernote() {
     // Check if Summernote is available
-    if (typeof $.fn.summernote === "undefined") {
+    if (typeof $.fn.summernote === 'undefined') {
       // Summernote is not loaded
       // Try again after a delay
       setTimeout(() => {
@@ -367,14 +367,14 @@ class AdminDashboard {
 
       textareas.each((index, element) => {
         const $this = $(element);
-        const toolbar = $this.data("toolbar") || "standard";
-        const placeholder = $this.data("placeholder") || "";
+        const toolbar = $this.data('toolbar') || 'standard';
+        const placeholder = $this.data('placeholder') || '';
 
         try {
           $this.summernote({
             height: 200,
             toolbar: this.getToolbarConfig(toolbar),
-            placeholder: placeholder,
+            placeholder,
             focus: false,
           });
         } catch (error) {
@@ -388,40 +388,40 @@ class AdminDashboard {
   getToolbarConfig(type) {
     const configs = {
       basic: [
-        ["style", ["style"]],
-        ["font", ["bold", "italic", "underline", "clear"]],
-        ["para", ["ul", "ol", "paragraph"]],
-        ["insert", ["link"]],
-        ["view", ["fullscreen", "codeview"]],
+        ['style', ['style']],
+        ['font', ['bold', 'italic', 'underline', 'clear']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['insert', ['link']],
+        ['view', ['fullscreen', 'codeview']],
       ],
       standard: [
-        ["style", ["style"]],
+        ['style', ['style']],
         [
-          "font",
+          'font',
           [
-            "bold",
-            "italic",
-            "underline",
-            "strikethrough",
-            "superscript",
-            "subscript",
-            "clear",
+            'bold',
+            'italic',
+            'underline',
+            'strikethrough',
+            'superscript',
+            'subscript',
+            'clear',
           ],
         ],
-        ["fontname", ["fontname"]],
-        ["fontsize", ["fontsize"]],
-        ["color", ["color"]],
-        ["para", ["ul", "ol", "paragraph"]],
-        ["height", ["height"]],
-        ["table", ["table"]],
-        ["insert", ["link", "picture", "video", "hr"]],
-        ["view", ["fullscreen", "codeview"]],
-        ["help", ["help"]],
+        ['fontname', ['fontname']],
+        ['fontsize', ['fontsize']],
+        ['color', ['color']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['height', ['height']],
+        ['table', ['table']],
+        ['insert', ['link', 'picture', 'video', 'hr']],
+        ['view', ['fullscreen', 'codeview']],
+        ['help', ['help']],
       ],
       minimal: [
-        ["style", ["bold", "italic", "underline"]],
-        ["para", ["ul", "ol"]],
-        ["insert", ["link"]],
+        ['style', ['bold', 'italic', 'underline']],
+        ['para', ['ul', 'ol']],
+        ['insert', ['link']],
       ],
     };
 
@@ -431,11 +431,11 @@ class AdminDashboard {
   // Initialize form validation
   initFormValidation() {
     // Bootstrap form validation
-    const forms = document.querySelectorAll(".needs-validation");
-    Array.from(forms).forEach((form) => {
-      form.addEventListener("submit", (event) => {
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
         // Add validation class for styling
-        form.classList.add("was-validated");
+        form.classList.add('was-validated');
 
         // If invalid, prevent submission
         if (!form.checkValidity()) {
@@ -446,18 +446,18 @@ class AdminDashboard {
 
         // Proceeding with a real submission: disable all submit buttons in this form and show loading
         const submitButtons = form.querySelectorAll('button[type="submit"]');
-        submitButtons.forEach((button) => {
+        submitButtons.forEach(button => {
           button.disabled = true;
-          button.classList.add("loading");
+          button.classList.add('loading');
         });
         // Allow form to submit normally
       });
     });
 
     // Real-time validation
-    const inputs = document.querySelectorAll(".form-control, .form-select");
-    inputs.forEach((input) => {
-      input.addEventListener("blur", () => {
+    const inputs = document.querySelectorAll('.form-control, .form-select');
+    inputs.forEach(input => {
+      input.addEventListener('blur', () => {
         this.validateField(input);
       });
     });
@@ -467,22 +467,22 @@ class AdminDashboard {
   validateField(field) {
     const isValid = field.checkValidity();
     if (isValid) {
-      field.classList.remove("is-invalid");
-      field.classList.add("is-valid");
+      field.classList.remove('is-invalid');
+      field.classList.add('is-valid');
     } else {
-      field.classList.remove("is-valid");
-      field.classList.add("is-invalid");
+      field.classList.remove('is-valid');
+      field.classList.add('is-invalid');
     }
   }
 
   // Initialize auto-generation features
   initAutoGeneration() {
     // Auto-generate slug from name
-    const nameInput = document.getElementById("name");
-    const slugInput = document.getElementById("slug");
+    const nameInput = document.getElementById('name');
+    const slugInput = document.getElementById('slug');
 
     if (nameInput && slugInput) {
-      nameInput.addEventListener("input", () => {
+      nameInput.addEventListener('input', () => {
         if (!slugInput.value) {
           slugInput.value = this.generateSlug(nameInput.value);
         }
@@ -490,9 +490,9 @@ class AdminDashboard {
     }
 
     // Auto-generate meta title from name
-    const metaTitleInput = document.getElementById("meta_title");
+    const metaTitleInput = document.getElementById('meta_title');
     if (nameInput && metaTitleInput) {
-      nameInput.addEventListener("input", () => {
+      nameInput.addEventListener('input', () => {
         if (!metaTitleInput.value) {
           metaTitleInput.value = nameInput.value;
         }
@@ -505,48 +505,48 @@ class AdminDashboard {
     return (
       text
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
         // trim leading/trailing hyphens (String.trim doesn't accept arguments)
-        .replace(/^[-]+|[-]+$/g, "")
+        .replace(/^[-]+|[-]+$/g, '')
     );
   }
 
   // Initialize file uploads
   initFileUploads() {
     // Image preview
-    const imageInput = document.getElementById("image");
+    const imageInput = document.getElementById('image');
     if (imageInput) {
-      imageInput.addEventListener("change", (e) => {
-        this.handleImagePreview(e, "image-preview");
+      imageInput.addEventListener('change', e => {
+        this.handleImagePreview(e, 'image-preview');
       });
     }
 
     // Gallery images preview
-    const galleryInput = document.getElementById("gallery_images");
+    const galleryInput = document.getElementById('gallery_images');
     if (galleryInput) {
-      galleryInput.addEventListener("change", (e) => {
-        this.handleGalleryPreview(e, "gallery-preview");
+      galleryInput.addEventListener('change', e => {
+        this.handleGalleryPreview(e, 'gallery-preview');
       });
     }
 
     // Drag and drop
-    const fileAreas = document.querySelectorAll(".file-upload-area");
-    fileAreas.forEach((area) => {
-      area.addEventListener("dragover", (e) => {
+    const fileAreas = document.querySelectorAll('.file-upload-area');
+    fileAreas.forEach(area => {
+      area.addEventListener('dragover', e => {
         e.preventDefault();
-        area.classList.add("dragover");
+        area.classList.add('dragover');
       });
 
-      area.addEventListener("dragleave", () => {
-        area.classList.remove("dragover");
+      area.addEventListener('dragleave', () => {
+        area.classList.remove('dragover');
       });
 
-      area.addEventListener("drop", (e) => {
+      area.addEventListener('drop', e => {
         e.preventDefault();
-        area.classList.remove("dragover");
-        const files = e.dataTransfer.files;
+        area.classList.remove('dragover');
+        const { files } = e.dataTransfer;
         this.handleFileDrop(files, area);
       });
     });
@@ -557,26 +557,24 @@ class AdminDashboard {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         let preview = document.getElementById(previewId);
         if (!preview) {
-          preview = document.createElement("div");
+          preview = document.createElement('div');
           preview.id = previewId;
-          preview.className = "image-preview mt-2";
+          preview.className = 'image-preview mt-2';
           event.target.parentNode.appendChild(preview);
         }
         // Sanitize image source to prevent XSS
         const sanitizedSrc = e.target.result.replace(
           /[<>&"']/g,
-          function (match) {
-            return {
-              "<": "&lt;",
-              ">": "&gt;",
-              "&": "&amp;",
-              '"': "&quot;",
-              "'": "&#x27;",
-            }[match];
-          },
+          match => ({
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            '\'': '&#x27;',
+          }[match]),
         );
 
         previewSecurityUtils.safeInnerHTML(
@@ -590,25 +588,25 @@ class AdminDashboard {
 
   // Handle gallery preview
   handleGalleryPreview(event, previewId) {
-    const files = event.target.files;
+    const { files } = event.target;
     if (files.length > 0) {
       let preview = document.getElementById(previewId);
       if (!preview) {
-        preview = document.createElement("div");
+        preview = document.createElement('div');
         preview.id = previewId;
-        preview.className = "gallery-preview mt-2";
+        preview.className = 'gallery-preview mt-2';
         event.target.parentNode.appendChild(preview);
       }
 
-      preview.innerHTML = "";
+      preview.innerHTML = '';
       Array.from(files).forEach((file, index) => {
         const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = document.createElement("img");
+        reader.onload = e => {
+          const img = document.createElement('img');
           img.src = e.target.result;
-          img.className = "img-thumbnail me-2 mb-2";
-          img.style.maxWidth = "100px";
-          img.style.maxHeight = "100px";
+          img.className = 'img-thumbnail me-2 mb-2';
+          img.style.maxWidth = '100px';
+          img.style.maxHeight = '100px';
           preview.appendChild(img);
         };
         reader.readAsDataURL(file);
@@ -623,7 +621,7 @@ class AdminDashboard {
       try {
         // Use DataTransfer to build a FileList that can be assigned to input.files
         const dataTransfer = new DataTransfer();
-        Array.from(files).forEach((file) => dataTransfer.items.add(file));
+        Array.from(files).forEach(file => dataTransfer.items.add(file));
         input.files = dataTransfer.files;
       } catch (err) {
         // Fallback: some environments may not support DataTransfer constructor
@@ -631,22 +629,22 @@ class AdminDashboard {
           input.files = files;
         } catch (e) {
           // Cannot programmatically set files; instead call any handler with the FileList
-          const evt = new CustomEvent("filesDropped", { detail: { files } });
+          const evt = new CustomEvent('filesDropped', { detail: { files } });
           input.dispatchEvent(evt);
         }
       }
 
       // Notify change handlers
-      input.dispatchEvent(new Event("change"));
+      input.dispatchEvent(new Event('change'));
     }
   }
 
   // Initialize buttons
   initButtons() {
     // Envato data fetching
-    const fetchEnvatoBtn = document.getElementById("fetch-envato-data");
+    const fetchEnvatoBtn = document.getElementById('fetch-envato-data');
     if (fetchEnvatoBtn) {
-      fetchEnvatoBtn.addEventListener("click", () => {
+      fetchEnvatoBtn.addEventListener('click', () => {
         this.handleEnvatoFetch();
       });
     }
@@ -656,8 +654,8 @@ class AdminDashboard {
     const nonFormButtons = document.querySelectorAll(
       'button[type="submit"][form=""]',
     );
-    nonFormButtons.forEach((button) => {
-      button.addEventListener("click", () => {
+    nonFormButtons.forEach(button => {
+      button.addEventListener('click', () => {
         this.setButtonLoading(button, true);
       });
     });
@@ -665,33 +663,41 @@ class AdminDashboard {
 
   // Handle Envato data fetching
   handleEnvatoFetch() {
-    const envatoItemIdInput = document.getElementById("envato_item_id");
-    const envatoLoading = document.getElementById("envato-loading");
-    const envatoError = document.getElementById("envato-error");
-    const fetchBtn = document.getElementById("fetch-envato-data");
+    const envatoItemIdInput = document.getElementById('envato_item_id');
+    const envatoLoading = document.getElementById('envato-loading');
+    const envatoError = document.getElementById('envato-error');
+    const fetchBtn = document.getElementById('fetch-envato-data');
 
-    if (!envatoItemIdInput) return;
+    if (!envatoItemIdInput) {
+      return;
+    }
 
     const itemId = envatoItemIdInput.value.trim();
     if (!itemId) {
-      this.showAlert("Please enter an Envato Item ID first", "warning");
+      this.showAlert('Please enter an Envato Item ID first', 'warning');
       return;
     }
 
     // Show loading state
-    if (envatoLoading) envatoLoading.classList.remove("hidden");
-    if (envatoError) envatoError.classList.add("hidden");
+    if (envatoLoading) {
+      envatoLoading.classList.remove('hidden');
+    }
+    if (envatoError) {
+      envatoError.classList.add('hidden');
+    }
     if (fetchBtn) {
       fetchBtn.disabled = true;
-      fetchBtn.classList.add("loading");
+      fetchBtn.classList.add('loading');
     }
 
     // Simulate API call (replace with actual implementation)
     setTimeout(() => {
-      if (envatoLoading) envatoLoading.classList.add("hidden");
+      if (envatoLoading) {
+        envatoLoading.classList.add('hidden');
+      }
       if (fetchBtn) {
         fetchBtn.disabled = false;
-        fetchBtn.classList.remove("loading");
+        fetchBtn.classList.remove('loading');
       }
       // Add actual Envato API integration here
     }, 2000);
@@ -701,34 +707,34 @@ class AdminDashboard {
   setButtonLoading(button, loading) {
     if (loading) {
       button.disabled = true;
-      button.classList.add("loading");
+      button.classList.add('loading');
     } else {
       button.disabled = false;
-      button.classList.remove("loading");
+      button.classList.remove('loading');
     }
   }
 
   // Initialize modals
   initModals() {
     // Auto-focus first input in modals
-    $(".modal").on("shown.bs.modal", function () {
-      $(this).find("input, textarea, select").first().focus();
+    $('.modal').on('shown.bs.modal', function() {
+      $(this).find('input, textarea, select').first().focus();
     });
   }
 
   // Bridge to global confirmation initializer (keeps compatibility)
   initConfirmations() {
-    if (typeof initConfirmationsGlobal === "function") {
+    if (typeof initConfirmationsGlobal === 'function') {
       initConfirmationsGlobal();
     } else {
       // Fallback inline implementation
-      document.addEventListener("click", (e) => {
-        const button = e.target.closest("[data-confirm]");
+      document.addEventListener('click', e => {
+        const button = e.target.closest('[data-confirm]');
         if (button) {
           e.preventDefault();
-          const message = button.getAttribute("data-confirm");
+          const message = button.getAttribute('data-confirm');
           if (window.confirm && confirm(message)) {
-            if (button.type === "submit" && button.form) {
+            if (button.type === 'submit' && button.form) {
               button.form.submit();
             } else if (button.href) {
               window.location.href = button.href;
@@ -742,12 +748,12 @@ class AdminDashboard {
   // Initialize tables
   initTables() {
     // Initialize DataTables if available
-    if (typeof $.fn.DataTable !== "undefined") {
-      $(".admin-table").DataTable({
+    if (typeof $.fn.DataTable !== 'undefined') {
+      $('.admin-table').DataTable({
         responsive: true,
         pageLength: 25,
         language: {
-          url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json",
+          url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json',
         },
       });
     }
@@ -755,24 +761,22 @@ class AdminDashboard {
 
   // Initialize icon preview for category forms
   initIconPreview() {
-    const iconInput = document.getElementById("icon");
-    const iconPreview = document.getElementById("icon-preview");
+    const iconInput = document.getElementById('icon');
+    const iconPreview = document.getElementById('icon-preview');
 
     if (iconInput && iconPreview) {
-      iconInput.addEventListener("input", function () {
-        const iconClass = this.value || "fas fa-ticket-alt";
+      iconInput.addEventListener('input', function() {
+        const iconClass = this.value || 'fas fa-ticket-alt';
         // Sanitize icon class to prevent XSS
         const sanitizedIconClass = iconClass.replace(
           /[<>&"']/g,
-          function (match) {
-            return {
-              "<": "&lt;",
-              ">": "&gt;",
-              "&": "&amp;",
-              '"': "&quot;",
-              "'": "&#x27;",
-            }[match];
-          },
+          match => ({
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            '\'': '&#x27;',
+          }[match]),
         );
 
         iconPreviewSecurityUtils.safeInnerHTML(
@@ -784,36 +788,36 @@ class AdminDashboard {
   }
 
   initCategoryPreview() {
-    const nameInput = document.getElementById("name");
-    const descriptionInput = document.getElementById("description");
-    const colorInput = document.getElementById("color");
-    const colorTextInput = document.getElementById("color-text");
-    const previewDiv = document.getElementById("category-preview");
-    const previewName = document.getElementById("preview-name");
-    const previewDescription = document.getElementById("preview-description");
+    const nameInput = document.getElementById('name');
+    const descriptionInput = document.getElementById('description');
+    const colorInput = document.getElementById('color');
+    const colorTextInput = document.getElementById('color-text');
+    const previewDiv = document.getElementById('category-preview');
+    const previewName = document.getElementById('preview-name');
+    const previewDescription = document.getElementById('preview-description');
 
     if (nameInput && previewName) {
-      nameInput.addEventListener("input", function () {
+      nameInput.addEventListener('input', function() {
         previewName.textContent =
           this.value || '{{ trans("app.Category Name") }}';
       });
     }
 
     if (descriptionInput && previewDescription) {
-      descriptionInput.addEventListener("input", function () {
+      descriptionInput.addEventListener('input', function() {
         previewDescription.textContent =
           this.value || '{{ trans("app.Category Description") }}';
       });
     }
 
     if (colorInput && colorTextInput && previewDiv) {
-      colorInput.addEventListener("input", function () {
+      colorInput.addEventListener('input', function() {
         const color = this.value;
         colorTextInput.value = color;
         previewDiv.style.backgroundColor = color;
       });
 
-      colorTextInput.addEventListener("input", function () {
+      colorTextInput.addEventListener('input', function() {
         const color = this.value;
         if (/^#[0-9A-F]{6}$/i.test(color)) {
           colorInput.value = color;
@@ -824,21 +828,21 @@ class AdminDashboard {
   }
 
   initArticlePreview() {
-    const titleInput = document.getElementById("title");
-    const excerptInput = document.getElementById("excerpt");
-    const previewDiv = document.getElementById("article-preview");
-    const previewTitle = document.getElementById("preview-title");
-    const previewExcerpt = document.getElementById("preview-excerpt");
+    const titleInput = document.getElementById('title');
+    const excerptInput = document.getElementById('excerpt');
+    const previewDiv = document.getElementById('article-preview');
+    const previewTitle = document.getElementById('preview-title');
+    const previewExcerpt = document.getElementById('preview-excerpt');
 
     if (titleInput && previewTitle) {
-      titleInput.addEventListener("input", function () {
+      titleInput.addEventListener('input', function() {
         previewTitle.textContent =
           this.value || '{{ trans("app.Article Title") }}';
       });
     }
 
     if (excerptInput && previewExcerpt) {
-      excerptInput.addEventListener("input", function () {
+      excerptInput.addEventListener('input', function() {
         previewExcerpt.textContent =
           this.value || '{{ trans("app.Article Excerpt") }}';
       });
@@ -846,47 +850,47 @@ class AdminDashboard {
   }
 
   initSerialFields() {
-    const requiresSerialCheckbox = document.getElementById("requires_serial");
-    const serialFields = document.getElementById("serial-fields");
+    const requiresSerialCheckbox = document.getElementById('requires_serial');
+    const serialFields = document.getElementById('serial-fields');
 
     if (requiresSerialCheckbox && serialFields) {
-      requiresSerialCheckbox.addEventListener("change", function () {
-        serialFields.style.display = this.checked ? "block" : "none";
+      requiresSerialCheckbox.addEventListener('change', function() {
+        serialFields.style.display = this.checked ? 'block' : 'none';
       });
     }
   }
 
   initUserPreview() {
-    const nameInput = document.getElementById("name");
-    const emailInput = document.getElementById("email");
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
     const roleInputs = document.querySelectorAll('input[name="role"]');
-    const previewDiv = document.getElementById("user-preview");
-    const previewName = document.getElementById("preview-name");
-    const previewEmail = document.getElementById("preview-email");
-    const previewRole = document.getElementById("preview-role");
+    const previewDiv = document.getElementById('user-preview');
+    const previewName = document.getElementById('preview-name');
+    const previewEmail = document.getElementById('preview-email');
+    const previewRole = document.getElementById('preview-role');
 
     if (nameInput && previewName) {
-      nameInput.addEventListener("input", function () {
+      nameInput.addEventListener('input', function() {
         previewName.textContent = this.value || '{{ trans("app.User Name") }}';
       });
     }
 
     if (emailInput && previewEmail) {
-      emailInput.addEventListener("input", function () {
+      emailInput.addEventListener('input', function() {
         previewEmail.textContent =
           this.value || '{{ trans("app.user@example.com") }}';
       });
     }
 
     if (roleInputs.length > 0 && previewRole) {
-      roleInputs.forEach((radio) => {
-        radio.addEventListener("change", function () {
+      roleInputs.forEach(radio => {
+        radio.addEventListener('change', function() {
           if (this.checked) {
             const roleText =
-              this.value === "admin"
-                ? '{{ trans("app.Administrator") }}'
-                : '{{ trans("app.User") }}';
-            const roleClass = this.value === "admin" ? "danger" : "secondary";
+              this.value === 'admin' ?
+                '{{ trans("app.Administrator") }}' :
+                '{{ trans("app.User") }}';
+            const roleClass = this.value === 'admin' ? 'danger' : 'secondary';
             previewRole.textContent = roleText;
             previewRole.className = `badge bg-${roleClass} mt-2`;
           }
@@ -896,18 +900,18 @@ class AdminDashboard {
   }
 
   initLicensePreview() {
-    const productSelect = document.getElementById("product_id");
-    const userSelect = document.getElementById("user_id");
-    const statusSelect = document.getElementById("status");
-    const maxDomainsInput = document.getElementById("max_domains");
-    const previewDiv = document.getElementById("license-preview");
-    const previewProduct = document.getElementById("preview-product");
-    const previewUser = document.getElementById("preview-user");
-    const previewStatus = document.getElementById("preview-status");
-    const previewDomains = document.getElementById("preview-domains");
+    const productSelect = document.getElementById('product_id');
+    const userSelect = document.getElementById('user_id');
+    const statusSelect = document.getElementById('status');
+    const maxDomainsInput = document.getElementById('max_domains');
+    const previewDiv = document.getElementById('license-preview');
+    const previewProduct = document.getElementById('preview-product');
+    const previewUser = document.getElementById('preview-user');
+    const previewStatus = document.getElementById('preview-status');
+    const previewDomains = document.getElementById('preview-domains');
 
     if (productSelect && previewProduct) {
-      productSelect.addEventListener("change", function () {
+      productSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         previewProduct.textContent =
           selectedOption.text || '{{ trans("app.Product Name") }}';
@@ -915,7 +919,7 @@ class AdminDashboard {
     }
 
     if (userSelect && previewUser) {
-      userSelect.addEventListener("change", function () {
+      userSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         previewUser.textContent =
           selectedOption.text || '{{ trans("app.User Name") }}';
@@ -923,40 +927,40 @@ class AdminDashboard {
     }
 
     if (statusSelect && previewStatus) {
-      statusSelect.addEventListener("change", function () {
+      statusSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         const statusValue = selectedOption.value;
         const statusText = selectedOption.text;
-        const statusClass = statusValue === "active" ? "success" : "danger";
+        const statusClass = statusValue === 'active' ? 'success' : 'danger';
         previewStatus.textContent = statusText;
         previewStatus.className = `badge bg-${statusClass} mt-2`;
       });
     }
 
     if (maxDomainsInput && previewDomains) {
-      maxDomainsInput.addEventListener("input", function () {
-        previewDomains.textContent = this.value || "1";
+      maxDomainsInput.addEventListener('input', function() {
+        previewDomains.textContent = this.value || '1';
       });
     }
   }
 
   initInvoicePreview() {
-    const userSelect = document.getElementById("user_id");
-    const amountInput = document.getElementById("amount");
-    const currencySelect = document.getElementById("currency");
-    const statusSelect = document.getElementById("status");
-    const dueDateInput = document.getElementById("due_date");
-    const previewDiv = document.getElementById("invoice-preview");
-    const previewCustomer = document.getElementById("preview-customer");
-    const previewAmount = document.getElementById("preview-amount");
-    const previewStatus = document.getElementById("preview-status");
-    const previewDueDate = document.getElementById("preview-due-date");
+    const userSelect = document.getElementById('user_id');
+    const amountInput = document.getElementById('amount');
+    const currencySelect = document.getElementById('currency');
+    const statusSelect = document.getElementById('status');
+    const dueDateInput = document.getElementById('due_date');
+    const previewDiv = document.getElementById('invoice-preview');
+    const previewCustomer = document.getElementById('preview-customer');
+    const previewAmount = document.getElementById('preview-amount');
+    const previewStatus = document.getElementById('preview-status');
+    const previewDueDate = document.getElementById('preview-due-date');
 
     if (userSelect && previewCustomer) {
-      userSelect.addEventListener("change", function () {
+      userSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         previewCustomer.textContent =
-          selectedOption.text.split(" (")[0] ||
+          selectedOption.text.split(' (')[0] ||
           '{{ trans("app.Customer Name") }}';
       });
     }
@@ -966,38 +970,38 @@ class AdminDashboard {
         if (amountInput.value && currencySelect.value) {
           previewAmount.textContent = `${amountInput.value} ${currencySelect.value}`;
         } else {
-          previewAmount.textContent = "$0.00 USD";
+          previewAmount.textContent = '$0.00 USD';
         }
       }
 
-      amountInput.addEventListener("input", updateAmount);
-      currencySelect.addEventListener("change", updateAmount);
+      amountInput.addEventListener('input', updateAmount);
+      currencySelect.addEventListener('change', updateAmount);
     }
 
     if (statusSelect && previewStatus) {
-      statusSelect.addEventListener("change", function () {
+      statusSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         const statusValue = selectedOption.value;
         const statusText = selectedOption.text;
         const statusClass =
-          statusValue === "paid"
-            ? "success"
-            : statusValue === "overdue"
-              ? "danger"
-              : "warning";
+          statusValue === 'paid' ?
+            'success' :
+            statusValue === 'overdue' ?
+              'danger' :
+              'warning';
         previewStatus.textContent = statusText;
         previewStatus.className = `badge bg-${statusClass} mt-2`;
       });
     }
 
     if (dueDateInput && previewDueDate) {
-      dueDateInput.addEventListener("change", function () {
+      dueDateInput.addEventListener('change', function() {
         if (this.value) {
           const date = new Date(this.value);
-          previewDueDate.textContent = date.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
+          previewDueDate.textContent = date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
           });
         } else {
           previewDueDate.textContent = '{{ trans("app.No Due Date") }}';
@@ -1007,21 +1011,21 @@ class AdminDashboard {
   }
 
   initEmailTemplatePreview() {
-    const subjectInput = document.getElementById("subject");
-    const bodyTextarea = document.getElementById("body");
-    const nameInput = document.getElementById("name");
-    const previewSubject = document.getElementById("preview-subject");
-    const previewContent = document.getElementById("preview-content");
-    const previewTemplateId = document.getElementById("preview-template-id");
+    const subjectInput = document.getElementById('subject');
+    const bodyTextarea = document.getElementById('body');
+    const nameInput = document.getElementById('name');
+    const previewSubject = document.getElementById('preview-subject');
+    const previewContent = document.getElementById('preview-content');
+    const previewTemplateId = document.getElementById('preview-template-id');
 
     // Auto-generate template name from subject
     if (subjectInput && nameInput) {
-      subjectInput.addEventListener("input", function () {
+      subjectInput.addEventListener('input', function() {
         if (!nameInput.value) {
           const value = this.value
             .toLowerCase()
-            .replace(/[^a-z0-9\s]/g, "")
-            .replace(/\s+/g, "_")
+            .replace(/[^a-z0-9\s]/g, '')
+            .replace(/\s+/g, '_')
             .substring(0, 50);
           nameInput.value = value;
         }
@@ -1040,15 +1044,13 @@ class AdminDashboard {
           bodyTextarea.value ||
           '{{ trans("app.Email content will appear here") }}';
         // Sanitize content to prevent XSS
-        const sanitizedContent = content.replace(/[<>&"']/g, function (match) {
-          return {
-            "<": "&lt;",
-            ">": "&gt;",
-            "&": "&amp;",
-            '"': "&quot;",
-            "'": "&#x27;",
-          }[match];
-        });
+        const sanitizedContent = content.replace(/[<>&"']/g, match => ({
+          '<': '&lt;',
+          '>': '&gt;',
+          '&': '&amp;',
+          '"': '&quot;',
+          '\'': '&#x27;',
+        }[match]));
 
         previewContent.innerHTML = sanitizedContent;
       }
@@ -1060,17 +1062,23 @@ class AdminDashboard {
     }
 
     // Event listeners for preview
-    if (subjectInput) subjectInput.addEventListener("input", updatePreview);
-    if (bodyTextarea) bodyTextarea.addEventListener("input", updatePreview);
-    if (nameInput) nameInput.addEventListener("input", updatePreview);
+    if (subjectInput) {
+      subjectInput.addEventListener('input', updatePreview);
+    }
+    if (bodyTextarea) {
+      bodyTextarea.addEventListener('input', updatePreview);
+    }
+    if (nameInput) {
+      nameInput.addEventListener('input', updatePreview);
+    }
 
     // Variable copy functionality
     const variableItems = document.querySelectorAll(
-      ".variable-item[data-variable]",
+      '.variable-item[data-variable]',
     );
-    variableItems.forEach((item) => {
-      item.addEventListener("click", function () {
-        const variable = this.getAttribute("data-variable");
+    variableItems.forEach(item => {
+      item.addEventListener('click', function() {
+        const variable = this.getAttribute('data-variable');
         copyToClipboard(variable);
       });
     });
@@ -1080,13 +1088,13 @@ class AdminDashboard {
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard
           .writeText(text)
-          .then(function () {
+          .then(() => {
             showNotification(
               '{{ trans("app.Variable copied to clipboard!") }}',
-              "success",
+              'success',
             );
           })
-          .catch(function () {
+          .catch(() => {
             fallbackCopyToClipboard(text);
           });
       } else {
@@ -1096,23 +1104,23 @@ class AdminDashboard {
 
     // Fallback copy method
     function fallbackCopyToClipboard(text) {
-      const textArea = document.createElement("textarea");
+      const textArea = document.createElement('textarea');
       textArea.value = text;
-      textArea.style.position = "fixed";
-      textArea.style.left = "-999999px";
-      textArea.style.top = "-999999px";
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
 
       try {
-        document.execCommand("copy");
+        document.execCommand('copy');
         showNotification(
           '{{ trans("app.Variable copied to clipboard!") }}',
-          "success",
+          'success',
         );
       } catch (err) {
-        showNotification('{{ trans("app.Failed to copy variable") }}', "error");
+        showNotification('{{ trans("app.Failed to copy variable") }}', 'error');
       }
 
       document.body.removeChild(textArea);
@@ -1123,7 +1131,7 @@ class AdminDashboard {
   }
 
   // Show alert message
-  showAlert(message, type = "info") {
+  showAlert(message, type = 'info') {
     // Sanitize message to prevent XSS
     // Message will be sanitized by SecurityUtils
 
@@ -1135,37 +1143,37 @@ class AdminDashboard {
         `;
 
     // Insert at the top of the page
-    const container = document.querySelector(".container-fluid");
+    const container = document.querySelector('.container-fluid');
     if (container) {
-      container.insertAdjacentHTML("afterbegin", alertHtml);
+      container.insertAdjacentHTML('afterbegin', alertHtml);
     }
   }
 
   // Utility methods
   static showLoading(element) {
-    element.classList.add("loading");
+    element.classList.add('loading');
   }
 
   static hideLoading(element) {
-    element.classList.remove("loading");
+    element.classList.remove('loading');
   }
 
   static showElement(element) {
-    element.classList.remove("hidden");
+    element.classList.remove('hidden');
   }
 
   static hideElement(element) {
-    element.classList.add("hidden");
+    element.classList.add('hidden');
   }
 
   // Initialize Email Template Variables
   initEmailTemplateVariables() {
     const variableItems = document.querySelectorAll(
-      ".variable-item[data-variable]",
+      '.variable-item[data-variable]',
     );
-    variableItems.forEach((item) => {
-      item.addEventListener("click", (event) => {
-        const variable = event.currentTarget.getAttribute("data-variable");
+    variableItems.forEach(item => {
+      item.addEventListener('click', event => {
+        const variable = event.currentTarget.getAttribute('data-variable');
         this.copyToClipboard(variable);
       });
     });
@@ -1177,7 +1185,7 @@ class AdminDashboard {
       navigator.clipboard
         .writeText(text)
         .then(() => {
-          this.showNotification("Variable copied to clipboard!", "success");
+          this.showNotification('Variable copied to clipboard!', 'success');
         })
         .catch(() => {
           this.fallbackCopyToClipboard(text);
@@ -1189,20 +1197,20 @@ class AdminDashboard {
 
   // Fallback copy method
   fallbackCopyToClipboard(text) {
-    const textArea = document.createElement("textarea");
+    const textArea = document.createElement('textarea');
     textArea.value = text;
-    textArea.style.position = "fixed";
-    textArea.style.left = "-999999px";
-    textArea.style.top = "-999999px";
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
 
     try {
-      document.execCommand("copy");
-      this.showNotification("Variable copied to clipboard!", "success");
+      document.execCommand('copy');
+      this.showNotification('Variable copied to clipboard!', 'success');
     } catch (err) {
-      this.showNotification("Failed to copy variable", "error");
+      this.showNotification('Failed to copy variable', 'error');
     }
 
     document.body.removeChild(textArea);
@@ -1210,13 +1218,13 @@ class AdminDashboard {
 
   // Show notification
   showNotification(message, type) {
-    const notification = document.createElement("div");
+    const notification = document.createElement('div');
     notification.className = `admin-notification admin-notification-${type}`;
 
     const icon =
-      type === "success"
-        ? '<i class="fas fa-check-circle"></i>'
-        : '<i class="fas fa-times-circle"></i>';
+      type === 'success' ?
+        '<i class="fas fa-check-circle"></i>' :
+        '<i class="fas fa-times-circle"></i>';
 
     notificationSecurityUtils.safeInnerHTML(
       this,
@@ -1243,24 +1251,24 @@ class AdminDashboard {
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             backdrop-filter: blur(10px);
             ${
-              type === "success"
-                ? "background: linear-gradient(135deg, #10b981 0%, #059669 100%);"
-                : "background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"
-            }
+  type === 'success' ?
+    'background: linear-gradient(135deg, #10b981 0%, #059669 100%);' :
+    'background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);'
+}
         `;
 
     document.body.appendChild(notification);
 
     // Animate in
     setTimeout(() => {
-      notification.style.opacity = "1";
-      notification.style.transform = "translateX(0) scale(1)";
+      notification.style.opacity = '1';
+      notification.style.transform = 'translateX(0) scale(1)';
     }, 100);
 
     // Remove after 4 seconds
     setTimeout(() => {
-      notification.style.opacity = "0";
-      notification.style.transform = "translateX(100%) scale(0.9)";
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateX(100%) scale(0.9)';
       setTimeout(() => {
         if (notification.parentNode) {
           notification.parentNode.removeChild(notification);
@@ -1274,20 +1282,20 @@ class AdminDashboard {
     const testDataInputs = document.querySelectorAll(
       'input[name^="test_data"]',
     );
-    const previewSubject = document.getElementById("preview-subject");
-    const previewBody = document.getElementById("preview-body");
+    const previewSubject = document.getElementById('preview-subject');
+    const previewBody = document.getElementById('preview-body');
 
     if (previewSubject) {
       // Get the original subject from data attribute or use a default
       const originalSubject =
-        previewSubject.getAttribute("data-original-subject") ||
-        "{{ $emailTemplate->subject }}";
+        previewSubject.getAttribute('data-original-subject') ||
+        '{{ $emailTemplate->subject }}';
       let subject = originalSubject;
-      testDataInputs.forEach((input) => {
-        const variable = input.name.replace("test_data[", "").replace("]", "");
-        const value = input.value || "{{" + variable + "}}";
+      testDataInputs.forEach(input => {
+        const variable = input.name.replace('test_data[', '').replace(']', '');
+        const value = input.value || `{{${variable}}}`;
         subject = subject.replace(
-          new RegExp("{{" + variable + "}}", "g"),
+          new RegExp(`{{${variable}}}`, 'g'),
           value,
         );
       });
@@ -1299,17 +1307,17 @@ class AdminDashboard {
       let originalBody;
       try {
         originalBody = JSON.parse(
-          previewBody.getAttribute("data-original-body-json") || '""',
+          previewBody.getAttribute('data-original-body-json') || '""',
         );
       } catch (e) {
-        originalBody = "";
+        originalBody = '';
       }
       let body = originalBody;
-      testDataInputs.forEach((input) => {
-        const variable = input.name.replace("test_data[", "").replace("]", "");
-        const value = input.value || "{{" + variable + "}}";
+      testDataInputs.forEach(input => {
+        const variable = input.name.replace('test_data[', '').replace(']', '');
+        const value = input.value || `{{${variable}}}`;
         body = body.replace(
-          new RegExp("\\\\?{{" + variable + "}}", "g"),
+          new RegExp(`\\\\?{{${variable}}}`, 'g'),
           value,
         );
       });
@@ -1324,8 +1332,8 @@ class AdminDashboard {
 
   // Preview Test Email
   previewTest() {
-    const modal = document.createElement("div");
-    modal.className = "modal fade";
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
     modalSecurityUtils.safeInnerHTML(
       this,
       `
@@ -1362,20 +1370,20 @@ class AdminDashboard {
       'input[name^="test_data"]',
     );
     const modalPreviewSubject = document.getElementById(
-      "modal-preview-subject",
+      'modal-preview-subject',
     );
-    const modalPreviewBody = document.getElementById("modal-preview-body");
+    const modalPreviewBody = document.getElementById('modal-preview-body');
 
     if (modalPreviewSubject) {
       const originalSubject =
-        modalPreviewSubject.getAttribute("data-original-subject") ||
-        "{{ $emailTemplate->subject }}";
+        modalPreviewSubject.getAttribute('data-original-subject') ||
+        '{{ $emailTemplate->subject }}';
       let subject = originalSubject;
-      testDataInputs.forEach((input) => {
-        const variable = input.name.replace("test_data[", "").replace("]", "");
-        const value = input.value || "{{" + variable + "}}";
+      testDataInputs.forEach(input => {
+        const variable = input.name.replace('test_data[', '').replace(']', '');
+        const value = input.value || `{{${variable}}}`;
         subject = subject.replace(
-          new RegExp("{{" + variable + "}}", "g"),
+          new RegExp(`{{${variable}}}`, 'g'),
           value,
         );
       });
@@ -1386,17 +1394,17 @@ class AdminDashboard {
       let originalBody;
       try {
         originalBody = JSON.parse(
-          modalPreviewBody.getAttribute("data-original-body-json") || '""',
+          modalPreviewBody.getAttribute('data-original-body-json') || '""',
         );
       } catch (e) {
-        originalBody = "";
+        originalBody = '';
       }
       let body = originalBody;
-      testDataInputs.forEach((input) => {
-        const variable = input.name.replace("test_data[", "").replace("]", "");
-        const value = input.value || "{{" + variable + "}}";
+      testDataInputs.forEach(input => {
+        const variable = input.name.replace('test_data[', '').replace(']', '');
+        const value = input.value || `{{${variable}}}`;
         body = body.replace(
-          new RegExp("\\\\?{{" + variable + "}}", "g"),
+          new RegExp(`\\\\?{{${variable}}}`, 'g'),
           value,
         );
       });
@@ -1407,7 +1415,7 @@ class AdminDashboard {
       }
     }
 
-    modal.addEventListener("hidden.bs.modal", function () {
+    modal.addEventListener('hidden.bs.modal', () => {
       document.body.removeChild(modal);
     });
   }
@@ -1418,7 +1426,7 @@ class AdminDashboard {
       navigator.clipboard
         .writeText(text)
         .then(() => {
-          this.showNotification("Copied to clipboard!", "success");
+          this.showNotification('Copied to clipboard!', 'success');
         })
         .catch(() => {
           this.fallbackCopyToClipboard(text);
@@ -1430,20 +1438,20 @@ class AdminDashboard {
 
   // Fallback copy method
   fallbackCopyToClipboard(text) {
-    const textArea = document.createElement("textarea");
+    const textArea = document.createElement('textarea');
     textArea.value = text;
-    textArea.style.position = "fixed";
-    textArea.style.left = "-999999px";
-    textArea.style.top = "-999999px";
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
 
     try {
-      document.execCommand("copy");
-      this.showNotification("Copied to clipboard!", "success");
+      document.execCommand('copy');
+      this.showNotification('Copied to clipboard!', 'success');
     } catch (err) {
-      this.showNotification("Failed to copy", "error");
+      this.showNotification('Failed to copy', 'error');
     }
 
     document.body.removeChild(textArea);
@@ -1460,38 +1468,38 @@ class AdminDashboard {
 
   // Initialize Template Filtering
   initTemplateFiltering() {
-    const searchInput = document.getElementById("searchTemplates");
-    const typeFilter = document.getElementById("type-filter");
-    const categoryFilter = document.getElementById("category-filter");
+    const searchInput = document.getElementById('searchTemplates');
+    const typeFilter = document.getElementById('type-filter');
+    const categoryFilter = document.getElementById('category-filter');
 
     if (searchInput) {
-      searchInput.addEventListener("keyup", () => this.filterTemplates());
+      searchInput.addEventListener('keyup', () => this.filterTemplates());
     }
 
     if (typeFilter) {
-      typeFilter.addEventListener("change", () => this.filterTemplates());
+      typeFilter.addEventListener('change', () => this.filterTemplates());
     }
 
     if (categoryFilter) {
-      categoryFilter.addEventListener("change", () => this.filterTemplates());
+      categoryFilter.addEventListener('change', () => this.filterTemplates());
     }
   }
 
   // Filter Templates
   filterTemplates() {
     const searchTerm =
-      document.getElementById("searchTemplates")?.value.toLowerCase() || "";
-    const typeFilter = document.getElementById("type-filter")?.value || "";
+      document.getElementById('searchTemplates')?.value.toLowerCase() || '';
+    const typeFilter = document.getElementById('type-filter')?.value || '';
     const categoryFilter =
-      document.getElementById("category-filter")?.value || "";
+      document.getElementById('category-filter')?.value || '';
 
-    const templateRows = document.querySelectorAll(".template-row");
+    const templateRows = document.querySelectorAll('.template-row');
 
-    templateRows.forEach((row) => {
-      const name = row.getAttribute("data-name") || "";
-      const subject = row.getAttribute("data-subject") || "";
-      const type = row.getAttribute("data-type") || "";
-      const category = row.getAttribute("data-category") || "";
+    templateRows.forEach(row => {
+      const name = row.getAttribute('data-name') || '';
+      const subject = row.getAttribute('data-subject') || '';
+      const type = row.getAttribute('data-type') || '';
+      const category = row.getAttribute('data-category') || '';
 
       const matchesSearch =
         name.includes(searchTerm) || subject.includes(searchTerm);
@@ -1499,19 +1507,19 @@ class AdminDashboard {
       const matchesCategory = !categoryFilter || category === categoryFilter;
 
       if (matchesSearch && matchesType && matchesCategory) {
-        row.style.display = "";
+        row.style.display = '';
       } else {
-        row.style.display = "none";
+        row.style.display = 'none';
       }
     });
   }
 
   // Initialize Delete Confirmations
   initDeleteConfirmations() {
-    const deleteButtons = document.querySelectorAll(".delete-template-btn");
-    deleteButtons.forEach((button) => {
-      button.addEventListener("click", (e) => {
-        const confirmMessage = button.getAttribute("data-confirm");
+    const deleteButtons = document.querySelectorAll('.delete-template-btn');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', e => {
+        const confirmMessage = button.getAttribute('data-confirm');
         if (!window.confirm || !confirm(confirmMessage)) {
           e.preventDefault();
         }
@@ -1525,20 +1533,20 @@ class AdminDashboard {
     const testDataInputs = document.querySelectorAll(
       'input[name^="test_data"]',
     );
-    testDataInputs.forEach((input) => {
-      input.addEventListener("input", () => this.updateEmailPreview());
+    testDataInputs.forEach(input => {
+      input.addEventListener('input', () => this.updateEmailPreview());
     });
 
     // Initialize preview buttons
-    const previewTestBtn = document.getElementById("preview-test-btn");
-    const updatePreviewBtn = document.getElementById("update-preview-btn");
+    const previewTestBtn = document.getElementById('preview-test-btn');
+    const updatePreviewBtn = document.getElementById('update-preview-btn');
 
     if (previewTestBtn) {
-      previewTestBtn.addEventListener("click", () => this.previewTest());
+      previewTestBtn.addEventListener('click', () => this.previewTest());
     }
 
     if (updatePreviewBtn) {
-      updatePreviewBtn.addEventListener("click", () =>
+      updatePreviewBtn.addEventListener('click', () =>
         this.updateEmailPreview(),
       );
     }
@@ -1555,11 +1563,11 @@ class AdminDashboard {
 
   // Initialize Copy to Clipboard
   initCopyToClipboard() {
-    const copyButtons = document.querySelectorAll(".copy-btn");
-    copyButtons.forEach((button) => {
-      const text = button.getAttribute("data-text");
+    const copyButtons = document.querySelectorAll('.copy-btn');
+    copyButtons.forEach(button => {
+      const text = button.getAttribute('data-text');
       if (text) {
-        button.addEventListener("click", () => this.copyToClipboard(text));
+        button.addEventListener('click', () => this.copyToClipboard(text));
       }
     });
   }
@@ -1578,42 +1586,42 @@ class AdminDashboard {
 
   // Initialize Invoice Filtering
   initInvoiceFiltering() {
-    const searchInput = document.getElementById("searchInvoices");
-    const statusFilter = document.getElementById("status-filter");
-    const dateFrom = document.getElementById("date-from");
-    const dateTo = document.getElementById("date-to");
+    const searchInput = document.getElementById('searchInvoices');
+    const statusFilter = document.getElementById('status-filter');
+    const dateFrom = document.getElementById('date-from');
+    const dateTo = document.getElementById('date-to');
 
     if (searchInput) {
-      searchInput.addEventListener("keyup", () => this.filterInvoices());
+      searchInput.addEventListener('keyup', () => this.filterInvoices());
     }
 
     if (statusFilter) {
-      statusFilter.addEventListener("change", () => this.filterInvoices());
+      statusFilter.addEventListener('change', () => this.filterInvoices());
     }
 
     if (dateFrom) {
-      dateFrom.addEventListener("change", () => this.filterInvoices());
+      dateFrom.addEventListener('change', () => this.filterInvoices());
     }
 
     if (dateTo) {
-      dateTo.addEventListener("change", () => this.filterInvoices());
+      dateTo.addEventListener('change', () => this.filterInvoices());
     }
   }
 
   // Filter Invoices
   filterInvoices() {
     const searchTerm =
-      document.getElementById("searchInvoices")?.value.toLowerCase() || "";
-    const statusFilter = document.getElementById("status-filter")?.value || "";
-    const dateFrom = document.getElementById("date-from")?.value || "";
-    const dateTo = document.getElementById("date-to")?.value || "";
+      document.getElementById('searchInvoices')?.value.toLowerCase() || '';
+    const statusFilter = document.getElementById('status-filter')?.value || '';
+    const dateFrom = document.getElementById('date-from')?.value || '';
+    const dateTo = document.getElementById('date-to')?.value || '';
 
-    const invoiceRows = document.querySelectorAll(".invoice-row");
+    const invoiceRows = document.querySelectorAll('.invoice-row');
 
-    invoiceRows.forEach((row) => {
-      const number = row.getAttribute("data-number") || "";
-      const user = row.getAttribute("data-user") || "";
-      const status = row.getAttribute("data-status") || "";
+    invoiceRows.forEach(row => {
+      const number = row.getAttribute('data-number') || '';
+      const user = row.getAttribute('data-user') || '';
+      const status = row.getAttribute('data-status') || '';
 
       const matchesSearch =
         number.includes(searchTerm) || user.includes(searchTerm);
@@ -1622,55 +1630,55 @@ class AdminDashboard {
       // Date filtering logic can be added here if needed
 
       if (matchesSearch && matchesStatus) {
-        row.style.display = "";
+        row.style.display = '';
       } else {
-        row.style.display = "none";
+        row.style.display = 'none';
       }
     });
   }
 
   // Initialize Invoice Print
   initInvoicePrint() {
-    const printBtn = document.getElementById("print-invoice-btn");
+    const printBtn = document.getElementById('print-invoice-btn');
     if (printBtn) {
-      printBtn.addEventListener("click", () => this.printInvoice());
+      printBtn.addEventListener('click', () => this.printInvoice());
     }
   }
 
   // Print Invoice
   printInvoice() {
     // Create a new window for printing
-    const printWindow = window.open("", "_blank");
+    const printWindow = window.open('', '_blank');
 
     // Get the invoice data from the page
     const invoiceNumber =
       document
-        .querySelector("[data-invoice-number]")
-        ?.getAttribute("data-invoice-number") || "N/A";
+        .querySelector('[data-invoice-number]')
+        ?.getAttribute('data-invoice-number') || 'N/A';
     const customer =
       document
-        .querySelector("[data-customer-name]")
-        ?.getAttribute("data-customer-name") || "No Customer";
+        .querySelector('[data-customer-name]')
+        ?.getAttribute('data-customer-name') || 'No Customer';
     const amount =
       document
-        .querySelector("[data-invoice-amount]")
-        ?.getAttribute("data-invoice-amount") || "0";
+        .querySelector('[data-invoice-amount]')
+        ?.getAttribute('data-invoice-amount') || '0';
     const currency =
       document
-        .querySelector("[data-invoice-currency]")
-        ?.getAttribute("data-invoice-currency") || "USD";
+        .querySelector('[data-invoice-currency]')
+        ?.getAttribute('data-invoice-currency') || 'USD';
     const status =
       document
-        .querySelector("[data-invoice-status]")
-        ?.getAttribute("data-invoice-status") || "Pending";
+        .querySelector('[data-invoice-status]')
+        ?.getAttribute('data-invoice-status') || 'Pending';
     const created =
       document
-        .querySelector("[data-invoice-created]")
-        ?.getAttribute("data-invoice-created") || "N/A";
+        .querySelector('[data-invoice-created]')
+        ?.getAttribute('data-invoice-created') || 'N/A';
     const due =
       document
-        .querySelector("[data-invoice-due]")
-        ?.getAttribute("data-invoice-due") || "No Due Date";
+        .querySelector('[data-invoice-due]')
+        ?.getAttribute('data-invoice-due') || 'No Due Date';
 
     // Create print content
     const printContent = `
@@ -1716,37 +1724,37 @@ class AdminDashboard {
   // Initialize invoice form toggles
   initInvoiceFormToggles() {
     // Toggle paid_at field based on status
-    const statusSelect = document.getElementById("status");
-    const paidAtGroup = document.getElementById("paid_at_group");
+    const statusSelect = document.getElementById('status');
+    const paidAtGroup = document.getElementById('paid_at_group');
 
     if (statusSelect && paidAtGroup) {
-      statusSelect.addEventListener("change", () => {
-        if (statusSelect.value === "paid") {
-          paidAtGroup.classList.remove("hidden-field");
-          paidAtGroup.classList.add("visible-field");
+      statusSelect.addEventListener('change', () => {
+        if (statusSelect.value === 'paid') {
+          paidAtGroup.classList.remove('hidden-field');
+          paidAtGroup.classList.add('visible-field');
         } else {
-          paidAtGroup.classList.remove("visible-field");
-          paidAtGroup.classList.add("hidden-field");
+          paidAtGroup.classList.remove('visible-field');
+          paidAtGroup.classList.add('hidden-field');
         }
       });
     }
 
     // Toggle custom fields based on license selection
-    const licenseSelect = document.getElementById("license_id");
-    const customFields = document.getElementById("custom_invoice_fields");
+    const licenseSelect = document.getElementById('license_id');
+    const customFields = document.getElementById('custom_invoice_fields');
 
     if (licenseSelect && customFields) {
-      licenseSelect.addEventListener("change", () => {
-        if (licenseSelect.value === "custom") {
-          customFields.classList.remove("hidden-field");
-          customFields.classList.add("visible-field");
-          document.getElementById("custom_invoice_type").required = true;
-          document.getElementById("custom_product_name").required = true;
+      licenseSelect.addEventListener('change', () => {
+        if (licenseSelect.value === 'custom') {
+          customFields.classList.remove('hidden-field');
+          customFields.classList.add('visible-field');
+          document.getElementById('custom_invoice_type').required = true;
+          document.getElementById('custom_product_name').required = true;
         } else {
-          customFields.classList.remove("visible-field");
-          customFields.classList.add("hidden-field");
-          document.getElementById("custom_invoice_type").required = false;
-          document.getElementById("custom_product_name").required = false;
+          customFields.classList.remove('visible-field');
+          customFields.classList.add('hidden-field');
+          document.getElementById('custom_invoice_type').required = false;
+          document.getElementById('custom_product_name').required = false;
         }
         this.toggleExpirationDateField();
       });
@@ -1758,50 +1766,50 @@ class AdminDashboard {
 
   // Initialize Invoice Create Functions
   initInvoiceCreateFunctions() {
-    const userSelect = document.getElementById("user_id");
-    const licenseSelect = document.getElementById("license_id");
+    const userSelect = document.getElementById('user_id');
+    const licenseSelect = document.getElementById('license_id');
     const customInvoiceTypeSelect = document.getElementById(
-      "custom_invoice_type",
+      'custom_invoice_type',
     );
     const expirationDateGroup = document.getElementById(
-      "expiration_date_group",
+      'expiration_date_group',
     );
-    const amountInput = document.getElementById("amount");
-    const currencySelect = document.getElementById("currency");
-    const dueDateInput = document.getElementById("due_date");
-    const previewCustomer = document.getElementById("preview-customer");
-    const previewAmount = document.getElementById("preview-amount");
-    const previewStatus = document.getElementById("preview-status");
-    const previewDueDate = document.getElementById("preview-due-date");
+    const amountInput = document.getElementById('amount');
+    const currencySelect = document.getElementById('currency');
+    const dueDateInput = document.getElementById('due_date');
+    const previewCustomer = document.getElementById('preview-customer');
+    const previewAmount = document.getElementById('preview-amount');
+    const previewStatus = document.getElementById('preview-status');
+    const previewDueDate = document.getElementById('preview-due-date');
 
     // Show/hide expiration date based on custom invoice type
     if (customInvoiceTypeSelect) {
-      customInvoiceTypeSelect.addEventListener("change", () =>
+      customInvoiceTypeSelect.addEventListener('change', () =>
         this.toggleExpirationDateField(),
       );
     }
 
     // Update preview functions
     if (userSelect) {
-      userSelect.addEventListener("change", () => this.updateInvoicePreview());
+      userSelect.addEventListener('change', () => this.updateInvoicePreview());
     }
     if (amountInput) {
-      amountInput.addEventListener("input", () => this.updateInvoicePreview());
+      amountInput.addEventListener('input', () => this.updateInvoicePreview());
     }
     if (currencySelect) {
-      currencySelect.addEventListener("change", () =>
+      currencySelect.addEventListener('change', () =>
         this.updateInvoicePreview(),
       );
     }
     if (dueDateInput) {
-      dueDateInput.addEventListener("change", () =>
+      dueDateInput.addEventListener('change', () =>
         this.updateInvoicePreview(),
       );
     }
 
     // Load licenses when user is selected
     if (userSelect && licenseSelect) {
-      userSelect.addEventListener("change", () => this.loadUserLicenses());
+      userSelect.addEventListener('change', () => this.loadUserLicenses());
     }
 
     // Initial setup
@@ -1812,36 +1820,36 @@ class AdminDashboard {
 
   // Toggle Paid At Field
   togglePaidAtField() {
-    const statusSelect = document.getElementById("status");
-    const paidAtGroup = document.getElementById("paid_at_group");
+    const statusSelect = document.getElementById('status');
+    const paidAtGroup = document.getElementById('paid_at_group');
 
     if (statusSelect && paidAtGroup) {
-      if (statusSelect.value === "paid") {
-        paidAtGroup.classList.remove("hidden-field");
-        paidAtGroup.classList.add("visible-field");
+      if (statusSelect.value === 'paid') {
+        paidAtGroup.classList.remove('hidden-field');
+        paidAtGroup.classList.add('visible-field');
       } else {
-        paidAtGroup.classList.remove("visible-field");
-        paidAtGroup.classList.add("hidden-field");
+        paidAtGroup.classList.remove('visible-field');
+        paidAtGroup.classList.add('hidden-field');
       }
     }
   }
 
   // Toggle Custom Invoice Fields
   toggleCustomInvoiceFields() {
-    const licenseSelect = document.getElementById("license_id");
-    const customFields = document.getElementById("custom_invoice_fields");
+    const licenseSelect = document.getElementById('license_id');
+    const customFields = document.getElementById('custom_invoice_fields');
 
     if (licenseSelect && customFields) {
-      if (licenseSelect.value === "custom") {
-        customFields.classList.remove("hidden-field");
-        customFields.classList.add("visible-field");
-        document.getElementById("custom_invoice_type").required = true;
-        document.getElementById("custom_product_name").required = true;
+      if (licenseSelect.value === 'custom') {
+        customFields.classList.remove('hidden-field');
+        customFields.classList.add('visible-field');
+        document.getElementById('custom_invoice_type').required = true;
+        document.getElementById('custom_product_name').required = true;
       } else {
-        customFields.classList.remove("visible-field");
-        customFields.classList.add("hidden-field");
-        document.getElementById("custom_invoice_type").required = false;
-        document.getElementById("custom_product_name").required = false;
+        customFields.classList.remove('visible-field');
+        customFields.classList.add('hidden-field');
+        document.getElementById('custom_invoice_type').required = false;
+        document.getElementById('custom_product_name').required = false;
       }
       this.toggleExpirationDateField();
     }
@@ -1849,64 +1857,64 @@ class AdminDashboard {
 
   // Toggle Expiration Date Field
   toggleExpirationDateField() {
-    const licenseSelect = document.getElementById("license_id");
+    const licenseSelect = document.getElementById('license_id');
     const customInvoiceTypeSelect = document.getElementById(
-      "custom_invoice_type",
+      'custom_invoice_type',
     );
     const expirationDateGroup = document.getElementById(
-      "expiration_date_group",
+      'expiration_date_group',
     );
 
     if (licenseSelect && customInvoiceTypeSelect && expirationDateGroup) {
       const selectedType = customInvoiceTypeSelect.value;
-      if (licenseSelect.value === "custom" && selectedType !== "one_time") {
-        expirationDateGroup.style.display = "block";
-        const expirationInput = document.getElementById("expiration_date");
+      if (licenseSelect.value === 'custom' && selectedType !== 'one_time') {
+        expirationDateGroup.style.display = 'block';
+        const expirationInput = document.getElementById('expiration_date');
         if (expirationInput && !expirationInput.value) {
           const today = new Date();
           switch (selectedType) {
-            case "monthly":
-              today.setMonth(today.getMonth() + 1);
-              break;
-            case "quarterly":
-              today.setMonth(today.getMonth() + 3);
-              break;
-            case "semi_annual":
-              today.setMonth(today.getMonth() + 6);
-              break;
-            case "annual":
-              today.setFullYear(today.getFullYear() + 1);
-              break;
-            case "custom_recurring":
-              today.setMonth(today.getMonth() + 1);
-              break;
+          case 'monthly':
+            today.setMonth(today.getMonth() + 1);
+            break;
+          case 'quarterly':
+            today.setMonth(today.getMonth() + 3);
+            break;
+          case 'semi_annual':
+            today.setMonth(today.getMonth() + 6);
+            break;
+          case 'annual':
+            today.setFullYear(today.getFullYear() + 1);
+            break;
+          case 'custom_recurring':
+            today.setMonth(today.getMonth() + 1);
+            break;
           }
-          expirationInput.value = today.toISOString().split("T")[0];
+          expirationInput.value = today.toISOString().split('T')[0];
         }
       } else {
-        expirationDateGroup.style.display = "none";
+        expirationDateGroup.style.display = 'none';
       }
     }
   }
 
   // Update Invoice Preview
   updateInvoicePreview() {
-    const userSelect = document.getElementById("user_id");
-    const amountInput = document.getElementById("amount");
-    const currencySelect = document.getElementById("currency");
-    const statusSelect = document.getElementById("status");
-    const dueDateInput = document.getElementById("due_date");
-    const previewCustomer = document.getElementById("preview-customer");
-    const previewAmount = document.getElementById("preview-amount");
-    const previewStatus = document.getElementById("preview-status");
-    const previewDueDate = document.getElementById("preview-due-date");
+    const userSelect = document.getElementById('user_id');
+    const amountInput = document.getElementById('amount');
+    const currencySelect = document.getElementById('currency');
+    const statusSelect = document.getElementById('status');
+    const dueDateInput = document.getElementById('due_date');
+    const previewCustomer = document.getElementById('preview-customer');
+    const previewAmount = document.getElementById('preview-amount');
+    const previewStatus = document.getElementById('preview-status');
+    const previewDueDate = document.getElementById('preview-due-date');
 
     if (userSelect && previewCustomer) {
       if (userSelect.value) {
         const selectedOption = userSelect.options[userSelect.selectedIndex];
-        previewCustomer.textContent = selectedOption.text.split(" (")[0];
+        previewCustomer.textContent = selectedOption.text.split(' (')[0];
       } else {
-        previewCustomer.textContent = "Customer Name";
+        previewCustomer.textContent = 'Customer Name';
       }
     }
 
@@ -1914,7 +1922,7 @@ class AdminDashboard {
       if (amountInput.value && currencySelect.value) {
         previewAmount.textContent = `${amountInput.value} ${currencySelect.value}`;
       } else {
-        previewAmount.textContent = "$0.00 USD";
+        previewAmount.textContent = '$0.00 USD';
       }
     }
 
@@ -1923,11 +1931,11 @@ class AdminDashboard {
         const statusText =
           statusSelect.options[statusSelect.selectedIndex].text;
         const statusClass =
-          statusSelect.value === "paid"
-            ? "success"
-            : statusSelect.value === "overdue"
-              ? "danger"
-              : "warning";
+          statusSelect.value === 'paid' ?
+            'success' :
+            statusSelect.value === 'overdue' ?
+              'danger' :
+              'warning';
         previewStatus.textContent = statusText;
         previewStatus.className = `badge bg-${statusClass} mt-2`;
       }
@@ -1936,10 +1944,10 @@ class AdminDashboard {
     if (dueDateInput && previewDueDate) {
       if (dueDateInput.value) {
         const date = new Date(dueDateInput.value);
-        previewDueDate.textContent = date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
+        previewDueDate.textContent = date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
         });
       }
     }
@@ -1947,33 +1955,35 @@ class AdminDashboard {
 
   // Load User Licenses
   loadUserLicenses() {
-    const userSelect = document.getElementById("user_id");
-    const licenseSelect = document.getElementById("license_id");
+    const userSelect = document.getElementById('user_id');
+    const licenseSelect = document.getElementById('license_id');
 
-    if (!userSelect || !licenseSelect) return;
+    if (!userSelect || !licenseSelect) {
+      return;
+    }
 
     const userId = userSelect.value;
 
     if (userId) {
       // Base URL for user licenses API
       const baseMeta = document.querySelector('meta[name="base-url"]');
-      const baseUrl = baseMeta ? baseMeta.getAttribute("content") : "";
+      const baseUrl = baseMeta ? baseMeta.getAttribute('content') : '';
       const apiUserLicensesBase =
-        (baseUrl.replace(/\/$/, "") || "") + "/admin/api/user";
+        `${baseUrl.replace(/\/$/, '') || ''}/admin/api/user`;
 
       fetch(`${apiUserLicensesBase}/${userId}/licenses`, {
-        credentials: "same-origin",
-        headers: { Accept: "application/json" },
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' },
       })
-        .then((response) => {
+        .then(response => {
           if (!response.ok) {
             throw new Error(
-              "Server returned " + response.status + " " + response.statusText,
+              `Server returned ${response.status} ${response.statusText}`,
             );
           }
           return response.text();
         })
-        .then((text) => {
+        .then(text => {
           try {
             const data = JSON.parse(text);
 
@@ -1982,23 +1992,23 @@ class AdminDashboard {
             licenseSelect.innerHTML +=
               '<option value="custom">Custom Invoice (No License)</option>';
 
-            data.forEach((license) => {
-              const option = document.createElement("option");
+            data.forEach(license => {
+              const option = document.createElement('option');
               option.value = license.id;
               let statusText = license.status;
               switch (license.status.toLowerCase()) {
-                case "active":
-                  statusText = "Active";
-                  break;
-                case "expired":
-                  statusText = "Expired";
-                  break;
-                case "suspended":
-                  statusText = "Suspended";
-                  break;
-                case "pending":
-                  statusText = "Pending";
-                  break;
+              case 'active':
+                statusText = 'Active';
+                break;
+              case 'expired':
+                statusText = 'Expired';
+                break;
+              case 'suspended':
+                statusText = 'Suspended';
+                break;
+              case 'pending':
+                statusText = 'Pending';
+                break;
               }
               option.textContent = `${license.product.name} - ${license.license_type} (${statusText})`;
               licenseSelect.appendChild(option);
@@ -2006,14 +2016,14 @@ class AdminDashboard {
 
             this.toggleCustomInvoiceFields();
           } catch (e) {
-            throw new Error("Invalid JSON response from server");
+            throw new Error('Invalid JSON response from server');
           }
         })
-        .catch((error) => {
+        .catch(error => {
           // Error loading licenses
           this.showNotification(
-            "Error loading licenses. Please make sure you are logged in and the server is reachable.",
-            "error",
+            'Error loading licenses. Please make sure you are logged in and the server is reachable.',
+            'error',
           );
         });
     } else {
@@ -2038,61 +2048,61 @@ class AdminDashboard {
 
   // Initialize KB Article Filtering
   initKBArticleFiltering() {
-    const searchInput = document.getElementById("searchArticles");
-    const categoryFilter = document.getElementById("category-filter");
-    const statusFilter = document.getElementById("status-filter");
+    const searchInput = document.getElementById('searchArticles');
+    const categoryFilter = document.getElementById('category-filter');
+    const statusFilter = document.getElementById('status-filter');
 
     if (searchInput) {
-      searchInput.addEventListener("keyup", () => this.filterArticles());
+      searchInput.addEventListener('keyup', () => this.filterArticles());
     }
 
     if (categoryFilter) {
-      categoryFilter.addEventListener("change", () => this.filterArticles());
+      categoryFilter.addEventListener('change', () => this.filterArticles());
     }
 
     if (statusFilter) {
-      statusFilter.addEventListener("change", () => this.filterArticles());
+      statusFilter.addEventListener('change', () => this.filterArticles());
     }
   }
 
   // Filter Articles
   filterArticles() {
     const searchTerm =
-      document.getElementById("searchArticles")?.value.toLowerCase() || "";
+      document.getElementById('searchArticles')?.value.toLowerCase() || '';
     const categoryFilter =
-      document.getElementById("category-filter")?.value || "";
-    const statusFilter = document.getElementById("status-filter")?.value || "";
+      document.getElementById('category-filter')?.value || '';
+    const statusFilter = document.getElementById('status-filter')?.value || '';
 
-    const articleRows = document.querySelectorAll(".article-row");
+    const articleRows = document.querySelectorAll('.article-row');
 
-    articleRows.forEach((row) => {
-      const title = row.getAttribute("data-title") || "";
-      const category = row.getAttribute("data-category") || "";
-      const status = row.getAttribute("data-status") || "";
+    articleRows.forEach(row => {
+      const title = row.getAttribute('data-title') || '';
+      const category = row.getAttribute('data-category') || '';
+      const status = row.getAttribute('data-status') || '';
 
       const matchesSearch = title.includes(searchTerm);
       const matchesCategory = !categoryFilter || category === categoryFilter;
       const matchesStatus = !statusFilter || status === statusFilter;
 
       if (matchesSearch && matchesCategory && matchesStatus) {
-        row.style.display = "";
+        row.style.display = '';
       } else {
-        row.style.display = "none";
+        row.style.display = 'none';
       }
     });
   }
 
   // Initialize KB Category Filtering
   initKBCategoryFiltering() {
-    const searchInput = document.getElementById("searchCategories");
-    const protectionFilter = document.getElementById("protection-filter");
+    const searchInput = document.getElementById('searchCategories');
+    const protectionFilter = document.getElementById('protection-filter');
 
     if (searchInput) {
-      searchInput.addEventListener("keyup", () => this.filterKBCategories());
+      searchInput.addEventListener('keyup', () => this.filterKBCategories());
     }
 
     if (protectionFilter) {
-      protectionFilter.addEventListener("change", () =>
+      protectionFilter.addEventListener('change', () =>
         this.filterKBCategories(),
       );
     }
@@ -2101,24 +2111,24 @@ class AdminDashboard {
   // Filter KB Categories
   filterKBCategories() {
     const searchTerm =
-      document.getElementById("searchCategories")?.value.toLowerCase() || "";
+      document.getElementById('searchCategories')?.value.toLowerCase() || '';
     const protectionFilter =
-      document.getElementById("protection-filter")?.value || "";
+      document.getElementById('protection-filter')?.value || '';
 
-    const categoryRows = document.querySelectorAll(".category-row");
+    const categoryRows = document.querySelectorAll('.category-row');
 
-    categoryRows.forEach((row) => {
-      const name = row.getAttribute("data-name") || "";
-      const protection = row.getAttribute("data-protection") || "";
+    categoryRows.forEach(row => {
+      const name = row.getAttribute('data-name') || '';
+      const protection = row.getAttribute('data-protection') || '';
 
       const matchesSearch = name.includes(searchTerm);
       const matchesProtection =
         !protectionFilter || protection === protectionFilter;
 
       if (matchesSearch && matchesProtection) {
-        row.style.display = "";
+        row.style.display = '';
       } else {
-        row.style.display = "none";
+        row.style.display = 'none';
       }
     });
   }
@@ -2129,18 +2139,18 @@ class AdminDashboard {
       'input[name="requires_serial"]',
     );
 
-    requiresSerialCheckboxes.forEach((checkbox) => {
-      checkbox.addEventListener("change", () => {
+    requiresSerialCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
         const serialFields = checkbox
-          .closest("form")
-          ?.querySelector("#serial-fields");
+          .closest('form')
+          ?.querySelector('#serial-fields');
         if (serialFields) {
           if (checkbox.checked) {
-            serialFields.classList.remove("hidden-field");
-            serialFields.classList.add("visible-field");
+            serialFields.classList.remove('hidden-field');
+            serialFields.classList.add('visible-field');
           } else {
-            serialFields.classList.remove("visible-field");
-            serialFields.classList.add("hidden-field");
+            serialFields.classList.remove('visible-field');
+            serialFields.classList.add('hidden-field');
           }
         }
       });
@@ -2182,43 +2192,43 @@ class AdminDashboard {
 
   // Initialize License Filtering
   initLicenseFiltering() {
-    const searchInput = document.getElementById("searchLicenses");
-    const statusFilter = document.getElementById("status-filter");
-    const typeFilter = document.getElementById("type-filter");
-    const sortFilter = document.getElementById("sort-filter");
+    const searchInput = document.getElementById('searchLicenses');
+    const statusFilter = document.getElementById('status-filter');
+    const typeFilter = document.getElementById('type-filter');
+    const sortFilter = document.getElementById('sort-filter');
 
     if (searchInput) {
-      searchInput.addEventListener("keyup", () => this.filterLicenses());
+      searchInput.addEventListener('keyup', () => this.filterLicenses());
     }
 
     if (statusFilter) {
-      statusFilter.addEventListener("change", () => this.filterLicenses());
+      statusFilter.addEventListener('change', () => this.filterLicenses());
     }
 
     if (typeFilter) {
-      typeFilter.addEventListener("change", () => this.filterLicenses());
+      typeFilter.addEventListener('change', () => this.filterLicenses());
     }
 
     if (sortFilter) {
-      sortFilter.addEventListener("change", () => this.filterLicenses());
+      sortFilter.addEventListener('change', () => this.filterLicenses());
     }
   }
 
   // Filter Licenses
   filterLicenses() {
     const searchTerm =
-      document.getElementById("searchLicenses")?.value.toLowerCase() || "";
-    const statusFilter = document.getElementById("status-filter")?.value || "";
-    const typeFilter = document.getElementById("type-filter")?.value || "";
+      document.getElementById('searchLicenses')?.value.toLowerCase() || '';
+    const statusFilter = document.getElementById('status-filter')?.value || '';
+    const typeFilter = document.getElementById('type-filter')?.value || '';
 
-    const licenseRows = document.querySelectorAll(".license-row");
+    const licenseRows = document.querySelectorAll('.license-row');
 
-    licenseRows.forEach((row) => {
-      const key = row.getAttribute("data-key") || "";
-      const customer = row.getAttribute("data-customer") || "";
-      const product = row.getAttribute("data-product") || "";
-      const status = row.getAttribute("data-status") || "";
-      const type = row.getAttribute("data-type") || "";
+    licenseRows.forEach(row => {
+      const key = row.getAttribute('data-key') || '';
+      const customer = row.getAttribute('data-customer') || '';
+      const product = row.getAttribute('data-product') || '';
+      const status = row.getAttribute('data-status') || '';
+      const type = row.getAttribute('data-type') || '';
 
       const matchesSearch =
         key.includes(searchTerm) ||
@@ -2228,9 +2238,9 @@ class AdminDashboard {
       const matchesType = !typeFilter || type === typeFilter;
 
       if (matchesSearch && matchesStatus && matchesType) {
-        row.style.display = "";
+        row.style.display = '';
       } else {
-        row.style.display = "none";
+        row.style.display = 'none';
       }
     });
   }
@@ -2241,18 +2251,18 @@ class AdminDashboard {
     this.initCopyToClipboard();
 
     // Initialize regenerate license key
-    const regenerateBtn = document.getElementById("regenerate-license-key-btn");
+    const regenerateBtn = document.getElementById('regenerate-license-key-btn');
     if (regenerateBtn) {
-      regenerateBtn.addEventListener("click", () =>
+      regenerateBtn.addEventListener('click', () =>
         this.regenerateLicenseKey(),
       );
     }
 
     // Initialize remove domain buttons
-    const removeDomainBtns = document.querySelectorAll(".remove-domain-btn");
-    removeDomainBtns.forEach((btn) => {
-      btn.addEventListener("click", () =>
-        this.removeDomain(btn.getAttribute("data-domain-id")),
+    const removeDomainBtns = document.querySelectorAll('.remove-domain-btn');
+    removeDomainBtns.forEach(btn => {
+      btn.addEventListener('click', () =>
+        this.removeDomain(btn.getAttribute('data-domain-id')),
       );
     });
   }
@@ -2262,13 +2272,13 @@ class AdminDashboard {
     if (
       window.confirm &&
       confirm(
-        "Are you sure you want to regenerate this license key? This action cannot be undone.",
+        'Are you sure you want to regenerate this license key? This action cannot be undone.',
       )
     ) {
       // Add regeneration logic here
       this.showNotification(
-        "License key regeneration functionality would be implemented here",
-        "info",
+        'License key regeneration functionality would be implemented here',
+        'info',
       );
     }
   }
@@ -2277,22 +2287,22 @@ class AdminDashboard {
   removeDomain(domainId) {
     if (
       window.confirm &&
-      confirm("Are you sure you want to remove this domain?")
+      confirm('Are you sure you want to remove this domain?')
     ) {
       // Add domain removal logic here
       this.showNotification(
-        "Domain removal functionality would be implemented here",
-        "info",
+        'Domain removal functionality would be implemented here',
+        'info',
       );
     }
   }
 
   // Initialize Progress Bars
   initProgressBars() {
-    const progressBars = document.querySelectorAll(".progress-bar[data-width]");
-    progressBars.forEach((bar) => {
-      const width = bar.getAttribute("data-width");
-      bar.style.width = width + "%";
+    const progressBars = document.querySelectorAll('.progress-bar[data-width]');
+    progressBars.forEach(bar => {
+      const width = bar.getAttribute('data-width');
+      bar.style.width = `${width}%`;
     });
   }
 
@@ -2321,40 +2331,40 @@ class AdminDashboard {
 
   // Initialize Ticket Form Toggles
   initTicketFormToggles() {
-    const createInvoiceCheckbox = document.getElementById("create_invoice");
-    const licenseInfo = document.getElementById("license-info");
-    const invoiceSection = document.getElementById("invoice-section");
-    const renewalGroup = document.getElementById("invoice-renewal-group");
+    const createInvoiceCheckbox = document.getElementById('create_invoice');
+    const licenseInfo = document.getElementById('license-info');
+    const invoiceSection = document.getElementById('invoice-section');
+    const renewalGroup = document.getElementById('invoice-renewal-group');
     const renewalPeriodGroup = document.getElementById(
-      "invoice-renewal-period-group",
+      'invoice-renewal-period-group',
     );
 
     if (createInvoiceCheckbox && invoiceSection) {
-      createInvoiceCheckbox.addEventListener("change", () => {
+      createInvoiceCheckbox.addEventListener('change', () => {
         if (createInvoiceCheckbox.checked) {
-          invoiceSection.classList.remove("hidden-field");
-          invoiceSection.classList.add("visible-field");
+          invoiceSection.classList.remove('hidden-field');
+          invoiceSection.classList.add('visible-field');
         } else {
-          invoiceSection.classList.remove("visible-field");
-          invoiceSection.classList.add("hidden-field");
+          invoiceSection.classList.remove('visible-field');
+          invoiceSection.classList.add('hidden-field');
         }
       });
     }
 
     // Toggle renewal fields based on invoice type
-    const invoiceTypeSelect = document.getElementById("invoice_type");
+    const invoiceTypeSelect = document.getElementById('invoice_type');
     if (invoiceTypeSelect && renewalGroup && renewalPeriodGroup) {
-      invoiceTypeSelect.addEventListener("change", () => {
-        if (invoiceTypeSelect.value === "renewal") {
-          renewalGroup.classList.remove("hidden-field");
-          renewalGroup.classList.add("visible-field");
-          renewalPeriodGroup.classList.remove("hidden-field");
-          renewalPeriodGroup.classList.add("visible-field");
+      invoiceTypeSelect.addEventListener('change', () => {
+        if (invoiceTypeSelect.value === 'renewal') {
+          renewalGroup.classList.remove('hidden-field');
+          renewalGroup.classList.add('visible-field');
+          renewalPeriodGroup.classList.remove('hidden-field');
+          renewalPeriodGroup.classList.add('visible-field');
         } else {
-          renewalGroup.classList.remove("visible-field");
-          renewalGroup.classList.add("hidden-field");
-          renewalPeriodGroup.classList.remove("visible-field");
-          renewalPeriodGroup.classList.add("hidden-field");
+          renewalGroup.classList.remove('visible-field');
+          renewalGroup.classList.add('hidden-field');
+          renewalPeriodGroup.classList.remove('visible-field');
+          renewalPeriodGroup.classList.add('hidden-field');
         }
       });
     }
@@ -2368,37 +2378,37 @@ class AdminDashboard {
 
   // Initialize User Filtering
   initUserFiltering() {
-    const searchInput = document.getElementById("searchUsers");
-    const roleFilter = document.getElementById("role-filter");
-    const statusFilter = document.getElementById("status-filter");
+    const searchInput = document.getElementById('searchUsers');
+    const roleFilter = document.getElementById('role-filter');
+    const statusFilter = document.getElementById('status-filter');
 
     if (searchInput) {
-      searchInput.addEventListener("keyup", () => this.filterUsers());
+      searchInput.addEventListener('keyup', () => this.filterUsers());
     }
 
     if (roleFilter) {
-      roleFilter.addEventListener("change", () => this.filterUsers());
+      roleFilter.addEventListener('change', () => this.filterUsers());
     }
 
     if (statusFilter) {
-      statusFilter.addEventListener("change", () => this.filterUsers());
+      statusFilter.addEventListener('change', () => this.filterUsers());
     }
   }
 
   // Filter Users
   filterUsers() {
     const searchTerm =
-      document.getElementById("searchUsers")?.value.toLowerCase() || "";
-    const roleFilter = document.getElementById("role-filter")?.value || "";
-    const statusFilter = document.getElementById("status-filter")?.value || "";
+      document.getElementById('searchUsers')?.value.toLowerCase() || '';
+    const roleFilter = document.getElementById('role-filter')?.value || '';
+    const statusFilter = document.getElementById('status-filter')?.value || '';
 
-    const userRows = document.querySelectorAll(".user-row");
+    const userRows = document.querySelectorAll('.user-row');
 
-    userRows.forEach((row) => {
-      const name = row.getAttribute("data-name") || "";
-      const email = row.getAttribute("data-email") || "";
-      const role = row.getAttribute("data-role") || "";
-      const status = row.getAttribute("data-status") || "";
+    userRows.forEach(row => {
+      const name = row.getAttribute('data-name') || '';
+      const email = row.getAttribute('data-email') || '';
+      const role = row.getAttribute('data-role') || '';
+      const status = row.getAttribute('data-status') || '';
 
       const matchesSearch =
         name.includes(searchTerm) || email.includes(searchTerm);
@@ -2406,9 +2416,9 @@ class AdminDashboard {
       const matchesStatus = !statusFilter || status === statusFilter;
 
       if (matchesSearch && matchesRole && matchesStatus) {
-        row.style.display = "";
+        row.style.display = '';
       } else {
-        row.style.display = "none";
+        row.style.display = 'none';
       }
     });
   }
@@ -2425,44 +2435,44 @@ class AdminDashboard {
   // Initialize Category Color Preview
   initCategoryColorPreview() {
     const colorInputs = document.querySelectorAll('input[name="color"]');
-    const previews = document.querySelectorAll(".category-preview");
-    const badges = document.querySelectorAll(".category-badge");
-    const avatars = document.querySelectorAll(".category-color-avatar");
+    const previews = document.querySelectorAll('.category-preview');
+    const badges = document.querySelectorAll('.category-badge');
+    const avatars = document.querySelectorAll('.category-color-avatar');
 
-    colorInputs.forEach((input) => {
-      input.addEventListener("input", () => {
+    colorInputs.forEach(input => {
+      input.addEventListener('input', () => {
         const color = input.value;
 
         // Update previews
-        previews.forEach((preview) => {
+        previews.forEach(preview => {
           preview.style.backgroundColor = color;
-          preview.setAttribute("data-color", color);
+          preview.setAttribute('data-color', color);
         });
 
         // Update badges
-        badges.forEach((badge) => {
+        badges.forEach(badge => {
           badge.style.backgroundColor = color;
-          badge.setAttribute("data-color", color);
+          badge.setAttribute('data-color', color);
         });
 
         // Update avatars
-        avatars.forEach((avatar) => {
+        avatars.forEach(avatar => {
           avatar.style.backgroundColor = color;
-          avatar.setAttribute("data-color", color);
+          avatar.setAttribute('data-color', color);
         });
       });
     });
 
     // Initialize existing colors
-    avatars.forEach((avatar) => {
-      const color = avatar.getAttribute("data-color");
+    avatars.forEach(avatar => {
+      const color = avatar.getAttribute('data-color');
       if (color) {
         avatar.style.backgroundColor = color;
       }
     });
 
-    badges.forEach((badge) => {
-      const color = badge.getAttribute("data-color");
+    badges.forEach(badge => {
+      const color = badge.getAttribute('data-color');
       if (color) {
         badge.style.backgroundColor = color;
       }
@@ -2471,9 +2481,9 @@ class AdminDashboard {
 
   // Initialize Reset Filters
   initResetFilters() {
-    const resetBtn = document.getElementById("reset-filters-btn");
+    const resetBtn = document.getElementById('reset-filters-btn');
     if (resetBtn) {
-      resetBtn.addEventListener("click", () => this.resetFilters());
+      resetBtn.addEventListener('click', () => this.resetFilters());
     }
   }
 
@@ -2481,27 +2491,27 @@ class AdminDashboard {
   resetFilters() {
     // Reset search inputs
     const searchInputs = document.querySelectorAll('input[type="text"]');
-    searchInputs.forEach((input) => {
-      if (input.id.includes("search")) {
-        input.value = "";
+    searchInputs.forEach(input => {
+      if (input.id.includes('search')) {
+        input.value = '';
       }
     });
 
     // Reset select filters
-    const selectFilters = document.querySelectorAll("select");
-    selectFilters.forEach((select) => {
-      if (select.id.includes("filter")) {
+    const selectFilters = document.querySelectorAll('select');
+    selectFilters.forEach(select => {
+      if (select.id.includes('filter')) {
         select.selectedIndex = 0;
       }
     });
 
     // Show all rows
     const rows = document.querySelectorAll('[class*="-row"]');
-    rows.forEach((row) => {
-      row.style.display = "";
+    rows.forEach(row => {
+      row.style.display = '';
     });
 
-    this.showNotification("Filters reset successfully", "success");
+    this.showNotification('Filters reset successfully', 'success');
   }
 
   // Initialize Programming Languages Functions
@@ -2518,24 +2528,24 @@ class AdminDashboard {
 
   // Initialize Programming Languages Filtering
   initProgrammingLanguagesFiltering() {
-    const searchInput = document.getElementById("searchLanguages");
-    const statusFilter = document.getElementById("status-filter");
-    const sortFilter = document.getElementById("sort-filter");
+    const searchInput = document.getElementById('searchLanguages');
+    const statusFilter = document.getElementById('status-filter');
+    const sortFilter = document.getElementById('sort-filter');
 
     if (searchInput) {
-      searchInput.addEventListener("keyup", () =>
+      searchInput.addEventListener('keyup', () =>
         this.filterProgrammingLanguages(),
       );
     }
 
     if (statusFilter) {
-      statusFilter.addEventListener("change", () =>
+      statusFilter.addEventListener('change', () =>
         this.filterProgrammingLanguages(),
       );
     }
 
     if (sortFilter) {
-      sortFilter.addEventListener("change", () =>
+      sortFilter.addEventListener('change', () =>
         this.filterProgrammingLanguages(),
       );
     }
@@ -2544,35 +2554,35 @@ class AdminDashboard {
   // Filter Programming Languages
   filterProgrammingLanguages() {
     const searchTerm =
-      document.getElementById("searchLanguages")?.value.toLowerCase() || "";
-    const statusFilter = document.getElementById("status-filter")?.value || "";
+      document.getElementById('searchLanguages')?.value.toLowerCase() || '';
+    const statusFilter = document.getElementById('status-filter')?.value || '';
 
-    const languageRows = document.querySelectorAll(".language-row");
+    const languageRows = document.querySelectorAll('.language-row');
 
-    languageRows.forEach((row) => {
-      const name = row.getAttribute("data-name") || "";
-      const description = row.getAttribute("data-description") || "";
-      const status = row.getAttribute("data-status") || "";
+    languageRows.forEach(row => {
+      const name = row.getAttribute('data-name') || '';
+      const description = row.getAttribute('data-description') || '';
+      const status = row.getAttribute('data-status') || '';
 
       const matchesSearch =
         name.includes(searchTerm) || description.includes(searchTerm);
       const matchesStatus = !statusFilter || status === statusFilter;
 
       if (matchesSearch && matchesStatus) {
-        row.style.display = "";
+        row.style.display = '';
       } else {
-        row.style.display = "none";
+        row.style.display = 'none';
       }
     });
   }
 
   // Initialize License File Viewing
   initLicenseFileViewing() {
-    const viewButtons = document.querySelectorAll(".view-license-file-btn");
-    viewButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const slug = btn.getAttribute("data-slug");
-        const type = btn.getAttribute("data-type");
+    const viewButtons = document.querySelectorAll('.view-license-file-btn');
+    viewButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const slug = btn.getAttribute('data-slug');
+        const type = btn.getAttribute('data-type');
         this.viewLicenseFile(slug, type);
       });
     });
@@ -2582,7 +2592,7 @@ class AdminDashboard {
   viewLicenseFile(slug, type) {
     // Show modal
     const modal = new bootstrap.Modal(
-      document.getElementById("licenseFileModal"),
+      document.getElementById('licenseFileModal'),
     );
     modal.show();
 
@@ -2592,8 +2602,8 @@ class AdminDashboard {
 
   // Load License File Content
   loadLicenseFileContent(slug, type) {
-    const contentElement = document.getElementById("licenseFileContent");
-    const copyBtn = document.querySelector(".copy-btn");
+    const contentElement = document.getElementById('licenseFileContent');
+    const copyBtn = document.querySelector('.copy-btn');
 
     // Show loading
     contentElement.innerHTML =
@@ -2601,33 +2611,33 @@ class AdminDashboard {
 
     // Make AJAX request
     fetch(`/admin/programming-languages/license-file/${slug}?type=${type}`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "X-CSRF-TOKEN":
+        'X-CSRF-TOKEN':
           document
             .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute("content") || "",
-        Accept: "application/json",
+            ?.getAttribute('content') || '',
+        Accept: 'application/json',
       },
     })
-      .then((response) => response.json())
-      .then((data) => {
+      .then(response => response.json())
+      .then(data => {
         if (data.success) {
           contentElementSecurityUtils.safeInnerHTML(
             this,
             `<pre>${data.content}</pre>`,
           );
           if (copyBtn) {
-            copyBtn.setAttribute("data-text", data.content);
+            copyBtn.setAttribute('data-text', data.content);
           }
         } else {
           contentElementSecurityUtils.safeInnerHTML(
             this,
-            `<div class="text-danger"><i class="fas fa-exclamation-triangle"></i> ${data.message || "Error loading file"}</div>`,
+            `<div class="text-danger"><i class="fas fa-exclamation-triangle"></i> ${data.message || 'Error loading file'}</div>`,
           );
         }
       })
-      .catch((error) => {
+      .catch(error => {
         // Error loading file
         contentElement.innerHTML =
           '<div class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading file</div>';
@@ -2636,17 +2646,17 @@ class AdminDashboard {
 
   // Initialize Template Viewing
   initTemplateViewing() {
-    const viewTemplateBtn = document.querySelector(".view-template-btn");
+    const viewTemplateBtn = document.querySelector('.view-template-btn');
     if (viewTemplateBtn) {
-      viewTemplateBtn.addEventListener("click", () => {
-        const languageId = viewTemplateBtn.getAttribute("data-language");
+      viewTemplateBtn.addEventListener('click', () => {
+        const languageId = viewTemplateBtn.getAttribute('data-language');
         this.viewTemplate(languageId);
       });
     }
 
-    const copyTemplateBtn = document.querySelector(".copy-template-btn");
+    const copyTemplateBtn = document.querySelector('.copy-template-btn');
     if (copyTemplateBtn) {
-      copyTemplateBtn.addEventListener("click", () => {
+      copyTemplateBtn.addEventListener('click', () => {
         this.copyTemplateContent();
       });
     }
@@ -2655,7 +2665,7 @@ class AdminDashboard {
   // View Template
   viewTemplate(languageId) {
     // Show modal
-    const modal = new bootstrap.Modal(document.getElementById("templateModal"));
+    const modal = new bootstrap.Modal(document.getElementById('templateModal'));
     modal.show();
 
     // Load template content
@@ -2664,7 +2674,7 @@ class AdminDashboard {
 
   // Load Template Content
   loadTemplateContent(languageId) {
-    const contentElement = document.querySelector(".template-content");
+    const contentElement = document.querySelector('.template-content');
 
     // Show loading
     contentElementSecurityUtils.safeInnerHTML(
@@ -2679,17 +2689,17 @@ class AdminDashboard {
 
     // Make AJAX request
     fetch(`/admin/programming-languages/${languageId}/template`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "X-CSRF-TOKEN":
+        'X-CSRF-TOKEN':
           document
             .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute("content") || "",
-        Accept: "application/json",
+            ?.getAttribute('content') || '',
+        Accept: 'application/json',
       },
     })
-      .then((response) => response.json())
-      .then((data) => {
+      .then(response => response.json())
+      .then(data => {
         if (data.success) {
           contentElementSecurityUtils.safeInnerHTML(
             this,
@@ -2699,11 +2709,11 @@ class AdminDashboard {
         } else {
           contentElementSecurityUtils.safeInnerHTML(
             this,
-            `<div class="text-danger text-center py-4"><i class="fas fa-exclamation-triangle fa-2x"></i><p class="mt-2">${data.message || "Error loading template"}</p></div>`,
+            `<div class="text-danger text-center py-4"><i class="fas fa-exclamation-triangle fa-2x"></i><p class="mt-2">${data.message || 'Error loading template'}</p></div>`,
           );
         }
       })
-      .catch((error) => {
+      .catch(error => {
         // Error loading file
         contentElement.innerHTML =
           '<div class="text-danger text-center py-4"><i class="fas fa-exclamation-triangle fa-2x"></i><p class="mt-2">Error loading template</p></div>';
@@ -2717,16 +2727,16 @@ class AdminDashboard {
         .writeText(this.templateContent)
         .then(() => {
           this.showNotification(
-            "Template content copied to clipboard",
-            "success",
+            'Template content copied to clipboard',
+            'success',
           );
         })
-        .catch((err) => {
+        .catch(err => {
           // Failed to copy
-          this.showNotification("Failed to copy content", "error");
+          this.showNotification('Failed to copy content', 'error');
         });
     } else {
-      this.showNotification("No template content to copy", "warning");
+      this.showNotification('No template content to copy', 'warning');
     }
   }
 
@@ -2738,11 +2748,11 @@ class AdminDashboard {
 
   // Initialize Logout Function
   initLogoutFunction() {
-    const logoutBtn = document.querySelector(".logout-btn");
+    const logoutBtn = document.querySelector('.logout-btn');
     if (logoutBtn) {
-      logoutBtn.addEventListener("click", (e) => {
+      logoutBtn.addEventListener('click', e => {
         e.preventDefault();
-        const logoutForm = document.getElementById("logout-form");
+        const logoutForm = document.getElementById('logout-form');
         if (logoutForm) {
           logoutForm.submit();
         }
@@ -2752,11 +2762,11 @@ class AdminDashboard {
 
   // Initialize Settings Functions
   initSettingsFunctions() {
-    console.log("initSettingsFunctions called");
+    console.log('initSettingsFunctions called');
 
     // Check if already initialized
-    if (document.body.dataset.settingsFunctionsInitialized === "true") {
-      console.log("Settings functions already initialized");
+    if (document.body.dataset.settingsFunctionsInitialized === 'true') {
+      console.log('Settings functions already initialized');
       return;
     }
 
@@ -2779,106 +2789,112 @@ class AdminDashboard {
     this.initPreloaderPreview();
 
     // Mark as initialized
-    document.body.dataset.settingsFunctionsInitialized = "true";
+    document.body.dataset.settingsFunctionsInitialized = 'true';
   }
 
   // Initialize Settings Tabs
   initSettingsTabs() {
-    const container = document.querySelector(".admin-settings-page");
-    if (!container) return;
+    const container = document.querySelector('.admin-settings-page');
+    if (!container) {
+      return;
+    }
 
     // Avoid double initialization
-    if (container.dataset.settingsTabsInit === "1") return;
+    if (container.dataset.settingsTabsInit === '1') {
+      return;
+    }
 
-    const tabButtons = container.querySelectorAll(".admin-tab-btn");
-    const tabPanels = container.querySelectorAll(".admin-tab-panel");
+    const tabButtons = container.querySelectorAll('.admin-tab-btn');
+    const tabPanels = container.querySelectorAll('.admin-tab-panel');
 
     // Initialize: show first panel and hide others
     tabPanels.forEach((panel, index) => {
       if (index === 0) {
-        panel.classList.add("active");
-        panel.classList.remove("admin-tab-panel-hidden");
-        panel.style.display = "";
+        panel.classList.add('active');
+        panel.classList.remove('admin-tab-panel-hidden');
+        panel.style.display = '';
       } else {
-        panel.classList.remove("active");
-        panel.classList.add("admin-tab-panel-hidden");
-        panel.style.display = "none";
+        panel.classList.remove('active');
+        panel.classList.add('admin-tab-panel-hidden');
+        panel.style.display = 'none';
       }
     });
 
-    tabButtons.forEach((button) => {
-      button.addEventListener("click", (e) => {
+    tabButtons.forEach(button => {
+      button.addEventListener('click', e => {
         e.preventDefault();
-        const targetTab = button.getAttribute("data-tab");
+        const targetTab = button.getAttribute('data-tab');
 
         // Remove active class from all buttons and hide all panels
-        tabButtons.forEach((btn) => btn.classList.remove("active"));
-        tabPanels.forEach((panel) => {
-          panel.classList.remove("active");
-          panel.classList.add("admin-tab-panel-hidden");
-          panel.style.display = "none";
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabPanels.forEach(panel => {
+          panel.classList.remove('active');
+          panel.classList.add('admin-tab-panel-hidden');
+          panel.style.display = 'none';
         });
 
         // Activate clicked button
-        button.classList.add("active");
+        button.classList.add('active');
 
         // Resolve target panel in multiple ways
         let targetPanel = container.querySelector(`#${CSS.escape(targetTab)}`);
-        if (!targetPanel)
+        if (!targetPanel) {
           targetPanel = container.querySelector(
-            `#${CSS.escape(targetTab + "-tab")}`,
+            `#${CSS.escape(`${targetTab}-tab`)}`,
           );
-        if (!targetPanel)
+        }
+        if (!targetPanel) {
           targetPanel = container.querySelector(
             `.admin-tab-panel[data-panel="${targetTab}"]`,
           );
+        }
 
         if (targetPanel) {
-          targetPanel.classList.add("active");
-          targetPanel.classList.remove("admin-tab-panel-hidden");
-          targetPanel.style.display = "";
+          targetPanel.classList.add('active');
+          targetPanel.classList.remove('admin-tab-panel-hidden');
+          targetPanel.style.display = '';
         }
       });
     });
 
-    container.dataset.settingsTabsInit = "1";
+    container.dataset.settingsTabsInit = '1';
   }
 
   // Initialize API Test
   initApiTest() {
-    console.log("initApiTest called");
-    const testBtn = document.getElementById("test-api-btn");
+    console.log('initApiTest called');
+    const testBtn = document.getElementById('test-api-btn');
     if (testBtn) {
       // Check if event listener already added
-      if (testBtn.dataset.apiTestInitialized === "true") {
-        console.log("API Test button already initialized");
+      if (testBtn.dataset.apiTestInitialized === 'true') {
+        console.log('API Test button already initialized');
         return;
       }
 
-      console.log("API Test button found, adding event listener");
+      console.log('API Test button found, adding event listener');
       const self = this;
-      testBtn.addEventListener("click", function () {
-        console.log("API Test button clicked");
+      testBtn.addEventListener('click', () => {
+        console.log('API Test button clicked');
         self.testEnvatoApi();
       });
 
       // Mark as initialized
-      testBtn.dataset.apiTestInitialized = "true";
+      testBtn.dataset.apiTestInitialized = 'true';
     } else {
-      console.log("API Test button not found");
+      console.log('API Test button not found');
     }
   }
 
   // Test Envato API
   async testEnvatoApi() {
-    console.log("testEnvatoApi function called");
-    const testBtn = document.getElementById("test-api-btn");
-    const resultDiv = document.getElementById("api-test-result");
+    console.log('testEnvatoApi function called');
+    const testBtn = document.getElementById('test-api-btn');
+    const resultDiv = document.getElementById('api-test-result');
 
     if (!testBtn || !resultDiv) {
-      console.log("testBtn or resultDiv not found");
-      console.log("testBtn:", testBtn);
-      console.log("resultDiv:", resultDiv);
+      console.log('testBtn or resultDiv not found');
+      console.log('testBtn:', testBtn);
+      console.log('resultDiv:', resultDiv);
       return;
     }
 
@@ -2887,8 +2903,8 @@ class AdminDashboard {
     testBtn.disabled = true;
 
     try {
-      const tokenInput = document.getElementById("envato_personal_token");
-      const token = tokenInput ? tokenInput.value : "";
+      const tokenInput = document.getElementById('envato_personal_token');
+      const token = tokenInput ? tokenInput.value : '';
 
       if (!token) {
         resultDivSecurityUtils.safeInnerHTML(
@@ -2909,18 +2925,18 @@ class AdminDashboard {
       }
 
       const response = await fetch(
-        window.location.origin + "/lic/public/admin/settings/test-api",
+        `${window.location.origin}/lic/public/admin/settings/test-api`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN":
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN':
               document
                 .querySelector('meta[name="csrf-token"]')
-                ?.getAttribute("content") || "",
+                ?.getAttribute('content') || '',
           },
           body: JSON.stringify({
-            token: token,
+            token,
           }),
         },
       );
@@ -2983,15 +2999,15 @@ class AdminDashboard {
   initColorPickerSync() {
     // Sync color inputs with text inputs
     const colorInputs = document.querySelectorAll('input[type="color"]');
-    colorInputs.forEach((colorInput) => {
+    colorInputs.forEach(colorInput => {
       const textInput =
         colorInput.parentElement.querySelector('input[type="text"]');
       if (textInput) {
-        colorInput.addEventListener("input", () => {
+        colorInput.addEventListener('input', () => {
           textInput.value = colorInput.value;
         });
 
-        textInput.addEventListener("input", () => {
+        textInput.addEventListener('input', () => {
           if (textInput.value.match(/^#[0-9A-F]{6}$/i)) {
             colorInput.value = textInput.value;
           }
@@ -3005,21 +3021,21 @@ class AdminDashboard {
     const fileInputs = document.querySelectorAll(
       'input[type="file"][accept="image/*"]',
     );
-    fileInputs.forEach((input) => {
-      input.addEventListener("change", (e) => {
+    fileInputs.forEach(input => {
+      input.addEventListener('change', e => {
         const file = e.target.files[0];
         if (file) {
           const reader = new FileReader();
-          reader.onload = (e) => {
+          reader.onload = e => {
             const preview = input.parentElement.querySelector(
-              ".admin-image-preview",
+              '.admin-image-preview',
             );
             if (preview) {
               preview.src = e.target.result;
             } else {
               // Create preview if it doesn't exist
-              const previewDiv = document.createElement("div");
-              previewDiv.className = "mt-3";
+              const previewDiv = document.createElement('div');
+              previewDiv.className = 'mt-3';
               previewDivSecurityUtils.safeInnerHTML(
                 this,
                 `
@@ -3038,71 +3054,73 @@ class AdminDashboard {
 
   // Initialize Logo Preview
   initLogoPreview() {
-    const logoPreview = document.getElementById("logo-preview");
-    if (!logoPreview) return;
+    const logoPreview = document.getElementById('logo-preview');
+    if (!logoPreview) {
+      return;
+    }
 
     // Initialize with data attributes
     const initLogoPreview = () => {
       const logoText =
-        document.querySelector('input[name="logo_text"]')?.value || "";
+        document.querySelector('input[name="logo_text"]')?.value || '';
       const showText =
         document.querySelector('input[name="logo_show_text"]')?.checked ||
         false;
       const textColor =
         document.querySelector('input[name="logo_text_color"]')?.value ||
         logoPreview.dataset.logoTextColor ||
-        "#1f2937";
+        '#1f2937';
       const fontSize =
         document.querySelector('input[name="logo_text_font_size"]')?.value ||
         logoPreview.dataset.logoTextFontSize ||
-        "24px";
+        '24px';
       const width =
         document.querySelector('input[name="logo_width"]')?.value ||
         logoPreview.dataset.logoWidth ||
-        "150";
+        '150';
       const height =
         document.querySelector('input[name="logo_height"]')?.value ||
         logoPreview.dataset.logoHeight ||
-        "50";
+        '50';
 
-      logoPreview.style.setProperty("--logo-width", width + "px");
-      logoPreview.style.setProperty("--logo-height", height + "px");
-      logoPreview.style.setProperty("--logo-text-color", textColor);
-      logoPreview.style.setProperty("--logo-text-font-size", fontSize);
+      logoPreview.style.setProperty('--logo-width', `${width}px`);
+      logoPreview.style.setProperty('--logo-height', `${height}px`);
+      logoPreview.style.setProperty('--logo-text-color', textColor);
+      logoPreview.style.setProperty('--logo-text-font-size', fontSize);
 
-      const textElement = logoPreview.querySelector(".admin-logo-preview-text");
+      const textElement = logoPreview.querySelector('.admin-logo-preview-text');
       if (textElement) {
         textElement.textContent = logoText;
-        textElement.style.display = showText ? "block" : "none";
+        textElement.style.display = showText ? 'block' : 'none';
       }
     };
 
     const updateLogoPreview = () => {
       const logoText =
-        document.querySelector('input[name="logo_text"]')?.value || "";
+        document.querySelector('input[name="logo_text"]')?.value || '';
       const showText =
         document.querySelector('input[name="logo_show_text"]')?.checked ||
         false;
       const textColor =
         document.querySelector('input[name="logo_text_color"]')?.value ||
-        "#1f2937";
+        '#1f2937';
       const fontSize =
         document.querySelector('input[name="logo_text_font_size"]')?.value ||
-        "24px";
+        '24px';
       const width =
-        document.querySelector('input[name="logo_width"]')?.value || "150";
+        document.querySelector('input[name="logo_width"]')?.value || '150';
       const height =
-        document.querySelector('input[name="logo_height"]')?.value || "50";
+        document.querySelector('input[name="logo_height"]')?.value || '50';
 
-      logoPreview.style.setProperty("--logo-width", width + "px");
-      logoPreview.style.setProperty("--logo-height", height + "px");
-      logoPreview.style.setProperty("--logo-text-color", textColor);
-      logoPreview.style.setProperty("--logo-text-font-size", fontSize);
+      logoPreview.style.setProperty('--logo-width', `${width}px`);
+      logoPreview.style.setProperty('--logo-height', `${height}px`);
+      logoPreview.style.setProperty('--logo-text-color', textColor);
+      logoPreview.style.setProperty('--logo-text-font-size', fontSize);
 
-      const textElement = logoPreview.querySelector(".admin-logo-preview-text");
+      const textElement = logoPreview.querySelector('.admin-logo-preview-text');
       if (textElement) {
         textElement.textContent = logoText;
-        textElement.style.display = showText ? "block" : "none";
+        textElement.style.display = showText ? 'block' : 'none';
       }
     };
 
@@ -3111,31 +3129,33 @@ class AdminDashboard {
 
     // Update preview when inputs change
     const inputs = [
-      "logo_text",
-      "logo_show_text",
-      "logo_text_color",
-      "logo_text_font_size",
-      "logo_width",
-      "logo_height",
+      'logo_text',
+      'logo_show_text',
+      'logo_text_color',
+      'logo_text_font_size',
+      'logo_width',
+      'logo_height',
     ];
-    inputs.forEach((name) => {
+    inputs.forEach(name => {
       const input = document.querySelector(`input[name="${name}"]`);
       if (input) {
-        input.addEventListener("input", updateLogoPreview);
-        input.addEventListener("change", updateLogoPreview);
+        input.addEventListener('input', updateLogoPreview);
+        input.addEventListener('change', updateLogoPreview);
       }
     });
   }
 
   // Initialize Preloader Preview
   initPreloaderPreview() {
-    const previewBtn = document.getElementById("preview-preloader");
-    if (!previewBtn) return;
+    const previewBtn = document.getElementById('preview-preloader');
+    if (!previewBtn) {
+      return;
+    }
 
-    previewBtn.addEventListener("click", () => {
+    previewBtn.addEventListener('click', () => {
       // Create a modal or overlay to show preloader preview
-      const modal = document.createElement("div");
-      modal.className = "admin-preloader-modal";
+      const modal = document.createElement('div');
+      modal.className = 'admin-preloader-modal';
       modalSecurityUtils.safeInnerHTML(
         this,
         `
@@ -3164,45 +3184,45 @@ class AdminDashboard {
 
   // Initialize Ticket Filtering
   initTicketFiltering() {
-    const searchInput = document.getElementById("searchTickets");
-    const categoryFilter = document.getElementById("category-filter");
-    const statusFilter = document.getElementById("status-filter");
-    const priorityFilter = document.getElementById("priority-filter");
+    const searchInput = document.getElementById('searchTickets');
+    const categoryFilter = document.getElementById('category-filter');
+    const statusFilter = document.getElementById('status-filter');
+    const priorityFilter = document.getElementById('priority-filter');
 
     if (searchInput) {
-      searchInput.addEventListener("keyup", () => this.filterTickets());
+      searchInput.addEventListener('keyup', () => this.filterTickets());
     }
 
     if (categoryFilter) {
-      categoryFilter.addEventListener("change", () => this.filterTickets());
+      categoryFilter.addEventListener('change', () => this.filterTickets());
     }
 
     if (statusFilter) {
-      statusFilter.addEventListener("change", () => this.filterTickets());
+      statusFilter.addEventListener('change', () => this.filterTickets());
     }
 
     if (priorityFilter) {
-      priorityFilter.addEventListener("change", () => this.filterTickets());
+      priorityFilter.addEventListener('change', () => this.filterTickets());
     }
   }
 
   // Filter Tickets
   filterTickets() {
     const searchTerm =
-      document.getElementById("searchTickets")?.value.toLowerCase() || "";
+      document.getElementById('searchTickets')?.value.toLowerCase() || '';
     const categoryFilter =
-      document.getElementById("category-filter")?.value || "";
-    const statusFilter = document.getElementById("status-filter")?.value || "";
+      document.getElementById('category-filter')?.value || '';
+    const statusFilter = document.getElementById('status-filter')?.value || '';
     const priorityFilter =
-      document.getElementById("priority-filter")?.value || "";
+      document.getElementById('priority-filter')?.value || '';
 
-    const ticketRows = document.querySelectorAll(".ticket-row");
+    const ticketRows = document.querySelectorAll('.ticket-row');
 
-    ticketRows.forEach((row) => {
-      const subject = row.getAttribute("data-subject") || "";
-      const category = row.getAttribute("data-category") || "";
-      const status = row.getAttribute("data-status") || "";
-      const priority = row.getAttribute("data-priority") || "";
+    ticketRows.forEach(row => {
+      const subject = row.getAttribute('data-subject') || '';
+      const category = row.getAttribute('data-category') || '';
+      const status = row.getAttribute('data-status') || '';
+      const priority = row.getAttribute('data-priority') || '';
 
       const matchesSearch = subject.includes(searchTerm);
       const matchesCategory = !categoryFilter || category === categoryFilter;
@@ -3215,9 +3235,9 @@ class AdminDashboard {
         matchesStatus &&
         matchesPriority
       ) {
-        row.style.display = "";
+        row.style.display = '';
       } else {
-        row.style.display = "none";
+        row.style.display = 'none';
       }
     });
   }
@@ -3233,10 +3253,10 @@ class AdminDashboard {
 
   // Initialize Ticket Category Filtering
   initTicketCategoryFiltering() {
-    const searchInput = document.getElementById("searchCategories");
+    const searchInput = document.getElementById('searchCategories');
 
     if (searchInput) {
-      searchInput.addEventListener("keyup", () =>
+      searchInput.addEventListener('keyup', () =>
         this.filterTicketCategories(),
       );
     }
@@ -3245,31 +3265,31 @@ class AdminDashboard {
   // Filter Ticket Categories
   filterTicketCategories() {
     const searchTerm =
-      document.getElementById("searchCategories")?.value.toLowerCase() || "";
+      document.getElementById('searchCategories')?.value.toLowerCase() || '';
 
-    const categoryRows = document.querySelectorAll(".category-row");
+    const categoryRows = document.querySelectorAll('.category-row');
 
-    categoryRows.forEach((row) => {
-      const name = row.getAttribute("data-name") || "";
-      const status = row.getAttribute("data-status") || "";
+    categoryRows.forEach(row => {
+      const name = row.getAttribute('data-name') || '';
+      const status = row.getAttribute('data-status') || '';
 
       const matchesSearch = name.includes(searchTerm);
-      const matchesStatus = status === "active" || searchTerm === "";
+      const matchesStatus = status === 'active' || searchTerm === '';
 
       if (matchesSearch && matchesStatus) {
-        row.style.display = "";
+        row.style.display = '';
       } else {
-        row.style.display = "none";
+        row.style.display = 'none';
       }
     });
   }
 
   // Initialize Ticket Category Delete Confirmations
   initTicketCategoryDeleteConfirmations() {
-    const deleteForms = document.querySelectorAll(".delete-category-form");
-    deleteForms.forEach((form) => {
-      form.addEventListener("submit", (e) => {
-        const confirmMessage = form.getAttribute("data-confirm");
+    const deleteForms = document.querySelectorAll('.delete-category-form');
+    deleteForms.forEach(form => {
+      form.addEventListener('submit', e => {
+        const confirmMessage = form.getAttribute('data-confirm');
         if (!window.confirm || !confirm(confirmMessage)) {
           e.preventDefault();
         }
@@ -3279,7 +3299,7 @@ class AdminDashboard {
 }
 
 // Initialize when DOM is ready
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', () => {
   // Add a small delay to ensure all scripts are loaded
   setTimeout(() => {
     window.adminDashboard = new AdminDashboard();
@@ -3293,30 +3313,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Direct initialization of API test button as backup
 function initApiTestButtonDirectly() {
-  const testBtn = document.getElementById("test-api-btn");
+  const testBtn = document.getElementById('test-api-btn');
   if (testBtn && !testBtn.dataset.apiTestInitialized) {
     const self = this;
-    testBtn.addEventListener("click", function () {
+    testBtn.addEventListener('click', () => {
       if (window.adminDashboard && window.adminDashboard.testEnvatoApi) {
         window.adminDashboard.testEnvatoApi();
       } else {
-        console.error("AdminDashboard not available");
+        console.error('AdminDashboard not available');
       }
     });
-    testBtn.dataset.apiTestInitialized = "true";
+    testBtn.dataset.apiTestInitialized = 'true';
   }
 }
 
 // Additional initialization after page load
-window.addEventListener("load", function () {
+window.addEventListener('load', () => {
   setTimeout(() => {
     initApiTestButtonDirectly();
   }, 500);
 });
 
 // Initialize when tab changes (for settings page)
-document.addEventListener("click", function (e) {
-  if (e.target && e.target.getAttribute("data-action") === "show-tab") {
+document.addEventListener('click', e => {
+  if (e.target && e.target.getAttribute('data-action') === 'show-tab') {
     setTimeout(() => {
       initApiTestButtonDirectly();
     }, 100);
@@ -3325,16 +3345,16 @@ document.addEventListener("click", function (e) {
 
 // Force initialization every 2 seconds as backup
 setInterval(() => {
-  const testBtn = document.getElementById("test-api-btn");
+  const testBtn = document.getElementById('test-api-btn');
   if (testBtn && !testBtn.dataset.apiTestInitialized) {
     initApiTestButtonDirectly();
   }
 }, 2000);
 
 // Debug: Log all clicks on the page
-document.addEventListener("click", function (e) {
-  if (e.target && e.target.id === "test-api-btn") {
-    console.log("Click detected on test-api-btn");
+document.addEventListener('click', e => {
+  if (e.target && e.target.id === 'test-api-btn') {
+    console.log('Click detected on test-api-btn');
   }
 });
 
@@ -3349,57 +3369,57 @@ function initProgrammingLanguagesEditFunctions() {
 
 function initProgrammingLanguagesEditTabs() {
   const tabButtons = document.querySelectorAll(
-    ".admin-programming-languages-edit .admin-tab-btn",
+    '.admin-programming-languages-edit .admin-tab-btn',
   );
   const tabPanels = document.querySelectorAll(
-    ".admin-programming-languages-edit .admin-tab-panel",
+    '.admin-programming-languages-edit .admin-tab-panel',
   );
 
-  tabButtons.forEach((button) => {
-    button.addEventListener("click", (e) => {
+  tabButtons.forEach(button => {
+    button.addEventListener('click', e => {
       e.preventDefault();
 
-      const targetTab = button.getAttribute("data-tab");
+      const targetTab = button.getAttribute('data-tab');
 
       // Remove active class from all buttons
-      tabButtons.forEach((btn) => {
-        btn.classList.remove("admin-tab-btn-active");
-        btn.setAttribute("aria-selected", "false");
-        btn.setAttribute("tabindex", "-1");
+      tabButtons.forEach(btn => {
+        btn.classList.remove('admin-tab-btn-active');
+        btn.setAttribute('aria-selected', 'false');
+        btn.setAttribute('tabindex', '-1');
       });
 
       // Add active class to clicked button
-      button.classList.add("admin-tab-btn-active");
-      button.setAttribute("aria-selected", "true");
-      button.setAttribute("tabindex", "0");
+      button.classList.add('admin-tab-btn-active');
+      button.setAttribute('aria-selected', 'true');
+      button.setAttribute('tabindex', '0');
 
       // Hide all panels
-      tabPanels.forEach((panel) => {
-        panel.classList.add("admin-tab-panel-hidden");
-        panel.setAttribute("aria-hidden", "true");
+      tabPanels.forEach(panel => {
+        panel.classList.add('admin-tab-panel-hidden');
+        panel.setAttribute('aria-hidden', 'true');
       });
 
       // Show target tab panel
       const targetPanel = document.getElementById(targetTab);
       if (targetPanel) {
-        targetPanel.classList.remove("admin-tab-panel-hidden");
-        targetPanel.setAttribute("aria-hidden", "false");
+        targetPanel.classList.remove('admin-tab-panel-hidden');
+        targetPanel.setAttribute('aria-hidden', 'false');
       }
     });
   });
 }
 
 function initProgrammingLanguagesEditIconPreview() {
-  const iconInput = document.getElementById("icon");
-  const iconPreview = document.getElementById("icon-preview");
+  const iconInput = document.getElementById('icon');
+  const iconPreview = document.getElementById('icon-preview');
 
   if (iconInput && iconPreview) {
-    iconInput.addEventListener("input", function () {
+    iconInput.addEventListener('input', function() {
       const iconClass = this.value.trim();
       if (iconClass) {
         iconPreview.className = iconClass;
       } else {
-        iconPreview.className = "fas fa-code";
+        iconPreview.className = 'fas fa-code';
       }
     });
   }
@@ -3407,16 +3427,16 @@ function initProgrammingLanguagesEditIconPreview() {
 
 function initProgrammingLanguagesEditFormValidation() {
   const forms = document.querySelectorAll(
-    ".admin-programming-languages-edit .needs-validation",
+    '.admin-programming-languages-edit .needs-validation',
   );
 
-  forms.forEach((form) => {
-    form.addEventListener("submit", (e) => {
+  forms.forEach(form => {
+    form.addEventListener('submit', e => {
       if (!form.checkValidity()) {
         e.preventDefault();
         e.stopPropagation();
       }
-      form.classList.add("was-validated");
+      form.classList.add('was-validated');
     });
   });
 }
@@ -3429,9 +3449,9 @@ function initProgrammingLanguagesEditButtons() {
   const loadTemplateButtons = document.querySelectorAll(
     '[data-action="load-template"]',
   );
-  loadTemplateButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const templateName = this.getAttribute("data-template");
+  loadTemplateButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const templateName = this.getAttribute('data-template');
       loadTemplate(templateName);
     });
   });
@@ -3440,9 +3460,9 @@ function initProgrammingLanguagesEditButtons() {
   const saveTemplateButtons = document.querySelectorAll(
     '[data-action="save-template"]',
   );
-  saveTemplateButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const templateName = this.getAttribute("data-template");
+  saveTemplateButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const templateName = this.getAttribute('data-template');
       saveTemplate(templateName);
     });
   });
@@ -3451,9 +3471,9 @@ function initProgrammingLanguagesEditButtons() {
   const previewTemplateButtons = document.querySelectorAll(
     '[data-action="preview-template"]',
   );
-  previewTemplateButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const templateName = this.getAttribute("data-template");
+  previewTemplateButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const templateName = this.getAttribute('data-template');
       previewTemplate(templateName);
     });
   });
@@ -3462,8 +3482,8 @@ function initProgrammingLanguagesEditButtons() {
   const validateTemplateButtons = document.querySelectorAll(
     '[data-action="validate-templates"]',
   );
-  validateTemplateButtons.forEach((button) => {
-    button.addEventListener("click", function () {
+  validateTemplateButtons.forEach(button => {
+    button.addEventListener('click', () => {
       validateTemplates();
     });
   });
@@ -3472,8 +3492,8 @@ function initProgrammingLanguagesEditButtons() {
   const toggleCodeViewButtons = document.querySelectorAll(
     '[data-action="toggle-code-view"]',
   );
-  toggleCodeViewButtons.forEach((button) => {
-    button.addEventListener("click", function () {
+  toggleCodeViewButtons.forEach(button => {
+    button.addEventListener('click', () => {
       toggleCodeView();
     });
   });
@@ -3482,8 +3502,8 @@ function initProgrammingLanguagesEditButtons() {
   const refreshTemplateButtons = document.querySelectorAll(
     '[data-action="refresh-templates"]',
   );
-  refreshTemplateButtons.forEach((button) => {
-    button.addEventListener("click", function () {
+  refreshTemplateButtons.forEach(button => {
+    button.addEventListener('click', () => {
       refreshTemplates();
     });
   });
@@ -3492,8 +3512,8 @@ function initProgrammingLanguagesEditButtons() {
   const viewTemplateButtons = document.querySelectorAll(
     '[data-action="view-template"]',
   );
-  viewTemplateButtons.forEach((button) => {
-    button.addEventListener("click", function () {
+  viewTemplateButtons.forEach(button => {
+    button.addEventListener('click', () => {
       viewTemplate();
     });
   });
@@ -3502,15 +3522,15 @@ function initProgrammingLanguagesEditButtons() {
   const createTemplateButtons = document.querySelectorAll(
     '[data-action="create-template"]',
   );
-  createTemplateButtons.forEach((button) => {
-    button.addEventListener("click", function () {
+  createTemplateButtons.forEach(button => {
+    button.addEventListener('click', () => {
       createTemplate();
     });
   });
 }
 
 function loadTemplate(templateName) {
-  showNotification("Loading template...", "info");
+  showNotification('Loading template...', 'info');
 
   // Find the template textarea
   const templateTextarea = document.querySelector(
@@ -3520,9 +3540,9 @@ function loadTemplate(templateName) {
   if (!templateTextarea) {
     // Try alternative selectors
     const altTextarea =
-      document.querySelector("#license_template") ||
+      document.querySelector('#license_template') ||
       document.querySelector('textarea[id="license_template"]') ||
-      document.querySelector("textarea.admin-code-editor");
+      document.querySelector('textarea.admin-code-editor');
 
     if (altTextarea) {
       // Use the alternative textarea
@@ -3530,7 +3550,7 @@ function loadTemplate(templateName) {
       return;
     }
 
-    showNotification("Template editor not found!", "error");
+    showNotification('Template editor not found!', 'error');
     return;
   }
 
@@ -3545,10 +3565,10 @@ function loadTemplateContent(templateTextarea) {
   let languageId = null;
 
   // Method 1: Extract from URL path
-  const urlParts = currentUrl.split("/");
+  const urlParts = currentUrl.split('/');
 
   // Look for the ID in the URL (should be after 'programming-languages')
-  const programmingLanguagesIndex = urlParts.indexOf("programming-languages");
+  const programmingLanguagesIndex = urlParts.indexOf('programming-languages');
   if (
     programmingLanguagesIndex !== -1 &&
     urlParts[programmingLanguagesIndex + 1]
@@ -3558,20 +3578,20 @@ function loadTemplateContent(templateTextarea) {
 
   // Method 2: Try to get from data attribute on the page
   if (!languageId) {
-    const dataElement = document.querySelector("[data-language-id]");
+    const dataElement = document.querySelector('[data-language-id]');
     if (dataElement) {
-      languageId = dataElement.getAttribute("data-language-id");
+      languageId = dataElement.getAttribute('data-language-id');
     }
   }
 
   // Method 3: Try to get from form action or hidden input
   if (!languageId) {
-    const form = document.querySelector("form");
+    const form = document.querySelector('form');
     if (form && form.action) {
       const actionUrl = form.action;
-      const actionParts = actionUrl.split("/");
+      const actionParts = actionUrl.split('/');
       const actionProgrammingLanguagesIndex = actionParts.indexOf(
-        "programming-languages",
+        'programming-languages',
       );
       if (
         actionProgrammingLanguagesIndex !== -1 &&
@@ -3583,44 +3603,44 @@ function loadTemplateContent(templateTextarea) {
   }
 
   if (!languageId || isNaN(languageId)) {
-    showNotification("Unable to determine programming language ID!", "error");
+    showNotification('Unable to determine programming language ID!', 'error');
     // Could not determine language ID from URL
     return;
   }
 
   // Make AJAX request to load template from server
   const baseUrl =
-    window.location.origin + window.location.pathname.split("/admin")[0];
+    window.location.origin + window.location.pathname.split('/admin')[0];
   const templateUrl = `${baseUrl}/admin/programming-languages/${languageId}/template-content`;
 
   fetch(templateUrl, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      "X-Requested-With": "XMLHttpRequest",
-      Accept: "application/json",
-      "X-CSRF-TOKEN":
+      'X-Requested-With': 'XMLHttpRequest',
+      Accept: 'application/json',
+      'X-CSRF-TOKEN':
         document
           .querySelector('meta[name="csrf-token"]')
-          ?.getAttribute("content") || "",
+          ?.getAttribute('content') || '',
     },
   })
-    .then((response) => response.json())
-    .then((data) => {
+    .then(response => response.json())
+    .then(data => {
       if (data.success) {
         templateTextarea.value = data.content;
 
         // Immediately fix text color and visibility
-        templateTextarea.style.color = "#1a1a1a";
-        templateTextarea.style.backgroundColor = "#ffffff";
-        templateTextarea.style.border = "1px solid #d1d5db";
+        templateTextarea.style.color = '#1a1a1a';
+        templateTextarea.style.backgroundColor = '#ffffff';
+        templateTextarea.style.border = '1px solid #d1d5db';
         templateTextarea.style.fontFamily =
           'Monaco, Consolas, "Courier New", monospace';
-        templateTextarea.style.fontSize = "14px";
-        templateTextarea.style.lineHeight = "1.5";
+        templateTextarea.style.fontSize = '14px';
+        templateTextarea.style.lineHeight = '1.5';
 
         // Force a re-render by temporarily changing and restoring the value
         const originalValue = templateTextarea.value;
-        templateTextarea.value = "";
+        templateTextarea.value = '';
         setTimeout(() => {
           templateTextarea.value = originalValue;
 
@@ -3629,20 +3649,20 @@ function loadTemplateContent(templateTextarea) {
           templateTextarea.blur();
 
           // Force visibility and remove any hiding styles
-          templateTextarea.style.display = "block";
-          templateTextarea.style.visibility = "visible";
-          templateTextarea.style.opacity = "1";
-          templateTextarea.style.height = "auto";
-          templateTextarea.style.minHeight = "200px";
+          templateTextarea.style.display = 'block';
+          templateTextarea.style.visibility = 'visible';
+          templateTextarea.style.opacity = '1';
+          templateTextarea.style.height = 'auto';
+          templateTextarea.style.minHeight = '200px';
 
           // Fix text color and background for visibility
-          templateTextarea.style.color = "#1a1a1a";
-          templateTextarea.style.backgroundColor = "#ffffff";
-          templateTextarea.style.border = "1px solid #d1d5db";
+          templateTextarea.style.color = '#1a1a1a';
+          templateTextarea.style.backgroundColor = '#ffffff';
+          templateTextarea.style.border = '1px solid #d1d5db';
           templateTextarea.style.fontFamily =
             'Monaco, Consolas, "Courier New", monospace';
-          templateTextarea.style.fontSize = "14px";
-          templateTextarea.style.lineHeight = "1.5";
+          templateTextarea.style.fontSize = '14px';
+          templateTextarea.style.lineHeight = '1.5';
 
           // Try to trigger any code editor refresh
           if (
@@ -3660,36 +3680,36 @@ function loadTemplateContent(templateTextarea) {
         // Check if this is a default template (read-only) or custom template (editable)
         const isDefaultTemplate =
           data.file_path &&
-          (data.file_path.includes("default") ||
-            data.file_path.includes("templates/licenses"));
+          (data.file_path.includes('default') ||
+            data.file_path.includes('templates/licenses'));
 
         if (isDefaultTemplate) {
           // Default template - make it read-only
           templateTextarea.readOnly = true;
-          templateTextarea.classList.add("readonly-template");
+          templateTextarea.classList.add('readonly-template');
 
           // Apply read-only styling
-          templateTextarea.style.color = "#374151";
-          templateTextarea.style.backgroundColor = "#f8fafc";
-          templateTextarea.style.border = "1px solid #e2e8f0";
+          templateTextarea.style.color = '#374151';
+          templateTextarea.style.backgroundColor = '#f8fafc';
+          templateTextarea.style.border = '1px solid #e2e8f0';
 
-          showNotification("Default template loaded (Read-only mode)", "info");
+          showNotification('Default template loaded (Read-only mode)', 'info');
 
           // Add visual indicator
           addReadOnlyIndicator(templateTextarea);
         } else {
           // Custom template - make it editable
           templateTextarea.readOnly = false;
-          templateTextarea.classList.remove("readonly-template");
+          templateTextarea.classList.remove('readonly-template');
 
           // Apply editable styling
-          templateTextarea.style.color = "#1a1a1a";
-          templateTextarea.style.backgroundColor = "#ffffff";
-          templateTextarea.style.border = "1px solid #d1d5db";
+          templateTextarea.style.color = '#1a1a1a';
+          templateTextarea.style.backgroundColor = '#ffffff';
+          templateTextarea.style.border = '1px solid #d1d5db';
 
           showNotification(
             `Custom template loaded successfully! (${data.file_size} bytes)`,
-            "success",
+            'success',
           );
 
           // Remove visual indicator if exists
@@ -3697,22 +3717,22 @@ function loadTemplateContent(templateTextarea) {
         }
 
         // Trigger change event for any listeners
-        templateTextarea.dispatchEvent(new Event("change"));
-        templateTextarea.dispatchEvent(new Event("input"));
+        templateTextarea.dispatchEvent(new Event('change'));
+        templateTextarea.dispatchEvent(new Event('input'));
 
         // Show template info if available
         if (data.last_modified) {
         }
       } else {
-        showNotification("Template file not found!", "warning");
+        showNotification('Template file not found!', 'warning');
 
         // Load default template as fallback
         loadDefaultTemplate(templateTextarea);
       }
     })
-    .catch((error) => {
+    .catch(error => {
       // Error loading template
-      showNotification("Error loading template: " + error.message, "error");
+      showNotification(`Error loading template: ${error.message}`, 'error');
 
       // Load default template as fallback
       loadDefaultTemplate(templateTextarea);
@@ -3737,15 +3757,15 @@ class License {
 
   templateTextarea.value = defaultTemplate;
   templateTextarea.readOnly = true;
-  templateTextarea.classList.add("readonly-template");
-  templateTextarea.dispatchEvent(new Event("change"));
+  templateTextarea.classList.add('readonly-template');
+  templateTextarea.dispatchEvent(new Event('change'));
 
   // Add visual indicator
   addReadOnlyIndicator(templateTextarea);
 
   showNotification(
-    "Default template loaded as fallback (Read-only mode)",
-    "info",
+    'Default template loaded as fallback (Read-only mode)',
+    'info',
   );
 }
 
@@ -3754,8 +3774,8 @@ function addReadOnlyIndicator(templateTextarea) {
   removeReadOnlyIndicator(templateTextarea);
 
   // Create read-only indicator
-  const indicator = document.createElement("div");
-  indicator.className = "readonly-indicator";
+  const indicator = document.createElement('div');
+  indicator.className = 'readonly-indicator';
   indicatorSecurityUtils.safeInnerHTML(
     this,
     `
@@ -3773,9 +3793,9 @@ function addReadOnlyIndicator(templateTextarea) {
   );
 
   // Add CSS for the indicator
-  if (!document.querySelector("#readonly-indicator-styles")) {
-    const style = document.createElement("style");
-    style.id = "readonly-indicator-styles";
+  if (!document.querySelector('#readonly-indicator-styles')) {
+    const style = document.createElement('style');
+    style.id = 'readonly-indicator-styles';
     style.textContent = `
             .readonly-indicator {
                 position: relative;
@@ -3822,7 +3842,7 @@ function addReadOnlyIndicator(templateTextarea) {
 
 function removeReadOnlyIndicator(templateTextarea) {
   const existingIndicator = templateTextarea.parentNode.querySelector(
-    ".readonly-indicator",
+    '.readonly-indicator',
   );
   if (existingIndicator) {
     existingIndicator.remove();
@@ -3830,7 +3850,7 @@ function removeReadOnlyIndicator(templateTextarea) {
 }
 
 function saveTemplate(templateName) {
-  showNotification("Saving template: " + templateName, "info");
+  showNotification(`Saving template: ${templateName}`, 'info');
 
   const templateTextarea = document.querySelector(
     'textarea[name="license_template"]',
@@ -3841,31 +3861,31 @@ function saveTemplate(templateName) {
       name: templateName,
       content: templateTextarea.value,
       timestamp: new Date().toISOString(),
-      version: "1.0",
+      version: '1.0',
       languageId: getCurrentLanguageId(),
     };
 
     try {
       localStorage.setItem(
-        "template_" + templateName + "_" + getCurrentLanguageId(),
+        `template_${templateName}_${getCurrentLanguageId()}`,
         JSON.stringify(templateData),
       );
-      showNotification("Template saved successfully!", "success");
+      showNotification('Template saved successfully!', 'success');
 
       // Update any template list if exists
       updateTemplateList();
     } catch (error) {
-      showNotification("Failed to save template: " + error.message, "error");
+      showNotification(`Failed to save template: ${error.message}`, 'error');
     }
   } else {
-    showNotification("No template content to save!", "warning");
+    showNotification('No template content to save!', 'warning');
   }
 }
 
 function getCurrentLanguageId() {
   const currentUrl = window.location.pathname;
-  const urlParts = currentUrl.split("/");
-  const programmingLanguagesIndex = urlParts.indexOf("programming-languages");
+  const urlParts = currentUrl.split('/');
+  const programmingLanguagesIndex = urlParts.indexOf('programming-languages');
   if (
     programmingLanguagesIndex !== -1 &&
     urlParts[programmingLanguagesIndex + 1]
@@ -3873,17 +3893,17 @@ function getCurrentLanguageId() {
     return urlParts[programmingLanguagesIndex + 1];
   }
 
-  const dataElement = document.querySelector("[data-language-id]");
+  const dataElement = document.querySelector('[data-language-id]');
   if (dataElement) {
-    return dataElement.getAttribute("data-language-id");
+    return dataElement.getAttribute('data-language-id');
   }
 
-  return "unknown";
+  return 'unknown';
 }
 
 function loadSavedTemplate() {
   const languageId = getCurrentLanguageId();
-  const templateKey = "template_custom_" + languageId;
+  const templateKey = `template_custom_${languageId}`;
 
   try {
     const savedTemplate = localStorage.getItem(templateKey);
@@ -3895,25 +3915,25 @@ function loadSavedTemplate() {
 
       if (templateTextarea && templateData.content) {
         templateTextarea.value = templateData.content;
-        templateTextarea.dispatchEvent(new Event("change"));
-        templateTextarea.dispatchEvent(new Event("input"));
+        templateTextarea.dispatchEvent(new Event('change'));
+        templateTextarea.dispatchEvent(new Event('input'));
 
-        showNotification("Saved template loaded successfully!", "success");
+        showNotification('Saved template loaded successfully!', 'success');
       }
     }
   } catch (error) {}
 }
 
 function previewTemplate(templateName) {
-  showNotification("Previewing template: " + templateName, "info");
+  showNotification(`Previewing template: ${templateName}`, 'info');
 
   const templateTextarea = document.querySelector(
     'textarea[name="license_template"]',
   );
   if (templateTextarea && templateTextarea.value.trim()) {
     // Create preview modal
-    const modal = document.createElement("div");
-    modal.className = "modal fade";
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
     modalSecurityUtils.safeInnerHTML(
       this,
       `
@@ -3935,7 +3955,7 @@ function previewTemplate(templateName) {
                             <label class="form-label">Template Info:</label>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <small class="text-muted">Lines: ${templateTextarea.value.split("\n").length}</small>
+                                    <small class="text-muted">Lines: ${templateTextarea.value.split('\n').length}</small>
                                 </div>
                                 <div class="col-md-6">
                                     <small class="text-muted">Characters: ${templateTextarea.value.length}</small>
@@ -3961,18 +3981,18 @@ function previewTemplate(templateName) {
     bsModal.show();
 
     // Clean up when modal is hidden
-    modal.addEventListener("hidden.bs.modal", function () {
+    modal.addEventListener('hidden.bs.modal', () => {
       document.body.removeChild(modal);
     });
 
-    showNotification("Template preview opened!", "success");
+    showNotification('Template preview opened!', 'success');
   } else {
-    showNotification("No template content to preview!", "warning");
+    showNotification('No template content to preview!', 'warning');
   }
 }
 
 function validateTemplates() {
-  showNotification("Validating templates...", "info");
+  showNotification('Validating templates...', 'info');
 
   const templateTextarea = document.querySelector(
     'textarea[name="license_template"]',
@@ -3982,63 +4002,63 @@ function validateTemplates() {
     const validationResults = [];
 
     // Basic PHP syntax validation
-    if (template.includes("<?php") || template.includes("<?=")) {
+    if (template.includes('<?php') || template.includes('<?=')) {
       validationResults.push({
-        type: "success",
-        message: "PHP syntax detected",
+        type: 'success',
+        message: 'PHP syntax detected',
       });
     } else {
-      validationResults.push({ type: "warning", message: "No PHP tags found" });
+      validationResults.push({ type: 'warning', message: 'No PHP tags found' });
     }
 
     // Check for common license template patterns
     const patterns = [
-      { pattern: /class\s+\w+/, message: "Class definition found" },
-      { pattern: /function\s+\w+/, message: "Function definition found" },
+      { pattern: /class\s+\w+/, message: 'Class definition found' },
+      { pattern: /function\s+\w+/, message: 'Function definition found' },
       {
         pattern: /validate|check|verify/i,
-        message: "Validation function detected",
+        message: 'Validation function detected',
       },
-      { pattern: /generate|create/i, message: "Generation function detected" },
-      { pattern: /license|key/i, message: "License-related content found" },
-      { pattern: /encrypt|decrypt/i, message: "Encryption functions found" },
+      { pattern: /generate|create/i, message: 'Generation function detected' },
+      { pattern: /license|key/i, message: 'License-related content found' },
+      { pattern: /encrypt|decrypt/i, message: 'Encryption functions found' },
     ];
 
     patterns.forEach(({ pattern, message }) => {
       if (pattern.test(template)) {
-        validationResults.push({ type: "success", message });
+        validationResults.push({ type: 'success', message });
       }
     });
 
     // Check for potential issues
     if (template.length < 50) {
       validationResults.push({
-        type: "warning",
-        message: "Template is very short",
+        type: 'warning',
+        message: 'Template is very short',
       });
     }
 
-    if (!template.includes("return")) {
+    if (!template.includes('return')) {
       validationResults.push({
-        type: "warning",
-        message: "No return statements found",
+        type: 'warning',
+        message: 'No return statements found',
       });
     }
 
     // Show validation results
     showValidationResults(validationResults);
   } else {
-    showNotification("No template content to validate!", "warning");
+    showNotification('No template content to validate!', 'warning');
   }
 }
 
 function showValidationResults(results) {
-  const modal = document.createElement("div");
-  modal.className = "modal fade";
+  const modal = document.createElement('div');
+  modal.className = 'modal fade';
 
-  const successCount = results.filter((r) => r.type === "success").length;
-  const warningCount = results.filter((r) => r.type === "warning").length;
-  const errorCount = results.filter((r) => r.type === "error").length;
+  const successCount = results.filter(r => r.type === 'success').length;
+  const warningCount = results.filter(r => r.type === 'warning').length;
+  const errorCount = results.filter(r => r.type === 'error').length;
 
   modal.innerHTML = `
         <div class="modal-dialog">
@@ -4073,15 +4093,15 @@ function showValidationResults(results) {
                     </div>
                     <div class="list-group">
                         ${results
-                          .map(
-                            (result) => `
+    .map(
+      result => `
                             <div class="list-group-item d-flex align-items-center">
-                                <i class="fas fa-${result.type === "success" ? "check-circle text-success" : result.type === "warning" ? "exclamation-triangle text-warning" : "times-circle text-danger"} me-3"></i>
+                                <i class="fas fa-${result.type === 'success' ? 'check-circle text-success' : result.type === 'warning' ? 'exclamation-triangle text-warning' : 'times-circle text-danger'} me-3"></i>
                                 <span>${result.message}</span>
                             </div>
                         `,
-                          )
-                          .join("")}
+    )
+    .join('')}
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -4096,29 +4116,29 @@ function showValidationResults(results) {
   const bsModal = new bootstrap.Modal(modal);
   bsModal.show();
 
-  modal.addEventListener("hidden.bs.modal", function () {
+  modal.addEventListener('hidden.bs.modal', () => {
     document.body.removeChild(modal);
   });
 
   showNotification(
     `Validation completed: ${successCount} success, ${warningCount} warnings, ${errorCount} errors`,
-    "info",
+    'info',
   );
 }
 
 function toggleCodeView() {
-  const codeViews = document.querySelectorAll(".code-view");
-  codeViews.forEach((view) => {
-    if (view.style.display === "none" || !view.style.display) {
-      view.style.display = "block";
+  const codeViews = document.querySelectorAll('.code-view');
+  codeViews.forEach(view => {
+    if (view.style.display === 'none' || !view.style.display) {
+      view.style.display = 'block';
     } else {
-      view.style.display = "none";
+      view.style.display = 'none';
     }
   });
 }
 
 function refreshTemplates() {
-  showNotification("Refreshing templates...", "info");
+  showNotification('Refreshing templates...', 'info');
 
   // Simulate refreshing templates from server
   setTimeout(() => {
@@ -4130,26 +4150,26 @@ function refreshTemplates() {
       'textarea[name="license_template"]',
     );
     if (templateTextarea) {
-      templateTextarea.value = "";
-      templateTextarea.dispatchEvent(new Event("change"));
+      templateTextarea.value = '';
+      templateTextarea.dispatchEvent(new Event('change'));
     }
 
     // Show available templates
     showAvailableTemplates();
 
-    showNotification("Templates refreshed successfully!", "success");
+    showNotification('Templates refreshed successfully!', 'success');
   }, 1000);
 }
 
 function updateTemplateList() {
   // Update any template list UI if it exists
-  const templateList = document.querySelector(".template-list");
+  const templateList = document.querySelector('.template-list');
   if (templateList) {
     // Get saved templates from localStorage
     const savedTemplates = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key.startsWith("template_")) {
+      if (key.startsWith('template_')) {
         try {
           const template = JSON.parse(localStorage.getItem(key));
           savedTemplates.push(template);
@@ -4162,7 +4182,7 @@ function updateTemplateList() {
     if (savedTemplates.length > 0) {
       templateList.innerHTML = savedTemplates
         .map(
-          (template) => `
+          template => `
                 <div class="template-item p-2 border rounded mb-2">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
@@ -4181,14 +4201,14 @@ function updateTemplateList() {
                 </div>
             `,
         )
-        .join("");
+        .join('');
     }
   }
 }
 
 function showAvailableTemplates() {
-  const modal = document.createElement("div");
-  modal.className = "modal fade";
+  const modal = document.createElement('div');
+  modal.className = 'modal fade';
   modalSecurityUtils.safeInnerHTML(
     this,
     `
@@ -4254,19 +4274,19 @@ function showAvailableTemplates() {
   const bsModal = new bootstrap.Modal(modal);
   bsModal.show();
 
-  modal.addEventListener("hidden.bs.modal", function () {
+  modal.addEventListener('hidden.bs.modal', () => {
     document.body.removeChild(modal);
   });
 }
 
 function viewTemplate() {
-  showNotification("Opening template viewer...", "info");
+  showNotification('Opening template viewer...', 'info');
 
   // Get saved templates from localStorage
   const savedTemplates = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key.startsWith("template_")) {
+    if (key.startsWith('template_')) {
       try {
         const template = JSON.parse(localStorage.getItem(key));
         savedTemplates.push(template);
@@ -4277,12 +4297,12 @@ function viewTemplate() {
   }
 
   if (savedTemplates.length === 0) {
-    showNotification("No saved templates found!", "warning");
+    showNotification('No saved templates found!', 'warning');
     return;
   }
 
-  const modal = document.createElement("div");
-  modal.className = "modal fade";
+  const modal = document.createElement('div');
+  modal.className = 'modal fade';
   modal.innerHTML = `
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -4299,9 +4319,9 @@ function viewTemplate() {
                             <h6>Saved Templates</h6>
                             <div class="list-group">
                                 ${savedTemplates
-                                  .map(
-                                    (template, index) => `
-                                    <button class="list-group-item list-group-item-action ${index === 0 ? "active" : ""}" 
+    .map(
+      (template, index) => `
+                                    <button class="list-group-item list-group-item-action ${index === 0 ? 'active' : ''}" 
                                             onclick="viewTemplateContent('${template.name}', this)">
                                         <div class="d-flex w-100 justify-content-between">
                                             <h6 class="mb-1">${template.name}</h6>
@@ -4311,8 +4331,8 @@ function viewTemplate() {
                                         <small>Version: ${template.version}</small>
                                     </button>
                                 `,
-                                  )
-                                  .join("")}
+    )
+    .join('')}
                             </div>
                         </div>
                         <div class="col-md-8">
@@ -4342,30 +4362,30 @@ function viewTemplate() {
   if (savedTemplates.length > 0) {
     viewTemplateContent(
       savedTemplates[0].name,
-      modal.querySelector(".list-group-item"),
+      modal.querySelector('.list-group-item'),
     );
   }
 
-  modal.addEventListener("hidden.bs.modal", function () {
+  modal.addEventListener('hidden.bs.modal', () => {
     document.body.removeChild(modal);
   });
 
-  showNotification("Template viewer opened!", "success");
+  showNotification('Template viewer opened!', 'success');
 }
 
 function viewTemplateContent(templateName, buttonElement) {
   // Update active button
   document
-    .querySelectorAll(".list-group-item")
-    .forEach((btn) => btn.classList.remove("active"));
-  buttonElement.classList.add("active");
+    .querySelectorAll('.list-group-item')
+    .forEach(btn => btn.classList.remove('active'));
+  buttonElement.classList.add('active');
 
   // Get template content
   const templateData = JSON.parse(
-    localStorage.getItem("template_" + templateName),
+    localStorage.getItem(`template_${templateName}`),
   );
   if (templateData) {
-    const viewer = document.getElementById("template-content-viewer");
+    const viewer = document.getElementById('template-content-viewer');
     viewerSecurityUtils.safeInnerHTML(
       this,
       `
@@ -4397,10 +4417,10 @@ function viewTemplateContent(templateName, buttonElement) {
 }
 
 function createTemplate() {
-  showNotification("Creating new template...", "info");
+  showNotification('Creating new template...', 'info');
 
-  const modal = document.createElement("div");
-  modal.className = "modal fade";
+  const modal = document.createElement('div');
+  modal.className = 'modal fade';
   modalSecurityUtils.safeInnerHTML(
     this,
     `
@@ -4453,10 +4473,10 @@ function createTemplate() {
   bsModal.show();
 
   // Auto-fill content based on type
-  const typeSelect = modal.querySelector("#template-type");
-  const contentTextarea = modal.querySelector("#template-content");
+  const typeSelect = modal.querySelector('#template-type');
+  const contentTextarea = modal.querySelector('#template-content');
 
-  typeSelect.addEventListener("change", function () {
+  typeSelect.addEventListener('change', function() {
     const templates = {
       default: `<?php
 // Default License Template
@@ -4502,40 +4522,40 @@ function generateLicense() {
 }`,
     };
 
-    contentTextarea.value = templates[this.value] || "";
+    contentTextarea.value = templates[this.value] || '';
   });
 
-  modal.addEventListener("hidden.bs.modal", function () {
+  modal.addEventListener('hidden.bs.modal', () => {
     document.body.removeChild(modal);
   });
 
-  showNotification("Template creator opened!", "success");
+  showNotification('Template creator opened!', 'success');
 }
 
 function saveNewTemplate() {
-  const modal = document.querySelector(".modal");
-  const name = modal.querySelector("#template-name").value.trim();
-  const type = modal.querySelector("#template-type").value;
-  const description = modal.querySelector("#template-description").value.trim();
-  const content = modal.querySelector("#template-content").value.trim();
+  const modal = document.querySelector('.modal');
+  const name = modal.querySelector('#template-name').value.trim();
+  const type = modal.querySelector('#template-type').value;
+  const description = modal.querySelector('#template-description').value.trim();
+  const content = modal.querySelector('#template-content').value.trim();
 
   if (!name || !content) {
-    showNotification("Please fill in all required fields!", "warning");
+    showNotification('Please fill in all required fields!', 'warning');
     return;
   }
 
   const templateData = {
-    name: name,
-    type: type,
-    description: description,
-    content: content,
+    name,
+    type,
+    description,
+    content,
     timestamp: new Date().toISOString(),
-    version: "1.0",
+    version: '1.0',
   };
 
   try {
-    localStorage.setItem("template_" + name, JSON.stringify(templateData));
-    showNotification("Template created successfully!", "success");
+    localStorage.setItem(`template_${name}`, JSON.stringify(templateData));
+    showNotification('Template created successfully!', 'success');
 
     // Load the template into the editor
     const templateTextarea = document.querySelector(
@@ -4543,13 +4563,13 @@ function saveNewTemplate() {
     );
     if (templateTextarea) {
       templateTextarea.value = content;
-      templateTextarea.dispatchEvent(new Event("change"));
+      templateTextarea.dispatchEvent(new Event('change'));
     }
 
     // Close modal
     bootstrap.Modal.getInstance(modal).hide();
   } catch (error) {
-    showNotification("Failed to create template: " + error.message, "error");
+    showNotification(`Failed to create template: ${error.message}`, 'error');
   }
 }
 
@@ -4557,16 +4577,16 @@ function saveNewTemplate() {
 function deleteTemplate(templateName) {
   if (
     window.confirm &&
-    confirm("Are you sure you want to delete this template?")
+    confirm('Are you sure you want to delete this template?')
   ) {
     try {
-      localStorage.removeItem("template_" + templateName);
-      showNotification("Template deleted successfully!", "success");
+      localStorage.removeItem(`template_${templateName}`);
+      showNotification('Template deleted successfully!', 'success');
 
       // Update template list if exists
       updateTemplateList();
     } catch (error) {
-      showNotification("Failed to delete template: " + error.message, "error");
+      showNotification(`Failed to delete template: ${error.message}`, 'error');
     }
   }
 }
@@ -4579,78 +4599,84 @@ function copyTemplateToClipboard() {
     navigator.clipboard
       .writeText(templateTextarea.value)
       .then(() => {
-        showNotification("Template copied to clipboard!", "success");
+        showNotification('Template copied to clipboard!', 'success');
       })
       .catch(() => {
-        showNotification("Failed to copy to clipboard!", "error");
+        showNotification('Failed to copy to clipboard!', 'error');
       });
   } else {
-    showNotification("No template content to copy!", "warning");
+    showNotification('No template content to copy!', 'warning');
   }
 }
 
 // Settings Page Tabs Functions
 function initSettingsTabs() {
-  const container = document.querySelector(".admin-settings-page");
-  if (!container) return;
+  const container = document.querySelector('.admin-settings-page');
+  if (!container) {
+    return;
+  }
 
   // Avoid double initialization
-  if (container.dataset.settingsTabsInit === "1") return;
+  if (container.dataset.settingsTabsInit === '1') {
+    return;
+  }
 
-  const tabButtons = container.querySelectorAll(".admin-tab-btn");
-  const tabPanels = container.querySelectorAll(".admin-tab-panel");
+  const tabButtons = container.querySelectorAll('.admin-tab-btn');
+  const tabPanels = container.querySelectorAll('.admin-tab-panel');
 
   // Initialize: show first panel (if any) and hide others
   tabPanels.forEach((panel, index) => {
     if (index === 0) {
-      panel.classList.add("active");
-      panel.classList.remove("admin-tab-panel-hidden");
-      panel.style.display = "";
+      panel.classList.add('active');
+      panel.classList.remove('admin-tab-panel-hidden');
+      panel.style.display = '';
     } else {
-      panel.classList.remove("active");
-      panel.classList.add("admin-tab-panel-hidden");
-      panel.style.display = "none";
+      panel.classList.remove('active');
+      panel.classList.add('admin-tab-panel-hidden');
+      panel.style.display = 'none';
     }
   });
 
-  tabButtons.forEach((button) => {
-    button.addEventListener("click", (e) => {
+  tabButtons.forEach(button => {
+    button.addEventListener('click', e => {
       e.preventDefault();
 
-      const targetTab = button.getAttribute("data-tab");
+      const targetTab = button.getAttribute('data-tab');
 
       // Remove active class from all buttons and hide all panels
-      tabButtons.forEach((btn) => btn.classList.remove("active"));
-      tabPanels.forEach((panel) => {
-        panel.classList.remove("active");
-        panel.classList.add("admin-tab-panel-hidden");
-        panel.style.display = "none";
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabPanels.forEach(panel => {
+        panel.classList.remove('active');
+        panel.classList.add('admin-tab-panel-hidden');
+        panel.style.display = 'none';
       });
 
       // Add active class to clicked button
-      button.classList.add("active");
+      button.classList.add('active');
 
       // Try multiple ways to find the target panel: id equal to data-tab, id with -tab suffix, or data-panel attribute
       let targetPanel = container.querySelector(`#${CSS.escape(targetTab)}`);
-      if (!targetPanel)
+      if (!targetPanel) {
         targetPanel = container.querySelector(
-          `#${CSS.escape(targetTab + "-tab")}`,
+          `#${CSS.escape(`${targetTab}-tab`)}`,
         );
-      if (!targetPanel)
+      }
+      if (!targetPanel) {
         targetPanel = container.querySelector(
           `.admin-tab-panel[data-panel="${targetTab}"]`,
         );
+      }
 
       if (targetPanel) {
-        targetPanel.classList.add("active");
+        targetPanel.classList.add('active');
         // ensure it's visible in case CSS relies on inline styles
-        targetPanel.style.display = "";
+        targetPanel.style.display = '';
       }
     });
   });
 
   // Mark initialized
-  container.dataset.settingsTabsInit = "1";
+  container.dataset.settingsTabsInit = '1';
 }
 
 // Programming Languages Create Functions
@@ -4663,50 +4689,50 @@ function initProgrammingLanguagesCreateFunctions() {
 // Programming Languages Show Tabs Functions
 function initProgrammingLanguagesShowTabs() {
   const tabButtons = document.querySelectorAll(
-    ".admin-programming-languages-show .admin-tab-btn",
+    '.admin-programming-languages-show .admin-tab-btn',
   );
   const tabPanels = document.querySelectorAll(
-    ".admin-programming-languages-show .admin-tab-panel",
+    '.admin-programming-languages-show .admin-tab-panel',
   );
 
   // Initialize: Show first panel and hide others
   tabPanels.forEach((panel, index) => {
     if (index === 0) {
-      panel.classList.remove("admin-tab-panel-hidden");
+      panel.classList.remove('admin-tab-panel-hidden');
     } else {
-      panel.classList.add("admin-tab-panel-hidden");
+      panel.classList.add('admin-tab-panel-hidden');
     }
   });
 
-  tabButtons.forEach((button) => {
-    button.addEventListener("click", (e) => {
+  tabButtons.forEach(button => {
+    button.addEventListener('click', e => {
       e.preventDefault();
 
-      const targetTab = button.getAttribute("data-tab");
+      const targetTab = button.getAttribute('data-tab');
 
       // Remove active class from all buttons
-      tabButtons.forEach((btn) => {
-        btn.classList.remove("admin-tab-btn-active");
-        btn.setAttribute("aria-selected", "false");
-        btn.setAttribute("tabindex", "-1");
+      tabButtons.forEach(btn => {
+        btn.classList.remove('admin-tab-btn-active');
+        btn.setAttribute('aria-selected', 'false');
+        btn.setAttribute('tabindex', '-1');
       });
 
       // Add active class to clicked button
-      button.classList.add("admin-tab-btn-active");
-      button.setAttribute("aria-selected", "true");
-      button.setAttribute("tabindex", "0");
+      button.classList.add('admin-tab-btn-active');
+      button.setAttribute('aria-selected', 'true');
+      button.setAttribute('tabindex', '0');
 
       // Hide all panels
-      tabPanels.forEach((panel) => {
-        panel.classList.add("admin-tab-panel-hidden");
-        panel.setAttribute("aria-hidden", "true");
+      tabPanels.forEach(panel => {
+        panel.classList.add('admin-tab-panel-hidden');
+        panel.setAttribute('aria-hidden', 'true');
       });
 
       // Show target panel
       const targetPanel = document.getElementById(targetTab);
       if (targetPanel) {
-        targetPanel.classList.remove("admin-tab-panel-hidden");
-        targetPanel.setAttribute("aria-hidden", "false");
+        targetPanel.classList.remove('admin-tab-panel-hidden');
+        targetPanel.setAttribute('aria-hidden', 'false');
       }
     });
   });
@@ -4715,50 +4741,50 @@ function initProgrammingLanguagesShowTabs() {
 // Programming Languages Index Tabs Functions
 function initProgrammingLanguagesIndexTabs() {
   const tabButtons = document.querySelectorAll(
-    ".admin-programming-languages-index .admin-tab-btn",
+    '.admin-programming-languages-index .admin-tab-btn',
   );
   const tabPanels = document.querySelectorAll(
-    ".admin-programming-languages-index .admin-tab-panel",
+    '.admin-programming-languages-index .admin-tab-panel',
   );
 
   // Initialize: Show first panel and hide others
   tabPanels.forEach((panel, index) => {
     if (index === 0) {
-      panel.classList.remove("admin-tab-panel-hidden");
+      panel.classList.remove('admin-tab-panel-hidden');
     } else {
-      panel.classList.add("admin-tab-panel-hidden");
+      panel.classList.add('admin-tab-panel-hidden');
     }
   });
 
-  tabButtons.forEach((button) => {
-    button.addEventListener("click", (e) => {
+  tabButtons.forEach(button => {
+    button.addEventListener('click', e => {
       e.preventDefault();
 
-      const targetTab = button.getAttribute("data-tab");
+      const targetTab = button.getAttribute('data-tab');
 
       // Remove active class from all buttons
-      tabButtons.forEach((btn) => {
-        btn.classList.remove("admin-tab-btn-active");
-        btn.setAttribute("aria-selected", "false");
-        btn.setAttribute("tabindex", "-1");
+      tabButtons.forEach(btn => {
+        btn.classList.remove('admin-tab-btn-active');
+        btn.setAttribute('aria-selected', 'false');
+        btn.setAttribute('tabindex', '-1');
       });
 
       // Add active class to clicked button
-      button.classList.add("admin-tab-btn-active");
-      button.setAttribute("aria-selected", "true");
-      button.setAttribute("tabindex", "0");
+      button.classList.add('admin-tab-btn-active');
+      button.setAttribute('aria-selected', 'true');
+      button.setAttribute('tabindex', '0');
 
       // Hide all panels
-      tabPanels.forEach((panel) => {
-        panel.classList.add("admin-tab-panel-hidden");
-        panel.setAttribute("aria-hidden", "true");
+      tabPanels.forEach(panel => {
+        panel.classList.add('admin-tab-panel-hidden');
+        panel.setAttribute('aria-hidden', 'true');
       });
 
       // Show target panel
       const targetPanel = document.getElementById(targetTab);
       if (targetPanel) {
-        targetPanel.classList.remove("admin-tab-panel-hidden");
-        targetPanel.setAttribute("aria-hidden", "false");
+        targetPanel.classList.remove('admin-tab-panel-hidden');
+        targetPanel.setAttribute('aria-hidden', 'false');
       }
     });
   });
@@ -4767,11 +4793,11 @@ function initProgrammingLanguagesIndexTabs() {
 // Reports Functions
 function initReportsFunctions() {
   // Export functionality
-  const exportButtons = document.querySelectorAll("[data-format]");
-  exportButtons.forEach((button) => {
-    button.addEventListener("click", (e) => {
+  const exportButtons = document.querySelectorAll('[data-format]');
+  exportButtons.forEach(button => {
+    button.addEventListener('click', e => {
       e.preventDefault();
-      const format = button.getAttribute("data-format");
+      const format = button.getAttribute('data-format');
       exportReport(format);
     });
   });
@@ -4780,11 +4806,11 @@ function initReportsFunctions() {
   const chartExportButtons = document.querySelectorAll(
     '[data-action="export-chart"]',
   );
-  chartExportButtons.forEach((button) => {
-    button.addEventListener("click", (e) => {
+  chartExportButtons.forEach(button => {
+    button.addEventListener('click', e => {
       e.preventDefault();
-      const chart = button.getAttribute("data-chart");
-      const format = button.getAttribute("data-format");
+      const chart = button.getAttribute('data-chart');
+      const format = button.getAttribute('data-format');
       exportChart(chart, format);
     });
   });
@@ -4793,8 +4819,8 @@ function initReportsFunctions() {
   const refreshButtons = document.querySelectorAll(
     '[data-action="refresh-reports"], [data-action="refresh-activity"]',
   );
-  refreshButtons.forEach((button) => {
-    button.addEventListener("click", (e) => {
+  refreshButtons.forEach(button => {
+    button.addEventListener('click', e => {
       e.preventDefault();
       refreshReports();
     });
@@ -4805,7 +4831,7 @@ function initReportsFunctions() {
     '[data-action="clear-blocked-ips"]',
   );
   if (clearBlockedIPsButton) {
-    clearBlockedIPsButton.addEventListener("click", (e) => {
+    clearBlockedIPsButton.addEventListener('click', e => {
       e.preventDefault();
       clearBlockedIPs();
     });
@@ -4825,7 +4851,7 @@ function exportReport(format) {
   // Simulate export process
   setTimeout(() => {
     // Create download link
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = `/admin/reports/export?format=${format}`;
     link.download = `reports.${format}`;
     document.body.appendChild(link);
@@ -4837,7 +4863,7 @@ function exportReport(format) {
     button.disabled = false;
 
     // Show success message
-    showNotification("Report exported successfully!", "success");
+    showNotification('Report exported successfully!', 'success');
   }, 1000);
 }
 
@@ -4855,7 +4881,7 @@ function exportChart(chartName, format) {
     button.disabled = false;
 
     // Show success message
-    showNotification(`${chartName} chart exported successfully!`, "success");
+    showNotification(`${chartName} chart exported successfully!`, 'success');
   }, 1000);
 }
 
@@ -4879,7 +4905,7 @@ function clearBlockedIPs() {
   if (
     window.confirm &&
     confirm(
-      "Are you sure you want to clear all blocked IPs? This action cannot be undone.",
+      'Are you sure you want to clear all blocked IPs? This action cannot be undone.',
     )
   ) {
     // Show loading state
@@ -4895,7 +4921,7 @@ function clearBlockedIPs() {
       button.disabled = false;
 
       // Show success message
-      showNotification("Blocked IPs cleared successfully!", "success");
+      showNotification('Blocked IPs cleared successfully!', 'success');
 
       // Reload the page to reflect changes
       setTimeout(() => {
@@ -4907,17 +4933,17 @@ function clearBlockedIPs() {
 
 function initCharts() {
   // Initialize Chart.js charts if available
-  if (typeof Chart !== "undefined") {
+  if (typeof Chart !== 'undefined') {
     // System Overview Chart
-    const systemOverviewCanvas = document.getElementById("systemOverviewChart");
+    const systemOverviewCanvas = document.getElementById('systemOverviewChart');
     if (systemOverviewCanvas) {
       try {
         const systemOverviewData = JSON.parse(
-          systemOverviewCanvas.getAttribute("data-chart-data") || "{}",
+          systemOverviewCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (systemOverviewData && Object.keys(systemOverviewData).length > 0) {
           new Chart(systemOverviewCanvas, {
-            type: "bar",
+            type: 'bar',
             data: systemOverviewData,
             options: {
               responsive: true,
@@ -4931,12 +4957,12 @@ function initCharts() {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
                 x: {
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
               },
@@ -4952,29 +4978,29 @@ function initCharts() {
     }
 
     // License Status Chart
-    const licenseStatusCanvas = document.getElementById("licenseStatusChart");
+    const licenseStatusCanvas = document.getElementById('licenseStatusChart');
     if (licenseStatusCanvas) {
       try {
         const licenseStatusData = JSON.parse(
-          licenseStatusCanvas.getAttribute("data-chart-data") || "{}",
+          licenseStatusCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (licenseStatusData && Object.keys(licenseStatusData).length > 0) {
           new Chart(licenseStatusCanvas, {
-            type: "doughnut",
+            type: 'doughnut',
             data: licenseStatusData,
             options: {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: "bottom",
+                  position: 'bottom',
                   labels: {
                     padding: 20,
                     usePointStyle: true,
                   },
                 },
               },
-              cutout: "60%",
+              cutout: '60%',
             },
           });
         } else {
@@ -4987,29 +5013,29 @@ function initCharts() {
     }
 
     // License Type Chart
-    const licenseTypeCanvas = document.getElementById("licenseTypeChart");
+    const licenseTypeCanvas = document.getElementById('licenseTypeChart');
     if (licenseTypeCanvas) {
       try {
         const licenseTypeData = JSON.parse(
-          licenseTypeCanvas.getAttribute("data-chart-data") || "{}",
+          licenseTypeCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (licenseTypeData && Object.keys(licenseTypeData).length > 0) {
           new Chart(licenseTypeCanvas, {
-            type: "doughnut",
+            type: 'doughnut',
             data: licenseTypeData,
             options: {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: "bottom",
+                  position: 'bottom',
                   labels: {
                     padding: 20,
                     usePointStyle: true,
                   },
                 },
               },
-              cutout: "60%",
+              cutout: '60%',
             },
           });
         } else {
@@ -5023,26 +5049,26 @@ function initCharts() {
 
     // Monthly Licenses Chart
     const monthlyLicensesCanvas = document.getElementById(
-      "monthlyLicensesChart",
+      'monthlyLicensesChart',
     );
     if (monthlyLicensesCanvas) {
       try {
         const monthlyLicensesData = JSON.parse(
-          monthlyLicensesCanvas.getAttribute("data-chart-data") || "{}",
+          monthlyLicensesCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (
           monthlyLicensesData &&
           Object.keys(monthlyLicensesData).length > 0
         ) {
           new Chart(monthlyLicensesCanvas, {
-            type: "line",
+            type: 'line',
             data: monthlyLicensesData,
             options: {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: "top",
+                  position: 'top',
                   labels: {
                     padding: 20,
                     usePointStyle: true,
@@ -5053,12 +5079,12 @@ function initCharts() {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
                 x: {
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
               },
@@ -5074,22 +5100,22 @@ function initCharts() {
     }
 
     // API Status Chart
-    const apiStatusCanvas = document.getElementById("apiStatusChart");
+    const apiStatusCanvas = document.getElementById('apiStatusChart');
     if (apiStatusCanvas) {
       try {
         const apiStatusData = JSON.parse(
-          apiStatusCanvas.getAttribute("data-chart-data") || "{}",
+          apiStatusCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (apiStatusData && Object.keys(apiStatusData).length > 0) {
           new Chart(apiStatusCanvas, {
-            type: "bar",
+            type: 'bar',
             data: apiStatusData,
             options: {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: "top",
+                  position: 'top',
                   labels: {
                     padding: 20,
                     usePointStyle: true,
@@ -5100,12 +5126,12 @@ function initCharts() {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
                 x: {
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
               },
@@ -5121,22 +5147,22 @@ function initCharts() {
     }
 
     // API Calls Chart
-    const apiCallsCanvas = document.getElementById("apiCallsChart");
+    const apiCallsCanvas = document.getElementById('apiCallsChart');
     if (apiCallsCanvas) {
       try {
         const apiCallsData = JSON.parse(
-          apiCallsCanvas.getAttribute("data-chart-data") || "{}",
+          apiCallsCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (apiCallsData && Object.keys(apiCallsData).length > 0) {
           new Chart(apiCallsCanvas, {
-            type: "line",
+            type: 'line',
             data: apiCallsData,
             options: {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: "top",
+                  position: 'top',
                   labels: {
                     padding: 20,
                     usePointStyle: true,
@@ -5147,12 +5173,12 @@ function initCharts() {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
                 x: {
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
               },
@@ -5169,26 +5195,26 @@ function initCharts() {
 
     // Invoices Monthly Chart
     const invoicesMonthlyCanvas = document.getElementById(
-      "invoicesMonthlyChart",
+      'invoicesMonthlyChart',
     );
     if (invoicesMonthlyCanvas) {
       try {
         const invoicesMonthlyData = JSON.parse(
-          invoicesMonthlyCanvas.getAttribute("data-chart-data") || "{}",
+          invoicesMonthlyCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (
           invoicesMonthlyData &&
           Object.keys(invoicesMonthlyData).length > 0
         ) {
           new Chart(invoicesMonthlyCanvas, {
-            type: "line",
+            type: 'line',
             data: invoicesMonthlyData,
             options: {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: "top",
+                  position: 'top',
                   labels: {
                     padding: 20,
                     usePointStyle: true,
@@ -5199,12 +5225,12 @@ function initCharts() {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
                 x: {
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
               },
@@ -5220,22 +5246,22 @@ function initCharts() {
     }
 
     // Monthly Revenue Chart
-    const monthlyRevenueCanvas = document.getElementById("monthlyRevenueChart");
+    const monthlyRevenueCanvas = document.getElementById('monthlyRevenueChart');
     if (monthlyRevenueCanvas) {
       try {
         const monthlyRevenueData = JSON.parse(
-          monthlyRevenueCanvas.getAttribute("data-chart-data") || "{}",
+          monthlyRevenueCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (monthlyRevenueData && Object.keys(monthlyRevenueData).length > 0) {
           new Chart(monthlyRevenueCanvas, {
-            type: "line",
+            type: 'line',
             data: monthlyRevenueData,
             options: {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: "top",
+                  position: 'top',
                   labels: {
                     padding: 20,
                     usePointStyle: true,
@@ -5246,17 +5272,17 @@ function initCharts() {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                   ticks: {
-                    callback: function (value) {
-                      return "$" + value.toLocaleString();
+                    callback: function(value) {
+                      return `$${value.toLocaleString()}`;
                     },
                   },
                 },
                 x: {
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
               },
@@ -5273,26 +5299,26 @@ function initCharts() {
 
     // Activity Timeline Chart
     const activityTimelineCanvas = document.getElementById(
-      "activityTimelineChart",
+      'activityTimelineChart',
     );
     if (activityTimelineCanvas) {
       try {
         const activityTimelineData = JSON.parse(
-          activityTimelineCanvas.getAttribute("data-chart-data") || "{}",
+          activityTimelineCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (
           activityTimelineData &&
           Object.keys(activityTimelineData).length > 0
         ) {
           new Chart(activityTimelineCanvas, {
-            type: "line",
+            type: 'line',
             data: activityTimelineData,
             options: {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: "top",
+                  position: 'top',
                   labels: {
                     padding: 20,
                     usePointStyle: true,
@@ -5303,12 +5329,12 @@ function initCharts() {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
                 x: {
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
               },
@@ -5325,26 +5351,26 @@ function initCharts() {
 
     // User Registrations Chart
     const userRegistrationsCanvas = document.getElementById(
-      "userRegistrationsChart",
+      'userRegistrationsChart',
     );
     if (userRegistrationsCanvas) {
       try {
         const userRegistrationsData = JSON.parse(
-          userRegistrationsCanvas.getAttribute("data-chart-data") || "{}",
+          userRegistrationsCanvas.getAttribute('data-chart-data') || '{}',
         );
         if (
           userRegistrationsData &&
           Object.keys(userRegistrationsData).length > 0
         ) {
           new Chart(userRegistrationsCanvas, {
-            type: "line",
+            type: 'line',
             data: userRegistrationsData,
             options: {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: "top",
+                  position: 'top',
                   labels: {
                     padding: 20,
                     usePointStyle: true,
@@ -5355,12 +5381,12 @@ function initCharts() {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
                 x: {
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                 },
               },
@@ -5377,42 +5403,42 @@ function initCharts() {
   } else {
     // Chart.js not available, show fallback for all charts
     const chartCanvases = document.querySelectorAll('canvas[id$="Chart"]');
-    chartCanvases.forEach((canvas) => {
+    chartCanvases.forEach(canvas => {
       showChartFallback(canvas);
     });
   }
 }
 
 function showChartFallback(canvas) {
-  const fallback = canvas.parentElement.querySelector(".chart-fallback");
+  const fallback = canvas.parentElement.querySelector('.chart-fallback');
   if (fallback) {
-    fallback.style.display = "block";
-    canvas.style.display = "none";
+    fallback.style.display = 'block';
+    canvas.style.display = 'none';
   }
 }
 
 function initProgrammingLanguagesCreateIconPreview() {
-  const iconInput = document.getElementById("icon");
-  const iconPreview = document.getElementById("icon-preview");
+  const iconInput = document.getElementById('icon');
+  const iconPreview = document.getElementById('icon-preview');
 
   if (iconInput && iconPreview) {
-    iconInput.addEventListener("input", function () {
+    iconInput.addEventListener('input', function() {
       const iconClass = this.value.trim();
       if (iconClass) {
         iconPreview.className = iconClass;
       } else {
-        iconPreview.className = "fas fa-code";
+        iconPreview.className = 'fas fa-code';
       }
     });
   }
 }
 
 function initProgrammingLanguagesCreateTemplatePreview() {
-  const templateInput = document.getElementById("license_template");
-  const templatePreview = document.getElementById("template-preview");
+  const templateInput = document.getElementById('license_template');
+  const templatePreview = document.getElementById('template-preview');
 
   if (templateInput && templatePreview) {
-    templateInput.addEventListener("input", function () {
+    templateInput.addEventListener('input', function() {
       const template = this.value.trim();
       if (template) {
         templatePreview.textContent = template;
@@ -5426,15 +5452,15 @@ function initProgrammingLanguagesCreateTemplatePreview() {
 
 function initProgrammingLanguagesCreateFormValidation() {
   const form = document.querySelector(
-    ".admin-programming-languages-create .needs-validation",
+    '.admin-programming-languages-create .needs-validation',
   );
   if (form) {
-    form.addEventListener("submit", function (event) {
+    form.addEventListener('submit', event => {
       if (!form.checkValidity()) {
         event.preventDefault();
         event.stopPropagation();
       }
-      form.classList.add("was-validated");
+      form.classList.add('was-validated');
     });
   }
 }
@@ -5442,48 +5468,54 @@ function initProgrammingLanguagesCreateFormValidation() {
 // Product Updates - Toggle Status Function
 function toggleUpdateStatus(updateId) {
   fetch(`/admin/product-updates/${updateId}/toggle-status`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN": document
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
         .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content"),
+        .getAttribute('content'),
     },
   })
-    .then((response) => response.json())
-    .then((data) => {
+    .then(response => response.json())
+    .then(data => {
       if (data.success) {
         location.reload();
       } else {
-        alert("Failed to update status");
+        alert('Failed to update status');
       }
     })
-    .catch((error) => {
-      console.error("Error:", error);
-      alert("An error occurred");
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred');
     });
 }
 
 // Settings Page - Human Questions Management
 function initializeHumanQuestions() {
-  const list = document.getElementById("human-questions-list");
-  const addBtn = document.getElementById("btn-add-question");
-  if (!list || !addBtn) return;
+  const list = document.getElementById('human-questions-list');
+  const addBtn = document.getElementById('btn-add-question');
+  if (!list || !addBtn) {
+    return;
+  }
 
   function reindex() {
-    const rows = list.querySelectorAll(".human-question-row");
+    const rows = list.querySelectorAll('.human-question-row');
     rows.forEach((row, idx) => {
-      row.setAttribute("data-index", idx);
+      row.setAttribute('data-index', idx);
       const q = row.querySelector('input[name$="[question]"]');
       const a = row.querySelector('input[name$="[answer]"]');
-      if (q) q.name = `human_questions[${idx}][question]`;
-      if (a) a.name = `human_questions[${idx}][answer]`;
+      if (q) {
+        q.name = `human_questions[${idx}][question]`;
+      }
+      if (a) {
+        a.name = `human_questions[${idx}][answer]`;
+      }
     });
   }
 
-  document.addEventListener("click", function (e) {
-    if (e.target && e.target.classList.contains("btn-remove-question")) {
-      const row = e.target.closest(".human-question-row");
+  document.addEventListener('click', e => {
+    if (e.target && e.target.classList.contains('btn-remove-question')) {
+      const row = e.target.closest('.human-question-row');
       if (row) {
         row.remove();
         reindex();
@@ -5491,11 +5523,11 @@ function initializeHumanQuestions() {
     }
   });
 
-  addBtn.addEventListener("click", function () {
-    const idx = list.querySelectorAll(".human-question-row").length;
-    const wrapper = document.createElement("div");
-    wrapper.className = "human-question-row mb-3";
-    wrapper.setAttribute("data-index", idx);
+  addBtn.addEventListener('click', function() {
+    const idx = list.querySelectorAll('.human-question-row').length;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'human-question-row mb-3';
+    wrapper.setAttribute('data-index', idx);
     wrapperSecurityUtils.safeInnerHTML(
       this,
       `
@@ -5519,48 +5551,48 @@ function initializeHumanQuestions() {
 
 // Settings Page - API Token Generation
 function initializeApiTokenGeneration() {
-  const generateTokenBtn = document.getElementById("generate-api-token");
-  const tokenInput = document.getElementById("license_api_token");
+  const generateTokenBtn = document.getElementById('generate-api-token');
+  const tokenInput = document.getElementById('license_api_token');
 
   if (generateTokenBtn && tokenInput) {
-    generateTokenBtn.addEventListener("click", function () {
+    generateTokenBtn.addEventListener('click', () => {
       // Generate a random 64-character token
-      const chars = "0123456789abcdef";
-      let token = "";
+      const chars = '0123456789abcdef';
+      let token = '';
       for (let i = 0; i < 64; i++) {
         token += chars[Math.floor(Math.random() * chars.length)];
       }
 
       // Update the input field
       tokenInput.value = token;
-      tokenInput.removeAttribute("readonly");
+      tokenInput.removeAttribute('readonly');
 
       // Show success message
-      showNotification("Token generated successfully!", "success");
+      showNotification('Token generated successfully!', 'success');
     });
   }
 
   // Make token input editable when clicked
   if (tokenInput) {
-    tokenInput.addEventListener("click", function () {
-      this.removeAttribute("readonly");
+    tokenInput.addEventListener('click', function() {
+      this.removeAttribute('readonly');
     });
 
     // Allow manual input
-    tokenInput.addEventListener("input", function () {
+    tokenInput.addEventListener('input', function() {
       // Remove readonly when user starts typing
-      this.removeAttribute("readonly");
+      this.removeAttribute('readonly');
     });
   }
 }
 
 // Settings Page - API Testing
 function initializeApiTesting() {
-  const testApiBtn = document.getElementById("test-api-btn");
-  const apiTestResult = document.getElementById("api-test-result");
+  const testApiBtn = document.getElementById('test-api-btn');
+  const apiTestResult = document.getElementById('api-test-result');
 
   if (testApiBtn && apiTestResult) {
-    testApiBtn.addEventListener("click", function () {
+    testApiBtn.addEventListener('click', function() {
       const button = this;
       const originalText = button.innerHTML;
 
@@ -5570,28 +5602,28 @@ function initializeApiTesting() {
       button.disabled = true;
 
       // Get form data
-      const formData = new FormData(document.querySelector("form"));
+      const formData = new FormData(document.querySelector('form'));
       formData.append(
-        "_token",
+        '_token',
         document
           .querySelector('meta[name="csrf-token"]')
-          .getAttribute("content"),
+          .getAttribute('content'),
       );
-      formData.append("action", "test-envato-api");
+      formData.append('action', 'test-envato-api');
 
       // Make AJAX request
-      fetch("/admin/settings/test-api", {
-        method: "POST",
+      fetch('/admin/settings/test-api', {
+        method: 'POST',
         body: formData,
         headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "X-CSRF-TOKEN": document
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': document
             .querySelector('meta[name="csrf-token"]')
-            .getAttribute("content"),
+            .getAttribute('content'),
         },
       })
-        .then((response) => response.json())
-        .then((data) => {
+        .then(response => response.json())
+        .then(data => {
           if (data.success) {
             apiTestResultSecurityUtils.safeInnerHTML(
               this,
@@ -5624,7 +5656,7 @@ function initializeApiTesting() {
             );
           }
         })
-        .catch((error) => {
+        .catch(error => {
           apiTestResultSecurityUtils.safeInnerHTML(
             this,
             `
@@ -5651,28 +5683,28 @@ function initializeApiTesting() {
 
 // Settings Page - Tab Switching
 function initializeSettingsTabs() {
-  const tabButtons = document.querySelectorAll("[data-tab]");
-  const tabPanels = document.querySelectorAll(".admin-tab-panel");
+  const tabButtons = document.querySelectorAll('[data-tab]');
+  const tabPanels = document.querySelectorAll('.admin-tab-panel');
 
   // Initialize tabs on page load
   function initializeTabs() {
     // Hide all panels except the first one
     tabPanels.forEach((panel, index) => {
       if (index === 0) {
-        panel.classList.remove("admin-tab-panel-hidden");
-        panel.setAttribute("aria-hidden", "false");
+        panel.classList.remove('admin-tab-panel-hidden');
+        panel.setAttribute('aria-hidden', 'false');
       } else {
-        panel.classList.add("admin-tab-panel-hidden");
-        panel.setAttribute("aria-hidden", "true");
+        panel.classList.add('admin-tab-panel-hidden');
+        panel.setAttribute('aria-hidden', 'true');
       }
     });
 
     // Set first button as active
     tabButtons.forEach((btn, index) => {
       if (index === 0) {
-        btn.classList.add("admin-tab-btn-active");
+        btn.classList.add('admin-tab-btn-active');
       } else {
-        btn.classList.remove("admin-tab-btn-active");
+        btn.classList.remove('admin-tab-btn-active');
       }
     });
   }
@@ -5680,30 +5712,30 @@ function initializeSettingsTabs() {
   // Initialize tabs when page loads
   initializeTabs();
 
-  tabButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const targetTab = this.getAttribute("data-tab");
+  tabButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const targetTab = this.getAttribute('data-tab');
 
       // Remove active class from all buttons
-      tabButtons.forEach((btn) => {
-        btn.classList.remove("admin-tab-btn-active");
-        btn.classList.remove("active");
+      tabButtons.forEach(btn => {
+        btn.classList.remove('admin-tab-btn-active');
+        btn.classList.remove('active');
       });
       // Add active class to clicked button
-      this.classList.add("admin-tab-btn-active");
-      this.classList.add("active");
+      this.classList.add('admin-tab-btn-active');
+      this.classList.add('active');
 
       // Hide all panels
-      tabPanels.forEach((panel) => {
-        panel.classList.add("admin-tab-panel-hidden");
-        panel.setAttribute("aria-hidden", "true");
+      tabPanels.forEach(panel => {
+        panel.classList.add('admin-tab-panel-hidden');
+        panel.setAttribute('aria-hidden', 'true');
       });
 
       // Show target panel
       const targetPanel = document.getElementById(targetTab);
       if (targetPanel) {
-        targetPanel.classList.remove("admin-tab-panel-hidden");
-        targetPanel.setAttribute("aria-hidden", "false");
+        targetPanel.classList.remove('admin-tab-panel-hidden');
+        targetPanel.setAttribute('aria-hidden', 'false');
       }
     });
   });
@@ -5711,12 +5743,12 @@ function initializeSettingsTabs() {
 
 // Settings Page - Logo Preview
 function initializeLogoPreview() {
-  const logoPreview = document.getElementById("logo-preview");
+  const logoPreview = document.getElementById('logo-preview');
   const logoInputs = document.querySelectorAll('input[name^="logo_"]');
 
   if (logoPreview && logoInputs.length > 0) {
-    logoInputs.forEach((input) => {
-      input.addEventListener("input", updateLogoPreview);
+    logoInputs.forEach(input => {
+      input.addEventListener('input', updateLogoPreview);
     });
 
     function updateLogoPreview() {
@@ -5726,15 +5758,15 @@ function initializeLogoPreview() {
         document.querySelector('input[name="logo_height"]')?.value || 50;
       const textColor =
         document.querySelector('input[name="logo_text_color"]')?.value ||
-        "#1f2937";
+        '#1f2937';
       const fontSize =
         document.querySelector('input[name="logo_text_font_size"]')?.value ||
-        "24px";
+        '24px';
 
-      logoPreview.style.width = width + "px";
-      logoPreview.style.height = height + "px";
+      logoPreview.style.width = `${width}px`;
+      logoPreview.style.height = `${height}px`;
 
-      const textElement = logoPreview.querySelector(".admin-logo-preview-text");
+      const textElement = logoPreview.querySelector('.admin-logo-preview-text');
       if (textElement) {
         textElement.style.color = textColor;
         textElement.style.fontSize = fontSize;
@@ -5746,14 +5778,14 @@ function initializeLogoPreview() {
 // Settings Page - Color Picker Synchronization
 function initializeColorPickers() {
   const colorInputs = document.querySelectorAll('input[type="color"]');
-  colorInputs.forEach((input) => {
+  colorInputs.forEach(input => {
     const textInput = input.nextElementSibling;
-    if (textInput && textInput.type === "text") {
-      input.addEventListener("input", function () {
+    if (textInput && textInput.type === 'text') {
+      input.addEventListener('input', function() {
         textInput.value = this.value;
       });
 
-      textInput.addEventListener("input", function () {
+      textInput.addEventListener('input', function() {
         if (this.value.match(/^#[0-9A-F]{6}$/i)) {
           input.value = this.value;
         }
@@ -5764,24 +5796,24 @@ function initializeColorPickers() {
 
 // Settings Page - Form Validation
 function initializeSettingsFormValidation() {
-  const form = document.querySelector("form");
+  const form = document.querySelector('form');
   if (form) {
-    form.addEventListener("submit", function (e) {
-      const requiredFields = form.querySelectorAll("[required]");
+    form.addEventListener('submit', e => {
+      const requiredFields = form.querySelectorAll('[required]');
       let isValid = true;
 
-      requiredFields.forEach((field) => {
+      requiredFields.forEach(field => {
         if (!field.value.trim()) {
-          field.classList.add("is-invalid");
+          field.classList.add('is-invalid');
           isValid = false;
         } else {
-          field.classList.remove("is-invalid");
+          field.classList.remove('is-invalid');
         }
       });
 
       if (!isValid) {
         e.preventDefault();
-        showNotification("Please fill in all required fields.", "error");
+        showNotification('Please fill in all required fields.', 'error');
       }
     });
   }
@@ -5789,27 +5821,27 @@ function initializeSettingsFormValidation() {
 
 // Tickets - Invoice Section Toggle
 function initializeInvoiceSectionToggle() {
-  const createInvoiceCheckbox = document.getElementById("create_invoice");
-  const invoiceSection = document.getElementById("invoice-section");
+  const createInvoiceCheckbox = document.getElementById('create_invoice');
+  const invoiceSection = document.getElementById('invoice-section');
 
   if (createInvoiceCheckbox && invoiceSection) {
     const invoiceFields = invoiceSection.querySelectorAll(
-      "input, select, textarea",
+      'input, select, textarea',
     );
 
     function toggleInvoiceSection() {
       if (createInvoiceCheckbox.checked) {
-        invoiceSection.style.display = "block";
-        invoiceFields.forEach((field) => {
+        invoiceSection.style.display = 'block';
+        invoiceFields.forEach(field => {
           field.disabled = false;
           field.required = true;
         });
       } else {
-        invoiceSection.style.display = "none";
-        invoiceFields.forEach((field) => {
+        invoiceSection.style.display = 'none';
+        invoiceFields.forEach(field => {
           field.disabled = true;
           field.required = false;
-          field.value = "";
+          field.value = '';
         });
       }
     }
@@ -5818,14 +5850,14 @@ function initializeInvoiceSectionToggle() {
     toggleInvoiceSection();
 
     // Toggle on checkbox change
-    createInvoiceCheckbox.addEventListener("change", toggleInvoiceSection);
+    createInvoiceCheckbox.addEventListener('change', toggleInvoiceSection);
   }
 }
 
 // Tickets - Knowledge Base Integration
 function initializeKnowledgeBaseIntegration() {
-  const kbArticleSelect = document.getElementById("kb-article-select");
-  const kbCategorySelect = document.getElementById("kb-category-select");
+  const kbArticleSelect = document.getElementById('kb-article-select');
+  const kbCategorySelect = document.getElementById('kb-category-select');
   const insertArticleBtn = document.querySelector(
     '[data-action="insert-kb-article"]',
   );
@@ -5836,11 +5868,11 @@ function initializeKnowledgeBaseIntegration() {
 
   // Insert Article functionality
   if (insertArticleBtn && kbArticleSelect && replyTextarea) {
-    insertArticleBtn.addEventListener("click", function () {
+    insertArticleBtn.addEventListener('click', () => {
       const selectedOption =
         kbArticleSelect.options[kbArticleSelect.selectedIndex];
       if (selectedOption.value) {
-        const title = selectedOption.dataset.title;
+        const { title } = selectedOption.dataset;
         const articleId = selectedOption.value;
 
         // Create article link to insert with full URL
@@ -5865,16 +5897,16 @@ function initializeKnowledgeBaseIntegration() {
         kbArticleSelect.selectedIndex = 0;
 
         // Show success message
-        showNotification("Article link inserted successfully!", "success");
+        showNotification('Article link inserted successfully!', 'success');
       } else {
-        showNotification("Please select an article first!", "warning");
+        showNotification('Please select an article first!', 'warning');
       }
     });
   }
 
   // Insert Category Link functionality
   if (insertCategoryBtn && kbCategorySelect && replyTextarea) {
-    insertCategoryBtn.addEventListener("click", function () {
+    insertCategoryBtn.addEventListener('click', () => {
       const selectedOption =
         kbCategorySelect.options[kbCategorySelect.selectedIndex];
       if (selectedOption.value) {
@@ -5883,9 +5915,9 @@ function initializeKnowledgeBaseIntegration() {
 
         // Create full link to insert
         const baseUrl = window.location.origin;
-        const fullCategoryUrl = categoryUrl.startsWith("http")
-          ? categoryUrl
-          : `${baseUrl}${categoryUrl}`;
+        const fullCategoryUrl = categoryUrl.startsWith('http') ?
+          categoryUrl :
+          `${baseUrl}${categoryUrl}`;
         const linkContent = `\n\n[${categoryName}](${fullCategoryUrl})\n\n`;
 
         // Insert at cursor position or append
@@ -5906,9 +5938,9 @@ function initializeKnowledgeBaseIntegration() {
         kbCategorySelect.selectedIndex = 0;
 
         // Show success message
-        showNotification("Category link inserted successfully!", "success");
+        showNotification('Category link inserted successfully!', 'success');
       } else {
-        showNotification("Please select a category first!", "warning");
+        showNotification('Please select a category first!', 'warning');
       }
     });
   }
@@ -5916,9 +5948,9 @@ function initializeKnowledgeBaseIntegration() {
 
 // Backups - Restore Confirmation
 function initializeBackupRestore() {
-  document.querySelectorAll(".restore-form").forEach(function (form) {
-    form.addEventListener("submit", function (e) {
-      var msg = form.getAttribute("data-confirm") || "Are you sure?";
+  document.querySelectorAll('.restore-form').forEach(form => {
+    form.addEventListener('submit', e => {
+      const msg = form.getAttribute('data-confirm') || 'Are you sure?';
       if (!confirm(msg)) {
         e.preventDefault();
       }
@@ -5929,7 +5961,7 @@ function initializeBackupRestore() {
 // Update Notification Functions
 function checkUpdateNotification() {
   // Only check if we're on admin pages and the notification element exists
-  if (!document.getElementById("update-notification")) {
+  if (!document.getElementById('update-notification')) {
     return;
   }
 
@@ -5943,48 +5975,48 @@ function checkUpdateNotification() {
   const statusUrl = `${baseUrl}/my-logos/public/admin/updates/notifications/status`;
 
   fetch(statusUrl, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN":
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN':
         document
           .querySelector('meta[name="csrf-token"]')
-          ?.getAttribute("content") || "",
-      "X-Requested-With": "XMLHttpRequest",
+          ?.getAttribute('content') || '',
+      'X-Requested-With': 'XMLHttpRequest',
     },
-    credentials: "same-origin",
+    credentials: 'same-origin',
   })
-    .then((response) => {
+    .then(response => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     })
-    .then((data) => {
+    .then(data => {
       if (data.success && data.data && data.data.should_show_notification) {
         showUpdateNotification();
       }
     })
-    .catch((error) => {
+    .catch(error => {
       // Only log error if it's not a 404 or similar expected error
-      if (!error.message.includes("404") && !error.message.includes("429")) {
-        console.error("Error checking update notification:", error);
+      if (!error.message.includes('404') && !error.message.includes('429')) {
+        console.error('Error checking update notification:', error);
       }
     });
 }
 
 function showUpdateNotification() {
-  const notification = document.getElementById("update-notification");
+  const notification = document.getElementById('update-notification');
   if (notification) {
-    notification.classList.add("show");
+    notification.classList.add('show');
   }
 }
 
 function dismissUpdateNotification() {
-  const notification = document.getElementById("update-notification");
+  const notification = document.getElementById('update-notification');
   if (notification) {
-    notification.classList.remove("show");
+    notification.classList.remove('show');
   }
 
   // Get the base URL from the current page
@@ -5993,37 +6025,37 @@ function dismissUpdateNotification() {
 
   // Dismiss for 24 hours
   fetch(dismissUrl, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN":
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN':
         document
           .querySelector('meta[name="csrf-token"]')
-          ?.getAttribute("content") || "",
-      "X-Requested-With": "XMLHttpRequest",
+          ?.getAttribute('content') || '',
+      'X-Requested-With': 'XMLHttpRequest',
     },
-    credentials: "same-origin",
+    credentials: 'same-origin',
     body: JSON.stringify({}),
   })
-    .then((response) => {
+    .then(response => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     })
-    .then((data) => {
-      console.log("Notification dismissed successfully");
+    .then(data => {
+      console.log('Notification dismissed successfully');
     })
-    .catch((error) => {
-      console.error("Error dismissing notification:", error);
+    .catch(error => {
+      console.error('Error dismissing notification:', error);
     });
 }
 
 function dismissUpdateNotificationPermanently() {
-  const notification = document.getElementById("update-notification");
+  const notification = document.getElementById('update-notification');
   if (notification) {
-    notification.classList.remove("show");
+    notification.classList.remove('show');
   }
 
   // Get the base URL from the current page
@@ -6035,37 +6067,37 @@ function dismissUpdateNotificationPermanently() {
   dismissUntil.setDate(dismissUntil.getDate() + 30); // 30 days
 
   fetch(dismissUrl, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN":
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN':
         document
           .querySelector('meta[name="csrf-token"]')
-          ?.getAttribute("content") || "",
-      "X-Requested-With": "XMLHttpRequest",
+          ?.getAttribute('content') || '',
+      'X-Requested-With': 'XMLHttpRequest',
     },
-    credentials: "same-origin",
+    credentials: 'same-origin',
     body: JSON.stringify({
       dismiss_until: dismissUntil.toISOString(),
     }),
   })
-    .then((response) => {
+    .then(response => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     })
-    .then((data) => {
-      console.log("Notification dismissed permanently successfully");
+    .then(data => {
+      console.log('Notification dismissed permanently successfully');
     })
-    .catch((error) => {
-      console.error("Error dismissing notification permanently:", error);
+    .catch(error => {
+      console.error('Error dismissing notification permanently:', error);
     });
 }
 
 // Initialize all settings page functionality
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', () => {
   initializeHumanQuestions();
   initializeApiTokenGeneration();
   initializeApiTesting();

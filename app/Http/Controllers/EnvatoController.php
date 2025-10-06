@@ -476,6 +476,9 @@ class EnvatoController extends Controller
      *
      * @return array The validated data
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function validatePurchaseRequest(Request $request): array
     {
         return $request->validate([
@@ -501,7 +504,7 @@ class EnvatoController extends Controller
      *
      * @param  Request  $request  The HTTP request
      *
-     * @return array The validated data
+     * @return array<string, mixed> The validated data
      */
     private function validateAjaxPurchaseRequest(Request $request): array
     {

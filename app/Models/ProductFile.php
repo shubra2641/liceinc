@@ -51,6 +51,11 @@ class ProductFile extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = ProductFileFactory::class;
+
     protected $fillable = [
         'product_id',
         'original_name',
@@ -76,14 +81,17 @@ class ProductFile extends Model
     /**
      * Get the product that owns the file.
      */
-    public function product()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Product, ProductFile>
+     */
+    public function product(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
     /**
      * Get formatted file size.
      */
-    public function getFormattedSizeAttribute()
+    public function getFormattedSizeAttribute(): string
     {
         $bytes = $this->file_size;
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -96,21 +104,21 @@ class ProductFile extends Model
     /**
      * Get file extension.
      */
-    public function getFileExtensionAttribute()
+    public function getFileExtensionAttribute(): string
     {
         return pathinfo($this->original_name, PATHINFO_EXTENSION);
     }
     /**
      * Check if file exists in storage.
      */
-    public function fileExists()
+    public function fileExists(): bool
     {
         return Storage::disk('private')->exists($this->file_path);
     }
     /**
      * Get decrypted file content.
      */
-    public function getDecryptedContent()
+    public function getDecryptedContent(): string
     {
         if (! $this->fileExists()) {
             return null;
@@ -133,12 +141,16 @@ class ProductFile extends Model
     /**
      * Increment download count.
      */
-    public function incrementDownloadCount()
+    public function incrementDownloadCount(): void
     {
         $this->increment('download_count');
     }
     /**
      * Scope for active files.
+     */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<ProductFile> $query
+     * @return \Illuminate\Database\Eloquent\Builder<ProductFile>
      */
     public function scopeActive($query)
     {
@@ -146,6 +158,11 @@ class ProductFile extends Model
     }
     /**
      * Scope for files belonging to a product.
+     */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<ProductFile> $query
+     * @param int $productId
+     * @return \Illuminate\Database\Eloquent\Builder<ProductFile>
      */
     public function scopeForProduct($query, $productId)
     {

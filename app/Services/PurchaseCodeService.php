@@ -146,6 +146,9 @@ class PurchaseCodeService
      *     echo "Purchase code verified from: " . $result['source'];
      * }
      */
+    /**
+     * @return array<string, mixed>
+     */
     public function verifyPurchaseCode(string $purchaseCode, ?int $productId = null, ?User $user = null): array
     {
         try {
@@ -224,6 +227,9 @@ class PurchaseCodeService
      *
      * @throws \Exception When database verification fails
      */
+    /**
+     * @return array<string, mixed>
+     */
     protected function verifyAgainstDatabase(string $purchaseCode, ?int $productId = null): array
     {
         try {
@@ -290,6 +296,9 @@ class PurchaseCodeService
      * if ($result['success']) {
      *     echo "Raw code verified successfully";
      * }
+     */
+    /**
+     * @return array<string, mixed>
      */
     public function verifyRawCode(string $rawCode, ?int $productId = null): array
     {
@@ -367,6 +376,9 @@ class PurchaseCodeService
             throw $e;
         }
     }
+    /**
+     * @return array<string, mixed>
+     */
     protected function verifyAgainstEnvato(string $purchaseCode, ?int $productId = null, ?User $user = null): array
     {
         try {
@@ -411,6 +423,9 @@ class PurchaseCodeService
     }
     /**
      * Create license record from Envato data.
+     */
+    /**
+     * @param array<string, mixed> $envatoData
      */
     protected function createLicenseFromEnvato(
         User $user,
@@ -470,7 +485,7 @@ class PurchaseCodeService
     /**
      * Check if user has access to KB content via product license.
      */
-    public function userHasKbAccess(User $user, $kbItem): bool
+    public function userHasKbAccess(User $user, KbArticle $kbItem): bool
     {
         // If KB item is not linked to any product, allow access
         if (! $kbItem->product_id) {
@@ -482,7 +497,10 @@ class PurchaseCodeService
     /**
      * Get accessible KB content for user based on their licenses.
      */
-    public function getAccessibleKbContent(User $user)
+    /**
+     * @return array<string, mixed>
+     */
+    public function getAccessibleKbContent(User $user): array
     {
         $userProductIds = $user->licenses()
             ->where('status', 'active')
@@ -506,7 +524,7 @@ class PurchaseCodeService
     /**
      * Check if user has access to KB category via product license.
      */
-    public function userHasCategoryAccess(User $user, $category): bool
+    public function userHasCategoryAccess(User $user, KbCategory $category): bool
     {
         // If category is not linked to any product, allow access
         if (! $category->product_id) {
@@ -518,7 +536,7 @@ class PurchaseCodeService
     /**
      * Check if user has access to KB article considering both direct product and category product.
      */
-    public function userHasArticleAccess(User $user, $article): bool
+    public function userHasArticleAccess(User $user, KbArticle $article): bool
     {
         // If article has direct product link, check that first
         if ($article->product_id) {

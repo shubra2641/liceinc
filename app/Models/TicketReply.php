@@ -31,6 +31,11 @@ class TicketReply extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = TicketReplyFactory::class;
+
     protected $fillable = [
         'ticket_id',
         'user_id',

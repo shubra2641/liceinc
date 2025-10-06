@@ -76,7 +76,7 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
      *
      * @param  string  $token  The OAuth access token for API authentication
      *
-     * @return array The raw user data from Envato API
+     * @return array<string, mixed> The raw user data from Envato API
      *
      * @throws \Exception When API request fails or returns invalid data
      *
@@ -137,6 +137,9 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
      * $user = $this->mapUserToObject($rawUserData);
      * echo "User: " . $user->getName() . " (" . $user->getEmail() . ")";
      */
+    /**
+     * @param array<string, mixed> $user
+     */
     protected function mapUserToObject(array $user): User
     {
         try {
@@ -191,7 +194,7 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
      *
      * @param  string  $code  The authorization code from OAuth callback
      *
-     * @return array The token request fields with proper validation
+     * @return array<string, mixed> The token request fields with proper validation
      *
      * @throws \InvalidArgumentException When authorization code is invalid
      */

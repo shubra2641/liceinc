@@ -5,17 +5,17 @@
  * including license type inheritance, domain count, and expiry dates.
  */
 
-document.addEventListener("DOMContentLoaded", function () {
-  console.log("License form calculations script loaded");
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('License form calculations script loaded');
 
   // Check if we're on a license form page
-  const productSelect = document.getElementById("product_id");
-  const licenseTypeSelect = document.getElementById("license_type");
-  const maxDomainsInput = document.getElementById("max_domains");
-  const licenseExpiresAtInput = document.getElementById("license_expires_at");
-  const supportExpiresAtInput = document.getElementById("support_expires_at");
+  const productSelect = document.getElementById('product_id');
+  const licenseTypeSelect = document.getElementById('license_type');
+  const maxDomainsInput = document.getElementById('max_domains');
+  const licenseExpiresAtInput = document.getElementById('license_expires_at');
+  const supportExpiresAtInput = document.getElementById('support_expires_at');
 
-  console.log("Elements found:", {
+  console.log('Elements found:', {
     productSelect: !!productSelect,
     licenseTypeSelect: !!licenseTypeSelect,
     maxDomainsInput: !!maxDomainsInput,
@@ -25,12 +25,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // If elements don't exist, exit early
   if (!productSelect || !licenseTypeSelect || !maxDomainsInput) {
-    console.log("Required elements not found, exiting");
+    console.log('Required elements not found, exiting');
     return;
   }
 
   // Product data cache
-  let productData = {};
+  const productData = {};
 
   /**
    * Load product data when product is selected
@@ -49,21 +49,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Fetch product data via AJAX
     fetch(`/admin/products/${productId}/data`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "X-Requested-With": "XMLHttpRequest",
-        "X-CSRF-TOKEN": document
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': document
           .querySelector('meta[name="csrf-token"]')
-          .getAttribute("content"),
+          .getAttribute('content'),
       },
     })
-      .then((response) => response.json())
-      .then((data) => {
+      .then(response => response.json())
+      .then(data => {
         productData[productId] = data;
         applyProductData(data);
+        return data;
       })
-      .catch((error) => {
-        console.error("Error loading product data:", error);
+      .catch(error => {
+        console.error('Error loading product data:', error);
       });
   }
 
@@ -71,12 +72,12 @@ document.addEventListener("DOMContentLoaded", function () {
    * Apply product data to form fields
    */
   function applyProductData(data) {
-    console.log("Applying product data:", data);
+    console.log('Applying product data:', data);
 
     // Set license type
     if (data.license_type) {
       licenseTypeSelect.value = data.license_type;
-      console.log("Set license type to:", data.license_type);
+      console.log('Set license type to:', data.license_type);
     }
 
     // Calculate max domains based on license type
@@ -93,20 +94,20 @@ document.addEventListener("DOMContentLoaded", function () {
     let maxDomains = 1;
 
     switch (licenseType) {
-      case "single":
-        maxDomains = 1;
-        break;
-      case "multi":
-        maxDomains = 5;
-        break;
-      case "developer":
-        maxDomains = 10;
-        break;
-      case "extended":
-        maxDomains = 20;
-        break;
-      default:
-        maxDomains = 1;
+    case 'single':
+      maxDomains = 1;
+      break;
+    case 'multi':
+      maxDomains = 5;
+      break;
+    case 'developer':
+      maxDomains = 10;
+      break;
+    case 'extended':
+      maxDomains = 20;
+      break;
+    default:
+      maxDomains = 1;
     }
 
     maxDomainsInput.value = maxDomains;
@@ -123,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const licenseExpiry = new Date(
         today.getTime() + data.duration_days * 24 * 60 * 60 * 1000,
       );
-      licenseExpiresAtInput.value = licenseExpiry.toISOString().split("T")[0];
+      licenseExpiresAtInput.value = licenseExpiry.toISOString().split('T')[0];
     }
 
     // Calculate support expiry date
@@ -131,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const supportExpiry = new Date(
         today.getTime() + data.support_days * 24 * 60 * 60 * 1000,
       );
-      supportExpiresAtInput.value = supportExpiry.toISOString().split("T")[0];
+      supportExpiresAtInput.value = supportExpiry.toISOString().split('T')[0];
     }
   }
 
@@ -139,86 +140,94 @@ document.addEventListener("DOMContentLoaded", function () {
    * Clear all calculated fields
    */
   function clearCalculations() {
-    licenseTypeSelect.value = "";
+    licenseTypeSelect.value = '';
     maxDomainsInput.value = 1;
-    if (licenseExpiresAtInput) licenseExpiresAtInput.value = "";
-    if (supportExpiresAtInput) supportExpiresAtInput.value = "";
+    if (licenseExpiresAtInput) {
+      licenseExpiresAtInput.value = '';
+    }
+    if (supportExpiresAtInput) {
+      supportExpiresAtInput.value = '';
+    }
   }
 
   /**
    * Update preview when form changes
    */
   function updatePreview() {
-    const productSelect = document.getElementById("product_id");
-    const userSelect = document.getElementById("user_id");
-    const statusSelect = document.getElementById("status");
+    const productSelect = document.getElementById('product_id');
+    const userSelect = document.getElementById('user_id');
+    const statusSelect = document.getElementById('status');
 
     if (productSelect && productSelect.value) {
-      const selectedOption = productSelect.options[productSelect.selectedIndex];
+      const { selectedIndex } = productSelect;
+      const selectedOption = productSelect.options[selectedIndex];
       const productName = selectedOption.text;
-      document.getElementById("preview-product").textContent = productName;
+      document.getElementById('preview-product').textContent = productName;
     }
 
     if (userSelect && userSelect.value) {
-      const selectedOption = userSelect.options[userSelect.selectedIndex];
-      const userName = selectedOption.text.split(" (")[0];
-      document.getElementById("preview-user").textContent = userName;
+      const { selectedIndex } = userSelect;
+      const selectedOption = userSelect.options[selectedIndex];
+      const userName = selectedOption.text.split(' (')[0];
+      document.getElementById('preview-user').textContent = userName;
     }
 
     if (statusSelect && statusSelect.value) {
-      const statusText = statusSelect.options[statusSelect.selectedIndex].text;
-      const statusBadge = document.getElementById("preview-status");
+      const { selectedIndex } = statusSelect;
+      const selectedOption = statusSelect.options[selectedIndex];
+      const statusText = selectedOption.text;
+      const statusBadge = document.getElementById('preview-status');
       statusBadge.textContent = statusText;
 
       // Update badge color based on status
-      statusBadge.className = "badge mt-2";
+      statusBadge.className = 'badge mt-2';
       switch (statusSelect.value) {
-        case "active":
-          statusBadge.classList.add("bg-success");
-          break;
-        case "inactive":
-          statusBadge.classList.add("bg-secondary");
-          break;
-        case "suspended":
-          statusBadge.classList.add("bg-warning");
-          break;
-        case "expired":
-          statusBadge.classList.add("bg-danger");
-          break;
-        default:
-          statusBadge.classList.add("bg-primary");
+      case 'active':
+        statusBadge.classList.add('bg-success');
+        break;
+      case 'inactive':
+        statusBadge.classList.add('bg-secondary');
+        break;
+      case 'suspended':
+        statusBadge.classList.add('bg-warning');
+        break;
+      case 'expired':
+        statusBadge.classList.add('bg-danger');
+        break;
+      default:
+        statusBadge.classList.add('bg-primary');
       }
     }
 
     // Update domains preview
     if (maxDomainsInput) {
-      document.getElementById("preview-domains").textContent =
+      document.getElementById('preview-domains').textContent =
         maxDomainsInput.value;
     }
   }
 
   // Event listeners
-  productSelect.addEventListener("change", function () {
-    console.log("Product changed to:", this.value);
+  productSelect.addEventListener('change', function() {
+    console.log('Product changed to:', this.value);
     loadProductData(this.value);
     updatePreview();
   });
 
-  licenseTypeSelect.addEventListener("change", function () {
+  licenseTypeSelect.addEventListener('change', function() {
     calculateMaxDomains(this.value);
     updatePreview();
   });
 
   // Add event listeners for preview updates
-  const userSelect = document.getElementById("user_id");
-  const statusSelect = document.getElementById("status");
+  const userSelect = document.getElementById('user_id');
+  const statusSelect = document.getElementById('status');
 
   if (userSelect) {
-    userSelect.addEventListener("change", updatePreview);
+    userSelect.addEventListener('change', updatePreview);
   }
 
   if (statusSelect) {
-    statusSelect.addEventListener("change", updatePreview);
+    statusSelect.addEventListener('change', updatePreview);
   }
 
   // Initial preview update

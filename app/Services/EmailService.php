@@ -53,6 +53,9 @@ class EmailService
      *
      *
      */
+    /**
+     * @param array<string, mixed> $data
+     */
     public function sendEmail(
         string $templateName,
         string $recipientEmail,
@@ -110,6 +113,9 @@ class EmailService
      *
      *
      */
+    /**
+     * @param array<string, mixed> $data
+     */
     public function sendToUser(User $user, string $templateName, array $data = []): bool
     {
         if (! $user || ! $user->email) {
@@ -143,6 +149,9 @@ class EmailService
      *
      *
      */
+    /**
+     * @param array<string, mixed> $data
+     */
     public function sendToAdmin(string $templateName, array $data = []): bool
     {
         // Get admin email from settings or use default
@@ -167,15 +176,20 @@ class EmailService
      * @param  string  $templateName  Template identifier
      * @param  array  $data  Variables for template substitution
      *
-     * @return array Results array with success/failure counts
+     * @return array<string, mixed> Results array with success/failure counts
      *
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
+     */
+    /**
+     * @param array<string, mixed> $users
+     * @param array<string, mixed> $data
+     */
+    /**
+     * @param array<string, mixed> $users
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
      */
     public function sendBulkEmail(array $users, string $templateName, array $data = []): array
     {
@@ -219,7 +233,7 @@ class EmailService
      * @param  string  $type  Template type ('user' or 'admin')
      * @param  string|null  $category  Optional category filter
      *
-     * @return Collection Collection of email templates
+     * @return \Illuminate\Database\Eloquent\Collection<int, EmailTemplate> Collection of email templates
      *
      * @throws \InvalidArgumentException When parameters are invalid
      *
@@ -257,6 +271,9 @@ class EmailService
      *
      *
      */
+    /**
+     * @param array<string, mixed> $templateData
+     */
     public function createOrUpdateTemplate(array $templateData): EmailTemplate
     {
         if (empty($templateData['name'])) {
@@ -286,6 +303,10 @@ class EmailService
      *
      *
      *
+     */
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
      */
     public function testTemplate(string $templateName, array $data = []): array
     {
@@ -343,6 +364,9 @@ class EmailService
      *
      *
      *
+     */
+    /**
+     * @param array<string, mixed> $data
      */
     public function sendWelcome(User $user, array $data = []): bool
     {
@@ -416,7 +440,7 @@ class EmailService
             'user_lastname' => $this->sanitizeString($user->lastname ?? ''),
             'user_phone' => $this->sanitizeString($user->phonenumber ?? 'Not provided'),
             'user_country' => $this->sanitizeString($user->country ?? 'Not provided'),
-            'registration_date' => $user->created_at->format('M d, Y \a\t g:i A'),
+            'registration_date' => $user->created_at ? $user->created_at->format('M d, Y \a\t g:i A') : 'Unknown',
             'registration_ip' => $this->sanitizeString(request()->ip() ?? 'Unknown'),
             'user_agent' => $this->sanitizeString(request()->userAgent() ?? 'Unknown'),
         ]);
@@ -474,6 +498,9 @@ class EmailService
     /**
      * Send license expiration warning to user.
      */
+    /**
+     * @param array<string, mixed> $licenseData
+     */
     public function sendLicenseExpiring(User $user, array $licenseData): bool
     {
         return $this->sendToUser($user, 'user_license_expiring', array_merge($licenseData, [
@@ -486,6 +513,9 @@ class EmailService
     /**
      * Send license updated notification to user.
      */
+    /**
+     * @param array<string, mixed> $licenseData
+     */
     public function sendLicenseUpdated(User $user, array $licenseData): bool
     {
         return $this->sendToUser($user, 'user_license_updated', array_merge($licenseData, [
@@ -496,6 +526,9 @@ class EmailService
     }
     /**
      * Send product version update notification to user.
+     */
+    /**
+     * @param array<string, mixed> $productData
      */
     public function sendProductVersionUpdate(User $user, array $productData): bool
     {
@@ -509,6 +542,9 @@ class EmailService
     /**
      * Send support ticket created notification to user.
      */
+    /**
+     * @param array<string, mixed> $ticketData
+     */
     public function sendTicketCreated(User $user, array $ticketData): bool
     {
         return $this->sendToUser($user, 'user_ticket_created', array_merge($ticketData, [
@@ -519,6 +555,9 @@ class EmailService
     }
     /**
      * Send support ticket status update notification to user.
+     */
+    /**
+     * @param array<string, mixed> $ticketData
      */
     public function sendTicketStatusUpdate(User $user, array $ticketData): bool
     {
@@ -532,6 +571,9 @@ class EmailService
     /**
      * Send support ticket reply notification to user.
      */
+    /**
+     * @param array<string, mixed> $ticketData
+     */
     public function sendTicketReply(User $user, array $ticketData): bool
     {
         return $this->sendToUser($user, 'user_ticket_reply', array_merge($ticketData, [
@@ -543,6 +585,9 @@ class EmailService
     }
     /**
      * Send invoice approaching due date notification to user.
+     */
+    /**
+     * @param array<string, mixed> $invoiceData
      */
     public function sendInvoiceApproachingDue(User $user, array $invoiceData): bool
     {
@@ -556,6 +601,9 @@ class EmailService
     /**
      * Send invoice paid notification to user.
      */
+    /**
+     * @param array<string, mixed> $invoiceData
+     */
     public function sendInvoicePaid(User $user, array $invoiceData): bool
     {
         return $this->sendToUser($user, 'user_invoice_paid', array_merge($invoiceData, [
@@ -568,6 +616,9 @@ class EmailService
     /**
      * Send invoice cancelled notification to user.
      */
+    /**
+     * @param array<string, mixed> $invoiceData
+     */
     public function sendInvoiceCancelled(User $user, array $invoiceData): bool
     {
         return $this->sendToUser($user, 'user_invoice_cancelled', array_merge($invoiceData, [
@@ -578,6 +629,9 @@ class EmailService
     }
     /**
      * Send admin notification for license created.
+     */
+    /**
+     * @param array<string, mixed> $licenseData
      */
     public function sendAdminLicenseCreated(array $licenseData): bool
     {
@@ -590,6 +644,9 @@ class EmailService
     }
     /**
      * Send admin notification for license expiring.
+     */
+    /**
+     * @param array<string, mixed> $licenseData
      */
     public function sendAdminLicenseExpiring(array $licenseData): bool
     {
@@ -605,6 +662,9 @@ class EmailService
     /**
      * Send admin notification for license renewed.
      */
+    /**
+     * @param array<string, mixed> $licenseData
+     */
     public function sendAdminLicenseRenewed(array $licenseData): bool
     {
         return $this->sendToAdmin('admin_license_renewed', array_merge($licenseData, [
@@ -617,6 +677,9 @@ class EmailService
     }
     /**
      * Send admin notification for support ticket created.
+     */
+    /**
+     * @param array<string, mixed> $ticketData
      */
     public function sendAdminTicketCreated(array $ticketData): bool
     {
@@ -631,6 +694,9 @@ class EmailService
     /**
      * Send renewal reminder to user.
      */
+    /**
+     * @param array<string, mixed> $renewalData
+     */
     public function sendRenewalReminder(User $user, array $renewalData): bool
     {
         return $this->sendToUser($user, 'user_renewal_reminder', array_merge($renewalData, [
@@ -644,6 +710,9 @@ class EmailService
     }
     /**
      * Send admin notification for renewal reminder.
+     */
+    /**
+     * @param array<string, mixed> $renewalData
      */
     public function sendAdminRenewalReminder(array $renewalData): bool
     {
@@ -660,6 +729,9 @@ class EmailService
     /**
      * Send admin notification for ticket reply from user.
      */
+    /**
+     * @param array<string, mixed> $ticketData
+     */
     public function sendAdminTicketReply(array $ticketData): bool
     {
         return $this->sendToAdmin('admin_ticket_reply', array_merge($ticketData, [
@@ -673,6 +745,9 @@ class EmailService
     /**
      * Send admin notification for ticket closed by user.
      */
+    /**
+     * @param array<string, mixed> $ticketData
+     */
     public function sendAdminTicketClosed(array $ticketData): bool
     {
         return $this->sendToAdmin('admin_ticket_closed', array_merge($ticketData, [
@@ -685,6 +760,9 @@ class EmailService
     }
     /**
      * Send admin notification for invoice approaching due.
+     */
+    /**
+     * @param array<string, mixed> $invoiceData
      */
     public function sendAdminInvoiceApproachingDue(array $invoiceData): bool
     {
@@ -700,6 +778,9 @@ class EmailService
     /**
      * Send admin notification for invoice cancelled.
      */
+    /**
+     * @param array<string, mixed> $invoiceData
+     */
     public function sendAdminInvoiceCancelled(array $invoiceData): bool
     {
         return $this->sendToAdmin('admin_invoice_cancelled', array_merge($invoiceData, [
@@ -713,7 +794,7 @@ class EmailService
     /**
      * Send payment failure notification to admin.
      */
-    public function sendPaymentFailureNotification($order): bool
+    public function sendPaymentFailureNotification(Invoice $order): bool
     {
         return $this->sendToAdmin('admin_payment_failure', [
             'customer_name' => $order->user->name,
@@ -730,7 +811,7 @@ class EmailService
     /**
      * Send license creation notification to user.
      */
-    public function sendLicenseCreated($license, $user = null): bool
+    public function sendLicenseCreated(License $license, ?User $user = null): bool
     {
         $targetUser = $user ?? $license->user;
         return $this->sendToUser($targetUser, 'license_created', [
@@ -750,7 +831,7 @@ class EmailService
     /**
      * Send admin notification about payment and license creation.
      */
-    public function sendAdminPaymentNotification($license, $invoice): bool
+    public function sendAdminPaymentNotification(License $license, Invoice $invoice): bool
     {
         return $this->sendToAdmin('admin_payment_license_created', [
             'customer_name' => $license->user->name,
@@ -770,7 +851,7 @@ class EmailService
     /**
      * Send custom invoice payment confirmation to user.
      */
-    public function sendCustomInvoicePaymentConfirmation($invoice): bool
+    public function sendCustomInvoicePaymentConfirmation(Invoice $invoice): bool
     {
         return $this->sendToUser($invoice->user, 'custom_invoice_payment_confirmation', [
             'customer_name' => $invoice->user->name,
@@ -787,7 +868,7 @@ class EmailService
     /**
      * Send admin notification for custom invoice payment.
      */
-    public function sendAdminCustomInvoicePaymentNotification($invoice): bool
+    public function sendAdminCustomInvoicePaymentNotification(Invoice $invoice): bool
     {
         return $this->sendToAdmin('admin_custom_invoice_payment', [
             'customer_name' => $invoice->user->name,
@@ -926,6 +1007,10 @@ class EmailService
      *
      *
      *
+     */
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
      */
     private function sanitizeData(array $data): array
     {

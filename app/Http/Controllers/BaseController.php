@@ -55,6 +55,11 @@ abstract class BaseController extends Controller
      *     'password' => 'required|min:8|confirmed'
      * ]);
      */
+    /**
+     * @param array<string, string> $rules
+     * @param array<string, string> $messages
+     * @return array<string, mixed>
+     */
     protected function validateRequest(Request $request, array $rules, array $messages = []): array
     {
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -83,6 +88,9 @@ abstract class BaseController extends Controller
      *
      * // Error response:
      * return $this->jsonResponse(null, 'User not found', 404);
+     */
+    /**
+     * @param array<string, mixed> $meta
      */
     protected function jsonResponse(
         mixed $data = null,
@@ -118,6 +126,9 @@ abstract class BaseController extends Controller
      *
      * // Server error:
      * return $this->errorResponse('Internal server error', 500);
+     */
+    /**
+     * @param array<string, mixed>|null $errors
      */
     protected function errorResponse(
         string $message = 'Error',
@@ -174,6 +185,9 @@ abstract class BaseController extends Controller
      *     'attempted_action' => 'admin_panel_access'
      * ]);
      */
+    /**
+     * @param array<string, mixed> $context
+     */
     protected function logSecurityEvent(string $event, Request $request, array $context = []): void
     {
         Log::warning('Security event: ' . $event, array_merge([
@@ -197,6 +211,10 @@ abstract class BaseController extends Controller
      * @example
      * // Sanitize user input for logging:
      * $sanitized = $this->sanitizeLogData($request->all());
+     */
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
      */
     protected function sanitizeLogData(array $data): array
     {
@@ -280,7 +298,8 @@ abstract class BaseController extends Controller
      */
     protected function hasPermission(string $permission, mixed $resource = null): bool
     {
-        return Auth::check() && Auth::user()->can($permission);
+        $user = Auth::user();
+        return Auth::check() && $user !== null && $user->can($permission);
     }
     /**
      * Require permission or abort with enhanced security.
@@ -321,6 +340,9 @@ abstract class BaseController extends Controller
      * // Get pagination metadata:
      * $meta = $this->getPaginationMeta($users);
      * return $this->jsonResponse($users, 'Users retrieved', 200, $meta);
+     */
+    /**
+     * @return array<string, mixed>
      */
     protected function getPaginationMeta($paginator): array
     {

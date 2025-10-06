@@ -98,7 +98,7 @@ class ProductUpdateApiController extends Controller
                 ], 403);
             }
             // Check domain if required
-            if ($license->product->requires_domain) {
+            if ($license->product && $license->product->requires_domain) {
                 if ($license->domains()->where('domain', $domain)->exists() === false) {
                     DB::rollBack();
                     return response()->json([
@@ -204,7 +204,7 @@ class ProductUpdateApiController extends Controller
                 ], 403);
             }
             // Check domain if required
-            if ($license->product->requires_domain) {
+            if ($license->product && $license->product->requires_domain) {
                 if ($license->domains()->where('domain', $domain)->exists() === false) {
                     DB::rollBack();
                     return response()->json([
@@ -300,7 +300,7 @@ class ProductUpdateApiController extends Controller
                 ], 403);
             }
             // Check domain if required
-            if ($license->product->requires_domain) {
+            if ($license->product && $license->product->requires_domain) {
                 if ($license->domains()->where('domain', $domain)->exists() === false) {
                     DB::rollBack();
                     return response()->json([
@@ -406,7 +406,7 @@ class ProductUpdateApiController extends Controller
                 ], 403);
             }
             // Check domain if required
-            if ($license->product->requires_domain) {
+            if ($license->product && $license->product->requires_domain) {
                 if ($license->domains()->where('domain', $domain)->exists() === false) {
                     DB::rollBack();
                     return response()->json([

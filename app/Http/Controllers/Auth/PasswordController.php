@@ -45,6 +45,9 @@ class PasswordController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function validatePasswordUpdate(Request $request): array
     {
         return $request->validateWithBag('updatePassword', [

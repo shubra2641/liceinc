@@ -63,6 +63,9 @@ class AuthenticatedSessionController extends Controller
             $request->authenticate();
             $request->session()->regenerate();
             $user = Auth::user();
+            if ($user === null) {
+                throw new \Illuminate\Auth\AuthenticationException('User not authenticated');
+            }
             // Handle email verification requirements
             if (! $user->hasVerifiedEmail()) {
                 DB::commit();

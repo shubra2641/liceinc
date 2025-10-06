@@ -3,7 +3,7 @@
  * Handles modal, dark mode, and responsive navigation
  */
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', () => {
   // ========================================
   // Modal Management
   // ========================================
@@ -11,59 +11,59 @@ document.addEventListener("DOMContentLoaded", function () {
   // Hide all modals by default
   const hideAllModals = () => {
     const modals = document.querySelectorAll(
-      ".license-history-modal, .user-modal-backdrop",
+      '.license-history-modal, .user-modal-backdrop',
     );
-    modals.forEach((modal) => {
-      modal.classList.remove("show");
-      modal.style.display = "none";
+    modals.forEach(modal => {
+      modal.classList.remove('show');
+      modal.style.display = 'none';
     });
   };
 
   // Show modal function
-  const showModal = (modalId) => {
+  const showModal = modalId => {
     const modal = document.getElementById(modalId);
-    const backdrop = document.querySelector(".user-modal-backdrop");
+    const backdrop = document.querySelector('.user-modal-backdrop');
 
     if (modal && backdrop) {
-      modal.classList.add("show");
-      backdrop.classList.add("show");
-      modal.style.display = "block";
-      backdrop.style.display = "block";
-      document.body.style.overflow = "hidden";
+      modal.classList.add('show');
+      backdrop.classList.add('show');
+      modal.style.display = 'block';
+      backdrop.style.display = 'block';
+      document.body.style.overflow = 'hidden';
     }
   };
 
   // Hide modal function
   const hideModal = () => {
     hideAllModals();
-    document.body.style.overflow = "auto";
+    document.body.style.overflow = 'auto';
   };
 
   // Modal event listeners
-  document.addEventListener("click", function (e) {
+  document.addEventListener('click', e => {
     // Close modal on backdrop click
-    if (e.target.classList.contains("user-modal-backdrop")) {
+    if (e.target.classList.contains('user-modal-backdrop')) {
       hideModal();
     }
 
     // Close modal on close button click
     if (
-      e.target.classList.contains("user-modal-close") ||
-      e.target.closest(".user-modal-close")
+      e.target.classList.contains('user-modal-close') ||
+      e.target.closest('.user-modal-close')
     ) {
       hideModal();
     }
 
     // Show modal on trigger click
-    if (e.target.hasAttribute("data-modal-trigger")) {
-      const modalId = e.target.getAttribute("data-modal-trigger");
+    if (e.target.hasAttribute('data-modal-trigger')) {
+      const modalId = e.target.getAttribute('data-modal-trigger');
       showModal(modalId);
     }
   });
 
   // Close modal on Escape key
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
       hideModal();
     }
   });
@@ -74,29 +74,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Check system dark mode preference
   const prefersDarkMode = window.matchMedia(
-    "(prefers-color-scheme: dark)",
+    '(prefers-color-scheme: dark)',
   ).matches;
 
   // Get stored theme preference
-  const getStoredTheme = () => {
-    return (
-      localStorage.getItem("theme") || (prefersDarkMode ? "dark" : "light")
-    );
-  };
+  const getStoredTheme = () => (
+    localStorage.getItem('theme') || (prefersDarkMode ? 'dark' : 'light')
+  );
 
   // Set theme
-  const setTheme = (theme) => {
+  const setTheme = theme => {
     const html = document.documentElement;
 
-    if (theme === "dark") {
-      html.setAttribute("data-theme", "dark");
-      html.classList.add("dark");
+    if (theme === 'dark') {
+      html.setAttribute('data-theme', 'dark');
+      html.classList.add('dark');
     } else {
-      html.removeAttribute("data-theme");
-      html.classList.remove("dark");
+      html.removeAttribute('data-theme');
+      html.classList.remove('dark');
     }
 
-    localStorage.setItem("theme", theme);
+    localStorage.setItem('theme', theme);
   };
 
   // Initialize theme
@@ -108,14 +106,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Toggle theme
   const toggleTheme = () => {
     const currentTheme = getStoredTheme();
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
   };
 
   // Theme toggle button
-  const themeToggleBtn = document.querySelector("[data-theme-toggle]");
+  const themeToggleBtn = document.querySelector('[data-theme-toggle]');
   if (themeToggleBtn) {
-    themeToggleBtn.addEventListener("click", toggleTheme);
+    themeToggleBtn.addEventListener('click', toggleTheme);
   }
 
   // Initialize theme on load
@@ -123,10 +121,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Listen for system theme changes
   window
-    .matchMedia("(prefers-color-scheme: dark)")
-    .addEventListener("change", function (e) {
-      if (!localStorage.getItem("theme")) {
-        setTheme(e.matches ? "dark" : "light");
+    .matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', e => {
+      if (!localStorage.getItem('theme')) {
+        setTheme(e.matches ? 'dark' : 'light');
       }
     });
 
@@ -134,63 +132,63 @@ document.addEventListener("DOMContentLoaded", function () {
   // Mobile Menu Management
   // ========================================
 
-  const mobileMenuToggle = document.querySelector("[data-mobile-menu-toggle]");
-  const mobileMenu = document.querySelector("[data-mobile-menu]");
-  const mobileMenuClose = document.querySelector(".mobile-menu-close");
+  const mobileMenuToggle = document.querySelector('[data-mobile-menu-toggle]');
+  const mobileMenu = document.querySelector('[data-mobile-menu]');
+  const mobileMenuClose = document.querySelector('.mobile-menu-close');
 
   // Toggle mobile menu
   const toggleMobileMenu = () => {
     if (mobileMenu) {
-      mobileMenu.classList.toggle("active");
-      document.body.classList.toggle("mobile-menu-open");
+      mobileMenu.classList.toggle('active');
+      document.body.classList.toggle('mobile-menu-open');
 
       // Create backdrop if it doesn't exist
-      let backdrop = document.querySelector(".mobile-menu-backdrop");
+      let backdrop = document.querySelector('.mobile-menu-backdrop');
       if (!backdrop) {
-        backdrop = document.createElement("div");
-        backdrop.classList.add("mobile-menu-backdrop");
+        backdrop = document.createElement('div');
+        backdrop.classList.add('mobile-menu-backdrop');
         document.body.appendChild(backdrop);
       }
 
-      backdrop.classList.toggle("active");
+      backdrop.classList.toggle('active');
     }
   };
 
   // Close mobile menu
   const closeMobileMenu = () => {
     if (mobileMenu) {
-      mobileMenu.classList.remove("active");
-      document.body.classList.remove("mobile-menu-open");
+      mobileMenu.classList.remove('active');
+      document.body.classList.remove('mobile-menu-open');
 
-      const backdrop = document.querySelector(".mobile-menu-backdrop");
+      const backdrop = document.querySelector('.mobile-menu-backdrop');
       if (backdrop) {
-        backdrop.classList.remove("active");
+        backdrop.classList.remove('active');
       }
     }
   };
 
   // Mobile menu event listeners
   if (mobileMenuToggle) {
-    mobileMenuToggle.addEventListener("click", toggleMobileMenu);
+    mobileMenuToggle.addEventListener('click', toggleMobileMenu);
   }
 
   if (mobileMenuClose) {
-    mobileMenuClose.addEventListener("click", closeMobileMenu);
+    mobileMenuClose.addEventListener('click', closeMobileMenu);
   }
 
   // Close mobile menu on backdrop click
-  document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("mobile-menu-backdrop")) {
+  document.addEventListener('click', e => {
+    if (e.target.classList.contains('mobile-menu-backdrop')) {
       closeMobileMenu();
     }
   });
 
   // Close mobile menu on escape key
-  document.addEventListener("keydown", function (e) {
+  document.addEventListener('keydown', e => {
     if (
-      e.key === "Escape" &&
+      e.key === 'Escape' &&
       mobileMenu &&
-      mobileMenu.classList.contains("show")
+      mobileMenu.classList.contains('show')
     ) {
       closeMobileMenu();
     }
@@ -206,25 +204,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (isMobile) {
       // Hide desktop navigation on mobile
-      const desktopNav = document.querySelector(".user-nav-links");
+      const desktopNav = document.querySelector('.user-nav-links');
       if (desktopNav) {
-        desktopNav.style.display = "none";
+        desktopNav.style.display = 'none';
       }
 
       // Show mobile menu button
       if (mobileMenuToggle) {
-        mobileMenuToggle.style.display = "flex";
+        mobileMenuToggle.style.display = 'flex';
       }
     } else {
       // Show desktop navigation on desktop
-      const desktopNav = document.querySelector(".user-nav-links");
+      const desktopNav = document.querySelector('.user-nav-links');
       if (desktopNav) {
-        desktopNav.style.display = "flex";
+        desktopNav.style.display = 'flex';
       }
 
       // Hide mobile menu button
       if (mobileMenuToggle) {
-        mobileMenuToggle.style.display = "none";
+        mobileMenuToggle.style.display = 'none';
       }
 
       // Close mobile menu if open
@@ -234,36 +232,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize responsive behavior
   handleResize();
-  window.addEventListener("resize", handleResize);
+  window.addEventListener('resize', handleResize);
 
   // ========================================
   // Dropdown Management
   // ========================================
 
   // Handle dropdown toggles
-  document.addEventListener("click", function (e) {
-    const dropdownToggle = e.target.closest(".user-dropdown-toggle");
-    const dropdown = e.target.closest(".user-dropdown");
+  document.addEventListener('click', e => {
+    const dropdownToggle = e.target.closest('.user-dropdown-toggle');
+    const dropdown = e.target.closest('.user-dropdown');
 
     if (dropdownToggle) {
       e.preventDefault();
-      const dropdownMenu = dropdown.querySelector(".user-dropdown-menu");
+      const dropdownMenu = dropdown.querySelector('.user-dropdown-menu');
 
       if (dropdownMenu) {
         // Close other dropdowns
-        document.querySelectorAll(".user-dropdown-menu").forEach((menu) => {
+        document.querySelectorAll('.user-dropdown-menu').forEach(menu => {
           if (menu !== dropdownMenu) {
-            menu.classList.remove("open");
+            menu.classList.remove('open');
           }
         });
 
         // Toggle current dropdown
-        dropdownMenu.classList.toggle("open");
+        dropdownMenu.classList.toggle('open');
       }
     } else {
       // Close all dropdowns when clicking outside
-      document.querySelectorAll(".user-dropdown-menu").forEach((menu) => {
-        menu.classList.remove("open");
+      document.querySelectorAll('.user-dropdown-menu').forEach(menu => {
+        menu.classList.remove('open');
       });
     }
   });
@@ -273,14 +271,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // ========================================
 
   // Handle logout button clicks
-  document.addEventListener("click", function (e) {
+  document.addEventListener('click', e => {
     if (
-      e.target.hasAttribute("data-action") &&
-      e.target.getAttribute("data-action") === "logout"
+      e.target.hasAttribute('data-action') &&
+      e.target.getAttribute('data-action') === 'logout'
     ) {
       e.preventDefault();
 
-      const logoutForm = document.getElementById("logout-form");
+      const logoutForm = document.getElementById('logout-form');
       if (logoutForm) {
         logoutForm.submit();
       }
@@ -292,14 +290,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // ========================================
 
   // Smooth scroll for anchor links
-  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-    anchor.addEventListener("click", function (e) {
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
       e.preventDefault();
-      const target = document.querySelector(this.getAttribute("href"));
+      const target = document.querySelector(this.getAttribute('href'));
       if (target) {
         target.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
+          behavior: 'smooth',
+          block: 'start',
         });
       }
     });
@@ -310,19 +308,19 @@ document.addEventListener("DOMContentLoaded", function () {
   // ========================================
 
   // Add loading states to forms
-  document.querySelectorAll("form").forEach((form) => {
-    form.addEventListener("submit", function () {
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', () => {
       const submitBtn = form.querySelector(
         'button[type="submit"], input[type="submit"]',
       );
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.classList.add("loading");
+        submitBtn.classList.add('loading');
 
         // Re-enable after 5 seconds as fallback
         setTimeout(() => {
           submitBtn.disabled = false;
-          submitBtn.classList.remove("loading");
+          submitBtn.classList.remove('loading');
         }, 5000);
       }
     });
@@ -333,9 +331,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // ========================================
 
   // Auto-hide notifications after 5 seconds
-  document.querySelectorAll(".user-notification").forEach((notification) => {
+  document.querySelectorAll('.user-notification').forEach(notification => {
     setTimeout(() => {
-      notification.classList.remove("show");
+      notification.classList.remove('show');
       setTimeout(() => {
         notification.remove();
       }, 300);
@@ -347,19 +345,19 @@ document.addEventListener("DOMContentLoaded", function () {
   // ========================================
 
   // Lazy load images
-  if ("IntersectionObserver" in window) {
+  if ('IntersectionObserver' in window) {
     const imageObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach((entry) => {
+      entries.forEach(entry => {
         if (entry.isIntersecting) {
           const img = entry.target;
           img.src = img.dataset.src;
-          img.classList.remove("lazy");
+          img.classList.remove('lazy');
           observer.unobserve(img);
         }
       });
     });
 
-    document.querySelectorAll("img[data-src]").forEach((img) => {
+    document.querySelectorAll('img[data-src]').forEach(img => {
       imageObserver.observe(img);
     });
   }
@@ -369,15 +367,15 @@ document.addEventListener("DOMContentLoaded", function () {
   // ========================================
 
   // Add keyboard navigation for dropdowns
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Tab") {
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
       const focusedElement = document.activeElement;
-      const dropdown = focusedElement.closest(".user-dropdown");
+      const dropdown = focusedElement.closest('.user-dropdown');
 
       if (dropdown && e.shiftKey === false) {
-        const dropdownMenu = dropdown.querySelector(".user-dropdown-menu");
-        if (dropdownMenu && !dropdownMenu.classList.contains("open")) {
-          dropdownMenu.classList.add("open");
+        const dropdownMenu = dropdown.querySelector('.user-dropdown-menu');
+        if (dropdownMenu && !dropdownMenu.classList.contains('open')) {
+          dropdownMenu.classList.add('open');
         }
       }
     }
@@ -387,5 +385,5 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize Everything
   // ========================================
 
-  console.log("User Dashboard JavaScript initialized successfully");
+  console.log('User Dashboard JavaScript initialized successfully');
 });

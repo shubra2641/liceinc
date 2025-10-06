@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $webhook_id
  * @property string $event_type
- * @property array $payload
+ * @property array<string, mixed> $payload
  * @property int $response_status
  * @property string|null $response_body
  * @property float $execution_time
@@ -24,6 +24,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class WebhookLog extends Model
 {
     use HasFactory;
+
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = WebhookLogFactory::class;
 
     /**
      * The attributes that are mass assignable.
@@ -59,6 +64,9 @@ class WebhookLog extends Model
     /**
      * Get the webhook that owns the log.
      */
+    /**
+     * @return BelongsTo<Webhook, WebhookLog>
+     */
     public function webhook(): BelongsTo
     {
         return $this->belongsTo(Webhook::class);
@@ -66,6 +74,10 @@ class WebhookLog extends Model
 
     /**
      * Scope a query to only include successful logs.
+     */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<WebhookLog> $query
+     * @return \Illuminate\Database\Eloquent\Builder<WebhookLog>
      */
     public function scopeSuccessful($query)
     {
@@ -75,6 +87,10 @@ class WebhookLog extends Model
     /**
      * Scope a query to only include failed logs.
      */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<WebhookLog> $query
+     * @return \Illuminate\Database\Eloquent\Builder<WebhookLog>
+     */
     public function scopeFailed($query)
     {
         return $query->where('is_successful', false);
@@ -82,6 +98,11 @@ class WebhookLog extends Model
 
     /**
      * Scope a query to only include logs for a specific event type.
+     */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<WebhookLog> $query
+     * @param string $eventType
+     * @return \Illuminate\Database\Eloquent\Builder<WebhookLog>
      */
     public function scopeEventType($query, string $eventType)
     {

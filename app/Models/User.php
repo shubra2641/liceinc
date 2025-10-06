@@ -144,6 +144,11 @@ class User extends AuthenticatableBase implements
     use Authorizable;
     use CanResetPassword;
     use HasFactory;
+
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = UserFactory::class;
     use HasRoles;
     use MustVerifyEmail;
     use Notifiable;

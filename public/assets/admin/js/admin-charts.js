@@ -5,7 +5,7 @@
 
 // Assume Chart.js and Bootstrap are loaded globally
 
-if (typeof window.AdminCharts === "undefined") {
+if (typeof window.AdminCharts === 'undefined') {
   class AdminCharts {
     constructor() {
       this.charts = {};
@@ -16,60 +16,60 @@ if (typeof window.AdminCharts === "undefined") {
       if (meta && meta.content) {
         try {
           // Keep the full URL as provided by the server (trim trailing slash)
-          baseUrl = meta.content.replace(/\/+$|\s+$/g, "");
+          baseUrl = meta.content.replace(/\/+$|\s+$/g, '');
         } catch (e) {
           baseUrl = window.location.origin;
         }
       }
       this.baseUrl = baseUrl;
 
-      this.buildUrl = (path = "") => {
+      this.buildUrl = (path = '') => {
         // Remove leading slashes and build full URL
-        const cleanPath = (path || "").toString().replace(/^\/+/, "");
-        const fullPath = cleanPath ? `/${cleanPath}` : "";
+        const cleanPath = (path || '').toString().replace(/^\/+/, '');
+        const fullPath = cleanPath ? `/${cleanPath}` : '';
         const finalUrl = `${this.baseUrl}${fullPath}`;
         // URL building for API calls
         return finalUrl;
       };
 
       // Validate URL to prevent SSRF attacks
-      this.isValidUrl = (url) => {
+      this.isValidUrl = url => {
         try {
           const urlObj = new URL(url);
           const allowedOrigins = [
             window.location.origin,
-            window.location.protocol + "//" + window.location.host,
+            `${window.location.protocol}//${window.location.host}`,
           ];
-          return allowedOrigins.some((origin) => url.startsWith(origin));
+          return allowedOrigins.some(origin => url.startsWith(origin));
         } catch (e) {
           return false;
         }
       };
 
       // Unified fetch with proper URL building and authentication
-      this.apiFetch = async (path, options = {}) => {
+      this.apiFetch = async(path, options = {}) => {
         const primaryUrl = this.buildUrl(path);
 
         // Validate URL to prevent SSRF attacks
         if (!this.isValidUrl(primaryUrl)) {
-          throw new Error("Invalid URL: SSRF protection activated");
+          throw new Error('Invalid URL: SSRF protection activated');
         }
 
         // Get CSRF token from meta tag
         const csrfToken = document
           .querySelector('meta[name="csrf-token"]')
-          ?.getAttribute("content");
+          ?.getAttribute('content');
 
         // Prepare headers with authentication
         const headers = {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
         };
 
         // Add CSRF token if available
         if (csrfToken) {
-          headers["X-CSRF-TOKEN"] = csrfToken;
+          headers['X-CSRF-TOKEN'] = csrfToken;
         }
 
         // Merge with any additional headers
@@ -77,34 +77,34 @@ if (typeof window.AdminCharts === "undefined") {
 
         const opts = Object.assign(
           {
-            credentials: "same-origin",
+            credentials: 'same-origin',
             headers,
-            method: options.method || "GET",
+            method: options.method || 'GET',
           },
           options,
         );
 
-        const tryParseJson = async (resp) => {
-          const ct = resp.headers.get("content-type") || "";
+        const tryParseJson = async resp => {
+          const ct = resp.headers.get('content-type') || '';
           if (!resp.ok) {
             // Handle authentication errors gracefully
             if (resp.status === 401) {
               throw new Error(
-                "Authentication required. Please refresh the page and log in again.",
+                'Authentication required. Please refresh the page and log in again.',
               );
             } else if (resp.status === 403) {
               throw new Error(
-                "Access denied. You do not have permission to access this data.",
+                'Access denied. You do not have permission to access this data.',
               );
             } else if (resp.status === 404) {
-              throw new Error("Data endpoint not found.");
+              throw new Error('Data endpoint not found.');
             } else if (resp.status >= 500) {
-              throw new Error("Server error occurred while fetching data.");
+              throw new Error('Server error occurred while fetching data.');
             }
             throw new Error(`HTTP ${resp.status}`);
           }
-          if (!ct.includes("application/json")) {
-            throw new Error(`Unexpected content-type: ${ct || "unknown"}`);
+          if (!ct.includes('application/json')) {
+            throw new Error(`Unexpected content-type: ${ct || 'unknown'}`);
           }
           return resp.json();
         };
@@ -112,15 +112,15 @@ if (typeof window.AdminCharts === "undefined") {
         try {
           // Validate URL to prevent SSRF attacks
           if (!this.isValidUrl(primaryUrl)) {
-            throw new Error("Invalid URL: SSRF protection activated");
+            throw new Error('Invalid URL: SSRF protection activated');
           }
           const resp = await fetch(primaryUrl, opts);
           return await tryParseJson(resp);
         } catch (e) {
           // Log the error for debugging (only in development)
           if (
-            window.location.hostname === "localhost" ||
-            window.location.hostname === "127.0.0.1"
+            window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1'
           ) {
             // AdminCharts: Failed to fetch data from primary URL, using fallback
           }
@@ -139,9 +139,9 @@ if (typeof window.AdminCharts === "undefined") {
         const urlObj = new URL(url);
         const allowedOrigins = [
           window.location.origin,
-          window.location.protocol + "//" + window.location.host,
+          `${window.location.protocol}//${window.location.host}`,
         ];
-        return allowedOrigins.some((origin) => url.startsWith(origin));
+        return allowedOrigins.some(origin => url.startsWith(origin));
       } catch (e) {
         return false;
       }
@@ -175,32 +175,34 @@ if (typeof window.AdminCharts === "undefined") {
     }
 
     createSystemOverviewChart() {
-      const ctx = document.getElementById("systemOverviewChart");
-      if (!ctx) return;
+      const ctx = document.getElementById('systemOverviewChart');
+      if (!ctx) {
+        return;
+      }
 
       // Check if chart already exists and destroy it
       if (Chart.getChart(ctx)) {
         Chart.getChart(ctx).destroy();
       }
 
-      this.apiFetch("/admin/dashboard/system-overview")
-        .then((apiData) => {
+      this.apiFetch('/admin/dashboard/system-overview')
+        .then(apiData => {
           const data = {
             labels: apiData.labels,
             datasets: [
               {
                 data: apiData.data,
                 backgroundColor: [
-                  "rgba(59, 130, 246, 0.8)",
-                  "rgba(239, 68, 68, 0.8)",
-                  "rgba(245, 158, 11, 0.8)",
-                  "rgba(16, 185, 129, 0.8)",
+                  'rgba(59, 130, 246, 0.8)',
+                  'rgba(239, 68, 68, 0.8)',
+                  'rgba(245, 158, 11, 0.8)',
+                  'rgba(16, 185, 129, 0.8)',
                 ],
                 borderColor: [
-                  "rgb(59, 130, 246)",
-                  "rgb(239, 68, 68)",
-                  "rgb(245, 158, 11)",
-                  "rgb(16, 185, 129)",
+                  'rgb(59, 130, 246)',
+                  'rgb(239, 68, 68)',
+                  'rgb(245, 158, 11)',
+                  'rgb(16, 185, 129)',
                 ],
                 borderWidth: 2,
                 hoverOffset: 8,
@@ -209,32 +211,32 @@ if (typeof window.AdminCharts === "undefined") {
           };
 
           const config = {
-            type: "doughnut",
-            data: data,
+            type: 'doughnut',
+            data,
             options: {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: "bottom",
+                  position: 'bottom',
                   labels: {
                     padding: 20,
                     usePointStyle: true,
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
                 tooltip: {
-                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                  titleColor: "#fff",
-                  bodyColor: "#fff",
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  titleColor: '#fff',
+                  bodyColor: '#fff',
                   cornerRadius: 8,
                   displayColors: true,
                   callbacks: {
-                    label: function (context) {
-                      const label = context.label || "";
+                    label: function(context) {
+                      const label = context.label || '';
                       const value = context.parsed || 0;
                       const total = context.dataset.data.reduce(
                         (a, b) => a + b,
@@ -250,21 +252,21 @@ if (typeof window.AdminCharts === "undefined") {
                 animateScale: true,
                 animateRotate: true,
                 duration: 2000,
-                easing: "easeInOutQuart",
+                easing: 'easeInOutQuart',
               },
             },
           };
 
           this.charts.systemOverview = new Chart(ctx, config);
         })
-        .catch((error) => {
+        .catch(error => {
           // Use fallback data if API fails
           const fallbackData = {
             labels: [
-              "Active Licenses",
-              "Expired Licenses",
-              "Pending Requests",
-              "Total Products",
+              'Active Licenses',
+              'Expired Licenses',
+              'Pending Requests',
+              'Total Products',
             ],
             data: [0, 0, 0, 0],
           };
@@ -280,16 +282,16 @@ if (typeof window.AdminCharts === "undefined") {
               {
                 data: fallbackData.data,
                 backgroundColor: [
-                  "rgba(59, 130, 246, 0.8)",
-                  "rgba(239, 68, 68, 0.8)",
-                  "rgba(245, 158, 11, 0.8)",
-                  "rgba(16, 185, 129, 0.8)",
+                  'rgba(59, 130, 246, 0.8)',
+                  'rgba(239, 68, 68, 0.8)',
+                  'rgba(245, 158, 11, 0.8)',
+                  'rgba(16, 185, 129, 0.8)',
                 ],
                 borderColor: [
-                  "rgb(59, 130, 246)",
-                  "rgb(239, 68, 68)",
-                  "rgb(245, 158, 11)",
-                  "rgb(16, 185, 129)",
+                  'rgb(59, 130, 246)',
+                  'rgb(239, 68, 68)',
+                  'rgb(245, 158, 11)',
+                  'rgb(16, 185, 129)',
                 ],
                 borderWidth: 2,
                 hoverOffset: 8,
@@ -298,14 +300,14 @@ if (typeof window.AdminCharts === "undefined") {
           };
 
           const config = {
-            type: "doughnut",
-            data: data,
+            type: 'doughnut',
+            data,
             options: {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: "bottom",
+                  position: 'bottom',
                 },
               },
             },
@@ -316,33 +318,35 @@ if (typeof window.AdminCharts === "undefined") {
     }
 
     createLicenseDistributionChart() {
-      const ctx = document.getElementById("licenseDistributionChart");
-      if (!ctx) return;
+      const ctx = document.getElementById('licenseDistributionChart');
+      if (!ctx) {
+        return;
+      }
 
       // Check if chart already exists and destroy it
       if (Chart.getChart(ctx)) {
         Chart.getChart(ctx).destroy();
       }
 
-      this.apiFetch("/admin/dashboard/license-distribution")
-        .then((apiData) => {
+      this.apiFetch('/admin/dashboard/license-distribution')
+        .then(apiData => {
           const data = {
             labels: apiData.labels,
             datasets: [
               {
-                label: "License Count",
+                label: 'License Count',
                 data: apiData.data,
                 backgroundColor: [
-                  "rgba(59, 130, 246, 0.6)",
-                  "rgba(16, 185, 129, 0.6)",
-                  "rgba(245, 158, 11, 0.6)",
-                  "rgba(139, 92, 246, 0.6)",
+                  'rgba(59, 130, 246, 0.6)',
+                  'rgba(16, 185, 129, 0.6)',
+                  'rgba(245, 158, 11, 0.6)',
+                  'rgba(139, 92, 246, 0.6)',
                 ],
                 borderColor: [
-                  "rgb(59, 130, 246)",
-                  "rgb(16, 185, 129)",
-                  "rgb(245, 158, 11)",
-                  "rgb(139, 92, 246)",
+                  'rgb(59, 130, 246)',
+                  'rgb(16, 185, 129)',
+                  'rgb(245, 158, 11)',
+                  'rgb(139, 92, 246)',
                 ],
                 borderWidth: 2,
                 borderRadius: 8,
@@ -352,8 +356,8 @@ if (typeof window.AdminCharts === "undefined") {
           };
 
           const config = {
-            type: "bar",
-            data: data,
+            type: 'bar',
+            data,
             options: {
               responsive: true,
               maintainAspectRatio: false,
@@ -361,12 +365,12 @@ if (typeof window.AdminCharts === "undefined") {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                   ticks: {
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
@@ -377,7 +381,7 @@ if (typeof window.AdminCharts === "undefined") {
                   ticks: {
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
@@ -387,12 +391,12 @@ if (typeof window.AdminCharts === "undefined") {
                   display: false,
                 },
                 tooltip: {
-                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                  titleColor: "#fff",
-                  bodyColor: "#fff",
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  titleColor: '#fff',
+                  bodyColor: '#fff',
                   cornerRadius: 8,
                   callbacks: {
-                    label: function (context) {
+                    label: function(context) {
                       return `Count: ${context.parsed.y}`;
                     },
                   },
@@ -400,24 +404,24 @@ if (typeof window.AdminCharts === "undefined") {
               },
               animation: {
                 duration: 2000,
-                easing: "easeInOutQuart",
-                delay: function (context) {
+                easing: 'easeInOutQuart',
+                delay: function(context) {
                   return context.dataIndex * 200;
                 },
               },
               onHover: (event, activeElements) => {
                 event.native.target.style.cursor =
-                  activeElements.length > 0 ? "pointer" : "default";
+                  activeElements.length > 0 ? 'pointer' : 'default';
               },
             },
           };
 
           this.charts.licenseDistribution = new Chart(ctx, config);
         })
-        .catch((error) => {
+        .catch(error => {
           // Use fallback data when API fails
           const fallbackData = {
-            labels: ["Regular", "Extended"],
+            labels: ['Regular', 'Extended'],
             data: [0, 0],
           };
 
@@ -425,13 +429,13 @@ if (typeof window.AdminCharts === "undefined") {
             labels: fallbackData.labels,
             datasets: [
               {
-                label: "License Count",
+                label: 'License Count',
                 data: fallbackData.data,
                 backgroundColor: [
-                  "rgba(59, 130, 246, 0.6)",
-                  "rgba(16, 185, 129, 0.6)",
+                  'rgba(59, 130, 246, 0.6)',
+                  'rgba(16, 185, 129, 0.6)',
                 ],
-                borderColor: ["rgb(59, 130, 246)", "rgb(16, 185, 129)"],
+                borderColor: ['rgb(59, 130, 246)', 'rgb(16, 185, 129)'],
                 borderWidth: 2,
                 borderRadius: 8,
                 borderSkipped: false,
@@ -440,8 +444,8 @@ if (typeof window.AdminCharts === "undefined") {
           };
 
           const config = {
-            type: "bar",
-            data: data,
+            type: 'bar',
+            data,
             options: {
               responsive: true,
               maintainAspectRatio: false,
@@ -449,12 +453,12 @@ if (typeof window.AdminCharts === "undefined") {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                   ticks: {
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
@@ -465,7 +469,7 @@ if (typeof window.AdminCharts === "undefined") {
                   ticks: {
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
@@ -475,12 +479,12 @@ if (typeof window.AdminCharts === "undefined") {
                   display: false,
                 },
                 tooltip: {
-                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                  titleColor: "#fff",
-                  bodyColor: "#fff",
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  titleColor: '#fff',
+                  bodyColor: '#fff',
                   cornerRadius: 8,
                   callbacks: {
-                    label: function (context) {
+                    label: function(context) {
                       return `Count: ${context.parsed.y}`;
                     },
                   },
@@ -488,7 +492,7 @@ if (typeof window.AdminCharts === "undefined") {
               },
               animation: {
                 duration: 1000,
-                easing: "easeInOutQuart",
+                easing: 'easeInOutQuart',
               },
             },
           };
@@ -497,13 +501,13 @@ if (typeof window.AdminCharts === "undefined") {
 
           // Show user-friendly message only in development
           if (
-            window.location.hostname === "localhost" ||
-            window.location.hostname === "127.0.0.1"
+            window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1'
           ) {
             if (window.adminDashboard && window.adminDashboard.showToast) {
               window.adminDashboard.showToast(
-                "Using fallback data for License Distribution chart",
-                "info",
+                'Using fallback data for License Distribution chart',
+                'info',
                 3000,
               );
             }
@@ -512,8 +516,10 @@ if (typeof window.AdminCharts === "undefined") {
     }
 
     createRevenueChart() {
-      const ctx = document.getElementById("revenueChart");
-      if (!ctx) return;
+      const ctx = document.getElementById('revenueChart');
+      if (!ctx) {
+        return;
+      }
 
       // Check if chart already exists and destroy it
       if (Chart.getChart(ctx)) {
@@ -521,43 +527,43 @@ if (typeof window.AdminCharts === "undefined") {
       }
 
       // Fetch real data from API
-      this.fetchRevenueData("monthly");
+      this.fetchRevenueData('monthly');
 
       // Store chart context for updates
       this.revenueChartCtx = ctx;
     }
 
-    fetchRevenueData(period = "monthly") {
+    fetchRevenueData(period = 'monthly') {
       this.apiFetch(
         `/admin/dashboard/revenue?period=${encodeURIComponent(period)}`,
       )
-        .then((apiData) => {
+        .then(apiData => {
           const data = {
             labels: apiData.labels,
             datasets: [
               {
-                label: "Revenue ($)",
+                label: 'Revenue ($)',
                 data: apiData.data,
-                borderColor: "rgb(59, 130, 246)",
-                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: "rgb(59, 130, 246)",
-                pointBorderColor: "#fff",
+                pointBackgroundColor: 'rgb(59, 130, 246)',
+                pointBorderColor: '#fff',
                 pointBorderWidth: 2,
                 pointRadius: 6,
                 pointHoverRadius: 8,
-                pointHoverBackgroundColor: "rgb(59, 130, 246)",
-                pointHoverBorderColor: "#fff",
+                pointHoverBackgroundColor: 'rgb(59, 130, 246)',
+                pointHoverBorderColor: '#fff',
                 pointHoverBorderWidth: 3,
               },
             ],
           };
 
           const config = {
-            type: "line",
-            data: data,
+            type: 'line',
+            data,
             options: {
               responsive: true,
               maintainAspectRatio: false,
@@ -565,15 +571,15 @@ if (typeof window.AdminCharts === "undefined") {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                   ticks: {
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
-                    callback: function (value) {
-                      return "$" + value.toLocaleString();
+                    callback: function(value) {
+                      return `$${value.toLocaleString()}`;
                     },
                   },
                 },
@@ -584,7 +590,7 @@ if (typeof window.AdminCharts === "undefined") {
                   ticks: {
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
@@ -594,12 +600,12 @@ if (typeof window.AdminCharts === "undefined") {
                   display: false,
                 },
                 tooltip: {
-                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                  titleColor: "#fff",
-                  bodyColor: "#fff",
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  titleColor: '#fff',
+                  bodyColor: '#fff',
                   cornerRadius: 8,
                   callbacks: {
-                    label: function (context) {
+                    label: function(context) {
                       return `Revenue: $${context.parsed.y.toLocaleString()}`;
                     },
                   },
@@ -607,11 +613,11 @@ if (typeof window.AdminCharts === "undefined") {
               },
               interaction: {
                 intersect: false,
-                mode: "index",
+                mode: 'index',
               },
               animation: {
                 duration: 2000,
-                easing: "easeInOutQuart",
+                easing: 'easeInOutQuart',
               },
             },
           };
@@ -631,10 +637,10 @@ if (typeof window.AdminCharts === "undefined") {
 
           this.charts.revenue = new Chart(this.revenueChartCtx, config);
         })
-        .catch((error) => {
+        .catch(error => {
           // Use fallback data when API fails
           const fallbackData = {
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
             data: [0, 0, 0, 0, 0, 0],
           };
 
@@ -642,15 +648,15 @@ if (typeof window.AdminCharts === "undefined") {
             labels: fallbackData.labels,
             datasets: [
               {
-                label: "Revenue ($)",
+                label: 'Revenue ($)',
                 data: fallbackData.data,
-                borderColor: "rgb(59, 130, 246)",
-                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: "rgb(59, 130, 246)",
-                pointBorderColor: "#fff",
+                pointBackgroundColor: 'rgb(59, 130, 246)',
+                pointBorderColor: '#fff',
                 pointBorderWidth: 2,
                 pointRadius: 6,
                 pointHoverRadius: 8,
@@ -659,8 +665,8 @@ if (typeof window.AdminCharts === "undefined") {
           };
 
           const config = {
-            type: "line",
-            data: data,
+            type: 'line',
+            data,
             options: {
               responsive: true,
               maintainAspectRatio: false,
@@ -668,15 +674,15 @@ if (typeof window.AdminCharts === "undefined") {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                   ticks: {
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
-                    callback: function (value) {
-                      return "$" + value.toLocaleString();
+                    callback: function(value) {
+                      return `$${value.toLocaleString()}`;
                     },
                   },
                 },
@@ -687,7 +693,7 @@ if (typeof window.AdminCharts === "undefined") {
                   ticks: {
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
@@ -697,12 +703,12 @@ if (typeof window.AdminCharts === "undefined") {
                   display: false,
                 },
                 tooltip: {
-                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                  titleColor: "#fff",
-                  bodyColor: "#fff",
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  titleColor: '#fff',
+                  bodyColor: '#fff',
                   cornerRadius: 8,
                   callbacks: {
-                    label: function (context) {
+                    label: function(context) {
                       return `Revenue: $${context.parsed.y.toLocaleString()}`;
                     },
                   },
@@ -710,11 +716,11 @@ if (typeof window.AdminCharts === "undefined") {
               },
               interaction: {
                 intersect: false,
-                mode: "index",
+                mode: 'index',
               },
               animation: {
                 duration: 1000,
-                easing: "easeInOutQuart",
+                easing: 'easeInOutQuart',
               },
             },
           };
@@ -736,8 +742,10 @@ if (typeof window.AdminCharts === "undefined") {
     }
 
     createActivityTimelineChart() {
-      const ctx = document.getElementById("activityTimelineChart");
-      if (!ctx) return;
+      const ctx = document.getElementById('activityTimelineChart');
+      if (!ctx) {
+        return;
+      }
 
       // Check if chart already exists and destroy it
       if (Chart.getChart(ctx)) {
@@ -745,21 +753,21 @@ if (typeof window.AdminCharts === "undefined") {
       }
 
       // Fetch real data from API
-      this.apiFetch("/admin/dashboard/activity-timeline")
-        .then((apiData) => {
+      this.apiFetch('/admin/dashboard/activity-timeline')
+        .then(apiData => {
           const data = {
             labels: apiData.labels,
             datasets: [
               {
-                label: "Active Users",
+                label: 'Active Users',
                 data: apiData.data,
-                borderColor: "rgb(16, 185, 129)",
-                backgroundColor: "rgba(16, 185, 129, 0.1)",
+                borderColor: 'rgb(16, 185, 129)',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: "rgb(16, 185, 129)",
-                pointBorderColor: "#fff",
+                pointBackgroundColor: 'rgb(16, 185, 129)',
+                pointBorderColor: '#fff',
                 pointBorderWidth: 2,
                 pointRadius: 6,
                 pointHoverRadius: 8,
@@ -768,8 +776,8 @@ if (typeof window.AdminCharts === "undefined") {
           };
 
           const config = {
-            type: "line",
-            data: data,
+            type: 'line',
+            data,
             options: {
               responsive: true,
               maintainAspectRatio: false,
@@ -777,12 +785,12 @@ if (typeof window.AdminCharts === "undefined") {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                   ticks: {
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
@@ -793,49 +801,49 @@ if (typeof window.AdminCharts === "undefined") {
                   ticks: {
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
               },
               plugins: {
                 legend: {
-                  position: "top",
+                  position: 'top',
                   labels: {
                     usePointStyle: true,
                     padding: 20,
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
                 tooltip: {
-                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                  titleColor: "#fff",
-                  bodyColor: "#fff",
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  titleColor: '#fff',
+                  bodyColor: '#fff',
                   cornerRadius: 8,
-                  mode: "index",
+                  mode: 'index',
                   intersect: false,
                 },
               },
               interaction: {
                 intersect: false,
-                mode: "index",
+                mode: 'index',
               },
               animation: {
                 duration: 2000,
-                easing: "easeInOutQuart",
+                easing: 'easeInOutQuart',
               },
             },
           };
 
           this.charts.activityTimeline = new Chart(ctx, config);
         })
-        .catch((error) => {
+        .catch(error => {
           // Use fallback data if API fails
           const fallbackData = {
-            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             data: [0, 0, 0, 0, 0, 0, 0],
           };
 
@@ -848,15 +856,15 @@ if (typeof window.AdminCharts === "undefined") {
             labels: fallbackData.labels,
             datasets: [
               {
-                label: "Daily Activity",
+                label: 'Daily Activity',
                 data: fallbackData.data,
-                borderColor: "rgb(16, 185, 129)",
-                backgroundColor: "rgba(16, 185, 129, 0.1)",
+                borderColor: 'rgb(16, 185, 129)',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: "rgb(16, 185, 129)",
-                pointBorderColor: "#fff",
+                pointBackgroundColor: 'rgb(16, 185, 129)',
+                pointBorderColor: '#fff',
                 pointBorderWidth: 2,
                 pointRadius: 6,
                 pointHoverRadius: 8,
@@ -865,8 +873,8 @@ if (typeof window.AdminCharts === "undefined") {
           };
 
           const config = {
-            type: "line",
-            data: data,
+            type: 'line',
+            data,
             options: {
               responsive: true,
               maintainAspectRatio: false,
@@ -874,12 +882,12 @@ if (typeof window.AdminCharts === "undefined") {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: "rgba(0, 0, 0, 0.1)",
+                    color: 'rgba(0, 0, 0, 0.1)',
                   },
                   ticks: {
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
@@ -890,39 +898,39 @@ if (typeof window.AdminCharts === "undefined") {
                   ticks: {
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
               },
               plugins: {
                 legend: {
-                  position: "top",
+                  position: 'top',
                   labels: {
                     usePointStyle: true,
                     padding: 20,
                     font: {
                       size: 12,
-                      weight: "500",
+                      weight: '500',
                     },
                   },
                 },
                 tooltip: {
-                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                  titleColor: "#fff",
-                  bodyColor: "#fff",
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  titleColor: '#fff',
+                  bodyColor: '#fff',
                   cornerRadius: 8,
-                  mode: "index",
+                  mode: 'index',
                   intersect: false,
                 },
               },
               interaction: {
                 intersect: false,
-                mode: "index",
+                mode: 'index',
               },
               animation: {
                 duration: 1000,
-                easing: "easeInOutQuart",
+                easing: 'easeInOutQuart',
               },
             },
           };
@@ -945,13 +953,13 @@ if (typeof window.AdminCharts === "undefined") {
         this.charts.systemOverview.canvas &&
         document.contains(this.charts.systemOverview.canvas)
       ) {
-        this.apiFetch("/admin/dashboard/system-overview")
-          .then((apiData) => {
+        this.apiFetch('/admin/dashboard/system-overview')
+          .then(apiData => {
             this.charts.systemOverview.data.labels = apiData.labels;
             this.charts.systemOverview.data.datasets[0].data = apiData.data;
-            this.charts.systemOverview.update("active");
+            this.charts.systemOverview.update('active');
           })
-          .catch((err) => {
+          .catch(err => {
             // System overview refresh failed silently
           });
       }
@@ -962,14 +970,14 @@ if (typeof window.AdminCharts === "undefined") {
         this.charts.licenseDistribution.canvas &&
         document.contains(this.charts.licenseDistribution.canvas)
       ) {
-        this.apiFetch("/admin/dashboard/license-distribution")
-          .then((apiData) => {
+        this.apiFetch('/admin/dashboard/license-distribution')
+          .then(apiData => {
             this.charts.licenseDistribution.data.labels = apiData.labels;
             this.charts.licenseDistribution.data.datasets[0].data =
               apiData.data;
-            this.charts.licenseDistribution.update("active");
+            this.charts.licenseDistribution.update('active');
           })
-          .catch((err) => {
+          .catch(err => {
             // License distribution refresh failed - keep existing data
             // Don't update the chart to avoid disrupting user experience
           });
@@ -979,7 +987,7 @@ if (typeof window.AdminCharts === "undefined") {
       const periodSelector = document.querySelector(
         '[data-action="change-chart-period"]',
       );
-      const period = periodSelector ? periodSelector.value : "monthly";
+      const period = periodSelector ? periodSelector.value : 'monthly';
       if (this.fetchRevenueData) {
         this.fetchRevenueData(period);
       }
@@ -990,13 +998,13 @@ if (typeof window.AdminCharts === "undefined") {
         this.charts.activityTimeline.canvas &&
         document.contains(this.charts.activityTimeline.canvas)
       ) {
-        this.apiFetch("/admin/dashboard/activity-timeline")
-          .then((apiData) => {
+        this.apiFetch('/admin/dashboard/activity-timeline')
+          .then(apiData => {
             this.charts.activityTimeline.data.labels = apiData.labels;
             this.charts.activityTimeline.data.datasets[0].data = apiData.data;
-            this.charts.activityTimeline.update("active");
+            this.charts.activityTimeline.update('active');
           })
-          .catch((err) => {
+          .catch(err => {
             // Activity timeline refresh failed - keep existing data
             // Don't update the chart to avoid disrupting user experience
           });
@@ -1009,13 +1017,13 @@ if (typeof window.AdminCharts === "undefined") {
         document.contains(this.charts.invoicesMonthly.canvas)
       ) {
         try {
-          const node = document.getElementById("invoicesMonthlyChart");
+          const node = document.getElementById('invoicesMonthlyChart');
           if (node && node.dataset && node.dataset.chartData) {
             const apiData = JSON.parse(node.dataset.chartData);
             this.charts.invoicesMonthly.data.labels = apiData.labels || [];
             this.charts.invoicesMonthly.data.datasets[0].data =
               apiData.data || [];
-            this.charts.invoicesMonthly.update("active");
+            this.charts.invoicesMonthly.update('active');
           }
         } catch (e) {
           // ignore JSON parse / update errors
@@ -1031,14 +1039,14 @@ if (typeof window.AdminCharts === "undefined") {
         const periodSelector = document.querySelector(
           '[data-action="change-api-period"]',
         );
-        const period = periodSelector ? periodSelector.value : "daily";
+        const period = periodSelector ? periodSelector.value : 'daily';
         this.apiFetch(`/admin/dashboard/api-requests?period=${period}`)
-          .then((apiData) => {
+          .then(apiData => {
             this.charts.apiRequests.data.labels = apiData.labels;
             this.charts.apiRequests.data.datasets = apiData.datasets;
-            this.charts.apiRequests.update("active");
+            this.charts.apiRequests.update('active');
           })
-          .catch((err) => {
+          .catch(err => {
             // API requests refresh failed - keep existing data
           });
       }
@@ -1049,8 +1057,8 @@ if (typeof window.AdminCharts === "undefined") {
         this.charts.apiPerformance.canvas &&
         document.contains(this.charts.apiPerformance.canvas)
       ) {
-        this.apiFetch("/admin/dashboard/api-performance")
-          .then((apiData) => {
+        this.apiFetch('/admin/dashboard/api-performance')
+          .then(apiData => {
             this.charts.apiPerformance.data.datasets[0].data = [
               apiData.today.success,
               apiData.yesterday.success,
@@ -1059,17 +1067,19 @@ if (typeof window.AdminCharts === "undefined") {
               apiData.today.failed,
               apiData.yesterday.failed,
             ];
-            this.charts.apiPerformance.update("active");
+            this.charts.apiPerformance.update('active');
           })
-          .catch((err) => {
+          .catch(err => {
             // API performance refresh failed - keep existing data
           });
       }
     }
 
     createInvoicesMonthlyChart() {
-      const ctxNode = document.getElementById("invoicesMonthlyChart");
-      if (!ctxNode) return;
+      const ctxNode = document.getElementById('invoicesMonthlyChart');
+      if (!ctxNode) {
+        return;
+      }
 
       // Check if chart already exists and destroy it
       if (Chart.getChart(ctxNode)) {
@@ -1079,32 +1089,32 @@ if (typeof window.AdminCharts === "undefined") {
       let chartData = { labels: [], data: [] };
       try {
         if (ctxNode.dataset && ctxNode.dataset.chartData) {
-          chartData = JSON.parse(ctxNode.dataset.chartData || "{}");
+          chartData = JSON.parse(ctxNode.dataset.chartData || '{}');
         }
       } catch (e) {
         chartData = { labels: [], data: [] };
       }
 
-      const ctx = ctxNode.getContext("2d");
+      const ctx = ctxNode.getContext('2d');
       const data = {
         labels: chartData.labels || [],
         datasets: [
           {
-            label: "Invoices ($)",
+            label: 'Invoices ($)',
             data: chartData.data || [],
-            borderColor: "rgb(59, 130, 246)",
-            backgroundColor: "rgba(59, 130, 246, 0.08)",
+            borderColor: 'rgb(59, 130, 246)',
+            backgroundColor: 'rgba(59, 130, 246, 0.08)',
             borderWidth: 2,
             fill: true,
             tension: 0.3,
-            pointBackgroundColor: "rgb(59, 130, 246)",
+            pointBackgroundColor: 'rgb(59, 130, 246)',
           },
         ],
       };
 
       const config = {
-        type: "line",
-        data: data,
+        type: 'line',
+        data,
         options: {
           responsive: true,
           maintainAspectRatio: false,
@@ -1112,8 +1122,8 @@ if (typeof window.AdminCharts === "undefined") {
             y: {
               beginAtZero: true,
               ticks: {
-                callback: function (value) {
-                  return "$" + value.toLocaleString();
+                callback: function(value) {
+                  return `$${value.toLocaleString()}`;
                 },
               },
             },
@@ -1123,7 +1133,7 @@ if (typeof window.AdminCharts === "undefined") {
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: function (context) {
+                label: function(context) {
                   return `Amount: $${context.parsed.y.toLocaleString()}`;
                 },
               },
@@ -1146,30 +1156,30 @@ if (typeof window.AdminCharts === "undefined") {
         '[data-action="change-chart-period"]',
       );
       if (periodSelector) {
-        periodSelector.addEventListener("change", (e) => {
+        periodSelector.addEventListener('change', e => {
           this.changeChartPeriod(e.target.value);
         });
       }
 
       // Add click handlers for charts
-      document.addEventListener("click", (e) => {
-        if (e.target.closest(".admin-chart-container")) {
-          const chartContainer = e.target.closest(".admin-chart-container");
-          const canvas = chartContainer.querySelector("canvas");
+      document.addEventListener('click', e => {
+        if (e.target.closest('.admin-chart-container')) {
+          const chartContainer = e.target.closest('.admin-chart-container');
+          const canvas = chartContainer.querySelector('canvas');
 
           if (canvas && canvas.chart) {
-            const chart = canvas.chart;
+            const { chart } = canvas;
             const elements = chart.getElementsAtEventForMode(
               e,
-              "nearest",
+              'nearest',
               { intersect: true },
               false,
             );
 
             if (elements.length > 0) {
               const element = elements[0];
-              const datasetIndex = element.datasetIndex;
-              const index = element.index;
+              const { datasetIndex } = element;
+              const { index } = element;
               const label = chart.data.labels[index];
               const value = chart.data.datasets[datasetIndex].data[index];
 
@@ -1188,7 +1198,7 @@ if (typeof window.AdminCharts === "undefined") {
         if (window.adminDashboard) {
           window.adminDashboard.showToast(
             `Chart period changed to ${period}`,
-            "info",
+            'info',
             2000,
           );
         }
@@ -1198,9 +1208,9 @@ if (typeof window.AdminCharts === "undefined") {
     showChartDetail(chart, label, value, datasetIndex) {
       const dataset = chart.data.datasets[datasetIndex];
       const detail = {
-        title: dataset.label || "Chart Detail",
-        label: label,
-        value: value,
+        title: dataset.label || 'Chart Detail',
+        label,
+        value,
         color: dataset.borderColor || dataset.backgroundColor,
       };
 
@@ -1208,7 +1218,7 @@ if (typeof window.AdminCharts === "undefined") {
       if (window.adminDashboard) {
         window.adminDashboard.showToast(
           `${detail.title}: ${detail.label} - ${detail.value}`,
-          "info",
+          'info',
           3000,
         );
       }
@@ -1216,15 +1226,15 @@ if (typeof window.AdminCharts === "undefined") {
 
     // Method to update chart theme (for dark mode)
     updateChartTheme(isDark) {
-      const textColor = isDark ? "#f9fafb" : "#374151";
-      const gridColor = isDark
-        ? "rgba(255, 255, 255, 0.1)"
-        : "rgba(0, 0, 0, 0.1)";
+      const textColor = isDark ? '#f9fafb' : '#374151';
+      const gridColor = isDark ?
+        'rgba(255, 255, 255, 0.1)' :
+        'rgba(0, 0, 0, 0.1)';
 
-      Object.values(this.charts).forEach((chart) => {
+      Object.values(this.charts).forEach(chart => {
         if (chart.options.scales) {
           // Update axis colors
-          Object.values(chart.options.scales).forEach((scale) => {
+          Object.values(chart.options.scales).forEach(scale => {
             if (scale.ticks) {
               scale.ticks.color = textColor;
             }
@@ -1244,34 +1254,36 @@ if (typeof window.AdminCharts === "undefined") {
     }
 
     // Method to export chart data
-    exportChartData(chartId, format = "csv") {
+    exportChartData(chartId, format = 'csv') {
       const chart = this.charts[chartId];
-      if (!chart) return;
+      if (!chart) {
+        return;
+      }
 
-      const data = chart.data;
-      let exportData = "";
+      const { data } = chart;
+      let exportData = '';
 
-      if (format === "csv") {
+      if (format === 'csv') {
         // CSV header
         exportData =
-          "Label," + data.datasets.map((ds) => ds.label).join(",") + "\n";
+          `Label,${data.datasets.map(ds => ds.label).join(',')}\n`;
 
         // CSV data
         data.labels.forEach((label, index) => {
-          exportData += label + ",";
-          data.datasets.forEach((dataset) => {
-            exportData += dataset.data[index] + ",";
+          exportData += `${label},`;
+          data.datasets.forEach(dataset => {
+            exportData += `${dataset.data[index]},`;
           });
-          exportData = exportData.slice(0, -1) + "\n";
+          exportData = `${exportData.slice(0, -1)}\n`;
         });
-      } else if (format === "json") {
+      } else if (format === 'json') {
         exportData = JSON.stringify(data, null, 2);
       }
 
       // Download file
-      const blob = new Blob([exportData], { type: "text/plain" });
+      const blob = new Blob([exportData], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
       a.download = `chart-data-${chartId}.${format}`;
       document.body.appendChild(a);
@@ -1282,14 +1294,14 @@ if (typeof window.AdminCharts === "undefined") {
 
     // Method to resize all charts
     resizeCharts() {
-      Object.values(this.charts).forEach((chart) => {
+      Object.values(this.charts).forEach(chart => {
         chart.resize();
       });
     }
 
     // Method to destroy all charts
     destroy() {
-      Object.values(this.charts).forEach((chart) => {
+      Object.values(this.charts).forEach(chart => {
         chart.destroy();
       });
       this.charts = {};
@@ -1297,8 +1309,10 @@ if (typeof window.AdminCharts === "undefined") {
 
     // Dashboard-specific chart methods
     createApiRequestsChart() {
-      const ctx = document.getElementById("apiRequestsChart");
-      if (!ctx) return;
+      const ctx = document.getElementById('apiRequestsChart');
+      if (!ctx) {
+        return;
+      }
 
       // Check if chart already exists and destroy it
       if (Chart.getChart(ctx)) {
@@ -1306,7 +1320,7 @@ if (typeof window.AdminCharts === "undefined") {
       }
 
       const apiRequestsChart = new Chart(ctx, {
-        type: "line",
+        type: 'line',
         data: {
           labels: [],
           datasets: [],
@@ -1316,11 +1330,11 @@ if (typeof window.AdminCharts === "undefined") {
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              position: "top",
+              position: 'top',
             },
             title: {
               display: true,
-              text: "API Requests Over Time",
+              text: 'API Requests Over Time',
             },
           },
           scales: {
@@ -1335,23 +1349,23 @@ if (typeof window.AdminCharts === "undefined") {
       this.charts.apiRequests = apiRequestsChart;
 
       // Load API requests data
-      const loadApiRequestsData = (period = "daily") => {
+      const loadApiRequestsData = (period = 'daily') => {
         this.apiFetch(`/admin/dashboard/api-requests?period=${period}`)
-          .then((data) => {
+          .then(data => {
             apiRequestsChart.data.labels = data.labels;
             apiRequestsChart.data.datasets = data.datasets;
             apiRequestsChart.update();
           })
-          .catch((error) => {
-            console.error("Error loading API requests data:", error);
+          .catch(error => {
+            console.error('Error loading API requests data:', error);
             // Use fallback data
-            apiRequestsChart.data.labels = ["No Data"];
+            apiRequestsChart.data.labels = ['No Data'];
             apiRequestsChart.data.datasets = [
               {
-                label: "API Requests",
+                label: 'API Requests',
                 data: [0],
-                borderColor: "rgb(59, 130, 246)",
-                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 tension: 0.1,
               },
             ];
@@ -1363,7 +1377,7 @@ if (typeof window.AdminCharts === "undefined") {
       loadApiRequestsData();
 
       // Handle period change
-      document.addEventListener("change", function (e) {
+      document.addEventListener('change', e => {
         if (e.target.matches('[data-action="change-api-period"]')) {
           loadApiRequestsData(e.target.value);
         }
@@ -1371,8 +1385,10 @@ if (typeof window.AdminCharts === "undefined") {
     }
 
     createApiPerformanceChart() {
-      const ctx = document.getElementById("apiPerformanceChart");
-      if (!ctx) return;
+      const ctx = document.getElementById('apiPerformanceChart');
+      if (!ctx) {
+        return;
+      }
 
       // Check if chart already exists and destroy it
       if (Chart.getChart(ctx)) {
@@ -1380,22 +1396,22 @@ if (typeof window.AdminCharts === "undefined") {
       }
 
       const apiPerformanceChart = new Chart(ctx, {
-        type: "bar",
+        type: 'bar',
         data: {
-          labels: ["Today", "Yesterday"],
+          labels: ['Today', 'Yesterday'],
           datasets: [
             {
-              label: "Successful",
+              label: 'Successful',
               data: [0, 0],
-              backgroundColor: "rgba(16, 185, 129, 0.8)",
-              borderColor: "rgba(16, 185, 129, 1)",
+              backgroundColor: 'rgba(16, 185, 129, 0.8)',
+              borderColor: 'rgba(16, 185, 129, 1)',
               borderWidth: 1,
             },
             {
-              label: "Failed",
+              label: 'Failed',
               data: [0, 0],
-              backgroundColor: "rgba(239, 68, 68, 0.8)",
-              borderColor: "rgba(239, 68, 68, 1)",
+              backgroundColor: 'rgba(239, 68, 68, 0.8)',
+              borderColor: 'rgba(239, 68, 68, 1)',
               borderWidth: 1,
             },
           ],
@@ -1405,11 +1421,11 @@ if (typeof window.AdminCharts === "undefined") {
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              position: "top",
+              position: 'top',
             },
             title: {
               display: true,
-              text: "API Performance Comparison",
+              text: 'API Performance Comparison',
             },
           },
           scales: {
@@ -1424,8 +1440,8 @@ if (typeof window.AdminCharts === "undefined") {
       this.charts.apiPerformance = apiPerformanceChart;
 
       // Load API performance data
-      this.apiFetch("/admin/dashboard/api-performance")
-        .then((data) => {
+      this.apiFetch('/admin/dashboard/api-performance')
+        .then(data => {
           apiPerformanceChart.data.datasets[0].data = [
             data.today.success,
             data.yesterday.success,
@@ -1436,8 +1452,8 @@ if (typeof window.AdminCharts === "undefined") {
           ];
           apiPerformanceChart.update();
         })
-        .catch((error) => {
-          console.error("Error loading API performance data:", error);
+        .catch(error => {
+          console.error('Error loading API performance data:', error);
           // Keep default data (0, 0) for both datasets
         });
     }
@@ -1448,25 +1464,25 @@ if (typeof window.AdminCharts === "undefined") {
 }
 
 // Initialize charts when DOM is ready
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
   // Check if Chart.js is loaded and AdminCharts is available
   if (
-    typeof Chart !== "undefined" &&
-    typeof window.AdminCharts !== "undefined" &&
-    typeof window.adminCharts === "undefined"
+    typeof Chart !== 'undefined' &&
+    typeof window.AdminCharts !== 'undefined' &&
+    typeof window.adminCharts === 'undefined'
   ) {
     try {
       window.adminCharts = new window.AdminCharts();
 
       // Listen for dark mode changes
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
+      const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
           if (
-            mutation.type === "attributes" &&
-            mutation.attributeName === "class"
+            mutation.type === 'attributes' &&
+            mutation.attributeName === 'class'
           ) {
             const isDark =
-              document.documentElement.classList.contains("dark-mode");
+              document.documentElement.classList.contains('dark-mode');
             if (window.adminCharts) {
               window.adminCharts.updateChartTheme(isDark);
             }
@@ -1476,7 +1492,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       observer.observe(document.documentElement, {
         attributes: true,
-        attributeFilter: ["class"],
+        attributeFilter: ['class'],
       });
     } catch (e) {
       // Silently ignore initialization errors to avoid breaking page
@@ -1486,13 +1502,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize reports charts if on reports page
   if (
-    document.getElementById("monthlyRevenueChart") ||
-    document.getElementById("invoicesMonthlyChart")
+    document.getElementById('monthlyRevenueChart') ||
+    document.getElementById('invoicesMonthlyChart')
   ) {
     // Add loading states to chart containers
-    const chartContainers = document.querySelectorAll(".chart-container");
-    chartContainers.forEach((container) => {
-      container.classList.add("loading");
+    const chartContainers = document.querySelectorAll('.chart-container');
+    chartContainers.forEach(container => {
+      container.classList.add('loading');
     });
 
     // Initialize reports charts
@@ -1500,8 +1516,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Remove loading states after charts are initialized
     setTimeout(() => {
-      chartContainers.forEach((container) => {
-        container.classList.remove("loading");
+      chartContainers.forEach(container => {
+        container.classList.remove('loading');
       });
     }, 1000);
 
@@ -1510,10 +1526,10 @@ document.addEventListener("DOMContentLoaded", () => {
       '[data-action="refresh-reports"]',
     );
     if (refreshBtn) {
-      refreshBtn.addEventListener("click", () => {
+      refreshBtn.addEventListener('click', () => {
         // Add loading states
-        chartContainers.forEach((container) => {
-          container.classList.add("loading");
+        chartContainers.forEach(container => {
+          container.classList.add('loading');
         });
 
         // Reload page after a short delay
@@ -1526,7 +1542,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Export for module usage
-if (typeof module !== "undefined" && module.exports) {
+if (typeof module !== 'undefined' && module.exports) {
   module.exports = AdminCharts;
 }
 
@@ -1538,13 +1554,13 @@ window.AdminCharts = AdminCharts;
  */
 function initReportsCharts() {
   // Check if Chart.js is available
-  if (typeof Chart === "undefined") {
+  if (typeof Chart === 'undefined') {
     // Chart.js is not loaded. Charts will not be initialized.
     return;
   }
 
   // Initialize Monthly Revenue Chart
-  const monthlyRevenueCanvas = document.getElementById("monthlyRevenueChart");
+  const monthlyRevenueCanvas = document.getElementById('monthlyRevenueChart');
   if (monthlyRevenueCanvas) {
     // Check if chart already exists
     if (Chart.getChart(monthlyRevenueCanvas)) {
@@ -1552,12 +1568,12 @@ function initReportsCharts() {
     }
 
     const chartData = JSON.parse(
-      monthlyRevenueCanvas.getAttribute("data-chart-data") || "{}",
+      monthlyRevenueCanvas.getAttribute('data-chart-data') || '{}',
     );
     if (chartData.labels && chartData.datasets) {
       try {
         new Chart(monthlyRevenueCanvas, {
-          type: "line",
+          type: 'line',
           data: chartData,
           options: {
             responsive: true,
@@ -1565,15 +1581,15 @@ function initReportsCharts() {
             plugins: {
               legend: {
                 display: true,
-                position: "top",
+                position: 'top',
               },
               tooltip: {
                 callbacks: {
-                  label: function (context) {
+                  label: function(context) {
                     return (
-                      context.dataset.label +
-                      ": $" +
-                      context.parsed.y.toLocaleString()
+                      `${context.dataset.label
+                      }: $${
+                        context.parsed.y.toLocaleString()}`
                     );
                   },
                 },
@@ -1583,18 +1599,18 @@ function initReportsCharts() {
               x: {
                 title: {
                   display: true,
-                  text: "Last 3 Months",
+                  text: 'Last 3 Months',
                 },
               },
               y: {
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Revenue ($)",
+                  text: 'Revenue ($)',
                 },
                 ticks: {
-                  callback: function (value) {
-                    return "$" + value.toLocaleString();
+                  callback: function(value) {
+                    return `$${value.toLocaleString()}`;
                   },
                 },
               },
@@ -1604,16 +1620,16 @@ function initReportsCharts() {
         // Monthly Revenue Chart initialized successfully
       } catch (error) {
         // Error initializing Monthly Revenue Chart handled gracefully
-        monthlyRevenueCanvas.parentElement.classList.add("error");
+        monthlyRevenueCanvas.parentElement.classList.add('error');
       }
     } else {
       // Monthly Revenue Chart: No data available
-      monthlyRevenueCanvas.parentElement.classList.add("error");
+      monthlyRevenueCanvas.parentElement.classList.add('error');
     }
   }
 
   // Initialize Monthly Licenses Chart
-  const monthlyLicensesCanvas = document.getElementById("monthlyLicensesChart");
+  const monthlyLicensesCanvas = document.getElementById('monthlyLicensesChart');
   if (monthlyLicensesCanvas) {
     // Check if chart already exists
     if (Chart.getChart(monthlyLicensesCanvas)) {
@@ -1621,12 +1637,12 @@ function initReportsCharts() {
     }
 
     const chartData = JSON.parse(
-      monthlyLicensesCanvas.getAttribute("data-chart-data") || "{}",
+      monthlyLicensesCanvas.getAttribute('data-chart-data') || '{}',
     );
     if (chartData.labels && chartData.datasets) {
       try {
         new Chart(monthlyLicensesCanvas, {
-          type: "line",
+          type: 'line',
           data: chartData,
           options: {
             responsive: true,
@@ -1634,16 +1650,16 @@ function initReportsCharts() {
             plugins: {
               legend: {
                 display: true,
-                position: "top",
+                position: 'top',
               },
               tooltip: {
                 callbacks: {
-                  label: function (context) {
+                  label: function(context) {
                     return (
-                      context.dataset.label +
-                      ": " +
-                      context.parsed.y +
-                      " licenses"
+                      `${context.dataset.label
+                      }: ${
+                        context.parsed.y
+                      } licenses`
                     );
                   },
                 },
@@ -1653,14 +1669,14 @@ function initReportsCharts() {
               x: {
                 title: {
                   display: true,
-                  text: "Last 3 Months",
+                  text: 'Last 3 Months',
                 },
               },
               y: {
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Number of Licenses",
+                  text: 'Number of Licenses',
                 },
               },
             },
@@ -1669,17 +1685,17 @@ function initReportsCharts() {
         // Monthly Licenses Chart initialized successfully
       } catch (error) {
         // Error initializing Monthly Licenses Chart handled gracefully
-        monthlyLicensesCanvas.parentElement.classList.add("error");
+        monthlyLicensesCanvas.parentElement.classList.add('error');
       }
     } else {
       // Monthly Licenses Chart: No data available
-      monthlyLicensesCanvas.parentElement.classList.add("error");
+      monthlyLicensesCanvas.parentElement.classList.add('error');
     }
   }
 
   // Initialize User Registrations Chart
   const userRegistrationsCanvas = document.getElementById(
-    "userRegistrationsChart",
+    'userRegistrationsChart',
   );
   if (userRegistrationsCanvas) {
     // Check if chart already exists
@@ -1688,12 +1704,12 @@ function initReportsCharts() {
     }
 
     const chartData = JSON.parse(
-      userRegistrationsCanvas.getAttribute("data-chart-data") || "{}",
+      userRegistrationsCanvas.getAttribute('data-chart-data') || '{}',
     );
     if (chartData.labels && chartData.datasets) {
       try {
         new Chart(userRegistrationsCanvas, {
-          type: "line",
+          type: 'line',
           data: chartData,
           options: {
             responsive: true,
@@ -1701,13 +1717,13 @@ function initReportsCharts() {
             plugins: {
               legend: {
                 display: true,
-                position: "top",
+                position: 'top',
               },
               tooltip: {
                 callbacks: {
-                  label: function (context) {
+                  label: function(context) {
                     return (
-                      context.dataset.label + ": " + context.parsed.y + " users"
+                      `${context.dataset.label}: ${context.parsed.y} users`
                     );
                   },
                 },
@@ -1717,14 +1733,14 @@ function initReportsCharts() {
               x: {
                 title: {
                   display: true,
-                  text: "Last 3 Months",
+                  text: 'Last 3 Months',
                 },
               },
               y: {
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Number of Users",
+                  text: 'Number of Users',
                 },
               },
             },
@@ -1733,16 +1749,16 @@ function initReportsCharts() {
         // User Registrations Chart initialized successfully
       } catch (error) {
         // Error initializing User Registrations Chart handled gracefully
-        userRegistrationsCanvas.parentElement.classList.add("error");
+        userRegistrationsCanvas.parentElement.classList.add('error');
       }
     } else {
       // User Registrations Chart: No data available
-      userRegistrationsCanvas.parentElement.classList.add("error");
+      userRegistrationsCanvas.parentElement.classList.add('error');
     }
   }
 
   // Initialize System Overview Chart
-  const systemOverviewCanvas = document.getElementById("systemOverviewChart");
+  const systemOverviewCanvas = document.getElementById('systemOverviewChart');
   if (systemOverviewCanvas) {
     // Check if chart already exists
     if (Chart.getChart(systemOverviewCanvas)) {
@@ -1750,12 +1766,12 @@ function initReportsCharts() {
     }
 
     const chartData = JSON.parse(
-      systemOverviewCanvas.getAttribute("data-chart-data") || "{}",
+      systemOverviewCanvas.getAttribute('data-chart-data') || '{}',
     );
     if (chartData.labels && chartData.datasets) {
       try {
         new Chart(systemOverviewCanvas, {
-          type: "doughnut",
+          type: 'doughnut',
           data: chartData,
           options: {
             responsive: true,
@@ -1763,7 +1779,7 @@ function initReportsCharts() {
             plugins: {
               legend: {
                 display: true,
-                position: "bottom",
+                position: 'bottom',
               },
             },
           },
@@ -1771,23 +1787,23 @@ function initReportsCharts() {
         // System Overview Chart initialized successfully
       } catch (error) {
         // Error initializing System Overview Chart handled gracefully
-        systemOverviewCanvas.parentElement.classList.add("error");
+        systemOverviewCanvas.parentElement.classList.add('error');
       }
     } else {
       // System Overview Chart: No data available
-      systemOverviewCanvas.parentElement.classList.add("error");
+      systemOverviewCanvas.parentElement.classList.add('error');
     }
   }
 
   // Initialize License Type Chart
-  const licenseTypeCanvas = document.getElementById("licenseTypeChart");
+  const licenseTypeCanvas = document.getElementById('licenseTypeChart');
   if (licenseTypeCanvas) {
     const chartData = JSON.parse(
-      licenseTypeCanvas.getAttribute("data-chart-data") || "{}",
+      licenseTypeCanvas.getAttribute('data-chart-data') || '{}',
     );
     if (chartData.labels && chartData.datasets) {
       new Chart(licenseTypeCanvas, {
-        type: "pie",
+        type: 'pie',
         data: chartData,
         options: {
           responsive: true,
@@ -1795,7 +1811,7 @@ function initReportsCharts() {
           plugins: {
             legend: {
               display: true,
-              position: "bottom",
+              position: 'bottom',
             },
           },
         },
@@ -1805,15 +1821,15 @@ function initReportsCharts() {
 
   // Initialize Activity Timeline Chart
   const activityTimelineCanvas = document.getElementById(
-    "activityTimelineChart",
+    'activityTimelineChart',
   );
   if (activityTimelineCanvas) {
     const chartData = JSON.parse(
-      activityTimelineCanvas.getAttribute("data-chart-data") || "{}",
+      activityTimelineCanvas.getAttribute('data-chart-data') || '{}',
     );
     if (chartData.labels && chartData.datasets) {
       new Chart(activityTimelineCanvas, {
-        type: "bar",
+        type: 'bar',
         data: chartData,
         options: {
           responsive: true,
@@ -1821,7 +1837,7 @@ function initReportsCharts() {
           plugins: {
             legend: {
               display: true,
-              position: "top",
+              position: 'top',
             },
           },
           scales: {
@@ -1835,7 +1851,7 @@ function initReportsCharts() {
   }
 
   // Initialize Invoices Monthly Chart
-  const invoicesMonthlyCanvas = document.getElementById("invoicesMonthlyChart");
+  const invoicesMonthlyCanvas = document.getElementById('invoicesMonthlyChart');
   if (invoicesMonthlyCanvas) {
     // Check if chart already exists
     if (Chart.getChart(invoicesMonthlyCanvas)) {
@@ -1843,12 +1859,12 @@ function initReportsCharts() {
     }
 
     const chartData = JSON.parse(
-      invoicesMonthlyCanvas.getAttribute("data-chart-data") || "{}",
+      invoicesMonthlyCanvas.getAttribute('data-chart-data') || '{}',
     );
     if (chartData.labels && chartData.datasets) {
       try {
         new Chart(invoicesMonthlyCanvas, {
-          type: "line",
+          type: 'line',
           data: chartData,
           options: {
             responsive: true,
@@ -1856,15 +1872,15 @@ function initReportsCharts() {
             plugins: {
               legend: {
                 display: true,
-                position: "top",
+                position: 'top',
               },
               tooltip: {
                 callbacks: {
-                  label: function (context) {
+                  label: function(context) {
                     return (
-                      context.dataset.label +
-                      ": $" +
-                      context.parsed.y.toLocaleString()
+                      `${context.dataset.label
+                      }: $${
+                        context.parsed.y.toLocaleString()}`
                     );
                   },
                 },
@@ -1874,18 +1890,18 @@ function initReportsCharts() {
               x: {
                 title: {
                   display: true,
-                  text: "Last 3 Months",
+                  text: 'Last 3 Months',
                 },
               },
               y: {
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Invoice Amount ($)",
+                  text: 'Invoice Amount ($)',
                 },
                 ticks: {
-                  callback: function (value) {
-                    return "$" + value.toLocaleString();
+                  callback: function(value) {
+                    return `$${value.toLocaleString()}`;
                   },
                 },
               },
@@ -1895,34 +1911,31 @@ function initReportsCharts() {
         // Invoices Monthly Chart initialized successfully
       } catch (error) {
         // Error initializing Invoices Monthly Chart handled gracefully
-        invoicesMonthlyCanvas.parentElement.classList.add("error");
+        invoicesMonthlyCanvas.parentElement.classList.add('error');
       }
     } else {
       // Invoices Monthly Chart: No data available
-      invoicesMonthlyCanvas.parentElement.classList.add("error");
+      invoicesMonthlyCanvas.parentElement.classList.add('error');
     }
   }
 }
 
 // Enhanced Logs Page JavaScript
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', () => {
   // View log details modal
-  document.addEventListener("click", function (e) {
+  document.addEventListener('click', function(e) {
     if (e.target.closest('[data-action="view-log-details"]')) {
-      const logId = e.target.closest('[data-action="view-log-details"]').dataset
-        .logId;
-      const modalContent = document.getElementById("logDetailsContent");
+      const { logId } = e.target.closest('[data-action="view-log-details"]').dataset;
+      const modalContent = document.getElementById('logDetailsContent');
       if (modalContent) {
         // Sanitize logId to prevent XSS
-        const sanitizedLogId = logId.replace(/[<>&"']/g, function (match) {
-          return {
-            "<": "&lt;",
-            ">": "&gt;",
-            "&": "&amp;",
-            '"': "&quot;",
-            "'": "&#x27;",
-          }[match];
-        });
+        const sanitizedLogId = logId.replace(/[<>&"']/g, match => ({
+          '<': '&lt;',
+          '>': '&gt;',
+          '&': '&amp;',
+          '"': '&quot;',
+          '\'': '&#x27;',
+        }[match]));
         window.SecurityUtils.safeInnerHTML(
           this,
           `
@@ -1943,16 +1956,16 @@ document.addEventListener("DOMContentLoaded", function () {
         );
       }
       const modal = new bootstrap.Modal(
-        document.getElementById("logDetailsModal"),
+        document.getElementById('logDetailsModal'),
       );
       modal.show();
     }
   });
 
   // Export functionality
-  document.addEventListener("click", function (e) {
+  document.addEventListener('click', e => {
     if (e.target.closest('[data-action="export-logs"]')) {
-      alert("Export functionality coming soon");
+      alert('Export functionality coming soon');
     }
   });
 });

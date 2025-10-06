@@ -147,7 +147,7 @@ class LicenseProtection
     /**
      * Get license information from database with enhanced security.
      *
-     * @return array|null The license information or null if not found
+     * @return array<string, mixed>|null The license information or null if not found
      *
      * @throws \Exception When database operations fail
      */
@@ -178,7 +178,7 @@ class LicenseProtection
     /**
      * Check if license is expired with enhanced validation.
      *
-     * @param  array  $licenseInfo  The license information
+     * @param  array<string, mixed>  $licenseInfo  The license information
      *
      * @return bool True if expired, false otherwise
      */
@@ -202,7 +202,7 @@ class LicenseProtection
     /**
      * Check if we should verify license periodically with enhanced validation.
      *
-     * @param  array  $licenseInfo  The license information
+     * @param  array<string, mixed>  $licenseInfo  The license information
      *
      * @return bool True if should verify, false otherwise
      */
@@ -228,7 +228,7 @@ class LicenseProtection
     /**
      * Verify license periodically with enhanced security.
      *
-     * @param  array  $licenseInfo  The license information
+     * @param  array<string, mixed>  $licenseInfo  The license information
      *
      * @throws \Exception When verification fails
      */
@@ -237,6 +237,9 @@ class LicenseProtection
         try {
             DB::beginTransaction();
             $licenseVerifier = new class {
+                /**
+                 * @return array<string, mixed>
+                 */
                 public function verifyLicense(string $purchaseCode, string $domain): array {
                     // Mock implementation for development
                     return ['valid' => true, 'message' => 'License verified'];

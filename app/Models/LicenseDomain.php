@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
@@ -37,6 +38,11 @@ class LicenseDomain extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = LicenseDomainFactory::class;
+
     protected $fillable = [
         'license_id', 'domain', 'status', 'is_verified', 'verified_at', 'added_at', 'last_used_at',
     ];
@@ -47,7 +53,10 @@ class LicenseDomain extends Model
         'added_at' => 'datetime',
         'last_used_at' => 'datetime',
     ];
-    public function license()
+    /**
+     * @return BelongsTo<License, LicenseDomain>
+     */
+    public function license(): BelongsTo
     {
         return $this->belongsTo(License::class);
     }

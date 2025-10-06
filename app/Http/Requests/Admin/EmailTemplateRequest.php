@@ -28,7 +28,8 @@ class EmailTemplateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && (auth()->user()->is_admin || auth()->user()->hasRole('admin'));
+        $user = auth()->user();
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -39,7 +40,8 @@ class EmailTemplateRequest extends FormRequest
     {
         $templateId = $this->route('email_template') ? $this->route('email_template')->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
-        $isTest = $this->isMethod('POST') && str_contains($this->route()->getName(), 'test');
+        $route = $this->route();
+        $isTest = $this->isMethod('POST') && $route && str_contains($route->getName() ?? '', 'test');
         // Test email validation
         if ($isTest) {
             return [

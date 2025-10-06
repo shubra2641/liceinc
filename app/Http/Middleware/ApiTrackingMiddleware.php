@@ -124,9 +124,9 @@ class ApiTrackingMiddleware
     /**
      * Sanitize request data to prevent XSS attacks.
      *
-     * @param  array  $data  The request data to sanitize
+     * @param  array<string, mixed>  $data  The request data to sanitize
      *
-     * @return array The sanitized request data
+     * @return array<string, mixed> The sanitized request data
      */
     private function sanitizeRequestData(array $data): array
     {
@@ -147,7 +147,7 @@ class ApiTrackingMiddleware
      *
      * @param  string  $content  The response content to sanitize
      *
-     * @return array The sanitized response data
+     * @return array<string, mixed> The sanitized response data
      */
     private function sanitizeResponseData(string $content): array
     {
@@ -183,7 +183,7 @@ class ApiTrackingMiddleware
      * Determine API call status based on response.
      *
      * @param  Response  $response  The HTTP response
-     * @param  array  $responseData  The parsed response data
+     * @param  array<string, mixed>  $responseData  The parsed response data
      *
      * @return string The determined status
      */

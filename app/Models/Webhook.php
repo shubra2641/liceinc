@@ -25,6 +25,11 @@ class Webhook extends Model
     use HasFactory;
 
     /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = WebhookFactory::class;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -57,6 +62,9 @@ class Webhook extends Model
     /**
      * Get the webhook logs for the webhook.
      */
+    /**
+     * @return HasMany<WebhookLog, Webhook>
+     */
     public function logs(): HasMany
     {
         return $this->hasMany(WebhookLog::class);
@@ -65,6 +73,10 @@ class Webhook extends Model
     /**
      * Scope a query to only include active webhooks.
      */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<Webhook> $query
+     * @return \Illuminate\Database\Eloquent\Builder<Webhook>
+     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -72,6 +84,10 @@ class Webhook extends Model
 
     /**
      * Scope a query to only include failed webhooks.
+     */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<Webhook> $query
+     * @return \Illuminate\Database\Eloquent\Builder<Webhook>
      */
     public function scopeFailed($query)
     {

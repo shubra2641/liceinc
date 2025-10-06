@@ -6,10 +6,11 @@
  * - Prevents preloader from showing longer than necessary
  * Envato-compliant JavaScript with validation and best practices
  */
+/* eslint-disable no-undef, radix */
 
 class FrontendPreloaderManager {
   constructor() {
-    this.container = document.getElementById("preloader-container");
+    this.container = document.getElementById('preloader-container');
     this.settings = this.getSettings();
     this.isVisible = true;
     this.pageReadyChecked = false;
@@ -22,12 +23,12 @@ class FrontendPreloaderManager {
     }
 
     return {
-      enabled: this.container.dataset.enabled === "1",
-      type: this.container.dataset.type || "spinner",
-      color: this.container.dataset.color || "#3b82f6",
-      backgroundColor: this.container.dataset.bg || "#ffffff",
+      enabled: this.container.dataset.enabled === '1',
+      type: this.container.dataset.type || 'spinner',
+      color: this.container.dataset.color || '#3b82f6',
+      backgroundColor: this.container.dataset.bg || '#ffffff',
       duration: parseInt(this.container.dataset.duration) || 2000,
-      text: this.container.dataset.text || "Loading...",
+      text: this.container.dataset.text || 'Loading...',
     };
   }
 
@@ -46,7 +47,7 @@ class FrontendPreloaderManager {
       return;
     }
 
-    const style = document.createElement("style");
+    const style = document.createElement('style');
     style.textContent = `
             :root {
                 --preloader-color: ${this.settings.color};
@@ -56,8 +57,8 @@ class FrontendPreloaderManager {
             
             @media (prefers-color-scheme: dark) {
                 :root {
-                    --preloader-bg-dark: ${this.settings.backgroundColor === "#ffffff" ? "#1f2937" : this.settings.backgroundColor};
-                    --preloader-text-color-dark: ${this.settings.color === "#3b82f6" ? "#d1d5db" : this.settings.color};
+                    --preloader-bg-dark: ${this.settings.backgroundColor === '#ffffff' ? '#1f2937' : this.settings.backgroundColor};
+                    --preloader-text-color-dark: ${this.settings.color === '#3b82f6' ? '#d1d5db' : this.settings.color};
                 }
             }
         `;
@@ -67,8 +68,8 @@ class FrontendPreloaderManager {
   checkPageReadiness() {
     // Check if page is actually ready by looking at document state and rendered content
     if (
-      document.readyState === "complete" ||
-      (document.readyState === "interactive" &&
+      document.readyState === 'complete' ||
+      (document.readyState === 'interactive' &&
         document.body &&
         document.body.children.length > 0)
     ) {
@@ -79,10 +80,9 @@ class FrontendPreloaderManager {
 
   setupEventListeners() {
     let pageReadyHidden = false;
-    let settingsTimeReached = false;
 
     // Hide preloader when DOM is ready (fastest)
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener('DOMContentLoaded', () => {
       // Use requestAnimationFrame to ensure page is visually ready
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -95,7 +95,7 @@ class FrontendPreloaderManager {
     });
 
     // Hide preloader when page is fully loaded (fallback)
-    window.addEventListener("load", () => {
+    window.addEventListener('load', () => {
       if (!pageReadyHidden) {
         pageReadyHidden = true;
         this.hidePreloader();
@@ -110,15 +110,14 @@ class FrontendPreloaderManager {
       }
     };
 
-    document.addEventListener("click", hideOnInteraction, { once: true });
-    document.addEventListener("keydown", hideOnInteraction, { once: true });
-    document.addEventListener("scroll", hideOnInteraction, { once: true });
+    document.addEventListener('click', hideOnInteraction, { once: true });
+    document.addEventListener('keydown', hideOnInteraction, { once: true });
+    document.addEventListener('scroll', hideOnInteraction, { once: true });
 
     // Settings-based timer: Only hide if page hasn't loaded yet
     // This acts as a maximum duration, not minimum
     if (this.settings.duration && this.settings.duration > 500) {
       setTimeout(() => {
-        settingsTimeReached = true;
         if (!pageReadyHidden) {
           // Page still not ready after settings duration - force hide
           this.hidePreloader();
@@ -127,9 +126,9 @@ class FrontendPreloaderManager {
     }
 
     // Minimum display time (if user wants preloader to show for at least some time)
-    const minDisplayTime = this.container.dataset.minDuration
-      ? parseInt(this.container.dataset.minDuration)
-      : 0;
+    const minDisplayTime = this.container.dataset.minDuration ?
+      parseInt(this.container.dataset.minDuration) :
+      0;
 
     if (minDisplayTime > 0) {
       setTimeout(() => {
@@ -150,7 +149,7 @@ class FrontendPreloaderManager {
     ); // Max 3 seconds total
 
     // Handle page visibility changes
-    document.addEventListener("visibilitychange", () => {
+    document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         this.pauseAnimations();
       } else {
@@ -165,16 +164,16 @@ class FrontendPreloaderManager {
     }
 
     // Add entrance animation
-    this.container.style.opacity = "1";
-    this.container.style.visibility = "visible";
+    this.container.style.opacity = '1';
+    this.container.style.visibility = 'visible';
 
     // Start progress animation if it's a progress type
-    if (this.settings.type === "progress") {
+    if (this.settings.type === 'progress') {
       this.animateProgress();
     }
 
     // Add loading state to body
-    document.body.classList.add("preloader-active");
+    document.body.classList.add('preloader-active');
   }
 
   hidePreloader() {
@@ -185,13 +184,13 @@ class FrontendPreloaderManager {
     this.isVisible = false;
 
     // Force hide immediately with CSS
-    this.container.style.opacity = "0";
-    this.container.style.visibility = "hidden";
-    this.container.style.display = "none";
-    this.container.classList.add("hidden");
+    this.container.style.opacity = '0';
+    this.container.style.visibility = 'hidden';
+    this.container.style.display = 'none';
+    this.container.classList.add('hidden');
 
     // Remove loading state from body
-    document.body.classList.remove("preloader-active");
+    document.body.classList.remove('preloader-active');
 
     // Remove from DOM immediately
     if (this.container && this.container.parentNode) {
@@ -200,7 +199,7 @@ class FrontendPreloaderManager {
   }
 
   animateProgress() {
-    const progressBar = this.container.querySelector(".preloader-progress-bar");
+    const progressBar = this.container.querySelector('.preloader-progress-bar');
     if (!progressBar) {
       return;
     }
@@ -212,33 +211,33 @@ class FrontendPreloaderManager {
         progress = 100;
         clearInterval(interval);
       }
-      progressBar.style.width = progress + "%";
+      progressBar.style.width = `${progress}%`;
     }, 50); // Faster updates
   }
 
   pauseAnimations() {
     const animations = this.container.querySelectorAll('[style*="animation"]');
-    animations.forEach((el) => {
-      el.style.animationPlayState = "paused";
+    animations.forEach(el => {
+      el.style.animationPlayState = 'paused';
     });
   }
 
   resumeAnimations() {
     const animations = this.container.querySelectorAll('[style*="animation"]');
-    animations.forEach((el) => {
-      el.style.animationPlayState = "running";
+    animations.forEach(el => {
+      el.style.animationPlayState = 'running';
     });
   }
 
   // Public method to manually hide preloader
   static hide() {
-    const preloader = document.getElementById("preloader-container");
+    const preloader = document.getElementById('preloader-container');
     if (preloader) {
-      preloader.style.opacity = "0";
-      preloader.style.visibility = "hidden";
-      preloader.style.display = "none";
-      preloader.classList.add("hidden");
-      document.body.classList.remove("preloader-active");
+      preloader.style.opacity = '0';
+      preloader.style.visibility = 'hidden';
+      preloader.style.display = 'none';
+      preloader.classList.add('hidden');
+      document.body.classList.remove('preloader-active');
 
       // Remove immediately
       if (preloader.parentNode) {
@@ -249,28 +248,28 @@ class FrontendPreloaderManager {
 
   // Public method to show preloader
   static show() {
-    const preloader = document.getElementById("preloader-container");
+    const preloader = document.getElementById('preloader-container');
     if (preloader) {
-      preloader.classList.remove("hidden");
-      preloader.style.opacity = "1";
-      preloader.style.visibility = "visible";
-      document.body.classList.add("preloader-active");
+      preloader.classList.remove('hidden');
+      preloader.style.opacity = '1';
+      preloader.style.visibility = 'visible';
+      document.body.classList.add('preloader-active');
     }
   }
 }
 
 // Initialize preloader when DOM is ready
-document.addEventListener("DOMContentLoaded", () => {
-  new FrontendPreloaderManager();
+document.addEventListener('DOMContentLoaded', () => {
+  new FrontendPreloaderManager(); // eslint-disable-line no-new
 });
 
 // Emergency fallback: Force hide preloader if nothing else worked
 setTimeout(() => {
-  const preloader = document.getElementById("preloader-container");
-  if (preloader && preloader.style.display !== "none") {
-    preloader.style.display = "none";
+  const preloader = document.getElementById('preloader-container');
+  if (preloader && preloader.style.display !== 'none') {
+    preloader.style.display = 'none';
     preloader.remove();
-    document.body.classList.remove("preloader-active");
+    document.body.classList.remove('preloader-active');
   }
 }, 5000); // Emergency only - 5 seconds max
 

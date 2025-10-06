@@ -2,6 +2,7 @@
  * Product Show Page JavaScript
  * Envato-compliant external JavaScript file
  */
+/* eslint-disable no-new, no-unused-vars, no-undef */
 
 class ProductShowManager {
   constructor() {
@@ -16,14 +17,14 @@ class ProductShowManager {
   }
 
   setupGalleryModal() {
-    const galleryModal = document.getElementById("galleryModal");
-    const galleryModalImage = document.getElementById("galleryModalImage");
+    const galleryModal = document.getElementById('galleryModal');
+    const galleryModalImage = document.getElementById('galleryModalImage');
 
     if (galleryModal && galleryModalImage) {
-      galleryModal.addEventListener("show.bs.modal", (event) => {
+      galleryModal.addEventListener('show.bs.modal', event => {
         const button = event.relatedTarget;
-        const imageSrc = button.getAttribute("data-image");
-        const imageAlt = button.getAttribute("alt");
+        const imageSrc = button.getAttribute('data-image');
+        const imageAlt = button.getAttribute('alt');
 
         galleryModalImage.src = imageSrc;
         galleryModalImage.alt = imageAlt;
@@ -35,8 +36,8 @@ class ProductShowManager {
     const purchaseButtons = document.querySelectorAll(
       '[data-action="purchase"]',
     );
-    purchaseButtons.forEach((button) => {
-      button.addEventListener("click", (e) => {
+    purchaseButtons.forEach(button => {
+      button.addEventListener('click', e => {
         e.preventDefault();
         this.handlePurchase();
       });
@@ -47,8 +48,8 @@ class ProductShowManager {
     const downloadButtons = document.querySelectorAll(
       '[data-action="download"]',
     );
-    downloadButtons.forEach((button) => {
-      button.addEventListener("click", (e) => {
+    downloadButtons.forEach(button => {
+      button.addEventListener('click', e => {
         e.preventDefault();
         this.handleDownload();
       });
@@ -59,8 +60,8 @@ class ProductShowManager {
     const wishlistButtons = document.querySelectorAll(
       '[data-action="wishlist"]',
     );
-    wishlistButtons.forEach((button) => {
-      button.addEventListener("click", (e) => {
+    wishlistButtons.forEach(button => {
+      button.addEventListener('click', e => {
         e.preventDefault();
         this.handleWishlist();
       });
@@ -69,21 +70,21 @@ class ProductShowManager {
 
   handlePurchase() {
     // Show notification
-    this.showNotification("Purchase functionality will be implemented", "info");
+    this.showNotification('Purchase functionality will be implemented', 'info');
   }
 
   handleDownload() {
     // Show notification
-    this.showNotification("Download functionality will be implemented", "info");
+    this.showNotification('Download functionality will be implemented', 'info');
   }
 
   handleWishlist() {
     // Show notification
-    this.showNotification("Wishlist functionality will be implemented", "info");
+    this.showNotification('Wishlist functionality will be implemented', 'info');
   }
 
-  showNotification(message, type = "info") {
-    const notification = document.createElement("div");
+  showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
     notification.className = `alert alert-${type} alert-dismissible fade show`;
     // Sanitize message to prevent XSS
     // Message will be sanitized by SecurityUtils
@@ -91,7 +92,7 @@ class ProductShowManager {
       this,
       `
             <div class="d-flex align-items-center">
-                <i class="fas fa-${type === "success" ? "check-circle" : type === "error" ? "exclamation-triangle" : "info-circle"} me-2"></i>
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
                 <span>${message}</span>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -100,7 +101,7 @@ class ProductShowManager {
 
     // Insert at the top of the page
     const container =
-      document.querySelector(".user-dashboard-container") || document.body;
+      document.querySelector('.user-dashboard-container') || document.body;
     container.insertBefore(notification, container.firstChild);
 
     // Auto remove after 5 seconds
@@ -113,8 +114,8 @@ class ProductShowManager {
 }
 
 // Initialize when DOM is ready
-document.addEventListener("DOMContentLoaded", () => {
-  new ProductShowManager();
+document.addEventListener('DOMContentLoaded', () => {
+  const productShowManager = new ProductShowManager(); // eslint-disable-line no-new
 });
 
 // Export for global access

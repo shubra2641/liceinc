@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Collection;
+use Carbon\Carbon;
 
 /**
  * @property int $id
@@ -136,6 +140,11 @@ class Product extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = ProductFactory::class;
+
     protected $fillable = [
         'name',
         'slug',
@@ -227,19 +236,28 @@ class Product extends Model
         'kb_articles' => 'array',
         'auto_renewal' => 'boolean',
     ];
-    public function licenses()
+    /**
+     * @return HasMany<License, Product>
+     */
+    public function licenses(): HasMany
     {
         return $this->hasMany(License::class);
     }
     /**
      * Get product files.
      */
-    public function files()
+    /**
+     * @return HasMany<ProductFile, Product>
+     */
+    public function files(): HasMany
     {
         return $this->hasMany(ProductFile::class);
     }
     /**
      * Get the product updates.
+     */
+    /**
+     * @return HasMany<ProductUpdate, Product>
      */
     public function updates(): HasMany
     {
@@ -248,7 +266,10 @@ class Product extends Model
     /**
      * Get the latest update for this product.
      */
-    public function latestUpdate()
+    /**
+     * @return HasOne<ProductUpdate, Product>
+     */
+    public function latestUpdate(): HasOne
     {
         return $this->hasOne(ProductUpdate::class)->active()->latest('version');
     }
@@ -262,15 +283,24 @@ class Product extends Model
     /**
      * Get active product files.
      */
-    public function activeFiles()
+    /**
+     * @return HasMany<ProductFile, Product>
+     */
+    public function activeFiles(): HasMany
     {
         return $this->hasMany(ProductFile::class)->where('is_active', true);
     }
+    /**
+     * @return BelongsTo<ProgrammingLanguage, Product>
+     */
     public function programmingLanguage(): BelongsTo
     {
         return $this->belongsTo(ProgrammingLanguage::class, 'programming_language');
     }
-    public function category()
+    /**
+     * @return BelongsTo<ProductCategory, Product>
+     */
+    public function category(): BelongsTo
     {
         // Specify foreign key explicitly to avoid default 'product_category_id'
         return $this->belongsTo(ProductCategory::class, 'category_id');
@@ -278,21 +308,30 @@ class Product extends Model
     /**
      * Get KB categories linked to this product.
      */
-    public function kbCategories()
+    /**
+     * @return BelongsToMany<KbCategory, Product>
+     */
+    public function kbCategories(): BelongsToMany
     {
         return $this->belongsToMany(KbCategory::class, 'product_kb_categories', 'product_id', 'kb_category_id');
     }
     /**
      * Get KB articles linked to this product.
      */
-    public function kbArticles()
+    /**
+     * @return BelongsToMany<KbArticle, Product>
+     */
+    public function kbArticles(): BelongsToMany
     {
         return $this->belongsToMany(KbArticle::class, 'product_kb_articles', 'product_id', 'kb_article_id');
     }
     /**
      * Get KB categories by IDs stored in JSON.
      */
-    public function getKbCategoriesAttribute($value)
+    /**
+     * @return array<int>
+     */
+    public function getKbCategoriesAttribute(?string $value = null): array
     {
         if (! $value) {
             return [];
@@ -303,7 +342,10 @@ class Product extends Model
     /**
      * Get KB articles by IDs stored in JSON.
      */
-    public function getKbArticlesAttribute($value)
+    /**
+     * @return array<int>
+     */
+    public function getKbArticlesAttribute(?string $value = null): array
     {
         if (! $value) {
             return [];
@@ -314,7 +356,10 @@ class Product extends Model
     /**
      * Get KB categories as Collection.
      */
-    public function getKbCategoriesCollection()
+    /**
+     * @return Collection<int, KbCategory>
+     */
+    public function getKbCategoriesCollection(): Collection
     {
         if (! $this->kb_categories) {
             return collect();
@@ -324,7 +369,10 @@ class Product extends Model
     /**
      * Get KB articles as Collection.
      */
-    public function getKbArticlesCollection()
+    /**
+     * @return Collection<int, KbArticle>
+     */
+    public function getKbArticlesCollection(): Collection
     {
         if (! $this->kb_articles) {
             return collect();
@@ -334,7 +382,7 @@ class Product extends Model
     /**
      * Check if product has KB access requirements.
      */
-    public function hasKbAccess()
+    public function hasKbAccess(): bool
     {
         return $this->kb_access_required &&
                (($this->kb_categories && count($this->kb_categories) > 0) ||
@@ -343,11 +391,14 @@ class Product extends Model
     /**
      * Get all accessible KB content (categories + articles from selected categories).
      */
-    public function getAccessibleKbContent()
+    /**
+     * @return array<string, Collection<int, KbCategory|KbArticle>>
+     */
+    public function getAccessibleKbContent(): array
     {
         $accessibleContent = [
-            'categories' => [],
-            'articles' => [],
+            'categories' => collect(),
+            'articles' => collect(),
         ];
         // Get selected categories
         if ($this->kb_categories && count($this->kb_categories) > 0) {
@@ -365,35 +416,35 @@ class Product extends Model
     /**
      * Check if support is still active for a license.
      */
-    public function isSupportActive($licenseCreatedAt)
+    public function isSupportActive(Carbon $licenseCreatedAt): bool
     {
         return $licenseCreatedAt->copy()->addDays($this->support_days)->isFuture();
     }
     /**
      * Get extended support price formatted.
      */
-    public function getFormattedExtendedSupportPriceAttribute()
+    public function getFormattedExtendedSupportPriceAttribute(): string
     {
         return '$' . number_format($this->extended_support_price, 2);
     }
     /**
      * Get formatted price.
      */
-    public function getFormattedPriceAttribute()
+    public function getFormattedPriceAttribute(): string
     {
         return '$' . number_format($this->price, 2);
     }
     /**
      * Get formatted renewal price.
      */
-    public function getFormattedRenewalPriceAttribute()
+    public function getFormattedRenewalPriceAttribute(): string
     {
         return $this->renewal_price ? '$' . number_format($this->renewal_price, 2) : 'N/A';
     }
     /**
      * Get renewal period label.
      */
-    public function getRenewalPeriodLabelAttribute()
+    public function getRenewalPeriodLabelAttribute(): string
     {
         return match ($this->renewal_period) {
             'monthly' => 'Monthly',
@@ -408,35 +459,38 @@ class Product extends Model
     /**
      * Get renewal period label (method version for view compatibility).
      */
-    public function renewalPeriodLabel()
+    public function renewalPeriodLabel(): string
     {
         return $this->renewal_period_label;
     }
     /**
      * Check if product is in stock.
      */
-    public function invoices()
+    /**
+     * @return HasMany<Invoice, Product>
+     */
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
     /**
      * Check if product has limited stock.
      */
-    public function hasLimitedStock()
+    public function hasLimitedStock(): bool
     {
         return ! is_null($this->stock) && $this->stock > 0;
     }
     /**
      * Check if product is in stock.
      */
-    public function isInStock()
+    public function isInStock(): bool
     {
         return is_null($this->stock) || $this->stock > 0;
     }
     /**
      * Decrease stock by specified amount.
      */
-    public function decreaseStock($amount = 1)
+    public function decreaseStock(int $amount = 1): void
     {
         if ($this->hasLimitedStock()) {
             $this->decrement('stock', $amount);
@@ -445,7 +499,7 @@ class Product extends Model
     /**
      * Increase stock by specified amount.
      */
-    public function increaseStock($amount = 1)
+    public function increaseStock(int $amount = 1): void
     {
         if ($this->hasLimitedStock()) {
             $this->increment('stock', $amount);
@@ -454,7 +508,7 @@ class Product extends Model
     /**
      * Get stock status.
      */
-    public function getStockStatusAttribute()
+    public function getStockStatusAttribute(): string
     {
         if (is_null($this->stock)) {
             return 'Unlimited';
@@ -464,14 +518,14 @@ class Product extends Model
     /**
      * Get renewal price (fallback to regular price if not set).
      */
-    public function getRenewalPrice()
+    public function getRenewalPrice(): float
     {
         return $this->renewal_price ?? $this->price;
     }
     /**
      * Calculate next renewal date.
      */
-    public function getNextRenewalDate($fromDate = null)
+    public function getNextRenewalDate(Carbon $fromDate = null): Carbon
     {
         $fromDate = $fromDate ?? now();
         return $fromDate->copy()->addDays($this->duration_days);
@@ -479,14 +533,14 @@ class Product extends Model
     /**
      * Calculate tax amount.
      */
-    public function getTaxAmountAttribute()
+    public function getTaxAmountAttribute(): float
     {
         return $this->price * ($this->tax_rate / 100);
     }
     /**
      * Get total price including tax.
      */
-    public function getTotalPriceAttribute()
+    public function getTotalPriceAttribute(): float
     {
         return $this->price + $this->tax_amount;
     }

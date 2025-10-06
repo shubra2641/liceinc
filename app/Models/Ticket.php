@@ -48,6 +48,11 @@ class Ticket extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = TicketFactory::class;
+
     protected $fillable = [
         'user_id',
         'license_id',

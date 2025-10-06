@@ -69,6 +69,11 @@ class Controller extends BaseController
      *     return $data;
      * });
      */
+    /**
+     * @template TCallbackReturnType
+     * @param callable(): TCallbackReturnType $callback
+     * @return TCallbackReturnType
+     */
     protected function transaction(callable $callback): mixed
     {
         try {
@@ -151,6 +156,9 @@ class Controller extends BaseController
      * @example
      * return $this->redirectWithMessage('users.index', 'User created successfully', 'success');
      */
+    /**
+     * @param array<string, mixed> $parameters
+     */
     protected function redirectWithMessage(
         string $route,
         string $message,
@@ -212,6 +220,9 @@ class Controller extends BaseController
      * @example
      * $this->logSecurityEvent('unauthorized_access', $request, ['user_id' => $userId]);
      */
+    /**
+     * @param array<string, mixed> $context
+     */
     protected function logSecurityEvent(string $event, Request $request, array $context = []): void
     {
         try {
@@ -248,6 +259,11 @@ class Controller extends BaseController
      *
      * @example
      * $validated = $this->validateRequest($request, ['name' => 'required|string']);
+     */
+    /**
+     * @param array<string, string> $rules
+     * @param array<string, string> $messages
+     * @return array<string, mixed>
      */
     protected function validateRequest(Request $request, array $rules, array $messages = []): array
     {
@@ -320,6 +336,9 @@ class Controller extends BaseController
                 return false;
             }
             $user = auth()->user();
+            if ($user === null) {
+                return false;
+            }
             if ($resource) {
                 return $user->can($permission, $resource);
             }

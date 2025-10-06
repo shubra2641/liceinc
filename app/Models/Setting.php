@@ -289,6 +289,11 @@ class Setting extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = SettingFactory::class;
+
     protected $fillable = [
         'site_name',
         'site_logo',

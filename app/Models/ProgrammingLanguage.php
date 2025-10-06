@@ -45,6 +45,11 @@ class ProgrammingLanguage extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = ProgrammingLanguageFactory::class;
+
     protected $fillable = [
         'name',
         'slug',
@@ -58,6 +63,9 @@ class ProgrammingLanguage extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+    /**
+     * @return HasMany<Product, ProgrammingLanguage>
+     */
     public function products(): HasMany
     {
         return $this->hasMany(Product::class, 'programming_language');
@@ -79,14 +87,14 @@ class ProgrammingLanguage extends Model
     /**
      * Get the license template for this language.
      */
-    public function getLicenseTemplate()
+    public function getLicenseTemplate(): string
     {
         return $this->license_template ?: $this->getDefaultLicenseTemplate();
     }
     /**
      * Get default license template for this language.
      */
-    private function getDefaultLicenseTemplate()
+    private function getDefaultLicenseTemplate(): string
     {
         $templates = [
             'php' => "<?php\n/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n" .
@@ -180,7 +188,7 @@ class ProgrammingLanguage extends Model
     /**
      * Check if template file exists.
      */
-    public function hasTemplateFile()
+    public function hasTemplateFile(): bool
     {
         try {
             $templatePath = $this->getTemplateFilePath();
@@ -192,7 +200,7 @@ class ProgrammingLanguage extends Model
     /**
      * Get template file path.
      */
-    public function getTemplateFilePath()
+    public function getTemplateFilePath(): string
     {
         // Ensure slug is safe for filesystem paths (prevent directory traversal)
         $slug = (string)$this->slug;
@@ -206,7 +214,10 @@ class ProgrammingLanguage extends Model
     /**
      * Get template information.
      */
-    public function getTemplateInfo()
+    /**
+     * @return array<string, mixed>
+     */
+    public function getTemplateInfo(): array
     {
         $templatePath = $this->getTemplateFilePath();
         return [
@@ -223,7 +234,10 @@ class ProgrammingLanguage extends Model
     /**
      * Get available template files from resources/templates/licenses/.
      */
-    public static function getAvailableTemplateFiles()
+    /**
+     * @return array<string, mixed>
+     */
+    public static function getAvailableTemplateFiles(): array
     {
         $templateDir = resource_path('templates/licenses');
         $templates = [];

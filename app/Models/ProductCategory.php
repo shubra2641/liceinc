@@ -66,6 +66,11 @@ class ProductCategory extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = ProductCategoryFactory::class;
+
     protected $fillable = [
         'name',
         'slug',
@@ -90,12 +95,18 @@ class ProductCategory extends Model
         'is_featured' => 'boolean',
         'allow_subcategories' => 'boolean',
     ];
+    /**
+     * @return HasMany<Product, ProductCategory>
+     */
     public function products(): HasMany
     {
         return $this->hasMany(Product::class, 'category_id');
     }
     /**
      * Get the parent category.
+     */
+    /**
+     * @return BelongsTo<ProductCategory, ProductCategory>
      */
     public function parent(): BelongsTo
     {
@@ -104,12 +115,19 @@ class ProductCategory extends Model
     /**
      * Get the child categories.
      */
+    /**
+     * @return HasMany<ProductCategory, ProductCategory>
+     */
     public function children(): HasMany
     {
         return $this->hasMany(ProductCategory::class, 'parent_id');
     }
     /**
      * Scope a query to only include root categories (no parent).
+     */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
+     * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeRoots($query)
     {
@@ -118,6 +136,10 @@ class ProductCategory extends Model
     /**
      * Scope a query to only include active categories.
      */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
+     * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
+     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -125,12 +147,20 @@ class ProductCategory extends Model
     /**
      * Scope a query to only include categories that show in menu.
      */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
+     * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
+     */
     public function scopeMenuVisible($query)
     {
         return $query->where('show_in_menu', true);
     }
     /**
      * Scope a query to only include featured categories.
+     */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
+     * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeFeatured($query)
     {

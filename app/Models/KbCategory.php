@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -61,6 +64,11 @@ class KbCategory extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = KbCategoryFactory::class;
+
     protected $fillable = [
         'name', 'slug', 'description', 'parent_id', 'serial', 'requires_serial', 'serial_message',
         'sort_order', 'product_id', 'meta_title', 'meta_description', 'meta_keywords', 'icon',
@@ -73,26 +81,40 @@ class KbCategory extends Model
         'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
-    public function parent()
+    /**
+     * @return BelongsTo<KbCategory, KbCategory>
+     */
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(KbCategory::class, 'parent_id');
     }
-    public function children()
+    /**
+     * @return HasMany<KbCategory, KbCategory>
+     */
+    public function children(): HasMany
     {
         return $this->hasMany(KbCategory::class, 'parent_id');
     }
-    public function articles()
+    /**
+     * @return HasMany<KbArticle, KbCategory>
+     */
+    public function articles(): HasMany
     {
         return $this->hasMany(KbArticle::class, 'kb_category_id');
     }
-    public function product()
+    /**
+     * @return BelongsTo<Product, KbCategory>
+     */
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
     /**
      * Scope to get only active categories.
+     * @param Builder<KbCategory> $query
+     * @return Builder<KbCategory>
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }

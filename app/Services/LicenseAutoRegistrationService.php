@@ -56,7 +56,7 @@ class LicenseAutoRegistrationService
      * @param  string  $purchaseCode  The purchase code to register
      * @param  int|null  $productId  Optional product ID for the license
      *
-     * @return array Registration result with success status, license object, and message
+     * @return array<string, mixed> Registration result with success status, license object, and message
      *
      * @throws InvalidArgumentException When purchase code is invalid
      * @throws \Exception When license registration fails
@@ -161,6 +161,9 @@ class LicenseAutoRegistrationService
      * if ($result['valid']) {
      *     // Purchase code is valid
      * }
+     */
+    /**
+     * @return array<string, mixed>
      */
     public function checkPurchaseCode(string $purchaseCode, ?int $productId = null): array
     {
@@ -277,6 +280,9 @@ class LicenseAutoRegistrationService
      *
      * @return int|null Determined product ID
      */
+    /**
+     * @param array<string, mixed> $verificationResult
+     */
     private function determineProductId(?int $productId, array $verificationResult): ?int
     {
         if ($productId) {
@@ -317,6 +323,9 @@ class LicenseAutoRegistrationService
      * @return License The created license
      *
      * @throws \Exception When license creation fails
+     */
+    /**
+     * @param array<string, mixed> $verificationResult
      */
     private function createLicense(
         string $purchaseCode,

@@ -137,7 +137,10 @@ class ProductFileService
      *     echo "File: " . $result['filename'];
      * }
      */
-    public function downloadFile(ProductFile $file, $userId = null): ?array
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function downloadFile(ProductFile $file, ?int $userId = null): ?array
     {
         try {
             // Validate inputs
@@ -255,6 +258,9 @@ class ProductFileService
      * @example
      * $files = $service->getProductFiles($product, true);
      * echo "Found " . $files->count() . " active files";
+     */
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, ProductFile>
      */
     public function getProductFiles(Product $product, bool $activeOnly = true): \Illuminate\Database\Eloquent\Collection
     {
@@ -459,7 +465,7 @@ class ProductFileService
     /**
      * Check if user has active license for product.
      */
-    private function userHasLicense(Product $product, $userId): bool
+    private function userHasLicense(Product $product, int $userId): bool
     {
         return $product->licenses()
             ->where('user_id', $userId)
@@ -473,7 +479,7 @@ class ProductFileService
     /**
      * Check if user has paid invoice for product.
      */
-    private function userHasPaidInvoice(Product $product, $userId): bool
+    private function userHasPaidInvoice(Product $product, int $userId): bool
     {
         return \App\Models\Invoice::where('product_id', $product->id)
             ->where('user_id', $userId)
@@ -483,7 +489,10 @@ class ProductFileService
     /**
      * Check if user can download files (has license AND paid invoice).
      */
-    public function userCanDownloadFiles(Product $product, $userId): array
+    /**
+     * @return array<string, mixed>
+     */
+    public function userCanDownloadFiles(Product $product, int $userId): array
     {
         $hasLicense = $this->userHasLicense($product, $userId);
         $hasPaidInvoice = $this->userHasPaidInvoice($product, $userId);
@@ -511,7 +520,10 @@ class ProductFileService
     /**
      * Get all available versions (updates + base files) for a product.
      */
-    public function getAllProductVersions(Product $product, $userId): array
+    /**
+     * @return array<string, mixed>
+     */
+    public function getAllProductVersions(Product $product, int $userId): array
     {
         // First check if user can download files
         $permissions = $this->userCanDownloadFiles($product, $userId);
@@ -551,7 +563,7 @@ class ProductFileService
     /**
      * Get the latest update file for a product or return the base product file.
      */
-    public function getLatestProductFile(Product $product, $userId): ?ProductFile
+    public function getLatestProductFile(Product $product, int $userId): ?ProductFile
     {
         // First check if user can download files
         $permissions = $this->userCanDownloadFiles($product, $userId);
@@ -593,7 +605,7 @@ class ProductFileService
     /**
      * Create a ProductFile record for an update file.
      */
-    private function createUpdateFileRecord($update): ProductFile
+    private function createUpdateFileRecord(ProductUpdate $update): ProductFile
     {
         // Create a temporary ProductFile record for the update
         $file = new ProductFile();
@@ -620,7 +632,11 @@ class ProductFileService
     /**
      * Download update file directly from the update record.
      */
-    public function downloadUpdateFile($update, $userId): array
+    /**
+     * @param ProductUpdate $update
+     * @return array<string, mixed>
+     */
+    public function downloadUpdateFile(ProductUpdate $update, int $userId): array
     {
         if (! $update->file_path || ! Storage::disk('private')->exists($update->file_path)) {
             throw new \Exception('Update file not found');

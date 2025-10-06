@@ -41,6 +41,9 @@ class UpdatePackageService
      *     echo "Installed {$result['data']['files_installed']} files";
      * }
      */
+    /**
+     * @return array<string, mixed>
+     */
     public function installUpdateFiles(string $packagePath): array
     {
         try {
@@ -107,6 +110,9 @@ class UpdatePackageService
      * if ($result['success']) {
      *     echo "Processed {$result['data']['files']} files";
      * }
+     */
+    /**
+     * @return array<string, mixed>
      */
     public function processUpdatePackage(string $packagePath): array
     {
@@ -194,6 +200,9 @@ class UpdatePackageService
      * @return array Validation result with status and message
      *
      * @throws \Exception If validation fails critically
+     */
+    /**
+     * @return array<string, mixed>
      */
     private function validatePackageStructure(string $packagePath): array
     {
@@ -322,6 +331,9 @@ class UpdatePackageService
      *
      * @throws \Exception When file processing fails
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function processUpdateFiles(string $extractPath): array
     {
         $result = [
@@ -369,6 +381,9 @@ class UpdatePackageService
      *
      * @throws \Exception When configuration reading fails
      */
+    /**
+     * @return array<string, mixed>|null
+     */
     private function readUpdateConfig(string $extractPath): ?array
     {
         try {
@@ -406,6 +421,10 @@ class UpdatePackageService
      * @return array Array of processed files with their actions
      *
      * @throws \Exception When file processing fails
+     */
+    /**
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
      */
     private function processFileUpdates(string $extractPath, array $config): array
     {
@@ -468,6 +487,10 @@ class UpdatePackageService
      *
      * @throws \Exception When migration processing fails
      */
+    /**
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
+     */
     private function processMigrations(string $extractPath, array $config): array
     {
         $migrationResult = [
@@ -480,6 +503,9 @@ class UpdatePackageService
             if (SecureFileHelper::isDirectory($migrationsDir)) {
                 // Copy migration files
                 $migrationFiles = glob($migrationsDir . '/*.php');
+                if ($migrationFiles === false) {
+                    $migrationFiles = [];
+                }
                 foreach ($migrationFiles as $migrationFile) {
                     $filename = basename($migrationFile);
                     $targetPath = database_path('migrations/' . $filename);
@@ -515,6 +541,10 @@ class UpdatePackageService
      * @return array Version update result with success status and version details
      *
      * @throws \Exception When version update fails
+     */
+    /**
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
      */
     private function updateVersionInfo(string $extractPath, array $config): array
     {
@@ -623,6 +653,9 @@ class UpdatePackageService
      * @param  int  $filesInstalled  Reference to files installed counter
      *
      * @throws \Exception When file installation fails
+     */
+    /**
+     * @param array<string, mixed> $steps
      */
     private function installFiles(string $sourceDir, string $targetDir, array &$steps, int &$filesInstalled): void
     {

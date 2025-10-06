@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Log;
  */
 class LicenseApiController extends Controller
 {
-    protected $envatoService;
+    protected EnvatoService $envatoService;
     public function __construct(EnvatoService $envatoService)
     {
         $this->envatoService = $envatoService;
@@ -292,6 +292,9 @@ class LicenseApiController extends Controller
     /**
      * Create license from Envato data.
      */
+    /**
+     * @param array<string, mixed> $envatoData
+     */
     private function createLicenseFromEnvato(Product $product, string $purchaseCode, array $envatoData): License
     {
         // Determine max_domains based on license type
@@ -458,6 +461,9 @@ class LicenseApiController extends Controller
      * @param  string  $message  The log message
      * @param  string  $source  The verification source
      * @param  array  $additionalData  Additional data to log
+     */
+    /**
+     * @param array<string, mixed> $additionalData
      */
     private function logApiVerificationAttempt(
         Request $request,

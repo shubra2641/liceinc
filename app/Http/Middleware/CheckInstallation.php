@@ -102,7 +102,7 @@ class CheckInstallation
             if ($route === false) {
                 return '';
             }
-            $routeName = $route->getName();
+            $routeName = $route ? $route->getName() : null;
             return $routeName ?? '';
         } catch (Exception $e) {
             Log::error('Failed to get current route name: ' . $e->getMessage());

@@ -56,6 +56,10 @@ class PaymentService
      *     'product_id' => 1
      * ], 'stripe');
      */
+    /**
+     * @param array<string, mixed> $orderData
+     * @return array<string, mixed>
+     */
     public function processPayment(array $orderData, string $gateway): array
     {
         try {
@@ -92,18 +96,25 @@ class PaymentService
      *
      * @throws \Exception When PayPal payment processing fails
      */
+    /**
+     * @param array<string, mixed> $orderData
+     * @return array<string, mixed>
+     */
     protected function processPayPalPayment(array $orderData): array
     {
         try {
             $settings = PaymentSetting::getByGateway('paypal');
+            if (!$settings) {
+                throw new \Exception('PayPal settings not found');
+            }
             $credentials = $settings->credentials;
             // Validate credentials
             $this->validatePayPalCredentials($credentials);
             // Create API context
             $apiContext = new ApiContext(
                 new OAuthTokenCredential(
-                    $credentials['client_id'],
-                    $credentials['client_secret'],
+                    $credentials['client_id'] ?? '',
+                    $credentials['client_secret'] ?? '',
                 ),
             );
             // Set mode (sandbox or live)
@@ -175,15 +186,22 @@ class PaymentService
      *
      * @throws \Exception When Stripe payment processing fails
      */
+    /**
+     * @param array<string, mixed> $orderData
+     * @return array<string, mixed>
+     */
     protected function processStripePayment(array $orderData): array
     {
         try {
             $settings = PaymentSetting::getByGateway('stripe');
+            if (!$settings) {
+                throw new \Exception('Stripe settings not found');
+            }
             $credentials = $settings->credentials;
             // Validate credentials
             $this->validateStripeCredentials($credentials);
             // Set Stripe API key
-            Stripe::setApiKey($credentials['secret_key']);
+            Stripe::setApiKey($credentials['secret_key'] ?? '');
             $session = Session::create([
                 'payment_method_types' => ['card'],
                 'line_items' => [
@@ -245,6 +263,9 @@ class PaymentService
      *     // Payment verified successfully
      * }
      */
+    /**
+     * @return array<string, mixed>
+     */
     public function verifyPayment(string $gateway, string $transactionId): array
     {
         try {
@@ -284,18 +305,24 @@ class PaymentService
      *
      * @throws \Exception When PayPal verification fails
      */
+    /**
+     * @return array<string, mixed>
+     */
     protected function verifyPayPalPayment(string $paymentId): array
     {
         try {
             $settings = PaymentSetting::getByGateway('paypal');
+            if (!$settings) {
+                throw new \Exception('PayPal settings not found');
+            }
             $credentials = $settings->credentials;
             // Validate credentials
             $this->validatePayPalCredentials($credentials);
             // Create API context
             $apiContext = new ApiContext(
                 new OAuthTokenCredential(
-                    $credentials['client_id'],
-                    $credentials['client_secret'],
+                    $credentials['client_id'] ?? '',
+                    $credentials['client_secret'] ?? '',
                 ),
             );
             $apiContext->setConfig([
@@ -341,14 +368,20 @@ class PaymentService
      *
      * @throws \Exception When Stripe verification fails
      */
+    /**
+     * @return array<string, mixed>
+     */
     protected function verifyStripePayment(string $transactionId): array
     {
         try {
             $settings = PaymentSetting::getByGateway('stripe');
+            if (!$settings) {
+                throw new \Exception('Stripe settings not found');
+            }
             $credentials = $settings->credentials;
             // Validate credentials
             $this->validateStripeCredentials($credentials);
-            Stripe::setApiKey($credentials['secret_key']);
+            Stripe::setApiKey($credentials['secret_key'] ?? '');
             // For Stripe Checkout, we need to retrieve the session, not payment_intent
             $session = Session::retrieve($transactionId);
             if ($session->payment_status === 'paid') {
@@ -398,6 +431,10 @@ class PaymentService
      *     'currency' => 'USD'
      * ], 'stripe', 'pi_1234567890');
      */
+    /**
+     * @param array<string, mixed> $orderData
+     * @return array<string, mixed>
+     */
     public function createLicenseAndInvoice(array $orderData, string $gateway, ?string $transactionId = null): array
     {
         try {
@@ -406,6 +443,9 @@ class PaymentService
             $this->validateGateway($gateway);
             DB::beginTransaction();
             $user = User::find($orderData['user_id']);
+            if (!$user) {
+                throw new \Exception('User not found');
+            }
             $product = isset($orderData['product_id']) ? Product::find($orderData['product_id']) : null;
             // Check if this is for an existing invoice
             $existingInvoice = null;
@@ -458,12 +498,12 @@ class PaymentService
                     // Create new license for product purchase
                     $license = License::create([
                         'user_id' => $user->id,
-                        'product_id' => $product->id,
-                        'license_type' => $product->license_type ?? 'single',
+                        'product_id' => $product ? $product->id : null,
+                        'license_type' => $product ? $product->license_type ?? 'single' : 'single',
                         'status' => 'active',
-                        'max_domains' => $product->max_domains ?? 1,
-                        'license_expires_at' => $this->calculateLicenseExpiry($product),
-                        'support_expires_at' => $this->calculateSupportExpiry($product),
+                        'max_domains' => $product ? $product->max_domains ?? 1 : 1,
+                        'license_expires_at' => $product ? $this->calculateLicenseExpiry($product) : null,
+                        'support_expires_at' => $product ? $this->calculateSupportExpiry($product) : null,
                         'notes' => "Purchased via {$gateway}",
                     ]);
                     // Create new invoice using InvoiceService
@@ -506,6 +546,9 @@ class PaymentService
      * @param  array  $orderData  Order data to validate
      *
      * @throws InvalidArgumentException When order data is invalid
+     */
+    /**
+     * @param array<string, mixed> $orderData
      */
     private function validateOrderData(array $orderData): void
     {
@@ -550,12 +593,15 @@ class PaymentService
      *
      * @throws InvalidArgumentException When credentials are invalid
      */
+    /**
+     * @param array<string, mixed> $credentials
+     */
     private function validatePayPalCredentials(array $credentials): void
     {
-        if (empty($credentials['client_id'])) {
+        if (empty($credentials['client_id'] ?? '')) {
             throw new InvalidArgumentException('PayPal client_id is required');
         }
-        if (empty($credentials['client_secret'])) {
+        if (empty($credentials['client_secret'] ?? '')) {
             throw new InvalidArgumentException('PayPal client_secret is required');
         }
     }
@@ -566,12 +612,15 @@ class PaymentService
      *
      * @throws InvalidArgumentException When credentials are invalid
      */
+    /**
+     * @param array<string, mixed> $credentials
+     */
     private function validateStripeCredentials(array $credentials): void
     {
-        if (empty($credentials['secret_key'])) {
+        if (empty($credentials['secret_key'] ?? '')) {
             throw new InvalidArgumentException('Stripe secret_key is required');
         }
-        if (! str_starts_with($credentials['secret_key'], 'sk_')) {
+        if (! str_starts_with($credentials['secret_key'] ?? '', 'sk_')) {
             throw new InvalidArgumentException('Invalid Stripe secret key format');
         }
     }

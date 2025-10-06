@@ -19,6 +19,9 @@ class EnvatoVerificationRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
      */
+    /**
+     * @return array<string, array<string>>
+     */
     public function rules(): array
     {
         return [

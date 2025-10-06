@@ -32,6 +32,11 @@ class PaymentSetting extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = PaymentSettingFactory::class;
+
     protected $fillable = [
         'gateway',
         'is_enabled',
@@ -62,6 +67,9 @@ class PaymentSetting extends Model
     /**
      * Get enabled gateways.
      */
+    /**
+     * @return array<string>
+     */
     public static function getEnabledGateways(): array
     {
         return static::where('is_enabled', true)
@@ -70,6 +78,9 @@ class PaymentSetting extends Model
     }
     /**
      * Get credentials for a specific gateway.
+     */
+    /**
+     * @return array<string, mixed>
      */
     public static function getCredentials(string $gateway): array
     {

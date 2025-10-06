@@ -244,7 +244,7 @@ class LicenseController extends Controller
      * @param  string  $productSlug  The product slug to match
      * @param  string  $domain  The domain (not used for Envato verification)
      *
-     * @return array Array with 'valid' key and license information if valid
+     * @return array<string, mixed> Array with 'valid' key and license information if valid
      *
      * @throws \Exception When database operations fail
      */
@@ -307,6 +307,9 @@ class LicenseController extends Controller
      * @param  LicenseVerifyRequest  $request  The HTTP request object
      * @param  array  $response  The response data to log
      * @param  string  $status  The verification status (success, failed, rate_limited)
+     */
+    /**
+     * @param array<string, mixed> $response
      */
     private function logLicenseVerification(
         ?License $license,

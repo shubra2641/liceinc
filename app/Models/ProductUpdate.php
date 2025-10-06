@@ -64,6 +64,11 @@ class ProductUpdate extends Model
     use HasFactory;
 
     /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = ProductUpdateFactory::class;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -104,6 +109,9 @@ class ProductUpdate extends Model
     ];
     /**
      * Get the product that owns the update.
+     */
+    /**
+     * @return BelongsTo<Product, ProductUpdate>
      */
     public function product(): BelongsTo
     {
@@ -210,12 +218,20 @@ class ProductUpdate extends Model
     /**
      * Scope for active updates.
      */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
+     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
     /**
      * Scope for major updates.
+     */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeMajor($query)
     {
@@ -224,12 +240,21 @@ class ProductUpdate extends Model
     /**
      * Scope for required updates.
      */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
+     */
     public function scopeRequired($query)
     {
         return $query->where('is_required', true);
     }
     /**
      * Scope for updates newer than version.
+     */
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     * @param string $version
+     * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeNewerThan($query, string $version)
     {

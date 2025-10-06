@@ -300,6 +300,9 @@ class LicenseService
      * @example
      * $licenses = $licenseService->getUserActiveLicenses($user);
      */
+    /**
+     * @return Collection<int, License>
+     */
     public function getUserActiveLicenses(User $user): Collection
     {
         try {

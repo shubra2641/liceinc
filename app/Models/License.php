@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 /**
@@ -66,6 +67,11 @@ class License extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = LicenseFactory::class;
+
     protected $fillable = [
         'product_id',
         'user_id',
@@ -116,30 +122,47 @@ class License extends Model
         } while (static::where('license_key', $key)->exists());
         return $key;
     }
+    /**
+     * @return BelongsTo<Product, License>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
+    /**
+     * @return BelongsTo<User, License>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
+    /**
+     * @return HasMany<LicenseDomain, License>
+     */
     public function domains(): HasMany
     {
         return $this->hasMany(LicenseDomain::class);
     }
+    /**
+     * @return HasMany<LicenseLog, License>
+     */
     public function logs(): HasMany
     {
         return $this->hasMany(LicenseLog::class);
     }
+    /**
+     * @return HasMany<Invoice, License>
+     */
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
     /**
      * Scope a query to only active licenses (status = active and not expired).
+     * @param Builder<License> $query
+     * @return Builder<License>
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active')
             ->where(function ($q) {
@@ -152,7 +175,11 @@ class License extends Model
      * This will match licenses where user_id = user id or where the linked
      * customer record has the same email as the user (common mapping in this app).
      */
-    public function scopeForUser($query, $user)
+    /**
+     * @param Builder<License> $query
+     * @return Builder<License>
+     */
+    public function scopeForUser(Builder $query, User|int $user): Builder
     {
         $userId = null;
         if (is_numeric($user)) {
@@ -165,28 +192,32 @@ class License extends Model
     /**
      * Scope a query to licenses for a specific customer id (backwards compatibility).
      */
-    public function scopeForCustomer($query, $customerId)
+    /**
+     * @param Builder<License> $query
+     * @return Builder<License>
+     */
+    public function scopeForCustomer(Builder $query, int $customerId): Builder
     {
         return $query->where('user_id', $customerId);
     }
     /**
      * Check if support is active.
      */
-    public function getSupportActiveAttribute()
+    public function getSupportActiveAttribute(): bool
     {
         return $this->support_expires_at && $this->support_expires_at->isFuture();
     }
     /**
      * Get expires_at attribute (alias for license_expires_at).
      */
-    public function getExpiresAtAttribute()
+    public function getExpiresAtAttribute(): ?\Carbon\Carbon
     {
         return $this->license_expires_at;
     }
     /**
      * Set expires_at attribute (alias for license_expires_at).
      */
-    public function setExpiresAtAttribute($value)
+    public function setExpiresAtAttribute(?\Carbon\Carbon $value): void
     {
         $this->license_expires_at = $value;
     }

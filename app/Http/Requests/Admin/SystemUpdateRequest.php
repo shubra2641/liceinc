@@ -26,7 +26,8 @@ class SystemUpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && (auth()->user()->is_admin || auth()->user()->hasRole('admin'));
+        $user = auth()->user();
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -35,7 +36,8 @@ class SystemUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isRollback = $this->isMethod('POST') && str_contains($this->route()->getName(), 'rollback');
+        $route = $this->route();
+        $isRollback = $this->isMethod('POST') && $route && str_contains($route->getName() ?? '', 'rollback');
         // Rollback validation
         if ($isRollback) {
             return [

@@ -148,7 +148,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
      *
      * @param  EnvatoService  $envatoService  The Envato service instance
      *
-     * @return array The validated settings array
+     * @return array<string, mixed> The validated settings array
      *
      * @throws \Exception When settings retrieval or validation fails
      */
@@ -174,7 +174,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
      * Ensures that all required OAuth settings are present and meet
      * security requirements for safe OAuth integration.
      *
-     * @param  array  $settings  The settings array to validate
+     * @param  array<string, mixed>  $settings  The settings array to validate
      *
      * @throws InvalidArgumentException When required settings are missing or invalid
      */

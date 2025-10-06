@@ -160,6 +160,8 @@ return array(
     'App\\Models\\TicketCategory' => $baseDir . '/app/Models/TicketCategory.php',
     'App\\Models\\TicketReply' => $baseDir . '/app/Models/TicketReply.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
+    'App\\Models\\Webhook' => $baseDir . '/app/Models/Webhook.php',
+    'App\\Models\\WebhookLog' => $baseDir . '/app/Models/WebhookLog.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
     'App\\Providers\\EnvatoSocialiteProvider' => $baseDir . '/app/Providers/EnvatoSocialiteProvider.php',
     'App\\Services\\AILicenseAnalyticsService' => $baseDir . '/app/Services/AILicenseAnalyticsService.php',

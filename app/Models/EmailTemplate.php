@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * EmailTemplate Model.
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $body Email body content with variable placeholders
  * @property string $type Template type: 'user' or 'admin'
  * @property string $category Template category: 'registration', 'license', 'ticket', 'invoice', etc.
- * @property array|null $variables Available variables for this template
+ * @property array<string, mixed>|null $variables Available variables for this template
  * @property bool $is_active Whether the template is active
  * @property string|null $description Template description
  * @property \Carbon\Carbon $created_at
@@ -46,6 +47,11 @@ use Illuminate\Database\Eloquent\Model;
 class EmailTemplate extends Model
 {
     use HasFactory;
+
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = EmailTemplateFactory::class;
 
     /**
      * The attributes that are mass assignable.
@@ -76,24 +82,30 @@ class EmailTemplate extends Model
     ];
     /**
      * Scope a query to only include active templates.
+     * @param Builder<EmailTemplate> $query
+     * @return Builder<EmailTemplate>
      */
-    public function scopeActive(Builder $query): void
+    public function scopeActive(Builder $query): Builder
     {
-        $query->where('is_active', true);
+        return $query->where('is_active', true);
     }
     /**
      * Scope a query to only include templates for a specific type.
+     * @param Builder<EmailTemplate> $query
+     * @return Builder<EmailTemplate>
      */
-    public function scopeForType(Builder $query, string $type): void
+    public function scopeForType(Builder $query, string $type): Builder
     {
-        $query->where('type', $type);
+        return $query->where('type', $type);
     }
     /**
      * Scope a query to only include templates for a specific category.
+     * @param Builder<EmailTemplate> $query
+     * @return Builder<EmailTemplate>
      */
-    public function scopeForCategory(Builder $query, string $category): void
+    public function scopeForCategory(Builder $query, string $category): Builder
     {
-        $query->where('category', $category);
+        return $query->where('category', $category);
     }
     /**
      * Get template by name.
@@ -105,14 +117,21 @@ class EmailTemplate extends Model
     /**
      * Get all templates for a specific type and category.
      */
+    /**
+     * @return Collection<int, EmailTemplate>
+     */
     public static function getByTypeAndCategory(
         string $type,
         string $category,
-    ): \Illuminate\Database\Eloquent\Collection {
+    ): Collection {
         return static::forType($type)->forCategory($category)->active()->get();
     }
     /**
      * Process template variables and return rendered content.
+     */
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, string>
      */
     public function render(array $data = []): array
     {
@@ -125,6 +144,9 @@ class EmailTemplate extends Model
     }
     /**
      * Replace variables in template content.
+     */
+    /**
+     * @param array<string, mixed> $data
      */
     protected function replaceVariables(string $content, array $data): string
     {

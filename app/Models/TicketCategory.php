@@ -54,6 +54,11 @@ class TicketCategory extends Model
 {
     use HasFactory;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
+    protected static $factory = TicketCategoryFactory::class;
+
     protected $table = 'ticket_categories';
     protected $fillable = [
         'name',

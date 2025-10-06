@@ -116,7 +116,7 @@ class ProductFileController extends Controller
     /**
      * Get downloadable files for a product (user must have valid license and paid invoice).
      */
-    public function index(Product $product)
+    public function index(Product $product): \Illuminate\View\View
     {
         // Ensure user is authenticated
         if (! auth()->check()) {
@@ -156,7 +156,7 @@ class ProductFileController extends Controller
     /**
      * Download a specific update version.
      */
-    public function downloadUpdate(Product $product, $updateId)
+    public function downloadUpdate(Product $product, int $updateId): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         // Ensure user is authenticated
         if (! auth()->check()) {
@@ -202,7 +202,7 @@ class ProductFileController extends Controller
     /**
      * Download the latest version (update or base file).
      */
-    public function downloadLatest(Product $product)
+    public function downloadLatest(Product $product): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         // Ensure user is authenticated
         if (! auth()->check()) {
@@ -259,7 +259,7 @@ class ProductFileController extends Controller
     /**
      * Download all files as a ZIP archive.
      */
-    public function downloadAll(Product $product)
+    public function downloadAll(Product $product): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         // Ensure user is authenticated
         if (! auth()->check()) {

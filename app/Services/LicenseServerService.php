@@ -683,6 +683,9 @@ class LicenseServerService
      *
      * @return bool True if valid, false otherwise
      */
+    /**
+     * @param array<string, mixed> $data
+     */
     private function validateUpdateResponse(array $data): bool
     {
         return isset($data['success']) && is_bool($data['success']);
