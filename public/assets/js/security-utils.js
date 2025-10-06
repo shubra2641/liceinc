@@ -78,16 +78,66 @@ window.SecurityUtils = {
      * @param {string} url - The URL to navigate to
      */
     safeNavigate: function(url) {
+        if (!url || typeof url !== 'string') {
+            console.error('Invalid URL: URL must be a non-empty string');
+            return;
+        }
+        
+        // Sanitize URL to prevent XSS and open redirects
+        const sanitizedUrl = this.sanitizeUrl(url);
+        if (!sanitizedUrl) {
+            console.error('Invalid URL: URL failed sanitization');
+            return;
+        }
+        
         try {
-            const urlObj = new URL(url, window.location.origin);
+            const urlObj = new URL(sanitizedUrl, window.location.origin);
+            
+            // Additional security checks
+            if (urlObj.protocol === 'javascript:' || urlObj.protocol === 'data:') {
+                console.error('Invalid URL: Dangerous protocol blocked');
+                return;
+            }
+            
             if (urlObj.origin === window.location.origin) {
-                window.location.href = url;
+                window.location.href = sanitizedUrl;
             } else {
                 console.error('Invalid URL: Cross-origin navigation blocked');
             }
         } catch (e) {
             console.error('Invalid URL format:', e);
         }
+    },
+
+    /**
+     * Sanitize URL to prevent XSS and open redirects
+     * @param {string} url - The URL to sanitize
+     * @returns {string|null} - Sanitized URL or null if invalid
+     */
+    sanitizeUrl: function(url) {
+        if (!url || typeof url !== 'string') {
+            return null;
+        }
+        
+        // Remove any potential XSS attempts
+        const cleanUrl = url.replace(/[<>'"]/g, '');
+        
+        // Check for dangerous protocols
+        const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:'];
+        for (const protocol of dangerousProtocols) {
+            if (cleanUrl.toLowerCase().startsWith(protocol)) {
+                return null;
+            }
+        }
+        
+        // Only allow http, https, and relative URLs
+        if (!cleanUrl.startsWith('/') && 
+            !cleanUrl.startsWith('http://') && 
+            !cleanUrl.startsWith('https://')) {
+            return null;
+        }
+        
+        return cleanUrl;
     },
 
     /**

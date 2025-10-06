@@ -39,12 +39,8 @@ function initializeSearchResults() {
                     // Validate URL to prevent XSS and ensure it's safe
                     try {
                         const urlObj = new URL(url, window.location.origin);
-                        // Only allow same-origin URLs
-                        if (urlObj.origin === window.location.origin) {
-                            window.location.href = url;
-                        } else {
-                            console.error('Invalid URL: Cross-origin navigation blocked');
-                        }
+                        // Use SecurityUtils for safe navigation
+                        SecurityUtils.safeNavigate(url);
                     } catch (e) {
                         console.error('Invalid URL format:', e);
                     }

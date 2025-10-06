@@ -100,9 +100,7 @@ class ConfigHelper
                 'trace' => $e->getTraceAsString(),
                 'context' => [
                     'memory_usage' => memory_get_usage(true),
-                    'execution_time' => microtime(true) - (defined('LARAVEL_START')
-                        ? LARAVEL_START
-                        : (($_SERVER['REQUEST_TIME_FLOAT'] ?? null) ? (float)$_SERVER['REQUEST_TIME_FLOAT'] : microtime(true))), // security-ignore: RAW_SUPERGLOBAL (read-only timing fallback)
+                    'execution_time' => \App\Helpers\ServerHelper::getExecutionTime(),
                 ],
             ]);
             // Graceful degradation with fallback

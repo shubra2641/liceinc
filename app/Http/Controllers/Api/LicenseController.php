@@ -490,18 +490,8 @@ class LicenseManager
      */
     private function getCurrentDomain()
     {
-        // Use Laravel Request facade instead of direct $_SERVER access
-        $request = request();
-        
-        if ($request->hasHeader('Host')) {
-            return $request->header('Host');
-        }
-        
-        if ($request->server('SERVER_NAME')) {
-            return $request->server('SERVER_NAME');
-        }
-        
-        return 'localhost';
+        // Use ServerHelper for safe domain retrieval
+        return \App\Helpers\ServerHelper::getCurrentDomain();
     }
     /**
      * Make API call to license server

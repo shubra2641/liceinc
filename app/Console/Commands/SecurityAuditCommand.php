@@ -493,9 +493,9 @@ class SecurityAuditCommand extends Command
                 );
             }
         }
-        // Check server software
-    $serverSoftware = $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown'; // security-ignore: RAW_SUPERGLOBAL (informational only)
-        if (stripos($serverSoftware, 'apache') !== false) {
+        // Check server software using ServerHelper
+        $serverInfo = \App\Helpers\ServerHelper::getServerInfo();
+        if ($serverInfo['is_apache']) {
             // Check for .htaccess files
             if (File::exists(public_path('.htaccess')) === false) {
                 $this->addIssue(

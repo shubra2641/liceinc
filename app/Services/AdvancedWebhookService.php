@@ -556,9 +556,8 @@ class AdvancedWebhookService
      */
     private function getExecutionTime(): float
     {
-        // This would be set at the beginning of the request
-        $start = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true); // security-ignore: RAW_SUPERGLOBAL(timing only)
-    return microtime(true) - (float)$start;
+        // Use ServerHelper for safe timing calculation
+        return \App\Helpers\ServerHelper::getExecutionTime();
     }
     /**
      * Send webhook event asynchronously for improved performance.
