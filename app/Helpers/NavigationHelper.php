@@ -2,19 +2,21 @@
 /**
  * Navigation Helper Functions with enhanced security.
  *
- * This helper file provides comprehensive navigation and language management
- * functionality with enhanced security measures and proper error handling.
- *
- * Features:
- * - Route activation checking with pattern matching
- * - Breadcrumb generation for navigation
- * - Navigation tree structure management
- * - Language detection and management
- * - Comprehensive language support (100+ languages)
- * - Enhanced security measures (input validation, XSS protection)
- * - Proper error handling for file operations
- * - Clean code structure with no duplicate patterns
- */
+ * This     /**
+     * Generate breadcrumbs for the current route with enhanced security.
+     *
+     * Creates a breadcrumb navigation structur    /**
+     * Get available languages from the lang directory with enhanced security.
+     *
+     * Scans the language directory and returns available languages with proper
+     * error handling and security measures.
+     *
+     * @return array Array of language information with code, name, flag, and native name
+     *
+     * @version 1.0.6
+     */
+use App\Helpers\SecureFileHelper;
+
 if (! function_exists('is_active_route')) {
     /**
      * Check if the current route matches the given route name with enhanced security.
@@ -220,12 +222,12 @@ if (function_exists('get_available_languages') === false) {
         try {
             $languages = [];
             $langPath = resource_path('lang');
-            if (is_dir($langPath) === false) {
+            if (SecureFileHelper::isDirectory($langPath) === false) {
                 return $languages;
             }
             $directories = array_diff(scandir($langPath), ['.', '..']);
             foreach ($directories as $dir) {
-                if (is_dir($langPath.DIRECTORY_SEPARATOR.$dir)) {
+                if (SecureFileHelper::isDirectory($langPath.DIRECTORY_SEPARATOR.$dir)) {
                     $sanitizedCode = htmlspecialchars(trim($dir), ENT_QUOTES, 'UTF-8');
                     if (! empty($sanitizedCode)) {
                         $languages[] = [
@@ -360,7 +362,6 @@ if (! function_exists('get_language_name')) {
             'kha' => 'Khasi',
             'mni-Beng' => 'Manipuri (Bengali)',
             'mni-Latn' => 'Manipuri (Latin)',
-            'mni-Mtei' => 'Manipuri (Meitei)',
         ];
         if (empty($code)) {
             throw new InvalidArgumentException('Language code cannot be empty');
@@ -486,7 +487,6 @@ if (! function_exists('get_language_flag')) {
             'kha' => '🇮🇳',
             'mni-Beng' => '🇮🇳',
             'mni-Latn' => '🇮🇳',
-            'mni-Mtei' => '🇮🇳',
         ];
         if (empty($code)) {
             throw new InvalidArgumentException('Language code cannot be empty');
@@ -612,7 +612,6 @@ if (! function_exists('get_language_native_name')) {
             'kha' => 'Khasi',
             'mni-Beng' => 'মণিপুরী',
             'mni-Latn' => 'Manipuri',
-            'mni-Mtei' => 'ꯃꯤꯇꯩꯂꯣꯟ',
         ];
         if (empty($code)) {
             throw new InvalidArgumentException('Language code cannot be empty');

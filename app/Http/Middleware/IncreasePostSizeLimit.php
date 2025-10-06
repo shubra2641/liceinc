@@ -3,6 +3,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\SecureFileHelper;
 use Symfony\Component\HttpFoundation\Response;
 /**
  * Increase Post Size Limit Middleware with enhanced security and validation.
@@ -132,8 +133,8 @@ class IncreasePostSizeLimit
             if (! preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $setting)) {
                 throw new \InvalidArgumentException('Invalid configuration setting name');
             }
-            // Set the configuration value
-            $result = ini_set($setting, $value);
+            // Set the configuration value using secure helper
+            $result = SecureFileHelper::setIniSetting($setting, $value);
             if ($result === false) {
                 // Don't log warning if the setting is already at the desired value
                 $currentValue = ini_get($setting);

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use LicenseProtection\LicenseVerifier;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use App\Helpers\SecureFileHelper;
 /**
  * Installation Controller with enhanced security and comprehensive setup.
  *
@@ -699,14 +700,14 @@ class InstallController extends Controller
             'storage_writable' => [
                 'name' => 'Storage Directory Writable',
                 'required' => 'Writable',
-                'current' => is_writable(storage_path()) ? 'Writable' : 'Not Writable',
-                'passed' => is_writable(storage_path()),
+                'current' => SecureFileHelper::isWritable(storage_path()) ? 'Writable' : 'Not Writable',
+                'passed' => SecureFileHelper::isWritable(storage_path()),
             ],
             'bootstrap_writable' => [
                 'name' => 'Bootstrap Cache Directory Writable',
                 'required' => 'Writable',
-                'current' => is_writable(base_path('bootstrap/cache')) ? 'Writable' : 'Not Writable',
-                'passed' => is_writable(base_path('bootstrap/cache')),
+                'current' => SecureFileHelper::isWritable(base_path('bootstrap/cache')) ? 'Writable' : 'Not Writable',
+                'passed' => SecureFileHelper::isWritable(base_path('bootstrap/cache')),
             ],
         ];
     }
@@ -1004,7 +1005,7 @@ class InstallController extends Controller
             return $input;
         }
         // Remove null bytes
-        $input = str_replace(chr(0), '', $input);
+        $input = str_replace(SecureFileHelper::getCharacter(0), '', $input);
         // Trim whitespace
         $input = trim($input);
         // Remove potentially dangerous characters

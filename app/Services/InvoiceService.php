@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\SecurityHelper;
 use Illuminate\Support\Str;
 /**
  * Invoice Service with enhanced security and performance.
@@ -125,6 +126,7 @@ class InvoiceService
      * validation and error handling.
      *
      * @param  License  $license  The license to create renewal invoice for
+     * @param  array  $options  Additional options for the invoice
      *
      * @return Invoice The created renewal invoice
      *
@@ -133,22 +135,43 @@ class InvoiceService
      *
      * @example
      * $renewalInvoice = $invoiceService->createRenewalInvoice($license);
+     * $customInvoice = $invoiceService->createRenewalInvoice($license, [
+     *     'amount' => 99.99,
+     *     'description' => 'Custom renewal description',
+     *     'due_date' => now()->addDays(15),
+     * ]);
      */
-    public function createRenewalInvoice(License $license): Invoice
+    public function createRenewalInvoice(License $license, array $options = []): Invoice
     {
         try {
             $this->validateLicense($license);
             DB::beginTransaction();
+
+            // Use provided options or defaults
+            $amount = $options['amount'] ?? $this->sanitizeAmount($license->product->price ?? 0);
+            $description = $options['description'] ?? 'License renewal invoice';
+            $dueDate = $options['due_date'] ?? now()->addDays(30);
+
             $invoice = Invoice::create([
                 'invoice_number' => $this->generateInvoiceNumber(),
                 'user_id' => $license->user_id,
                 'license_id' => $license->id,
-                'amount' => $this->sanitizeAmount($license->product->price ?? 0),
+                'amount' => $this->sanitizeAmount($amount),
                 'currency' => 'USD',
                 'status' => 'pending',
-                'due_date' => now()->addDays(30),
-                'notes' => 'License renewal invoice',
+                'due_date' => $dueDate,
+                'notes' => $description,
             ]);
+
+            // Handle new expiry date if provided
+            if (isset($options['new_expiry_date'])) {
+                // You might want to store this in a custom field or handle it differently
+                Log::info('New expiry date provided for renewal invoice', [
+                    'invoice_id' => $invoice->id,
+                    'new_expiry_date' => $options['new_expiry_date'],
+                ]);
+            }
+
             DB::commit();
             return $invoice;
         } catch (\Exception $e) {
@@ -349,7 +372,7 @@ class InvoiceService
         $this->validateLicense($license);
         $validStatuses = ['paid', 'pending', 'overdue', 'cancelled'];
         if (! in_array($paymentStatus, $validStatuses)) {
-            throw new \InvalidArgumentException('Invalid payment status: '.$paymentStatus);
+            throw new \InvalidArgumentException('Invalid payment status: ' . SecurityHelper::escapeVariable($paymentStatus));
         }
     }
     /**

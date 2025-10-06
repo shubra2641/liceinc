@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Helpers\SecurityHelper;
 /**
  * Login Request with enhanced security and validation.
  *
@@ -141,7 +142,7 @@ class LoginRequest extends FormRequest
             ]);
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => SecurityHelper::escapeTranslation(trans('auth.failed')),
             ]);
         }
         RateLimiter::clear($this->throttleKey());

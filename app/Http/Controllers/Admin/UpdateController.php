@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\SecureFileHelper;
 /**
  * Update Controller with enhanced security.
  *
@@ -289,7 +290,7 @@ class UpdateController extends Controller
     private function createSystemBackup(string $version): string
     {
         $backupDir = storage_path('app/backups');
-        if (! is_dir($backupDir) && ! mkdir($backupDir, 0755, true)) {
+        if (! SecureFileHelper::isDirectory($backupDir) && ! SecureFileHelper::createDirectory($backupDir, 0755, true)) {
             throw new \Exception('Failed to create backup directory');
         }
         $backupName = 'backup_'.$version.'_'.date('Y-m-d_H-i-s').'.zip';
@@ -310,7 +311,7 @@ class UpdateController extends Controller
             foreach ($filesToBackup as $file) {
                 $fullPath = base_path($file);
                 if (file_exists($fullPath)) {
-                    if (is_dir($fullPath)) {
+                    if (SecureFileHelper::isDirectory($fullPath)) {
                         $this->addDirectoryToZip($zip, $fullPath, $file);
                     } else {
                         $zip->addFile($fullPath, $file);
@@ -334,7 +335,7 @@ class UpdateController extends Controller
      */
     private function addDirectoryToZip(\ZipArchive $zip, string $dir, string $zipPath): void
     {
-        if (! is_dir($dir)) {
+        if (! SecureFileHelper::isDirectory($dir)) {
             throw new \Exception("Directory does not exist: {$dir}");
         }
         $iterator = new \RecursiveIteratorIterator(
@@ -525,7 +526,7 @@ class UpdateController extends Controller
         try {
             $backupDir = storage_path('app/backups');
             $backups = [];
-            if (is_dir($backupDir)) {
+            if (SecureFileHelper::isDirectory($backupDir)) {
                 $files = glob($backupDir.'/backup_*.zip');
                 foreach ($files as $file) {
                     $backups[] = [
@@ -593,8 +594,8 @@ class UpdateController extends Controller
             $validated = $request->validated();
             $file = $request->file('update_package');
             $uploadDir = storage_path('app/updates');
-            if (! is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
+            if (! SecureFileHelper::isDirectory($uploadDir)) {
+                SecureFileHelper::createDirectory($uploadDir, 0755, true);
             }
             $filename = 'update_'.date('Y-m-d_H-i-s').'.zip';
             $filePath = $file->storeAs('updates', $filename);
@@ -699,7 +700,7 @@ class UpdateController extends Controller
         if ($zip->open($backupPath) === true) {
             // Extract to temporary directory first
             $tempDir = storage_path('app/temp/restore_'.time());
-            mkdir($tempDir, 0755, true);
+            SecureFileHelper::createDirectory($tempDir, 0755, true);
             $zip->extractTo($tempDir);
             $zip->close();
             // Restore files to their original locations
@@ -723,8 +724,8 @@ class UpdateController extends Controller
                 $targetPath = base_path($relativePath);
                 // Create directory if it doesn't exist
                 $targetDir = dirname($targetPath);
-                if (! is_dir($targetDir)) {
-                    mkdir($targetDir, 0755, true);
+                if (! SecureFileHelper::isDirectory($targetDir)) {
+                    SecureFileHelper::createDirectory($targetDir, 0755, true);
                 }
                 // Copy file
                 copy($file->getRealPath(), $targetPath);
@@ -736,13 +737,13 @@ class UpdateController extends Controller
      */
     private function deleteDirectory(string $dir): void
     {
-        if (! is_dir($dir)) {
+        if (! SecureFileHelper::isDirectory($dir)) {
             return;
         }
         $files = array_diff(scandir($dir), ['.', '..']);
         foreach ($files as $file) {
             $path = $dir.'/'.$file;
-            is_dir($path) ? $this->deleteDirectory($path) : unlink($path);
+            SecureFileHelper::isDirectory($path) ? $this->deleteDirectory($path) : unlink($path);
         }
         rmdir($dir);
     }
@@ -1053,8 +1054,8 @@ class UpdateController extends Controller
             $updateFileName = "auto_update_{$version}_".time().'.zip';
             $updateFilePath = storage_path("app/updates/{$updateFileName}");
             // Ensure updates directory exists
-            if (! is_dir(storage_path('app/updates'))) {
-                mkdir(storage_path('app/updates'), 0755, true);
+            if (! SecureFileHelper::isDirectory(storage_path('app/updates'))) {
+                SecureFileHelper::createDirectory(storage_path('app/updates'), 0755, true);
             }
             // Use the downloaded file directly
             $updateFilePath = $downloadResult['file_path'];
@@ -1132,8 +1133,8 @@ class UpdateController extends Controller
             $steps[] = 'System backup created: '.basename($backupPath);
             // Extract to temporary directory
             $tempPath = storage_path("app/temp/auto_update_{$version}_".time());
-            if (! is_dir($tempPath)) {
-                mkdir($tempPath, 0755, true);
+            if (! SecureFileHelper::isDirectory($tempPath)) {
+                SecureFileHelper::createDirectory($tempPath, 0755, true);
             }
             $zip->extractTo($tempPath);
             $zip->close();
@@ -1176,7 +1177,7 @@ class UpdateController extends Controller
     {
         // Check if files are in a 'files' subdirectory or directly in temp path
         $sourcePath = $tempPath.'/files';
-        if (! is_dir($sourcePath)) {
+        if (! SecureFileHelper::isDirectory($sourcePath)) {
             // Files are directly in temp path
             $sourcePath = $tempPath;
         }
@@ -1189,7 +1190,7 @@ class UpdateController extends Controller
     private function runUpdateMigrations(string $tempPath): void
     {
         $migrationsPath = $tempPath.'/database/migrations';
-        if (! is_dir($migrationsPath)) {
+        if (! SecureFileHelper::isDirectory($migrationsPath)) {
             return; // No migrations to run
         }
         // Copy migrations to database/migrations
@@ -1220,8 +1221,8 @@ class UpdateController extends Controller
      */
     private function copyDirectoryRecursive(string $source, string $destination): void
     {
-        if (! is_dir($destination)) {
-            mkdir($destination, 0755, true);
+        if (! SecureFileHelper::isDirectory($destination)) {
+            SecureFileHelper::createDirectory($destination, 0755, true);
         }
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS),
@@ -1235,8 +1236,8 @@ class UpdateController extends Controller
                 $targetPath = $destination.DIRECTORY_SEPARATOR.$relativePath;
                 // Ensure target directory exists
                 $targetDir = dirname($targetPath);
-                if (! is_dir($targetDir)) {
-                    mkdir($targetDir, 0755, true);
+                if (! SecureFileHelper::isDirectory($targetDir)) {
+                    SecureFileHelper::createDirectory($targetDir, 0755, true);
                 }
                 copy($filePath, $targetPath);
                 $fileCount++;

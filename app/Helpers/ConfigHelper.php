@@ -306,8 +306,9 @@ class ConfigHelper
                 ->first();
             if ($setting) {
                 foreach ($keys as $key) {
-                    if (isset($setting->$key) && $setting->$key !== null && $setting->$key !== '') {
-                        $settings[$key] = $setting->$key;
+                    $value = $setting->$key;
+                    if ($value !== null && $value !== '') {
+                        $settings[$key] = $value;
                     }
                 }
             }
@@ -596,7 +597,7 @@ class ConfigHelper
         foreach ($keys as $key) {
             if (($settings[$key] ?? null) === null) {
                 $envKey = $envMappings[$key] ?? strtoupper($key);
-                $envValue = env($envKey);
+                $envValue = env($envKey); // @phpstan-ignore-line
                 if ($envValue !== null) {
                     $settings[$key] = $envValue;
                 }

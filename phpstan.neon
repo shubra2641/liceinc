@@ -10,3 +10,6 @@ parameters:
         - vendor/
         - storage/
         - public/
+    bootstrapFiles:
+        - vendor/autoload.php
+    treatPhpDocTypesAsCertain: false

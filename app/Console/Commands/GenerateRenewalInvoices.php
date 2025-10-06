@@ -6,6 +6,7 @@ use App\Services\EmailService;
 use App\Services\InvoiceService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use App\Helpers\SecurityHelper;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 /**
@@ -78,6 +79,7 @@ class GenerateRenewalInvoices extends Command
             $generatedCount = 0;
             $emailSentCount = 0;
             $errorCount = 0;
+            /** @var License $license */
             foreach ($licenses as $license) {
                 try {
                     DB::beginTransaction();
@@ -135,7 +137,7 @@ class GenerateRenewalInvoices extends Command
         $days = (int)$this->option('days');
         // Validate days range (1-365 days)
         if ($days < 1 || $days > 365) {
-            throw new \InvalidArgumentException("Days must be between 1 and 365, got: {$days}");
+            throw new \InvalidArgumentException("Days must be between 1 and 365, got: " . SecurityHelper::escapeVariable((string)$days));
         }
         return $days;
     }
@@ -191,6 +193,8 @@ class GenerateRenewalInvoices extends Command
                 ]);
                 return null;
             }
+
+            /** @var Product $product */
             // Calculate renewal price based on product settings
             $renewalPrice = $product->renewal_price ?? $product->price ?? 0;
             if ($renewalPrice <= 0) {
@@ -353,7 +357,9 @@ class GenerateRenewalInvoices extends Command
                             : 'Unknown',
                         'invoice_id' => $invoice->id ?? 'Unknown',
                     ];
-                    $this->emailService->sendRenewalReminder($license->user, $customerData);
+                    /** @var \App\Models\User $user */
+                    $user = $license->user;
+                    $this->emailService->sendRenewalReminder($user, $customerData);
                     $notificationsSent++;
                 } catch (\Exception $e) {
                     Log::error('Failed to send customer renewal notification', [
@@ -368,6 +374,8 @@ class GenerateRenewalInvoices extends Command
             $totalNotifications++;
             try {
                 // Sanitize data to prevent XSS
+                /** @var \App\Models\User|null $user */
+                $user = $license->user;
                 $adminData = [
                     'license_key' => htmlspecialchars(
                         $license->license_key ?? '',
@@ -380,12 +388,12 @@ class GenerateRenewalInvoices extends Command
                         'UTF-8',
                     ),
                     'customer_name' => htmlspecialchars(
-                        $license->user ? $license->user->name : 'Unknown User',
+                        $user ? $user->name : 'Unknown User',
                         ENT_QUOTES,
                         'UTF-8',
                     ),
                     'customer_email' => htmlspecialchars(
-                        $license->user ? $license->user->email : 'No email provided',
+                        $user ? $user->email : 'No email provided',
                         ENT_QUOTES,
                         'UTF-8',
                     ),

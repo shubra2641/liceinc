@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
+use App\Helpers\SecureFileHelper;
 /**
  * Admin License Verification Log Controller with enhanced security.
  *
@@ -299,7 +300,7 @@ class LicenseVerificationLogController extends Controller
                 'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             ];
             $callback = function () use ($logs) {
-                $file = fopen('php://output', 'w');
+                $file = SecureFileHelper::openOutput('php://output', 'w');
                 // CSV Headers
                 fputcsv($file, [
                     'ID', 'Purchase Code Hash', 'Domain', 'IP Address', 'Status',
@@ -319,7 +320,7 @@ class LicenseVerificationLogController extends Controller
                         $log->created_at->format('Y-m-d H:i:s'),
                     ]);
                 }
-                fclose($file);
+                SecureFileHelper::closeFile($file);
             };
             DB::commit();
             return response()->stream($callback, 200, $headers);

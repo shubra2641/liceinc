@@ -1,0 +1,24 @@
+[2025-10-06 07:14:53] local.ERROR: syntax error, unexpected token "foreach", expecting "," or ";" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"foreach\", expecting \",\" or \";\" at D:\\xampp\\htdocs\\my-logos\\app\\Console\\Commands\\GenerateRenewalInvoices.php:5)
+[stacktrace]
+#0 D:\\xampp\\htdocs\\my-logos\\vendor\\composer\\ClassLoader.php(427): Composer\\Autoload\\{closure}('D:\\\\xampp\\\\htdocs...')
+#1 [internal function]: Composer\\Autoload\\ClassLoader->loadClass('App\\\\Console\\\\Com...')
+#2 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(372): is_subclass_of('App\\\\Console\\\\Com...', 'Illuminate\\\\Cons...')
+#3 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(497): Illuminate\\Foundation\\Console\\Kernel->load(Array)
+#4 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(482): Illuminate\\Foundation\\Console\\Kernel->discoverCommands()
+#5 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(195): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
+#6 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#7 D:\\xampp\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#8 {main}
+"} 
+[2025-10-06 07:15:13] local.ERROR: syntax error, unexpected token "use" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"use\" at D:\\xampp\\htdocs\\my-logos\\app\\Console\\Commands\\GenerateRenewalInvoices.php:16)
+[stacktrace]
+#0 D:\\xampp\\htdocs\\my-logos\\vendor\\composer\\ClassLoader.php(427): Composer\\Autoload\\{closure}('D:\\\\xampp\\\\htdocs...')
+#1 [internal function]: Composer\\Autoload\\ClassLoader->loadClass('App\\\\Console\\\\Com...')
+#2 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(372): is_subclass_of('App\\\\Console\\\\Com...', 'Illuminate\\\\Cons...')
+#3 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(497): Illuminate\\Foundation\\Console\\Kernel->load(Array)
+#4 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(482): Illuminate\\Foundation\\Console\\Kernel->discoverCommands()
+#5 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(195): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
+#6 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#7 D:\\xampp\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#8 {main}
+"} 

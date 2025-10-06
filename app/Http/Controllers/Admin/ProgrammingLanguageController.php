@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 use Illuminate\View\View;
+use App\Helpers\SecureFileHelper;
 /**
  * Admin Programming Language Controller with enhanced security.
  *
@@ -512,13 +513,13 @@ class ProgrammingLanguageController extends Controller
     {
         // Create a temporary file for syntax checking
         $tempFile = tempnam(sys_get_temp_dir(), 'php_syntax_check');
-        file_put_contents($tempFile, $code);
+        SecureFileHelper::putContents($tempFile, $code);
     // Run PHP syntax check using Symfony Process (safer than shell_exec)
     $process = new Process(['php', '-l', $tempFile]);
     $process->run();
     $output = $process->getOutput().$process->getErrorOutput();
         // Clean up
-        unlink($tempFile);
+        SecureFileHelper::deleteFile($tempFile);
         if (strpos($output, 'No syntax errors detected') === false) {
             return [
                 'valid' => false,
@@ -605,7 +606,7 @@ class ProgrammingLanguageController extends Controller
             }
             $filename = $programming_language->slug.'.php';
             $filePath = $templateDir.'/'.$filename;
-            file_put_contents($filePath, $request->template_content);
+            SecureFileHelper::putContents($filePath, $request->template_content);
             return response()->json([
                 'success' => true,
                 'message' => 'Template file created successfully',
@@ -699,7 +700,7 @@ class ProgrammingLanguageController extends Controller
                 'success' => true,
                 'content' => $content,
                 'file_path' => $templatePath,
-                'file_size' => filesize($templatePath),
+                'file_size' => SecureFileHelper::getFileSize($templatePath),
                 'last_modified' => date('Y-m-d H:i:s', filemtime($templatePath)),
             ]);
         }

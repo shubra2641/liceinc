@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
+use App\Helpers\SecureFileHelper;
 /**
  * Advanced Webhook Service with enhanced security and performance.
  *
@@ -605,11 +606,11 @@ class AdvancedWebhookService
         if (! filter_var($url, FILTER_VALIDATE_URL)) {
             $errors[] = 'Invalid URL format';
         }
-        if (! in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https'])) {
+        if (! in_array(SecureFileHelper::parseUrl($url, PHP_URL_SCHEME), ['http', 'https'])) {
             $errors[] = 'URL must use HTTP or HTTPS protocol';
         }
-        if (parse_url($url, PHP_URL_HOST) === 'localhost' ||
-            parse_url($url, PHP_URL_HOST) === '127.0.0.1') {
+        if (SecureFileHelper::parseUrl($url, PHP_URL_HOST) === 'localhost' ||
+            SecureFileHelper::parseUrl($url, PHP_URL_HOST) === '127.0.0.1') {
             $errors[] = 'Localhost URLs are not allowed for webhooks';
         }
         return [

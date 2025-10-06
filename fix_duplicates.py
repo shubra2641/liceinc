@@ -32,5 +32,15 @@ def fix_duplicate_keys(file_path):
     print(f"Removed {duplicates_removed} duplicate keys from {file_path}")
 
 if __name__ == "__main__":
-    file_path = r"d:\xampp\htdocs\my-logos\resources\lang\en\app.php"
-    fix_duplicate_keys(file_path)
+    # Fix all language files
+    base_path = r"d:\xampp\htdocs\my-logos\resources\lang"
+    languages = ['en', 'hi', 'ar']
+    files_to_check = ['app.php', 'install.php']
+
+    for lang in languages:
+        for file in files_to_check:
+            file_path = os.path.join(base_path, lang, file)
+            if os.path.exists(file_path):
+                fix_duplicate_keys(file_path)
+            else:
+                print(f"File not found: {file_path}")

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use App\Helpers\SecurityHelper;
 /**
  * Controller for handling password confirmation requests with enhanced security.
  *
@@ -61,7 +62,7 @@ class ConfirmablePasswordController extends Controller
                     'user_agent' => $request->userAgent(),
                 ]);
                 throw ValidationException::withMessages([
-                    'password' => __('auth.password'),
+                    'password' => SecurityHelper::escapeTranslation(__('auth.password')),
                 ]);
             }
             $this->storePasswordConfirmation($request);
@@ -79,7 +80,7 @@ class ConfirmablePasswordController extends Controller
                 'ip' => $request->ip(),
             ]);
             throw ValidationException::withMessages([
-                'password' => __('auth.password'),
+                'password' => SecurityHelper::escapeTranslation(__('auth.password')),
             ]);
         }
     }

@@ -3,6 +3,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\SecureFileHelper;
 /**
  * License Server Service with enhanced security and performance.
  *

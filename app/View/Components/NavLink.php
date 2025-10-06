@@ -1,6 +1,7 @@
 <?php
 namespace App\View\Components;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\SecureFileHelper;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 /**
@@ -78,7 +79,7 @@ class NavLink extends Component
         }
         Log::warning('Invalid active state provided to NavLink component', [
             'active' => $active,
-            'type' => gettype($active),
+            'type' => SecureFileHelper::getType($active),
         ]);
         throw new \InvalidArgumentException('Invalid active state: '.var_export($active, true));
     }

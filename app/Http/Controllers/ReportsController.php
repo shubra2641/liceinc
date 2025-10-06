@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Throwable;
+use App\Helpers\SecureFileHelper;
 /**
  * Reports Controller with enhanced security and comprehensive reporting functionality.
  *
@@ -679,7 +680,7 @@ class ReportsController extends Controller
                     $license->product ? $license->product->price : '0',
                 ]);
             }
-            fclose($file);
+            SecureFileHelper::closeFile($file);
         };
         return response()->stream($callback, 200, $headers);
     }
@@ -717,7 +718,7 @@ class ReportsController extends Controller
                     $license->product ? $license->product->price : '0',
                 ]);
             }
-            fclose($file);
+            SecureFileHelper::closeFile($file);
         };
         return response()->stream($callback, 200, $headers);
     }

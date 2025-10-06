@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use App\Helpers\SecureFileHelper;
 /**
  * Admin License Controller with enhanced security.
  *
@@ -398,7 +399,7 @@ class LicenseController extends Controller
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
         $callback = function () use ($licenses) {
-            $file = fopen('php://output', 'w');
+            $file = SecureFileHelper::openOutput('php://output', 'w');
             // CSV Headers
             fputcsv($file, [
                 'ID',

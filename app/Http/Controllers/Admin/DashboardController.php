@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use App\Helpers\SecureFileHelper;
 /**
  * Admin Dashboard Controller with enhanced security.
  *
@@ -492,7 +493,7 @@ class DashboardController extends Controller
     private function getApiErrorsToday(): int
     {
         $logFile = storage_path('logs/laravel.log');
-        if (! file_exists($logFile)) {
+        if (! SecureFileHelper::fileExists($logFile)) {
             return 0;
         }
         $today = now()->format('Y-m-d');
@@ -505,7 +506,7 @@ class DashboardController extends Controller
                     $errorCount++;
                 }
             }
-            fclose($handle);
+            SecureFileHelper::closeFile($handle);
         }
         return $errorCount;
     }
@@ -526,7 +527,7 @@ class DashboardController extends Controller
     private function getApiErrorsThisMonth(): int
     {
         $logFile = storage_path('logs/laravel.log');
-        if (! file_exists($logFile)) {
+        if (! SecureFileHelper::fileExists($logFile)) {
             return 0;
         }
         $month = now()->format('Y-m');
@@ -539,7 +540,7 @@ class DashboardController extends Controller
                     $errorCount++;
                 }
             }
-            fclose($handle);
+            SecureFileHelper::closeFile($handle);
         }
         return $errorCount;
     }

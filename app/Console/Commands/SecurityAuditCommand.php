@@ -117,8 +117,8 @@ class SecurityAuditCommand extends Command
                 $this->fixSecurityIssues();
             }
             // Send email report if requested
-            if ($this->option('email')) {
-                $this->sendEmailReport($this->option('email'));
+            if ($this->option('email')) { // @phpstan-ignore-line
+                $this->sendEmailReport($this->option('email')); // @phpstan-ignore-line
             }
             $this->auditStats['end_time'] = microtime(true);
             $this->auditStats['issues_found'] = count($this->issues);

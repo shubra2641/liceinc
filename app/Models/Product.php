@@ -2,7 +2,7 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Product extends Model
 {
     use HasFactory;
@@ -136,7 +136,7 @@ class Product extends Model
     {
         return $this->hasMany(ProductFile::class)->where('is_active', true);
     }
-    public function programmingLanguage()
+    public function programmingLanguage(): BelongsTo
     {
         return $this->belongsTo(ProgrammingLanguage::class, 'programming_language');
     }

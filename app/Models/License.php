@@ -2,6 +2,8 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 class License extends Model
 {
@@ -56,23 +58,23 @@ class License extends Model
         } while (static::where('license_key', $key)->exists());
         return $key;
     }
-    public function product()
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-    public function domains()
+    public function domains(): HasMany
     {
         return $this->hasMany(LicenseDomain::class);
     }
-    public function logs()
+    public function logs(): HasMany
     {
         return $this->hasMany(LicenseLog::class);
     }
-    public function invoices()
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }

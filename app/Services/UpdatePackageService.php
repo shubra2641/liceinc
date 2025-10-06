@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 use ZipArchive;
+use App\Helpers\SecureFileHelper;
 /**
  * Update Package Service with enhanced security and comprehensive update processing.
  *
@@ -44,7 +45,7 @@ class UpdatePackageService
             DB::beginTransaction();
             $tempDir = storage_path('app/temp/update_'.time());
             // Create temp directory with security validation
-            if (! is_dir($tempDir)) {
+            if (! SecureFileHelper::isDirectory($tempDir)) {
                 if (! mkdir($tempDir, 0755, true)) {
                     throw new \Exception('Failed to create temporary directory');
                 }
@@ -161,7 +162,7 @@ class UpdatePackageService
         if (empty($packagePath)) {
             throw new InvalidArgumentException('Package path cannot be empty');
         }
-        if (! file_exists($packagePath)) {
+        if (! SecureFileHelper::fileExists($packagePath)) {
             throw new InvalidArgumentException('Package file does not exist');
         }
         if (! is_readable($packagePath)) {
@@ -192,7 +193,7 @@ class UpdatePackageService
      */
     private function validatePackageStructure(string $packagePath): array
     {
-        if (! file_exists($packagePath)) {
+        if (! SecureFileHelper::fileExists($packagePath)) {
             return [
                 'valid' => false,
                 'message' => 'Package file does not exist',
@@ -287,7 +288,7 @@ class UpdatePackageService
     {
         try {
             $tempDir = storage_path('app/temp/update_'.time());
-            if (! is_dir($tempDir)) {
+            if (! SecureFileHelper::isDirectory($tempDir)) {
                 if (! mkdir($tempDir, 0755, true)) {
                     throw new \Exception('Failed to create temporary directory');
                 }
@@ -368,7 +369,7 @@ class UpdatePackageService
     {
         try {
             $configFile = $extractPath.'/update.json';
-            if (! file_exists($configFile)) {
+            if (! SecureFileHelper::fileExists($configFile)) {
                 return null;
             }
             if (! is_readable($configFile)) {
@@ -407,7 +408,7 @@ class UpdatePackageService
         try {
             $processedFiles = [];
             $filesDir = $extractPath.'/files';
-            if (! is_dir($filesDir)) {
+            if (! SecureFileHelper::isDirectory($filesDir)) {
                 return $processedFiles;
             }
             $files = new \RecursiveIteratorIterator(
@@ -419,7 +420,7 @@ class UpdatePackageService
                     $relativePath = substr($file->getRealPath(), strlen($filesDir) + 1);
                     $targetPath = base_path($relativePath);
                     // Create backup of existing file
-                    if (file_exists($targetPath)) {
+                    if (SecureFileHelper::fileExists($targetPath)) {
                         $backupPath = $this->createFileBackup($targetPath);
                         $processedFiles[] = [
                             'file' => $relativePath,
@@ -433,7 +434,7 @@ class UpdatePackageService
                         ];
                     }
                     // Create directory if it doesn't exist
-                    $targetDir = dirname($targetPath);
+                    $targetDir = SecureFileHelper::getDirectoryName($targetPath);
                     if (! Storage::disk('local')->exists($targetDir)) {
                         Storage::disk('local')->makeDirectory($targetDir);
                     }
@@ -472,7 +473,7 @@ class UpdatePackageService
         ];
         try {
             $migrationsDir = $extractPath.'/migrations';
-            if (is_dir($migrationsDir)) {
+            if (SecureFileHelper::isDirectory($migrationsDir)) {
                 // Copy migration files
                 $migrationFiles = glob($migrationsDir.'/*.php');
                 foreach ($migrationFiles as $migrationFile) {
@@ -567,7 +568,7 @@ class UpdatePackageService
     {
         try {
             $backupDir = storage_path('app/backups/files');
-            if (! is_dir($backupDir)) {
+            if (! SecureFileHelper::isDirectory($backupDir)) {
                 if (! mkdir($backupDir, 0755, true)) {
                     throw new \Exception('Failed to create backup directory');
                 }
@@ -597,7 +598,7 @@ class UpdatePackageService
     private function cleanupTempFiles(string $tempDir): void
     {
         try {
-            if (is_dir($tempDir)) {
+            if (SecureFileHelper::isDirectory($tempDir)) {
                 $this->deleteDirectory($tempDir);
             }
         } catch (\Exception $e) {
@@ -634,7 +635,7 @@ class UpdatePackageService
                 $relativePath = substr($sourcePath, strlen($sourceDir) + 1);
                 $targetPath = $targetDir.'/'.$relativePath;
                 if ($item->isDir()) {
-                    if (! is_dir($targetPath)) {
+                    if (! SecureFileHelper::isDirectory($targetPath)) {
                         if (! mkdir($targetPath, 0755, true)) {
                             throw new \Exception("Failed to create directory: {$relativePath}");
                         }
@@ -642,12 +643,12 @@ class UpdatePackageService
                     }
                 } else {
                     // Create backup of existing file
-                    if (file_exists($targetPath)) {
+                    if (SecureFileHelper::fileExists($targetPath)) {
                         $this->createFileBackup($targetPath);
                     }
                     // Create target directory if it doesn't exist
-                    $targetDirPath = dirname($targetPath);
-                    if (! is_dir($targetDirPath)) {
+                    $targetDirPath = SecureFileHelper::getDirectoryName($targetPath);
+                    if (! SecureFileHelper::isDirectory($targetDirPath)) {
                         if (! mkdir($targetDirPath, 0755, true)) {
                             throw new \Exception("Failed to create target directory: {$targetDirPath}");
                         }
@@ -680,13 +681,13 @@ class UpdatePackageService
     private function deleteDirectory(string $dir): void
     {
         try {
-            if (! is_dir($dir)) {
+            if (! SecureFileHelper::isDirectory($dir)) {
                 return;
             }
             $files = array_diff(scandir($dir), ['.', '..']);
             foreach ($files as $file) {
                 $path = $dir.'/'.$file;
-                if (is_dir($path)) {
+                if (SecureFileHelper::isDirectory($path)) {
                     $this->deleteDirectory($path);
                 } else {
                     if (! unlink($path)) {
