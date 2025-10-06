@@ -4,7 +4,9 @@
 const showNotification = (message, type = 'info') => {
   const notification = document.createElement('div');
   notification.className = `user-notification user-notification-${type} show`;
-  notification.innerHTML = `
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(notification, `
         <div class="user-notification-content">
             <div class="user-notification-icon">
                 <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
@@ -14,7 +16,30 @@ const showNotification = (message, type = 'info') => {
                 <i class="fas fa-times"></i>
             </button>
         </div>
-    `;
+    `, true, true);
+  } else {
+    // Fallback: create elements safely
+    const content = document.createElement('div');
+    content.className = 'user-notification-content';
+    
+    const icon = document.createElement('div');
+    icon.className = 'user-notification-icon';
+    icon.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>`;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'user-notification-message';
+    messageDiv.textContent = message;
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'user-notification-close';
+    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    closeBtn.onclick = () => notification.remove();
+    
+    content.appendChild(icon);
+    content.appendChild(messageDiv);
+    content.appendChild(closeBtn);
+    notification.appendChild(content);
+  }
 
   document.body.appendChild(notification);
   setTimeout(() => notification.remove(), 5000);
@@ -389,7 +414,12 @@ class FrontendPreloaderManager {
 
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 20; // Faster progress
+      // Use secure random for better security
+      if (typeof SecurityUtils !== 'undefined' && SecurityUtils.secureRandom) {
+        progress += SecurityUtils.secureRandom(20);
+      } else {
+        progress += Math.random() * 20; // Fallback for older browsers
+      }
       if (progress >= 100) {
         progress = 100;
         clearInterval(interval);
@@ -912,24 +942,40 @@ window.ProductShowManager = ProductShowManager;
 
   const showCopySuccess = button => {
     const originalText = button.innerHTML;
-    // Sanitize original text to prevent XSS
-    // Text will be sanitized by SecurityUtils
-    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined') {
+      SecurityUtils.safeInnerHTML(button, '<i class="fas fa-check"></i> Copied!', true, true);
+    } else {
+      button.textContent = 'Copied!';
+    }
     button.style.background = '#10b981';
 
     setTimeout(() => {
-      button.innerHTML = originalText;
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(button, originalText, true, true);
+      } else {
+        button.textContent = originalText;
+      }
       button.style.background = '';
     }, 2000);
   };
 
   const showCopyError = button => {
     const originalText = button.innerHTML;
-    button.innerHTML = '<i class="fas fa-times"></i> Failed';
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined') {
+      SecurityUtils.safeInnerHTML(button, '<i class="fas fa-times"></i> Failed', true, true);
+    } else {
+      button.textContent = 'Failed';
+    }
     button.style.background = '#ef4444';
 
     setTimeout(() => {
-      button.innerHTML = originalText;
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(button, originalText, true, true);
+      } else {
+        button.textContent = originalText;
+      }
       button.style.background = '';
     }, 2000);
   };
@@ -1313,7 +1359,8 @@ window.ProductShowManager = ProductShowManager;
           '\'': '&#x27;',
         }[match])),
       }));
-      domainsList.innerHTML = sanitizedDomains
+      // Use SecurityUtils for safe HTML insertion
+      const domainsHtml = sanitizedDomains
         .map(
           domain => `
                 <div class="domain-item">
@@ -1337,6 +1384,13 @@ window.ProductShowManager = ProductShowManager;
             `,
         )
         .join('');
+      
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(domainsList, domainsHtml, true, true);
+      } else {
+        domainsList.textContent = ''; // Clear and add text content for security
+        domainsList.textContent = 'Domains loaded';
+      }
     };
 
     const updateEnvatoStatus = envatoData => {
@@ -1399,8 +1453,16 @@ window.ProductShowManager = ProductShowManager;
       // Simulate loading license history
       const historyContent = $('.user-history-content');
       if (historyContent) {
-        historyContent.innerHTML =
-          '<div class="text-center p-4">Loading history...</div>';
+        // Use SecurityUtils for safe HTML insertion
+        if (typeof SecurityUtils !== 'undefined') {
+          SecurityUtils.safeInnerHTML(historyContent, 
+            '<div class="text-center p-4">Loading history...</div>', 
+            true, 
+            true
+          );
+        } else {
+          historyContent.textContent = 'Loading history...';
+        }
 
         // Simulate API call
         setTimeout(() => {
@@ -1454,7 +1516,8 @@ window.ProductShowManager = ProductShowManager;
             }[match])),
           }));
 
-          historyContent.innerHTML = sanitizedHistory
+          // Use SecurityUtils for safe HTML insertion
+          const historyHtml = sanitizedHistory
             .map(
               item => `
                         <div class="history-item">
@@ -1473,6 +1536,12 @@ window.ProductShowManager = ProductShowManager;
                     `,
             )
             .join('');
+          
+          if (typeof SecurityUtils !== 'undefined') {
+            SecurityUtils.safeInnerHTML(historyContent, historyHtml, true, true);
+          } else {
+            historyContent.textContent = 'History loaded';
+          }
         }, 1000);
       }
     };
@@ -1627,14 +1696,24 @@ window.ProductShowManager = ProductShowManager;
             return;
           }
 
-          const response = await fetch(formAction, {
-            method: 'POST',
-            body: formData,
-            headers: {
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                .content,
-            },
-          });
+          // Use SecurityUtils for safe fetch
+          const response = typeof SecurityUtils !== 'undefined' 
+            ? await SecurityUtils.safeFetch(formAction, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                    .content,
+                },
+              })
+            : await fetch(formAction, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                    .content,
+                },
+              });
 
           const data = await response.json();
 

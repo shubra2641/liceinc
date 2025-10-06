@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Mail\DynamicEmail;
 use App\Models\EmailTemplate;
+use App\Models\Invoice;
+use App\Models\License;
 use App\Models\Setting;
 use App\Models\User;
 use Exception;
@@ -935,7 +937,7 @@ class EmailService
             throw new \InvalidArgumentException('Email address cannot be empty');
         }
         $sanitized = filter_var(trim($email), FILTER_SANITIZE_EMAIL);
-        if (! filter_var($sanitized, FILTER_VALIDATE_EMAIL)) {
+        if ($sanitized === false || ! filter_var($sanitized, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Invalid email address format');
         }
         return $sanitized;
@@ -1009,7 +1011,7 @@ class EmailService
      *
      */
     /**
-     * @param array<string, mixed> $data
+     * @param array<mixed, mixed> $data
      * @return array<string, mixed>
      */
     private function sanitizeData(array $data): array

@@ -338,11 +338,17 @@
       `connection-result ${success ? 'success' : 'error'}`;
     // Sanitize message to prevent XSS
     // Message will be sanitized by SecurityUtils
-    resultDiv.innerHTML =
-      `<i class="fas ${
-        success ? 'fa-check-circle' : 'fa-times-circle'
-      }"></i> ${
-        message}`;
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined') {
+      SecurityUtils.safeInnerHTML(resultDiv, 
+        `<i class="fas ${success ? 'fa-check-circle' : 'fa-times-circle'}"></i> ${message}`, 
+        true, 
+        true
+      );
+    } else {
+      // Fallback: use textContent for security
+      resultDiv.textContent = message;
+    }
     resultDiv.style.display = 'flex';
   }
 
@@ -528,15 +534,27 @@
           '\'': '&#x27;',
         }[match]),
       );
-      button.innerHTML =
-        `<i class="fas fa-spinner fa-spin"></i> <span>${
-          sanitizedTranslation
-        }</span>`;
+      // Use SecurityUtils for safe HTML insertion
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(button, 
+          `<i class="fas fa-spinner fa-spin"></i> <span>${sanitizedTranslation}</span>`, 
+          true, 
+          true
+        );
+      } else {
+        // Fallback: use textContent for security
+        button.textContent = sanitizedTranslation;
+      }
     } else {
       button.classList.remove('loading');
       button.disabled = false;
       if (button.dataset.originalText) {
-        button.innerHTML = button.dataset.originalText;
+        // Use SecurityUtils for safe HTML restoration
+        if (typeof SecurityUtils !== 'undefined') {
+          SecurityUtils.safeInnerHTML(button, button.dataset.originalText, true, true);
+        } else {
+          button.textContent = button.dataset.originalText;
+        }
         delete button.dataset.originalText;
       }
     }

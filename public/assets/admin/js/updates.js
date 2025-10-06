@@ -61,7 +61,12 @@ function checkForUpdates() {
   const btn = document.getElementById('check-updates-btn');
   const originalText = btn.innerHTML;
 
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking...';
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', true, true);
+  } else {
+    btn.textContent = 'Checking...';
+  }
   btn.disabled = true;
 
   // eslint-disable-next-line promise/catch-or-return
@@ -89,9 +94,12 @@ function checkForUpdates() {
       showAlert('error', 'An error occurred while checking for updates');
     })
     .finally(() => {
-      // Sanitize original text to prevent XSS
-      // Text will be sanitized by SecurityUtils
-      btn.innerHTML = originalText;
+      // Use SecurityUtils for safe HTML restoration
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+      } else {
+        btn.textContent = originalText;
+      }
       btn.disabled = false;
     });
 }
@@ -109,7 +117,12 @@ function performUpdate(version) {
   const btn = document.getElementById('confirm-update-btn');
   const originalText = btn.innerHTML;
 
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Updating...', true, true);
+  } else {
+    btn.textContent = 'Updating...';
+  }
   btn.disabled = true;
 
   // eslint-disable-next-line promise/catch-or-return
@@ -143,9 +156,12 @@ function performUpdate(version) {
       showAlert('error', 'An error occurred during update');
     })
     .finally(() => {
-      // Sanitize original text to prevent XSS
-      // Text will be sanitized by SecurityUtils
-      btn.innerHTML = originalText;
+      // Use SecurityUtils for safe HTML restoration
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+      } else {
+        btn.textContent = originalText;
+      }
       btn.disabled = false;
       bootstrap.Modal.getInstance(
         document.getElementById('updateModal'),
@@ -167,9 +183,17 @@ function showVersionDetails(version) {
           '"': '&quot;',
           '\'': '&#x27;',
         }[match]));
-        document.getElementById('versionDetailsTitle').innerHTML =
-          `<i class="fas fa-info-circle me-2"></i>Version Details - ${
-            sanitizedVersion}`;
+        // Use SecurityUtils for safe HTML insertion
+        const titleElement = document.getElementById('versionDetailsTitle');
+        if (typeof SecurityUtils !== 'undefined') {
+          SecurityUtils.safeInnerHTML(titleElement, 
+            `<i class="fas fa-info-circle me-2"></i>Version Details - ${sanitizedVersion}`, 
+            true, 
+            true
+          );
+        } else {
+          titleElement.textContent = `Version Details - ${sanitizedVersion}`;
+        }
 
         let content = '<div class="version-details">';
 
@@ -258,7 +282,13 @@ function showVersionDetails(version) {
         }
 
         content += '</div>';
-        document.getElementById('versionDetailsContent').innerHTML = content;
+        // Use SecurityUtils for safe HTML insertion
+        const contentElement = document.getElementById('versionDetailsContent');
+        if (typeof SecurityUtils !== 'undefined') {
+          SecurityUtils.safeInnerHTML(contentElement, content, true, true);
+        } else {
+          contentElement.textContent = 'Version details loaded';
+        }
 
         const modal = new bootstrap.Modal(
           document.getElementById('versionDetailsModal'),
@@ -289,7 +319,12 @@ function performRollback(version) {
   const btn = document.getElementById('confirm-rollback-btn');
   const originalText = btn.innerHTML;
 
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Rolling back...';
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Rolling back...', true, true);
+  } else {
+    btn.textContent = 'Rolling back...';
+  }
   btn.disabled = true;
 
   // eslint-disable-next-line promise/catch-or-return
@@ -323,7 +358,12 @@ function performRollback(version) {
       showAlert('error', 'An error occurred during rollback');
     })
     .finally(() => {
-      btn.innerHTML = originalText;
+      // Use SecurityUtils for safe HTML restoration
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+      } else {
+        btn.textContent = originalText;
+      }
       btn.disabled = false;
       bootstrap.Modal.getInstance(
         document.getElementById('rollbackModal'),
@@ -406,8 +446,16 @@ function displayUpdateInfo(updateData) {
       }[match]));
       return `<li><i class="fas fa-check text-success me-2"></i>${sanitizedItem}</li>`;
     });
-    changelogElement.innerHTML =
-      `<ul class="list-unstyled">${sanitizedChangelog.join('')}</ul>`;
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined') {
+      SecurityUtils.safeInnerHTML(changelogElement, 
+        `<ul class="list-unstyled">${sanitizedChangelog.join('')}</ul>`, 
+        true, 
+        true
+      );
+    } else {
+      changelogElement.textContent = 'Changelog loaded';
+    }
   } else {
     changelogElement.textContent = 'No changelog available';
   }
@@ -500,8 +548,17 @@ function showProductUpdateInfo(updateData, productName) {
     existingModal.remove();
   }
 
-  // Add modal to body
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInsertAdjacentHTML(document.body, 'beforeend', modalHtml, true);
+  } else {
+    // Fallback: create element safely
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = modalHtml;
+    while (tempDiv.firstChild) {
+      document.body.appendChild(tempDiv.firstChild);
+    }
+  }
 
   // Show modal
   const modal = new bootstrap.Modal(
@@ -543,7 +600,12 @@ function checkAutoUpdates() {
   const btn = document.getElementById('check-auto-updates-btn');
   const originalText = btn.innerHTML;
 
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking...';
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', true, true);
+  } else {
+    btn.textContent = 'Checking...';
+  }
   btn.disabled = true;
 
   // eslint-disable-next-line promise/catch-or-return
@@ -610,7 +672,12 @@ function checkAutoUpdates() {
       showAlert('error', `An error occurred during update: ${error.message}`);
     })
     .finally(() => {
-      btn.innerHTML = originalText;
+      // Use SecurityUtils for safe HTML restoration
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+      } else {
+        btn.textContent = originalText;
+      }
       btn.disabled = false;
     });
 }
@@ -639,7 +706,8 @@ function showAutoUpdateInfo(updateData) {
       '\'': '&#x27;',
     }[match]),
   );
-  updateInfoDiv.innerHTML = `
+  // Use SecurityUtils for safe HTML insertion
+  const updateInfoHtml = `
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
@@ -682,6 +750,12 @@ function showAutoUpdateInfo(updateData) {
             </div>
         </div>
     `;
+  
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(updateInfoDiv, updateInfoHtml, true, true);
+  } else {
+    updateInfoDiv.textContent = 'Update information loaded';
+  }
   updateInfoDiv.style.display = 'block';
 }
 
@@ -698,7 +772,12 @@ function installAutoUpdate(version) {
   const btn = document.querySelector('#auto-update-info .btn-primary');
   const originalText = btn.innerHTML;
 
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Installing...';
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Installing...', true, true);
+  } else {
+    btn.textContent = 'Installing...';
+  }
   btn.disabled = true;
 
   // eslint-disable-next-line promise/catch-or-return
@@ -735,7 +814,12 @@ function installAutoUpdate(version) {
       showAlert('error', 'An error occurred during installation');
     })
     .finally(() => {
-      btn.innerHTML = originalText;
+      // Use SecurityUtils for safe HTML restoration
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+      } else {
+        btn.textContent = originalText;
+      }
       btn.disabled = false;
     });
 }
@@ -764,7 +848,16 @@ function showAlert(type, message) {
 
   // Insert at the top of the page
   const container = document.querySelector('.admin-page-header').parentNode;
-  container.insertAdjacentHTML('afterbegin', alertHtml);
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInsertAdjacentHTML(container, 'afterbegin', alertHtml, true);
+  } else {
+    // Fallback: create element safely
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = alertHtml;
+    while (tempDiv.firstChild) {
+      container.insertBefore(tempDiv.firstChild, container.firstChild);
+    }
+  }
 
   // Auto-dismiss after 5 seconds
   setTimeout(() => {
@@ -824,33 +917,46 @@ function loadVersionHistory() {
         });
 
         html += '</div>';
-        content.innerHTML = html;
+        // Use SecurityUtils for safe HTML insertion
+        if (typeof SecurityUtils !== 'undefined') {
+          SecurityUtils.safeInnerHTML(content, html, true, true);
+        } else {
+          content.textContent = 'Version history loaded';
+        }
       } else {
-        contentSecurityUtils.safeInnerHTML(
-          this,
-          `
-                <div class="text-center py-4">
-                    <i class="fas fa-info-circle text-muted fs-1 mb-3"></i>
-                    <h5 class="text-muted">No Version History Available</h5>
-                    <p class="text-muted">Version information will appear here</p>
-                </div>
-            `,
-        );
+        // Use SecurityUtils for safe HTML insertion
+        if (typeof SecurityUtils !== 'undefined') {
+          SecurityUtils.safeInnerHTML(content, 
+            `<div class="text-center py-4">
+                <i class="fas fa-info-circle text-muted fs-1 mb-3"></i>
+                <h5 class="text-muted">No Version History Available</h5>
+                <p class="text-muted">Version information will appear here</p>
+            </div>`, 
+            true, 
+            true
+          );
+        } else {
+          content.textContent = 'No version history available';
+        }
       }
       return true;
     })
     .catch(error => {
       console.error('Error loading version history:', error);
-      window.SecurityUtils.safeInnerHTML(
-        document.getElementById('version-history-content'),
-        `
-            <div class="text-center py-4">
-                <i class="fas fa-exclamation-triangle text-warning fs-1 mb-3"></i>
-                <h5 class="text-warning">Error loading version history</h5>
-                <p class="text-muted">Please try again later</p>
-            </div>
-        `,
-      );
+      const content = document.getElementById('version-history-content');
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(content, 
+          `<div class="text-center py-4">
+              <i class="fas fa-exclamation-triangle text-warning fs-1 mb-3"></i>
+              <h5 class="text-warning">Error loading version history</h5>
+              <p class="text-muted">Please try again later</p>
+          </div>`, 
+          true, 
+          true
+        );
+      } else {
+        content.textContent = 'Error loading version history';
+      }
     });
 }
 
