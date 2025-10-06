@@ -143,7 +143,7 @@ class EnhancedSecurityService
                 throw new \InvalidArgumentException('Action and identifier cannot be empty');
             }
             $config = self::RATE_LIMITS[$action] ?? self::RATE_LIMITS['api_requests'];
-            return RateLimiter::attempt(
+            $result = RateLimiter::attempt(
                 $action . ':' . $identifier,
                 $config['max_attempts'],
                 function () {
@@ -151,6 +151,7 @@ class EnhancedSecurityService
                 },
                 $config['decay_minutes'] * 60,
             );
+            return (bool) $result;
         } catch (\Exception $e) {
             Log::error('Rate limit check failed', [
                 'error' => $e->getMessage(),
@@ -237,10 +238,10 @@ class EnhancedSecurityService
             }
             // Remove null bytes and control characters
             $data = str_replace(["\0", "\x00"], '', $data);
-            $data = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $data);
+            $data = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $data) ?? '';
             // Remove dangerous patterns
             foreach (self::DANGEROUS_PATTERNS as $pattern) {
-                $data = preg_replace($pattern, '', $data);
+                $data = preg_replace($pattern, '', $data) ?? '';
             }
             if (! $allowHtml) {
                 // Strip all HTML tags
@@ -277,14 +278,14 @@ class EnhancedSecurityService
     {
         $errors = [];
         try {
-            $maxSize = config('security.file_upload_security.max_size_kb', 2048) * 1024;
+            $maxSize = (int) config('security.file_upload_security.max_size_kb', 2048) * 1024;
             $allowedMimes = config('security.file_upload_security.allowed_mimes', []);
             // Check file size
             if ($file->getSize() > $maxSize) {
                 $errors[] = 'File size exceeds maximum allowed size';
             }
             // Check MIME type
-            if (! empty($allowedMimes) && ! in_array($file->getClientOriginalExtension(), $allowedMimes)) {
+            if (! empty($allowedMimes) && is_array($allowedMimes) && ! in_array($file->getClientOriginalExtension(), $allowedMimes)) {
                 $errors[] = 'File type not allowed';
             }
             // Check for malicious content in filename
