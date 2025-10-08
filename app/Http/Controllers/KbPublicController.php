@@ -227,7 +227,9 @@ class KbPublicController extends Controller
             if (! $hasAccess && $providedRawCode) {
                 $accessResult = $this->handleArticleRawCodeAccess($article, $providedRawCode);
                 if ($accessResult['success']) {
-                    return $accessResult['redirect'] instanceof \Illuminate\Http\RedirectResponse ? $accessResult['redirect'] : redirect()->back();
+                    return $accessResult['redirect'] instanceof \Illuminate\Http\RedirectResponse
+                        ? $accessResult['redirect']
+                        : redirect()->back();
                 } else {
                     $error = $accessResult['error'];
                     DB::rollBack();
@@ -247,7 +249,11 @@ class KbPublicController extends Controller
                 $this->incrementArticleViews($article);
                 $relatedArticles = $this->getRelatedArticles($article);
                 DB::commit();
-                return view('kb.article', ['article' => $article, 'relatedArticles' => $relatedArticles, 'accessSource' => $accessSource]);
+                return view('kb.article', [
+                    'article' => $article,
+                    'relatedArticles' => $relatedArticles,
+                    'accessSource' => $accessSource
+                ]);
             }
             // No access - show purchase prompt
             DB::rollBack();
@@ -611,7 +617,9 @@ class KbPublicController extends Controller
             );
             if ($rawResult['success']) {
                 $license = $rawResult['license'] ?? null;
-                $productId = $rawResult['productId'] ?? ($license instanceof \App\Models\License ? $license->productId : null);
+                $productId = $rawResult['productId'] ?? (
+                    $license instanceof \App\Models\License ? $license->productId : null
+                );
                 $product = $productId ? Product::find($productId) : null;
                 if ($product && $product->id == $category->productId) {
                     $accessToken = 'kb_access_' . $category->id . '_' . time() . '_' . substr(md5($license instanceof \App\Models\License ? $license->licenseKey : ''), 0, 8);
@@ -794,7 +802,9 @@ class KbPublicController extends Controller
             );
             if ($rawResult['success']) {
                 $license = $rawResult['license'] ?? null;
-                $productId = $rawResult['productId'] ?? ($license instanceof \App\Models\License ? $license->productId : null);
+                $productId = $rawResult['productId'] ?? (
+                    $license instanceof \App\Models\License ? $license->productId : null
+                );
                 $product = $productId ? Product::find($productId) : null;
                 $articleProductId = $article->productId ?:
                     $article->category->productId;

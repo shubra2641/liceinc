@@ -66,7 +66,7 @@ class UpdateNotificationRequest extends FormRequest
                 'permanent_dismiss' => [
                     'boolean',
                 ],
-                'notify_others' => [
+                'notifyOthers' => [
                     'boolean',
                 ],
                 'dismiss_all_types' => [
@@ -102,13 +102,13 @@ class UpdateNotificationRequest extends FormRequest
                 'integer',
                 'exists:users,id',
             ],
-            'send_email' => [
+            'sendEmail' => [
                 'boolean',
             ],
-            'send_push' => [
+            'sendPush' => [
                 'boolean',
             ],
-            'send_sms' => [
+            'sendSms' => [
                 'boolean',
             ],
             'schedule_time' => [
@@ -121,10 +121,10 @@ class UpdateNotificationRequest extends FormRequest
                 'date',
                 'after:now',
             ],
-            'auto_dismiss' => [
+            'autoDismiss' => [
                 'boolean',
             ],
-            'dismiss_after_hours' => [
+            'dismissAfterHours' => [
                 'nullable',
                 'integer',
                 'min:1',
@@ -145,7 +145,7 @@ class UpdateNotificationRequest extends FormRequest
             'dismiss_type.regex' => 'Dismiss type contains invalid characters.',
             'dismiss_reason.regex' => 'Dismiss reason contains invalid characters.',
             'permanent_dismiss.boolean' => 'Permanent dismiss must be true or false.',
-            'notify_others.boolean' => 'Notify others must be true or false.',
+            'notifyOthers.boolean' => 'Notify others must be true or false.',
             'dismiss_all_types.boolean' => 'Dismiss all types must be true or false.',
             'notification_type.required' => 'Notification type is required.',
             'notification_type.regex' => 'Notification type contains invalid characters.',
@@ -153,16 +153,16 @@ class UpdateNotificationRequest extends FormRequest
             'priority.regex' => 'Priority contains invalid characters.',
             'target_users.*.integer' => 'Target user must be a valid user ID.',
             'target_users.*.exists' => 'Target user does not exist.',
-            'send_email.boolean' => 'Send email must be true or false.',
-            'send_push.boolean' => 'Send push must be true or false.',
-            'send_sms.boolean' => 'Send SMS must be true or false.',
+            'sendEmail.boolean' => 'Send email must be true or false.',
+            'sendPush.boolean' => 'Send push must be true or false.',
+            'sendSms.boolean' => 'Send SMS must be true or false.',
             'schedule_time.date' => 'Schedule time must be a valid date.',
             'schedule_time.after' => 'Schedule time must be in the future.',
             'expiresAt.date' => 'Expires at must be a valid date.',
             'expiresAt.after' => 'Expires at must be in the future.',
-            'auto_dismiss.boolean' => 'Auto dismiss must be true or false.',
-            'dismiss_after_hours.min' => 'Dismiss after hours must be at least 1.',
-            'dismiss_after_hours.max' => 'Dismiss after hours cannot exceed 168 (1 week).',
+            'autoDismiss.boolean' => 'Auto dismiss must be true or false.',
+            'dismissAfterHours.min' => 'Dismiss after hours must be at least 1.',
+            'dismissAfterHours.max' => 'Dismiss after hours cannot exceed 168 (1 week).',
         ];
     }
     /**
@@ -177,20 +177,20 @@ class UpdateNotificationRequest extends FormRequest
             'dismiss_type' => 'dismiss type',
             'dismiss_reason' => 'dismiss reason',
             'permanent_dismiss' => 'permanent dismiss',
-            'notify_others' => 'notify others',
+            'notifyOthers' => 'notify others',
             'dismiss_all_types' => 'dismiss all types',
             'notification_type' => 'notification type',
             'message' => 'notification message',
             'priority' => 'notification priority',
             'target_users' => 'target users',
             'target_users.*' => 'target user',
-            'send_email' => 'send email',
-            'send_push' => 'send push notification',
-            'send_sms' => 'send SMS',
+            'sendEmail' => 'send email',
+            'sendPush' => 'send push notification',
+            'sendSms' => 'send SMS',
             'schedule_time' => 'schedule time',
             'expiresAt' => 'expiration date',
-            'auto_dismiss' => 'auto dismiss',
-            'dismiss_after_hours' => 'dismiss after hours',
+            'autoDismiss' => 'auto dismiss',
+            'dismissAfterHours' => 'dismiss after hours',
         ];
     }
     /**
@@ -200,8 +200,12 @@ class UpdateNotificationRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'dismiss_type' => $this->input('dismiss_type') ? $this->sanitizeInput($this->input('dismiss_type')) : null,
-            'dismiss_reason' => $this->input('dismiss_reason') ? $this->sanitizeInput($this->input('dismiss_reason')) : null,
+            'dismiss_type' => $this->input('dismiss_type')
+                ? $this->sanitizeInput($this->input('dismiss_type'))
+                : null,
+            'dismiss_reason' => $this->input('dismiss_reason')
+                ? $this->sanitizeInput($this->input('dismiss_reason'))
+                : null,
             'notification_type' => $this->input('notification_type') ? $this->sanitizeInput($this->input('notification_type')) : null,
             'message' => $this->input('message') ? $this->sanitizeInput($this->input('message')) : null,
             'priority' => $this->input('priority') ? $this->sanitizeInput($this->input('priority')) : null,
@@ -209,21 +213,21 @@ class UpdateNotificationRequest extends FormRequest
         // Handle checkbox values
         $this->merge([
             'permanent_dismiss' => $this->has('permanent_dismiss'),
-            'notify_others' => $this->has('notify_others'),
+            'notifyOthers' => $this->has('notifyOthers'),
             'dismiss_all_types' => $this->has('dismiss_all_types'),
-            'send_email' => $this->has('send_email'),
-            'send_push' => $this->has('send_push'),
-            'send_sms' => $this->has('send_sms'),
-            'auto_dismiss' => $this->has('auto_dismiss'),
+            'sendEmail' => $this->has('sendEmail'),
+            'sendPush' => $this->has('sendPush'),
+            'sendSms' => $this->has('sendSms'),
+            'autoDismiss' => $this->has('autoDismiss'),
         ]);
         // Set default values
         $this->merge([
-            'notify_others' => $this->notify_others ?? false,
-            'send_email' => $this->send_email ?? true,
-            'send_push' => $this->send_push ?? false,
-            'send_sms' => $this->send_sms ?? false,
-            'auto_dismiss' => $this->auto_dismiss ?? false,
-            'dismiss_after_hours' => $this->dismiss_after_hours ?? 24,
+            'notifyOthers' => $this->notifyOthers ?? false,
+            'sendEmail' => $this->sendEmail ?? true,
+            'sendPush' => $this->sendPush ?? false,
+            'sendSms' => $this->sendSms ?? false,
+            'autoDismiss' => $this->autoDismiss ?? false,
+            'dismissAfterHours' => $this->dismissAfterHours ?? 24,
         ]);
     }
     /**

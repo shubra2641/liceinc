@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Storage;
  * @property string $encrypted_name
  * @property string $filePath
  * @property string $fileType
- * @property int $file_size
- * @property string $encryption_key
+ * @property int $fileSize
+ * @property string $encryptionKey
  * @property string $checksum
  * @property string|null $description
  * @property int $downloadCount
@@ -69,20 +69,20 @@ class ProductFile extends Model
         'encrypted_name',
         'filePath',
         'fileType',
-        'file_size',
-        'encryption_key',
+        'fileSize',
+        'encryptionKey',
         'checksum',
         'description',
         'downloadCount',
         'isActive',
     ];
     protected $casts = [
-        'file_size' => 'integer',
+        'fileSize' => 'integer',
         'downloadCount' => 'integer',
         'isActive' => 'boolean',
     ];
     protected $hidden = [
-        'encryption_key',
+        'encryptionKey',
     ];
     public $timestamps = true;
     /**
@@ -100,7 +100,7 @@ class ProductFile extends Model
      */
     public function getFormattedSizeAttribute(): string
     {
-        $bytes = $this->file_size;
+        $bytes = $this->fileSize;
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
         $unitsCount = count($units);
         for ($i = 0; $bytes > 1024 && $i < $unitsCount - 1; $i++) {
@@ -135,7 +135,7 @@ class ProductFile extends Model
             if ($encryptedContent === null) {
                 return null;
             }
-            $decryptionKey = Crypt::decryptString($this->encryption_key);
+            $decryptionKey = Crypt::decryptString($this->encryptionKey);
             $result = openssl_decrypt(
                 $encryptedContent,
                 'AES-256-CBC',
@@ -161,6 +161,7 @@ class ProductFile extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductFile> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductFile>
      */
     public function scopeActive($query)
@@ -173,6 +174,7 @@ class ProductFile extends Model
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductFile> $query
      * @param int $productId
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductFile>
      */
     public function scopeForProduct($query, $productId)

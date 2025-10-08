@@ -230,7 +230,11 @@ class PaymentController extends Controller
             }
             DB::commit();
             // Redirect to payment gateway
-            return redirect()->to(is_string($paymentResult['redirect_url'] ?? null) ? $paymentResult['redirect_url'] : '/');
+            return redirect()->to(
+                is_string($paymentResult['redirect_url'] ?? null)
+                    ? $paymentResult['redirect_url']
+                    : '/'
+            );
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             Log::warning('Payment processing validation failed', [
@@ -320,7 +324,10 @@ class PaymentController extends Controller
                         'ip' => request()->ip(),
                     ]);
                 }
-                return redirect()->route('user.dashboard')->with('error', trans('app.Invalid payment response'));
+                return redirect()->route('user.dashboard')->with(
+                    'error',
+                    trans('app.Invalid payment response')
+                );
             }
             $user = Auth::user();
             // Verify payment with gateway
@@ -403,7 +410,11 @@ class PaymentController extends Controller
                         'gateway' => $gateway,
                         'transactionId' => $transactionId,
                     ]);
-                    $result = $this->paymentService->createLicenseAndInvoice($orderData, $gateway, is_string($transactionId) ? $transactionId : null);
+                    $result = $this->paymentService->createLicenseAndInvoice(
+                        $orderData,
+                        $gateway,
+                        is_string($transactionId) ? $transactionId : null
+                    );
                     Log::warning('License and invoice creation result', [
                         'success' => $result['success'] ?? false,
                         'licenseId' => (is_object($result['license'] ?? null) && isset($result['license']->id)) ? $result['license']->id : 'N/A',

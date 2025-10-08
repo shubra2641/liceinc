@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property int $id
  * @property string $gateway
- * @property bool $is_enabled
+ * @property bool $isEnabled
  * @property bool $is_sandbox
  * @property array<array-key, mixed>|null $credentials
  * @property string|null $webhook_url
@@ -44,13 +44,13 @@ class PaymentSetting extends Model
 
     protected $fillable = [
         'gateway',
-        'is_enabled',
+        'isEnabled',
         'is_sandbox',
         'credentials',
         'webhook_url',
     ];
     protected $casts = [
-        'is_enabled' => 'boolean',
+        'isEnabled' => 'boolean',
         'is_sandbox' => 'boolean',
         'credentials' => 'array',
     ];
@@ -67,7 +67,7 @@ class PaymentSetting extends Model
     public static function isGatewayEnabled(string $gateway): bool
     {
         $setting = static::getByGateway($gateway);
-        return $setting ? $setting->is_enabled : false;
+        return $setting ? $setting->isEnabled : false;
     }
     /**
      * Get enabled gateways.
@@ -77,7 +77,7 @@ class PaymentSetting extends Model
      */
     public static function getEnabledGateways(): array
     {
-        $gateways = static::where('is_enabled', true)
+        $gateways = static::where('isEnabled', true)
             ->pluck('gateway')
             ->toArray();
         $result = [];

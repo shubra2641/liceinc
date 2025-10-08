@@ -16,8 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $serial
  * @property string $status
  * @property string|null $user_agent
- * @property array<array-key, mixed>|null $request_data
- * @property array<array-key, mixed>|null $response_data
+ * @property array<array-key, mixed>|null $requestData
+ * @property array<array-key, mixed>|null $responseData
  * @property \Illuminate\Support\Carbon|null $createdAt
  * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read string|null $action
@@ -59,12 +59,12 @@ class LicenseLog extends Model
         'serial',
         'status',
         'user_agent',
-        'request_data',
-        'response_data',
+        'requestData',
+        'responseData',
     ];
     protected $casts = [
-        'request_data' => 'array',
-        'response_data' => 'array',
+        'requestData' => 'array',
+        'responseData' => 'array',
     ];
     /**
      * @return BelongsTo<License, $this>
@@ -74,11 +74,11 @@ class LicenseLog extends Model
         return $this->belongsTo(License::class);
     }
     /**
-     * Virtual attribute to access the action from request_data.
+     * Virtual attribute to access the action from requestData.
      */
     public function getActionAttribute(): ?string
     {
-        $data = $this->request_data;
+        $data = $this->requestData;
         if ($data === null) {
             return null;
         }
@@ -87,11 +87,11 @@ class LicenseLog extends Model
         return is_string($action) ? $action : null;
     }
     /**
-     * Virtual attribute to access the message from response_data.
+     * Virtual attribute to access the message from responseData.
      */
     public function getMessageAttribute(): ?string
     {
-        $data = $this->response_data;
+        $data = $this->responseData;
         if ($data === null) {
             return null;
         }

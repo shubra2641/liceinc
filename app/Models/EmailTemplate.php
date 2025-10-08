@@ -89,6 +89,7 @@ class EmailTemplate extends Model
      * Scope a query to only include active templates.
      *
      * @param Builder<EmailTemplate> $query
+     *
      * @return Builder<EmailTemplate>
      */
     public function scopeActive(Builder $query): Builder
@@ -99,6 +100,7 @@ class EmailTemplate extends Model
      * Scope a query to only include templates for a specific type.
      *
      * @param Builder<EmailTemplate> $query
+     *
      * @return Builder<EmailTemplate>
      */
     public function scopeForType(Builder $query, string $type): Builder
@@ -109,6 +111,7 @@ class EmailTemplate extends Model
      * Scope a query to only include templates for a specific category.
      *
      * @param Builder<EmailTemplate> $query
+     *
      * @return Builder<EmailTemplate>
      */
     public function scopeForCategory(Builder $query, string $category): Builder
@@ -139,6 +142,7 @@ class EmailTemplate extends Model
      */
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, string>
      */
     public function render(array $data = []): array

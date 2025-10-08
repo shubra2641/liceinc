@@ -101,6 +101,7 @@ class TicketCategory extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<TicketCategory> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<TicketCategory>
      */
     public function scopeActive(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
@@ -112,6 +113,7 @@ class TicketCategory extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<TicketCategory> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<TicketCategory>
      */
     public function scopeOrdered(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder

@@ -66,19 +66,19 @@ class VersionManagementRequest extends FormRequest
                     'max:255',
                     'regex:/^[a-zA-Z0-9\-_.]+$/',
                 ],
-                'include_changelog' => [
+                'includeChangelog' => [
                     'boolean',
                 ],
-                'include_dependencies' => [
+                'includeDependencies' => [
                     'boolean',
                 ],
-                'include_security_updates' => [
+                'includeSecurityUpdates' => [
                     'boolean',
                 ],
-                'include_feature_updates' => [
+                'includeFeatureUpdates' => [
                     'boolean',
                 ],
-                'include_bug_fixes' => [
+                'includeBugFixes' => [
                     'boolean',
                 ],
                 'limit' => [
@@ -136,19 +136,19 @@ class VersionManagementRequest extends FormRequest
                     'max:255',
                     'regex:/^[a-zA-Z0-9\-_.]+$/',
                 ],
-                'include_changelog' => [
+                'includeChangelog' => [
                     'boolean',
                 ],
-                'include_dependencies' => [
+                'includeDependencies' => [
                     'boolean',
                 ],
-                'include_security_updates' => [
+                'includeSecurityUpdates' => [
                     'boolean',
                 ],
-                'include_feature_updates' => [
+                'includeFeatureUpdates' => [
                     'boolean',
                 ],
-                'include_bug_fixes' => [
+                'includeBugFixes' => [
                     'boolean',
                 ],
                 'check_beta' => [
@@ -166,13 +166,13 @@ class VersionManagementRequest extends FormRequest
                 'compare_versions' => [
                     'boolean',
                 ],
-                'include_download_url' => [
+                'includeDownloadUrl' => [
                     'boolean',
                 ],
-                'include_checksums' => [
+                'includeChecksums' => [
                     'boolean',
                 ],
-                'include_file_list' => [
+                'includeFileList' => [
                     'boolean',
                 ],
             ];
@@ -185,19 +185,19 @@ class VersionManagementRequest extends FormRequest
                 'max:20',
                 'regex:/^[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z0-9]+)?$/',
             ],
-            'include_changelog' => [
+            'includeChangelog' => [
                 'boolean',
             ],
-            'include_dependencies' => [
+            'includeDependencies' => [
                 'boolean',
             ],
-            'include_security_updates' => [
+            'includeSecurityUpdates' => [
                 'boolean',
             ],
-            'include_feature_updates' => [
+            'includeFeatureUpdates' => [
                 'boolean',
             ],
-            'include_bug_fixes' => [
+            'includeBugFixes' => [
                 'boolean',
             ],
         ];
@@ -223,17 +223,17 @@ class VersionManagementRequest extends FormRequest
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
             'filter_version.regex' => 'Filter version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
-            'include_changelog.boolean' => 'Include changelog must be true or false.',
-            'include_dependencies.boolean' => 'Include dependencies must be true or false.',
-            'include_security_updates.boolean' => 'Include security updates must be true or false.',
-            'include_feature_updates.boolean' => 'Include feature updates must be true or false.',
-            'include_bug_fixes.boolean' => 'Include bug fixes must be true or false.',
+            'includeChangelog.boolean' => 'Include changelog must be true or false.',
+            'includeDependencies.boolean' => 'Include dependencies must be true or false.',
+            'includeSecurityUpdates.boolean' => 'Include security updates must be true or false.',
+            'includeFeatureUpdates.boolean' => 'Include feature updates must be true or false.',
+            'includeBugFixes.boolean' => 'Include bug fixes must be true or false.',
             'check_beta.boolean' => 'Check beta must be true or false.',
             'check_prerelease.boolean' => 'Check prerelease must be true or false.',
             'compare_versions.boolean' => 'Compare versions must be true or false.',
-            'include_download_url.boolean' => 'Include download URL must be true or false.',
-            'include_checksums.boolean' => 'Include checksums must be true or false.',
-            'include_file_list.boolean' => 'Include file list must be true or false.',
+            'includeDownloadUrl.boolean' => 'Include download URL must be true or false.',
+            'includeChecksums.boolean' => 'Include checksums must be true or false.',
+            'includeFileList.boolean' => 'Include file list must be true or false.',
             'limit.min' => 'Limit must be at least 1.',
             'limit.max' => 'Limit cannot exceed 100.',
             'offset.min' => 'Offset must be at least 0.',
@@ -256,17 +256,17 @@ class VersionManagementRequest extends FormRequest
             'domain' => 'domain',
             'version' => 'version',
             'current_version' => 'current version',
-            'include_changelog' => 'include changelog',
-            'include_dependencies' => 'include dependencies',
-            'include_security_updates' => 'include security updates',
-            'include_feature_updates' => 'include feature updates',
-            'include_bug_fixes' => 'include bug fixes',
+            'includeChangelog' => 'include changelog',
+            'includeDependencies' => 'include dependencies',
+            'includeSecurityUpdates' => 'include security updates',
+            'includeFeatureUpdates' => 'include feature updates',
+            'includeBugFixes' => 'include bug fixes',
             'check_beta' => 'check beta versions',
             'check_prerelease' => 'check prerelease versions',
             'compare_versions' => 'compare versions',
-            'include_download_url' => 'include download URL',
-            'include_checksums' => 'include checksums',
-            'include_file_list' => 'include file list',
+            'includeDownloadUrl' => 'include download URL',
+            'includeChecksums' => 'include checksums',
+            'includeFileList' => 'include file list',
             'limit' => 'limit',
             'offset' => 'offset',
             'sortOrder' => 'sort order',
@@ -286,34 +286,38 @@ class VersionManagementRequest extends FormRequest
             'product_slug' => $this->sanitizeInput($this->input('product_slug')),
             'domain' => $this->sanitizeInput($this->input('domain')),
             'version' => $this->sanitizeInput($this->input('version')),
-            'current_version' => $this->input('current_version') ? $this->sanitizeInput($this->input('current_version')) : null,
-            'filter_version' => $this->input('filter_version') ? $this->sanitizeInput($this->input('filter_version')) : null,
+            'current_version' => $this->input('current_version')
+                ? $this->sanitizeInput($this->input('current_version'))
+                : null,
+            'filter_version' => $this->input('filter_version')
+                ? $this->sanitizeInput($this->input('filter_version'))
+                : null,
             'sortOrder' => $this->input('sortOrder') ? $this->sanitizeInput($this->input('sortOrder')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
-            'include_changelog' => $this->has('include_changelog'),
-            'include_dependencies' => $this->has('include_dependencies'),
-            'include_security_updates' => $this->has('include_security_updates'),
-            'include_feature_updates' => $this->has('include_feature_updates'),
-            'include_bug_fixes' => $this->has('include_bug_fixes'),
+            'includeChangelog' => $this->has('includeChangelog'),
+            'includeDependencies' => $this->has('includeDependencies'),
+            'includeSecurityUpdates' => $this->has('includeSecurityUpdates'),
+            'includeFeatureUpdates' => $this->has('includeFeatureUpdates'),
+            'includeBugFixes' => $this->has('includeBugFixes'),
             'check_beta' => $this->has('check_beta'),
             'check_prerelease' => $this->has('check_prerelease'),
             'compare_versions' => $this->has('compare_versions'),
-            'include_download_url' => $this->has('include_download_url'),
-            'include_checksums' => $this->has('include_checksums'),
-            'include_file_list' => $this->has('include_file_list'),
+            'includeDownloadUrl' => $this->has('includeDownloadUrl'),
+            'includeChecksums' => $this->has('includeChecksums'),
+            'includeFileList' => $this->has('includeFileList'),
         ]);
         // Set default values
         $this->merge([
-            'include_changelog' => $this->include_changelog ?? true,
-            'include_dependencies' => $this->include_dependencies ?? true,
-            'include_security_updates' => $this->include_security_updates ?? true,
-            'include_feature_updates' => $this->include_feature_updates ?? true,
-            'include_bug_fixes' => $this->include_bug_fixes ?? true,
-            'include_download_url' => $this->include_download_url ?? true,
-            'include_checksums' => $this->include_checksums ?? false,
-            'include_file_list' => $this->include_file_list ?? false,
+            'includeChangelog' => $this->includeChangelog ?? true,
+            'includeDependencies' => $this->includeDependencies ?? true,
+            'includeSecurityUpdates' => $this->includeSecurityUpdates ?? true,
+            'includeFeatureUpdates' => $this->includeFeatureUpdates ?? true,
+            'includeBugFixes' => $this->includeBugFixes ?? true,
+            'includeDownloadUrl' => $this->includeDownloadUrl ?? true,
+            'includeChecksums' => $this->includeChecksums ?? false,
+            'includeFileList' => $this->includeFileList ?? false,
             'limit' => $this->limit ?? 20,
             'offset' => $this->offset ?? 0,
             'sortOrder' => $this->sortOrder ?? 'desc',

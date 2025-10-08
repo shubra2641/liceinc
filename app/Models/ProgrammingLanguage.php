@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Storage;
  * @property bool $isActive
  * @property int $sortOrder
  * @property string|null $fileExtension
- * @property string|null $license_template
+ * @property string|null $licenseTemplate
  * @property \Illuminate\Support\Carbon|null $createdAt
  * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
@@ -63,7 +63,7 @@ class ProgrammingLanguage extends Model
         'isActive',
         'sortOrder',
         'fileExtension',
-        'license_template',
+        'licenseTemplate',
     ];
     protected $casts = [
         'isActive' => 'boolean',
@@ -96,7 +96,7 @@ class ProgrammingLanguage extends Model
      */
     public function getLicenseTemplate(): string
     {
-        return $this->license_template ?: $this->getDefaultLicenseTemplate();
+        return $this->licenseTemplate ?: $this->getDefaultLicenseTemplate();
     }
     /**
      * Get default license template for this language.

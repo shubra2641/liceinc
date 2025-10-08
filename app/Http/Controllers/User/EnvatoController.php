@@ -96,11 +96,11 @@ class EnvatoController extends Controller
                 $buyerEmail = data_get($sale, 'buyer_email');
                 $supportEnd = data_get($sale, 'supported_until');
                 $itemId = is_string(data_get($sale, 'item.id')) ? data_get($sale, 'item.id') : '';
-                if ($product->envato_item_id && (string)$product->envato_item_id !== $itemId) {
+                if (is_string($product->envatoItemId) && $product->envatoItemId !== $itemId) {
                     Log::warning('Purchase code does not belong to product', [
                         'purchase_code' => $this->hashForLogging(is_string($purchaseCode) ? $purchaseCode : ''),
                         'product_slug' => $productSlug,
-                        'product_envatoId' => $product->envato_item_id,
+                        'product_envatoId' => $product->envatoItemId,
                         'sale_item_id' => $itemId,
                         'ip' => $request->ip(),
                         'user_agent' => $request->userAgent(),
@@ -116,7 +116,9 @@ class EnvatoController extends Controller
                     [
                         'productId' => $product->id,
                         'userId' => $user->id,
-                        'support_expiresAt' => $supportEnd ? date('Y-m-d', strtotime(is_string($supportEnd) ? $supportEnd : '') ?: time()) : null,
+                        'support_expiresAt' => $supportEnd
+                            ? date('Y-m-d', strtotime(is_string($supportEnd) ? $supportEnd : '') ?: time())
+                            : null,
                         'status' => 'active',
                     ],
                 );
@@ -131,7 +133,11 @@ class EnvatoController extends Controller
         } catch (Throwable $e) {
             Log::error('Envato purchase verification error', [
                 'error' => $e->getMessage(),
-                'purchase_code' => $this->hashForLogging(is_string($request->validated('purchase_code', '')) ? $request->validated('purchase_code', '') : ''),
+                'purchase_code' => $this->hashForLogging(
+                    is_string($request->validated('purchase_code', ''))
+                        ? $request->validated('purchase_code', '')
+                        : ''
+                ),
                 'product_slug' => $request->validated('product_slug', ''),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
@@ -226,6 +232,7 @@ class EnvatoController extends Controller
                 if (! $user->hasRole('admin')) {
                     // This is a regular user, no need to assign any specific role
                     // The default behavior will work fine
+                    // Regular users don't need additional role assignments
                 }
                 Auth::login($user, true);
                 // Determine redirect route based on user role (same logic as AuthenticatedSessionController)
@@ -381,7 +388,11 @@ class EnvatoController extends Controller
         } catch (Throwable $e) {
             Log::error('User purchase verification error', [
                 'error' => $e->getMessage(),
-                'purchase_code' => $this->hashForLogging(is_string($request->validated('purchase_code', '')) ? $request->validated('purchase_code', '') : ''),
+                'purchase_code' => $this->hashForLogging(
+                    is_string($request->validated('purchase_code', ''))
+                        ? $request->validated('purchase_code', '')
+                        : ''
+                ),
                 'productId' => $request->validated('productId', ''),
                 'userId' => auth()->id(),
                 'ip' => $request->ip(),

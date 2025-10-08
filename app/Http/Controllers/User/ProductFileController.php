@@ -92,7 +92,9 @@ class ProductFileController extends Controller
                 auth()->id() ? (int)auth()->id() : 0
             );
             if (! $permissions['can_download']) {
-                abort(403, is_string($permissions['message']) ? $permissions['message'] : 'Access denied');
+                abort(403, is_string($permissions['message'])
+                ? $permissions['message']
+                : 'Access denied');
             }
             $fileData = $this->productFileService->downloadFile(
                 $file,
@@ -101,10 +103,16 @@ class ProductFileController extends Controller
             if (! $fileData) {
                 abort(403, 'File download failed');
             }
-            return response(is_string($fileData['content']) ? $fileData['content'] : '')
-                ->header('Content-Type', is_string($fileData['mime_type']) ? $fileData['mime_type'] : 'application/octet-stream')
+            return response(is_string($fileData['content'])
+                ? $fileData['content']
+                : '')
+                ->header('Content-Type', is_string($fileData['mime_type'])
+                    ? $fileData['mime_type']
+                    : 'application/octet-stream')
                 ->header('Content-Disposition', 'attachment; filename="'
-                    . $this->sanitizeFilename(is_string($fileData['filename']) ? $fileData['filename'] : '') . '"')
+                    . $this->sanitizeFilename(is_string($fileData['filename'])
+                        ? $fileData['filename']
+                        : '') . '"')
                 ->header('Content-Length', is_numeric($fileData['size']) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
@@ -134,7 +142,10 @@ class ProductFileController extends Controller
             abort(403, 'This product does not support file downloads');
         }
         // Check user permissions
-        $permissions = $this->productFileService->userCanDownloadFiles($product, auth()->id() ? (int)auth()->id() : 0);
+        $permissions = $this->productFileService->userCanDownloadFiles(
+            $product,
+            auth()->id() ? (int)auth()->id() : 0
+        );
         if (! $permissions['can_download']) {
             return view('user.products.files.index', ['product' => $product])
                 ->with('permissions', $permissions)
@@ -174,9 +185,14 @@ class ProductFileController extends Controller
             abort(403, 'This product does not support file downloads');
         }
         // Check user permissions
-        $permissions = $this->productFileService->userCanDownloadFiles($product, auth()->id() ? (int)auth()->id() : 0);
+        $permissions = $this->productFileService->userCanDownloadFiles(
+            $product,
+            auth()->id() ? (int)auth()->id() : 0
+        );
         if (! $permissions['can_download']) {
-            abort(403, is_string($permissions['message']) ? $permissions['message'] : 'Access denied');
+            abort(403, is_string($permissions['message'])
+                ? $permissions['message']
+                : 'Access denied');
         }
         try {
             // Get the specific update
@@ -192,8 +208,12 @@ class ProductFileController extends Controller
                 auth()->id() ? (int)auth()->id() : 0
             );
             // Return file download response
-            return response(is_string($fileData['content']) ? $fileData['content'] : '')
-                ->header('Content-Type', is_string($fileData['mime_type']) ? $fileData['mime_type'] : 'application/octet-stream')
+            return response(is_string($fileData['content'])
+                ? $fileData['content']
+                : '')
+                ->header('Content-Type', is_string($fileData['mime_type'])
+                    ? $fileData['mime_type']
+                    : 'application/octet-stream')
                 ->header('Content-Disposition', 'attachment; filename="' . (is_string($fileData['filename']) ? $fileData['filename'] : '') . '"')
                 ->header('Content-Length', is_numeric($fileData['size']) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -223,13 +243,21 @@ class ProductFileController extends Controller
             abort(403, 'This product does not support file downloads');
         }
         // Check user permissions
-        $permissions = $this->productFileService->userCanDownloadFiles($product, auth()->id() ? (int)auth()->id() : 0);
+        $permissions = $this->productFileService->userCanDownloadFiles(
+            $product,
+            auth()->id() ? (int)auth()->id() : 0
+        );
         if (! $permissions['can_download']) {
-            abort(403, is_string($permissions['message']) ? $permissions['message'] : 'Access denied');
+            abort(403, is_string($permissions['message'])
+                ? $permissions['message']
+                : 'Access denied');
         }
         try {
             // Get the latest file (update or base)
-            $latestFile = $this->productFileService->getLatestProductFile($product, auth()->id() ? (int)auth()->id() : 0);
+            $latestFile = $this->productFileService->getLatestProductFile(
+                $product,
+                auth()->id() ? (int)auth()->id() : 0
+            );
             if (! $latestFile) {
                 abort(404, 'No files available for download');
             }
@@ -250,8 +278,12 @@ class ProductFileController extends Controller
                 abort(403, 'File download failed');
             }
             // Return file download response
-            return response(is_string($fileData['content']) ? $fileData['content'] : '')
-                ->header('Content-Type', is_string($fileData['mime_type']) ? $fileData['mime_type'] : 'application/octet-stream')
+            return response(is_string($fileData['content'])
+                ? $fileData['content']
+                : '')
+                ->header('Content-Type', is_string($fileData['mime_type'])
+                    ? $fileData['mime_type']
+                    : 'application/octet-stream')
                 ->header('Content-Disposition', 'attachment; filename="' . (is_string($fileData['filename']) ? $fileData['filename'] : '') . '"')
                 ->header('Content-Length', is_numeric($fileData['size']) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -280,9 +312,14 @@ class ProductFileController extends Controller
             abort(403, 'This product does not support file downloads');
         }
         // Check user permissions
-        $permissions = $this->productFileService->userCanDownloadFiles($product, auth()->id() ? (int)auth()->id() : 0);
+        $permissions = $this->productFileService->userCanDownloadFiles(
+            $product,
+            auth()->id() ? (int)auth()->id() : 0
+        );
         if (! $permissions['can_download']) {
-            abort(403, is_string($permissions['message']) ? $permissions['message'] : 'Access denied');
+            abort(403, is_string($permissions['message'])
+                ? $permissions['message']
+                : 'Access denied');
         }
         $files = $this->productFileService->getProductFiles($product, true);
         if ($files->isEmpty()) {

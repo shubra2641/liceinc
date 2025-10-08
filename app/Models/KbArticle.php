@@ -99,6 +99,7 @@ class KbArticle extends Model
     }
     /**
      * @param Builder<KbArticle> $query
+     *
      * @return Builder<KbArticle>
      */
     public function scopePublished(Builder $query): Builder

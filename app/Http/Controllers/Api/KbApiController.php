@@ -139,10 +139,10 @@ class KbApiController extends Controller
      *     "success": true,
      *     "message": "Article requirements retrieved",
      *     "data": {
-     *         "requires_serial": true,
+     *         "requiresSerial": true,
      *         "title": "Article Title",
      *         "excerpt": "Article excerpt...",
-     *         "serial_message": "Please enter the serial code to access this article.",
+     *         "serialMessage": "Please enter the serial code to access this article.",
      *         "serial_source": "article"
      *     }
      * }
@@ -159,14 +159,14 @@ class KbApiController extends Controller
             }
             $requiresSerial = $this->requiresSerialVerification($article);
             $responseData = [
-                'requires_serial' => $requiresSerial,
+                'requiresSerial' => $requiresSerial,
                 'title' => $this->sanitizeOutput($article->title),
                 'excerpt' => $this->sanitizeOutput($article->excerpt),
             ];
             if ($requiresSerial) {
                 $serialInfo = $this->getSerialInfo($article);
                 $message = is_string($serialInfo['message'] ?? null) ? $serialInfo['message'] : null;
-                $responseData['serial_message'] = $this->sanitizeOutput($message);
+                $responseData['serialMessage'] = $this->sanitizeOutput($message);
                 $responseData['serial_source'] = $serialInfo['source'];
             }
             return $this->successResponse($responseData, 'Article requirements retrieved');
@@ -200,11 +200,11 @@ class KbApiController extends Controller
      *     "success": true,
      *     "message": "Category requirements retrieved",
      *     "data": {
-     *         "requires_serial": true,
+     *         "requiresSerial": true,
      *         "name": "Category Name",
      *         "description": "Category description...",
      *         "articles_count": 5,
-     *         "serial_message": "Please enter the serial code to access articles in this category."
+     *         "serialMessage": "Please enter the serial code to access articles in this category."
      *     }
      * }
      */
@@ -219,15 +219,17 @@ class KbApiController extends Controller
                 return $this->errorResponse('Category not found', 404);
             }
             $responseData = [
-                'requires_serial' => $category->requires_serial,
+                'requiresSerial' => $category->requiresSerial,
                 'name' => $this->sanitizeOutput($category->name),
                 'description' => $this->sanitizeOutput($category->description),
                 'articles_count' => $category->articles->count(),
             ];
-            if ($category->requires_serial) {
-                $serialMessage = $category->serial_message
+            if ($category->requiresSerial) {
+                $serialMessage = $category->serialMessage
                     ?: 'Please enter the serial code to access articles in this category.';
-                $responseData['serial_message'] = $this->sanitizeOutput($serialMessage);
+                $responseData['serialMessage'] = $this->sanitizeOutput(
+                    is_string($serialMessage) ? $serialMessage : ''
+                );
             }
             return $this->successResponse($responseData, 'Category requirements retrieved');
         } catch (\Exception $e) {
@@ -285,8 +287,8 @@ class KbApiController extends Controller
      */
     private function requiresSerialVerification(KbArticle $article): bool
     {
-        return $article->requires_serial ||
-               $article->category->requires_serial;
+        return $article->requiresSerial ||
+               $article->category->requiresSerial;
     }
     /**
      * Validate serial code.
@@ -298,11 +300,11 @@ class KbApiController extends Controller
      */
     private function validateSerial(KbArticle $article, string $serial): array
     {
-        if ($article->requires_serial && $article->serial === $serial) {
+        if ($article->requiresSerial && $article->serial === $serial) {
             return ['valid' => true, 'source' => 'article'];
         }
         if (
-            $article->category->requires_serial &&
+            $article->category->requiresSerial &&
             $article->category->serial === $serial
         ) {
             return ['valid' => true, 'source' => 'category'];
@@ -321,15 +323,15 @@ class KbApiController extends Controller
      */
     private function getSerialInfo(KbArticle $article): array
     {
-        if ($article->requires_serial) {
+        if ($article->requiresSerial) {
             return [
-                'message' => $article->serial_message ?: 'Please enter the serial code to access this article.',
+                'message' => $article->serialMessage ?: 'Please enter the serial code to access this article.',
                 'source' => 'article',
             ];
         }
-        if ($article->category->requires_serial) {
+        if ($article->category->requiresSerial) {
             return [
-                'message' => $article->category->serial_message
+                'message' => $article->category->serialMessage
                     ?: 'Please enter the serial code to access articles in this category.',
                 'source' => 'category',
             ];

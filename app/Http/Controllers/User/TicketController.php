@@ -135,11 +135,11 @@ class TicketController extends Controller
             $allCategories = TicketCategory::active()->ordered()->get();
             // If user is not logged in, show only categories that don't require login
             if (! auth()->check()) {
-                $categories = $allCategories->where('requires_login', false);
+                $categories = $allCategories->where('requiresLogin', false);
             } else {
                 $categories = $allCategories;
             }
-            $requiresLoginCount = $allCategories->where('requires_login', true)->count();
+            $requiresLoginCount = $allCategories->where('requiresLogin', true)->count();
             $totalCount = $allCategories->count();
             // If all categories require login and user is not logged in
             if ($totalCount > 0 && $requiresLoginCount === $totalCount && ! auth()->check()) {
@@ -195,13 +195,13 @@ class TicketController extends Controller
                 return back()->withErrors(['category_id' => 'Invalid category selected'])->withInput();
             }
             // If category requires login, ensure user is authenticated
-            if ($category->requires_login && ! Auth::check()) {
+            if ($category->requiresLogin && ! Auth::check()) {
                 DB::rollBack();
                 return redirect()->route('login');
             }
             // If category requires a valid purchase code, validate it
             $license = null;
-            if ($category->requires_valid_purchase_code) {
+            if ($category->requiresValidPurchaseCode) {
                 if (empty($validated['purchase_code'])) {
                     DB::rollBack();
                     return back()->withErrors(['purchase_code' => 'Purchase code is required for this category'])
@@ -222,7 +222,10 @@ class TicketController extends Controller
             $ticketData = $this->prepareTicketData($validated, $category, $license);
             // If created from an invoice, attach invoice and link license/product
             if (empty($validated['invoice_id']) === false) {
-                $ticketData = $this->attachInvoiceData($ticketData, is_numeric($validated['invoice_id']) ? (int)$validated['invoice_id'] : 0);
+                $ticketData = $this->attachInvoiceData(
+                    $ticketData,
+                    is_numeric($validated['invoice_id']) ? (int)$validated['invoice_id'] : 0
+                );
             }
             if (! empty($validated['purchase_code'])) {
                 $ticketData['purchase_code'] = $validated['purchase_code'];
@@ -233,7 +236,10 @@ class TicketController extends Controller
             DB::commit();
             // Redirect based on user authentication status
             if (Auth::check()) {
-                return redirect()->route('user.tickets.show', $ticket)->with('success', 'Ticket created successfully');
+                return redirect()->route('user.tickets.show', $ticket)->with(
+                    'success',
+                    'Ticket created successfully'
+                );
             } else {
                 // For guests, redirect to support ticket view
                 return redirect()->route('support.tickets.show', $ticket)
@@ -542,7 +548,8 @@ class TicketController extends Controller
     {
         try {
             // First try to find an existing license record
-            $license = License::where('purchase_code', $validated['purchase_code'])->first();
+            $license = License::where('purchase_code', $validated['purchase_code'])
+                ->first();
             if (! $license) {
                 // Try to verify via Envato service if available
                 try {
@@ -569,7 +576,11 @@ class TicketController extends Controller
                             'licenseType' => 'regular',
                             'status' => 'active',
                             'support_expiresAt' => data_get($sale, 'supported_until')
-                                ? date('Y-m-d', strtotime(is_string(data_get($sale, 'supported_until')) ? data_get($sale, 'supported_until') : '') ?: time())
+                                ? date('Y-m-d', strtotime(
+                                    is_string(data_get($sale, 'supported_until'))
+                                        ? data_get($sale, 'supported_until')
+                                        : ''
+                                ) ?: time())
                                 : null,
                         ]);
                     }

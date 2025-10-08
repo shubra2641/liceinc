@@ -148,8 +148,12 @@ class EnvatoHelper
                 }
                 return [
                     'personal_token' => self::sanitizeOutput($setting->envatoPersonalToken),
-                    'client_id' => self::sanitizeOutput(is_string($setting->envatoClientId) ? $setting->envatoClientId : null),
-                    'client_secret' => self::sanitizeOutput(is_string($setting->envatoClientSecret) ? $setting->envatoClientSecret : null),
+                    'client_id' => self::sanitizeOutput(
+                        is_string($setting->envatoClientId) ? $setting->envatoClientId : null
+                    ),
+                    'client_secret' => self::sanitizeOutput(
+                        is_string($setting->envatoClientSecret) ? $setting->envatoClientSecret : null
+                    ),
                 ];
             });
             if (is_array($result)) {

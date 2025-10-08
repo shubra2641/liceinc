@@ -82,6 +82,7 @@ class WebhookLog extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<WebhookLog> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<WebhookLog>
      */
     public function scopeSuccessful($query)
@@ -94,6 +95,7 @@ class WebhookLog extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<WebhookLog> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<WebhookLog>
      */
     public function scopeFailed($query)
@@ -107,6 +109,7 @@ class WebhookLog extends Model
     /**
      * @param \Illuminate\Database\Eloquent\Builder<WebhookLog> $query
      * @param string $eventType
+     *
      * @return \Illuminate\Database\Eloquent\Builder<WebhookLog>
      */
     public function scopeEventType($query, string $eventType)

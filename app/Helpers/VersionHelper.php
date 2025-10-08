@@ -108,7 +108,9 @@ class VersionHelper
 
                 return '1.0.1';
             }
-            $version = (is_array($versionData) && isset($versionData['current_version'])) ? $versionData['current_version'] : '1.0.1';
+            $version = (is_array($versionData) && isset($versionData['current_version']))
+                ? $versionData['current_version']
+                : '1.0.1';
             // Validate version format
             if (! is_string($version) || ! self::isValidVersion($version)) {
                 Log::error('Invalid version format in version file', [
@@ -261,7 +263,7 @@ class VersionHelper
             }
             // Update the existing record
             $setting->version = $newVersion;
-            $setting->last_updatedAt = now();
+            $setting->lastUpdatedAt = now();
             $setting->save();
             // Record version update in history
             self::recordVersionUpdate($newVersion, "Auto update from {$currentVersion}");
@@ -337,7 +339,11 @@ class VersionHelper
                     return [];
                 }
 
-                $changelog = (is_array($versionData) && isset($versionData['changelog']) && is_array($versionData['changelog']) && isset($versionData['changelog'][$version])) ? $versionData['changelog'][$version] : [];
+                $changelog = (is_array($versionData) && isset($versionData['changelog'])
+                    && is_array($versionData['changelog'])
+                    && isset($versionData['changelog'][$version]))
+                    ? $versionData['changelog'][$version]
+                    : [];
                 /**
  * @var array<string, mixed> $result
 */
@@ -423,7 +429,12 @@ class VersionHelper
                 return [];
             }
 
-            $instructions = (is_array($versionData) && isset($versionData['update_instructions']) && is_array($versionData['update_instructions']) && isset($versionData['update_instructions'][$version])) ? $versionData['update_instructions'][$version] : [];
+            $instructions = (is_array($versionData)
+                && isset($versionData['update_instructions'])
+                && is_array($versionData['update_instructions'])
+                && isset($versionData['update_instructions'][$version]))
+                ? $versionData['update_instructions'][$version]
+                : [];
             /**
  * @var array<string, mixed> $result
 */

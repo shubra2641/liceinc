@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Storage;
  * @property array<array-key, mixed>|null $changelog
  * @property string|null $filePath
  * @property string|null $fileName
- * @property int|null $file_size
+ * @property int|null $fileSize
  * @property string|null $file_hash
  * @property string|null $update_filePath
  * @property bool $isMajor
@@ -90,7 +90,7 @@ class ProductUpdate extends Model
         'changelog',
         'filePath',
         'fileName',
-        'file_size',
+        'fileSize',
         'file_hash',
         'isMajor',
         'isRequired',
@@ -214,10 +214,10 @@ class ProductUpdate extends Model
      */
     public function getFormattedFileSizeAttribute(): string
     {
-        if (! $this->file_size) {
+        if (! $this->fileSize) {
             return 'Unknown';
         }
-        $bytes = $this->file_size;
+        $bytes = $this->fileSize;
         $units = ['B', 'KB', 'MB', 'GB'];
         $unitsCount = count($units);
         for ($i = 0; $bytes > 1024 && $i < $unitsCount - 1; $i++) {
@@ -230,6 +230,7 @@ class ProductUpdate extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeActive($query)
@@ -241,6 +242,7 @@ class ProductUpdate extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeMajor($query)
@@ -252,6 +254,7 @@ class ProductUpdate extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeRequired($query)
@@ -264,6 +267,7 @@ class ProductUpdate extends Model
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
      * @param string $version
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeNewerThan($query, string $version)
