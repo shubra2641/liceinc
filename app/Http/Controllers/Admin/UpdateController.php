@@ -286,7 +286,8 @@ class UpdateController extends Controller
             if (! empty($instructions)) {
                 foreach ($instructions as $key => $instruction) {
                     // Here you could add custom update logic based on instructions
-                    $steps['instruction_' . $key] = 'Custom instruction: ' . (is_string($instruction) ? $instruction : '');
+                    $steps['instruction_' . $key] = 'Custom instruction: '
+                        . (is_string($instruction) ? $instruction : '');
                 }
             }
             // Step 9: Optimize application (if not in debug mode)
@@ -323,7 +324,10 @@ class UpdateController extends Controller
     private function createSystemBackup(string $version): string
     {
         $backupDir = storage_path('app/backups');
-        if (! SecureFileHelper::isDirectory($backupDir) && ! SecureFileHelper::createDirectory($backupDir, 0755, true)) {
+        if (
+            ! SecureFileHelper::isDirectory($backupDir)
+            && ! SecureFileHelper::createDirectory($backupDir, 0755, true)
+        ) {
             throw new \Exception('Failed to create backup directory');
         }
         $backupName = 'backup_' . $version . '_' . date('Y-m-d_H-i-s') . '.zip';
