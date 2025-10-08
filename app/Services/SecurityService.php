@@ -473,7 +473,9 @@ class SecurityService
             $allowedExtensions = is_array($allowedExtensionsConfig) ? $allowedExtensionsConfig : [];
             $extension = method_exists($file, 'getClientOriginalExtension')
                 ?
-                (is_string($file->getClientOriginalExtension()) ? strtolower($file->getClientOriginalExtension()) : '') : '';
+                (is_string($file->getClientOriginalExtension())
+                    ? strtolower($file->getClientOriginalExtension())
+                    : '') : '';
             $isAllowed = false;
             foreach ($allowedExtensions as $category => $extensions) {
                 $extensionsArray = is_array($extensions) ? $extensions : [];

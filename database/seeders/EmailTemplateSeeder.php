@@ -164,7 +164,8 @@ class EmailTemplateSeeder extends Seeder
                 'name' => 'user_invoice_paid',
                 'subject' => 'Invoice Paid - #{{invoice_number}}',
                 'body' => '<h2>Invoice Paid - Thank You!</h2><p>Hello {{user_name}},</p>' .
-                    '<p>Thank you for your payment! We\'ve successfully processed your payment for invoice #{{invoice_number}}.</p>',
+                    '<p>Thank you for your payment! We\'ve successfully processed your payment for ' .
+                        'invoice #{{invoice_number}}.</p>',
                 'type' => 'user',
                 'category' => 'invoice',
                 'variables' => ['invoice_number', 'invoice_amount', 'payment_date', 'payment_method', 'user_name'],
@@ -201,10 +202,13 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'admin_license_expiring',
                 'subject' => 'License Expiring Soon - {{product_name}}',
-                'body' => '<h2>License Expiring Soon</h2><p>A customer license is about to expire and may need attention.</p>',
+                'body' => '<h2>License Expiring Soon</h2>' .
+                    '<p>A customer license is about to expire and may need attention.</p>',
                 'type' => 'admin',
                 'category' => 'license',
-                'variables' => ['license_key', 'product_name', 'customer_name', 'customer_email', 'expires_at', 'days_remaining'],
+                'variables' => [
+                    'license_key', 'product_name', 'customer_name', 'customer_email', 'expires_at', 'days_remaining'
+                ],
                 'is_active' => true,
                 'description' => 'Warning sent to admin when license is about to expire',
             ],
@@ -254,7 +258,9 @@ class EmailTemplateSeeder extends Seeder
                 'body' => '<h2>Invoice Due Soon</h2><p>A customer invoice is approaching its due date.</p>',
                 'type' => 'admin',
                 'category' => 'invoice',
-                'variables' => ['invoice_number', 'invoice_amount', 'customer_name', 'customer_email', 'due_date', 'days_remaining'],
+                'variables' => [
+                    'invoice_number', 'invoice_amount', 'customer_name', 'customer_email', 'due_date', 'days_remaining'
+                ],
                 'is_active' => true,
                 'description' => 'Reminder sent to admin when invoice is approaching due date',
             ],
@@ -264,7 +270,9 @@ class EmailTemplateSeeder extends Seeder
                 'body' => '<h2>Invoice Cancelled</h2><p>A customer invoice has been cancelled.</p>',
                 'type' => 'admin',
                 'category' => 'invoice',
-                'variables' => ['invoice_number', 'invoice_amount', 'customer_name', 'customer_email', 'cancellation_reason'],
+                'variables' => [
+                    'invoice_number', 'invoice_amount', 'customer_name', 'customer_email', 'cancellation_reason'
+                ],
                 'is_active' => true,
                 'description' => 'Notification sent to admin when invoice is cancelled',
             ],

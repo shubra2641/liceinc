@@ -99,7 +99,7 @@ class TicketFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'license_id' => $license->id,
-            'purchase_code' => $license->license_key,
+            'purchase_code' => $license->licenseKey,
         ]);
     }
 }

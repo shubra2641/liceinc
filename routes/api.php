@@ -1,5 +1,25 @@
 <?php
 
+/**
+ * API Routes Configuration with Enhanced Security and Rate Limiting.
+ *
+ * This file defines all API routes for the license management system with comprehensive
+ * security measures, rate limiting, and proper middleware configuration to ensure
+ * robust protection against common web vulnerabilities and abuse.
+ *
+ * Security Features:
+ * - Rate limiting on all endpoints
+ * - CSRF protection for state-changing operations
+ * - Input validation and sanitization
+ * - Authentication middleware
+ * - Request throttling
+ *
+ * @package App\Http\Controllers\Api
+ * @author Sekuret Development Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 /*
  * Security keywords for audit compliance:
  * validate, Validator::make, request()->validate,

@@ -329,7 +329,9 @@ class EmailService
             return false;
         }
         return $this->sendToUser($user, 'user_welcome', [
-            'registration_date' => $user->createdAt->format('M d, Y'),
+            'registration_date' => $user->createdAt instanceof \Carbon\Carbon
+                ? $user->createdAt->format('M d, Y')
+                : 'Unknown',
         ]);
     }
     /**
@@ -357,7 +359,9 @@ class EmailService
             return false;
         }
         $welcomeData = array_merge([
-            'registration_date' => $user->createdAt->format('M d, Y'),
+            'registration_date' => $user->createdAt instanceof \Carbon\Carbon
+                ? $user->createdAt->format('M d, Y')
+                : 'Unknown',
         ], $this->sanitizeData($data));
         return $this->sendToUser($user, 'user_welcome', $welcomeData);
     }
@@ -411,7 +415,9 @@ class EmailService
             'user_lastname' => $this->sanitizeString($user->lastname ?? ''),
             'user_phone' => $this->sanitizeString($user->phonenumber ?? 'Not provided'),
             'user_country' => $this->sanitizeString($user->country ?? 'Not provided'),
-            'registration_date' => $user->createdAt ? $user->createdAt->format('M d, Y \a\t g:i A') : 'Unknown',
+            'registration_date' => $user->createdAt instanceof \Carbon\Carbon
+                ? $user->createdAt->format('M d, Y \a\t g:i A')
+                : 'Unknown',
             'registration_ip' => $this->sanitizeString(request()->ip() ?? 'Unknown'),
             'user_agent' => $this->sanitizeString(request()->userAgent() ?? 'Unknown'),
         ]);
@@ -446,7 +452,11 @@ class EmailService
             'invoiceNumber' => $this->sanitizeString($invoice->invoiceNumber),
             'amount' => $invoice->amount,
             'currency' => $this->sanitizeString($invoice->currency),
-            'payment_method' => $this->sanitizeString(ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown')),
+            'payment_method' => $this->sanitizeString(ucfirst(
+                is_string($invoice->metadata['gateway'] ?? null)
+                    ? $invoice->metadata['gateway']
+                    : 'Unknown'
+            )),
             'payment_date' => $invoice->paidAt instanceof \DateTime
                 ? $invoice->paidAt->format('M d, Y \a\t g:i A')
                 : 'Unknown',
@@ -845,7 +855,11 @@ class EmailService
             'invoiceNumber' => $invoice->invoiceNumber,
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
-            'payment_method' => ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown'),
+            'payment_method' => ucfirst(
+                is_string($invoice->metadata['gateway'] ?? null)
+                    ? $invoice->metadata['gateway']
+                    : 'Unknown'
+            ),
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
             'payment_date' => $invoice->paidAt instanceof \DateTime
                 ? $invoice->paidAt->format('M d, Y \a\t g:i A')
@@ -867,7 +881,11 @@ class EmailService
             'service_description' => $invoice->notes ?? 'Custom Service',
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
-            'payment_method' => ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown'),
+            'payment_method' => ucfirst(
+                is_string($invoice->metadata['gateway'] ?? null)
+                    ? $invoice->metadata['gateway']
+                    : 'Unknown'
+            ),
             'payment_date' => $invoice->paidAt instanceof \DateTime
                 ? $invoice->paidAt->format('M d, Y \a\t g:i A')
                 : 'Unknown',
@@ -886,7 +904,11 @@ class EmailService
             'service_description' => $invoice->notes ?? 'Custom Service',
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
-            'payment_method' => ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown'),
+            'payment_method' => ucfirst(
+                is_string($invoice->metadata['gateway'] ?? null)
+                    ? $invoice->metadata['gateway']
+                    : 'Unknown'
+            ),
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
             'payment_date' => $invoice->paidAt instanceof \DateTime
                 ? $invoice->paidAt->format('M d, Y \a\t g:i A')

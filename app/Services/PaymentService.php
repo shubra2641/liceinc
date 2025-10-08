@@ -243,7 +243,9 @@ class PaymentService
                 'cancel_url' => $appUrlString . '/payment/cancel/stripe',
                 'metadata' => [
                     'userId' => is_string($orderData['userId'] ?? '') ? (string)($orderData['userId'] ?? '') : '',
-                    'productId' => is_string($orderData['productId'] ?? '') ? (string)($orderData['productId'] ?? '') : '',
+                    'productId' => is_string($orderData['productId'] ?? '')
+                        ? (string)($orderData['productId'] ?? '')
+                        : '',
                 ],
             ]);
             return [
@@ -415,7 +417,7 @@ class PaymentService
             Stripe::setApiKey($secretKeyString);
             // For Stripe Checkout, we need to retrieve the session, not payment_intent
             $session = Session::retrieve($transactionId);
-            if ($session->payment_status === 'paid') {
+            if ($session->paymentStatus === 'paid') {
                 return [
                     'success' => true,
                     'transaction_id' => $transactionId,
@@ -530,18 +532,30 @@ class PaymentService
                     $license = License::create([
                         'userId' => $user->id ?? 0,
                         'productId' => $product instanceof \App\Models\Product ? $product->id : null,
-                        'licenseType' => $product instanceof \App\Models\Product ? $product->licenseType ?? 'single' : 'single',
+                        'licenseType' => $product instanceof \App\Models\Product
+                            ? $product->licenseType ?? 'single'
+                            : 'single',
                         'status' => 'active',
-                        'maxDomains' => $product instanceof \App\Models\Product ? (is_numeric($product->maxDomains ?? null) ? (int) $product->maxDomains : 1) : 1,
-                        'licenseExpiresAt' => $product instanceof \App\Models\Product ? $this->calculateLicenseExpiry($product) : null,
-                        'support_expiresAt' => $product instanceof \App\Models\Product ? $this->calculateSupportExpiry($product) : null,
+                        'maxDomains' => $product instanceof \App\Models\Product
+                            ? (is_numeric($product->maxDomains ?? null)
+                                ? (int) $product->maxDomains
+                                : 1)
+                            : 1,
+                        'licenseExpiresAt' => $product instanceof \App\Models\Product
+                            ? $this->calculateLicenseExpiry($product)
+                            : null,
+                        'support_expiresAt' => $product instanceof \App\Models\Product
+                            ? $this->calculateSupportExpiry($product)
+                            : null,
                         'notes' => "Purchased via {$gateway}",
                     ]);
                     // Create new invoice using InvoiceService
                     $invoiceService = app(InvoiceService::class);
                     $amount = is_numeric($orderData['amount'] ?? 0) ? (float)($orderData['amount'] ?? 0) : 0.0;
                     $userModel = $user instanceof \App\Models\User ? $user : $user->first();
-                    $productModel = $product instanceof \App\Models\Product ? $product : ($product ? $product->first() : null);
+                    $productModel = $product instanceof \App\Models\Product
+                        ? $product
+                        : ($product ? $product->first() : null);
 
                     if (!$userModel || !$productModel) {
                         throw new \Exception('User or Product not found');
@@ -695,7 +709,9 @@ class PaymentService
         if (empty($clientId)) {
             throw new InvalidArgumentException('PayPal client_id is required');
         }
-        $clientSecret = is_string($credentials['client_secret'] ?? '') ? (string)($credentials['client_secret'] ?? '') : '';
+        $clientSecret = is_string($credentials['client_secret'] ?? '')
+            ? (string)($credentials['client_secret'] ?? '')
+            : '';
         if (empty($clientSecret)) {
             throw new InvalidArgumentException('PayPal client_secret is required');
         }

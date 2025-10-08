@@ -111,7 +111,9 @@ class InvoiceService
                 $invoiceNumber = 'INV-' . strtoupper(Str::random(8));
                 $attempts++;
                 if ($attempts > $maxAttempts) {
-                    throw new \Exception('Failed to generate unique invoice number after ' . $maxAttempts . ' attempts');
+                    throw new \Exception(
+                        'Failed to generate unique invoice number after ' . $maxAttempts . ' attempts'
+                    );
                 }
             } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
             return $invoiceNumber;
@@ -377,7 +379,9 @@ class InvoiceService
         $this->validateLicense($license);
         $validStatuses = ['paid', 'pending', 'overdue', 'cancelled'];
         if (! in_array($paymentStatus, $validStatuses)) {
-            throw new \InvalidArgumentException('Invalid payment status: ' . SecurityHelper::escapeVariable($paymentStatus));
+            throw new \InvalidArgumentException(
+                'Invalid payment status: ' . SecurityHelper::escapeVariable($paymentStatus)
+            );
         }
     }
     /**

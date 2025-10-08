@@ -1,5 +1,25 @@
 <?php
 
+/**
+ * Web Routes Configuration with Enhanced Security and Comprehensive Access Control.
+ *
+ * This file defines all web routes for the license management system including
+ * admin panels, user interfaces, and public pages with comprehensive security
+ * measures and proper middleware configuration.
+ *
+ * Security Features:
+ * - Rate limiting on all endpoints
+ * - CSRF protection for state-changing operations
+ * - Input validation and sanitization
+ * - Authentication and authorization middleware
+ * - Request throttling and abuse prevention
+ *
+ * @package App\Http\Controllers
+ * @author Sekuret Development Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 use App\Http\Controllers\Admin\AutoUpdateController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailTemplateController;

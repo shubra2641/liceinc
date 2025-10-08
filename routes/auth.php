@@ -1,5 +1,26 @@
 <?php
 
+/**
+ * Authentication Routes with Enhanced Security and Comprehensive Access Control.
+ *
+ * This file defines all authentication-related routes including registration,
+ * login, password reset, email verification, and logout functionality. It implements
+ * comprehensive security measures to protect against common authentication vulnerabilities.
+ *
+ * Security Features:
+ * - Rate limiting on all authentication endpoints
+ * - CSRF protection for all state-changing operations
+ * - Input validation and sanitization
+ * - Secure password requirements
+ * - Email verification requirements
+ * - Account lockout protection
+ *
+ * @package App\Http\Controllers\Auth
+ * @author Sekuret Development Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 declare(strict_types=1);
 
 /*

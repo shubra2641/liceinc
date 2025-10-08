@@ -277,14 +277,20 @@ class EnhancedSecurityService
     {
         $errors = [];
         try {
-            $maxSize = (is_numeric(config('security.file_upload_security.max_size_kb', 2048)) ? (int)config('security.file_upload_security.max_size_kb', 2048) : 2048) * 1024;
+            $maxSize = (is_numeric(config('security.file_upload_security.max_size_kb', 2048))
+                ? (int)config('security.file_upload_security.max_size_kb', 2048)
+                : 2048) * 1024;
             $allowedMimes = config('security.file_upload_security.allowed_mimes', []);
             // Check file size
             if ($file->getSize() > $maxSize) {
                 $errors[] = 'File size exceeds maximum allowed size';
             }
             // Check MIME type
-            if (! empty($allowedMimes) && is_array($allowedMimes) && ! in_array($file->getClientOriginalExtension(), $allowedMimes)) {
+            if (
+                ! empty($allowedMimes)
+                && is_array($allowedMimes)
+                && ! in_array($file->getClientOriginalExtension(), $allowedMimes)
+            ) {
                 $errors[] = 'File type not allowed';
             }
             // Check for malicious content in filename

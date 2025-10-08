@@ -429,6 +429,7 @@ class UpdatePackageService
      */
     /**
      * @param array<string, mixed> $config
+     *
      * @return array<string, mixed>
      */
     private function processFileUpdates(string $extractPath, array $config): array
@@ -498,6 +499,7 @@ class UpdatePackageService
      */
     /**
      * @param array<string, mixed> $config
+     *
      * @return array<string, mixed>
      */
     private function processMigrations(string $extractPath, array $config): array
@@ -553,6 +555,7 @@ class UpdatePackageService
      */
     /**
      * @param array<string, mixed> $config
+     *
      * @return array<string, mixed>
      */
     private function updateVersionInfo(string $extractPath, array $config): array
@@ -584,7 +587,9 @@ class UpdatePackageService
                 }
                 $versionResult['success'] = true;
                 $versionResult['message'] = 'Version information updated';
-                $currentVersion = is_array($versionData) && isset($versionData['current_version']) ? $versionData['current_version'] : null;
+                $currentVersion = is_array($versionData) && isset($versionData['current_version'])
+                    ? $versionData['current_version']
+                    : null;
                 $versionResult['version'] = $currentVersion;
             } else {
                 $versionResult['message'] = 'No version file found';

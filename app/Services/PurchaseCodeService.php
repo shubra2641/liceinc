@@ -384,7 +384,12 @@ class PurchaseCodeService
     {
         try {
             $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
-            if (!$envatoData || !isset($envatoData['item']) || !is_array($envatoData['item']) || !isset($envatoData['item']['id'])) {
+            if (
+                !$envatoData
+                || !isset($envatoData['item'])
+                || !is_array($envatoData['item'])
+                || !isset($envatoData['item']['id'])
+            ) {
                 return [
                     'success' => false,
                     'error' => 'Invalid Envato purchase code',
@@ -396,7 +401,7 @@ class PurchaseCodeService
             // If product ID is specified, verify it matches the Envato item
             if ($productId) {
                 $product = Product::find($productId);
-                if (!$product || !$product->envato_item_id || $product->envato_item_id != $envatoItemId) {
+                if (!$product || !$product->envatoItemId || $product->envatoItemId != $envatoItemId) {
                     return [
                         'success' => false,
                         'error' => 'Purchase code does not belong to this product',
@@ -450,10 +455,18 @@ class PurchaseCodeService
             'licenseType' => 'regular',
             'status' => 'active',
             'purchase_date' => data_get($envatoData, 'sold_at')
-                ? date('Y-m-d H:i:s', strtotime(is_string(data_get($envatoData, 'sold_at')) ? data_get($envatoData, 'sold_at') : '') ?: time())
+                ? date('Y-m-d H:i:s', strtotime(
+                    is_string(data_get($envatoData, 'sold_at'))
+                        ? data_get($envatoData, 'sold_at')
+                        : ''
+                ) ?: time())
                 : now(),
             'support_expiresAt' => data_get($envatoData, 'supported_until')
-                ? date('Y-m-d H:i:s', strtotime(is_string(data_get($envatoData, 'supported_until')) ? data_get($envatoData, 'supported_until') : '') ?: time())
+                ? date('Y-m-d H:i:s', strtotime(
+                    is_string(data_get($envatoData, 'supported_until'))
+                        ? data_get($envatoData, 'supported_until')
+                        : ''
+                ) ?: time())
                 : null,
             'licenseExpiresAt' => null, // Lifetime license
         ];

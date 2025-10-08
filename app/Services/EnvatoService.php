@@ -59,7 +59,11 @@ class EnvatoService
             }
             return [
                 'token' => $this->sanitizeString(
-                    is_string($setting->envatoPersonalToken ?? null) ? $setting->envatoPersonalToken : (is_string(config('envato.token')) ? config('envato.token') : ''),
+                    is_string($setting->envatoPersonalToken ?? null)
+                        ? $setting->envatoPersonalToken
+                        : (is_string(config('envato.token'))
+                            ? config('envato.token')
+                            : ''),
                 ),
                 'api_key' => $this->sanitizeString(is_string($setting->envatoApiKey ?? null)
                     ? $setting->envatoApiKey

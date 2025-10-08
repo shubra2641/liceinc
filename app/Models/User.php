@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
@@ -55,22 +53,22 @@ use Spatie\Permission\Traits\HasRoles;
  * @property bool $overrideautoclose
  * @property \Illuminate\Support\Carbon|null $datecreated
  * @property string $email
- * @property \Illuminate\Support\Carbon|null $emailVerifiedAt
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property string $role
- * @property bool $isAdmin
- * @property string|null $envatoUsername
- * @property string|null $envatoId
- * @property string|null $envatoToken
- * @property string|null $envatoRefreshToken
- * @property \Illuminate\Support\Carbon|null $envatoToken_expiresAt
+ * @property bool $is_admin
+ * @property string|null $envato_username
+ * @property string|null $envato_id
+ * @property string|null $envato_token
+ * @property string|null $envato_refresh_token
+ * @property \Illuminate\Support\Carbon|null $envato_token_expires_at
  * @property string $password
  * @property string|null $remember_token
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
  * @property-read int|null $invoices_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LicenseLog> $licenseLogs
- * @property-read int|null $licenseLogs_count
+ * @property-read int|null $license_logs_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\License> $licenses
  * @property-read int|null $licenses_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int,
@@ -157,8 +155,6 @@ class User extends AuthenticatableBase implements
      * @phpstan-ignore-next-line
      */
     protected static $factory = UserFactory::class;
-
-    // Traits
     use HasRoles;
     use MustVerifyEmailTrait;
     use Notifiable;
@@ -175,7 +171,7 @@ class User extends AuthenticatableBase implements
         'companyname',
         'email',
         'password',
-        'emailVerifiedAt',
+        'email_verified_at',
         'status',
         'address1',
         'address2',
@@ -190,6 +186,7 @@ class User extends AuthenticatableBase implements
         'startdate',
         'expdate',
         'lastlogin',
+        'status',
         'language',
         'allow_sso',
         'email_verified',
@@ -207,12 +204,12 @@ class User extends AuthenticatableBase implements
         'overrideautoclose',
         'datecreated',
         'role',
-        'isAdmin',
-        'envatoUsername',
-        'envatoId',
-        'envatoToken',
-        'envatoRefreshToken',
-        'envatoToken_expiresAt',
+        'is_admin',
+        'envato_username',
+        'envato_id',
+        'envato_token',
+        'envato_refresh_token',
+        'envato_token_expires_at',
     ];
     /**
      * The attributes that should be hidden for serialization.
@@ -222,8 +219,8 @@ class User extends AuthenticatableBase implements
     protected $hidden = [
         'password',
         'remember_token',
-        'envatoToken',
-        'envatoRefreshToken',
+        'envato_token',
+        'envato_refresh_token',
         'pwresetkey',
         'pwresetexpiry',
         'cardnum',
@@ -236,9 +233,9 @@ class User extends AuthenticatableBase implements
      * @var array<string, string>
      */
     protected $casts = [
-        'emailVerifiedAt' => 'datetime',
+        'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'envatoToken_expiresAt' => 'datetime',
+        'envato_token_expires_at' => 'datetime',
         'lastlogin' => 'datetime',
         'datecreated' => 'datetime',
         'pwresetexpiry' => 'datetime',
@@ -253,32 +250,35 @@ class User extends AuthenticatableBase implements
         'overrideautoclose' => 'boolean',
         'allow_sso' => 'boolean',
         'email_verified' => 'boolean',
-        'isAdmin' => 'boolean',
+        'is_admin' => 'boolean',
         'status' => 'string',
         'email_preferences' => 'array',
     ];
     /**
-     * @return HasMany<License, $this>
+     * @return HasMany<License, User>
      */
     public function licenses(): HasMany
     {
+        // @phpstan-ignore-next-line
         return $this->hasMany(License::class);
     }
     /**
-     * @return HasMany<Ticket, $this>
+     * @return HasMany<Ticket, User>
      */
     public function tickets(): HasMany
     {
+        // @phpstan-ignore-next-line
         return $this->hasMany(Ticket::class);
     }
     /**
      * Invoices belonging to the user.
      */
     /**
-     * @return HasMany<Invoice, $this>
+     * @return HasMany<Invoice, User>
      */
     public function invoices(): HasMany
     {
+        // @phpstan-ignore-next-line
         return $this->hasMany(Invoice::class);
     }
     public function hasEnvatoAccount(): bool
@@ -289,10 +289,11 @@ class User extends AuthenticatableBase implements
      * License logs that belong to the user through licenses.
      */
     /**
-     * @return HasManyThrough<LicenseLog, License, $this>
+     * @return HasManyThrough<LicenseLog, License, User>
      */
     public function licenseLogs(): HasManyThrough
     {
-        return $this->hasManyThrough(LicenseLog::class, License::class, 'userId', 'licenseId');
+        // @phpstan-ignore-next-line
+        return $this->hasManyThrough(LicenseLog::class, License::class, 'user_id', 'license_id');
     }
 }
