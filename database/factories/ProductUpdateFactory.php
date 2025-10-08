@@ -14,7 +14,8 @@ class ProductUpdateFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<ProductUpdate> */
+     * @var class-string<ProductUpdate>
+*/
     protected $model = ProductUpdate::class;
 
     /**

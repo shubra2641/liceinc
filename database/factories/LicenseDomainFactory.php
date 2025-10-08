@@ -14,7 +14,8 @@ class LicenseDomainFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<LicenseDomain> */
+     * @var class-string<LicenseDomain>
+*/
     protected $model = LicenseDomain::class;
 
     /**

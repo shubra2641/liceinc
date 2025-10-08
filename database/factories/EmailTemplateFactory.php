@@ -13,7 +13,7 @@ class EmailTemplateFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\Illuminate\Database\Eloquent\Model>
+     * @var class-string<EmailTemplate>
      */
     protected $model = EmailTemplate::class;
 
@@ -64,7 +64,7 @@ class EmailTemplateFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'type' => $type,
-            'name' => ucwords(str_replace('_', ' ', $type)).' Template',
+            'name' => ucwords(str_replace('_', ' ', $type)) . ' Template',
         ]);
     }
 

@@ -13,7 +13,8 @@ class ProgrammingLanguageFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<ProgrammingLanguage> */
+     * @var class-string<ProgrammingLanguage>
+*/
     protected $model = ProgrammingLanguage::class;
 
     /**
@@ -29,12 +30,13 @@ class ProgrammingLanguageFactory extends Factory
         ];
 
         $name = $this->faker->randomElement($languages);
+        $nameString = is_string($name) ? $name : (string) $name;
 
         return [
-            'name' => $name,
-            'slug' => strtolower((string)$name),
+            'name' => $nameString,
+            'slug' => strtolower($nameString),
             'description' => $this->faker->sentence(),
-            'icon' => 'fab fa-'.strtolower((string)$name),
+            'icon' => 'fab fa-' . strtolower($nameString),
             'color' => $this->faker->hexColor(),
             'is_active' => true,
             'sort_order' => $this->faker->numberBetween(1, 100),
@@ -61,7 +63,7 @@ class ProgrammingLanguageFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'name' => $name,
             'slug' => strtolower($name),
-            'icon' => 'fab fa-'.strtolower($name),
+            'icon' => 'fab fa-' . strtolower($name),
         ]);
     }
 

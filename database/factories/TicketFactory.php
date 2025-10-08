@@ -16,7 +16,8 @@ class TicketFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<Ticket> */
+     * @var class-string<Ticket>
+*/
     protected $model = Ticket::class;
 
     /**
@@ -32,7 +33,7 @@ class TicketFactory extends Factory
             'status' => 'open',
             'priority' => 'medium',
             'department' => 'technical',
-            'purchase_code' => 'TEST-'.strtoupper(\Illuminate\Support\Str::random(8)),
+            'purchase_code' => 'TEST-' . strtoupper(\Illuminate\Support\Str::random(8)),
             'product_version' => '1.0.0',
             'browser_info' => 'Chrome/91.0',
             'created_at' => now(),

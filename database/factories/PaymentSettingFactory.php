@@ -13,7 +13,8 @@ class PaymentSettingFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<PaymentSetting> */
+     * @var class-string<PaymentSetting>
+*/
     protected $model = PaymentSetting::class;
 
     /**
@@ -61,8 +62,8 @@ class PaymentSettingFactory extends Factory
             'name' => 'Stripe',
             'description' => 'Pay with credit card via Stripe',
             'settings' => json_encode([
-                'publishable_key' => 'pk_test_'.$this->faker->uuid(),
-                'secret_key' => 'sk_test_'.$this->faker->uuid(),
+                'publishable_key' => 'pk_test_' . $this->faker->uuid(),
+                'secret_key' => 'sk_test_' . $this->faker->uuid(),
                 'mode' => 'sandbox',
             ]),
         ]);
@@ -91,7 +92,8 @@ class PaymentSettingFactory extends Factory
     public function production(): static
     {
         return $this->state(function (array $attributes) {
-            $settings = json_decode((string)$attributes['settings'], true);
+            $settingsJson = $attributes['settings'] ?? '{}';
+            $settings = json_decode((string) $settingsJson, true);
             if (is_array($settings)) {
                 $settings['mode'] = 'live';
             }

@@ -13,7 +13,8 @@ class SettingFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<Setting> */
+     * @var class-string<Setting>
+*/
     protected $model = Setting::class;
 
     /**
@@ -24,7 +25,7 @@ class SettingFactory extends Factory
     public function definition(): array
     {
         return [
-            'key' => 'test_setting_'.rand(1000, 9999),
+            'key' => 'test_setting_' . rand(1000, 9999),
             'value' => 'test_value',
             'type' => 'general',
             'site_name' => 'Test Site',

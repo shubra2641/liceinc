@@ -6,8 +6,6 @@ parameters:
     paths:
         - app
         - config
-        - database/factories
-        - database/seeders
         - routes
     
     # استبعاد المسارات
@@ -18,7 +16,7 @@ parameters:
         - node_modules/*
         - public/*
         - tests/*
-        - database/migrations/*
+        - database/*
         - stubs/*
     
     # Stub files for third-party libraries

@@ -15,7 +15,8 @@ class TicketReplyFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<TicketReply> */
+     * @var class-string<TicketReply>
+*/
     protected $model = TicketReply::class;
 
     /**

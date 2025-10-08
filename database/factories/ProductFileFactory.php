@@ -14,7 +14,8 @@ class ProductFileFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<ProductFile> */
+     * @var class-string<ProductFile>
+*/
     protected $model = ProductFile::class;
 
     /**
@@ -24,15 +25,16 @@ class ProductFileFactory extends Factory
      */
     public function definition(): array
     {
-        $originalName = (string)$this->faker->words(3, true).'.zip';
+        $words = $this->faker->words(3, true);
+        $originalName = (is_string($words) ? $words : implode(' ', $words)) . '.zip';
 
         return [
             'original_name' => $originalName,
-            'encrypted_name' => $this->faker->uuid().'.encrypted',
-            'file_path' => 'uploads/products/'.$this->faker->uuid().'.encrypted',
+            'encrypted_name' => $this->faker->uuid() . '.encrypted',
+            'file_path' => 'uploads/products/' . $this->faker->uuid() . '.encrypted',
             'file_type' => 'application/zip',
             'file_size' => $this->faker->numberBetween(1000000, 50000000), // 1MB to 50MB
-            'encryption_key' => 'encrypted_key_'.$this->faker->uuid(),
+            'encryption_key' => 'encrypted_key_' . $this->faker->uuid(),
             'checksum' => $this->faker->sha256(),
             'description' => $this->faker->sentence(),
             'download_count' => $this->faker->numberBetween(0, 1000),

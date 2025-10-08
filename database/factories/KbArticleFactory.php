@@ -14,7 +14,8 @@ class KbArticleFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\Illuminate\Database\Eloquent\Model> */
+     * @var class-string<KbArticle>
+     */
     protected $model = KbArticle::class;
 
     /**
@@ -31,7 +32,7 @@ class KbArticleFactory extends Factory
             'excerpt' => $this->faker->sentence(),
             'meta_title' => $this->faker->sentence(6),
             'meta_description' => $this->faker->sentence(10),
-            'featured_image' => 'images/kb/'.$this->faker->uuid().'.jpg',
+            'featured_image' => 'images/kb/' . $this->faker->uuid() . '.jpg',
             'status' => 'published',
             'views' => $this->faker->numberBetween(0, 1000),
             'sort_order' => $this->faker->numberBetween(1, 100),

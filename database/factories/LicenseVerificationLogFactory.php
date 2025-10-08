@@ -14,7 +14,8 @@ class LicenseVerificationLogFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<LicenseVerificationLog> */
+     * @var class-string<LicenseVerificationLog>
+*/
     protected $model = LicenseVerificationLog::class;
 
     /**

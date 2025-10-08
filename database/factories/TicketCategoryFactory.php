@@ -13,7 +13,8 @@ class TicketCategoryFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<TicketCategory> */
+     * @var class-string<TicketCategory>
+*/
     protected $model = TicketCategory::class;
 
     /**

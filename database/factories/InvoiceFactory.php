@@ -15,7 +15,8 @@ class InvoiceFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\Illuminate\Database\Eloquent\Model> */
+     * @var class-string<Invoice>
+     */
     protected $model = Invoice::class;
 
     /**
@@ -26,7 +27,7 @@ class InvoiceFactory extends Factory
     public function definition(): array
     {
         return [
-            'invoice_number' => 'INV-'.str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT),
+            'invoice_number' => 'INV-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT),
             'total_amount' => 29.99,
             'currency' => 'USD',
             'status' => 'pending',

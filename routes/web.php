@@ -75,6 +75,7 @@ use Illuminate\Support\Facades\Route;
  * All inputs are validated (validate) and sanitized (htmlspecialchars, htmlentities) before processing.
  * Authentication checks (Auth::check, Auth::user) applied via middleware to protected routes.
  */
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 /**
@@ -751,7 +752,7 @@ Route::middleware(['auth', 'user'])->group(function () {
 // AUTH ROUTES (Laravel Breeze/Jetstream)
 // ============================================================================
 
-require __DIR__.'/auth.php'; // security-ignore: LARAVEL_ROUTES
+require __DIR__ . '/auth.php'; // security-ignore: LARAVEL_ROUTES
 
 // ============================================================================
 // INSTALLATION ROUTES

@@ -71,9 +71,9 @@ Artisan::command('inspire', function () {
 // Process renewal and overdue invoices daily
 Schedule::command('invoices:process')
     ->dailyAt(INVOICE_PROCESSING_TIME)
-    ->description('Process renewal and overdue invoices daily at '.INVOICE_PROCESSING_TIME)
+    ->description('Process renewal and overdue invoices daily at ' . INVOICE_PROCESSING_TIME)
     ->onFailure(function () {
-        Log::error('Scheduled invoice processing failed at '.now());
+        Log::error('Scheduled invoice processing failed at ' . now());
     })
     ->onSuccess(function () {
         // No success logging as per Envato rules
@@ -84,7 +84,7 @@ Schedule::command('invoices:process --overdue')
     ->hourly()
     ->description('Process overdue invoices hourly for urgent cases')
     ->onFailure(function () {
-        Log::error('Scheduled overdue invoice processing failed at '.now());
+        Log::error('Scheduled overdue invoice processing failed at ' . now());
     })
     ->onSuccess(function () {
         // No success logging as per Envato rules
@@ -100,26 +100,26 @@ Schedule::command('invoices:process --overdue')
 // Generate renewal invoices for licenses expiring within 7 days (daily)
 Schedule::command('licenses:generate-renewal-invoices')
     ->dailyAt(RENEWAL_INVOICE_TIME)
-    ->description('Generate renewal invoices for licenses expiring within '.DEFAULT_RENEWAL_DAYS.' days')
+    ->description('Generate renewal invoices for licenses expiring within ' . DEFAULT_RENEWAL_DAYS . ' days')
     ->onFailure(function () {
-        Log::error('Scheduled renewal invoice generation failed at '.now());
+        Log::error('Scheduled renewal invoice generation failed at ' . now());
     })
     ->onSuccess(function () {
         // No success logging as per Envato rules
     });
 
 // Generate renewal invoices for licenses expiring within 30 days (weekly reminder)
-Schedule::command('licenses:generate-renewal-invoices --days='.WEEKLY_REMINDER_DAYS)
+Schedule::command('licenses:generate-renewal-invoices --days=' . WEEKLY_REMINDER_DAYS)
     ->weekly()
     ->sundays()
     ->at(WEEKLY_REMINDER_TIME)
     ->description(
-        'Generate renewal invoices for licenses expiring within '.
-        WEEKLY_REMINDER_DAYS.
+        'Generate renewal invoices for licenses expiring within ' .
+        WEEKLY_REMINDER_DAYS .
         ' days (weekly reminder)',
     )
     ->onFailure(function () {
-        Log::error('Scheduled weekly renewal invoice generation failed at '.now());
+        Log::error('Scheduled weekly renewal invoice generation failed at ' . now());
     })
     ->onSuccess(function () {
         // No success logging as per Envato rules

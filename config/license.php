@@ -213,9 +213,11 @@ return [
             return App\Helpers\ConfigHelper::getSetting('envato_client_secret', '', 'ENVATO_CLIENT_SECRET');
         },
         'redirect_uri' => function () {
+            $appUrl = config('app.url');
+            $baseUrl = is_string($appUrl) ? $appUrl : '';
             return App\Helpers\ConfigHelper::getSetting(
                 'envato_redirect_uri',
-                config('app.url').'/auth/envato/callback',
+                $baseUrl . '/auth/envato/callback',
                 'ENVATO_REDIRECT_URI',
             );
         },

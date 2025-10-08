@@ -15,7 +15,8 @@ class LicenseLogFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<LicenseLog> */
+     * @var class-string<LicenseLog>
+*/
     protected $model = LicenseLog::class;
 
     /**
@@ -43,7 +44,7 @@ class LicenseLogFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'action' => $action,
-            'description' => ucfirst($action).' action performed',
+            'description' => ucfirst($action) . ' action performed',
         ]);
     }
 
