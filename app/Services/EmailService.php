@@ -434,13 +434,19 @@ class EmailService
             'customer_name' => $this->sanitizeString($license->user->name),
             'customer_email' => $this->sanitizeString($license->user->email),
             'product_name' => $this->sanitizeString($license->product->name ?? ''),
-            'order_number' => $this->sanitizeString($invoice->invoice_number),
+            'order_number' => $this->sanitizeString(is_string($invoice->invoiceNumber) 
+                ? $invoice->invoiceNumber 
+                : ''),
             'licenseKey' => $this->sanitizeString($license->licenseKey),
-            'invoice_number' => $this->sanitizeString($invoice->invoice_number),
+            'invoice_number' => $this->sanitizeString(is_string($invoice->invoiceNumber) 
+                ? $invoice->invoiceNumber 
+                : ''),
             'amount' => $invoice->amount,
             'currency' => $this->sanitizeString($invoice->currency),
             'payment_method' => $this->sanitizeString(ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown')),
-            'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
+            'payment_date' => $invoice->paidAt instanceof \DateTime 
+                ? $invoice->paidAt->format('M d, Y \a\t g:i A') 
+                : 'Unknown',
             'licenseExpiresAt' => $license->licenseExpiresAt ?
                 $license->licenseExpiresAt->format('M d, Y') : 'Never',
         ]);
@@ -785,11 +791,16 @@ class EmailService
             'customer_name' => $order->user->name,
             'customer_email' => $order->user->email,
             'product_name' => $order->product->name ?? '',
-            'order_number' => $order->order_number,
+            'order_number' => $order->orderNumber,
             'amount' => $order->amount,
             'currency' => $order->currency,
-            'payment_method' => ucfirst((string)($order->payment_gateway ?? 'Unknown')),
-            'failure_reason' => (is_array($order->gateway_response) && isset($order->gateway_response['error'])) ? $order->gateway_response['error'] : 'Unknown error',
+            'payment_method' => ucfirst(is_string($order->paymentGateway) 
+                ? $order->paymentGateway 
+                : 'Unknown'),
+            'failure_reason' => (is_array($order->gatewayResponse) 
+                && isset($order->gatewayResponse['error'])) 
+                ? $order->gatewayResponse['error'] 
+                : 'Unknown error',
             'failure_date' => now()->format('M d, Y \a\t g:i A'),
         ]);
     }
@@ -812,8 +823,9 @@ class EmailService
             'maxDomains' => $license->maxDomains,
             'licenseExpiresAt' => $license->licenseExpiresAt ?
                 $license->licenseExpiresAt->format('M d, Y') : 'Never',
-            'support_expiresAt' => $license->support_expiresAt ?
-                $license->support_expiresAt->format('M d, Y') : 'Never',
+            'support_expiresAt' => $license->supportExpiresAt instanceof \DateTime
+                ? $license->supportExpiresAt->format('M d, Y') 
+                : 'Never',
             'created_date' => $license->createdAt?->format('M d, Y \a\t g:i A') ?? 'Unknown',
         ]);
     }
@@ -832,7 +844,9 @@ class EmailService
             'currency' => $invoice->currency,
             'payment_method' => ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown'),
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
-            'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
+            'payment_date' => $invoice->paidAt instanceof \DateTime 
+                ? $invoice->paidAt->format('M d, Y \a\t g:i A') 
+                : 'Unknown',
             'licenseType' => ucfirst((string)($license->licenseType ?? 'Unknown')),
             'maxDomains' => $license->maxDomains,
         ]);
@@ -851,7 +865,9 @@ class EmailService
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
             'payment_method' => ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown'),
-            'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
+            'payment_date' => $invoice->paidAt instanceof \DateTime 
+                ? $invoice->paidAt->format('M d, Y \a\t g:i A') 
+                : 'Unknown',
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
         ]);
     }
@@ -869,7 +885,9 @@ class EmailService
             'currency' => $invoice->currency,
             'payment_method' => ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown'),
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
-            'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
+            'payment_date' => $invoice->paidAt instanceof \DateTime 
+                ? $invoice->paidAt->format('M d, Y \a\t g:i A') 
+                : 'Unknown',
         ]);
     }
     /**

@@ -444,6 +444,7 @@ class AILicenseAnalyticsService
      */
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function applyAISmoothing(array $data): array
@@ -474,6 +475,7 @@ class AILicenseAnalyticsService
      */
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function predictFutureTrends(array $data, int $days): array
@@ -932,6 +934,7 @@ class AILicenseAnalyticsService
     }
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function detectSeasonality(array $data): array

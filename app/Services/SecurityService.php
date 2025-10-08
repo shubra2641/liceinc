@@ -49,6 +49,7 @@ class SecurityService
     /**
      * @param array<mixed> $data
      * @param array<mixed> $rules
+     *
      * @return array<mixed>
      */
     public function validateAndSanitizeInput(array $data, array $rules = []): array
@@ -446,6 +447,7 @@ class SecurityService
      */
     /**
      * @param mixed $file
+     *
      * @return array<string, mixed>
      */
     public function validateFileUpload($file): array
@@ -469,7 +471,8 @@ class SecurityService
             // Check file extension
             $allowedExtensionsConfig = config('security.file_upload_security.allowed_extensions', []);
             $allowedExtensions = is_array($allowedExtensionsConfig) ? $allowedExtensionsConfig : [];
-            $extension = method_exists($file, 'getClientOriginalExtension') ?
+            $extension = method_exists($file, 'getClientOriginalExtension')
+                ?
                 (is_string($file->getClientOriginalExtension()) ? strtolower($file->getClientOriginalExtension()) : '') : '';
             $isAllowed = false;
             foreach ($allowedExtensions as $category => $extensions) {
