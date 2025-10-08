@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Helpers;
 
 use App\Models\Setting;
@@ -67,7 +69,7 @@ class EnvatoHelper
                 }
                 // Validate that all required fields are present and not empty
                 $requiredFields = [
-                    'envato_personal_token',
+                    'envatoPersonalToken',
                     'envato_client_id',
                     'envato_client_secret',
                 ];
@@ -135,7 +137,7 @@ class EnvatoHelper
                 }
                 // Validate that all required fields are present and not empty
                 $requiredFields = [
-                    'envato_personal_token',
+                    'envatoPersonalToken',
                     'envato_client_id',
                     'envato_client_secret',
                 ];
@@ -145,7 +147,7 @@ class EnvatoHelper
                     }
                 }
                 return [
-                    'personal_token' => self::sanitizeOutput($setting->envato_personal_token),
+                    'personal_token' => self::sanitizeOutput($setting->envatoPersonalToken),
                     'client_id' => self::sanitizeOutput($setting->envato_client_id),
                     'client_secret' => self::sanitizeOutput($setting->envato_client_secret),
                 ];

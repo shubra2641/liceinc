@@ -66,7 +66,7 @@ class ProfileController extends Controller
             $key = 'profile-index:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 20)) {
                 Log::warning('Rate limit exceeded for profile index', [
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -94,7 +94,7 @@ class ProfileController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             abort(500, 'Failed to load profile');
@@ -123,7 +123,7 @@ class ProfileController extends Controller
             $key = 'profile-edit:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for profile edit form', [
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -149,7 +149,7 @@ class ProfileController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             abort(500, 'Failed to load profile edit form');
@@ -182,7 +182,7 @@ class ProfileController extends Controller
             $key = 'profile-update:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for profile update', [
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -210,9 +210,9 @@ class ProfileController extends Controller
             if ($user) {
                 $user->fill($validatedData);
                 if ($user->isDirty('email')) {
-                    $user->email_verified_at = null;
+                    $user->emailVerifiedAt = null;
                     Log::warning('User email changed, verification required', [
-                        'user_id' => $user->id,
+                        'userId' => $user->id,
                         'old_email' => $user->getOriginal('email'),
                         'new_email' => $user->email,
                     'ip' => request()->ip(),
@@ -226,7 +226,7 @@ class ProfileController extends Controller
             DB::rollBack();
             Log::warning('Profile update validation failed', [
                 'errors' => $e->errors(),
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->back()->withErrors($e->errors())->withInput();
@@ -237,7 +237,7 @@ class ProfileController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->back()->with('error', 'Failed to update profile. Please try again.');
@@ -269,7 +269,7 @@ class ProfileController extends Controller
             $key = 'profile-destroy:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 3)) {
                 Log::warning('Rate limit exceeded for profile deletion', [
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -291,7 +291,7 @@ class ProfileController extends Controller
             $user = $request->user();
             if ($user) {
                 Log::warning('User account deletion initiated', [
-                    'user_id' => $user->id,
+                    'userId' => $user->id,
                     'user_email' => $user->email,
                 'ip' => request()->ip(),
                 'user_agent' => request()->userAgent(),
@@ -303,7 +303,7 @@ class ProfileController extends Controller
             $request->session()->regenerateToken();
             DB::commit();
             Log::warning('User account deleted successfully', [
-                'deleted_user_id' => $user?->id,
+                'deleted_userId' => $user?->id,
                 'ip' => request()->ip(),
             ]);
             return Redirect::to('/');
@@ -311,7 +311,7 @@ class ProfileController extends Controller
             DB::rollBack();
             Log::warning('Profile deletion validation failed', [
                 'errors' => $e->errors(),
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->back()->withErrors($e->errors())->withInput();
@@ -322,7 +322,7 @@ class ProfileController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->back()->with('error', 'Failed to delete account. Please try again.');

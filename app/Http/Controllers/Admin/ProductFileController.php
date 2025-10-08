@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -78,7 +80,7 @@ class ProductFileController extends Controller
             return view('admin.products.files.index', ['product' => $product, 'files' => $files]);
         } catch (\Exception $e) {
             Log::error('Product files listing failed', [
-                'product_id' => $product->id,
+                'productId' => $product->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -143,18 +145,18 @@ class ProductFileController extends Controller
                 'message' => 'File uploaded successfully',
                 'file' => [
                     'id' => $file->id,
-                    'original_name' => $file->original_name,
-                    'file_size' => $file->formatted_size,
-                    'file_type' => $file->file_type,
+                    'originalName' => $file->originalName,
+                    'file_size' => $file->formattedSize,
+                    'fileType' => $file->fileType,
                     'description' => $file->description,
-                    'download_count' => $file->download_count,
-                    'created_at' => $file->created_at?->format('Y-m-d H:i:s'),
+                    'downloadCount' => $file->downloadCount,
+                    'createdAt' => $file->createdAt?->format('Y-m-d H:i:s'),
                 ],
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('File upload failed', [
-                'product_id' => $product->id,
+                'productId' => $product->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -236,7 +238,7 @@ class ProductFileController extends Controller
      * // Update file status:
      * PUT /admin/product-files/123
      * {
-     *     "is_active": true,
+     *     "isActive": true,
      *     "description": "Updated description"
      * }
      *
@@ -251,7 +253,7 @@ class ProductFileController extends Controller
             DB::beginTransaction();
             $validated = $request->validated();
             $file->update([
-                'is_active' => $validated['is_active'],
+                'isActive' => $validated['isActive'],
                 'description' => $validated['description'],
             ]);
             DB::commit();
@@ -261,7 +263,7 @@ class ProductFileController extends Controller
                 'message' => 'File updated successfully',
                 'file' => [
                     'id' => $file->id,
-                    'is_active' => $file->is_active,
+                    'isActive' => $file->isActive,
                     'description' => $file->description,
                 ],
             ]);
@@ -374,8 +376,8 @@ class ProductFileController extends Controller
             $files = $product->files;
             $stats = [
                 'total_files' => $files->count(),
-                'active_files' => $files->where('is_active', true)->count(),
-                'total_downloads' => $files->sum('download_count'),
+                'active_files' => $files->where('isActive', true)->count(),
+                'total_downloads' => $files->sum('downloadCount'),
                 'total_size' => $files->sum('file_size'),
                 'formatted_total_size' => $this->formatBytes(is_numeric($files->sum('file_size')) ? (int)$files->sum('file_size') : 0),
             ];
@@ -386,7 +388,7 @@ class ProductFileController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('File statistics retrieval failed', [
-                'product_id' => $product->id,
+                'productId' => $product->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

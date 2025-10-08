@@ -13,25 +13,25 @@ use Illuminate\Support\Str;
 
 /**
  * @property int $id
- * @property int|null $product_id
+ * @property int|null $productId
  * @property int|null $customer_id
- * @property int|null $user_id
+ * @property int|null $userId
  * @property string $purchase_code
- * @property string $license_key
+ * @property string $licenseKey
  * @property string $status
  * @property int $max_domains
- * @property string $license_type
+ * @property string $licenseType
  * @property string|null $supported_until
- * @property \Illuminate\Support\Carbon|null $license_expires_at
- * @property \Illuminate\Support\Carbon|null $support_expires_at
+ * @property \Illuminate\Support\Carbon|null $license_expiresAt
+ * @property \Illuminate\Support\Carbon|null $support_expiresAt
  * @property string|null $purchase_date
  * @property string|null $notes
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LicenseDomain> $domains
  * @property-read int|null $domains_count
  * @property-read int $active_domains_count
- * @property mixed $expires_at
+ * @property mixed $expiresAt
  * @property-read int $remaining_domains
  * @property-read mixed $support_active
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
@@ -78,24 +78,24 @@ class License extends Model
     protected static $factory = LicenseFactory::class;
 
     protected $fillable = [
-        'product_id',
-        'user_id',
+        'productId',
+        'userId',
         'purchase_code',
-        'license_key',
-        'license_type',
-        'support_expires_at',
-        'license_expires_at',
+        'licenseKey',
+        'licenseType',
+        'support_expiresAt',
+        'license_expiresAt',
         'status',
         'max_domains',
         'notes',
     ];
     protected $hidden = [
-        'license_key',
+        'licenseKey',
         'purchase_code',
     ];
     protected $casts = [
-        'support_expires_at' => 'datetime',
-        'license_expires_at' => 'datetime',
+        'support_expiresAt' => 'datetime',
+        'license_expiresAt' => 'datetime',
         'max_domains' => 'integer',
     ];
     protected static function booted(): void
@@ -105,8 +105,8 @@ class License extends Model
             if (empty($license->purchase_code)) {
                 $license->purchase_code = static::generateUniquePurchaseCode();
             }
-            // Always use purchase_code as license_key for consistency
-            $license->license_key = $license->purchase_code;
+            // Always use purchase_code as licenseKey for consistency
+            $license->licenseKey = $license->purchase_code;
         });
     }
     protected static function generateUniquePurchaseCode(): string
@@ -124,7 +124,7 @@ class License extends Model
             $key = strtoupper(Str::random(32));
             // Format like XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX
             $key = substr($key, 0, 8) . '-' . substr($key, 8, 8) . '-' . substr($key, 16, 8) . '-' . substr($key, 24, 8);
-        } while (static::where('license_key', $key)->exists());
+        } while (static::where('licenseKey', $key)->exists());
         return $key;
     }
     /**
@@ -172,13 +172,13 @@ class License extends Model
     {
         return $query->where('status', 'active')
             ->where(function ($q) {
-                $q->whereNull('license_expires_at')
-                    ->orWhere('license_expires_at', '>', now());
+                $q->whereNull('license_expiresAt')
+                    ->orWhere('license_expiresAt', '>', now());
             });
     }
     /**
      * Scope a query to licenses belonging to a given user instance or user id.
-     * This will match licenses where user_id = user id or where the linked
+     * This will match licenses where userId = user id or where the linked
      * customer record has the same email as the user (common mapping in this app).
      */
     /**
@@ -193,7 +193,7 @@ class License extends Model
         } elseif ($user instanceof User) {
             $userId = $user->id;
         }
-        return $query->where('user_id', $userId);
+        return $query->where('userId', $userId);
     }
     /**
      * Scope a query to licenses for a specific customer id (backwards compatibility).
@@ -204,28 +204,28 @@ class License extends Model
      */
     public function scopeForCustomer(Builder $query, int $customerId): Builder
     {
-        return $query->where('user_id', $customerId);
+        return $query->where('userId', $customerId);
     }
     /**
      * Check if support is active.
      */
     public function getSupportActiveAttribute(): bool
     {
-        return $this->support_expires_at && $this->support_expires_at->isFuture();
+        return $this->support_expiresAt && $this->support_expiresAt->isFuture();
     }
     /**
-     * Get expires_at attribute (alias for license_expires_at).
+     * Get expiresAt attribute (alias for license_expiresAt).
      */
     public function getExpiresAtAttribute(): ?\Carbon\Carbon
     {
-        return $this->license_expires_at;
+        return $this->license_expiresAt;
     }
     /**
-     * Set expires_at attribute (alias for license_expires_at).
+     * Set expiresAt attribute (alias for license_expiresAt).
      */
     public function setExpiresAtAttribute(?\Carbon\Carbon $value): void
     {
-        $this->license_expires_at = $value ? \Illuminate\Support\Carbon::instance($value) : null;
+        $this->license_expiresAt = $value ? \Illuminate\Support\Carbon::instance($value) : null;
     }
     /**
      * Get the number of active domains for this license.

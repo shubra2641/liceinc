@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,13 +23,13 @@ use Illuminate\Support\Str;
  * @property string|null $text_color
  * @property string|null $icon
  * @property string|null $image
- * @property bool $is_active
+ * @property bool $isActive
  * @property bool $show_in_menu
  * @property bool $is_featured
  * @property bool $allow_subcategories
- * @property int $sort_order
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int $sortOrder
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductCategory> $children
  * @property-read int|null $children_count
  * @property-read ProductCategory|null $parent
@@ -79,8 +81,8 @@ class ProductCategory extends Model
         'slug',
         'description',
         'image',
-        'is_active',
-        'sort_order',
+        'isActive',
+        'sortOrder',
         'parent_id',
         'meta_title',
         'meta_keywords',
@@ -93,7 +95,7 @@ class ProductCategory extends Model
         'allow_subcategories',
     ];
     protected $casts = [
-        'is_active' => 'boolean',
+        'isActive' => 'boolean',
         'show_in_menu' => 'boolean',
         'is_featured' => 'boolean',
         'allow_subcategories' => 'boolean',
@@ -145,7 +147,7 @@ class ProductCategory extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where('isActive', true);
     }
     /**
      * Scope a query to only include categories that show in menu.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -75,7 +77,7 @@ class LicenseVerificationGuideController extends Controller
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for license verification guide access', [
                     'ip' => $request->ip(),
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
                 return view('admin.license-verification-guide.index', [
@@ -86,11 +88,11 @@ class LicenseVerificationGuideController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes window
             // Validate user permissions
             $user = Auth::user();
-            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to license verification guide', [
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'ip' => $request->ip(),
-                    'is_admin' => $user ? $user->is_admin : false,
+                    'isAdmin' => $user ? $user->isAdmin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
                 return view('admin.license-verification-guide.index', [
@@ -114,7 +116,7 @@ class LicenseVerificationGuideController extends Controller
             Log::error('License verification guide view failed to load', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ip' => $request->ip(),
             ]);
             // Return fallback view with error information

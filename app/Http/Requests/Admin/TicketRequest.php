@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +31,7 @@ class TicketRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -67,7 +69,7 @@ class TicketRequest extends FormRequest
         }
         // Store/Update validation
         return [
-            'user_id' => [
+            'userId' => [
                 'required',
                 'integer',
                 'exists:users,id',
@@ -101,7 +103,7 @@ class TicketRequest extends FormRequest
             'create_invoice' => [
                 'boolean',
             ],
-            'invoice_product_id' => [
+            'invoice_productId' => [
                 'nullable',
                 'required_if:create_invoice,1',
                 'integer',
@@ -146,8 +148,8 @@ class TicketRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'user_id.required' => 'User selection is required.',
-            'user_id.exists' => 'Selected user does not exist.',
+            'userId.required' => 'User selection is required.',
+            'userId.exists' => 'Selected user does not exist.',
             'category_id.required' => 'Category selection is required.',
             'category_id.exists' => 'Selected category does not exist.',
             'subject.required' => 'Ticket subject is required.',
@@ -159,7 +161,7 @@ class TicketRequest extends FormRequest
             'content.max' => 'Content must not exceed 10,000 characters.',
             'content.regex' => 'Content contains invalid characters.',
             'status.in' => 'Status must be one of: open, pending, resolved, closed, cancelled.',
-            'invoice_product_id.required_if' => 'Product selection is required when creating an invoice.',
+            'invoice_productId.required_if' => 'Product selection is required when creating an invoice.',
             'invoice_amount.required_if' => 'Invoice amount is required when creating an invoice.',
             'invoice_amount.min' => 'Invoice amount must be at least 0.01.',
             'invoice_amount.max' => 'Invoice amount must not exceed 999,999.99.',
@@ -183,14 +185,14 @@ class TicketRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'user_id' => 'user',
+            'userId' => 'user',
             'category_id' => 'category',
             'subject' => 'ticket subject',
             'priority' => 'ticket priority',
             'content' => 'ticket content',
             'status' => 'ticket status',
             'create_invoice' => 'create invoice',
-            'invoice_product_id' => 'invoice product',
+            'invoice_productId' => 'invoice product',
             'invoice_amount' => 'invoice amount',
             'billing_type' => 'billing type',
             'billing_cycle' => 'billing cycle',

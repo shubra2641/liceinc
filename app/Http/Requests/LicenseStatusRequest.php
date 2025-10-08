@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -35,7 +37,7 @@ class LicenseStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'license_key' => [
+            'licenseKey' => [
                 'required',
                 'string',
                 'max:255',
@@ -57,10 +59,10 @@ class LicenseStatusRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'license_key.required' => 'License key is required.',
-            'license_key.string' => 'License key must be a string.',
-            'license_key.max' => 'License key must not exceed 255 characters.',
-            'license_key.regex' => 'License key contains invalid characters.',
+            'licenseKey.required' => 'License key is required.',
+            'licenseKey.string' => 'License key must be a string.',
+            'licenseKey.max' => 'License key must not exceed 255 characters.',
+            'licenseKey.regex' => 'License key contains invalid characters.',
             'email.required' => 'Email address is required.',
             'email.email' => 'Please provide a valid email address.',
             'email.max' => 'Email address must not exceed 255 characters.',
@@ -75,7 +77,7 @@ class LicenseStatusRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'license_key' => 'license key',
+            'licenseKey' => 'license key',
             'email' => 'email address',
         ];
     }

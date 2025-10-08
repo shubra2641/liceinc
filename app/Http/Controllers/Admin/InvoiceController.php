@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -37,8 +39,8 @@ use Illuminate\View\View;
  * // Create a new invoice
  * POST /admin/invoices
  * {
- *     "user_id": 1,
- *     "license_id": 5,
+ *     "userId": 1,
+ *     "licenseId": 5,
  *     "type": "initial",
  *     "amount": 99.99,
  *     "currency": "USD",
@@ -71,7 +73,7 @@ class InvoiceController extends Controller
      *
      * @example
      * // Request with filters:
-     * GET /admin/invoices?status=paid&date_from=2024-01-01&date_to=2024-01-31
+     * GET /admin/invoices?status=paid&dateFrom=2024-01-01&dateTo=2024-01-31
      *
      * // Returns view with:
      * // - Paginated invoices list
@@ -90,16 +92,16 @@ class InvoiceController extends Controller
                     $query->where('status', $status);
                 }
             }
-            if ($request->filled('date_from')) {
-                $dateFrom = trim(is_string($request->date_from) ? $request->date_from : '');
+            if ($request->filled('dateFrom')) {
+                $dateFrom = trim(is_string($request->dateFrom) ? $request->dateFrom : '');
                 if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateFrom) === 1) {
-                    $query->whereDate('created_at', '>=', $dateFrom);
+                    $query->whereDate('createdAt', '>=', $dateFrom);
                 }
             }
-            if ($request->filled('date_to')) {
-                $dateTo = trim(is_string($request->date_to) ? $request->date_to : '');
+            if ($request->filled('dateTo')) {
+                $dateTo = trim(is_string($request->dateTo) ? $request->dateTo : '');
                 if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateTo)) {
-                    $query->whereDate('created_at', '<=', $dateTo);
+                    $query->whereDate('createdAt', '<=', $dateTo);
                 }
             }
             $invoices = $query->latest()->paginate(10);
@@ -159,8 +161,8 @@ class InvoiceController extends Controller
      * // Request for license-based invoice:
      * POST /admin/invoices
      * {
-     *     "user_id": 1,
-     *     "license_id": 5,
+     *     "userId": 1,
+     *     "licenseId": 5,
      *     "type": "initial",
      *     "amount": 99.99,
      *     "currency": "USD",
@@ -170,8 +172,8 @@ class InvoiceController extends Controller
      * // Request for custom invoice:
      * POST /admin/invoices
      * {
-     *     "user_id": 1,
-     *     "license_id": "custom",
+     *     "userId": 1,
+     *     "licenseId": "custom",
      *     "type": "custom",
      *     "amount": 149.99,
      *     "currency": "USD",
@@ -184,21 +186,21 @@ class InvoiceController extends Controller
     {
         try {
             DB::beginTransaction();
-            $isCustomInvoice = $request->license_id === 'custom';
+            $isCustomInvoice = $request->licenseId === 'custom';
             $validated = $request->validated();
             $license = null;
             $productId = null;
             if (! $isCustomInvoice) {
-                $license = License::find($validated['license_id']);
+                $license = License::find($validated['licenseId']);
                 if (! $license) {
                     throw new \Exception('License not found');
                 }
-                $productId = $license->product_id;
+                $productId = $license->productId;
             }
             $invoice = Invoice::create([
-                'user_id' => $validated['user_id'],
-                'license_id' => $isCustomInvoice ? null : $validated['license_id'],
-                'product_id' => $productId,
+                'userId' => $validated['userId'],
+                'licenseId' => $isCustomInvoice ? null : $validated['licenseId'],
+                'productId' => $productId,
                 'type' => $validated['type'],
                 'amount' => $validated['amount'],
                 'currency' => $validated['currency'],
@@ -381,8 +383,8 @@ class InvoiceController extends Controller
      * // Update invoice:
      * PUT /admin/invoices/123
      * {
-     *     "user_id": 1,
-     *     "license_id": 5,
+     *     "userId": 1,
+     *     "licenseId": 5,
      *     "type": "renewal",
      *     "amount": 79.99,
      *     "currency": "USD",
@@ -397,21 +399,21 @@ class InvoiceController extends Controller
     {
         try {
             DB::beginTransaction();
-            $isCustomInvoice = $request->license_id === 'custom';
+            $isCustomInvoice = $request->licenseId === 'custom';
             $validated = $request->validated();
             $license = null;
             $productId = null;
             if (! $isCustomInvoice) {
-                $license = License::find($validated['license_id']);
+                $license = License::find($validated['licenseId']);
                 if (! $license) {
                     throw new \Exception('License not found');
                 }
-                $productId = $license->product_id;
+                $productId = $license->productId;
             }
             $invoice->update([
-                'user_id' => $validated['user_id'],
-                'license_id' => $isCustomInvoice ? null : $validated['license_id'],
-                'product_id' => $productId,
+                'userId' => $validated['userId'],
+                'licenseId' => $isCustomInvoice ? null : $validated['licenseId'],
+                'productId' => $productId,
                 'type' => $validated['type'],
                 'amount' => $validated['amount'],
                 'currency' => $validated['currency'],

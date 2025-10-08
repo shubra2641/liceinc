@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +31,7 @@ class InvoiceRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -41,12 +43,12 @@ class InvoiceRequest extends FormRequest
         $invoiceId = $this->route('invoice')->id ?? null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
-            'user_id' => [
+            'userId' => [
                 'required',
                 'integer',
                 'exists:users,id',
             ],
-            'product_id' => [
+            'productId' => [
                 'nullable',
                 'integer',
                 'exists:products,id',
@@ -154,9 +156,9 @@ class InvoiceRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'user_id.required' => 'User selection is required.',
-            'user_id.exists' => 'Selected user does not exist.',
-            'product_id.exists' => 'Selected product does not exist.',
+            'userId.required' => 'User selection is required.',
+            'userId.exists' => 'Selected user does not exist.',
+            'productId.exists' => 'Selected product does not exist.',
             'invoice_number.required' => 'Invoice number is required.',
             'invoice_number.unique' => 'This invoice number already exists.',
             'invoice_number.regex' => 'Invoice number can only contain uppercase letters, numbers, and hyphens.',
@@ -194,8 +196,8 @@ class InvoiceRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'user_id' => 'user',
-            'product_id' => 'product',
+            'userId' => 'user',
+            'productId' => 'product',
             'invoice_number' => 'invoice number',
             'amount' => 'invoice amount',
             'currency' => 'currency',

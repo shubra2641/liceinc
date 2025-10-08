@@ -218,7 +218,7 @@ class Controller extends BaseController
      * @param  array  $context  Additional context for the log entry
      *
      * @example
-     * $this->logSecurityEvent('unauthorized_access', $request, ['user_id' => $userId]);
+     * $this->logSecurityEvent('unauthorized_access', $request, ['userId' => $userId]);
      */
     /**
      * @param array<string, mixed> $context
@@ -232,7 +232,7 @@ class Controller extends BaseController
                 'method' => $request->method(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'user_id' => auth()->check() ? auth()->id() : 'guest',
+                'userId' => auth()->check() ? auth()->id() : 'guest',
                 'timestamp' => now()->toISOString(),
             ], $context));
         } catch (Throwable $e) {
@@ -280,7 +280,7 @@ class Controller extends BaseController
                 'method' => $request->method(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'user_id' => auth()->check() ? auth()->id() : 'guest',
+                'userId' => auth()->check() ? auth()->id() : 'guest',
                 'errors' => $e->errors(),
                 'input' => $this->sanitizeInput($request->all()),
             ]);
@@ -311,7 +311,7 @@ class Controller extends BaseController
             'method' => $request->method(),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'user_id' => auth()->check() ? auth()->id() : 'guest',
+            'userId' => auth()->check() ? auth()->id() : 'guest',
             'trace' => $e->getTraceAsString(),
         ]);
         return $this->errorResponse(
@@ -351,7 +351,7 @@ class Controller extends BaseController
         } catch (Throwable $e) {
             Log::error('Permission check failed', [
                 'permission' => $permission,
-                'user_id' => auth()->id(),
+                'userId' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

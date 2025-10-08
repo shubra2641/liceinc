@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Product;
@@ -75,7 +77,7 @@ class TicketController extends Controller
                 throw new Exception('User not authenticated');
             }
             DB::beginTransaction();
-            $tickets = Ticket::where('user_id', $userId)
+            $tickets = Ticket::where('userId', $userId)
                 ->latest()
                 ->paginate(self::PAGINATION_LIMIT);
             DB::commit();
@@ -87,7 +89,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load user tickets: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
             /**
@@ -125,7 +127,7 @@ class TicketController extends Controller
             return view($viewName);
         } catch (Exception $e) {
             Log::error('Failed to load ticket creation form: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
             return redirect()->back()->with('error', 'Failed to load ticket creation form. Please try again.');
@@ -163,19 +165,19 @@ class TicketController extends Controller
             // Auto-register license if purchase code is provided
             $license = $this->handleLicenseRegistration($validated, $licenseService);
             $ticket = Ticket::create([
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'subject' => $validated['subject'],
                 'priority' => $validated['priority'],
                 'status' => 'open',
                 'content' => $validated['content'],
-                'license_id' => $license instanceof \App\Models\License ? $license->id : null,
+                'licenseId' => $license instanceof \App\Models\License ? $license->id : null,
             ]);
             DB::commit();
             return redirect()->route('tickets.show', $ticket)->with('success', 'Ticket created successfully');
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to create ticket: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -210,10 +212,10 @@ class TicketController extends Controller
             // Ticket is already validated by type hint
             if (! $this->canViewTicket($ticket)) {
                 Log::warning('Unauthorized ticket access attempt', [
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'ticket_id' => $ticket->id,
-                    'ticket_user_id' => $ticket->user_id,
-                    'ip_address' => request()->ip(),
+                    'ticket_userId' => $ticket->userId,
+                    'ipAddress' => request()->ip(),
                 ]);
                 abort(403, 'Unauthorized access to ticket');
             }
@@ -228,7 +230,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load ticket details: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -274,10 +276,10 @@ class TicketController extends Controller
             // Request and ticket are validated by type hints
             if (! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket modification attempt', [
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'ticket_id' => $ticket->id,
-                    'ticket_user_id' => $ticket->user_id,
-                    'ip_address' => request()->ip(),
+                    'ticket_userId' => $ticket->userId,
+                    'ipAddress' => request()->ip(),
                 ]);
                 abort(403, 'Unauthorized access to modify ticket');
             }
@@ -289,7 +291,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to update ticket: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
@@ -318,10 +320,10 @@ class TicketController extends Controller
             // Ticket is validated by type hint
             if (! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket deletion attempt', [
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'ticket_id' => $ticket->id,
-                    'ticket_user_id' => $ticket->user_id,
-                    'ip_address' => request()->ip(),
+                    'ticket_userId' => $ticket->userId,
+                    'ipAddress' => request()->ip(),
                 ]);
                 abort(403, 'Unauthorized access to delete ticket');
             }
@@ -332,7 +334,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to delete ticket: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -366,10 +368,10 @@ class TicketController extends Controller
             // Request and ticket are validated by type hints
             if (! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket reply attempt', [
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'ticket_id' => $ticket->id,
-                    'ticket_user_id' => $ticket->user_id,
-                    'ip_address' => request()->ip(),
+                    'ticket_userId' => $ticket->userId,
+                    'ipAddress' => request()->ip(),
                 ]);
                 abort(403, 'Unauthorized access to reply to ticket');
             }
@@ -382,7 +384,7 @@ class TicketController extends Controller
             // Create the reply
             $reply = TicketReply::create([
                 'ticket_id' => $ticket->id,
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'message' => $validated['message'],
             ]);
             // Handle closing the ticket
@@ -396,7 +398,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to add ticket reply: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
@@ -522,7 +524,7 @@ class TicketController extends Controller
      */
     private function canViewTicket(Ticket $ticket): bool
     {
-        return $ticket->user_id === Auth::id() || Auth::user()?->hasRole('admin');
+        return $ticket->userId === Auth::id() || Auth::user()?->hasRole('admin');
     }
     /**
      * Check if user can modify ticket.
@@ -533,6 +535,6 @@ class TicketController extends Controller
      */
     private function canModifyTicket(Ticket $ticket): bool
     {
-        return $ticket->user_id === Auth::id() || Auth::user()?->hasRole('admin');
+        return $ticket->userId === Auth::id() || Auth::user()?->hasRole('admin');
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,7 +32,7 @@ class ProductCategoryRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -73,10 +75,10 @@ class ProductCategoryRequest extends FormRequest
                 'max:2048',
                 'dimensions:max_width=1920, max_height=1080',
             ],
-            'is_active' => [
+            'isActive' => [
                 'boolean',
             ],
-            'sort_order' => [
+            'sortOrder' => [
                 'nullable',
                 'integer',
                 'min:0',
@@ -157,8 +159,8 @@ class ProductCategoryRequest extends FormRequest
             'meta_title.regex' => 'Meta title contains invalid characters.',
             'meta_keywords.regex' => 'Meta keywords contain invalid characters.',
             'meta_description.regex' => 'Meta description contains invalid characters.',
-            'sort_order.min' => 'Sort order must be at least 0.',
-            'sort_order.max' => 'Sort order must not exceed 9999.',
+            'sortOrder.min' => 'Sort order must be at least 0.',
+            'sortOrder.max' => 'Sort order must not exceed 9999.',
             'parent_id.exists' => 'Selected parent category does not exist.',
             'parent_id.not_in' => 'A category cannot be its own parent.',
         ];
@@ -175,8 +177,8 @@ class ProductCategoryRequest extends FormRequest
             'slug' => 'category slug',
             'description' => 'category description',
             'image' => 'category image',
-            'is_active' => 'active status',
-            'sort_order' => 'sort order',
+            'isActive' => 'active status',
+            'sortOrder' => 'sort order',
             'meta_title' => 'meta title',
             'meta_keywords' => 'meta keywords',
             'meta_description' => 'meta description',
@@ -212,7 +214,7 @@ class ProductCategoryRequest extends FormRequest
         }
         // Handle checkbox values
         $this->merge([
-            'is_active' => $this->has('is_active'),
+            'isActive' => $this->has('isActive'),
             'show_in_menu' => $this->has('show_in_menu'),
             'is_featured' => $this->has('is_featured'),
             'allow_subcategories' => $this->has('allow_subcategories'),

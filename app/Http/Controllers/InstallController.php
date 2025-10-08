@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
@@ -918,7 +920,7 @@ class InstallController extends Controller
                 'name' => $adminConfig['name'],
                 'email' => $adminConfig['email'],
                 'password' => Hash::make(is_string($adminConfig['password'] ?? null) ? $adminConfig['password'] : ''),
-                'email_verified_at' => now(),
+                'emailVerifiedAt' => now(),
                 'status' => 'active',
                 'email_verified' => true,
             ]);

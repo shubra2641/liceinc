@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -49,7 +51,7 @@ class TicketIndexRequest extends FormRequest
                 'integer',
                 'exists:ticket_categories,id',
             ],
-            'user_id' => [
+            'userId' => [
                 'sometimes',
                 'integer',
                 'exists:users,id',
@@ -79,7 +81,7 @@ class TicketIndexRequest extends FormRequest
             'status.in' => 'Status must be one of: open, closed, in_progress.',
             'priority.in' => 'Priority must be one of: low, medium, high.',
             'category_id.exists' => 'Selected category does not exist.',
-            'user_id.exists' => 'Selected user does not exist.',
+            'userId.exists' => 'Selected user does not exist.',
             'search.regex' => 'Search contains invalid characters.',
             'search.max' => 'Search cannot exceed 255 characters.',
             'per_page.min' => 'Per page must be at least 1.',
@@ -97,7 +99,7 @@ class TicketIndexRequest extends FormRequest
             'status' => 'ticket status',
             'priority' => 'ticket priority',
             'category_id' => 'category',
-            'user_id' => 'user',
+            'userId' => 'user',
             'search' => 'search term',
             'per_page' => 'items per page',
         ];

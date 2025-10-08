@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +31,7 @@ class ProductFileRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -41,7 +43,7 @@ class ProductFileRequest extends FormRequest
         $fileId = $this->route('file')->id ?? null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
-            'product_id' => [
+            'productId' => [
                 'required',
                 'integer',
                 'exists:products,id',
@@ -71,7 +73,7 @@ class ProductFileRequest extends FormRequest
                 'max:50',
                 'regex:/^[0-9]+\.[0-9]+\.[0-9]+$/',
             ],
-            'file_type' => [
+            'fileType' => [
                 'required',
                 'string',
                 Rule::in([
@@ -79,16 +81,16 @@ class ProductFileRequest extends FormRequest
                     'plugin', 'theme', 'library', 'other',
                 ]),
             ],
-            'is_active' => [
+            'isActive' => [
                 'boolean',
             ],
-            'is_required' => [
+            'isRequired' => [
                 'boolean',
             ],
             'is_premium' => [
                 'boolean',
             ],
-            'download_count' => [
+            'downloadCount' => [
                 'nullable',
                 'integer',
                 'min:0',
@@ -135,7 +137,7 @@ class ProductFileRequest extends FormRequest
                 'max:5000',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
-            'sort_order' => [
+            'sortOrder' => [
                 'nullable',
                 'integer',
                 'min:0',
@@ -151,8 +153,8 @@ class ProductFileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'product_id.required' => 'Product selection is required.',
-            'product_id.exists' => 'Selected product does not exist.',
+            'productId.required' => 'Product selection is required.',
+            'productId.exists' => 'Selected product does not exist.',
             'name.required' => 'File name is required.',
             'name.regex' => 'File name contains invalid characters.',
             'description.regex' => 'Description contains invalid characters.',
@@ -162,10 +164,10 @@ class ProductFileRequest extends FormRequest
             'file.max' => 'File size must not exceed 100MB.',
             'version.required' => 'File version is required.',
             'version.regex' => 'Version must be in format: x.y.z (e.g., 1.0.0).',
-            'file_type.required' => 'File type is required.',
-            'file_type.in' => 'File type must be one of: source, binary, documentation, demo, '
+            'fileType.required' => 'File type is required.',
+            'fileType.in' => 'File type must be one of: source, binary, documentation, demo, '
                 . 'template, plugin, theme, library, other.',
-            'download_count.min' => 'Download count cannot be negative.',
+            'downloadCount.min' => 'Download count cannot be negative.',
             'file_size.min' => 'File size must be at least 1 byte.',
             'file_size.max' => 'File size must not exceed 1GB.',
             'checksum.regex' => 'Checksum must be a valid hexadecimal string.',
@@ -174,8 +176,8 @@ class ProductFileRequest extends FormRequest
             'compatibility.regex' => 'Compatibility information contains invalid characters.',
             'requirements.regex' => 'Requirements contain invalid characters.',
             'installation_instructions.regex' => 'Installation instructions contain invalid characters.',
-            'sort_order.min' => 'Sort order must be at least 0.',
-            'sort_order.max' => 'Sort order must not exceed 9999.',
+            'sortOrder.min' => 'Sort order must be at least 0.',
+            'sortOrder.max' => 'Sort order must not exceed 9999.',
         ];
     }
     /**
@@ -186,16 +188,16 @@ class ProductFileRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'product_id' => 'product',
+            'productId' => 'product',
             'name' => 'file name',
             'description' => 'file description',
             'file' => 'file upload',
             'version' => 'file version',
-            'file_type' => 'file type',
-            'is_active' => 'active status',
-            'is_required' => 'required file',
+            'fileType' => 'file type',
+            'isActive' => 'active status',
+            'isRequired' => 'required file',
             'is_premium' => 'premium file',
-            'download_count' => 'download count',
+            'downloadCount' => 'download count',
             'file_size' => 'file size',
             'checksum' => 'file checksum',
             'release_notes' => 'release notes',
@@ -203,7 +205,7 @@ class ProductFileRequest extends FormRequest
             'compatibility' => 'compatibility',
             'requirements' => 'system requirements',
             'installation_instructions' => 'installation instructions',
-            'sort_order' => 'sort order',
+            'sortOrder' => 'sort order',
         ];
     }
     /**
@@ -227,15 +229,15 @@ class ProductFileRequest extends FormRequest
         ]);
         // Handle checkbox values
         $this->merge([
-            'is_active' => $this->has('is_active'),
-            'is_required' => $this->has('is_required'),
+            'isActive' => $this->has('isActive'),
+            'isRequired' => $this->has('isRequired'),
             'is_premium' => $this->has('is_premium'),
         ]);
         // Set default values
         $this->merge([
-            'is_active' => $this->is_active ?? true,
-            'download_count' => $this->download_count ?? 0,
-            'sort_order' => $this->sort_order ?? 0,
+            'isActive' => $this->isActive ?? true,
+            'downloadCount' => $this->downloadCount ?? 0,
+            'sortOrder' => $this->sortOrder ?? 0,
         ]);
     }
     /**

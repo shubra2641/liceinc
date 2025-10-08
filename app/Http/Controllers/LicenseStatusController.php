@@ -40,7 +40,7 @@ use Throwable;
  * // Check license status
  * POST /license-status/check
  * {
- *     "license_key": "ABC123-DEF456-GHI789",
+ *     "licenseKey": "ABC123-DEF456-GHI789",
  *     "email": "user@example.com"
  * }
  */
@@ -114,7 +114,7 @@ class LicenseStatusController extends Controller
                 }
                 Cache::put($key, (is_numeric($attempts) ? (int)$attempts : 0) + 1, now()->addMinutes($decayMinutes));
                 $validator = Validator::make($request->all(), [
-                    'license_key' => 'required|string|max:255',
+                    'licenseKey' => 'required|string|max:255',
                     'email' => 'required|email|max:255',
                 ]);
                 if ($validator->fails()) {
@@ -129,13 +129,13 @@ class LicenseStatusController extends Controller
                         422,
                     );
                 }
-                $licenseCode = $this->sanitizeInput($request->validated('license_key'));
+                $licenseCode = $this->sanitizeInput($request->validated('licenseKey'));
                 $email = $this->sanitizeInput($request->validated('email'));
                 // Search for license by code and email
                 $license = $this->findLicenseByCodeAndEmail(is_string($licenseCode) ? $licenseCode : '', is_string($email) ? $email : '');
                 if (! $license) {
                     Log::warning('License not found', [
-                        'license_key' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
+                        'licenseKey' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
                         'email' => $this->hashForLogging(is_string($email) ? $email : ''),
                         'ip' => $ip,
                         'user_agent' => $request->userAgent(),
@@ -160,8 +160,8 @@ class LicenseStatusController extends Controller
                 // Reset attempts on success
                 Cache::forget($key);
                 Log::debug('License status checked successfully', [
-                    'license_id' => $license->id,
-                    'license_key' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
+                    'licenseId' => $license->id,
+                    'licenseKey' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
                     'email' => $this->hashForLogging(is_string($email) ? $email : ''),
                     'status' => $status,
                     'ip' => $ip,
@@ -176,7 +176,7 @@ class LicenseStatusController extends Controller
         } catch (Throwable $e) {
             Log::error('License check error', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging(is_string($request->validated('license_key')) ? $request->validated('license_key') : ''),
+                'licenseKey' => $this->hashForLogging(is_string($request->validated('licenseKey')) ? $request->validated('licenseKey') : ''),
                 'email' => $this->hashForLogging(is_string($request->validated('email')) ? $request->validated('email') : ''),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
@@ -211,7 +211,7 @@ class LicenseStatusController extends Controller
         try {
             $result = $this->transaction(function () use ($request) {
                 $validator = Validator::make($request->all(), [
-                    'license_key' => 'required|string|max:255',
+                    'licenseKey' => 'required|string|max:255',
                     'email' => 'required|email|max:255',
                 ]);
                 if ($validator->fails()) {
@@ -226,12 +226,12 @@ class LicenseStatusController extends Controller
                         422,
                     );
                 }
-                $licenseCode = $this->sanitizeInput($request->validated('license_key'));
+                $licenseCode = $this->sanitizeInput($request->validated('licenseKey'));
                 $email = $this->sanitizeInput($request->validated('email'));
                 $license = $this->findLicenseByCodeAndEmail(is_string($licenseCode) ? $licenseCode : '', is_string($email) ? $email : '');
                 if (! $license) {
                     Log::warning('License not found for history request', [
-                        'license_key' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
+                        'licenseKey' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
                         'email' => $this->hashForLogging(is_string($email) ? $email : ''),
                         'ip' => $request->ip(),
                         'user_agent' => $request->userAgent(),
@@ -243,22 +243,22 @@ class LicenseStatusController extends Controller
                     );
                 }
                 $logs = $license->logs()
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('createdAt', 'desc')
                     ->limit(50)
                     ->get()
                     ->map(function ($log): array {
                         return [
                             'action' => $log->action,
                             'status' => $log->status,
-                            'ip_address' => $log->ip_address,
+                            'ipAddress' => $log->ipAddress,
                             'user_agent' => $log->user_agent,
-                            'created_at' => $log->created_at?->format('Y-m-d H:i:s'),
+                            'createdAt' => $log->createdAt?->format('Y-m-d H:i:s'),
                             'message' => $log->message,
                         ];
                     });
                 Log::debug('License history retrieved successfully', [
-                    'license_id' => $license->id,
-                    'license_key' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
+                    'licenseId' => $license->id,
+                    'licenseKey' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
                     'email' => $this->hashForLogging(is_string($email) ? $email : ''),
                     'logs_count' => $logs->count(),
                     'ip' => $request->ip(),
@@ -268,7 +268,7 @@ class LicenseStatusController extends Controller
         } catch (Throwable $e) {
             Log::error('License history error', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging(is_string($request->validated('license_key')) ? $request->validated('license_key') : ''),
+                'licenseKey' => $this->hashForLogging(is_string($request->validated('licenseKey')) ? $request->validated('licenseKey') : ''),
                 'email' => $this->hashForLogging(is_string($request->validated('email')) ? $request->validated('email') : ''),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
@@ -294,7 +294,7 @@ class LicenseStatusController extends Controller
     {
         try {
             // Search for license by code and email
-            $license = License::where('license_key', $licenseCode)
+            $license = License::where('licenseKey', $licenseCode)
                 ->whereHas('user', function ($subQ) use ($email) {
                     $subQ->where('email', $email);
                 })
@@ -313,7 +313,7 @@ class LicenseStatusController extends Controller
         } catch (Throwable $e) {
             Log::error('Failed to find license by code and email', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging($licenseCode),
+                'licenseKey' => $this->hashForLogging($licenseCode),
                 'email' => $this->hashForLogging($email),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -365,19 +365,19 @@ class LicenseStatusController extends Controller
         string $email,
     ): array {
         return [
-            'license_key' => $license->license_key,
+            'licenseKey' => $license->licenseKey,
             'purchase_code' => $license->purchase_code,
             'email' => $license->user ? $license->user->email : $email,
             'status' => $status,
-            'license_type' => $licenseType,
+            'licenseType' => $licenseType,
             'product_name' => $license->product
                 ? $license->product->name
                 : 'Not specified',
-            'created_at' => $license->created_at?->format('Y-m-d H:i:s'),
-            'expires_at' => $license->license_expires_at ? $license->license_expires_at->format('Y-m-d H:i:s') : null,
-            'is_expired' => $license->license_expires_at && $license->license_expires_at->isPast(),
-            'days_remaining' => $license->license_expires_at
-                ? max(0, now()->diffInDays($license->license_expires_at, false))
+            'createdAt' => $license->createdAt?->format('Y-m-d H:i:s'),
+            'expiresAt' => $license->license_expiresAt ? $license->license_expiresAt->format('Y-m-d H:i:s') : null,
+            'is_expired' => $license->license_expiresAt && $license->license_expiresAt->isPast(),
+            'days_remaining' => $license->license_expiresAt
+                ? max(0, now()->diffInDays($license->license_expiresAt, false))
                 : null,
             'domains' => $license->domains->toArray(),
             'supported_until' => $license->supported_until,
@@ -405,7 +405,7 @@ class LicenseStatusController extends Controller
         } catch (Throwable $e) {
             Log::error('Failed to determine license type', [
                 'error' => $e->getMessage(),
-                'license_id' => $license->id,
+                'licenseId' => $license->id,
                 'trace' => $e->getTraceAsString(),
             ]);
             return __('license_status.custom');
@@ -422,7 +422,7 @@ class LicenseStatusController extends Controller
     {
         try {
             if ($license->status === 'active') {
-                if ($license->license_expires_at && $license->license_expires_at->isPast()) {
+                if ($license->license_expiresAt && $license->license_expiresAt->isPast()) {
                     return __('license_status.expired');
                 }
                 return __('license_status.active');
@@ -437,7 +437,7 @@ class LicenseStatusController extends Controller
         } catch (Throwable $e) {
             Log::error('Failed to get license status', [
                 'error' => $e->getMessage(),
-                'license_id' => $license->id,
+                'licenseId' => $license->id,
                 'license_status' => $license->status,
                 'trace' => $e->getTraceAsString(),
             ]);

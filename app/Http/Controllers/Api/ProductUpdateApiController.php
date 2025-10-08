@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -38,9 +40,9 @@ use Illuminate\Support\Facades\Storage;
  * // Check for updates
  * POST /api/product-updates/check
  * {
- *     "product_id": 1,
+ *     "productId": 1,
  *     "current_version": "1.0.0",
- *     "license_key": "ABC123-DEF456-GHI789",
+ *     "licenseKey": "ABC123-DEF456-GHI789",
  *     "domain": "example.com"
  * }
  */
@@ -54,7 +56,7 @@ class ProductUpdateApiController extends Controller
      * security measures and proper error handling.
      *
      * @param  ProductUpdateCheckRequest  $request
-     *         The validated request containing product_id, current_version, license_key, and domain
+     *         The validated request containing productId, current_version, licenseKey, and domain
      *
      * @return JsonResponse JSON response with available updates or error
      *
@@ -63,16 +65,16 @@ class ProductUpdateApiController extends Controller
      * @example
      * // Request body:
      * {
-     *     "product_id": 1,
+     *     "productId": 1,
      *     "current_version": "1.0.0",
-     *     "license_key": "ABC123-DEF456-GHI789",
+     *     "licenseKey": "ABC123-DEF456-GHI789",
      *     "domain": "example.com"
      * }
      *
      * // Success response:
      * {
      *     "success": true,
-     *     "product_id": 1,
+     *     "productId": 1,
      *     "current_version": "1.0.0",
      *     "latest_version": "1.2.0",
      *     "updates_available": 2,
@@ -85,13 +87,13 @@ class ProductUpdateApiController extends Controller
             DB::beginTransaction();
             // Get validated data from Request class
             $validated = $request->validated();
-            $productId = $validated['product_id'];
+            $productId = $validated['productId'];
             $currentVersion = $validated['current_version'];
-            $licenseKey = $validated['license_key'];
+            $licenseKey = $validated['licenseKey'];
             $domain = $validated['domain'];
             // Verify license
-            $license = License::where('license_key', $licenseKey)
-                ->where('product_id', $productId)
+            $license = License::where('licenseKey', $licenseKey)
+                ->where('productId', $productId)
                 ->where('status', 'active')
                 ->first();
             if (! $license) {
@@ -112,14 +114,14 @@ class ProductUpdateApiController extends Controller
                 }
             }
             // Get available updates
-            $updates = ProductUpdate::where('product_id', $productId)
+            $updates = ProductUpdate::where('productId', $productId)
                 ->active()
                 ->newerThan(is_string($currentVersion) ? $currentVersion : '')
                 ->orderBy('version', 'desc')
                 ->get();
             $response = [
                 'success' => true,
-                'product_id'  => $productId,
+                'productId'  => $productId,
                 'current_version' => $currentVersion,
                 'latest_version'  => $updates->first()->version ?? $currentVersion,
                 'updates_available' => $updates->count(),
@@ -129,10 +131,10 @@ class ProductUpdateApiController extends Controller
                         'title'  => $update->title,
                         'description' => $update->description,
                         'changelog'  => $update->changelog,
-                        'is_major' => $update->is_major,
-                        'is_required'  => $update->is_required,
-                        'file_size' => $update->formatted_file_size,
-                        'released_at'  => $update->released_at?->toISOString(),
+                        'isMajor' => $update->isMajor,
+                        'isRequired'  => $update->isRequired,
+                        'file_size' => $update->formattedFileSize,
+                        'releasedAt'  => $update->releasedAt?->toISOString(),
                         'download_url' => $update->download_url,
                         'requirements'  => $update->requirements,
                         'compatibility' => $update->compatibility,
@@ -162,7 +164,7 @@ class ProductUpdateApiController extends Controller
      * comprehensive security measures and proper error handling.
      *
      * @param  ProductUpdateLatestVersionRequest  $request
-     *         The validated request containing product_id, license_key, and domain
+     *         The validated request containing productId, licenseKey, and domain
      *
      * @return JsonResponse JSON response with latest version information or error
      *
@@ -171,15 +173,15 @@ class ProductUpdateApiController extends Controller
      * @example
      * // Request body:
      * {
-     *     "product_id": 1,
-     *     "license_key": "ABC123-DEF456-GHI789",
+     *     "productId": 1,
+     *     "licenseKey": "ABC123-DEF456-GHI789",
      *     "domain": "example.com"
      * }
      *
      * // Success response:
      * {
      *     "success": true,
-     *     "product_id": 1,
+     *     "productId": 1,
      *     "latest_version": "1.2.0",
      *     "title": "New Features Update",
      *     "description": "Added new features...",
@@ -192,12 +194,12 @@ class ProductUpdateApiController extends Controller
             DB::beginTransaction();
             // Get validated data from Request class
             $validated = $request->validated();
-            $productId = $validated['product_id'];
-            $licenseKey = $validated['license_key'];
+            $productId = $validated['productId'];
+            $licenseKey = $validated['licenseKey'];
             $domain = $validated['domain'];
             // Verify license
-            $license = License::where('license_key', $licenseKey)
-                ->where('product_id', $productId)
+            $license = License::where('licenseKey', $licenseKey)
+                ->where('productId', $productId)
                 ->where('status', 'active')
                 ->first();
             if (! $license) {
@@ -218,7 +220,7 @@ class ProductUpdateApiController extends Controller
                 }
             }
             // Get latest update
-            $latestUpdate = ProductUpdate::where('product_id', $productId)
+            $latestUpdate = ProductUpdate::where('productId', $productId)
                 ->active()
                 ->orderBy('version', 'desc')
                 ->first();
@@ -231,15 +233,15 @@ class ProductUpdateApiController extends Controller
             }
             $response = [
                 'success' => true,
-                'product_id'  => $productId,
+                'productId'  => $productId,
                 'latest_version' => $latestUpdate->version,
                 'title'  => $latestUpdate->title,
                 'description' => $latestUpdate->description,
                 'changelog'  => $latestUpdate->changelog,
-                'is_major' => $latestUpdate->is_major,
-                'is_required'  => $latestUpdate->is_required,
-                'file_size' => $latestUpdate->formatted_file_size,
-                'released_at'  => $latestUpdate->released_at?->toISOString(),
+                'isMajor' => $latestUpdate->isMajor,
+                'isRequired'  => $latestUpdate->isRequired,
+                'file_size' => $latestUpdate->formattedFileSize,
+                'releasedAt'  => $latestUpdate->releasedAt?->toISOString(),
                 'download_url' => $latestUpdate->download_url,
                 'requirements'  => $latestUpdate->requirements,
                 'compatibility' => $latestUpdate->compatibility,
@@ -266,7 +268,7 @@ class ProductUpdateApiController extends Controller
      * the license and ensuring the update exists and is available with
      * comprehensive security measures and proper error handling.
      *
-     * @param  ProductUpdateDownloadRequest  $request  The validated request containing license_key and domain
+     * @param  ProductUpdateDownloadRequest  $request  The validated request containing licenseKey and domain
      * @param  int  $productId  The product ID to download update for
      * @param  string  $version  The version to download
      *
@@ -278,7 +280,7 @@ class ProductUpdateApiController extends Controller
      * // URL: /api/product-updates/download/{productId}/{version}
      * // Request body:
      * {
-     *     "license_key": "ABC123-DEF456-GHI789",
+     *     "licenseKey": "ABC123-DEF456-GHI789",
      *     "domain": "example.com"
      * }
      * // Returns: File download or JSON error response
@@ -289,11 +291,11 @@ class ProductUpdateApiController extends Controller
             DB::beginTransaction();
             // Get validated data from Request class
             $validated = $request->validated();
-            $licenseKey = $validated['license_key'];
+            $licenseKey = $validated['licenseKey'];
             $domain = $validated['domain'];
             // Verify license
-            $license = License::where('license_key', $licenseKey)
-                ->where('product_id', $productId)
+            $license = License::where('licenseKey', $licenseKey)
+                ->where('productId', $productId)
                 ->where('status', 'active')
                 ->first();
             if (! $license) {
@@ -308,16 +310,16 @@ class ProductUpdateApiController extends Controller
                 }
             }
             // Get update
-            $update = ProductUpdate::where('product_id', $productId)
+            $update = ProductUpdate::where('productId', $productId)
                 ->where('version', $version)
                 ->active()
                 ->first();
-            if (! $update || ! $update->file_path) {
+            if (! $update || ! $update->filePath) {
                 DB::rollBack();
                 return new Response('Update file not found', 404);
             }
             // Check if file exists
-            if (! Storage::exists($update->file_path)) {
+            if (! Storage::exists($update->filePath)) {
                 DB::rollBack();
                 return new Response('Update file not available', 404);
             }
@@ -329,7 +331,7 @@ class ProductUpdateApiController extends Controller
             Log::error('Product update download failed', [
                 'error' => $e->getMessage(),
                 'trace'  => $e->getTraceAsString(),
-                'product_id' => $productId,
+                'productId' => $productId,
                 'version'  => $version,
                 'request_data' => $request->all(),
             ]);
@@ -344,7 +346,7 @@ class ProductUpdateApiController extends Controller
      * comprehensive security measures and proper error handling.
      *
      * @param  ProductUpdateChangelogRequest  $request
-     *         The validated request containing product_id, license_key, and domain
+     *         The validated request containing productId, licenseKey, and domain
      *
      * @return JsonResponse JSON response with changelog information or error
      *
@@ -353,22 +355,22 @@ class ProductUpdateApiController extends Controller
      * @example
      * // Request body:
      * {
-     *     "product_id": 1,
-     *     "license_key": "ABC123-DEF456-GHI789",
+     *     "productId": 1,
+     *     "licenseKey": "ABC123-DEF456-GHI789",
      *     "domain": "example.com"
      * }
      *
      * // Success response:
      * {
      *     "success": true,
-     *     "product_id": 1,
+     *     "productId": 1,
      *     "changelog": [
      *         {
      *             "version": "1.2.0",
      *             "title": "New Features Update",
      *             "changelog": "Added new features...",
-     *             "is_major": true,
-     *             "released_at": "2024-01-01T00:00:00.000000Z"
+     *             "isMajor": true,
+     *             "releasedAt": "2024-01-01T00:00:00.000000Z"
      *         }
      *     ]
      * }
@@ -379,12 +381,12 @@ class ProductUpdateApiController extends Controller
             DB::beginTransaction();
             // Get validated data from Request class
             $validated = $request->validated();
-            $productId = $validated['product_id'];
-            $licenseKey = $validated['license_key'];
+            $productId = $validated['productId'];
+            $licenseKey = $validated['licenseKey'];
             $domain = $validated['domain'];
             // Verify license
-            $license = License::where('license_key', $licenseKey)
-                ->where('product_id', $productId)
+            $license = License::where('licenseKey', $licenseKey)
+                ->where('productId', $productId)
                 ->where('status', 'active')
                 ->first();
             if (! $license) {
@@ -405,7 +407,7 @@ class ProductUpdateApiController extends Controller
                 }
             }
             // Get all updates
-            $updates = ProductUpdate::where('product_id', $productId)
+            $updates = ProductUpdate::where('productId', $productId)
                 ->active()
                 ->orderBy('version', 'desc')
                 ->get();
@@ -414,15 +416,15 @@ class ProductUpdateApiController extends Controller
                     'version' => $update->version,
                     'title'  => $update->title,
                     'changelog' => $update->changelog,
-                    'is_major'  => $update->is_major,
-                    'is_required' => $update->is_required,
-                    'released_at'  => $update->released_at?->toISOString(),
+                    'isMajor'  => $update->isMajor,
+                    'isRequired' => $update->isRequired,
+                    'releasedAt'  => $update->releasedAt?->toISOString(),
                 ];
             });
             DB::commit();
             return response()->json([
                 'success' => true,
-                'product_id'  => $productId,
+                'productId'  => $productId,
                 'changelog' => $changelog,
             ]);
         } catch (\Exception $e) {

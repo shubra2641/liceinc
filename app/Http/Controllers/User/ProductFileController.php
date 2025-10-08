@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
@@ -81,7 +83,7 @@ class ProductFileController extends Controller
                 abort(403, 'This product does not support file downloads');
             }
             // Check if file is active
-            if (! $file->is_active) {
+            if (! $file->isActive) {
                 abort(404, 'File not available');
             }
             // Check user permissions
@@ -103,9 +105,9 @@ class ProductFileController extends Controller
                 ->header('Expires', '0');
         } catch (\Exception $e) {
             Log::error('User file download failed', [
-                'user_id' => auth()->id() ? (int)auth()->id() : 0,
+                'userId' => auth()->id() ? (int)auth()->id() : 0,
                 'file_id' => $file->id ?? 'unknown',
-                'product_id' => $file->product_id ?? 'unknown',
+                'productId' => $file->productId ?? 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -138,7 +140,7 @@ class ProductFileController extends Controller
         $allVersions = $this->productFileService->getAllProductVersions($product, auth()->id() ? (int)auth()->id() : 0);
         // Get latest update information
         $latestUpdate = $product->updates()
-            ->where('is_active', true)
+            ->where('isActive', true)
             ->orderBy('version', 'desc')
             ->first();
         // Get latest file (update or base)
@@ -173,10 +175,10 @@ class ProductFileController extends Controller
         try {
             // Get the specific update
             $update = $product->updates()->find($updateId);
-            if (! $update || ! $update->is_active) {
+            if (! $update || ! $update->isActive) {
                 abort(404, 'Update not found or not available');
             }
-            if ($update->file_path === null) {
+            if ($update->filePath === null) {
                 abort(404, 'Update file not available');
             }
             $fileData = $this->productFileService->downloadUpdateFile($update, auth()->id() ? (int)auth()->id() : 0);
@@ -190,8 +192,8 @@ class ProductFileController extends Controller
                 ->header('Expires', '0');
         } catch (\Exception $e) {
             Log::error('User update download failed', [
-                'user_id' => auth()->id() ? (int)auth()->id() : 0,
-                'product_id' => $product->id,
+                'userId' => auth()->id() ? (int)auth()->id() : 0,
+                'productId' => $product->id,
                 'update_id' => $updateId,
                 'error' => $e->getMessage(),
             ]);
@@ -248,8 +250,8 @@ class ProductFileController extends Controller
                 ->header('Expires', '0');
         } catch (\Exception $e) {
             Log::error('User latest file download failed', [
-                'user_id' => auth()->id() ? (int)auth()->id() : 0,
-                'product_id' => $product->id,
+                'userId' => auth()->id() ? (int)auth()->id() : 0,
+                'productId' => $product->id,
                 'error' => $e->getMessage(),
             ]);
             abort(500, 'Download failed');
@@ -293,7 +295,7 @@ class ProductFileController extends Controller
             foreach ($files as $file) {
                 $fileData = $this->productFileService->downloadFile($file, auth()->id() ? (int)auth()->id() : 0);
                 if ($fileData) {
-                    $zip->addFromString($file->original_name, is_string($fileData['content']) ? $fileData['content'] : '');
+                    $zip->addFromString($file->originalName, is_string($fileData['content']) ? $fileData['content'] : '');
                     $addedFiles++;
                 }
             }
@@ -309,8 +311,8 @@ class ProductFileController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('ZIP download failed', [
-                'user_id' => auth()->id() ? (int)auth()->id() : 0,
-                'product_id' => $product->id,
+                'userId' => auth()->id() ? (int)auth()->id() : 0,
+                'productId' => $product->id,
                 'error' => $e->getMessage(),
             ]);
             abort(500, 'ZIP creation failed');

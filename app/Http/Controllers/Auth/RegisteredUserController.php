@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Auth;
 
 use App\Helpers\ConfigHelper;
@@ -195,7 +197,7 @@ class RegisteredUserController extends Controller
      */
     private function getHumanQuestions(): array
     {
-        $humanQuestionsJson = ConfigHelper::getSetting('human_questions', null);
+        $humanQuestionsJson = ConfigHelper::getSetting('humanQuestions', null);
         if (empty($humanQuestionsJson)) {
             return [];
         }
@@ -333,7 +335,7 @@ class RegisteredUserController extends Controller
         $enableCaptcha = ConfigHelper::getSetting('enable_captcha', false);
         $captchaSiteKey = ConfigHelper::getSetting('captcha_site_key', '');
         $enableHumanQuestion = ConfigHelper::getSetting('enable_human_question', true);
-        $humanQuestionsJson = ConfigHelper::getSetting('human_questions', null);
+        $humanQuestionsJson = ConfigHelper::getSetting('humanQuestions', null);
         $humanQuestions = [];
         if (! empty($humanQuestionsJson)) {
             $decoded = json_decode(is_string($humanQuestionsJson) ? $humanQuestionsJson : '', true);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -110,8 +112,8 @@ class DashboardController extends Controller
             $stats['invoices_cancelled_count'] = $invoiceCancelledCount;
             $stats['invoices_cancelled_amount'] = $invoiceCancelledAmount;
             // API Statistics
-            $stats['api_requests_today'] = LicenseLog::whereDate('created_at', today())->count();
-            $stats['api_requests_this_month'] = LicenseLog::whereMonth('created_at', now()->month)->count();
+            $stats['api_requests_today'] = LicenseLog::whereDate('createdAt', today())->count();
+            $stats['api_requests_this_month'] = LicenseLog::whereMonth('createdAt', now()->month)->count();
             $stats['api_success_rate'] = $this->calculateApiSuccessRate();
             $stats['api_errors_today'] = $this->getApiErrorsToday();
             $stats['api_errors_this_month'] = $this->getApiErrorsThisMonth();
@@ -222,8 +224,8 @@ class DashboardController extends Controller
     {
         try {
             // Use actual enum values defined in the licenses table: regular / extended
-            $regularLicenses = License::where('license_type', 'regular')->count();
-            $extendedLicenses = License::where('license_type', 'extended')->count();
+            $regularLicenses = License::where('licenseType', 'regular')->count();
+            $extendedLicenses = License::where('licenseType', 'extended')->count();
             return response()->json([
                 'labels' => ['Regular', 'Extended'],
                 'data' => [$regularLicenses, $extendedLicenses],
@@ -283,8 +285,8 @@ class DashboardController extends Controller
                     $startDate = Carbon::create($year, $month, 1)?->startOfMonth();
                     $endDate = Carbon::create($year, $month, 1)?->endOfMonth();
                     // Calculate revenue from licenses created in this month
-                    $monthlyRevenue = License::join('products', 'licenses.product_id', '=', 'products.id')
-                        ->whereBetween('licenses.created_at', [$startDate, $endDate])
+                    $monthlyRevenue = License::join('products', 'licenses.productId', '=', 'products.id')
+                        ->whereBetween('licenses.createdAt', [$startDate, $endDate])
                         ->sum('products.price');
                     $data[] = (float)$monthlyRevenue;
                     $labels[] = Carbon::create($year, $month, 1)?->format('M');
@@ -297,8 +299,8 @@ class DashboardController extends Controller
                     $endMonth = $quarter * 3;
                     $startDate = Carbon::create($year, $startMonth, 1)?->startOfMonth();
                     $endDate = Carbon::create($year, $endMonth, 1)?->endOfMonth();
-                    $quarterlyRevenue = License::join('products', 'licenses.product_id', '=', 'products.id')
-                        ->whereBetween('licenses.created_at', [$startDate, $endDate])
+                    $quarterlyRevenue = License::join('products', 'licenses.productId', '=', 'products.id')
+                        ->whereBetween('licenses.createdAt', [$startDate, $endDate])
                         ->sum('products.price');
                     $data[] = (float)$quarterlyRevenue;
                 }
@@ -309,8 +311,8 @@ class DashboardController extends Controller
                 for ($y = $currentYear - 4; $y <= $currentYear; $y++) {
                     $startDate = Carbon::create((int)$y, 1, 1)?->startOfYear();
                     $endDate = Carbon::create((int)$y, 12, 31)?->endOfYear();
-                    $yearlyRevenue = License::join('products', 'licenses.product_id', '=', 'products.id')
-                        ->whereBetween('licenses.created_at', [$startDate, $endDate])
+                    $yearlyRevenue = License::join('products', 'licenses.productId', '=', 'products.id')
+                        ->whereBetween('licenses.createdAt', [$startDate, $endDate])
                         ->sum('products.price');
                     $data[] = (float)$yearlyRevenue;
                     $labels[] = $y;
@@ -371,8 +373,8 @@ class DashboardController extends Controller
                 $startOfDay = $date->copy()->startOfDay();
                 $endOfDay = $date->copy()->endOfDay();
                 // Sum total activity counts for the day (tickets created + licenses created)
-                $ticketsCount = Ticket::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
-                $licensesCount = License::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
+                $ticketsCount = Ticket::whereBetween('createdAt', [$startOfDay, $endOfDay])->count();
+                $licensesCount = License::whereBetween('createdAt', [$startOfDay, $endOfDay])->count();
                 $dailyTotal = $ticketsCount + $licensesCount;
                 $data[] = $dailyTotal;
                 $labels[] = $date->format('M j');
@@ -578,10 +580,10 @@ class DashboardController extends Controller
                     $date = now()->subDays($i);
                     $startOfDay = $date->copy()->startOfDay();
                     $endOfDay = $date->copy()->endOfDay();
-                    $totalRequests = LicenseLog::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
-                    $successRequests = LicenseLog::whereBetween('created_at', [$startOfDay, $endOfDay])
+                    $totalRequests = LicenseLog::whereBetween('createdAt', [$startOfDay, $endOfDay])->count();
+                    $successRequests = LicenseLog::whereBetween('createdAt', [$startOfDay, $endOfDay])
                         ->where('status', 'success')->count();
-                    $failedRequests = LicenseLog::whereBetween('created_at', [$startOfDay, $endOfDay])
+                    $failedRequests = LicenseLog::whereBetween('createdAt', [$startOfDay, $endOfDay])
                         ->where('status', 'failed')->count();
                     $data[] = $totalRequests;
                     $successData[] = $successRequests;
@@ -593,10 +595,10 @@ class DashboardController extends Controller
                     $hour = now()->subHours($i);
                     $startOfHour = $hour->copy()->startOfHour();
                     $endOfHour = $hour->copy()->endOfHour();
-                    $totalRequests = LicenseLog::whereBetween('created_at', [$startOfHour, $endOfHour])->count();
-                    $successRequests = LicenseLog::whereBetween('created_at', [$startOfHour, $endOfHour])
+                    $totalRequests = LicenseLog::whereBetween('createdAt', [$startOfHour, $endOfHour])->count();
+                    $successRequests = LicenseLog::whereBetween('createdAt', [$startOfHour, $endOfHour])
                         ->where('status', 'success')->count();
-                    $failedRequests = LicenseLog::whereBetween('created_at', [$startOfHour, $endOfHour])
+                    $failedRequests = LicenseLog::whereBetween('createdAt', [$startOfHour, $endOfHour])
                         ->where('status', 'failed')->count();
                     $data[] = $totalRequests;
                     $successData[] = $successRequests;
@@ -688,16 +690,16 @@ class DashboardController extends Controller
             $today = now()->startOfDay();
             $yesterday = now()->subDay()->startOfDay();
             // Today's metrics
-            $todayRequests = LicenseLog::whereDate('created_at', today())->count();
-            $todaySuccess = LicenseLog::whereDate('created_at', today())->where('status', 'success')->count();
-            $todayFailed = LicenseLog::whereDate('created_at', today())->where('status', 'failed')->count();
+            $todayRequests = LicenseLog::whereDate('createdAt', today())->count();
+            $todaySuccess = LicenseLog::whereDate('createdAt', today())->where('status', 'success')->count();
+            $todayFailed = LicenseLog::whereDate('createdAt', today())->where('status', 'failed')->count();
             // Yesterday's metrics
-            $yesterdayRequests = LicenseLog::whereDate('created_at', $yesterday)->count();
-            $yesterdaySuccess = LicenseLog::whereDate('created_at', $yesterday)->where('status', 'success')->count();
-            $yesterdayFailed = LicenseLog::whereDate('created_at', $yesterday)->where('status', 'failed')->count();
+            $yesterdayRequests = LicenseLog::whereDate('createdAt', $yesterday)->count();
+            $yesterdaySuccess = LicenseLog::whereDate('createdAt', $yesterday)->where('status', 'success')->count();
+            $yesterdayFailed = LicenseLog::whereDate('createdAt', $yesterday)->where('status', 'failed')->count();
             // Top domains
             $topDomains = LicenseLog::selectRaw('domain, COUNT(*) as count')
-                ->where('created_at', '>=', now()->subDays(7))
+                ->where('createdAt', '>=', now()->subDays(7))
                 ->groupBy('domain')
                 ->orderBy('count', 'desc')
                 ->limit(5)

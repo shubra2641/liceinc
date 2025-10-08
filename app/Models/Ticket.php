@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,14 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
- * @property int|null $user_id
+ * @property int|null $userId
  * @property string $subject
  * @property string $priority
  * @property string $status
  * @property string $content
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property int|null $license_id
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property int|null $licenseId
  * @property int|null $invoice_id
  * @property string|null $purchase_code
  * @property int|null $category_id
@@ -57,8 +59,8 @@ class Ticket extends Model
     protected static $factory = TicketFactory::class;
 
     protected $fillable = [
-        'user_id',
-        'license_id',
+        'userId',
+        'licenseId',
         'invoice_id',
         'category_id',
         'purchase_code',
@@ -68,8 +70,8 @@ class Ticket extends Model
         'content',
     ];
     protected $casts = [
-        'user_id' => 'integer',
-        'license_id' => 'integer',
+        'userId' => 'integer',
+        'licenseId' => 'integer',
         'category_id' => 'integer',
     ];
     /**

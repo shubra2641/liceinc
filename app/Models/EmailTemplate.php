@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -20,10 +22,10 @@ use Illuminate\Database\Eloquent\Collection;
  * @property string $type Template type: 'user' or 'admin'
  * @property string $category Template category: 'registration', 'license', 'ticket', 'invoice', etc.
  * @property array<string, mixed>|null $variables Available variables for this template
- * @property bool $is_active Whether the template is active
+ * @property bool $isActive Whether the template is active
  * @property string|null $description Template description
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $createdAt
+ * @property \Carbon\Carbon $updatedAt
  * @method static Builder<static>|EmailTemplate active()
  * @method static \Database\Factories\EmailTemplateFactory factory($count = null, $state = [])
  * @method static Builder<static>|EmailTemplate forCategory(string $category)
@@ -71,7 +73,7 @@ class EmailTemplate extends Model
         'type',
         'category',
         'variables',
-        'is_active',
+        'isActive',
         'description',
     ];
     /**
@@ -81,7 +83,7 @@ class EmailTemplate extends Model
      */
     protected $casts = [
         'variables' => 'array',
-        'is_active' => 'boolean',
+        'isActive' => 'boolean',
     ];
     /**
      * Scope a query to only include active templates.
@@ -91,7 +93,7 @@ class EmailTemplate extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        return $query->where('isActive', true);
     }
     /**
      * Scope a query to only include templates for a specific type.

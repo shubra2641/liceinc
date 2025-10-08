@@ -43,7 +43,7 @@ use Throwable;
  *     "name": "Getting Started",
  *     "description": "Basic setup and configuration",
  *     "parent_id": null,
- *     "product_id": 1
+ *     "productId": 1
  * }
  */
 class KbCategoryController extends Controller
@@ -98,7 +98,7 @@ class KbCategoryController extends Controller
     {
         try {
             $parents = KbCategory::pluck('name', 'id');
-            $products = Product::where('is_active', true)->get();
+            $products = Product::where('isActive', true)->get();
             return view('admin.kb.categories.create', ['parents' => $parents, 'products' => $products]);
         } catch (Throwable $e) {
             Log::error('Failed to load category creation form', [
@@ -136,7 +136,7 @@ class KbCategoryController extends Controller
                     'slug' => 'nullable|string|max:255|unique:kb_categories,slug',
                     'description' => 'nullable|string',
                     'parent_id' => 'nullable|exists:kb_categories,id',
-                    'product_id' => 'nullable|exists:products,id',
+                    'productId' => 'nullable|exists:products,id',
                     'serial' => 'nullable|string|max:255',
                     'requires_serial' => 'sometimes|boolean',
                     'serial_message' => 'nullable|string',
@@ -145,8 +145,8 @@ class KbCategoryController extends Controller
                     'meta_keywords' => 'nullable|string|max:255',
                     'icon' => 'nullable|string|max:255',
                     'is_featured' => 'sometimes|boolean',
-                    'is_active' => 'sometimes|boolean',
-                    'sort_order' => 'nullable|integer|min:0',
+                    'isActive' => 'sometimes|boolean',
+                    'sortOrder' => 'nullable|integer|min:0',
                 ]);
                 // Sanitize input data
                 $validated = $this->sanitizeCategoryData($validated);
@@ -195,7 +195,7 @@ class KbCategoryController extends Controller
         try {
             $kbCategory->load(['articles' => function ($query) {
                 if (is_object($query) && method_exists($query, 'where')) {
-                    $query->where('is_active', true);
+                    $query->where('isActive', true);
                     if (method_exists($query, 'latest')) {
                         $query->latest();
                     }
@@ -236,7 +236,7 @@ class KbCategoryController extends Controller
     {
         try {
             $parents = KbCategory::where('id', '!=', $kbCategory->id)->pluck('name', 'id');
-            $products = Product::where('is_active', true)->get();
+            $products = Product::where('isActive', true)->get();
             return view('admin.kb.categories.edit', [
                 'category' => $kbCategory,
                 'parents' => $parents,
@@ -278,7 +278,7 @@ class KbCategoryController extends Controller
                     'slug' => 'required|string|max:255|unique:kb_categories,slug,' . $kbCategory->id,
                     'description' => 'nullable|string',
                     'parent_id' => 'nullable|exists:kb_categories,id',
-                    'product_id' => 'nullable|exists:products,id',
+                    'productId' => 'nullable|exists:products,id',
                     'serial' => 'nullable|string|max:255',
                     'requires_serial' => 'sometimes|boolean',
                     'serial_message' => 'nullable|string',
@@ -287,8 +287,8 @@ class KbCategoryController extends Controller
                     'meta_keywords' => 'nullable|string|max:255',
                     'icon' => 'nullable|string|max:255',
                     'is_featured' => 'sometimes|boolean',
-                    'is_active' => 'sometimes|boolean',
-                    'sort_order' => 'nullable|integer|min:0',
+                    'isActive' => 'sometimes|boolean',
+                    'sortOrder' => 'nullable|integer|min:0',
                 ]);
                 // Sanitize input data
                 $validated = $this->sanitizeCategoryData($validated);

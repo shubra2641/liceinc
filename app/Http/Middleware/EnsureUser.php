@@ -59,7 +59,7 @@ class EnsureUser
             // Check if user's email is verified
             $email = $user->email;
             $isTestEmail = $this->isTestEmail($email);
-            if (! $user->email_verified_at) {
+            if (! $user->emailVerifiedAt) {
                 if ($isTestEmail) {
                     return redirect()->route('test-email-warning');
                 } else {
@@ -78,7 +78,7 @@ class EnsureUser
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'request_url' => $request->fullUrl(),
-                'user_id' => $request->user()?->id,
+                'userId' => $request->user()?->id,
             ]);
             // Re-throw the exception to maintain middleware behavior
             throw $e;
@@ -113,9 +113,9 @@ class EnsureUser
         if (! isset($user->email) && ! method_exists($user, 'getEmail')) {
             throw new InvalidArgumentException('User object must have email property or method');
         }
-        // Check if user has email_verified_at attribute (for Eloquent models)
-        if (! isset($user->email_verified_at) && ! method_exists($user, 'getEmailVerifiedAt')) {
-            throw new InvalidArgumentException('User object must have email_verified_at property or method');
+        // Check if user has emailVerifiedAt attribute (for Eloquent models)
+        if (! isset($user->emailVerifiedAt) && ! method_exists($user, 'getEmailVerifiedAt')) {
+            throw new InvalidArgumentException('User object must have emailVerifiedAt property or method');
         }
     }
     /**

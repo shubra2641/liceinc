@@ -67,21 +67,21 @@ class LicenseService
             $this->validateCreateLicenseParameters($user, $product, $paymentGateway);
             return DB::transaction(function () use ($user, $product, $paymentGateway) {
                 $license = License::create([
-                    'user_id' => $user->id,
-                    'product_id' => $product->id,
-                    'license_type' => $product->license_type ?? 'single',
+                    'userId' => $user->id,
+                    'productId' => $product->id,
+                    'licenseType' => $product->licenseType ?? 'single',
                     'status' => 'active',
                     'max_domains' => $product->max_domains ?? 1,
-                    'license_expires_at' => $this->calculateLicenseExpiry($product),
-                    'support_expires_at' => $this->calculateSupportExpiry($product),
+                    'license_expiresAt' => $this->calculateLicenseExpiry($product),
+                    'support_expiresAt' => $this->calculateSupportExpiry($product),
                     'notes' => $paymentGateway
                         ? "Purchased via {$this->sanitizeInput($paymentGateway)}"
                         : 'Manual creation',
                 ]);
                 Log::debug('License created successfully', [
-                    'license_id' => $license->id,
-                    'user_id' => $user->id,
-                    'product_id' => $product->id,
+                    'licenseId' => $license->id,
+                    'userId' => $user->id,
+                    'productId' => $product->id,
                     'payment_gateway' => $paymentGateway ? $this->hashForLogging($paymentGateway) : null,
                 ]);
                 return $license;
@@ -89,8 +89,8 @@ class LicenseService
         } catch (Throwable $e) {
             Log::error('Failed to create license', [
                 'error' => $e->getMessage(),
-                'user_id' => $user->id ?? 'unknown',
-                'product_id' => $product->id ?? 'unknown',
+                'userId' => $user->id ?? 'unknown',
+                'productId' => $product->id ?? 'unknown',
                 'payment_gateway' => $paymentGateway ? $this->hashForLogging($paymentGateway) : null,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -116,12 +116,12 @@ class LicenseService
     {
         try {
             // Product is already validated by type hint
-            // If product has lifetime license or renewal_period is lifetime, return null (no expiry)
-            if ($product->license_type === 'lifetime' || $product->renewal_period === 'lifetime') {
+            // If product has lifetime license or renewalPeriod is lifetime, return null (no expiry)
+            if ($product->licenseType === 'lifetime' || $product->renewalPeriod === 'lifetime') {
                 return null;
             }
-            // Calculate expiry based on renewal_period from product
-            $days = $this->getRenewalPeriodInDays($product->renewal_period);
+            // Calculate expiry based on renewalPeriod from product
+            $days = $this->getRenewalPeriodInDays($product->renewalPeriod);
             // If no valid renewal period, use default from settings
             if ($days === null) {
                 $days = \App\Helpers\ConfigHelper::getSetting('license_default_duration', 365);
@@ -131,9 +131,9 @@ class LicenseService
         } catch (Throwable $e) {
             Log::error('Failed to calculate license expiry', [
                 'error' => $e->getMessage(),
-                'product_id' => $product->id ?? 'unknown',
-                'license_type' => $product->license_type ?? 'unknown',
-                'renewal_period' => $product->renewal_period ?? 'unknown',
+                'productId' => $product->id ?? 'unknown',
+                'licenseType' => $product->licenseType ?? 'unknown',
+                'renewalPeriod' => $product->renewalPeriod ?? 'unknown',
                 'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
@@ -158,8 +158,8 @@ class LicenseService
     {
         try {
             // Product is already validated by type hint
-            // Use product's support_days or default from settings
-            $supportDuration = $product->support_days
+            // Use product's supportDays or default from settings
+            $supportDuration = $product->supportDays
                 ?? \App\Helpers\ConfigHelper::getSetting('license_support_duration', 365);
             // Calculate support expiry based on duration in days
             $supportDurationInt = is_numeric($supportDuration) ? (int)$supportDuration : 365;
@@ -167,8 +167,8 @@ class LicenseService
         } catch (Throwable $e) {
             Log::error('Failed to calculate support expiry', [
                 'error' => $e->getMessage(),
-                'product_id' => $product->id ?? 'unknown',
-                'support_days' => $product->support_days ?? 'unknown',
+                'productId' => $product->id ?? 'unknown',
+                'supportDays' => $product->supportDays ?? 'unknown',
                 'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
@@ -224,11 +224,11 @@ class LicenseService
             $this->validateCanPurchaseParameters($user, $product);
             // Check if user already owns this product
             $existingLicense = $user->licenses()
-                ->where('product_id', $product->id)
+                ->where('productId', $product->id)
                 ->where('status', 'active')
                 ->where(function ($q) {
-                    $q->whereNull('license_expires_at')
-                        ->orWhere('license_expires_at', '>', now());
+                    $q->whereNull('license_expiresAt')
+                        ->orWhere('license_expiresAt', '>', now());
                 })
                 ->first();
             if ($existingLicense) {
@@ -239,7 +239,7 @@ class LicenseService
                 ];
             }
             // Check if product is available for purchase
-            if (! $product->is_active) {
+            if (! $product->isActive) {
                 return [
                     'can_purchase' => false,
                     'reason' => 'product_inactive',
@@ -262,8 +262,8 @@ class LicenseService
         } catch (Throwable $e) {
             Log::error('Failed to check user purchase eligibility', [
                 'error' => $e->getMessage(),
-                'user_id' => $user->id ?? 'unknown',
-                'product_id' => $product->id ?? 'unknown',
+                'userId' => $user->id ?? 'unknown',
+                'productId' => $product->id ?? 'unknown',
                 'trace' => $e->getTraceAsString(),
             ]);
             return [
@@ -302,15 +302,15 @@ class LicenseService
                 ->with('product')
                 ->where('status', 'active')
                 ->where(function ($q) {
-                    $q->whereNull('license_expires_at')
-                        ->orWhere('license_expires_at', '>', now());
+                    $q->whereNull('license_expiresAt')
+                        ->orWhere('license_expiresAt', '>', now());
                 })
                 ->get();
             return $licenses;
         } catch (Throwable $e) {
             Log::error('Failed to get user active licenses', [
                 'error' => $e->getMessage(),
-                'user_id' => $user->id ?? 'unknown',
+                'userId' => $user->id ?? 'unknown',
                 'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
@@ -336,12 +336,12 @@ class LicenseService
     {
         try {
             $this->validateLicenseKey($licenseKey);
-            $license = License::where('license_key', $this->sanitizeInput($licenseKey))
+            $license = License::where('licenseKey', $this->sanitizeInput($licenseKey))
                 ->with('product', 'user')
                 ->first();
             if (! $license) {
                 Log::warning('License validation failed: License key not found', [
-                    'license_key' => $this->hashForLogging($licenseKey),
+                    'licenseKey' => $this->hashForLogging($licenseKey),
                     'domain' => $domain ? $this->hashForLogging($domain) : null,
                 ]);
                 return [
@@ -351,7 +351,7 @@ class LicenseService
             }
             if ($license->status !== 'active') {
                 Log::warning('License validation failed: License is not active', [
-                    'license_id' => $license->id,
+                    'licenseId' => $license->id,
                     'status' => $license->status,
                     'domain' => $domain ? $this->hashForLogging($domain) : null,
                 ]);
@@ -360,10 +360,10 @@ class LicenseService
                     'message' => 'License is not active',
                 ];
             }
-            if ($license->license_expires_at && $license->license_expires_at->isPast()) {
+            if ($license->license_expiresAt && $license->license_expiresAt->isPast()) {
                 Log::warning('License validation failed: License has expired', [
-                    'license_id' => $license->id,
-                    'expires_at' => $license->license_expires_at->toISOString(),
+                    'licenseId' => $license->id,
+                    'expiresAt' => $license->license_expiresAt->toISOString(),
                     'domain' => $domain ? $this->hashForLogging($domain) : null,
                 ]);
                 return [
@@ -376,7 +376,7 @@ class LicenseService
                 $allowedDomains = $license->domains()->pluck('domain')->toArray();
                 if (! in_array($this->sanitizeDomain($domain), $allowedDomains)) {
                     Log::warning('License validation failed: Domain not authorized', [
-                        'license_id' => $license->id,
+                        'licenseId' => $license->id,
                         'domain' => $this->hashForLogging($domain),
                         'allowed_domains_count' => count($allowedDomains),
                     ]);
@@ -394,7 +394,7 @@ class LicenseService
         } catch (Throwable $e) {
             Log::error('License validation exception', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging($licenseKey),
+                'licenseKey' => $this->hashForLogging($licenseKey),
                 'domain' => $domain ? $this->hashForLogging($domain) : null,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -425,10 +425,10 @@ class LicenseService
         try {
             $this->validateActivationParameters($licenseKey, $domain);
             return DB::transaction(function () use ($licenseKey, $domain) {
-                $license = License::where('license_key', $this->sanitizeInput($licenseKey))->first();
+                $license = License::where('licenseKey', $this->sanitizeInput($licenseKey))->first();
                 if (! $license) {
                     Log::warning('License activation failed: License key not found', [
-                        'license_key' => $this->hashForLogging($licenseKey),
+                        'licenseKey' => $this->hashForLogging($licenseKey),
                         'domain' => $this->hashForLogging($domain),
                     ]);
                     return [
@@ -438,7 +438,7 @@ class LicenseService
                 }
                 if ($license->status !== 'active') {
                     Log::warning('License activation failed: License is not active', [
-                        'license_id' => $license->id,
+                        'licenseId' => $license->id,
                         'status' => $license->status,
                         'domain' => $this->hashForLogging($domain),
                     ]);
@@ -459,7 +459,7 @@ class LicenseService
                         'status' => 'active',
                     ]);
                     Log::debug('License activated for domain', [
-                        'license_id' => $license->id,
+                        'licenseId' => $license->id,
                         'domain' => $this->hashForLogging($domain),
                         'total_domains' => count($currentDomains),
                     ]);
@@ -473,7 +473,7 @@ class LicenseService
         } catch (Throwable $e) {
             Log::error('License activation exception', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging($licenseKey),
+                'licenseKey' => $this->hashForLogging($licenseKey),
                 'domain' => $this->hashForLogging($domain),
                 'trace' => $e->getTraceAsString(),
             ]);

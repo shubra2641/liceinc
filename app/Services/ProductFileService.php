@@ -92,11 +92,11 @@ class ProductFileService
             $encryptedKey = Crypt::encryptString($encryptionKey);
             // Create database record
             $productFile = ProductFile::create([
-                'product_id' => $product->id,
-                'original_name' => $originalName,
+                'productId' => $product->id,
+                'originalName' => $originalName,
                 'encrypted_name' => $encryptedName,
-                'file_path' => $filePath,
-                'file_type' => $file->getMimeType(),
+                'filePath' => $filePath,
+                'fileType' => $file->getMimeType(),
                 'file_size' => $file->getSize(),
                 'encryption_key' => $encryptedKey,
                 'checksum' => $checksum,
@@ -105,8 +105,8 @@ class ProductFileService
             return $productFile;
         } catch (\Exception $e) {
             Log::error('Error uploading product file', [
-                'product_id' => $product->id,
-                'original_name' => $file->getClientOriginalName(),
+                'productId' => $product->id,
+                'originalName' => $file->getClientOriginalName(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -152,8 +152,8 @@ class ProductFileService
             if (!$file->fileExists()) {
                 Log::error('File not found for download', [
                     'file_id' => $file->id,
-                    'user_id' => $userId,
-                    'file_path' => $file->file_path ?? 'unknown',
+                    'userId' => $userId,
+                    'filePath' => $file->filePath ?? 'unknown',
                 ]);
                 return null;
             }
@@ -162,7 +162,7 @@ class ProductFileService
             if (! $content) {
                 Log::error('Failed to decrypt file', [
                     'file_id' => $file->id,
-                    'user_id' => $userId,
+                    'userId' => $userId,
                 ]);
                 return null;
             }
@@ -170,7 +170,7 @@ class ProductFileService
             if (hash('sha256', $content) !== $file->checksum) {
                 Log::error('File checksum mismatch', [
                     'file_id' => $file->id,
-                    'user_id' => $userId,
+                    'userId' => $userId,
                     'expected_checksum' => $file->checksum,
                     'actual_checksum' => hash('sha256', $content),
                 ]);
@@ -180,14 +180,14 @@ class ProductFileService
             $file->incrementDownloadCount();
             return [
                 'content' => $content,
-                'filename' => $file->original_name,
-                'mime_type' => $file->file_type,
+                'filename' => $file->originalName,
+                'mime_type' => $file->fileType,
                 'size' => $file->file_size,
             ];
         } catch (\Exception $e) {
             Log::error('Error downloading product file', [
                 'file_id' => $file->id ?? 'unknown',
-                'user_id' => $userId ?? 'unknown',
+                'userId' => $userId ?? 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -219,7 +219,7 @@ class ProductFileService
             // File is validated by type hint
             // Delete physical file
             if ($file->fileExists()) {
-                Storage::disk('private')->delete($file->file_path);
+                Storage::disk('private')->delete($file->filePath);
             }
             // Delete database record
             $file->delete();
@@ -227,7 +227,7 @@ class ProductFileService
         } catch (\Exception $e) {
             Log::error('Failed to delete product file', [
                 'file_id' => $file->id ?? 'unknown',
-                'product_id' => $file->product_id ?? 'unknown',
+                'productId' => $file->productId ?? 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -261,16 +261,16 @@ class ProductFileService
             // Product is validated by type hint
             $query = $product->files();
             if ($activeOnly) {
-                $query->where('is_active', true);
+                $query->where('isActive', true);
             }
             /**
  * @var \Illuminate\Database\Eloquent\Collection<int, ProductFile> $files
 */
-            $files = $query->orderBy('created_at', 'desc')->get();
+            $files = $query->orderBy('createdAt', 'desc')->get();
             return $files;
         } catch (\Exception $e) {
             Log::error('Error getting product files', [
-                'product_id' => $product->id,
+                'productId' => $product->id,
                 'active_only' => $activeOnly,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -465,11 +465,11 @@ class ProductFileService
     private function userHasLicense(Product $product, int $userId): bool
     {
         return $product->licenses()
-            ->where('user_id', $userId)
+            ->where('userId', $userId)
             ->where('status', 'active')
             ->where(function ($q) {
-                $q->whereNull('license_expires_at')
-                    ->orWhere('license_expires_at', '>', now());
+                $q->whereNull('license_expiresAt')
+                    ->orWhere('license_expiresAt', '>', now());
             })
             ->exists();
     }
@@ -478,8 +478,8 @@ class ProductFileService
      */
     private function userHasPaidInvoice(Product $product, int $userId): bool
     {
-        return \App\Models\Invoice::where('product_id', $product->id)
-            ->where('user_id', $userId)
+        return \App\Models\Invoice::where('productId', $product->id)
+            ->where('userId', $userId)
             ->where('status', 'paid')
             ->exists();
     }
@@ -530,7 +530,7 @@ class ProductFileService
         $allVersions = [];
         // Get all active product updates (both required and optional)
         $updates = $product->updates()
-            ->where('is_active', true)
+            ->where('isActive', true)
             ->orderBy('version', 'desc')
             ->get();
         foreach ($updates as $update) {
@@ -542,8 +542,8 @@ class ProductFileService
         }
         // Get all base product files
         $baseFiles = $product->files()
-            ->where('is_active', true)
-            ->orderBy('created_at', 'desc')
+            ->where('isActive', true)
+            ->orderBy('createdAt', 'desc')
             ->get();
         foreach ($baseFiles as $file) {
             $file->is_update = false;
@@ -552,7 +552,7 @@ class ProductFileService
         }
         // Sort by creation date (newest first)
         usort($allVersions, function ($a, $b) {
-            return $b->created_at <=> $a->created_at;
+            return $b->createdAt <=> $a->createdAt;
         });
         // Return all versions without logging success
         return ['all_versions' => $allVersions];
@@ -569,17 +569,17 @@ class ProductFileService
         }
         // Check if there are any product updates available
         $latestUpdate = $product->updates()
-            ->where('is_active', true)
+            ->where('isActive', true)
             ->orderBy('version', 'desc')
             ->first();
-        if ($latestUpdate && $latestUpdate->update_file_path) {
+        if ($latestUpdate && $latestUpdate->update_filePath) {
             // Return the latest update file
             return $this->createUpdateFileRecord($latestUpdate);
         }
         // If no updates available, return the base product file
         return $product->files()
-            ->where('is_active', true)
-            ->orderBy('created_at', 'desc')
+            ->where('isActive', true)
+            ->orderBy('createdAt', 'desc')
             ->first();
     }
     /**
@@ -589,7 +589,7 @@ class ProductFileService
     {
         // Check if there are any product updates available
         $latestUpdate = $product->updates()
-            ->where('is_active', true)
+            ->where('isActive', true)
             ->orderBy('version', 'desc')
             ->first();
         if ($latestUpdate) {
@@ -608,19 +608,19 @@ class ProductFileService
         $file = new ProductFile();
         // Note: We can't set id directly as it's auto-increment
         // This is a temporary object for display purposes
-        $file->product_id = is_numeric($update->product_id) ? (int)$update->product_id : 0;
-        $file->original_name = (is_string($update->title) ? $update->title : '') . '_v' . (is_string($update->version) ? $update->version : '') . '.zip';
-        $filePath = $update->file_path ?? '';
-        $file->file_path = is_string($filePath) ? $filePath : '';
+        $file->productId = is_numeric($update->productId) ? (int)$update->productId : 0;
+        $file->originalName = (is_string($update->title) ? $update->title : '') . '_v' . (is_string($update->version) ? $update->version : '') . '.zip';
+        $filePath = $update->filePath ?? '';
+        $file->filePath = is_string($filePath) ? $filePath : '';
         $file->file_size = is_numeric($update->file_size ?? 0) ? (int)($update->file_size ?? 0) : 0;
-        $file->file_extension = 'zip';
+        $file->fileExtension = 'zip';
         $file->description = is_string($update->description) ? $update->description : null;
-        $file->is_active = true;
-        $file->download_count = 0;
-        $file->created_at = $update->created_at instanceof \Illuminate\Support\Carbon ? $update->created_at : null;
-        $file->updated_at = $update->updated_at instanceof \Illuminate\Support\Carbon ? $update->updated_at : null;
-        // Add formatted_size for display
-        $file->formatted_size = $file->file_size > 0 ?
+        $file->isActive = true;
+        $file->downloadCount = 0;
+        $file->createdAt = $update->createdAt instanceof \Illuminate\Support\Carbon ? $update->createdAt : null;
+        $file->updatedAt = $update->updatedAt instanceof \Illuminate\Support\Carbon ? $update->updatedAt : null;
+        // Add formattedSize for display
+        $file->formattedSize = $file->file_size > 0 ?
             number_format($file->file_size / 1024 / 1024, 2) . ' MB' :
             'Unknown';
         // Add update_info for the view
@@ -637,15 +637,15 @@ class ProductFileService
      */
     public function downloadUpdateFile(\App\Models\ProductUpdate $update, int $userId): array
     {
-        if (! $update->file_path || ! Storage::disk('private')->exists($update->file_path)) {
+        if (! $update->filePath || ! Storage::disk('private')->exists($update->filePath)) {
             throw new \Exception('Update file not found');
         }
         $fileName = $update->title . '_v' . $update->version . '.zip';
         return [
-            'content' => Storage::disk('private')->get($update->file_path),
+            'content' => Storage::disk('private')->get($update->filePath),
             'filename' => $fileName,
             'mime_type' => 'application/zip',
-            'size' => Storage::disk('private')->size($update->file_path),
+            'size' => Storage::disk('private')->size($update->filePath),
         ];
     }
 }

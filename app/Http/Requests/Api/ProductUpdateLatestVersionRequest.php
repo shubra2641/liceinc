@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,12 +30,12 @@ class ProductUpdateLatestVersionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => [
+            'productId' => [
                 'required',
                 'integer',
                 'min:1',
             ],
-            'license_key' => [
+            'licenseKey' => [
                 'required',
                 'string',
                 'max:255',
@@ -56,11 +58,11 @@ class ProductUpdateLatestVersionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'product_id.required' => 'Product ID is required.',
-            'product_id.integer' => 'Product ID must be a valid integer.',
-            'product_id.min' => 'Product ID must be at least 1.',
-            'license_key.required' => 'License key is required.',
-            'license_key.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
+            'productId.required' => 'Product ID is required.',
+            'productId.integer' => 'Product ID must be a valid integer.',
+            'productId.min' => 'Product ID must be at least 1.',
+            'licenseKey.required' => 'License key is required.',
+            'licenseKey.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
             'domain.required' => 'Domain is required.',
             'domain.regex' => 'Domain can only contain letters, numbers, hyphens, underscores, and dots.',
         ];
@@ -72,7 +74,7 @@ class ProductUpdateLatestVersionRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'license_key' => $this->sanitizeInput($this->license_key),
+            'licenseKey' => $this->sanitizeInput($this->licenseKey),
             'domain' => $this->sanitizeInput($this->domain),
         ]);
     }

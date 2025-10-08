@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +31,7 @@ class PaymentSettingsRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.

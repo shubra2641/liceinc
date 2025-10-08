@@ -507,7 +507,7 @@ class SecurityService
                 $fileName = method_exists($file, 'getClientOriginalName') ? $file->getClientOriginalName() : '';
                 $fileSize = method_exists($file, 'getSize') ? $file->getSize() : 0;
                 $this->logSecurityEvent('file_upload_validation_failed', [
-                    'file_name' => is_string($fileName) ? $fileName : '',
+                    'fileName' => is_string($fileName) ? $fileName : '',
                     'file_size' => is_numeric($fileSize) ? (int)$fileSize : 0,
                     'mime_type' => $mimeType,
                     'errors' => $result['errors'],

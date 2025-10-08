@@ -64,7 +64,7 @@ class LicenseController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to display user licenses', [
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -107,8 +107,8 @@ class LicenseController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to display license details', [
-                'user_id' => Auth::id(),
-                'license_id' => $id,
+                'userId' => Auth::id(),
+                'licenseId' => $id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -153,7 +153,7 @@ class LicenseController extends Controller
             return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         } catch (\Exception $e) {
             Log::error('Failed to retrieve user licenses', [
-                'user_id' => ($user instanceof \App\Models\User && isset($user->id)) ? $user->id : 'unknown',
+                'userId' => ($user instanceof \App\Models\User && isset($user->id)) ? $user->id : 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -181,7 +181,7 @@ class LicenseController extends Controller
             return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         } catch (\Exception $e) {
             Log::error('Failed to retrieve user invoices', [
-                'user_id' => ($user instanceof \App\Models\User && isset($user->id)) ? $user->id : 'unknown',
+                'userId' => ($user instanceof \App\Models\User && isset($user->id)) ? $user->id : 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -209,8 +209,8 @@ class LicenseController extends Controller
             throw new \Exception('User not found');
         } catch (\Exception $e) {
             Log::error('Failed to retrieve user license', [
-                'user_id' => ($user instanceof \App\Models\User && isset($user->id)) ? $user->id : 'unknown',
-                'license_id' => $id,
+                'userId' => ($user instanceof \App\Models\User && isset($user->id)) ? $user->id : 'unknown',
+                'licenseId' => $id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

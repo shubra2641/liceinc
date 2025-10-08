@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\License;
@@ -360,7 +362,7 @@ class SecurityAuditCommand extends Command
     {
         $this->info('Checking user account security...');
         // Check for users without email verification
-        $unverifiedUsers = User::whereNull('email_verified_at')->count();
+        $unverifiedUsers = User::whereNull('emailVerifiedAt')->count();
         if ($unverifiedUsers > 0) {
             $this->addIssue(
                 'low',
@@ -372,7 +374,7 @@ class SecurityAuditCommand extends Command
         $inactiveAdmins = User::whereHas('roles', function ($query) {
             $query->where('name', 'admin');
         })
-            ->where('updated_at', '<', now()->subMonths(6))
+            ->where('updatedAt', '<', now()->subMonths(6))
             ->count();
         if ($inactiveAdmins > 0) {
             $this->addIssue(
@@ -393,7 +395,7 @@ class SecurityAuditCommand extends Command
         $this->info('Checking license system security...');
         // Check for licenses without proper validation
         $invalidLicenses = License::where('status', 'active')
-            ->where('license_expires_at', '<', now())
+            ->where('license_expiresAt', '<', now())
             ->count();
         if ($invalidLicenses > 0) {
             $this->addIssue(
@@ -404,8 +406,8 @@ class SecurityAuditCommand extends Command
         }
         // Check for suspicious license patterns
         $duplicateKeys = DB::table('licenses')
-            ->select('license_key')
-            ->groupBy('license_key')
+            ->select('licenseKey')
+            ->groupBy('licenseKey')
             ->havingRaw('COUNT(*) > 1')
             ->count();
         if ($duplicateKeys > 0) {
@@ -436,7 +438,7 @@ class SecurityAuditCommand extends Command
             $logFiles = File::files($logPath);
             $totalSize = 0;
             foreach ($logFiles as $file) {
-                $totalSize += File::size($file);
+                $totalSize += File::size($file->getPathname());
             }
             // Check if logs are too large (>100MB)
             if ($totalSize > 100 * 1024 * 1024) {
@@ -448,11 +450,11 @@ class SecurityAuditCommand extends Command
             }
             // Check for publicly accessible log files
             foreach ($logFiles as $file) {
-                if (is_readable($file) && fileperms($file) & 0004) {
+                if (is_readable($file->getPathname()) && fileperms($file->getPathname()) & 0004) {
                     $this->addIssue(
                         'medium',
                         'Log Files',
-                        'Log file ' . basename($file) . ' is world-readable',
+                        'Log file ' . basename($file->getPathname()) . ' is world-readable',
                     );
                 }
             }
@@ -557,12 +559,9 @@ class SecurityAuditCommand extends Command
     {
         $files = File::allFiles($directory);
         foreach ($files as $file) {
-            if (is_writable($file) && (fileperms($file) & 0002)) {
+            if (is_writable($file->getPathname()) && (fileperms($file->getPathname()) & 0002)) {
                 $relativePath = $file->getRelativePathname();
-                if (!is_string($relativePath)) {
-                    continue;
-                }
-                $permissions = fileperms($file);
+                $permissions = fileperms($file->getPathname());
                 $writableFiles[$relativePath] = [
                     'path' => $relativePath,
                     'permissions' => $permissions !== false ? $permissions : 0,
@@ -766,9 +765,9 @@ class SecurityAuditCommand extends Command
      */
     private function checkSuspiciousActivity(): int
     {
-        return LicenseLog::where('created_at', '>', now()->subDays(7))
+        return LicenseLog::where('createdAt', '>', now()->subDays(7))
             ->where('action', 'verification')
-            ->groupBy('ip_address')
+            ->groupBy('ipAddress')
             ->havingRaw('COUNT(*) > 100')
             ->count();
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\KbArticle;
@@ -141,7 +143,7 @@ class KbController extends Controller
         try {
             // Request is validated by type hint
             $validated = $this->validateArticleData($request);
-            $validated['user_id'] = auth()->id();
+            $validated['userId'] = auth()->id();
             DB::beginTransaction();
             KbArticle::create($validated);
             DB::commit();
@@ -150,7 +152,7 @@ class KbController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to create knowledge base article: ' . $e->getMessage(), [
-                'user_id' => auth()->id(),
+                'userId' => auth()->id(),
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);

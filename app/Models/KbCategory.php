@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,17 +19,17 @@ use Illuminate\Database\Eloquent\Builder;
  * @property string|null $serial
  * @property bool $requires_serial
  * @property string|null $serial_message
- * @property int $sort_order
+ * @property int $sortOrder
  * @property int $is_published
  * @property bool $is_featured
- * @property bool $is_active
+ * @property bool $isActive
  * @property int|null $parent_id
- * @property int|null $product_id
+ * @property int|null $productId
  * @property string|null $meta_title
  * @property string|null $meta_description
  * @property string|null $meta_keywords
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle> $articles
  * @property-read int|null $articles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, KbCategory> $children
@@ -74,15 +76,15 @@ class KbCategory extends Model
 
     protected $fillable = [
         'name', 'slug', 'description', 'parent_id', 'serial', 'requires_serial', 'serial_message',
-        'sort_order', 'product_id', 'meta_title', 'meta_description', 'meta_keywords', 'icon',
-        'is_featured', 'is_active',
+        'sortOrder', 'productId', 'meta_title', 'meta_description', 'meta_keywords', 'icon',
+        'is_featured', 'isActive',
     ];
     protected $casts = [
         'parent_id' => 'integer',
         'requires_serial' => 'boolean',
         'is_featured' => 'boolean',
-        'is_active' => 'boolean',
-        'sort_order' => 'integer',
+        'isActive' => 'boolean',
+        'sortOrder' => 'integer',
     ];
     /**
      * @return BelongsTo<KbCategory, $this>
@@ -120,6 +122,6 @@ class KbCategory extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        return $query->where('isActive', true);
     }
 }

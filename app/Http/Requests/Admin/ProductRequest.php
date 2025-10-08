@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,7 +32,7 @@ class ProductRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -101,7 +103,7 @@ class ProductRequest extends FormRequest
                 'max:50',
                 'regex:/^[0-9]+\.[0-9]+\.[0-9]+$/',
             ],
-            'is_active' => [
+            'isActive' => [
                 'boolean',
             ],
             'is_featured' => [
@@ -225,7 +227,7 @@ class ProductRequest extends FormRequest
             'currency' => 'currency',
             'image' => 'product image',
             'version' => 'product version',
-            'is_active' => 'active status',
+            'isActive' => 'active status',
             'is_featured' => 'featured status',
             'is_popular' => 'popular status',
             'is_downloadable' => 'downloadable status',
@@ -258,7 +260,7 @@ class ProductRequest extends FormRequest
         ]);
         // Handle checkbox values
         $this->merge([
-            'is_active' => $this->has('is_active'),
+            'isActive' => $this->has('isActive'),
             'is_featured' => $this->has('is_featured'),
             'is_popular' => $this->has('is_popular'),
             'is_downloadable' => $this->has('is_downloadable'),
@@ -268,7 +270,7 @@ class ProductRequest extends FormRequest
         ]);
         // Set default values
         $this->merge([
-            'is_active' => $this->is_active ?? true,
+            'isActive' => $this->isActive ?? true,
             'currency' => $this->currency ?? 'USD',
         ]);
     }

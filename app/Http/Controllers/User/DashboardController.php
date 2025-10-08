@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
@@ -75,7 +77,7 @@ class DashboardController extends Controller
             // SEO data
             $seoData = $this->getSeoData();
             // Get recent invoices for dashboard
-            $recentInvoices = $user->invoices()->with('license.product')->orderBy('created_at', 'desc')->take(5)->get();
+            $recentInvoices = $user->invoices()->with('license.product')->orderBy('createdAt', 'desc')->take(5)->get();
             DB::commit();
             return view('user.dashboard', array_merge(
                 [
@@ -92,7 +94,7 @@ class DashboardController extends Controller
             Log::error('User dashboard failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -126,13 +128,13 @@ class DashboardController extends Controller
             return License::forUser($user)
                 ->where('status', 'active')
                 ->where(function ($q) {
-                    $q->whereNull('license_expires_at')
-                        ->orWhere('license_expires_at', '>', now());
+                    $q->whereNull('license_expiresAt')
+                        ->orWhere('license_expiresAt', '>', now());
                 })->count();
         } catch (\Exception $e) {
             Log::error('Failed to get active licenses count', [
                 'error' => $e->getMessage(),
-                'user_id' => $user->id,
+                'userId' => $user->id,
             ]);
             return 0;
         }
@@ -147,8 +149,8 @@ class DashboardController extends Controller
     private function getAvailableProducts()
     {
         try {
-            return Product::where('is_active', true)
-                ->orderBy('created_at', 'desc')
+            return Product::where('isActive', true)
+                ->orderBy('createdAt', 'desc')
                 ->limit(6)
                 ->get();
         } catch (\Exception $e) {
@@ -183,7 +185,7 @@ class DashboardController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to get invoice statistics', [
                 'error' => $e->getMessage(),
-                'user_id' => $user->id,
+                'userId' => $user->id,
             ]);
             return [
                 'invoiceTotal' => 0,

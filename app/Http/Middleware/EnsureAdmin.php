@@ -89,7 +89,7 @@ class EnsureAdmin
                 'method' => $request->method(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'user_id' => $request->user()?->id,
+                'userId' => $request->user()?->id,
                 'trace' => $e->getTraceAsString(),
             ]);
             // Fallback to access denied for security
@@ -115,7 +115,7 @@ class EnsureAdmin
         try {
             $email = $user->email;
             $isTestEmail = $this->isTestEmail($email);
-            if (! $user->email_verified_at) {
+            if (! $user->emailVerifiedAt) {
                 if ($isTestEmail) {
                     $this->logTestEmailAccess($request, $user);
                     redirect()->route('test-email-warning')->send();
@@ -127,7 +127,7 @@ class EnsureAdmin
         } catch (Throwable $e) {
             Log::error('Email verification validation error', [
                 'error' => $e->getMessage(),
-                'user_id' => $user->id ?? 'unknown',
+                'userId' => $user->id ?? 'unknown',
                 'email' => $this->hashForLogging($user->email ?? 'unknown'),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -185,7 +185,7 @@ class EnsureAdmin
                 'method' => $request->method(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'user_id' => $user?->id,
+                'userId' => $user?->id,
                 'user_email' => $user ? $this->hashForLogging($user->email) : null,
                 'timestamp' => now()->toISOString(),
                 'request_id' => $request->header('X-Request-ID'),

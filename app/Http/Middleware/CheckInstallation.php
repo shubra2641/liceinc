@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -31,7 +33,7 @@ class CheckInstallation
     /**
      * Installation file path constant.
      */
-    private const INSTALLED_FILE_PATH = '.installed';
+    private const INSTALLED_filePath = '.installed';
     /**
      * Routes that should skip installation check.
      */
@@ -55,7 +57,7 @@ class CheckInstallation
     {
         try {
             // Request is validated by type hint
-            $installedFile = storage_path(self::INSTALLED_FILE_PATH);
+            $installedFile = storage_path(self::INSTALLED_filePath);
             $currentRoute = $this->getCurrentRouteName($request);
             // Skip installation check for certain routes
             if ($this->shouldSkipRoute($currentRoute)) {

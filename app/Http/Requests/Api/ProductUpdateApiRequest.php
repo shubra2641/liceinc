@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -47,7 +49,7 @@ class ProductUpdateApiRequest extends FormRequest
         // Check updates validation
         if ($isCheck) {
             return [
-                'product_id' => [
+                'productId' => [
                     'required',
                     'integer',
                     'min:1',
@@ -58,7 +60,7 @@ class ProductUpdateApiRequest extends FormRequest
                     'max:20',
                     'regex:/^[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z0-9]+)?$/',
                 ],
-                'license_key' => [
+                'licenseKey' => [
                     'required',
                     'string',
                     'max:255',
@@ -102,12 +104,12 @@ class ProductUpdateApiRequest extends FormRequest
         // Latest version validation
         if ($isLatest) {
             return [
-                'product_id' => [
+                'productId' => [
                     'required',
                     'integer',
                     'min:1',
                 ],
-                'license_key' => [
+                'licenseKey' => [
                     'required',
                     'string',
                     'max:255',
@@ -163,7 +165,7 @@ class ProductUpdateApiRequest extends FormRequest
         // Download validation
         if ($isDownload) {
             return [
-                'product_id' => [
+                'productId' => [
                     'required',
                     'integer',
                     'min:1',
@@ -174,7 +176,7 @@ class ProductUpdateApiRequest extends FormRequest
                     'max:20',
                     'regex:/^[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z0-9]+)?$/',
                 ],
-                'license_key' => [
+                'licenseKey' => [
                     'required',
                     'string',
                     'max:255',
@@ -212,12 +214,12 @@ class ProductUpdateApiRequest extends FormRequest
         // Changelog validation
         if ($isChangelog) {
             return [
-                'product_id' => [
+                'productId' => [
                     'required',
                     'integer',
                     'min:1',
                 ],
-                'license_key' => [
+                'licenseKey' => [
                     'required',
                     'string',
                     'max:255',
@@ -255,7 +257,7 @@ class ProductUpdateApiRequest extends FormRequest
                     'integer',
                     'min:0',
                 ],
-                'sort_order' => [
+                'sortOrder' => [
                     'nullable',
                     'string',
                     'max:10',
@@ -267,14 +269,14 @@ class ProductUpdateApiRequest extends FormRequest
                     'max:20',
                     'regex:/^[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z0-9]+)?$/',
                 ],
-                'filter_date_from' => [
+                'filter_dateFrom' => [
                     'nullable',
                     'date',
                 ],
-                'filter_date_to' => [
+                'filter_dateTo' => [
                     'nullable',
                     'date',
-                    'after_or_equal:filter_date_from',
+                    'after_or_equal:filter_dateFrom',
                 ],
                 'include_release_notes' => [
                     'boolean',
@@ -298,14 +300,14 @@ class ProductUpdateApiRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'product_id.required' => 'Product ID is required.',
-            'product_id.integer' => 'Product ID must be a valid integer.',
-            'product_id.min' => 'Product ID must be at least 1.',
+            'productId.required' => 'Product ID is required.',
+            'productId.integer' => 'Product ID must be a valid integer.',
+            'productId.min' => 'Product ID must be at least 1.',
             'current_version.required' => 'Current version is required.',
             'current_version.regex' => 'Current version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
-            'license_key.required' => 'License key is required.',
-            'license_key.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
+            'licenseKey.required' => 'License key is required.',
+            'licenseKey.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
             'domain.required' => 'Domain is required.',
             'domain.regex' => 'Domain can only contain letters, numbers, hyphens, underscores, and dots.',
             'version.required' => 'Version is required.',
@@ -331,12 +333,12 @@ class ProductUpdateApiRequest extends FormRequest
             'limit.min' => 'Limit must be at least 1.',
             'limit.max' => 'Limit cannot exceed 100.',
             'offset.min' => 'Offset must be at least 0.',
-            'sort_order.regex' => 'Sort order contains invalid characters.',
+            'sortOrder.regex' => 'Sort order contains invalid characters.',
             'filter_version.regex' => 'Filter version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
-            'filter_date_from.date' => 'Filter date from must be a valid date.',
-            'filter_date_to.date' => 'Filter date to must be a valid date.',
-            'filter_date_to.after_or_equal' => 'Filter date to must be after or equal to filter date from.',
+            'filter_dateFrom.date' => 'Filter date from must be a valid date.',
+            'filter_dateTo.date' => 'Filter date to must be a valid date.',
+            'filter_dateTo.after_or_equal' => 'Filter date to must be after or equal to filter date from.',
             'include_release_notes.boolean' => 'Include release notes must be true or false.',
             'include_breaking_changes.boolean' => 'Include breaking changes must be true or false.',
             'include_deprecations.boolean' => 'Include deprecations must be true or false.',
@@ -350,9 +352,9 @@ class ProductUpdateApiRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'product_id' => 'product ID',
+            'productId' => 'product ID',
             'current_version' => 'current version',
-            'license_key' => 'license key',
+            'licenseKey' => 'license key',
             'domain' => 'domain',
             'version' => 'version',
             'include_changelog' => 'include changelog',
@@ -374,10 +376,10 @@ class ProductUpdateApiRequest extends FormRequest
             'download_type' => 'download type',
             'limit' => 'limit',
             'offset' => 'offset',
-            'sort_order' => 'sort order',
+            'sortOrder' => 'sort order',
             'filter_version' => 'filter version',
-            'filter_date_from' => 'filter date from',
-            'filter_date_to' => 'filter date to',
+            'filter_dateFrom' => 'filter date from',
+            'filter_dateTo' => 'filter date to',
             'include_release_notes' => 'include release notes',
             'include_breaking_changes' => 'include breaking changes',
             'include_deprecations' => 'include deprecations',
@@ -391,11 +393,11 @@ class ProductUpdateApiRequest extends FormRequest
         // Sanitize input to prevent XSS
         $this->merge([
             'current_version' => $this->input('current_version') ? $this->sanitizeInput($this->input('current_version')) : null,
-            'license_key' => $this->sanitizeInput($this->input('license_key')),
+            'licenseKey' => $this->sanitizeInput($this->input('licenseKey')),
             'domain' => $this->sanitizeInput($this->input('domain')),
             'version' => $this->input('version') ? $this->sanitizeInput($this->input('version')) : null,
             'filter_version' => $this->input('filter_version') ? $this->sanitizeInput($this->input('filter_version')) : null,
-            'sort_order' => $this->input('sort_order') ? $this->sanitizeInput($this->input('sort_order')) : null,
+            'sortOrder' => $this->input('sortOrder') ? $this->sanitizeInput($this->input('sortOrder')) : null,
             'download_type' => $this->input('download_type') ? $this->sanitizeInput($this->input('download_type')) : null,
         ]);
         // Handle checkbox values
@@ -438,7 +440,7 @@ class ProductUpdateApiRequest extends FormRequest
             'include_deprecations' => $this->include_deprecations ?? true,
             'limit' => $this->limit ?? 20,
             'offset' => $this->offset ?? 0,
-            'sort_order' => $this->sort_order ?? 'desc',
+            'sortOrder' => $this->sortOrder ?? 'desc',
         ]);
     }
     /**

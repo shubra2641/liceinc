@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Navigation Helper Functions with enhanced security.
  *
@@ -11,7 +13,7 @@
 
 use App\Helpers\SecureFileHelper;
 
-if (! function_exists('is_active_route')) {
+if (! function_exists('isActive_route')) {
     /**
      * Check if the current route matches the given route name with enhanced security.
      *
@@ -26,7 +28,7 @@ if (! function_exists('is_active_route')) {
      *
      * @version 1.0.6
      */
-    function is_active_route(string $routeName): bool
+    function isActive_route(string $routeName): bool
     {
         if (empty($routeName)) {
             throw new InvalidArgumentException('Route name cannot be empty');
@@ -35,7 +37,7 @@ if (! function_exists('is_active_route')) {
         return request()->routeIs($sanitizedRouteName);
     }
 }
-if (! function_exists('is_active_route_pattern')) {
+if (! function_exists('isActive_route_pattern')) {
     /**
      * Check if the current route matches the given pattern with enhanced security.
      *
@@ -50,7 +52,7 @@ if (! function_exists('is_active_route_pattern')) {
      *
      * @version 1.0.6
      */
-    function is_active_route_pattern(string $pattern): bool
+    function isActive_route_pattern(string $pattern): bool
     {
         if (empty($pattern)) {
             throw new InvalidArgumentException('Route pattern cannot be empty');

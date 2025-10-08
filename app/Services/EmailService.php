@@ -122,7 +122,7 @@ class EmailService
             'user_name' => $this->sanitizeString($user->name),
             'user_firstname' => $this->sanitizeString($user->firstname ?? ''),
             'user_lastname' => $this->sanitizeString($user->lastname ?? ''),
-            'user_id' => $user->id,
+            'userId' => $user->id,
         ];
         return $this->sendEmail($templateName, $user->email, array_merge($data, $userData), $user->name);
     }
@@ -317,12 +317,12 @@ class EmailService
      */
     public function sendUserWelcome(User $user): bool
     {
-        if (!$user->created_at) {
+        if (!$user->createdAt) {
             Log::error('Invalid user provided for welcome email');
             return false;
         }
         return $this->sendToUser($user, 'user_welcome', [
-            'registration_date' => $user->created_at->format('M d, Y'),
+            'registration_date' => $user->createdAt->format('M d, Y'),
         ]);
     }
     /**
@@ -345,12 +345,12 @@ class EmailService
      */
     public function sendWelcome(User $user, array $data = []): bool
     {
-        if (!$user->created_at) {
+        if (!$user->createdAt) {
             Log::error('Invalid user provided for welcome email');
             return false;
         }
         $welcomeData = array_merge([
-            'registration_date' => $user->created_at->format('M d, Y'),
+            'registration_date' => $user->createdAt->format('M d, Y'),
         ], $this->sanitizeData($data));
         return $this->sendToUser($user, 'user_welcome', $welcomeData);
     }
@@ -404,7 +404,7 @@ class EmailService
             'user_lastname' => $this->sanitizeString($user->lastname ?? ''),
             'user_phone' => $this->sanitizeString($user->phonenumber ?? 'Not provided'),
             'user_country' => $this->sanitizeString($user->country ?? 'Not provided'),
-            'registration_date' => $user->created_at ? $user->created_at->format('M d, Y \a\t g:i A') : 'Unknown',
+            'registration_date' => $user->createdAt ? $user->createdAt->format('M d, Y \a\t g:i A') : 'Unknown',
             'registration_ip' => $this->sanitizeString(request()->ip() ?? 'Unknown'),
             'user_agent' => $this->sanitizeString(request()->userAgent() ?? 'Unknown'),
         ]);
@@ -435,14 +435,14 @@ class EmailService
             'customer_email' => $this->sanitizeString($license->user->email),
             'product_name' => $this->sanitizeString($license->product->name ?? ''),
             'order_number' => $this->sanitizeString($invoice->invoice_number),
-            'license_key' => $this->sanitizeString($license->license_key),
+            'licenseKey' => $this->sanitizeString($license->licenseKey),
             'invoice_number' => $this->sanitizeString($invoice->invoice_number),
             'amount' => $invoice->amount,
             'currency' => $this->sanitizeString($invoice->currency),
             'payment_method' => $this->sanitizeString(ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown')),
             'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
-            'license_expires_at' => $license->license_expires_at ?
-                $license->license_expires_at->format('M d, Y') : 'Never',
+            'license_expiresAt' => $license->license_expiresAt ?
+                $license->license_expiresAt->format('M d, Y') : 'Never',
         ]);
     }
     /**
@@ -463,15 +463,15 @@ class EmailService
      */
     public function sendLicenseExpiring(User $user, array $licenseData): bool
     {
-        $licenseKey = $licenseData['license_key'] ?? '';
+        $licenseKey = $licenseData['licenseKey'] ?? '';
         $productName = $licenseData['product_name'] ?? '';
-        $expiresAt = $licenseData['expires_at'] ?? '';
+        $expiresAt = $licenseData['expiresAt'] ?? '';
         $daysRemaining = $licenseData['days_remaining'] ?? 0;
 
         return $this->sendToUser($user, 'user_license_expiring', array_merge($licenseData, [
-            'license_key' => is_string($licenseKey) ? $licenseKey : '',
+            'licenseKey' => is_string($licenseKey) ? $licenseKey : '',
             'product_name' => is_string($productName) ? $productName : '',
-            'expires_at' => is_string($expiresAt) ? $expiresAt : '',
+            'expiresAt' => is_string($expiresAt) ? $expiresAt : '',
             'days_remaining' => is_numeric($daysRemaining) ? (int)$daysRemaining : 0,
         ]));
     }
@@ -484,7 +484,7 @@ class EmailService
     public function sendLicenseUpdated(User $user, array $licenseData): bool
     {
         return $this->sendToUser($user, 'user_license_updated', array_merge($licenseData, [
-            'license_key' => $licenseData['license_key'] ?? '',
+            'licenseKey' => $licenseData['licenseKey'] ?? '',
             'product_name' => $licenseData['product_name'] ?? '',
             'update_type' => $licenseData['update_type'] ?? 'updated',
         ]));
@@ -609,13 +609,13 @@ class EmailService
      */
     public function sendAdminLicenseCreated(array $licenseData): bool
     {
-        $licenseKey = $licenseData['license_key'] ?? '';
+        $licenseKey = $licenseData['licenseKey'] ?? '';
         $productName = $licenseData['product_name'] ?? '';
         $customerName = $licenseData['customer_name'] ?? '';
         $customerEmail = $licenseData['customer_email'] ?? '';
 
         return $this->sendToAdmin('admin_license_created', array_merge($licenseData, [
-            'license_key' => is_string($licenseKey) ? $licenseKey : '',
+            'licenseKey' => is_string($licenseKey) ? $licenseKey : '',
             'product_name' => is_string($productName) ? $productName : '',
             'customer_name' => is_string($customerName) ? $customerName : '',
             'customer_email' => is_string($customerEmail) ? $customerEmail : '',
@@ -630,11 +630,11 @@ class EmailService
     public function sendAdminLicenseExpiring(array $licenseData): bool
     {
         return $this->sendToAdmin('admin_license_expiring', array_merge($licenseData, [
-            'license_key' => $licenseData['license_key'] ?? '',
+            'licenseKey' => $licenseData['licenseKey'] ?? '',
             'product_name' => $licenseData['product_name'] ?? '',
             'customer_name' => $licenseData['customer_name'] ?? '',
             'customer_email' => $licenseData['customer_email'] ?? '',
-            'expires_at' => $licenseData['expires_at'] ?? '',
+            'expiresAt' => $licenseData['expiresAt'] ?? '',
             'days_remaining' => $licenseData['days_remaining'] ?? 0,
         ]));
     }
@@ -647,11 +647,11 @@ class EmailService
     public function sendAdminLicenseRenewed(array $licenseData): bool
     {
         return $this->sendToAdmin('admin_license_renewed', array_merge($licenseData, [
-            'license_key' => $licenseData['license_key'] ?? '',
+            'licenseKey' => $licenseData['licenseKey'] ?? '',
             'product_name' => $licenseData['product_name'] ?? '',
             'customer_name' => $licenseData['customer_name'] ?? '',
             'customer_email' => $licenseData['customer_email'] ?? '',
-            'new_expires_at' => $licenseData['new_expires_at'] ?? '',
+            'new_expiresAt' => $licenseData['new_expiresAt'] ?? '',
         ]));
     }
     /**
@@ -685,9 +685,9 @@ class EmailService
     public function sendRenewalReminder(User $user, array $renewalData): bool
     {
         return $this->sendToUser($user, 'user_renewal_reminder', array_merge($renewalData, [
-            'license_key' => $renewalData['license_key'] ?? '',
+            'licenseKey' => $renewalData['licenseKey'] ?? '',
             'product_name' => $renewalData['product_name'] ?? '',
-            'expires_at' => $renewalData['expires_at'] ?? '',
+            'expiresAt' => $renewalData['expiresAt'] ?? '',
             'invoice_amount' => $renewalData['invoice_amount'] ?? 0,
             'invoice_due_date' => $renewalData['invoice_due_date'] ?? '',
             'invoice_id' => $renewalData['invoice_id'] ?? '',
@@ -702,11 +702,11 @@ class EmailService
     public function sendAdminRenewalReminder(array $renewalData): bool
     {
         return $this->sendToAdmin('admin_renewal_reminder', array_merge($renewalData, [
-            'license_key' => $renewalData['license_key'] ?? '',
+            'licenseKey' => $renewalData['licenseKey'] ?? '',
             'product_name' => $renewalData['product_name'] ?? '',
             'customer_name' => $renewalData['customer_name'] ?? '',
             'customer_email' => $renewalData['customer_email'] ?? '',
-            'expires_at' => $renewalData['expires_at'] ?? '',
+            'expiresAt' => $renewalData['expiresAt'] ?? '',
             'invoice_amount' => $renewalData['invoice_amount'] ?? 0,
             'invoice_id' => $renewalData['invoice_id'] ?? '',
         ]));
@@ -807,14 +807,14 @@ class EmailService
             'customer_name' => $license->user->name ?? '',
             'customer_email' => $license->user->email ?? '',
             'product_name' => $license->product->name ?? '',
-            'license_key' => $license->license_key,
-            'license_type' => ucfirst((string)($license->license_type ?? 'Unknown')),
+            'licenseKey' => $license->licenseKey,
+            'licenseType' => ucfirst((string)($license->licenseType ?? 'Unknown')),
             'max_domains' => $license->max_domains,
-            'license_expires_at' => $license->license_expires_at ?
-                $license->license_expires_at->format('M d, Y') : 'Never',
-            'support_expires_at' => $license->support_expires_at ?
-                $license->support_expires_at->format('M d, Y') : 'Never',
-            'created_date' => $license->created_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
+            'license_expiresAt' => $license->license_expiresAt ?
+                $license->license_expiresAt->format('M d, Y') : 'Never',
+            'support_expiresAt' => $license->support_expiresAt ?
+                $license->support_expiresAt->format('M d, Y') : 'Never',
+            'created_date' => $license->createdAt?->format('M d, Y \a\t g:i A') ?? 'Unknown',
         ]);
     }
     /**
@@ -826,14 +826,14 @@ class EmailService
             'customer_name' => $license->user->name ?? '',
             'customer_email' => $license->user->email ?? '',
             'product_name' => $license->product->name ?? '',
-            'license_key' => $license->license_key,
+            'licenseKey' => $license->licenseKey,
             'invoice_number' => $invoice->invoice_number,
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
             'payment_method' => ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown'),
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
             'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
-            'license_type' => ucfirst((string)($license->license_type ?? 'Unknown')),
+            'licenseType' => ucfirst((string)($license->licenseType ?? 'Unknown')),
             'max_domains' => $license->max_domains,
         ]);
     }

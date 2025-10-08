@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,12 +20,12 @@ use Illuminate\Database\Eloquent\Builder;
  * @property string|null $icon
  * @property string $priority
  * @property string $color
- * @property int $sort_order
- * @property bool $is_active
+ * @property int $sortOrder
+ * @property bool $isActive
  * @property bool $requires_login
  * @property bool $requires_valid_purchase_code
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Ticket> $tickets
  * @property-read int|null $tickets_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory active()
@@ -68,8 +70,8 @@ class TicketCategory extends Model
         'slug',
         'description',
         'color',
-        'sort_order',
-        'is_active',
+        'sortOrder',
+        'isActive',
         'requires_login',
         'requires_valid_purchase_code',
         'meta_title',
@@ -79,8 +81,8 @@ class TicketCategory extends Model
         'priority',
     ];
     protected $casts = [
-        'is_active' => 'boolean',
-        'sort_order' => 'integer',
+        'isActive' => 'boolean',
+        'sortOrder' => 'integer',
         'requires_login' => 'boolean',
         'requires_valid_purchase_code' => 'boolean',
     ];
@@ -103,10 +105,10 @@ class TicketCategory extends Model
      */
     public function scopeActive(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        return $query->where('is_active', true);
+        return $query->where('isActive', true);
     }
     /**
-     * Scope to order by sort_order.
+     * Scope to order by sortOrder.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<TicketCategory> $query
@@ -114,6 +116,6 @@ class TicketCategory extends Model
      */
     public function scopeOrdered(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        return $query->orderBy('sort_order');
+        return $query->orderBy('sortOrder');
     }
 }

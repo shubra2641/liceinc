@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +31,7 @@ class EmailTemplateRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -96,7 +98,7 @@ class EmailTemplateRequest extends FormRequest
                     'update', 'notification', 'marketing', 'support',
                 ]),
             ],
-            'is_active' => [
+            'isActive' => [
                 'boolean',
             ],
             'variables' => [
@@ -177,7 +179,7 @@ class EmailTemplateRequest extends FormRequest
             'body' => 'email body',
             'type' => 'template type',
             'category' => 'template category',
-            'is_active' => 'active status',
+            'isActive' => 'active status',
             'variables' => 'template variables',
             'description' => 'template description',
             'priority' => 'template priority',
@@ -200,12 +202,12 @@ class EmailTemplateRequest extends FormRequest
         ]);
         // Handle checkbox values
         $this->merge([
-            'is_active' => $this->has('is_active'),
+            'isActive' => $this->has('isActive'),
             'send_immediately' => $this->has('send_immediately'),
         ]);
         // Set default values
         $this->merge([
-            'is_active' => $this->is_active ?? true,
+            'isActive' => $this->isActive ?? true,
             'priority' => $this->priority ?? 5,
         ]);
         // Sanitize test data if present

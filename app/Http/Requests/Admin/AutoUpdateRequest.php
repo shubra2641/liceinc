@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,7 +30,7 @@ class AutoUpdateRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -42,7 +44,7 @@ class AutoUpdateRequest extends FormRequest
         // Install update validation
         if ($isInstall) {
             return [
-                'license_key' => [
+                'licenseKey' => [
                     'required',
                     'string',
                     'max:255',
@@ -108,7 +110,7 @@ class AutoUpdateRequest extends FormRequest
         }
         // Check updates validation
         return [
-            'license_key' => [
+            'licenseKey' => [
                 'required',
                 'string',
                 'max:255',
@@ -178,8 +180,8 @@ class AutoUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'license_key.required' => 'License key is required.',
-            'license_key.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
+            'licenseKey.required' => 'License key is required.',
+            'licenseKey.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
             'product_slug.required' => 'Product slug is required.',
             'product_slug.regex' => 'Product slug can only contain letters, numbers, hyphens, and underscores.',
             'domain.required' => 'Domain is required.',
@@ -225,7 +227,7 @@ class AutoUpdateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'license_key' => 'license key',
+            'licenseKey' => 'license key',
             'product_slug' => 'product slug',
             'domain' => 'domain',
             'version' => 'target version',
@@ -262,7 +264,7 @@ class AutoUpdateRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'license_key' => $this->sanitizeInput($this->input('license_key')),
+            'licenseKey' => $this->sanitizeInput($this->input('licenseKey')),
             'product_slug' => $this->sanitizeInput($this->input('product_slug')),
             'domain' => $this->sanitizeInput($this->input('domain')),
             'version' => $this->sanitizeInput($this->input('version')),

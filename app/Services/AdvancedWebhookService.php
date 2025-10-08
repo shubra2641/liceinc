@@ -31,7 +31,7 @@ use App\Helpers\SecureFileHelper;
  * @example
  * // Send a webhook event
  * $webhookService = new AdvancedWebhookService();
- * $webhookService->sendWebhookEvent('user.created', ['user_id' => 123]);
+ * $webhookService->sendWebhookEvent('user.created', ['userId' => 123]);
  *
  * // Test a webhook endpoint
  * $result = $webhookService->testWebhook($webhook);
@@ -60,9 +60,9 @@ class AdvancedWebhookService
      * @example
      * // Send to all webhooks listening for user events
      * $webhookService->sendWebhookEvent('user.created', [
-     *     'user_id' => 123,
+     *     'userId' => 123,
      *     'email' => 'user@example.com',
-     *     'created_at' => '2025-01-01T00:00:00Z'
+     *     'createdAt' => '2025-01-01T00:00:00Z'
      * ]);
      *
      * // Send to specific webhook
@@ -75,7 +75,7 @@ class AdvancedWebhookService
     {
         $webhooks = $webhookId !== null
             ? Webhook::where('id', $webhookId)->get()
-            : Webhook::where('is_active', true)
+            : Webhook::where('isActive', true)
                 ->whereJsonContains('events', $eventType)
                 ->get();
         foreach ($webhooks as $webhook) {
@@ -313,7 +313,7 @@ class AdvancedWebhookService
     {
         $attemptCount = WebhookLog::where('webhook_id', $webhook->id)
             ->where('event_type', $eventType)
-            ->where('created_at', '>=', now()->subHour())
+            ->where('createdAt', '>=', now()->subHour())
             ->count();
         return $attemptCount + 1;
     }
@@ -336,7 +336,7 @@ class AdvancedWebhookService
         ]);
         // Optionally disable webhook after repeated failures
         if ($webhook->failed_attempts > 10) {
-            $webhook->update(['is_active' => false]);
+            $webhook->update(['isActive' => false]);
         }
     }
     /**
@@ -442,7 +442,7 @@ class AdvancedWebhookService
     {
         $startDate = now()->subDays($days);
         $logs = WebhookLog::where('webhook_id', $webhook->id)
-            ->where('created_at', '>=', $startDate)
+            ->where('createdAt', '>=', $startDate)
             ->get();
         $totalAttempts = $logs->count();
         $successfulAttempts = $logs->where('success', true)->count();
@@ -482,7 +482,7 @@ class AdvancedWebhookService
     public function cleanupOldLogs(int $days = 90): int
     {
         $cutoffDate = now()->subDays($days);
-        $result = WebhookLog::where('created_at', '<', $cutoffDate)->delete();
+        $result = WebhookLog::where('createdAt', '<', $cutoffDate)->delete();
         return is_numeric($result) ? (int)$result : 0;
     }
     /**
@@ -507,7 +507,7 @@ class AdvancedWebhookService
     public function getWebhookHealth(Webhook $webhook): array
     {
         $recentLogs = WebhookLog::where('webhook_id', $webhook->id)
-            ->where('created_at', '>=', now()->subHours(24))
+            ->where('createdAt', '>=', now()->subHours(24))
             ->get();
         $recentFailures = $recentLogs->where('success', false)->count();
         $totalRecent = $recentLogs->count();
@@ -525,7 +525,7 @@ class AdvancedWebhookService
             'health_score' => round($healthScore, 1),
             'recent_failures' => $recentFailures,
             'total_recent_attempts' => $totalRecent,
-            'last_attempt' => $recentLogs->sortByDesc('created_at')->first()?->created_at,
+            'last_attempt' => $recentLogs->sortByDesc('createdAt')->first()?->createdAt,
         ];
     }
     /**
@@ -543,7 +543,7 @@ class AdvancedWebhookService
      * @example
      * $updatedCount = $webhookService->bulkUpdateWebhooks(
      *     [1, 2, 3, 4, 5],
-     *     ['is_active' => false, 'updated_at' => now()]
+     *     ['isActive' => false, 'updatedAt' => now()]
      * );
      * echo "Updated $updatedCount webhooks";
      */
@@ -581,7 +581,7 @@ class AdvancedWebhookService
         $startDate = now()->subDays($days);
         $webhooks = Webhook::with(['logs' => function ($query) use ($startDate) {
             if (is_object($query) && method_exists($query, 'where')) {
-                $query->where('created_at', '>=', $startDate);
+                $query->where('createdAt', '>=', $startDate);
             }
         }])->get();
         $report = [];
@@ -596,7 +596,7 @@ class AdvancedWebhookService
                 'total_attempts' => $totalAttempts,
                 'successful_attempts' => $successfulAttempts,
                 'success_rate' => $totalAttempts > 0 ? round(($successfulAttempts / $totalAttempts) * 100, 2) : 0,
-                'last_attempt' => $logs->sortByDesc('created_at')->first()?->created_at,
+                'last_attempt' => $logs->sortByDesc('createdAt')->first()?->createdAt,
                 'health_status' => $this->getWebhookHealth($webhook)['status'],
             ];
         }

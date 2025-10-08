@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use App\Models\Invoice;
@@ -101,7 +103,7 @@ class ProcessOverdueInvoices implements ShouldQueue
             try {
                 $invoice->update([
                     'status' => 'overdue',
-                    'updated_at' => now(),
+                    'updatedAt' => now(),
                 ]);
                 $processedCount++;
             } catch (\Exception $e) {

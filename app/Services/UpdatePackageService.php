@@ -625,7 +625,7 @@ class UpdatePackageService
             return $backupPath;
         } catch (\Exception $e) {
             Log::error('Failed to create file backup', [
-                'file_path' => $filePath,
+                'filePath' => $filePath,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

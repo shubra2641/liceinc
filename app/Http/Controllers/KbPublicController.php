@@ -334,7 +334,7 @@ class KbPublicController extends Controller
     private function checkCategoryAccess($category, $user): bool
     {
         try {
-            $requiresAccess = (bool)($category->requires_serial || $category->product_id);
+            $requiresAccess = (bool)($category->requires_serial || $category->productId);
             if (! $requiresAccess) {
                 return true; // No access required
             }
@@ -342,25 +342,25 @@ class KbPublicController extends Controller
                 return false; // User not logged in
             }
             // If category is linked to a product, user must have an active license for that product
-            if ($category->product_id) {
+            if ($category->productId) {
                 // Check if user has an active license for that specific product
                 $hasLicense = $user instanceof \App\Models\User ? $user->licenses()
-                    ->where('product_id', $category->product_id)
+                    ->where('productId', $category->productId)
                     ->where('status', 'active')
                     ->where(function ($query) {
-                        $query->whereNull('license_expires_at')
-                            ->orWhere('license_expires_at', '>', now());
+                        $query->whereNull('license_expiresAt')
+                            ->orWhere('license_expiresAt', '>', now());
                     })
                     ->exists() : false;
                 return $hasLicense;
             }
-            return false; // Requires access but no product_id
+            return false; // Requires access but no productId
         } catch (\Exception $e) {
             Log::error('Failed to check category access', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'category_id' => $category->id ?? null,
-                'user_id' => $user->id ?? null,
+                'userId' => $user->id ?? null,
             ]);
             return false;
         }
@@ -380,9 +380,9 @@ class KbPublicController extends Controller
         try {
             $requiresAccess = (bool)($article->requires_serial ||
                                      $article->requires_purchase_code ||
-                                     $article->product_id ||
+                                     $article->productId ||
                                      ($article->category->requires_serial ||
-                                      $article->category->product_id));
+                                      $article->category->productId));
             if (! $requiresAccess) {
                 return true; // No access required
             }
@@ -390,26 +390,26 @@ class KbPublicController extends Controller
                 return false; // User not logged in
             }
             // If article is linked directly to a product, user must have an active license for that product
-            if ($article->product_id) {
+            if ($article->productId) {
                 $hasLicense = $user instanceof \App\Models\User ? $user->licenses()
-                    ->where('product_id', $article->product_id)
+                    ->where('productId', $article->productId)
                     ->where('status', 'active')
                     ->where(function ($query) {
-                        $query->whereNull('license_expires_at')
-                            ->orWhere('license_expires_at', '>', now());
+                        $query->whereNull('license_expiresAt')
+                            ->orWhere('license_expiresAt', '>', now());
                     })
                     ->exists() : false;
                 return $hasLicense;
             }
-            // Otherwise, if category defines a product_id, check that product
-            if ($article->category->product_id) {
-                $catProductId = $article->category->product_id;
+            // Otherwise, if category defines a productId, check that product
+            if ($article->category->productId) {
+                $catProductId = $article->category->productId;
                 $hasLicense = $user instanceof \App\Models\User ? $user->licenses()
-                    ->where('product_id', $catProductId)
+                    ->where('productId', $catProductId)
                     ->where('status', 'active')
                     ->where(function ($query) {
-                        $query->whereNull('license_expires_at')
-                            ->orWhere('license_expires_at', '>', now());
+                        $query->whereNull('license_expiresAt')
+                            ->orWhere('license_expiresAt', '>', now());
                     })
                     ->exists() : false;
                 return $hasLicense;
@@ -420,7 +420,7 @@ class KbPublicController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'article_id' => $article->id ?? null,
-                'user_id' => $user->id ?? null,
+                'userId' => $user->id ?? null,
             ]);
             return false;
         }
@@ -450,7 +450,7 @@ class KbPublicController extends Controller
     private function getActiveCategories()
     {
         try {
-            return KbCategory::where('is_active', true)
+            return KbCategory::where('isActive', true)
                 ->withCount('children')
                 ->with('product')
                 ->orderBy('name')
@@ -475,7 +475,7 @@ class KbPublicController extends Controller
         try {
             return KbArticle::where('is_published', true)
                 ->whereHas('category', function ($query) {
-                    $query->where('is_active', true);
+                    $query->where('isActive', true);
                 })
                 ->with('category', 'product')
                 ->latest()
@@ -522,7 +522,7 @@ class KbPublicController extends Controller
      */
     private function categoryRequiresAccess(KbCategory $category): bool
     {
-        return (bool)($category->requires_serial || $category->product_id);
+        return (bool)($category->requires_serial || $category->productId);
     }
     /**
      * Get category articles with enhanced security and error handling.
@@ -539,7 +539,7 @@ class KbPublicController extends Controller
             return KbArticle::where('kb_category_id', $category->id)
                 ->where('is_published', true)
                 ->whereHas('category', function ($query) {
-                    $query->where('is_active', true);
+                    $query->where('isActive', true);
                 })
                 ->with('category', 'product')
                 ->latest()
@@ -595,19 +595,19 @@ class KbPublicController extends Controller
         try {
             $rawResult = $this->purchaseCodeService->verifyRawCode(
                 $rawCode,
-                $category->product_id,
+                $category->productId,
             );
             if ($rawResult['success']) {
                 $license = $rawResult['license'] ?? null;
-                $productId = $rawResult['product_id'] ?? ($license instanceof \App\Models\License ? $license->product_id : null);
+                $productId = $rawResult['productId'] ?? ($license instanceof \App\Models\License ? $license->productId : null);
                 $product = $productId ? Product::find($productId) : null;
-                if ($product && $product->id == $category->product_id) {
-                    $accessToken = 'kb_access_' . $category->id . '_' . time() . '_' . substr(md5($license instanceof \App\Models\License ? $license->license_key : ''), 0, 8);
+                if ($product && $product->id == $category->productId) {
+                    $accessToken = 'kb_access_' . $category->id . '_' . time() . '_' . substr(md5($license instanceof \App\Models\License ? $license->licenseKey : ''), 0, 8);
                     session([$accessToken => [
-                        'license_id' => $license instanceof \App\Models\License ? $license->id : null,
-                        'product_id' => $product->id,
+                        'licenseId' => $license instanceof \App\Models\License ? $license->id : null,
+                        'productId' => $product->id,
                         'category_id' => $category->id,
-                        'expires_at' => now()->addHours(24),
+                        'expiresAt' => now()->addHours(24),
                     ]]);
                     return [
                         'success' => true,
@@ -653,7 +653,7 @@ class KbPublicController extends Controller
         try {
             if (session()->has($accessToken)) {
                 $tokenData = session($accessToken);
-                if (is_array($tokenData) && isset($tokenData['expires_at']) && isset($tokenData['category_id']) && $tokenData['expires_at'] > now() && $tokenData['category_id'] == $categoryId) {
+                if (is_array($tokenData) && isset($tokenData['expiresAt']) && isset($tokenData['category_id']) && $tokenData['expiresAt'] > now() && $tokenData['category_id'] == $categoryId) {
                     return ['valid' => true];
                 } else {
                     session()->forget($accessToken);
@@ -684,7 +684,7 @@ class KbPublicController extends Controller
             return KbArticle::where('slug', $slug)
                 ->where('is_published', true)
                 ->whereHas('category', function ($query) {
-                    $query->where('is_active', true);
+                    $query->where('isActive', true);
                 })
                 ->with('category', 'product')
                 ->firstOrFail();
@@ -707,9 +707,9 @@ class KbPublicController extends Controller
     private function articleRequiresAccess(KbArticle $article): bool
     {
         return (bool)($article->requires_serial ||
-                                 $article->product_id ||
+                                 $article->productId ||
                                  ($article->category->requires_serial ||
-                                  $article->category->product_id));
+                                  $article->category->productId));
     }
     /**
      * Increment article views with enhanced security and error handling.
@@ -747,7 +747,7 @@ class KbPublicController extends Controller
                 ->where('id', '!=', $article->id)
                 ->where('is_published', true)
                 ->whereHas('category', function ($query) {
-                    $query->where('is_active', true);
+                    $query->where('isActive', true);
                 })
                 ->with('category', 'product')
                 ->latest()
@@ -775,25 +775,25 @@ class KbPublicController extends Controller
     private function handleArticleRawCodeAccess(KbArticle $article, string $rawCode): array
     {
         try {
-            $productIdToVerify = $article->product_id ?: $article->category->product_id;
+            $productIdToVerify = $article->productId ?: $article->category->productId;
             $rawResult = $this->purchaseCodeService->verifyRawCode(
                 $rawCode,
                 $productIdToVerify,
             );
             if ($rawResult['success']) {
                 $license = $rawResult['license'] ?? null;
-                $productId = $rawResult['product_id'] ?? ($license instanceof \App\Models\License ? $license->product_id : null);
+                $productId = $rawResult['productId'] ?? ($license instanceof \App\Models\License ? $license->productId : null);
                 $product = $productId ? Product::find($productId) : null;
-                $articleProductId = $article->product_id ?:
-                    $article->category->product_id;
+                $articleProductId = $article->productId ?:
+                    $article->category->productId;
                 if ($product && $product->id == $articleProductId) {
                     $accessToken = 'kb_article_access_' . $article->id . '_' . time() . '_' .
-                        substr(md5($license instanceof \App\Models\License ? $license->license_key : ''), 0, 8);
+                        substr(md5($license instanceof \App\Models\License ? $license->licenseKey : ''), 0, 8);
                     session([$accessToken => [
-                        'license_id' => $license instanceof \App\Models\License ? $license->id : null,
-                        'product_id' => $product->id,
+                        'licenseId' => $license instanceof \App\Models\License ? $license->id : null,
+                        'productId' => $product->id,
                         'article_id' => $article->id,
-                        'expires_at' => now()->addHours(24),
+                        'expiresAt' => now()->addHours(24),
                     ]]);
                     return [
                         'success' => true,
@@ -839,7 +839,7 @@ class KbPublicController extends Controller
         try {
             if (session()->has($accessToken)) {
                 $tokenData = session($accessToken);
-                if (is_array($tokenData) && isset($tokenData['expires_at']) && isset($tokenData['article_id']) && $tokenData['expires_at'] > now() && $tokenData['article_id'] == $articleId) {
+                if (is_array($tokenData) && isset($tokenData['expiresAt']) && isset($tokenData['article_id']) && $tokenData['expiresAt'] > now() && $tokenData['article_id'] == $articleId) {
                     return ['valid' => true];
                 } else {
                     session()->forget($accessToken);
@@ -883,7 +883,7 @@ class KbPublicController extends Controller
     private function getAllCategoriesWithAccess()
     {
         try {
-            $allCategories = KbCategory::where('is_active', true)
+            $allCategories = KbCategory::where('isActive', true)
                 ->with('product', 'articles')
                 ->get();
             $user = auth()->user();
@@ -916,7 +916,7 @@ class KbPublicController extends Controller
             // Search articles with case-insensitive search (secure)
             $articles = KbArticle::where('is_published', true)
                 ->whereHas('category', function ($query) {
-                    $query->where('is_active', true);
+                    $query->where('isActive', true);
                 })
                 ->where(function ($query) use ($searchTerm) {
                     $query->whereRaw('LOWER(title) LIKE ?', [$searchTerm])
@@ -926,7 +926,7 @@ class KbPublicController extends Controller
                 ->with('category', 'product')
                 ->get();
             // Search categories with case-insensitive search (secure)
-            $categories = KbCategory::where('is_active', true)
+            $categories = KbCategory::where('isActive', true)
                 ->where(function ($query) use ($searchTerm) {
                     $query->whereRaw('LOWER(name) LIKE ?', [$searchTerm])
                         ->orWhereRaw('LOWER(description) LIKE ?', [$searchTerm]);

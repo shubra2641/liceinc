@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -8,19 +10,19 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int $id
- * @property string $purchase_code_hash
+ * @property string $purchaseCodeHash
  * @property string $domain
- * @property string $ip_address
+ * @property string $ipAddress
  * @property string|null $user_agent
- * @property bool $is_valid
- * @property string|null $response_message
+ * @property bool $isValid
+ * @property string|null $responseMessage
  * @property array<array-key, mixed>|null $response_data
- * @property string $verification_source
+ * @property string $verificationSource
  * @property string $status
  * @property string|null $error_details
  * @property \Illuminate\Support\Carbon|null $verified_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read string $masked_purchase_code
  * @property-read string $source_badge_class
  * @property-read string $status_badge_class
@@ -61,20 +63,20 @@ class LicenseVerificationLog extends Model
      */
     protected static $factory = LicenseVerificationLogFactory::class;
     protected $fillable = [
-        'purchase_code_hash',
+        'purchaseCodeHash',
         'domain',
-        'ip_address',
+        'ipAddress',
         'user_agent',
-        'is_valid',
-        'response_message',
+        'isValid',
+        'responseMessage',
         'response_data',
-        'verification_source',
+        'verificationSource',
         'status',
         'error_details',
         'verified_at',
     ];
     protected $casts = [
-        'is_valid' => 'boolean',
+        'isValid' => 'boolean',
         'response_data' => 'array',
         'verified_at' => 'datetime',
     ];
@@ -89,7 +91,7 @@ class LicenseVerificationLog extends Model
      */
     public function scopeSuccessful(Builder $query): Builder
     {
-        return $query->where('is_valid', true)->where('status', 'success');
+        return $query->where('isValid', true)->where('status', 'success');
     }
     /**
      * Scope for failed verifications.
@@ -99,7 +101,7 @@ class LicenseVerificationLog extends Model
      */
     public function scopeFailed(Builder $query): Builder
     {
-        return $query->where('is_valid', false);
+        return $query->where('isValid', false);
     }
     /**
      * Scope for specific domain.
@@ -119,7 +121,7 @@ class LicenseVerificationLog extends Model
      */
     public function scopeForIp(Builder $query, string $ip): Builder
     {
-        return $query->where('ip_address', $ip);
+        return $query->where('ipAddress', $ip);
     }
     /**
      * Scope for specific verification source.
@@ -129,7 +131,7 @@ class LicenseVerificationLog extends Model
      */
     public function scopeFromSource(Builder $query, string $source): Builder
     {
-        return $query->where('verification_source', $source);
+        return $query->where('verificationSource', $source);
     }
     /**
      * Scope for recent attempts (last 24 hours).
@@ -139,7 +141,7 @@ class LicenseVerificationLog extends Model
      */
     public function scopeRecent(Builder $query, int $hours = 24): Builder
     {
-        return $query->where('created_at', '>=', now()->subHours($hours));
+        return $query->where('createdAt', '>=', now()->subHours($hours));
     }
     /**
      * Get masked purchase code for display.
@@ -147,7 +149,7 @@ class LicenseVerificationLog extends Model
     public function getMaskedPurchaseCodeAttribute(): string
     {
         // Show first 4 and last 4 characters, mask the middle
-        $hash = $this->purchase_code_hash;
+        $hash = $this->purchaseCodeHash;
         if (strlen($hash) > 8) {
             return substr($hash, 0, 4) . '****' . substr($hash, -4);
         }
@@ -170,7 +172,7 @@ class LicenseVerificationLog extends Model
      */
     public function getSourceBadgeClassAttribute(): string
     {
-        return match ($this->verification_source) {
+        return match ($this->verificationSource) {
             'install' => 'badge-primary',
             'api' => 'badge-info',
             'admin' => 'badge-warning',

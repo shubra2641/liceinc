@@ -15,9 +15,9 @@ use Illuminate\Support\Str;
  * @property string $invoice_number
  * @property string|null $order_number
  * @property string|null $payment_gateway
- * @property int $user_id
- * @property int|null $license_id
- * @property int|null $product_id
+ * @property int $userId
+ * @property int|null $licenseId
+ * @property int|null $productId
  * @property string $type
  * @property numeric $amount
  * @property string $currency
@@ -26,8 +26,8 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $paid_at
  * @property string|null $notes
  * @property array<array-key, mixed>|null $metadata
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read mixed $days_until_due
  * @property-read mixed $remaining_amount
  * @property-read \App\Models\License|null $license
@@ -72,9 +72,9 @@ class Invoice extends Model
 
     protected $fillable = [
         'invoice_number',
-        'user_id',
-        'license_id',
-        'product_id',
+        'userId',
+        'licenseId',
+        'productId',
         'type',
         'amount',
         'currency',

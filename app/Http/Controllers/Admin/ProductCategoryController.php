@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -72,7 +74,7 @@ class ProductCategoryController extends Controller
         try {
             DB::beginTransaction();
             $categories = ProductCategory::withCount('products')
-                ->orderBy('sort_order')
+                ->orderBy('sortOrder')
                 ->orderBy('name')
                 ->paginate(15);
             DB::commit();
@@ -128,8 +130,8 @@ class ProductCategoryController extends Controller
      * {
      *     "name": "Web Development",
      *     "description": "Web development tools and resources",
-     *     "is_active": true,
-     *     "sort_order": 1,
+     *     "isActive": true,
+     *     "sortOrder": 1,
      *     "color": "#3b82f6",
      *     "show_in_menu": true
      * }
@@ -142,7 +144,7 @@ class ProductCategoryController extends Controller
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for product category creation', [
                     'ip' => $request->ip(),
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
                 return redirect()->back()
@@ -152,11 +154,11 @@ class ProductCategoryController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes window
             // Validate user permissions
             $user = Auth::user();
-            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to create product category', [
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'ip' => $request->ip(),
-                    'is_admin' => $user ? $user->is_admin : false,
+                    'isAdmin' => $user ? $user->isAdmin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
                 return redirect()->back()
@@ -188,7 +190,7 @@ class ProductCategoryController extends Controller
             Log::error('Product category creation failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ip' => $request->ip(),
                 'name' => $request->name ?? 'unknown',
             ]);
@@ -203,7 +205,7 @@ class ProductCategoryController extends Controller
      * Shows detailed information about a specific product category
      * with proper error handling and security measures.
      *
-     * @param  ProductCategory  $product_category  The product category to display
+     * @param  ProductCategory  $productCategory  The product category to display
      *
      * @return View The product category details view
      *
@@ -218,23 +220,23 @@ class ProductCategoryController extends Controller
      * // - Associated products
      * // - Category statistics
      */
-    public function show(ProductCategory $product_category): View|RedirectResponse
+    public function show(ProductCategory $productCategory): View|RedirectResponse
     {
         try {
             DB::beginTransaction();
-            $product_category->load('products');
+            $productCategory->load('products');
             DB::commit();
             /**
  * @var view-string $viewName
 */
             $viewName = 'admin.product-categories.show';
-            return view($viewName, ['product_category' => $product_category]);
+            return view($viewName, ['product_category' => $productCategory]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Product category view failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'category_id' => $product_category->id ?? 'unknown',
+                'category_id' => $productCategory->id ?? 'unknown',
             ]);
             return redirect()->route('admin.product-categories.index')
                 ->with('error', 'Failed to load category details.');
@@ -245,7 +247,7 @@ class ProductCategoryController extends Controller
      *
      * Displays the category edit form with current data and proper security measures.
      *
-     * @param  ProductCategory  $product_category  The product category to edit
+     * @param  ProductCategory  $productCategory  The product category to edit
      *
      * @return View The product category edit form view
      *
@@ -258,13 +260,13 @@ class ProductCategoryController extends Controller
      * // - Current image preview
      * // - SEO metadata fields
      */
-    public function edit(ProductCategory $product_category): View
+    public function edit(ProductCategory $productCategory): View
     {
         /**
  * @var view-string $viewName
 */
         $viewName = 'admin.product-categories.edit';
-        return view($viewName, ['product_category' => $product_category]);
+        return view($viewName, ['product_category' => $productCategory]);
     }
     /**
      * Update the specified product category with enhanced security.
@@ -273,7 +275,7 @@ class ProductCategoryController extends Controller
      * image upload security, and proper error handling using Request classes.
      *
      * @param  ProductCategoryRequest  $request  The validated request containing updated category data
-     * @param  ProductCategory  $product_category  The product category to update
+     * @param  ProductCategory  $productCategory  The product category to update
      *
      * @return RedirectResponse Redirect to categories list with success message
      *
@@ -286,11 +288,11 @@ class ProductCategoryController extends Controller
      * {
      *     "name": "Updated Web Development",
      *     "description": "Updated description",
-     *     "is_active": true,
+     *     "isActive": true,
      *     "color": "#10b981"
      * }
      */
-    public function update(ProductCategoryRequest $request, ProductCategory $product_category): RedirectResponse
+    public function update(ProductCategoryRequest $request, ProductCategory $productCategory): RedirectResponse
     {
         try {
             // Rate limiting for security
@@ -299,7 +301,7 @@ class ProductCategoryController extends Controller
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for product category update', [
                     'ip' => $request->ip(),
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
                 return redirect()->back()
@@ -309,12 +311,12 @@ class ProductCategoryController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes window
             // Validate user permissions
             $user = Auth::user();
-            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to update product category', [
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'ip' => $request->ip(),
-                    'category_id' => $product_category->id,
-                    'is_admin' => $user ? $user->is_admin : false,
+                    'category_id' => $productCategory->id,
+                    'isAdmin' => $user ? $user->isAdmin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
                 return redirect()->back()
@@ -332,13 +334,13 @@ class ProductCategoryController extends Controller
                     throw new \Exception('Invalid image file uploaded.');
                 }
                 // Delete old image
-                if ($product_category->image) {
-                    Storage::disk('public')->delete($product_category->image);
+                if ($productCategory->image) {
+                    Storage::disk('public')->delete($productCategory->image);
                 }
                 $imagePath = $image->store('categories', 'public');
                 $validated['image'] = $imagePath;
             }
-            $product_category->update($validated);
+            $productCategory->update($validated);
             DB::commit();
             return redirect()->route('admin.product-categories.index')
                 ->with('success', 'Category updated successfully.');
@@ -350,9 +352,9 @@ class ProductCategoryController extends Controller
             Log::error('Product category update failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ip' => $request->ip(),
-                'category_id' => $product_category->id,
+                'category_id' => $productCategory->id,
                 'name' => $request->name ?? 'unknown',
             ]);
             return redirect()->back()
@@ -366,7 +368,7 @@ class ProductCategoryController extends Controller
      * Deletes a product category with proper validation, file cleanup,
      * and comprehensive error handling.
      *
-     * @param  ProductCategory  $product_category  The product category to delete
+     * @param  ProductCategory  $productCategory  The product category to delete
      *
      * @return RedirectResponse Redirect to categories list with success/error message
      *
@@ -381,7 +383,7 @@ class ProductCategoryController extends Controller
      * // - Error message if category has products
      * // - Error message if deletion fails
      */
-    public function destroy(ProductCategory $product_category): RedirectResponse
+    public function destroy(ProductCategory $productCategory): RedirectResponse
     {
         try {
             // Rate limiting for security
@@ -389,7 +391,7 @@ class ProductCategoryController extends Controller
             if (RateLimiter::tooManyAttempts($key, 3)) {
                 Log::warning('Rate limit exceeded for product category deletion', [
                     'ip' => request()->ip(),
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
                 return redirect()->back()
@@ -398,12 +400,12 @@ class ProductCategoryController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes window
             // Validate user permissions
             $user = Auth::user();
-            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to delete product category', [
-                    'user_id' => Auth::id(),
+                    'userId' => Auth::id(),
                     'ip' => request()->ip(),
-                    'category_id' => $product_category->id,
-                    'is_admin' => $user ? $user->is_admin : false,
+                    'category_id' => $productCategory->id,
+                    'isAdmin' => $user ? $user->isAdmin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
                 return redirect()->back()
@@ -411,24 +413,24 @@ class ProductCategoryController extends Controller
             }
             DB::beginTransaction();
             // Check if category has products
-            if ($product_category->products()->count() > 0) {
+            if ($productCategory->products()->count() > 0) {
                 DB::rollBack();
                 return redirect()->back()
                     ->with('error', 'Cannot delete category with existing products.');
             }
             // Delete image file
-            if ($product_category->image) {
+            if ($productCategory->image) {
                 try {
-                    Storage::disk('public')->delete($product_category->image);
+                    Storage::disk('public')->delete($productCategory->image);
                 } catch (\Exception $e) {
                     Log::warning('Failed to delete category image', [
-                        'category_id' => $product_category->id,
-                        'image_path' => $product_category->image,
+                        'category_id' => $productCategory->id,
+                        'image_path' => $productCategory->image,
                         'error' => $e->getMessage(),
                     ]);
                 }
             }
-            $product_category->delete();
+            $productCategory->delete();
             DB::commit();
             return redirect()->route('admin.product-categories.index')
                 ->with('success', 'Category deleted successfully.');
@@ -437,9 +439,9 @@ class ProductCategoryController extends Controller
             Log::error('Product category deletion failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ip' => request()->ip(),
-                'category_id' => $product_category->id,
+                'category_id' => $productCategory->id,
             ]);
             return redirect()->back()
                 ->with('error', 'Failed to delete category. Please try again.');

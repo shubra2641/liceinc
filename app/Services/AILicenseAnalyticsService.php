@@ -143,8 +143,8 @@ class AILicenseAnalyticsService
     {
         $startDate = now()->subDays($days);
         // Get daily license creation trends
-        $licenseTrends = License::selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->where('created_at', '>=', $startDate)
+        $licenseTrends = License::selectRaw('DATE(createdAt) as date, COUNT(*) as count')
+            ->where('createdAt', '>=', $startDate)
             ->groupBy('date')
             ->orderBy('date')
             ->get()
@@ -153,9 +153,9 @@ class AILicenseAnalyticsService
         // Get daily revenue trends
         $revenueTrends = $this->getRevenueTrends($startDate);
         // Get customer acquisition trends
-        $customerTrends = User::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+        $customerTrends = User::selectRaw('DATE(createdAt) as date, COUNT(*) as count')
             ->where('role', 'customer')
-            ->where('created_at', '>=', $startDate)
+            ->where('createdAt', '>=', $startDate)
             ->groupBy('date')
             ->orderBy('date')
             ->get()
@@ -237,13 +237,13 @@ class AILicenseAnalyticsService
         $startDate = now()->subDays($days);
         $products = Product::withCount(['licenses' => function ($query) use ($startDate) {
             if (is_object($query) && method_exists($query, 'where')) {
-                $query->where('created_at', '>=', $startDate);
+                $query->where('createdAt', '>=', $startDate);
             }
         }])->get();
         $performance = [];
         foreach ($products as $product) {
             $performance[] = [
-                'product_id' => $product->id,
+                'productId' => $product->id,
                 'name' => $product->name,
                 'license_count' => $product->licenses_count,
                 'revenue' => $this->calculateProductRevenue($product->id),
@@ -276,7 +276,7 @@ class AILicenseAnalyticsService
         $startDate = now()->subDays($days);
         // Get license distribution by country
         $distribution = License::selectRaw('country, COUNT(*) as count')
-            ->where('created_at', '>=', $startDate)
+            ->where('createdAt', '>=', $startDate)
             ->whereNotNull('country')
             ->groupBy('country')
             ->orderByDesc('count')
@@ -328,16 +328,16 @@ class AILicenseAnalyticsService
      */
     private function predictLicenseExpirations(): array
     {
-        $expiringSoon = License::where('license_expires_at', '<=', now()->addDays(30))
+        $expiringSoon = License::where('license_expiresAt', '<=', now()->addDays(30))
             ->where('status', 'active')
             ->get();
         $predictions = [];
         foreach ($expiringSoon as $license) {
             $renewalProbability = $this->calculateRenewalProbability($license);
             $predictions[] = [
-                'license_id' => $license->id,
-                'expires_at' => $license->license_expires_at,
-                'days_until_expiry' => now()->diffInDays($license->license_expires_at),
+                'licenseId' => $license->id,
+                'expiresAt' => $license->license_expiresAt,
+                'days_until_expiry' => now()->diffInDays($license->license_expiresAt),
                 'renewal_probability' => $renewalProbability,
                 'confidence_score' => $this->calculateConfidenceScore(['license' => $license]),
                 'recommended_action' => $this->getRecommendedAction(['probability' => $renewalProbability]),
@@ -413,13 +413,13 @@ class AILicenseAnalyticsService
     {
         $factors = [];
         // Customer history factor
-        $customerHistory = $this->getCustomerHistory($license->user_id ?? 0);
+        $customerHistory = $this->getCustomerHistory($license->userId ?? 0);
         $factors['customer_history'] = $customerHistory;
         // License usage factor
         $usageFactor = $this->getLicenseUsageFactor($license->id);
         $factors['usage'] = $usageFactor;
         // Payment history factor
-        $paymentHistory = $this->getPaymentHistory($license->user_id ?? 0);
+        $paymentHistory = $this->getPaymentHistory($license->userId ?? 0);
         $factors['payment_history'] = $paymentHistory;
         // Time since last activity
         $activityFactor = $this->getActivityFactor($license->id);
@@ -599,7 +599,7 @@ class AILicenseAnalyticsService
      * @throws \Exception When event logging fails
      *
      * @example
-     * $service->logAnalyticsEvent('dashboard_viewed', ['user_id' => 123]);
+     * $service->logAnalyticsEvent('dashboard_viewed', ['userId' => 123]);
      */
     /**
      * @param array<string, mixed> $eventData
@@ -658,7 +658,7 @@ class AILicenseAnalyticsService
                 return DB::transaction(function (): array {
                     return [
                         'active_licenses_now' => $this->getActiveLicenses(),
-                        'licenses_created_today' => License::whereDate('created_at', today())->count(),
+                        'licenses_created_today' => License::whereDate('createdAt', today())->count(),
                         'revenue_today' => $this->calculateTodayRevenue(),
                         'api_calls_last_hour' => $this->getApiCallsLastHour(),
                         'system_health' => $this->getSystemHealthMetrics(),
@@ -836,8 +836,8 @@ class AILicenseAnalyticsService
     private function calculateGrowthRate(int $days): float
     {
         try {
-            $currentPeriod = License::where('created_at', '>=', now()->subDays($days))->count();
-            $previousPeriod = License::whereBetween('created_at', [
+            $currentPeriod = License::where('createdAt', '>=', now()->subDays($days))->count();
+            $previousPeriod = License::whereBetween('createdAt', [
                 now()->subDays($days * 2),
                 now()->subDays($days),
             ])->count();
@@ -991,9 +991,9 @@ class AILicenseAnalyticsService
     private function getRevenueTrends(Carbon $startDate): array
     {
         $revenueData = DB::table('invoices')
-            ->selectRaw('DATE(created_at) as date, SUM(amount) as revenue')
+            ->selectRaw('DATE(createdAt) as date, SUM(amount) as revenue')
             ->where('status', 'paid')
-            ->where('created_at', '>=', $startDate)
+            ->where('createdAt', '>=', $startDate)
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -1017,7 +1017,7 @@ class AILicenseAnalyticsService
         $products = Product::withCount('licenses')
             ->with(['licenses' => function ($query) {
                 if (is_object($query) && method_exists($query, 'where')) {
-                    $query->where('created_at', '>=', now()->subDays(30));
+                    $query->where('createdAt', '>=', now()->subDays(30));
                 }
             }])
             ->get();
@@ -1025,7 +1025,7 @@ class AILicenseAnalyticsService
         $predictions = [];
         foreach ($products as $product) {
             $predictions[] = [
-                'product_id' => $product->id,
+                'productId' => $product->id,
                 'name' => $product->name,
                 'current_sales' => $product->licenses_count,
                 'predicted_sales' => (int)($product->licenses_count * 1.1),
@@ -1131,7 +1131,7 @@ class AILicenseAnalyticsService
     private function calculateProductRevenue(int $productId): float
     {
         return (float) DB::table('invoices')
-            ->where('product_id', $productId)
+            ->where('productId', $productId)
             ->where('status', 'paid')
             ->sum('amount');
     }
@@ -1142,13 +1142,13 @@ class AILicenseAnalyticsService
     private function calculateProductGrowthRate(int $productId): float
     {
         $current = DB::table('licenses')
-            ->where('product_id', $productId)
-            ->where('created_at', '>=', now()->subDays(30))
+            ->where('productId', $productId)
+            ->where('createdAt', '>=', now()->subDays(30))
             ->count();
 
         $previous = DB::table('licenses')
-            ->where('product_id', $productId)
-            ->whereBetween('created_at', [now()->subDays(60), now()->subDays(30)])
+            ->where('productId', $productId)
+            ->whereBetween('createdAt', [now()->subDays(60), now()->subDays(30)])
             ->count();
 
         return $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
@@ -1160,7 +1160,7 @@ class AILicenseAnalyticsService
     private function calculateMarketShare(int $productId): float
     {
         $productSales = DB::table('licenses')
-            ->where('product_id', $productId)
+            ->where('productId', $productId)
             ->count();
 
         $totalSales = DB::table('licenses')->count();

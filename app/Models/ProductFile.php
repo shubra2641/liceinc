@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,23 +11,23 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
- * @property int $product_id
- * @property string $original_name
+ * @property int $productId
+ * @property string $originalName
  * @property string $encrypted_name
- * @property string $file_path
- * @property string $file_type
+ * @property string $filePath
+ * @property string $fileType
  * @property int $file_size
  * @property string $encryption_key
  * @property string $checksum
  * @property string|null $description
- * @property int $download_count
- * @property bool $is_active
+ * @property int $downloadCount
+ * @property bool $isActive
  * @property array<array-key, mixed>|null $update_info
  * @property bool $is_update
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read mixed $file_extension
- * @property-read mixed $formatted_size
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property-read mixed $fileExtension
+ * @property-read mixed $formattedSize
  * @property-read \App\Models\Product $product
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductFile active()
  * @method static \Database\Factories\ProductFileFactory factory($count = null, $state = [])
@@ -62,22 +64,22 @@ class ProductFile extends Model
     protected static $factory = ProductFileFactory::class;
 
     protected $fillable = [
-        'product_id',
-        'original_name',
+        'productId',
+        'originalName',
         'encrypted_name',
-        'file_path',
-        'file_type',
+        'filePath',
+        'fileType',
         'file_size',
         'encryption_key',
         'checksum',
         'description',
-        'download_count',
-        'is_active',
+        'downloadCount',
+        'isActive',
     ];
     protected $casts = [
         'file_size' => 'integer',
-        'download_count' => 'integer',
-        'is_active' => 'boolean',
+        'downloadCount' => 'integer',
+        'isActive' => 'boolean',
     ];
     protected $hidden = [
         'encryption_key',
@@ -111,14 +113,14 @@ class ProductFile extends Model
      */
     public function getFileExtensionAttribute(): string
     {
-        return pathinfo($this->original_name, PATHINFO_EXTENSION);
+        return pathinfo($this->originalName, PATHINFO_EXTENSION);
     }
     /**
      * Check if file exists in storage.
      */
     public function fileExists(): bool
     {
-        return Storage::disk('private')->exists($this->file_path);
+        return Storage::disk('private')->exists($this->filePath);
     }
     /**
      * Get decrypted file content.
@@ -129,7 +131,7 @@ class ProductFile extends Model
             return null;
         }
         try {
-            $encryptedContent = Storage::disk('private')->get($this->file_path);
+            $encryptedContent = Storage::disk('private')->get($this->filePath);
             if ($encryptedContent === null) {
                 return null;
             }
@@ -152,7 +154,7 @@ class ProductFile extends Model
      */
     public function incrementDownloadCount(): void
     {
-        $this->increment('download_count');
+        $this->increment('downloadCount');
     }
     /**
      * Scope for active files.
@@ -163,7 +165,7 @@ class ProductFile extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where('isActive', true);
     }
     /**
      * Scope for files belonging to a product.
@@ -175,6 +177,6 @@ class ProductFile extends Model
      */
     public function scopeForProduct($query, $productId)
     {
-        return $query->where('product_id', $productId);
+        return $query->where('productId', $productId);
     }
 }

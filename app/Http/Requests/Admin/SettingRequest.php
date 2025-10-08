@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -27,7 +29,7 @@ class SettingRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -161,7 +163,7 @@ class SettingRequest extends FormRequest
                 'max:500',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
-            'envato_personal_token' => [
+            'envatoPersonalToken' => [
                 'nullable',
                 'string',
                 'max:255',
@@ -211,7 +213,7 @@ class SettingRequest extends FormRequest
             'enable_human_question' => [
                 'boolean',
             ],
-            'human_questions' => [
+            'humanQuestions' => [
                 'nullable',
                 'array',
             ],

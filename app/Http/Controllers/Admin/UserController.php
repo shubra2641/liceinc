@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -55,14 +57,14 @@ class UserController extends Controller
         try {
             $users = User::with(['licenses', 'tickets'])
                 ->withCount(['licenses', 'tickets'])
-                ->orderBy('created_at', 'desc')
+                ->orderBy('createdAt', 'desc')
                 ->paginate(10);
             return view('admin.users.index', ['users' => $users]);
         } catch (\Exception $e) {
             Log::error('Failed to load users listing', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => auth()->id(),
+                'userId' => auth()->id(),
             ]);
             return view('admin.users.index', [
                 'users' => collect(),
@@ -128,7 +130,7 @@ class UserController extends Controller
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make(is_string($validated['password'] ?? null) ? $validated['password'] : ''),
-                'email_verified_at' => now(),
+                'emailVerifiedAt' => now(),
                 'firstname' => $validated['firstname'],
                 'lastname' => $validated['lastname'],
                 'companyname' => $validated['companyname'],
@@ -198,7 +200,7 @@ class UserController extends Controller
             Log::error('Failed to load user details', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => $user->id,
+                'userId' => $user->id,
                 'requested_by' => auth()->id(),
             ]);
             return view('admin.users.show', [
@@ -276,8 +278,8 @@ class UserController extends Controller
                 'state' => $validated['state'],
                 'postcode' => $validated['postcode'],
                 'country' => $validated['country'],
-                'status' => $validated['is_active'] ?? false ? 'active' : 'inactive',
-                'email_verified_at' => $validated['email_verified_at'] ?? null,
+                'status' => $validated['isActive'] ?? false ? 'active' : 'inactive',
+                'emailVerifiedAt' => $validated['emailVerifiedAt'] ?? null,
             ]);
             if ($request->filled('password')) {
                 $user->update([
@@ -294,7 +296,7 @@ class UserController extends Controller
             Log::error('User update failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => $user->id,
+                'userId' => $user->id,
                 'request_data' => $request->except(['password', 'password_confirmation']),
             ]);
             return redirect()->back()->withInput()
@@ -342,7 +344,7 @@ class UserController extends Controller
             Log::error('User deletion failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => $user->id,
+                'userId' => $user->id,
                 'deleted_by' => auth()->id(),
             ]);
             return redirect()->route('admin.users.index')
@@ -388,7 +390,7 @@ class UserController extends Controller
             Log::error('User role toggle failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => $user->id,
+                'userId' => $user->id,
                 'toggled_by' => auth()->id(),
             ]);
             return redirect()->back()
@@ -426,7 +428,7 @@ class UserController extends Controller
             Log::error('Password reset email failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => $user->id,
+                'userId' => $user->id,
                 'sent_by' => auth()->id(),
             ]);
             return redirect()->back()
@@ -455,11 +457,11 @@ class UserController extends Controller
      *     "licenses": [
      *         {
      *             "id": 1,
-     *             "license_key": "abc123...",
+     *             "licenseKey": "abc123...",
      *             "product_name": "Premium License",
      *             "product_price": 99.99,
      *             "status": "active",
-     *             "expires_at": "2024-12-31T23:59:59Z"
+     *             "expiresAt": "2024-12-31T23:59:59Z"
      *         }
      *     ]
      * }
@@ -471,11 +473,11 @@ class UserController extends Controller
             $licenses = $user->licenses->map(function ($license) {
                 return [
                     'id' => $license->id,
-                    'license_key' => $license->license_key,
+                    'licenseKey' => $license->licenseKey,
                     'product_name' => $license->product ? $license->product->name : 'Unknown Product',
                     'product_price' => $license->product ? $license->product->price : 0,
                     'status' => $license->status,
-                    'expires_at' => $license->expires_at,
+                    'expiresAt' => $license->expiresAt,
                 ];
             });
             return response()->json([
@@ -486,7 +488,7 @@ class UserController extends Controller
             Log::error('Failed to get user licenses', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => $userId,
+                'userId' => $userId,
                 'requested_by' => auth()->id(),
             ]);
             return response()->json([

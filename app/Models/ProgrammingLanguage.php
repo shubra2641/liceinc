@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,12 +17,12 @@ use Illuminate\Support\Facades\Storage;
  * @property string|null $description
  * @property string $status
  * @property string|null $icon
- * @property bool $is_active
- * @property int $sort_order
- * @property string|null $file_extension
+ * @property bool $isActive
+ * @property int $sortOrder
+ * @property string|null $fileExtension
  * @property string|null $license_template
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
  * @property-read int|null $products_count
  * @method static \Database\Factories\ProgrammingLanguageFactory factory($count = null, $state = [])
@@ -58,13 +60,13 @@ class ProgrammingLanguage extends Model
         'slug',
         'description',
         'icon',
-        'is_active',
-        'sort_order',
-        'file_extension',
+        'isActive',
+        'sortOrder',
+        'fileExtension',
         'license_template',
     ];
     protected $casts = [
-        'is_active' => 'boolean',
+        'isActive' => 'boolean',
     ];
     /**
      * @return HasMany<Product, $this>
@@ -102,7 +104,8 @@ class ProgrammingLanguage extends Model
     private function getDefaultLicenseTemplate(): string
     {
         $templates = [
-            'php' => "<?php\n/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n" .
+            'php' => "<?php
+declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n" .
                 " * License: {LICENSE_CODE}\n * Valid Until: {VALID_UNTIL}\n */\n\n" .
                 "define('LICENSE_CODE', '{LICENSE_CODE}');\n" .
                 "define('LICENSE_DOMAIN', '{DOMAIN}');\n" .
@@ -227,12 +230,12 @@ class ProgrammingLanguage extends Model
         $templatePath = $this->getTemplateFilePath();
         return [
             'has_file' => $this->hasTemplateFile(),
-            'file_path' => $templatePath,
+            'filePath' => $templatePath,
             'file_size' => $this->hasTemplateFile() ? filesize($templatePath) : 0,
             'last_modified' => $this->hasTemplateFile()
                 ? date('Y-m-d H:i:s', filemtime($templatePath) ?: time())
                 : null,
-            'template_content' => $this->hasTemplateFile() ?
+            'templateContent' => $this->hasTemplateFile() ?
                 file_get_contents($templatePath) : $this->getLicenseTemplate(),
         ];
     }
@@ -260,7 +263,7 @@ class ProgrammingLanguage extends Model
                 // Remove both .php and .blade.php extensions
                 $cleanName = str_replace(['.php', '.blade.php'], '', $filename);
                 $templates[$cleanName] = [
-                    'file_path' => $file,
+                    'filePath' => $file,
                     'file_size' => filesize($file),
                     'last_modified' => date('Y-m-d H:i:s', Storage::disk('local')->lastModified($file)),
                 ];

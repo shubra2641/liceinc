@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,8 +14,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property bool $is_sandbox
  * @property array<array-key, mixed>|null $credentials
  * @property string|null $webhook_url
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @method static \Database\Factories\PaymentSettingFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting newQuery()

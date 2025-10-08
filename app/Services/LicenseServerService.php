@@ -148,7 +148,7 @@ class LicenseServerService
             }
             $response = Http::timeout($this->timeout)
                 ->post("{$this->getBaseUrl()}/license/check-updates", [
-                    'license_key' => $this->sanitizeInput($licenseKey),
+                    'licenseKey' => $this->sanitizeInput($licenseKey),
                     'current_version' => $this->sanitizeInput($currentVersion),
                     'product_slug' => $this->sanitizeInput($productSlug),
                     'domain' => $domain ? $this->sanitizeDomain($domain) : null,
@@ -172,7 +172,7 @@ class LicenseServerService
         } catch (\Exception $e) {
             Log::error('License server update check exception', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging($licenseKey),
+                'licenseKey' => $this->hashForLogging($licenseKey),
                 'product_slug' => $productSlug,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -211,7 +211,7 @@ class LicenseServerService
             }
             $response = Http::timeout($this->timeout)
                 ->post("{$this->getBaseUrl()}/license/version-history", [
-                    'license_key' => $this->sanitizeInput($licenseKey),
+                    'licenseKey' => $this->sanitizeInput($licenseKey),
                     'product_slug' => $this->sanitizeInput($productSlug),
                     'domain' => $domain ? $this->sanitizeDomain($domain) : null,
                 ]);
@@ -229,7 +229,7 @@ class LicenseServerService
         } catch (\Exception $e) {
             Log::error('License server version history exception', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging($licenseKey),
+                'licenseKey' => $this->hashForLogging($licenseKey),
                 'product_slug' => $productSlug,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -357,7 +357,7 @@ class LicenseServerService
             }
             $response = Http::timeout($this->timeout)
                 ->post("{$this->getBaseUrl()}/license/latest-version", [
-                    'license_key' => $this->sanitizeInput($licenseKey),
+                    'licenseKey' => $this->sanitizeInput($licenseKey),
                     'product_slug' => $this->sanitizeInput($productSlug),
                     'domain' => $domain ? $this->sanitizeDomain($domain) : null,
                 ]);
@@ -375,7 +375,7 @@ class LicenseServerService
         } catch (\Exception $e) {
             Log::error('License server latest version exception', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging($licenseKey),
+                'licenseKey' => $this->hashForLogging($licenseKey),
                 'product_slug' => $productSlug,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -423,7 +423,7 @@ class LicenseServerService
                     if (! mkdir($tempDir, 0755, true)) {
                         Log::error('Failed to create temp directory', [
                             'temp_dir' => $tempDir,
-                            'license_key' => $this->hashForLogging($licenseKey),
+                            'licenseKey' => $this->hashForLogging($licenseKey),
                             'product_slug' => $productSlug,
                             'version' => $version,
                         ]);
@@ -435,7 +435,7 @@ class LicenseServerService
                 if (file_put_contents($tempPath, $response->body()) === false) {
                     Log::error('Failed to save update file', [
                         'temp_path' => $tempPath,
-                        'license_key' => $this->hashForLogging($licenseKey),
+                        'licenseKey' => $this->hashForLogging($licenseKey),
                         'product_slug' => $productSlug,
                         'version' => $version,
                     ]);
@@ -446,7 +446,7 @@ class LicenseServerService
                 }
                 return [
                     'success' => true,
-                    'file_path' => $tempPath,
+                    'filePath' => $tempPath,
                     'file_size' => filesize($tempPath),
                 ];
             } else {
@@ -455,7 +455,7 @@ class LicenseServerService
         } catch (\Exception $e) {
             Log::error('License server download exception', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging($licenseKey),
+                'licenseKey' => $this->hashForLogging($licenseKey),
                 'product_slug' => $productSlug,
                 'version' => $version,
                 'trace' => $e->getTraceAsString(),
@@ -564,7 +564,7 @@ class LicenseServerService
         } catch (\Exception $e) {
             Log::error('Failed to clear license cache', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging($licenseKey),
+                'licenseKey' => $this->hashForLogging($licenseKey),
                 'product_slug' => $productSlug,
             ]);
         }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -109,8 +111,8 @@ class TicketApiController extends Controller
             if (isset($validated['category_id'])) {
                 $query->where('category_id', $validated['category_id']);
             }
-            if (isset($validated['user_id'])) {
-                $query->where('user_id', $validated['user_id']);
+            if (isset($validated['userId'])) {
+                $query->where('userId', $validated['userId']);
             }
             // Search with sanitized input
             if (isset($validated['search'])) {
@@ -187,7 +189,7 @@ class TicketApiController extends Controller
      *         "version": "1.0.0"
      *     },
      *     "license_exists": true,
-     *     "license_id": 123
+     *     "licenseId": 123
      * }
      *
      * // Success response (license found via Envato API):
@@ -228,7 +230,7 @@ class TicketApiController extends Controller
                         'version' => $this->sanitizeOutput($existingLicense->product->version ?? '1.0.0'),
                     ],
                     'license_exists' => true,
-                    'license_id' => $existingLicense->id,
+                    'licenseId' => $existingLicense->id,
                 ]);
             }
             // If not found in database, try Envato API

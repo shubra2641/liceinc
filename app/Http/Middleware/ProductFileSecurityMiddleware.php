@@ -82,7 +82,7 @@ class ProductFileSecurityMiddleware
                 'method' => $request->method(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'user_id' => auth()->id(),
+                'userId' => auth()->id(),
                 'trace' => $e->getTraceAsString(),
             ]);
             // Fallback to access denied for security
@@ -151,7 +151,7 @@ class ProductFileSecurityMiddleware
                     'method' => $request->method(),
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
-                    'user_id' => auth()->id(),
+                    'userId' => auth()->id(),
                 ]);
                 return;
             }
@@ -166,7 +166,7 @@ class ProductFileSecurityMiddleware
                 'method' => $request->method(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'user_id' => auth()->id(),
+                'userId' => auth()->id(),
                 'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
@@ -191,7 +191,7 @@ class ProductFileSecurityMiddleware
             if (! auth()->check()) {
                 Log::warning('Unauthorized file access attempt', [
                     'file_id' => (is_object($file) && isset($file->id)) ? $file->id : 'unknown',
-                    'product_id' => (is_object($file) && isset($file->product_id)) ? $file->product_id : 'unknown',
+                    'productId' => (is_object($file) && isset($file->productId)) ? $file->productId : 'unknown',
                     'url' => $request->fullUrl(),
                     'method' => $request->method(),
                     'ip' => $request->ip(),
@@ -205,7 +205,7 @@ class ProductFileSecurityMiddleware
             Log::error('Additional security checks error', [
                 'error' => $e->getMessage(),
                 'file_id' => (is_object($file) && isset($file->id)) ? $file->id : 'unknown',
-                'product_id' => (is_object($file) && isset($file->product_id)) ? $file->product_id : 'unknown',
+                'productId' => (is_object($file) && isset($file->productId)) ? $file->productId : 'unknown',
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
                 'ip' => $request->ip(),
@@ -236,8 +236,8 @@ class ProductFileSecurityMiddleware
             if ($this->shouldLogFileAccess($request, $file)) {
                 Log::debug('File access security check', [
                     'file_id' => (is_object($file) && isset($file->id)) ? $file->id : 'unknown',
-                    'product_id' => (is_object($file) && isset($file->product_id)) ? $file->product_id : 'unknown',
-                    'user_id' => auth()->id(),
+                    'productId' => (is_object($file) && isset($file->productId)) ? $file->productId : 'unknown',
+                    'userId' => auth()->id(),
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                     'url' => $request->fullUrl(),
@@ -249,7 +249,7 @@ class ProductFileSecurityMiddleware
             Log::error('File access logging error', [
                 'error' => $e->getMessage(),
                 'file_id' => (is_object($file) && isset($file->id)) ? $file->id : 'unknown',
-                'product_id' => (is_object($file) && isset($file->product_id)) ? $file->product_id : 'unknown',
+                'productId' => (is_object($file) && isset($file->productId)) ? $file->productId : 'unknown',
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
                 'ip' => $request->ip(),

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,28 +11,28 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
- * @property int $product_id
+ * @property int $productId
  * @property string $version
  * @property string $title
  * @property string|null $description
  * @property array<array-key, mixed>|null $changelog
- * @property string|null $file_path
- * @property string|null $file_name
+ * @property string|null $filePath
+ * @property string|null $fileName
  * @property int|null $file_size
  * @property string|null $file_hash
- * @property string|null $update_file_path
- * @property bool $is_major
- * @property bool $is_required
- * @property bool $is_active
+ * @property string|null $update_filePath
+ * @property bool $isMajor
+ * @property bool $isRequired
+ * @property bool $isActive
  * @property array<array-key, mixed>|null $requirements
  * @property array<array-key, mixed>|null $compatibility
- * @property \Illuminate\Support\Carbon|null $released_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $releasedAt
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read string $changelog_text
  * @property-read string|null $download_url
  * @property-read string|null $file_url
- * @property-read string $formatted_file_size
+ * @property-read string $formattedFileSize
  * @property-read \App\Models\Product $product
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate active()
  * @method static \Database\Factories\ProductUpdateFactory factory($count = null, $state = [])
@@ -81,21 +83,21 @@ class ProductUpdate extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'product_id',
+        'productId',
         'version',
         'title',
         'description',
         'changelog',
-        'file_path',
-        'file_name',
+        'filePath',
+        'fileName',
         'file_size',
         'file_hash',
-        'is_major',
-        'is_required',
-        'is_active',
+        'isMajor',
+        'isRequired',
+        'isActive',
         'requirements',
         'compatibility',
-        'released_at',
+        'releasedAt',
     ];
     /**
      * The attributes that should be cast.
@@ -103,13 +105,13 @@ class ProductUpdate extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'is_major' => 'boolean',
-        'is_required' => 'boolean',
-        'is_active' => 'boolean',
+        'isMajor' => 'boolean',
+        'isRequired' => 'boolean',
+        'isActive' => 'boolean',
         'changelog' => 'array',
         'requirements' => 'array',
         'compatibility' => 'array',
-        'released_at' => 'datetime',
+        'releasedAt' => 'datetime',
     ];
     /**
      * Get the product that owns the update.
@@ -126,21 +128,21 @@ class ProductUpdate extends Model
      */
     public function getFileUrlAttribute(): ?string
     {
-        if (! $this->file_path) {
+        if (! $this->filePath) {
             return null;
         }
-        return Storage::url($this->file_path);
+        return Storage::url($this->filePath);
     }
     /**
      * Get the update file download URL.
      */
     public function getDownloadUrlAttribute(): ?string
     {
-        if (! $this->file_path) {
+        if (! $this->filePath) {
             return null;
         }
         return route('api.product-updates.download', [
-            'product' => $this->product_id,
+            'product' => $this->productId,
             'version' => $this->version,
         ]);
     }
@@ -232,7 +234,7 @@ class ProductUpdate extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where('isActive', true);
     }
     /**
      * Scope for major updates.
@@ -243,7 +245,7 @@ class ProductUpdate extends Model
      */
     public function scopeMajor($query)
     {
-        return $query->where('is_major', true);
+        return $query->where('isMajor', true);
     }
     /**
      * Scope for required updates.
@@ -254,7 +256,7 @@ class ProductUpdate extends Model
      */
     public function scopeRequired($query)
     {
-        return $query->where('is_required', true);
+        return $query->where('isRequired', true);
     }
     /**
      * Scope for updates newer than version.

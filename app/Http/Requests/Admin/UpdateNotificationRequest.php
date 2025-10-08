@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,7 +30,7 @@ class UpdateNotificationRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -114,7 +116,7 @@ class UpdateNotificationRequest extends FormRequest
                 'date',
                 'after:now',
             ],
-            'expires_at' => [
+            'expiresAt' => [
                 'nullable',
                 'date',
                 'after:now',
@@ -156,8 +158,8 @@ class UpdateNotificationRequest extends FormRequest
             'send_sms.boolean' => 'Send SMS must be true or false.',
             'schedule_time.date' => 'Schedule time must be a valid date.',
             'schedule_time.after' => 'Schedule time must be in the future.',
-            'expires_at.date' => 'Expires at must be a valid date.',
-            'expires_at.after' => 'Expires at must be in the future.',
+            'expiresAt.date' => 'Expires at must be a valid date.',
+            'expiresAt.after' => 'Expires at must be in the future.',
             'auto_dismiss.boolean' => 'Auto dismiss must be true or false.',
             'dismiss_after_hours.min' => 'Dismiss after hours must be at least 1.',
             'dismiss_after_hours.max' => 'Dismiss after hours cannot exceed 168 (1 week).',
@@ -186,7 +188,7 @@ class UpdateNotificationRequest extends FormRequest
             'send_push' => 'send push notification',
             'send_sms' => 'send SMS',
             'schedule_time' => 'schedule time',
-            'expires_at' => 'expiration date',
+            'expiresAt' => 'expiration date',
             'auto_dismiss' => 'auto dismiss',
             'dismiss_after_hours' => 'dismiss after hours',
         ];

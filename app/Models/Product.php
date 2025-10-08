@@ -23,25 +23,25 @@ use Carbon\Carbon;
  * @property string|null $description Description as string
  * @property float $price
  * @property string $status
- * @property string $license_type
- * @property int $support_days
+ * @property string $licenseType
+ * @property int $supportDays
  * @property \Illuminate\Support\Carbon|null $supported_until
  * @property float|null $extended_support_price
- * @property int|null $extended_support_days
+ * @property int|null $extended_supportDays
  * @property \Illuminate\Support\Carbon|null $extended_supported_until
  * @property array<array-key, mixed>|null $kb_categories Array of KB category IDs linked to this product
  * @property array<array-key, mixed>|null $kb_articles Array of KB article IDs linked to this product
  * @property bool $kb_access_required Whether KB access is required for this product
  * @property string|null $kb_access_message Custom message for KB access requirement
- * @property bool $is_active
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property bool $isActive
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property int|null $category_id
  * @property int|null $kb_category_id
  * @property int|null $programming_language
- * @property string|null $integration_file_path
- * @property float|null $renewal_price
- * @property string|null $renewal_period
+ * @property string|null $integration_filePath
+ * @property float|null $renewalPrice
+ * @property string|null $renewalPeriod
  * @property float $tax_rate
  * @property int $stock_quantity
  * @property bool $requires_domain
@@ -58,7 +58,7 @@ use Carbon\Carbon;
  * @property string|null $image
  * @property array<array-key, mixed>|null $gallery_images
  * @property int|null $stock
- * @property int $duration_days
+ * @property int $durationDays
  * @property bool $auto_renewal
  * @property int $renewal_reminder_days
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ProductFile> $activeFiles
@@ -69,9 +69,9 @@ use Carbon\Carbon;
  * @property-read string $current_version
  * @property-read mixed $formatted_extended_support_price
  * @property-read mixed $formatted_price
- * @property-read mixed $formatted_renewal_price
+ * @property-read mixed $formatted_renewalPrice
  * @property-read string $latest_version
- * @property-read mixed $renewal_period_label
+ * @property-read mixed $renewalPeriod_label
  * @property-read mixed $stock_status
  * @property-read mixed $tax_amount
  * @property-read mixed $total_price
@@ -159,18 +159,18 @@ class Product extends Model
         'description',
         'price',
         'status',
-        'license_type',
-        'renewal_price',
-        'renewal_period',
-        'support_days',
+        'licenseType',
+        'renewalPrice',
+        'renewalPeriod',
+        'supportDays',
         'tax_rate',
         'stock_quantity',
         'supported_until',
         'extended_support_price',
-        'extended_support_days',
+        'extended_supportDays',
         'extended_supported_until',
-        'is_active',
-        'integration_file_path',
+        'isActive',
+        'integration_filePath',
         'programming_language',
         'category_id',
         'kb_category_id',
@@ -192,20 +192,20 @@ class Product extends Model
         'kb_access_required',
         'kb_access_message',
         'stock',
-        'duration_days',
+        'durationDays',
         'auto_renewal',
         'renewal_reminder_days',
     ];
     protected $casts = [
         'price' => 'float',
         'extended_support_price' => 'float',
-        'renewal_price' => 'float',
+        'renewalPrice' => 'float',
         'tax_rate' => 'float',
         'supported_until' => 'datetime',
         'extended_supported_until' => 'datetime',
-        'extended_support_days' => 'integer',
-        'support_days' => 'integer',
-        'duration_days' => 'integer',
+        'extended_supportDays' => 'integer',
+        'supportDays' => 'integer',
+        'durationDays' => 'integer',
         'renewal_reminder_days' => 'integer',
         'stock_quantity' => 'integer',
         'stock' => 'integer',
@@ -222,11 +222,11 @@ class Product extends Model
         'description' => 'string',
         'purchase_url_envato' => 'string',
         'purchase_url_buy' => 'string',
-        'integration_file_path' => 'string',
+        'integration_filePath' => 'string',
         'status' => 'string',
-        'license_type' => 'string',
-        'renewal_period' => 'string',
-        'is_active' => 'boolean',
+        'licenseType' => 'string',
+        'renewalPeriod' => 'string',
+        'isActive' => 'boolean',
         'requires_domain' => 'boolean',
         'is_featured' => 'boolean',
         'is_popular' => 'boolean',
@@ -293,7 +293,7 @@ class Product extends Model
      */
     public function activeFiles(): HasMany
     {
-        return $this->hasMany(ProductFile::class)->where('is_active', true);
+        return $this->hasMany(ProductFile::class)->where('isActive', true);
     }
     /**
      * @return BelongsTo<ProgrammingLanguage, $this>
@@ -318,7 +318,7 @@ class Product extends Model
      */
     public function kbCategories(): BelongsToMany
     {
-        return $this->belongsToMany(KbCategory::class, 'product_kb_categories', 'product_id', 'kb_category_id');
+        return $this->belongsToMany(KbCategory::class, 'product_kb_categories', 'productId', 'kb_category_id');
     }
     /**
      * Get KB articles linked to this product.
@@ -328,7 +328,7 @@ class Product extends Model
      */
     public function kbArticles(): BelongsToMany
     {
-        return $this->belongsToMany(KbArticle::class, 'product_kb_articles', 'product_id', 'kb_article_id');
+        return $this->belongsToMany(KbArticle::class, 'product_kb_articles', 'productId', 'kb_article_id');
     }
     /**
      * Get KB categories by IDs stored in JSON.
@@ -428,7 +428,7 @@ class Product extends Model
      */
     public function isSupportActive(Carbon $licenseCreatedAt): bool
     {
-        return $licenseCreatedAt->copy()->addDays($this->support_days)->isFuture();
+        return $licenseCreatedAt->copy()->addDays($this->supportDays)->isFuture();
     }
     /**
      * Get extended support price formatted.
@@ -450,14 +450,14 @@ class Product extends Model
      */
     public function getFormattedRenewalPriceAttribute(): string
     {
-        return $this->renewal_price ? '$' . number_format((float)$this->renewal_price, 2) : 'N/A';
+        return $this->renewalPrice ? '$' . number_format((float)$this->renewalPrice, 2) : 'N/A';
     }
     /**
      * Get renewal period label.
      */
     public function getRenewalPeriodLabelAttribute(): string
     {
-        return match ($this->renewal_period ?? 'annual') {
+        return match ($this->renewalPeriod ?? 'annual') {
             'monthly' => 'Monthly',
             'quarterly' => 'Quarterly',
             'semi-annual' => 'Semi-Annual',
@@ -472,7 +472,7 @@ class Product extends Model
      */
     public function renewalPeriodLabel(): string
     {
-        $label = $this->renewal_period_label ?? 'Annual';
+        $label = $this->renewalPeriod_label ?? 'Annual';
         return is_string($label) ? $label : 'Annual';
     }
     /**
@@ -532,7 +532,7 @@ class Product extends Model
      */
     public function getRenewalPrice(): float
     {
-        return (float)($this->renewal_price ?? $this->price);
+        return (float)($this->renewalPrice ?? $this->price);
     }
     /**
      * Calculate next renewal date.
@@ -540,7 +540,7 @@ class Product extends Model
     public function getNextRenewalDate(Carbon $fromDate = null): Carbon
     {
         $fromDate = $fromDate ?? now();
-        return $fromDate->copy()->addDays($this->duration_days);
+        return $fromDate->copy()->addDays($this->durationDays);
     }
     /**
      * Calculate tax amount.
@@ -563,7 +563,7 @@ class Product extends Model
     {
         // Check if there are any product updates available
         $latestUpdate = $this->updates()
-            ->where('is_active', true)
+            ->where('isActive', true)
             ->orderBy('version', 'desc')
             ->first();
         if ($latestUpdate) {

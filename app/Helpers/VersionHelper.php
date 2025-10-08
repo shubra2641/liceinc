@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Helpers;
 
 use App\Models\Setting;
@@ -259,7 +261,7 @@ class VersionHelper
             }
             // Update the existing record
             $setting->version = $newVersion;
-            $setting->last_updated_at = now();
+            $setting->last_updatedAt = now();
             $setting->save();
             // Record version update in history
             self::recordVersionUpdate($newVersion, "Auto update from {$currentVersion}");
@@ -652,7 +654,7 @@ class VersionHelper
                 ['key' => 'current_version'],
                 [
                     'value' => $newVersion,
-                    'updated_at' => now(),
+                    'updatedAt' => now(),
                 ],
             );
             // Clear cache
@@ -691,7 +693,7 @@ class VersionHelper
             DB::beginTransaction();
             try {
                 $versions = Setting::where('key', 'LIKE', 'version_%')
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('createdAt', 'desc')
                     ->get();
                 $history = $versions->map(function ($setting) {
                     $version = str_replace('version_', '', $setting->key ?? '');
@@ -707,7 +709,7 @@ class VersionHelper
 
                     return [
                         'version' => $version,
-                        'updated_at' => $setting->created_at,
+                        'updatedAt' => $setting->createdAt,
                         'value' => $setting->value,
                     ];
                 })->filter()->values()->toArray();
@@ -765,7 +767,7 @@ class VersionHelper
                 ['key' => "version_{$version}"],
                 [
                     'value' => $sanitizedDetails,
-                    'updated_at' => now(),
+                    'updatedAt' => now(),
                 ],
             );
             DB::commit();

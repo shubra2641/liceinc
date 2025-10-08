@@ -41,7 +41,7 @@ class PaymentService
      * Includes comprehensive validation, security measures, and error handling for
      * reliable payment processing operations.
      *
-     * @param  array  $orderData  Order data including amount, currency, user_id, product_id
+     * @param  array  $orderData  Order data including amount, currency, userId, productId
      * @param  string  $gateway  Payment gateway to use ('paypal' or 'stripe')
      *
      * @return array Payment processing result with success status and redirect URL
@@ -53,8 +53,8 @@ class PaymentService
      * $result = $service->processPayment([
      *     'amount' => 99.99,
      *     'currency' => 'USD',
-     *     'user_id' => 1,
-     *     'product_id' => 1
+     *     'userId' => 1,
+     *     'productId' => 1
      * ], 'stripe');
      */
     /**
@@ -91,7 +91,7 @@ class PaymentService
      * Processes PayPal payments with comprehensive validation, security measures,
      * and error handling for reliable payment processing operations.
      *
-     * @param  array  $orderData  Order data including amount, currency, user_id, product_id
+     * @param  array  $orderData  Order data including amount, currency, userId, productId
      *
      * @return array PayPal payment processing result
      *
@@ -138,9 +138,9 @@ class PaymentService
             $transaction = new Transaction();
             $transaction->setAmount($amount);
             $transaction->setDescription('Product Purchase');
-            $userId = is_string($orderData['user_id'] ?? '') ? (string)($orderData['user_id'] ?? '') : '';
-            $productId = is_string($orderData['product_id'] ?? '') ? (string)($orderData['product_id'] ?? '') : '';
-            $transaction->setCustom("user_id:" . $userId . ", product_id:" . $productId);
+            $userId = is_string($orderData['userId'] ?? '') ? (string)($orderData['userId'] ?? '') : '';
+            $productId = is_string($orderData['productId'] ?? '') ? (string)($orderData['productId'] ?? '') : '';
+            $transaction->setCustom("userId:" . $userId . ", productId:" . $productId);
             // Create redirect URLs
             $redirectUrls = new RedirectUrls();
             $appUrl = config('app.url');
@@ -187,7 +187,7 @@ class PaymentService
      * Processes Stripe payments with comprehensive validation, security measures,
      * and error handling for reliable payment processing operations.
      *
-     * @param  array  $orderData  Order data including amount, currency, user_id, product_id
+     * @param  array  $orderData  Order data including amount, currency, userId, productId
      *
      * @return array Stripe payment processing result
      *
@@ -230,8 +230,8 @@ class PaymentService
                 'success_url' => $appUrlString . '/payment/success/stripe',
                 'cancel_url' => $appUrlString . '/payment/cancel/stripe',
                 'metadata' => [
-                    'user_id' => is_string($orderData['user_id'] ?? '') ? (string)($orderData['user_id'] ?? '') : '',
-                    'product_id' => is_string($orderData['product_id'] ?? '') ? (string)($orderData['product_id'] ?? '') : '',
+                    'userId' => is_string($orderData['userId'] ?? '') ? (string)($orderData['userId'] ?? '') : '',
+                    'productId' => is_string($orderData['productId'] ?? '') ? (string)($orderData['productId'] ?? '') : '',
                 ],
             ]);
             return [
@@ -428,7 +428,7 @@ class PaymentService
      * Includes comprehensive validation, security measures, and error handling
      * for reliable license and invoice management.
      *
-     * @param  array  $orderData  Order data including user_id, product_id, amount, currency
+     * @param  array  $orderData  Order data including userId, productId, amount, currency
      * @param  string  $gateway  Payment gateway used ('paypal' or 'stripe')
      * @param  string|null  $transactionId  Transaction ID from payment gateway
      *
@@ -439,8 +439,8 @@ class PaymentService
      *
      * @example
      * $result = $service->createLicenseAndInvoice([
-     *     'user_id' => 1,
-     *     'product_id' => 1,
+     *     'userId' => 1,
+     *     'productId' => 1,
      *     'amount' => 99.99,
      *     'currency' => 'USD'
      * ], 'stripe', 'pi_1234567890');
@@ -456,11 +456,11 @@ class PaymentService
             $this->validateOrderData($orderData);
             $this->validateGateway($gateway);
             DB::beginTransaction();
-            $user = User::find($orderData['user_id']);
+            $user = User::find($orderData['userId']);
             if (!$user) {
                 throw new \Exception('User not found');
             }
-            $product = isset($orderData['product_id']) ? Product::find($orderData['product_id']) : null;
+            $product = isset($orderData['productId']) ? Product::find($orderData['productId']) : null;
             // Check if this is for an existing invoice
             $existingInvoice = null;
             if (isset($orderData['invoice_id']) && $orderData['invoice_id']) {
@@ -487,9 +487,9 @@ class PaymentService
                     $license = null;
                     // Create new invoice for custom service
                     $invoice = Invoice::create([
-                        'user_id' => $user->id ?? 0,
-                        'product_id' => null,
-                        'license_id' => null,
+                        'userId' => $user->id ?? 0,
+                        'productId' => null,
+                        'licenseId' => null,
                         'invoice_number' => $this->generateInvoiceNumber(),
                         'amount' => $orderData['amount'],
                         'currency' => $orderData['currency'],
@@ -510,13 +510,13 @@ class PaymentService
                 } else {
                     // Create new license for product purchase
                     $license = License::create([
-                        'user_id' => $user->id ?? 0,
-                        'product_id' => $product instanceof \App\Models\Product ? $product->id : null,
-                        'license_type' => $product instanceof \App\Models\Product ? $product->license_type ?? 'single' : 'single',
+                        'userId' => $user->id ?? 0,
+                        'productId' => $product instanceof \App\Models\Product ? $product->id : null,
+                        'licenseType' => $product instanceof \App\Models\Product ? $product->licenseType ?? 'single' : 'single',
                         'status' => 'active',
                         'max_domains' => $product instanceof \App\Models\Product ? (is_numeric($product->max_domains ?? null) ? (int) $product->max_domains : 1) : 1,
-                        'license_expires_at' => $product instanceof \App\Models\Product ? $this->calculateLicenseExpiry($product) : null,
-                        'support_expires_at' => $product instanceof \App\Models\Product ? $this->calculateSupportExpiry($product) : null,
+                        'license_expiresAt' => $product instanceof \App\Models\Product ? $this->calculateLicenseExpiry($product) : null,
+                        'support_expiresAt' => $product instanceof \App\Models\Product ? $this->calculateSupportExpiry($product) : null,
                         'notes' => "Purchased via {$gateway}",
                     ]);
                     // Create new invoice using InvoiceService
@@ -628,8 +628,8 @@ class PaymentService
         if (empty($orderData)) {
             throw new InvalidArgumentException('Order data cannot be empty');
         }
-        if (isset($orderData['user_id']) === false || ! is_numeric($orderData['user_id']) || $orderData['user_id'] < 1) {
-            throw new InvalidArgumentException('Valid user_id is required');
+        if (isset($orderData['userId']) === false || ! is_numeric($orderData['userId']) || $orderData['userId'] < 1) {
+            throw new InvalidArgumentException('Valid userId is required');
         }
         if (! isset($orderData['amount']) || ! is_numeric($orderData['amount']) || $orderData['amount'] <= 0) {
             throw new InvalidArgumentException('Valid amount is required');
@@ -755,12 +755,12 @@ class PaymentService
     protected function calculateLicenseExpiry(Product $product): ?\DateTime
     {
         try {
-            // If product has lifetime license or renewal_period is lifetime, return null (no expiry)
-            if ($product->license_type === 'lifetime' || $product->renewal_period === 'lifetime') {
+            // If product has lifetime license or renewalPeriod is lifetime, return null (no expiry)
+            if ($product->licenseType === 'lifetime' || $product->renewalPeriod === 'lifetime') {
                 return null;
             }
-            // Calculate expiry based on renewal_period from product
-            $days = $this->getRenewalPeriodInDays($product->renewal_period);
+            // Calculate expiry based on renewalPeriod from product
+            $days = $this->getRenewalPeriodInDays($product->renewalPeriod);
             // If no valid renewal period, use default from settings
             if ($days === null) {
                 $defaultDuration = \App\Helpers\ConfigHelper::getSetting('license_default_duration', 365);
@@ -769,7 +769,7 @@ class PaymentService
             return now()->addDays($days);
         } catch (\Exception $e) {
             Log::error('Failed to calculate license expiry', [
-                'product_id' => $product->id,
+                'productId' => $product->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -788,8 +788,8 @@ class PaymentService
     protected function calculateSupportExpiry(Product $product): \DateTime
     {
         try {
-            // Use product's support_days or default from settings
-            $productSupportDays = $product->support_days ?? null;
+            // Use product's supportDays or default from settings
+            $productSupportDays = $product->supportDays ?? null;
             $defaultSupportDuration = \App\Helpers\ConfigHelper::getSetting('license_support_duration', 365);
             $supportDuration = is_numeric($productSupportDays) ? (int)$productSupportDays :
                               (is_numeric($defaultSupportDuration) ? (int)$defaultSupportDuration : 365);
@@ -797,7 +797,7 @@ class PaymentService
             return now()->addDays($supportDuration);
         } catch (\Exception $e) {
             Log::error('Failed to calculate support expiry', [
-                'product_id' => $product->id,
+                'productId' => $product->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

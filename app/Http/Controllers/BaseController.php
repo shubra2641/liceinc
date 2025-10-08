@@ -170,7 +170,7 @@ abstract class BaseController extends Controller
             'method' => $request->method(),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'user_id' => Auth::id(),
+            'userId' => Auth::id(),
             'errors' => $errors,
             'input' => $this->sanitizeLogData($request->all()),
         ]);
@@ -201,7 +201,7 @@ abstract class BaseController extends Controller
             'method' => $request->method(),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'user_id' => Auth::id(),
+            'userId' => Auth::id(),
         ], $context));
     }
     /**
@@ -228,7 +228,7 @@ abstract class BaseController extends Controller
             'password',
             'password_confirmation',
             'api_token',
-            'license_key',
+            'licenseKey',
             'purchase_code',
             'credit_card',
             'ssn',
@@ -286,7 +286,7 @@ abstract class BaseController extends Controller
             'url' => $request->fullUrl(),
             'method' => $request->method(),
             'ip' => $request->ip(),
-            'user_id' => Auth::id(),
+            'userId' => Auth::id(),
         ]);
         return $this->errorResponse($message, null, $statusCode);
     }
@@ -330,7 +330,7 @@ abstract class BaseController extends Controller
         if (! $this->hasPermission($permission)) {
             Log::warning('Permission denied', [
                 'permission' => $permission,
-                'user_id' => Auth::id(),
+                'userId' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             abort(Response::HTTP_FORBIDDEN, 'Insufficient permissions');

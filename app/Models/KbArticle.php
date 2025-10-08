@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * @property int $id
  * @property int $kb_category_id
- * @property int|null $product_id
+ * @property int|null $productId
  * @property string $title
  * @property string $slug
  * @property string|null $excerpt
@@ -22,13 +24,13 @@ use Illuminate\Database\Eloquent\Builder;
  * @property string|null $serial
  * @property int $requires_serial
  * @property string|null $serial_message
- * @property int $sort_order
+ * @property int $sortOrder
  * @property int $views
  * @property bool $is_published
  * @property bool $allow_comments
  * @property bool $is_featured
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read \App\Models\KbCategory $category
  * @property-read \App\Models\Product|null $product
  * @method static \Database\Factories\KbArticleFactory factory($count = null, $state = [])

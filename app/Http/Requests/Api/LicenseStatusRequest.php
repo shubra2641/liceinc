@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -27,7 +29,7 @@ class LicenseStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'license_key' => [
+            'licenseKey' => [
                 'required',
                 'string',
                 'max:255',
@@ -49,8 +51,8 @@ class LicenseStatusRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'license_key.required' => 'License key is required.',
-            'license_key.regex' => 'License key contains invalid characters.',
+            'licenseKey.required' => 'License key is required.',
+            'licenseKey.regex' => 'License key contains invalid characters.',
             'product_slug.required' => 'Product slug is required.',
             'product_slug.regex' => 'Product slug contains invalid characters.',
         ];
@@ -63,7 +65,7 @@ class LicenseStatusRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'license_key' => 'license key',
+            'licenseKey' => 'license key',
             'product_slug' => 'product slug',
         ];
     }
@@ -73,9 +75,9 @@ class LicenseStatusRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         // Sanitize inputs to prevent XSS
-        if ($this->has('license_key')) {
+        if ($this->has('licenseKey')) {
             $this->merge([
-                'license_key' => $this->sanitizeInput($this->input('license_key')),
+                'licenseKey' => $this->sanitizeInput($this->input('licenseKey')),
             ]);
         }
         if ($this->has('product_slug')) {

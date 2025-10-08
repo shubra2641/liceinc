@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +31,7 @@ class LicenseVerificationLogRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -67,14 +69,14 @@ class LicenseVerificationLogRequest extends FormRequest
                 'include_comparison' => [
                     'boolean',
                 ],
-                'date_from' => [
+                'dateFrom' => [
                     'nullable',
                     'date',
                 ],
-                'date_to' => [
+                'dateTo' => [
                     'nullable',
                     'date',
-                    'after_or_equal:date_from',
+                    'after_or_equal:dateFrom',
                 ],
             ];
         }
@@ -176,24 +178,24 @@ class LicenseVerificationLogRequest extends FormRequest
                 'max:255',
                 'regex:/^[a-zA-Z0-9\-_.]+$/',
             ],
-            'ip_address' => [
+            'ipAddress' => [
                 'nullable',
                 'ip',
             ],
-            'license_key' => [
+            'licenseKey' => [
                 'nullable',
                 'string',
                 'max:255',
                 'regex:/^[a-zA-Z0-9\-_]+$/',
             ],
-            'date_from' => [
+            'dateFrom' => [
                 'nullable',
                 'date',
             ],
-            'date_to' => [
+            'dateTo' => [
                 'nullable',
                 'date',
-                'after_or_equal:date_from',
+                'after_or_equal:dateFrom',
             ],
             'per_page' => [
                 'nullable',
@@ -207,7 +209,7 @@ class LicenseVerificationLogRequest extends FormRequest
                 'max:50',
                 'regex:/^[a-zA-Z0-9\s\-_.,!?@#$%&*()]+$/',
             ],
-            'sort_order' => [
+            'sortOrder' => [
                 'nullable',
                 'string',
                 'max:10',
@@ -247,15 +249,15 @@ class LicenseVerificationLogRequest extends FormRequest
             'status.regex' => 'Status contains invalid characters.',
             'source.regex' => 'Source contains invalid characters.',
             'domain.regex' => 'Domain can only contain letters, numbers, hyphens, underscores, and dots.',
-            'ip_address.ip' => 'IP address must be a valid IP address.',
-            'license_key.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
-            'date_from.date' => 'Date from must be a valid date.',
-            'date_to.date' => 'Date to must be a valid date.',
-            'date_to.after_or_equal' => 'Date to must be after or equal to date from.',
+            'ipAddress.ip' => 'IP address must be a valid IP address.',
+            'licenseKey.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
+            'dateFrom.date' => 'Date from must be a valid date.',
+            'dateTo.date' => 'Date to must be a valid date.',
+            'dateTo.after_or_equal' => 'Date to must be after or equal to date from.',
             'per_page.min' => 'Per page must be at least 1.',
             'per_page.max' => 'Per page cannot exceed 100.',
             'sort_by.regex' => 'Sort by contains invalid characters.',
-            'sort_order.regex' => 'Sort order contains invalid characters.',
+            'sortOrder.regex' => 'Sort order contains invalid characters.',
             'group_by.regex' => 'Group by contains invalid characters.',
             'threshold_type.regex' => 'Threshold type contains invalid characters.',
             'risk_level.regex' => 'Risk level contains invalid characters.',
@@ -292,13 +294,13 @@ class LicenseVerificationLogRequest extends FormRequest
             'status' => 'verification status',
             'source' => 'verification source',
             'domain' => 'domain',
-            'ip_address' => 'IP address',
-            'license_key' => 'license key',
-            'date_from' => 'date from',
-            'date_to' => 'date to',
+            'ipAddress' => 'IP address',
+            'licenseKey' => 'license key',
+            'dateFrom' => 'date from',
+            'dateTo' => 'date to',
             'per_page' => 'per page',
             'sort_by' => 'sort by',
-            'sort_order' => 'sort order',
+            'sortOrder' => 'sort order',
             'group_by' => 'group by',
             'include_breakdown' => 'include breakdown',
             'include_trends' => 'include trends',
@@ -330,9 +332,9 @@ class LicenseVerificationLogRequest extends FormRequest
             'status' => $this->input('status') ? $this->sanitizeInput($this->input('status')) : null,
             'source' => $this->input('source') ? $this->sanitizeInput($this->input('source')) : null,
             'domain' => $this->input('domain') ? $this->sanitizeInput($this->input('domain')) : null,
-            'license_key' => $this->input('license_key') ? $this->sanitizeInput($this->input('license_key')) : null,
+            'licenseKey' => $this->input('licenseKey') ? $this->sanitizeInput($this->input('licenseKey')) : null,
             'sort_by' => $this->input('sort_by') ? $this->sanitizeInput($this->input('sort_by')) : null,
-            'sort_order' => $this->input('sort_order') ? $this->sanitizeInput($this->input('sort_order')) : null,
+            'sortOrder' => $this->input('sortOrder') ? $this->sanitizeInput($this->input('sortOrder')) : null,
             'group_by' => $this->input('group_by') ? $this->sanitizeInput($this->input('group_by')) : null,
             'threshold_type' => $this->input('threshold_type') ? $this->sanitizeInput($this->input('threshold_type')) : null,
             'risk_level' => $this->input('risk_level') ? $this->sanitizeInput($this->input('risk_level')) : null,
@@ -363,8 +365,8 @@ class LicenseVerificationLogRequest extends FormRequest
             'hours' => $this->hours ?? 24,
             'min_attempts' => $this->min_attempts ?? 3,
             'per_page' => $this->per_page ?? 20,
-            'sort_by' => $this->sort_by ?? 'created_at',
-            'sort_order' => $this->sort_order ?? 'desc',
+            'sort_by' => $this->sort_by ?? 'createdAt',
+            'sortOrder' => $this->sortOrder ?? 'desc',
             'include_breakdown' => $this->include_breakdown ?? true,
             'include_trends' => $this->include_trends ?? true,
             'include_comparison' => $this->include_comparison ?? false,

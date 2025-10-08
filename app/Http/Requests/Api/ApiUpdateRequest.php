@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -47,7 +49,7 @@ class ApiUpdateRequest extends FormRequest
         // Check updates validation
         if ($isCheck) {
             return [
-                'license_key' => [
+                'licenseKey' => [
                     'required',
                     'string',
                     'max:255',
@@ -71,7 +73,7 @@ class ApiUpdateRequest extends FormRequest
                     'max:255',
                     'regex:/^[a-zA-Z0-9\-_]+$/',
                 ],
-                'product_id' => [
+                'productId' => [
                     'nullable',
                     'integer',
                     'min:1',
@@ -108,7 +110,7 @@ class ApiUpdateRequest extends FormRequest
         // Version history validation
         if ($isHistory) {
             return [
-                'license_key' => [
+                'licenseKey' => [
                     'required',
                     'string',
                     'max:255',
@@ -126,7 +128,7 @@ class ApiUpdateRequest extends FormRequest
                     'max:255',
                     'regex:/^[a-zA-Z0-9\-_]+$/',
                 ],
-                'product_id' => [
+                'productId' => [
                     'nullable',
                     'integer',
                     'min:1',
@@ -157,7 +159,7 @@ class ApiUpdateRequest extends FormRequest
                     'integer',
                     'min:0',
                 ],
-                'sort_order' => [
+                'sortOrder' => [
                     'nullable',
                     'string',
                     'max:10',
@@ -169,21 +171,21 @@ class ApiUpdateRequest extends FormRequest
                     'max:20',
                     'regex:/^[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z0-9]+)?$/',
                 ],
-                'filter_date_from' => [
+                'filter_dateFrom' => [
                     'nullable',
                     'date',
                 ],
-                'filter_date_to' => [
+                'filter_dateTo' => [
                     'nullable',
                     'date',
-                    'after_or_equal:filter_date_from',
+                    'after_or_equal:filter_dateFrom',
                 ],
             ];
         }
         // Latest version validation
         if ($isLatest) {
             return [
-                'license_key' => [
+                'licenseKey' => [
                     'required',
                     'string',
                     'max:255',
@@ -201,7 +203,7 @@ class ApiUpdateRequest extends FormRequest
                     'max:255',
                     'regex:/^[a-zA-Z0-9\-_]+$/',
                 ],
-                'product_id' => [
+                'productId' => [
                     'nullable',
                     'integer',
                     'min:1',
@@ -250,7 +252,7 @@ class ApiUpdateRequest extends FormRequest
         // Update info validation
         if ($isInfo) {
             return [
-                'license_key' => [
+                'licenseKey' => [
                     'required',
                     'string',
                     'max:255',
@@ -268,7 +270,7 @@ class ApiUpdateRequest extends FormRequest
                     'max:255',
                     'regex:/^[a-zA-Z0-9\-_]+$/',
                 ],
-                'product_id' => [
+                'productId' => [
                     'nullable',
                     'integer',
                     'min:1',
@@ -322,8 +324,8 @@ class ApiUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'license_key.required' => 'License key is required.',
-            'license_key.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
+            'licenseKey.required' => 'License key is required.',
+            'licenseKey.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
             'current_version.required' => 'Current version is required.',
             'current_version.regex' => 'Current version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
@@ -331,8 +333,8 @@ class ApiUpdateRequest extends FormRequest
             'domain.regex' => 'Domain can only contain letters, numbers, hyphens, underscores, and dots.',
             'product_slug.required' => 'Product slug is required.',
             'product_slug.regex' => 'Product slug can only contain letters, numbers, hyphens, and underscores.',
-            'product_id.integer' => 'Product ID must be a valid integer.',
-            'product_id.min' => 'Product ID must be at least 1.',
+            'productId.integer' => 'Product ID must be a valid integer.',
+            'productId.min' => 'Product ID must be at least 1.',
             'version.required' => 'Version is required.',
             'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
@@ -348,12 +350,12 @@ class ApiUpdateRequest extends FormRequest
             'limit.min' => 'Limit must be at least 1.',
             'limit.max' => 'Limit cannot exceed 100.',
             'offset.min' => 'Offset must be at least 0.',
-            'sort_order.regex' => 'Sort order contains invalid characters.',
+            'sortOrder.regex' => 'Sort order contains invalid characters.',
             'filter_version.regex' => 'Filter version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
-            'filter_date_from.date' => 'Filter date from must be a valid date.',
-            'filter_date_to.date' => 'Filter date to must be a valid date.',
-            'filter_date_to.after_or_equal' => 'Filter date to must be after or equal to filter date from.',
+            'filter_dateFrom.date' => 'Filter date from must be a valid date.',
+            'filter_dateTo.date' => 'Filter date to must be a valid date.',
+            'filter_dateTo.after_or_equal' => 'Filter date to must be after or equal to filter date from.',
             'compare_versions.boolean' => 'Compare versions must be true or false.',
             'include_download_url.boolean' => 'Include download URL must be true or false.',
             'include_checksums.boolean' => 'Include checksums must be true or false.',
@@ -370,11 +372,11 @@ class ApiUpdateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'license_key' => 'license key',
+            'licenseKey' => 'license key',
             'current_version' => 'current version',
             'domain' => 'domain',
             'product_slug' => 'product slug',
-            'product_id' => 'product ID',
+            'productId' => 'product ID',
             'version' => 'version',
             'include_changelog' => 'include changelog',
             'include_dependencies' => 'include dependencies',
@@ -387,10 +389,10 @@ class ApiUpdateRequest extends FormRequest
             'notify_on_available' => 'notify on available',
             'limit' => 'limit',
             'offset' => 'offset',
-            'sort_order' => 'sort order',
+            'sortOrder' => 'sort order',
             'filter_version' => 'filter version',
-            'filter_date_from' => 'filter date from',
-            'filter_date_to' => 'filter date to',
+            'filter_dateFrom' => 'filter date from',
+            'filter_dateTo' => 'filter date to',
             'compare_versions' => 'compare versions',
             'include_download_url' => 'include download URL',
             'include_checksums' => 'include checksums',
@@ -406,13 +408,13 @@ class ApiUpdateRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'license_key' => $this->sanitizeInput($this->input('license_key')),
+            'licenseKey' => $this->sanitizeInput($this->input('licenseKey')),
             'current_version' => $this->input('current_version') ? $this->sanitizeInput($this->input('current_version')) : null,
             'domain' => $this->sanitizeInput($this->input('domain')),
             'product_slug' => $this->sanitizeInput($this->input('product_slug')),
             'version' => $this->input('version') ? $this->sanitizeInput($this->input('version')) : null,
             'filter_version' => $this->input('filter_version') ? $this->sanitizeInput($this->input('filter_version')) : null,
-            'sort_order' => $this->input('sort_order') ? $this->sanitizeInput($this->input('sort_order')) : null,
+            'sortOrder' => $this->input('sortOrder') ? $this->sanitizeInput($this->input('sortOrder')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -446,7 +448,7 @@ class ApiUpdateRequest extends FormRequest
             'include_rollback_info' => $this->include_rollback_info ?? false,
             'limit' => $this->limit ?? 20,
             'offset' => $this->offset ?? 0,
-            'sort_order' => $this->sort_order ?? 'desc',
+            'sortOrder' => $this->sortOrder ?? 'desc',
         ]);
     }
     /**

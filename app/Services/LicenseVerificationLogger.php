@@ -80,14 +80,14 @@ class LicenseVerificationLogger
             $status = self::determineStatus($isValid, $errorDetails);
             // Create log entry
             $log = LicenseVerificationLog::create([
-                'purchase_code_hash' => $purchaseCodeHash,
+                'purchaseCodeHash' => $purchaseCodeHash,
                 'domain' => $domain,
-                'ip_address' => $ipAddress,
+                'ipAddress' => $ipAddress,
                 'user_agent' => $userAgent,
-                'is_valid' => $isValid,
-                'response_message' => $message,
+                'isValid' => $isValid,
+                'responseMessage' => $message,
                 'response_data' => $responseData,
-                'verification_source' => $source,
+                'verificationSource' => $source,
                 'status' => $status,
                 'error_details' => $errorDetails,
                 'verified_at' => $isValid ? now() : null,
@@ -96,10 +96,10 @@ class LicenseVerificationLogger
             if (! $isValid || $errorDetails) {
                 $logLevel = $errorDetails ? 'error' : 'warning';
                 Log::channel('single')->$logLevel('License verification attempt', [
-                    'purchase_code_hash' => $purchaseCodeHash,
+                    'purchaseCodeHash' => $purchaseCodeHash,
                     'domain' => $domain,
-                    'ip_address' => $ipAddress,
-                    'is_valid' => $isValid,
+                    'ipAddress' => $ipAddress,
+                    'isValid' => $isValid,
                     'status' => $status,
                     'source' => $source,
                     'message' => $message,
@@ -109,17 +109,17 @@ class LicenseVerificationLogger
         } catch (Exception $e) {
             // Fallback logging if database fails
             Log::error('Failed to log license verification attempt', [
-                'purchase_code_hash' => hash('sha256', $purchaseCode),
+                'purchaseCodeHash' => hash('sha256', $purchaseCode),
                 'domain' => $domain,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
             // Return a mock log entry
             return new LicenseVerificationLog([
-                'purchase_code_hash' => hash('sha256', $purchaseCode),
+                'purchaseCodeHash' => hash('sha256', $purchaseCode),
                 'domain' => $domain,
-                'is_valid' => $isValid,
-                'response_message' => $message,
+                'isValid' => $isValid,
+                'responseMessage' => $message,
                 'status' => $isValid ? 'success' : 'failed',
             ]);
         }
@@ -147,16 +147,16 @@ class LicenseVerificationLogger
             $days = self::validateDays($days);
             $startDate = now()->subDays($days);
             return [
-                'total_attempts' => LicenseVerificationLog::where('created_at', '>=', $startDate)
+                'total_attempts' => LicenseVerificationLog::where('createdAt', '>=', $startDate)
                     ->count(),
-                'successful_attempts' => LicenseVerificationLog::where('created_at', '>=', $startDate)
+                'successful_attempts' => LicenseVerificationLog::where('createdAt', '>=', $startDate)
                     ->successful()->count(),
-                'failed_attempts' => LicenseVerificationLog::where('created_at', '>=', $startDate)
+                'failed_attempts' => LicenseVerificationLog::where('createdAt', '>=', $startDate)
                     ->failed()->count(),
-                'unique_domains' => LicenseVerificationLog::where('created_at', '>=', $startDate)
+                'unique_domains' => LicenseVerificationLog::where('createdAt', '>=', $startDate)
                     ->distinct('domain')->count('domain'),
-                'unique_ips' => LicenseVerificationLog::where('created_at', '>=', $startDate)
-                    ->distinct('ip_address')->count('ip_address'),
+                'unique_ips' => LicenseVerificationLog::where('createdAt', '>=', $startDate)
+                    ->distinct('ipAddress')->count('ipAddress'),
                 'recent_failed_attempts' => LicenseVerificationLog::recent(24)->failed()->count(),
             ];
         } catch (Exception $e) {
@@ -196,8 +196,8 @@ class LicenseVerificationLogger
             $minAttempts = self::validateMinAttempts($minAttempts);
             $result = LicenseVerificationLog::recent($hours)
                 ->failed()
-                ->selectRaw('ip_address, COUNT(*) as attempt_count, MAX(created_at) as last_attempt')
-                ->groupBy('ip_address')
+                ->selectRaw('ipAddress, COUNT(*) as attempt_count, MAX(createdAt) as last_attempt')
+                ->groupBy('ipAddress')
                 ->having('attempt_count', '>=', $minAttempts)
                 ->orderBy('attempt_count', 'desc')
                 ->get()
@@ -234,7 +234,7 @@ class LicenseVerificationLogger
         try {
             $limit = self::validateLimit($limit);
             return LicenseVerificationLog::with([])
-                ->orderBy('created_at', 'desc')
+                ->orderBy('createdAt', 'desc')
                 ->limit($limit)
                 ->get();
         } catch (Exception $e) {
@@ -261,7 +261,7 @@ class LicenseVerificationLogger
         try {
             $days = self::validateDays($days);
             $cutoffDate = now()->subDays($days);
-            $deletedCount = LicenseVerificationLog::where('created_at', '<', $cutoffDate)->delete();
+            $deletedCount = LicenseVerificationLog::where('createdAt', '<', $cutoffDate)->delete();
             // Cleanup completed successfully - no logging needed for successful operations
             return is_numeric($deletedCount) ? (int)$deletedCount : 0;
         } catch (Exception $e) {

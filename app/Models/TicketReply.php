@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,10 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $ticket_id
- * @property int $user_id
+ * @property int $userId
  * @property string $message
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read \App\Models\Ticket $ticket
  * @property-read \App\Models\User $user
  * @method static \Database\Factories\TicketReplyFactory factory($count = null, $state = [])
@@ -41,12 +43,12 @@ class TicketReply extends Model
 
     protected $fillable = [
         'ticket_id',
-        'user_id',
+        'userId',
         'message',
     ];
     protected $casts = [
         'ticket_id' => 'integer',
-        'user_id' => 'integer',
+        'userId' => 'integer',
     ];
     /**
      * @return BelongsTo<Ticket, $this>

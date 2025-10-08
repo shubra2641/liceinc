@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Helpers\SecureFileHelper;
@@ -47,10 +49,10 @@ class ProgrammingLanguageController extends Controller
      */
     public function index(): View
     {
-        $languages = ProgrammingLanguage::orderBy('sort_order')->orderBy('name')->paginate(15);
+        $languages = ProgrammingLanguage::orderBy('sortOrder')->orderBy('name')->paginate(15);
         $availableTemplates = ProgrammingLanguage::getAvailableTemplateFiles();
 
-        // Some views expect $programming_languages, others expect $languages — provide both aliases
+        // Some views expect $programmingLanguages, others expect $languages — provide both aliases
         return view('admin.programming-languages.index', [
             'programmingLanguages' => $languages,
             'languages' => $languages,
@@ -100,14 +102,14 @@ class ProgrammingLanguageController extends Controller
                 }
             } else {
                 // Get custom template from language
-                $programming_language = ProgrammingLanguage::where('slug', $language)->first();
-                if (! $programming_language) {
+                $programmingLanguage = ProgrammingLanguage::where('slug', $language)->first();
+                if (! $programmingLanguage) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Programming language not found',
                     ], 404);
                 }
-                $templatePath = $programming_language->getTemplateFilePath();
+                $templatePath = $programmingLanguage->getTemplateFilePath();
                 if (file_exists($templatePath)) {
                     $content = file_get_contents($templatePath);
                 } else {
@@ -194,17 +196,17 @@ class ProgrammingLanguageController extends Controller
      * Shows detailed information about a specific programming language
      * including available templates and configuration details.
      *
-     * @param  ProgrammingLanguage  $programming_language  The programming language to display
+     * @param  ProgrammingLanguage  $programmingLanguage  The programming language to display
      *
      * @return View The programming language details view
      *
      * @version 1.0.6
      */
-    public function show(ProgrammingLanguage $programming_language): View
+    public function show(ProgrammingLanguage $programmingLanguage): View
     {
         $availableTemplates = ProgrammingLanguage::getAvailableTemplateFiles();
 
-        return view('admin.programming-languages.show', ['programming_language' => $programming_language, 'availableTemplates' => $availableTemplates]);
+        return view('admin.programming-languages.show', ['programming_language' => $programmingLanguage, 'availableTemplates' => $availableTemplates]);
     }
 
     /**
@@ -213,15 +215,15 @@ class ProgrammingLanguageController extends Controller
      * Displays the programming language edit form with populated data
      * for updating language configuration.
      *
-     * @param  ProgrammingLanguage  $programming_language  The programming language to edit
+     * @param  ProgrammingLanguage  $programmingLanguage  The programming language to edit
      *
      * @return View The programming language edit form view
      *
      * @version 1.0.6
      */
-    public function edit(ProgrammingLanguage $programming_language): View
+    public function edit(ProgrammingLanguage $programmingLanguage): View
     {
-        return view('admin.programming-languages.edit', ['programming_language' => $programming_language]);
+        return view('admin.programming-languages.edit', ['programming_language' => $programmingLanguage]);
     }
 
     /**
@@ -231,7 +233,7 @@ class ProgrammingLanguageController extends Controller
      * automatic slug generation, and proper error handling.
      *
      * @param  ProgrammingLanguageRequest  $request  The validated request containing updated language data
-     * @param  ProgrammingLanguage  $programming_language  The programming language to update
+     * @param  ProgrammingLanguage  $programmingLanguage  The programming language to update
      *
      * @return RedirectResponse Redirect to languages list with success message
      *
@@ -241,13 +243,13 @@ class ProgrammingLanguageController extends Controller
      */
     public function update(
         ProgrammingLanguageRequest $request,
-        ProgrammingLanguage $programming_language,
+        ProgrammingLanguage $programmingLanguage,
     ): RedirectResponse {
         try {
             DB::beginTransaction();
             $validated = $request->validated();
             $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
-            $programming_language->update($validated);
+            $programmingLanguage->update($validated);
             DB::commit();
 
             return redirect()->route('admin.programming-languages.index')
@@ -257,7 +259,7 @@ class ProgrammingLanguageController extends Controller
             Log::error('Programming language update failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'programming_language_id' => $programming_language->id,
+                'programming_language_id' => $programmingLanguage->id,
                 'request_data' => $request->except(['license_template']),
             ]);
 
@@ -274,7 +276,7 @@ class ProgrammingLanguageController extends Controller
      * Deletes a programming language with proper validation to ensure
      * it's not being used by any products.
      *
-     * @param  ProgrammingLanguage  $programming_language  The programming language to delete
+     * @param  ProgrammingLanguage  $programmingLanguage  The programming language to delete
      *
      * @return RedirectResponse Redirect to languages list with success message
      *
@@ -282,18 +284,18 @@ class ProgrammingLanguageController extends Controller
      *
      * @version 1.0.6
      */
-    public function destroy(ProgrammingLanguage $programming_language): RedirectResponse
+    public function destroy(ProgrammingLanguage $programmingLanguage): RedirectResponse
     {
         try {
             DB::beginTransaction();
             // Check if language is being used by products
-            if ($programming_language->products()->count() > 0) {
+            if ($programmingLanguage->products()->count() > 0) {
                 DB::rollBack();
 
                 return redirect()->route('admin.programming-languages.index')
                     ->with('error', 'Cannot delete programming language that is being used by products.');
             }
-            $programming_language->delete();
+            $programmingLanguage->delete();
             DB::commit();
 
             return redirect()->route('admin.programming-languages.index')
@@ -303,7 +305,7 @@ class ProgrammingLanguageController extends Controller
             Log::error('Programming language deletion failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'programming_language_id' => $programming_language->id,
+                'programming_language_id' => $programmingLanguage->id,
             ]);
 
             return redirect()
@@ -318,7 +320,7 @@ class ProgrammingLanguageController extends Controller
      * Toggles the programming language active status with proper
      * error handling and database transactions.
      *
-     * @param  ProgrammingLanguage  $programming_language  The programming language to toggle
+     * @param  ProgrammingLanguage  $programmingLanguage  The programming language to toggle
      *
      * @return RedirectResponse Redirect back with success message
      *
@@ -326,14 +328,14 @@ class ProgrammingLanguageController extends Controller
      *
      * @version 1.0.6
      */
-    public function toggle(ProgrammingLanguage $programming_language): RedirectResponse
+    public function toggle(ProgrammingLanguage $programmingLanguage): RedirectResponse
     {
         try {
             DB::beginTransaction();
-            $programming_language->update([
-                'is_active' => ! $programming_language->is_active,
+            $programmingLanguage->update([
+                'isActive' => ! $programmingLanguage->isActive,
             ]);
-            $status = $programming_language->is_active ? 'activated' : 'deactivated';
+            $status = $programmingLanguage->isActive ? 'activated' : 'deactivated';
             DB::commit();
 
             return redirect()->route('admin.programming-languages.index')
@@ -343,7 +345,7 @@ class ProgrammingLanguageController extends Controller
             Log::error('Programming language status toggle failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'programming_language_id' => $programming_language->id,
+                'programming_language_id' => $programmingLanguage->id,
             ]);
 
             return redirect()
@@ -358,15 +360,15 @@ class ProgrammingLanguageController extends Controller
      * Retrieves detailed template information including file existence,
      * size, and modification date for a specific programming language.
      *
-     * @param  ProgrammingLanguage  $programming_language  The programming language to get template info for
+     * @param  ProgrammingLanguage  $programmingLanguage  The programming language to get template info for
      *
      * @return JsonResponse JSON response with template information
      *
      * @version 1.0.6
      */
-    public function getTemplateInfo(ProgrammingLanguage $programming_language): JsonResponse
+    public function getTemplateInfo(ProgrammingLanguage $programmingLanguage): JsonResponse
     {
-        $templatePath = resource_path("templates/licenses/{$programming_language->slug}.blade.php");
+        $templatePath = resource_path("templates/licenses/{$programmingLanguage->slug}.blade.php");
         $templateExists = file_exists($templatePath);
         $templateInfo = [
             'exists' => $templateExists,
@@ -426,12 +428,12 @@ class ProgrammingLanguageController extends Controller
             $availableTemplates = ProgrammingLanguage::getAvailableTemplateFiles();
             $validationResults = [];
             foreach ($availableTemplates as $templateName => $templateInfo) {
-                $templatePath = (is_array($templateInfo) && isset($templateInfo['file_path'])) ? $templateInfo['file_path'] : '';
+                $templatePath = (is_array($templateInfo) && isset($templateInfo['filePath'])) ? $templateInfo['filePath'] : '';
                 $content = file_get_contents(is_string($templatePath) ? $templatePath : '');
                 $result = [
                     'template' => $templateName,
-                    'file_path' => $templatePath,
-                    'is_valid' => true,
+                    'filePath' => $templatePath,
+                    'isValid' => true,
                     'errors' => [],
                     'warnings' => [],
                 ];
@@ -452,7 +454,7 @@ class ProgrammingLanguageController extends Controller
                 if (pathinfo(is_string($templatePath) ? $templatePath : '', PATHINFO_EXTENSION) === 'php') {
                     $syntaxCheck = $content !== false ? $this->validatePHPSyntax($content) : false;
                     if (! $syntaxCheck) {
-                        $result['is_valid'] = false;
+                        $result['isValid'] = false;
                         $result['errors'][] = 'PHP syntax error detected';
                     }
                 }
@@ -472,7 +474,7 @@ class ProgrammingLanguageController extends Controller
                 'summary' => [
                     'total_templates' => count($validationResults),
                     'valid_templates' => count(
-                        array_filter($validationResults, fn ($r) => $r['is_valid']),
+                        array_filter($validationResults, fn ($r) => $r['isValid']),
                     ),
                     'templates_with_errors' => count(
                         array_filter($validationResults, fn ($r) => ! empty($r['errors'])),
@@ -526,7 +528,7 @@ class ProgrammingLanguageController extends Controller
      * with proper file validation and security measures.
      *
      * @param  ProgrammingLanguageAdvancedRequest  $request  The validated request containing template file
-     * @param  ProgrammingLanguage  $programming_language  The programming language to upload template for
+     * @param  ProgrammingLanguage  $programmingLanguage  The programming language to upload template for
      *
      * @return JsonResponse JSON response with upload result
      *
@@ -536,7 +538,7 @@ class ProgrammingLanguageController extends Controller
      */
     public function uploadTemplate(
         ProgrammingLanguageAdvancedRequest $request,
-        ProgrammingLanguage $programming_language,
+        ProgrammingLanguage $programmingLanguage,
     ): JsonResponse {
         try {
             $file = $request->file('template_file');
@@ -545,13 +547,13 @@ class ProgrammingLanguageController extends Controller
             if (! is_dir($templateDir)) {
                 mkdir($templateDir, 0755, true);
             }
-            $filename = $programming_language->slug . '.php';
+            $filename = $programmingLanguage->slug . '.php';
             $file->move($templateDir, $filename);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Template file uploaded successfully',
-                'file_path' => $templateDir . '/' . $filename,
+                'filePath' => $templateDir . '/' . $filename,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -568,7 +570,7 @@ class ProgrammingLanguageController extends Controller
      * programming language with proper validation and security measures.
      *
      * @param  ProgrammingLanguageAdvancedRequest  $request  The validated request containing template content
-     * @param  ProgrammingLanguage  $programming_language  The programming language to create template for
+     * @param  ProgrammingLanguage  $programmingLanguage  The programming language to create template for
      *
      * @return JsonResponse JSON response with creation result
      *
@@ -578,7 +580,7 @@ class ProgrammingLanguageController extends Controller
      */
     public function createTemplateFile(
         ProgrammingLanguageAdvancedRequest $request,
-        ProgrammingLanguage $programming_language,
+        ProgrammingLanguage $programmingLanguage,
     ): JsonResponse {
         try {
             $templateDir = resource_path('templates/licenses');
@@ -586,14 +588,14 @@ class ProgrammingLanguageController extends Controller
             if (! is_dir($templateDir)) {
                 mkdir($templateDir, 0755, true);
             }
-            $filename = $programming_language->slug . '.php';
+            $filename = $programmingLanguage->slug . '.php';
             $filePath = $templateDir . '/' . $filename;
-            SecureFileHelper::putContents($filePath, is_string($request->template_content ?? null) ? $request->template_content : '');
+            SecureFileHelper::putContents($filePath, is_string($request->templateContent ?? null) ? $request->templateContent : '');
 
             return response()->json([
                 'success' => true,
                 'message' => 'Template file created successfully',
-                'file_path' => $filePath,
+                'filePath' => $filePath,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -615,7 +617,7 @@ class ProgrammingLanguageController extends Controller
      */
     public function export(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        $languages = ProgrammingLanguage::orderBy('sort_order')->orderBy('name')->get();
+        $languages = ProgrammingLanguage::orderBy('sortOrder')->orderBy('name')->get();
         $filename = 'programming_languages_' . date('Y-m-d_H-i-s') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
@@ -645,11 +647,11 @@ class ProgrammingLanguageController extends Controller
                     $language->slug,
                     $language->description,
                     $language->icon,
-                    $language->file_extension,
-                    $language->is_active ? 'Yes' : 'No',
-                    $language->sort_order,
-                    $language->created_at?->format('Y-m-d H:i:s'),
-                    $language->updated_at?->format('Y-m-d H:i:s'),
+                    $language->fileExtension,
+                    $language->isActive ? 'Yes' : 'No',
+                    $language->sortOrder,
+                    $language->createdAt?->format('Y-m-d H:i:s'),
+                    $language->updatedAt?->format('Y-m-d H:i:s'),
                     ]);
                 }
                 fclose($file);
@@ -665,22 +667,22 @@ class ProgrammingLanguageController extends Controller
      * Retrieves the template content for a specific programming language
      * along with file metadata including size and modification date.
      *
-     * @param  ProgrammingLanguage  $programming_language  The programming language to get template content for
+     * @param  ProgrammingLanguage  $programmingLanguage  The programming language to get template content for
      *
      * @return JsonResponse JSON response with template content or error
      *
      * @version 1.0.6
      */
-    public function getTemplateContent(ProgrammingLanguage $programming_language): JsonResponse
+    public function getTemplateContent(ProgrammingLanguage $programmingLanguage): JsonResponse
     {
-        $templatePath = resource_path("templates/licenses/{$programming_language->slug}.blade.php");
+        $templatePath = resource_path("templates/licenses/{$programmingLanguage->slug}.blade.php");
         if (file_exists($templatePath)) {
             $content = file_get_contents($templatePath);
 
             return response()->json([
                 'success' => true,
                 'content' => $content,
-                'file_path' => $templatePath,
+                'filePath' => $templatePath,
                 'file_size' => SecureFileHelper::getFileSize($templatePath),
                 'last_modified' => date('Y-m-d H:i:s', (int)filemtime($templatePath)),
             ]);
@@ -689,7 +691,7 @@ class ProgrammingLanguageController extends Controller
         return response()->json([
             'success' => false,
             'message' => 'Template file not found',
-            'file_path' => $templatePath,
+            'filePath' => $templatePath,
         ], 404);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,7 +32,7 @@ class ProgrammingLanguageRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -79,15 +81,15 @@ class ProgrammingLanguageRequest extends FormRequest
                 'mimes:java,cpp,c,cs,go,rb,swift,kt,scala,rs,html,css,json,xml,yaml,yml,md,txt',
                 'max:10240', // 10MB
             ],
-            'template_content' => [
+            'templateContent' => [
                 'nullable',
                 'string',
                 'max:50000',
             ],
-            'is_active' => [
+            'isActive' => [
                 'boolean',
             ],
-            'sort_order' => [
+            'sortOrder' => [
                 'nullable',
                 'integer',
                 'min:0',
@@ -151,9 +153,9 @@ class ProgrammingLanguageRequest extends FormRequest
             'description.regex' => 'Description contains invalid characters.',
             'template_file.mimes' => 'Template file must be a valid programming language file.',
             'template_file.max' => 'Template file size must not exceed 10MB.',
-            'template_content.max' => 'Template content must not exceed 50,000 characters.',
-            'sort_order.min' => 'Sort order must be at least 0.',
-            'sort_order.max' => 'Sort order must not exceed 9999.',
+            'templateContent.max' => 'Template content must not exceed 50,000 characters.',
+            'sortOrder.min' => 'Sort order must be at least 0.',
+            'sortOrder.max' => 'Sort order must not exceed 9999.',
             'icon.regex' => 'Icon contains invalid characters.',
             'color.regex' => 'Color must be a valid hex color code (e.g., #3b82f6).',
             'version.regex' => 'Version must be in format: x.y or x.y.z (e.g., 1.0 or 1.0.0).',
@@ -174,9 +176,9 @@ class ProgrammingLanguageRequest extends FormRequest
             'mime_type' => 'MIME type',
             'description' => 'language description',
             'template_file' => 'template file',
-            'template_content' => 'template content',
-            'is_active' => 'active status',
-            'sort_order' => 'sort order',
+            'templateContent' => 'template content',
+            'isActive' => 'active status',
+            'sortOrder' => 'sort order',
             'icon' => 'language icon',
             'color' => 'language color',
             'syntax_highlighting' => 'syntax highlighting',
@@ -200,15 +202,15 @@ class ProgrammingLanguageRequest extends FormRequest
         ]);
         // Handle checkbox values
         $this->merge([
-            'is_active' => $this->has('is_active'),
+            'isActive' => $this->has('isActive'),
             'syntax_highlighting' => $this->has('syntax_highlighting'),
             'auto_completion' => $this->has('auto_completion'),
             'error_detection' => $this->has('error_detection'),
         ]);
         // Set default values
         $this->merge([
-            'is_active' => $this->is_active ?? true,
-            'sort_order' => $this->sort_order ?? 0,
+            'isActive' => $this->isActive ?? true,
+            'sortOrder' => $this->sortOrder ?? 0,
         ]);
     }
     /**

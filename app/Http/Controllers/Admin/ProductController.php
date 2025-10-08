@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -74,7 +76,7 @@ class ProductController extends Controller
                     'envato_item_id' => $itemData['id'] ?? null,
                     'purchase_url_envato' => $itemData['url'] ?? null,
                     'purchase_url_buy' => $itemData['url'] ?? null, // Same as purchase URL for now
-                    'support_days' => $this->calculateSupportDays($itemData),
+                    'supportDays' => $this->calculateSupportDays($itemData),
                     'version' => $itemData['version'] ?? null,
                     'price' => isset($itemData['price_cents']) && is_numeric($itemData['price_cents']) ? ($itemData['price_cents'] / 100) : null,
                     'name' => $itemData['name'] ?? null,
@@ -178,7 +180,8 @@ class ProductController extends Controller
     private function getIntegrationCodeTemplate(Product $product, string $apiUrl): string
     {
         // Return a minimal placeholder integration file to avoid complex embedded templates here.
-        return "<?php\n// Integration placeholder for {$product->slug}\n// API: {$apiUrl}\n";
+        return "<?php
+declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// API: {$apiUrl}\n";
     }
 
     /**
@@ -219,14 +222,14 @@ class ProductController extends Controller
                 $productsQuery->orderBy('price', 'desc');
                 break;
             case 'newest':
-                $productsQuery->orderBy('created_at', 'desc');
+                $productsQuery->orderBy('createdAt', 'desc');
                 break;
             default:
                 $productsQuery->orderBy('name', 'asc');
         }
         $products = $productsQuery->paginate(10)->withQueryString();
-        $categories = \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get();
-        $programmingLanguages = \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get();
+        $categories = \App\Models\ProductCategory::where('isActive', true)->orderBy('sortOrder')->get();
+        $programmingLanguages = \App\Models\ProgrammingLanguage::where('isActive', true)->orderBy('sortOrder')->get();
         // Provide all products collection for grouped/category displays in the admin index
         $allProducts = Product::with(['category', 'programmingLanguage'])->get();
 
@@ -238,8 +241,8 @@ class ProductController extends Controller
      */
     public function create(): View
     {
-        $categories = \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get();
-        $programmingLanguages = \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get();
+        $categories = \App\Models\ProductCategory::where('isActive', true)->orderBy('sortOrder')->get();
+        $programmingLanguages = \App\Models\ProgrammingLanguage::where('isActive', true)->orderBy('sortOrder')->get();
         $kbCategories = KbCategory::where('is_published', true)->orderBy('name')->get(['id', 'name', 'slug']);
         $kbArticles = KbArticle::where('is_published', true)
             ->with('category:id, name')
@@ -284,7 +287,7 @@ class ProductController extends Controller
                 $validated['gallery_images'] = $galleryPaths;
             }
             // Handle lifetime renewal period - set extended_supported_until to null for lifetime
-            if (isset($validated['renewal_period']) && $validated['renewal_period'] === 'lifetime') {
+            if (isset($validated['renewalPeriod']) && $validated['renewalPeriod'] === 'lifetime') {
                 $validated['extended_supported_until'] = null;
             }
             $product = Product::create($validated);
@@ -360,7 +363,7 @@ class ProductController extends Controller
                 $validated['gallery_images'] = $galleryPaths;
             }
             // Handle lifetime renewal period - set extended_supported_until to null for lifetime
-            if (isset($validated['renewal_period']) && $validated['renewal_period'] === 'lifetime') {
+            if (isset($validated['renewalPeriod']) && $validated['renewalPeriod'] === 'lifetime') {
                 $validated['extended_supported_until'] = null;
             }
             $product->update($validated);
@@ -426,12 +429,12 @@ class ProductController extends Controller
         return response()->json([
             'id' => $product->id,
             'name' => $product->name,
-            'license_type' => $product->license_type,
-            'duration_days' => $product->duration_days,
-            'support_days' => $product->support_days,
+            'licenseType' => $product->licenseType,
+            'durationDays' => $product->durationDays,
+            'supportDays' => $product->supportDays,
             'price' => $product->price,
-            'renewal_price' => $product->renewal_price,
-            'renewal_period' => $product->renewal_period,
+            'renewalPrice' => $product->renewalPrice,
+            'renewalPeriod' => $product->renewalPeriod,
         ]);
     }
 
@@ -440,8 +443,8 @@ class ProductController extends Controller
      */
     public function edit(Product $product): View
     {
-        $categories = \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get();
-        $programmingLanguages = \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get();
+        $categories = \App\Models\ProductCategory::where('isActive', true)->orderBy('sortOrder')->get();
+        $programmingLanguages = \App\Models\ProgrammingLanguage::where('isActive', true)->orderBy('sortOrder')->get();
         // Load product files
         $product->load('files');
 
@@ -485,7 +488,7 @@ class ProductController extends Controller
             Storage::disk('public')->put($filePath, $integrationCode);
             // Update product with integration file path
             $product->update([
-                'integration_file_path' => $filePath,
+                'integrationFilePath' => $filePath,
             ]);
 
             return $filePath;
@@ -499,11 +502,12 @@ class ProductController extends Controller
      */
     public function downloadIntegration(Product $product)
     {
-        if (! $product->integration_file_path || ! Storage::disk('public')->exists($product->integration_file_path)) {
+        $integrationFilePath = $product->integrationFilePath;
+        if (! $integrationFilePath || ! is_string($integrationFilePath) || ! Storage::disk('public')->exists($integrationFilePath)) {
             return redirect()->back()->with('error', 'Integration file not found. Please regenerate it.');
         }
 
-        return Storage::disk('public')->download($product->integration_file_path, "{$product->slug}.php");
+        return Storage::disk('public')->download($integrationFilePath, "{$product->slug}.php");
     }
 
     /**
@@ -595,20 +599,20 @@ class ProductController extends Controller
                     'name' => $validated['name'] ?? 'Test User',
                     'email' => $validated['email'],
                     'password' => bcrypt('password123'), // Default password for test users
-                    'email_verified_at' => now(),
+                    'emailVerifiedAt' => now(),
                 ],
             );
             // Generate unique purchase code
             $purchaseCode = 'TEST-' . strtoupper(Str::random(16));
-            // Create license (license_key will be automatically set to same value as purchase_code)
+            // Create license (licenseKey will be automatically set to same value as purchase_code)
             $license = License::create([
-                'product_id' => $product->id,
-                'user_id' => $user->id,
+                'productId' => $product->id,
+                'userId' => $user->id,
                 'purchase_code' => $purchaseCode,
                 'status' => 'active',
-                'license_type' => 'regular',
-                'support_expires_at' => now()->addDays($product->support_days),
-                'license_expires_at' => now()->addYear(),
+                'licenseType' => 'regular',
+                'support_expiresAt' => now()->addDays($product->supportDays),
+                'license_expiresAt' => now()->addYear(),
             ]);
             // Add domain
             $license->domains()->create([
@@ -631,8 +635,8 @@ class ProductController extends Controller
     public function logs(Product $product): View
     {
         $logs = LicenseLog::with(['license'])
-            ->whereHas('license', fn ($q) => $q->where('product_id', $product->id))
-            ->orWhere('serial', 'like', '%TEST-%') // For test licenses without license_id
+            ->whereHas('license', fn ($q) => $q->where('productId', $product->id))
+            ->orWhere('serial', 'like', '%TEST-%') // For test licenses without licenseId
             ->latest()
             ->paginate(50);
 

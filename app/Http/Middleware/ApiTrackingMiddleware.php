@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Models\License;
@@ -46,7 +48,7 @@ class ApiTrackingMiddleware
      * // Middleware automatically tracks:
      * // POST /api/license/verify
      * // {
-     * //     "license_key": "ABC123-DEF456-GHI789",
+     * //     "licenseKey": "ABC123-DEF456-GHI789",
      * //     "domain": "example.com",
      * //     "serial": "SERIAL123"
      * // }
@@ -95,21 +97,21 @@ class ApiTrackingMiddleware
             $responseContent = $response->getContent();
             $responseData = $this->sanitizeResponseData($responseContent !== false ? $responseContent : '');
             // Extract and sanitize license information
-            $licenseKey = $this->sanitizeInput(is_string($requestData['license_key'] ?? null) ? $requestData['license_key'] : null);
+            $licenseKey = $this->sanitizeInput(is_string($requestData['licenseKey'] ?? null) ? $requestData['licenseKey'] : null);
             $domain = $this->sanitizeInput(is_string($requestData['domain'] ?? null) ? $requestData['domain'] : null);
             $serial = $this->sanitizeInput(is_string($requestData['serial'] ?? null) ? $requestData['serial'] : null);
             // Find license by key with security validation
             $license = null;
             if ($licenseKey && $this->isValidLicenseKey($licenseKey)) {
-                $license = License::where('license_key', $licenseKey)->first();
+                $license = License::where('licenseKey', $licenseKey)->first();
             }
             // Determine status with enhanced validation
             $status = $this->determineStatus($response, $responseData);
             // Create log entry with sanitized data
             LicenseLog::create([
-                'license_id' => $license ? $license->id : null,
+                'licenseId' => $license ? $license->id : null,
                 'domain' => $domain,
-                'ip_address' => $request->ip(),
+                'ipAddress' => $request->ip(),
                 'serial' => $serial,
                 'status' => $status,
                 'user_agent' => $this->sanitizeInput($request->userAgent()),

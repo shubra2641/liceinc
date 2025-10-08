@@ -438,7 +438,7 @@ class EnhancedSecurityService
                 'method' => $request->method(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'user_id' => auth()->id(),
+                'userId' => auth()->id(),
                 'timestamp' => now()->toISOString(),
                 'fingerprint' => $this->getClientFingerprint($request),
             ], $context));

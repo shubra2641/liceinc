@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -8,16 +10,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
- * @property int $license_id
+ * @property int $licenseId
  * @property string $domain
- * @property string $ip_address
+ * @property string $ipAddress
  * @property string $serial
  * @property string $status
  * @property string|null $user_agent
  * @property array<array-key, mixed>|null $request_data
  * @property array<array-key, mixed>|null $response_data
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $createdAt
+ * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property-read string|null $action
  * @property-read string|null $message
  * @property-read \App\Models\License $license
@@ -51,9 +53,9 @@ class LicenseLog extends Model
     protected static $factory = LicenseLogFactory::class;
 
     protected $fillable = [
-        'license_id',
+        'licenseId',
         'domain',
-        'ip_address',
+        'ipAddress',
         'serial',
         'status',
         'user_agent',
@@ -104,8 +106,8 @@ class LicenseLog extends Model
      */
     public static function getApiCallsByDate(int $days = 30): \Illuminate\Database\Eloquent\Collection
     {
-        return static::selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->where('created_at', '>=', now()->subDays($days))
+        return static::selectRaw('DATE(createdAt) as date, COUNT(*) as count')
+            ->where('createdAt', '>=', now()->subDays($days))
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -118,7 +120,7 @@ class LicenseLog extends Model
     public static function getApiStatusDistribution(int $days = 30): \Illuminate\Database\Eloquent\Collection
     {
         return static::selectRaw('status, COUNT(*) as count')
-            ->where('created_at', '>=', now()->subDays($days))
+            ->where('createdAt', '>=', now()->subDays($days))
             ->groupBy('status')
             ->get();
     }
@@ -143,8 +145,8 @@ class LicenseLog extends Model
      */
     public static function getApiCallsByHour(): \Illuminate\Database\Eloquent\Collection
     {
-        return static::selectRaw('HOUR(created_at) as hour, COUNT(*) as count')
-            ->whereDate('created_at', today())
+        return static::selectRaw('HOUR(createdAt) as hour, COUNT(*) as count')
+            ->whereDate('createdAt', today())
             ->groupBy('hour')
             ->orderBy('hour')
             ->get();

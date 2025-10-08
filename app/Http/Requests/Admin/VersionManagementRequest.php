@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +31,7 @@ class VersionManagementRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -46,7 +48,7 @@ class VersionManagementRequest extends FormRequest
         // Version history validation
         if ($isHistory) {
             return [
-                'license_key' => [
+                'licenseKey' => [
                     'required',
                     'string',
                     'max:255',
@@ -90,7 +92,7 @@ class VersionManagementRequest extends FormRequest
                     'integer',
                     'min:0',
                 ],
-                'sort_order' => [
+                'sortOrder' => [
                     'nullable',
                     'string',
                     'max:10',
@@ -102,21 +104,21 @@ class VersionManagementRequest extends FormRequest
                     'max:20',
                     'regex:/^[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z0-9]+)?$/',
                 ],
-                'filter_date_from' => [
+                'filter_dateFrom' => [
                     'nullable',
                     'date',
                 ],
-                'filter_date_to' => [
+                'filter_dateTo' => [
                     'nullable',
                     'date',
-                    'after_or_equal:filter_date_from',
+                    'after_or_equal:filter_dateFrom',
                 ],
             ];
         }
         // Latest version validation
         if ($isLatest === true) {
             return [
-                'license_key' => [
+                'licenseKey' => [
                     'required',
                     'string',
                     'max:255',
@@ -208,8 +210,8 @@ class VersionManagementRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'license_key.required' => 'License key is required.',
-            'license_key.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
+            'licenseKey.required' => 'License key is required.',
+            'licenseKey.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
             'product_slug.required' => 'Product slug is required.',
             'product_slug.regex' => 'Product slug can only contain letters, numbers, hyphens, and underscores.',
             'domain.required' => 'Domain is required.',
@@ -235,10 +237,10 @@ class VersionManagementRequest extends FormRequest
             'limit.min' => 'Limit must be at least 1.',
             'limit.max' => 'Limit cannot exceed 100.',
             'offset.min' => 'Offset must be at least 0.',
-            'sort_order.regex' => 'Sort order contains invalid characters.',
-            'filter_date_from.date' => 'Filter date from must be a valid date.',
-            'filter_date_to.date' => 'Filter date to must be a valid date.',
-            'filter_date_to.after_or_equal' => 'Filter date to must be after or equal to filter date from.',
+            'sortOrder.regex' => 'Sort order contains invalid characters.',
+            'filter_dateFrom.date' => 'Filter date from must be a valid date.',
+            'filter_dateTo.date' => 'Filter date to must be a valid date.',
+            'filter_dateTo.after_or_equal' => 'Filter date to must be after or equal to filter date from.',
         ];
     }
     /**
@@ -249,7 +251,7 @@ class VersionManagementRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'license_key' => 'license key',
+            'licenseKey' => 'license key',
             'product_slug' => 'product slug',
             'domain' => 'domain',
             'version' => 'version',
@@ -267,10 +269,10 @@ class VersionManagementRequest extends FormRequest
             'include_file_list' => 'include file list',
             'limit' => 'limit',
             'offset' => 'offset',
-            'sort_order' => 'sort order',
+            'sortOrder' => 'sort order',
             'filter_version' => 'filter version',
-            'filter_date_from' => 'filter date from',
-            'filter_date_to' => 'filter date to',
+            'filter_dateFrom' => 'filter date from',
+            'filter_dateTo' => 'filter date to',
         ];
     }
     /**
@@ -280,13 +282,13 @@ class VersionManagementRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'license_key' => $this->sanitizeInput($this->input('license_key')),
+            'licenseKey' => $this->sanitizeInput($this->input('licenseKey')),
             'product_slug' => $this->sanitizeInput($this->input('product_slug')),
             'domain' => $this->sanitizeInput($this->input('domain')),
             'version' => $this->sanitizeInput($this->input('version')),
             'current_version' => $this->input('current_version') ? $this->sanitizeInput($this->input('current_version')) : null,
             'filter_version' => $this->input('filter_version') ? $this->sanitizeInput($this->input('filter_version')) : null,
-            'sort_order' => $this->input('sort_order') ? $this->sanitizeInput($this->input('sort_order')) : null,
+            'sortOrder' => $this->input('sortOrder') ? $this->sanitizeInput($this->input('sortOrder')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -314,7 +316,7 @@ class VersionManagementRequest extends FormRequest
             'include_file_list' => $this->include_file_list ?? false,
             'limit' => $this->limit ?? 20,
             'offset' => $this->offset ?? 0,
-            'sort_order' => $this->sort_order ?? 'desc',
+            'sortOrder' => $this->sortOrder ?? 'desc',
         ]);
     }
     /**

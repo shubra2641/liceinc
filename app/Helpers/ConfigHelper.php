@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Helpers;
 
 use App\Models\Setting;
@@ -552,7 +554,7 @@ class ConfigHelper
     {
         return self::getSettings([
             'license_api_token',
-            'envato_personal_token',
+            'envatoPersonalToken',
             'envato_client_id',
             'envato_client_secret',
             'envato_redirect_uri',
@@ -569,7 +571,7 @@ class ConfigHelper
             'license_grace_period',
             // Domain management settings
             'license_allow_localhost',
-            'license_allow_ip_addresses',
+            'license_allow_ipAddresses',
             'license_allow_wildcards',
             'license_validate_ssl',
             'license_auto_approve_subdomains',
@@ -623,13 +625,13 @@ class ConfigHelper
     public static function getEnvatoSettings(): array
     {
         return self::getSettings([
-            'envato_personal_token',
+            'envatoPersonalToken',
             'envato_client_id',
             'envato_client_secret',
             'envato_redirect_uri',
             'envato_auth_enabled',
             'envato_oauth_enabled',
-            'envato_username',
+            'envatoUsername',
         ]);
     }
 
