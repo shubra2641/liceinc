@@ -1,8 +1,9 @@
 <?php
 
 return [
-
-    /* |-------------------------------------------------------------------------- | View Storage Paths
+    /*
+    |--------------------------------------------------------------------------
+    | View Storage Paths
     |--------------------------------------------------------------------------
     |
     | Most templating systems load templates from disk. Here you may specify
@@ -15,7 +16,9 @@ return [
         resource_path('views'),
     ],
 
-    /* |-------------------------------------------------------------------------- | Compiled View Path
+    /*
+    |--------------------------------------------------------------------------
+    | Compiled View Path
     |--------------------------------------------------------------------------
     |
     | This option determines where all the compiled Blade templates will be
@@ -25,5 +28,4 @@ return [
     */
 
     'compiled' => storage_path('framework/views'),
-
 ];

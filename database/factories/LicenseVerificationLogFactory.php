@@ -7,13 +7,21 @@ use App\Models\LicenseVerificationLog;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\LicenseVerificationLog> */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\LicenseVerificationLog>
+ */
 class LicenseVerificationLogFactory extends Factory
 {
-    /**   * The name of the factory's corresponding model. *   * @var class-string<LicenseVerificationLog> */
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var class-string<LicenseVerificationLog> */
     protected $model = LicenseVerificationLog::class;
 
-    /**   * Define the model's default state. *   * @return array<string, mixed> */
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
@@ -27,7 +35,9 @@ class LicenseVerificationLogFactory extends Factory
         ];
     }
 
-    /**   * Create a failed verification. */
+    /**
+     * Create a failed verification.
+     */
     public function failed(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -36,7 +46,9 @@ class LicenseVerificationLogFactory extends Factory
         ]);
     }
 
-    /**   * Create a blocked verification. */
+    /**
+     * Create a blocked verification.
+     */
     public function blocked(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -45,7 +57,9 @@ class LicenseVerificationLogFactory extends Factory
         ]);
     }
 
-    /**   * Set a specific domain. */
+    /**
+     * Set a specific domain.
+     */
     public function domain(string $domain): static
     {
         return $this->state(fn (array $attributes) => [
@@ -53,7 +67,9 @@ class LicenseVerificationLogFactory extends Factory
         ]);
     }
 
-    /**   * Associate with a license. */
+    /**
+     * Associate with a license.
+     */
     public function forLicense(License $license): static
     {
         return $this->state(fn (array $attributes) => [

@@ -7,13 +7,21 @@ use App\Models\KbCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\KbArticle> */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\KbArticle>
+ */
 class KbArticleFactory extends Factory
 {
-    /**   * The name of the factory's corresponding model. *   * @var class-string<\Illuminate\Database\Eloquent\Model> */
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var class-string<\Illuminate\Database\Eloquent\Model> */
     protected $model = KbArticle::class;
 
-    /**   * Define the model's default state. *   * @return array<string, mixed> */
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
@@ -23,7 +31,7 @@ class KbArticleFactory extends Factory
             'excerpt' => $this->faker->sentence(),
             'meta_title' => $this->faker->sentence(6),
             'meta_description' => $this->faker->sentence(10),
-            'featured_image' => 'images/kb/' . $this->faker->uuid() . '.jpg',
+            'featured_image' => 'images/kb/'.$this->faker->uuid().'.jpg',
             'status' => 'published',
             'views' => $this->faker->numberBetween(0, 1000),
             'sort_order' => $this->faker->numberBetween(1, 100),
@@ -32,7 +40,9 @@ class KbArticleFactory extends Factory
         ];
     }
 
-    /**   * Create a draft article. */
+    /**
+     * Create a draft article.
+     */
     public function draft(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -40,7 +50,9 @@ class KbArticleFactory extends Factory
         ]);
     }
 
-    /**   * Create an unpublished article. */
+    /**
+     * Create an unpublished article.
+     */
     public function unpublished(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -48,7 +60,9 @@ class KbArticleFactory extends Factory
         ]);
     }
 
-    /**   * Create a featured article. */
+    /**
+     * Create a featured article.
+     */
     public function featured(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -57,7 +71,9 @@ class KbArticleFactory extends Factory
         ]);
     }
 
-    /**   * Create a popular article. */
+    /**
+     * Create a popular article.
+     */
     public function popular(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -65,7 +81,9 @@ class KbArticleFactory extends Factory
         ]);
     }
 
-    /**   * Associate with a category. */
+    /**
+     * Associate with a category.
+     */
     public function inCategory(KbCategory $category): static
     {
         return $this->state(fn (array $attributes) => [

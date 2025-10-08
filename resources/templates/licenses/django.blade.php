@@ -1,6 +1,11 @@
 /**
- * License Verification System * Product: {{product}} * Language: Django * Generated: {{date}} *
- * This is a generic template. Please customize according to Django best practices. */
+ * License Verification System
+ * Product: {{product}}
+ * Language: Django
+ * Generated: {{date}}
+ *
+ * This is a generic template. Please customize according to Django best practices.
+ */
 
 # License verification for Django
 # API URL: {{license_api_url}}

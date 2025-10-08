@@ -14,13 +14,13 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_email_verification',
                 'subject' => 'Verify Your Email Address - {{site_name}}',
-                'body' => '<h2>Verify Your Email Address</h2>' .
-                    '<p>Hello {{user_name}},</p>' .
-                    '<p>Thank you for registering with {{site_name}}! To complete your registration ' .
-                    'and activate your account, please verify your email address by clicking the button below:</p>' .
-                    '<div style="text-align: center; margin: 30px 0;">' .
-                    '<a href="{{verification_url}}" class="email-button">Verify Email Address</a></div>' .
-                    '<div class="highlight-box"><h4>Important Information</h4>' .
+                'body' => '<h2>Verify Your Email Address</h2>'.
+                    '<p>Hello {{user_name}},</p>'.
+                    '<p>Thank you for registering with {{site_name}}! To complete your registration '.
+                    'and activate your account, please verify your email address by clicking the button below:</p>'.
+                    '<div style="text-align: center; margin: 30px 0;">'.
+                    '<a href="{{verification_url}}" class="email-button">Verify Email Address</a></div>'.
+                    '<div class="highlight-box"><h4>Important Information</h4>'.
                     '<p>This verification link will expire on <strong>{{verification_expires}}</strong>.</p></div>',
                 'type' => 'user',
                 'category' => 'registration',
@@ -31,10 +31,10 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_password_reset',
                 'subject' => 'Reset Your Password - {{site_name}}',
-                'body' => '<h2>Reset Your Password</h2><p>Hello {{user_name}},</p>' .
-                    '<p>We received a request to reset your password for your {{site_name}} account. ' .
-                    'Click the button below to reset your password:</p>' .
-                    '<div style="text-align: center; margin: 30px 0;">' .
+                'body' => '<h2>Reset Your Password</h2><p>Hello {{user_name}},</p>'.
+                    '<p>We received a request to reset your password for your {{site_name}} account. '.
+                    'Click the button below to reset your password:</p>'.
+                    '<div style="text-align: center; margin: 30px 0;">'.
                     '<a href="{{reset_url}}" class="email-button">Reset Password</a></div>',
                 'type' => 'user',
                 'category' => 'registration',
@@ -45,10 +45,10 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_welcome',
                 'subject' => 'Welcome to {{site_name}}!',
-                'body' => '<h2>Welcome to {{site_name}}!</h2><p>Hello {{user_name}},</p>' .
-                    '<p>Welcome to {{site_name}}! We\'re excited to have you as part of our community. ' .
-                    'Your account was successfully created on {{registration_date}}.</p>' .
-                    '<div style="text-align: center; margin: 30px 0;">' .
+                'body' => '<h2>Welcome to {{site_name}}!</h2><p>Hello {{user_name}},</p>'.
+                    '<p>Welcome to {{site_name}}! We\'re excited to have you as part of our community. '.
+                    'Your account was successfully created on {{registration_date}}.</p>'.
+                    '<div style="text-align: center; margin: 30px 0;">'.
                     '<a href="{{site_url}}/dashboard" class="email-button">Go to Dashboard</a></div>',
                 'type' => 'user',
                 'category' => 'registration',
@@ -59,10 +59,10 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_license_created',
                 'subject' => 'New License Created - {{product_name}}',
-                'body' => '<h2>New License Created</h2><p>Hello {{user_name}},</p>' .
-                    '<p>Great news! A new license has been created for you. Here are the details:</p>' .
-                    '<table class="email-table"><tr><th>Product</th><td>{{product_name}}</td></tr>' .
-                    '<tr><th>License Key</th><td style="font-family: monospace;">{{license_key}}</td></tr>' .
+                'body' => '<h2>New License Created</h2><p>Hello {{user_name}},</p>'.
+                    '<p>Great news! A new license has been created for you. Here are the details:</p>'.
+                    '<table class="email-table"><tr><th>Product</th><td>{{product_name}}</td></tr>'.
+                    '<tr><th>License Key</th><td style="font-family: monospace;">{{license_key}}</td></tr>'.
                     '<tr><th>Expires</th><td>{{expires_at}}</td></tr></table>',
                 'type' => 'user',
                 'category' => 'license',
@@ -73,9 +73,9 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_license_expiring',
                 'subject' => 'License Expiring Soon - {{product_name}}',
-                'body' => '<h2>License Expiring Soon</h2><p>Hello {{user_name}},</p>' .
-                    '<p>Your license for <strong>{{product_name}}</strong> will expire in {{days_remaining}} days on {{expires_at}}.</p>' .
-                    '<div class="info-box warning"><h4>Action Required</h4>' .
+                'body' => '<h2>License Expiring Soon</h2><p>Hello {{user_name}},</p>'.
+                    '<p>Your license for <strong>{{product_name}}</strong> will expire in {{days_remaining}} days on {{expires_at}}.</p>'.
+                    '<div class="info-box warning"><h4>Action Required</h4>'.
                     '<p>To continue using this product without interruption, please renew your license before it expires.</p></div>',
                 'type' => 'user',
                 'category' => 'license',
@@ -116,7 +116,7 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_ticket_status_update',
                 'subject' => 'Ticket Status Updated - #{{ticket_id}}',
-                'body' => '<h2>Ticket Status Updated</h2><p>Hello {{user_name}},</p>' .
+                'body' => '<h2>Ticket Status Updated</h2><p>Hello {{user_name}},</p>'.
                     '<p>The status of your support ticket has been updated.</p>',
                 'type' => 'user',
                 'category' => 'ticket',
@@ -127,7 +127,7 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_ticket_reply',
                 'subject' => 'New Reply to Your Ticket - #{{ticket_id}}',
-                'body' => '<h2>New Reply to Your Ticket</h2><p>Hello {{user_name}},</p>' .
+                'body' => '<h2>New Reply to Your Ticket</h2><p>Hello {{user_name}},</p>'.
                     '<p>You have received a new reply to your support ticket from {{replied_by}}.</p>',
                 'type' => 'user',
                 'category' => 'ticket',
@@ -138,7 +138,7 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_invoice_approaching_due',
                 'subject' => 'Invoice Due Soon - #{{invoice_number}}',
-                'body' => '<h2>Invoice Due Soon</h2><p>Hello {{user_name}},</p>' .
+                'body' => '<h2>Invoice Due Soon</h2><p>Hello {{user_name}},</p>'.
                     '<p>This is a friendly reminder that your invoice #{{invoice_number}} is due in {{days_remaining}} days on {{due_date}}.</p>',
                 'type' => 'user',
                 'category' => 'invoice',
@@ -149,7 +149,7 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_invoice_paid',
                 'subject' => 'Invoice Paid - #{{invoice_number}}',
-                'body' => '<h2>Invoice Paid - Thank You!</h2><p>Hello {{user_name}},</p>' .
+                'body' => '<h2>Invoice Paid - Thank You!</h2><p>Hello {{user_name}},</p>'.
                     '<p>Thank you for your payment! We\'ve successfully processed your payment for invoice #{{invoice_number}}.</p>',
                 'type' => 'user',
                 'category' => 'invoice',
@@ -160,7 +160,7 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_invoice_cancelled',
                 'subject' => 'Invoice Cancelled - #{{invoice_number}}',
-                'body' => '<h2>Invoice Cancelled</h2><p>Hello {{user_name}},</p>' .
+                'body' => '<h2>Invoice Cancelled</h2><p>Hello {{user_name}},</p>'.
                     '<p>Your invoice #{{invoice_number}} has been cancelled.</p>',
                 'type' => 'user',
                 'category' => 'invoice',
@@ -173,9 +173,9 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'admin_license_created',
                 'subject' => 'New License Created - {{product_name}}',
-                'body' => '<h2>New License Created</h2><p>A new license has been created in the system.</p>' .
-                    '<table class="email-table"><tr><th>Product</th><td>{{product_name}}</td></tr>' .
-                    '<tr><th>License Key</th><td style="font-family: monospace;">{{license_key}}</td></tr>' .
+                'body' => '<h2>New License Created</h2><p>A new license has been created in the system.</p>'.
+                    '<table class="email-table"><tr><th>Product</th><td>{{product_name}}</td></tr>'.
+                    '<tr><th>License Key</th><td style="font-family: monospace;">{{license_key}}</td></tr>'.
                     '<tr><th>Customer</th><td>{{customer_name}} ({{customer_email}})</td></tr></table>',
                 'type' => 'admin',
                 'category' => 'license',

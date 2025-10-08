@@ -1,6 +1,11 @@
 /**
- * License Verification System * Product: {{product}} * Language: C++ * Generated: {{date}} *
- * This is a generic template. Please customize according to C++ best practices. */
+ * License Verification System
+ * Product: {{product}}
+ * Language: C++
+ * Generated: {{date}}
+ *
+ * This is a generic template. Please customize according to C++ best practices.
+ */
 
 // License verification for C++
 // API URL: {{license_api_url}}

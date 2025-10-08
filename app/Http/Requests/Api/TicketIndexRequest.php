@@ -5,17 +5,33 @@ namespace App\Http\Requests\Api;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * Ticket Index Request with comprehensive validation. *
- * This request class handles validation for ticket listing with filtering * and search capabilities with comprehensive security measures. *
- * Features: * - Comprehensive validation rules for all filter parameters * - XSS protection and input sanitization * - Custom validation messages for better UX * - Security validation rules * - Search and pagination validation */
+ * Ticket Index Request with comprehensive validation.
+ *
+ * This request class handles validation for ticket listing with filtering
+ * and search capabilities with comprehensive security measures.
+ *
+ * Features:
+ * - Comprehensive validation rules for all filter parameters
+ * - XSS protection and input sanitization
+ * - Custom validation messages for better UX
+ * - Security validation rules
+ * - Search and pagination validation
+ */
 class TicketIndexRequest extends FormRequest
 {
-    /**   * Determine if the user is authorized to make this request. */
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true; // Authorization handled by middleware
     }
-    /**   * Get the validation rules that apply to the request. *   * @return array<string, mixed> */
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [
@@ -53,7 +69,12 @@ class TicketIndexRequest extends FormRequest
             ],
         ];
     }
-    /**   * Get custom validation messages. *   * @return array<string, string> */
+
+    /**
+     * Get custom validation messages.
+     *
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [
@@ -67,7 +88,12 @@ class TicketIndexRequest extends FormRequest
             'per_page.max' => 'Per page cannot exceed 100 items.',
         ];
     }
-    /**   * Get custom attributes for validator errors. *   * @return array<string, string> */
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
+     */
     public function attributes(): array
     {
         return [
@@ -79,7 +105,10 @@ class TicketIndexRequest extends FormRequest
             'per_page' => 'items per page',
         ];
     }
-    /**   * Prepare the data for validation. */
+
+    /**
+     * Prepare the data for validation.
+     */
     protected function prepareForValidation(): void
     {
         $this->merge([

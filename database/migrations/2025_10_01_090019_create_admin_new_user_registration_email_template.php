@@ -2,8 +2,10 @@
 
 use Illuminate\Database\Migrations\Migration;
 
-return new class () extends Migration {
-    /**   * Run the migrations. */
+return new class() extends Migration {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         // Create admin new user registration email template
@@ -49,7 +51,9 @@ return new class () extends Migration {
         ]);
     }
 
-    /**   * Reverse the migrations. */
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         App\Models\EmailTemplate::where('name', 'admin_new_user_registration')->delete();

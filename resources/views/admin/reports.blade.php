@@ -201,7 +201,8 @@
                             <div class="stats-card-label">{{ trans('app.Active_licenses') }}</div>
                             <div class="stats-card-trend positive">
                                 <i class="stats-trend-icon positive"></i>
-                                <span>{{ $totalLicenses > 0 ? round(($activeLicenses / $totalLicenses) * 100, 1) : 0 }}% {{ trans('app.of_total') }}</span> </div>
+                                <span>{{ $totalLicenses > 0 ? round(($activeLicenses / $totalLicenses) * 100, 1) : 0 }}% {{ trans('app.of_total') }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -225,7 +226,8 @@
                             <div class="stats-card-label">{{ trans('app.expired_licenses') }}</div>
                             <div class="stats-card-trend negative">
                                 <i class="stats-trend-icon negative"></i>
-                                <span>{{ $totalLicenses > 0 ? round(($expiredLicenses / $totalLicenses) * 100, 1) : 0 }}% {{ trans('app.of_total') }}</span> </div>
+                                <span>{{ $totalLicenses > 0 ? round(($expiredLicenses / $totalLicenses) * 100, 1) : 0 }}% {{ trans('app.of_total') }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

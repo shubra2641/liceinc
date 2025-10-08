@@ -30,13 +30,12 @@ use App\Http\Controllers\Admin\UpdateController;
 use App\Http\Controllers\Admin\UpdateNotificationController;
 // User Controllers
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\User\TicketController as UserTicketController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\KbArticleController;
 use App\Http\Controllers\KbCategoryController;
-// Admin Controllers
 use App\Http\Controllers\KbPublicController;
+// Admin Controllers
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LicenseDomainController;
 use App\Http\Controllers\LicenseStatusController;
@@ -50,6 +49,7 @@ use App\Http\Controllers\User\InvoiceController as UserInvoiceController;
 use App\Http\Controllers\User\LicenseController as UserLicenseController;
 use App\Http\Controllers\User\ProductFileController as UserProductFileController;
 use App\Http\Controllers\User\ProfileController as UserProfileController;
+use App\Http\Controllers\User\TicketController as UserTicketController;
 // API Controllers
 
 // Legacy Controllers (to be reviewed)
@@ -67,14 +67,23 @@ use Illuminate\Support\Facades\Route;
 // ============================================================================
 
 /**
- * Public Routes with Enhanced Security and Validation. *
- * These routes handle public-facing functionality with comprehensive security measures, * input validation (validate, Validator::make, request()->validate), rate limiting (throttle), * and protection against common web vulnerabilities. * All inputs are validated (validate) and sanitized (htmlspecialchars, htmlentities) before processing. * Authentication checks (Auth::check, Auth::user) applied via middleware to protected routes. */
-
+ * Public Routes with Enhanced Security and Validation.
+ *
+ * These routes handle public-facing functionality with comprehensive security measures,
+ * input validation (validate, Validator::make, request()->validate), rate limiting (throttle),
+ * and protection against common web vulnerabilities.
+ * All inputs are validated (validate) and sanitized (htmlspecialchars, htmlentities) before processing.
+ * Authentication checks (Auth::check, Auth::user) applied via middleware to protected routes.
+ */
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 /**
- * Language Switcher Route with Enhanced Security and Validation. *
- * This route handles language switching with comprehensive validation, * security measures, and error handling. * Security: Input validation via Controller, Output sanitization via Controller. */
+ * Language Switcher Route with Enhanced Security and Validation.
+ *
+ * This route handles language switching with comprehensive validation,
+ * security measures, and error handling.
+ * Security: Input validation via Controller, Output sanitization via Controller.
+ */
 Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
 // ============================================================================
@@ -82,8 +91,11 @@ Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.s
 // ============================================================================
 
 /**
- * License Status Check Routes with Enhanced Security. *
- * These routes handle public license status checking with comprehensive * validation, security measures, and rate limiting. */
+ * License Status Check Routes with Enhanced Security.
+ *
+ * These routes handle public license status checking with comprehensive
+ * validation, security measures, and rate limiting.
+ */
 Route::prefix('license-status')->group(function () {
     Route::get('/', [LicenseStatusController::class, 'index'])->name('license.status');
     Route::get('/status', [LicenseStatusController::class, 'index'])->name('license-status');
@@ -96,8 +108,11 @@ Route::prefix('license-status')->group(function () {
 });
 
 /**
- * Public Knowledge Base Routes with Enhanced Security. *
- * These routes handle public knowledge base access with comprehensive * validation, security measures, and search functionality. */
+ * Public Knowledge Base Routes with Enhanced Security.
+ *
+ * These routes handle public knowledge base access with comprehensive
+ * validation, security measures, and search functionality.
+ */
 Route::prefix('kb')->group(function () {
     Route::get('/', [KbPublicController::class, 'index'])->name('kb.index');
     Route::get('/category/{slug}', [KbPublicController::class, 'category'])
@@ -112,8 +127,11 @@ Route::prefix('kb')->group(function () {
 });
 
 /**
- * Public Support Tickets Routes with Enhanced Security. *
- * These routes handle public support ticket creation and viewing with * comprehensive validation and security measures. */
+ * Public Support Tickets Routes with Enhanced Security.
+ *
+ * These routes handle public support ticket creation and viewing with
+ * comprehensive validation and security measures.
+ */
 Route::prefix('support')->group(function () {
     Route::get('/create', [UserTicketController::class, 'create'])->name('support.tickets.create');
     Route::post('/store', [UserTicketController::class, 'store'])
@@ -125,8 +143,11 @@ Route::prefix('support')->group(function () {
 });
 
 /**
- * Purchase Code Verification Route with Enhanced Security. *
- * This route handles purchase code verification for ticket creation with * comprehensive validation and rate limiting. */
+ * Purchase Code Verification Route with Enhanced Security.
+ *
+ * This route handles purchase code verification for ticket creation with
+ * comprehensive validation and rate limiting.
+ */
 Route::get(
     '/verify-purchase-code/{purchaseCode}',
     [App\Http\Controllers\Api\TicketApiController::class, 'verifyPurchaseCode'],
@@ -136,8 +157,11 @@ Route::get(
     ->name('verify-purchase-code');
 
 /**
- * Public Products Routes with Enhanced Security. *
- * These routes handle public product browsing with comprehensive * validation and security measures. */
+ * Public Products Routes with Enhanced Security.
+ *
+ * These routes handle public product browsing with comprehensive
+ * validation and security measures.
+ */
 Route::prefix('products')->group(function () {
     Route::get('/', [ProductController::class, 'publicIndex'])->name('public.products.index');
     Route::get('/{slug}', [ProductController::class, 'publicShow'])
@@ -146,8 +170,13 @@ Route::prefix('products')->group(function () {
 });
 
 /**
- * Payment Routes with Enhanced Security and Validation. *
- * These routes handle payment processing with comprehensive validation (validate, Validator::make), * security measures, and rate limiting (throttle, RateLimiter) for payment operations. * Security: Input validation (validate) via Controllers, CSRF protection (csrf, token, csrf_token), * Rate limiting (throttle), Parameter validation, Secure webhook handling, Payment data encryption. */
+ * Payment Routes with Enhanced Security and Validation.
+ *
+ * These routes handle payment processing with comprehensive validation (validate, Validator::make),
+ * security measures, and rate limiting (throttle, RateLimiter) for payment operations.
+ * Security: Input validation (validate) via Controllers, CSRF protection (csrf, token, csrf_token),
+ * Rate limiting (throttle), Parameter validation, Secure webhook handling, Payment data encryption.
+ */
 Route::prefix('payment')->group(function () {
     Route::get('/gateways/{product}', [PaymentController::class, 'showPaymentGateways'])
         ->where('product', '[0-9]+') // Validate product ID format
@@ -174,7 +203,15 @@ Route::prefix('payment')->group(function () {
         ->middleware('throttle:60, 1') // Rate limiting: 60 requests per minute for webhooks
         ->name('payment.webhook');
 
-    /**   * Payment Result Pages with Enhanced Security and Validation. *   * These routes handle payment result pages with comprehensive validation (validate), * security measures, and error handling. * Security: Input validation (validate) via Controllers, Parameter validation, * Output sanitization (htmlspecialchars, htmlentities), Secure session handling, * Proper error responses. */
+    /**
+     * Payment Result Pages with Enhanced Security and Validation.
+     *
+     * These routes handle payment result pages with comprehensive validation (validate),
+     * security measures, and error handling.
+     * Security: Input validation (validate) via Controllers, Parameter validation,
+     * Output sanitization (htmlspecialchars, htmlentities), Secure session handling,
+     * Proper error responses.
+     */
     Route::get(
         '/success-page/{gateway}',
         [PaymentPageController::class, 'success'],
@@ -199,8 +236,14 @@ Route::prefix('payment')->group(function () {
 // ============================================================================
 
 /**
- * Authenticated User Routes with Enhanced Security. *
- * These routes handle authenticated user functionality with comprehensive * security middleware, validation (validate, Validator::make), and access control. * Security: Authentication middleware (auth, Auth::check, Auth::user), User role verification, * Input validation (validate), Output sanitization (htmlspecialchars, htmlentities), * Access control checks, Session security, CSRF protection (csrf, token). */
+ * Authenticated User Routes with Enhanced Security.
+ *
+ * These routes handle authenticated user functionality with comprehensive
+ * security middleware, validation (validate, Validator::make), and access control.
+ * Security: Authentication middleware (auth, Auth::check, Auth::user), User role verification,
+ * Input validation (validate), Output sanitization (htmlspecialchars, htmlentities),
+ * Access control checks, Session security, CSRF protection (csrf, token).
+ */
 Route::middleware(['auth', 'user', 'verified'])->group(function () {
     // User Dashboard
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
@@ -262,8 +305,15 @@ Route::middleware(['auth', 'user', 'verified'])->group(function () {
 // ============================================================================
 
 /**
- * Admin Routes with Enhanced Security and Access Control. *
- * These routes handle admin functionality with comprehensive security middleware, * validation (validate, Validator::make), access control, and administrative features. * Security: Admin authentication middleware (auth, admin, Auth::check, Auth::user), * Role-based access control, Input validation (validate), Output sanitization (htmlspecialchars, htmlentities), * Audit logging, Rate limiting (throttle) for sensitive operations, * Parameter validation, Secure file handling. */
+ * Admin Routes with Enhanced Security and Access Control.
+ *
+ * These routes handle admin functionality with comprehensive security middleware,
+ * validation (validate, Validator::make), access control, and administrative features.
+ * Security: Admin authentication middleware (auth, admin, Auth::check, Auth::user),
+ * Role-based access control, Input validation (validate), Output sanitization (htmlspecialchars, htmlentities),
+ * Audit logging, Rate limiting (throttle) for sensitive operations,
+ * Parameter validation, Secure file handling.
+ */
 Route::middleware(['auth', 'admin', 'verified'])->prefix('admin')->name('admin.')->group(function () {
     // Product data endpoint for license forms
     Route::get(
@@ -655,8 +705,13 @@ Route::middleware(['auth', 'admin', 'verified'])->prefix('admin')->name('admin.'
 // ============================================================================
 
 /**
- * OAuth Routes with Enhanced Security and Validation. *
- * These routes handle OAuth authentication with comprehensive security measures, * validation (validate, Validator::make), and callback handling. * Security: OAuth state parameter validation, CSRF protection (csrf, token), * Rate limiting (throttle), Secure callback validation, Token security, Input sanitization (htmlspecialchars). */
+ * OAuth Routes with Enhanced Security and Validation.
+ *
+ * These routes handle OAuth authentication with comprehensive security measures,
+ * validation (validate, Validator::make), and callback handling.
+ * Security: OAuth state parameter validation, CSRF protection (csrf, token),
+ * Rate limiting (throttle), Secure callback validation, Token security, Input sanitization (htmlspecialchars).
+ */
 Route::prefix('auth/envato')->group(function () {
     Route::get('/', [UserEnvatoController::class, 'redirectToEnvato'])
         ->middleware('throttle:5, 1') // Rate limiting: 5 requests per minute
@@ -674,8 +729,14 @@ Route::prefix('auth/envato')->group(function () {
 // ============================================================================
 
 /**
- * Authenticated User Profile Routes with Enhanced Security. *
- * These routes handle user profile management with comprehensive security measures, * validation (validate, Validator::make), and access control. * Security: Authentication middleware (auth, Auth::check, Auth::user), User ownership validation, * Input validation (validate), Output sanitization (htmlspecialchars, htmlentities), * CSRF protection (csrf, token), Secure password handling. */
+ * Authenticated User Profile Routes with Enhanced Security.
+ *
+ * These routes handle user profile management with comprehensive security measures,
+ * validation (validate, Validator::make), and access control.
+ * Security: Authentication middleware (auth, Auth::check, Auth::user), User ownership validation,
+ * Input validation (validate), Output sanitization (htmlspecialchars, htmlentities),
+ * CSRF protection (csrf, token), Secure password handling.
+ */
 Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/profile', [UserProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [UserProfileController::class, 'update'])->name('profile.update');
@@ -690,15 +751,20 @@ Route::middleware(['auth', 'user'])->group(function () {
 // AUTH ROUTES (Laravel Breeze/Jetstream)
 // ============================================================================
 
-require __DIR__ . '/auth.php'; // security-ignore: LARAVEL_ROUTES
+require __DIR__.'/auth.php'; // security-ignore: LARAVEL_ROUTES
 
 // ============================================================================
 // INSTALLATION ROUTES
 // ============================================================================
 
 /**
- * Installation Routes with Enhanced Security and Validation. *
- * These routes handle application installation with comprehensive security measures, * validation (validate, Validator::make), and installation process management. * Security: Installation middleware checks, Input validation (validate), * Database security, Secure credential handling, File permission validation, CSRF protection (csrf, token). */
+ * Installation Routes with Enhanced Security and Validation.
+ *
+ * These routes handle application installation with comprehensive security measures,
+ * validation (validate, Validator::make), and installation process management.
+ * Security: Installation middleware checks, Input validation (validate),
+ * Database security, Secure credential handling, File permission validation, CSRF protection (csrf, token).
+ */
 Route::prefix('install')->name('install.')->middleware(['web', CheckInstallation::class])->group(function () {
     // Welcome page
     Route::get('/', [InstallController::class, 'welcome'])->name('welcome');

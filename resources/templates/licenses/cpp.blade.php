@@ -1,5 +1,8 @@
 /**
- * License Verification System for C++ * Product: {{product}} * Generated: {{date}} */
+ * License Verification System for C++
+ * Product: {{product}}
+ * Generated: {{date}}
+ */
 
 #include <iostream>
 #include <string>
@@ -19,7 +22,10 @@ private:
     std::string api_token = "{{api_token}}";
 
     // Callback function for curl
-    static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* userp) { userp->append((char*)contents, size * nmemb); return size * nmemb; }
+    static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* userp) {
+        userp->append((char*)contents, size * nmemb);
+        return size * nmemb;
+    }
 
 public:
     struct LicenseResponse {
@@ -39,7 +45,10 @@ public:
         }
     };
 
-    /**   * Verify license with purchase code * This method sends a single request to our system which handles both Envato and database verification */
+    /**
+     * Verify license with purchase code
+     * This method sends a single request to our system which handles both Envato and database verification
+     */
     LicenseResponse verifyLicense(const std::string& purchase_code, const std::string& domain = "") {
         try {
             // Send single request to our system
@@ -52,9 +61,12 @@ public:
 
 private:
 
-    /**   * Verify with our license system */
+    /**
+     * Verify with our license system
+     */
     LicenseResponse verifyWithOurSystem(const std::string& purchase_code, const std::string& domain = "") {
-        CURL* curl = curl_easy_init(); std::string response_string;
+        CURL* curl = curl_easy_init();
+        std::string response_string;
 
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, api_url.c_str());
@@ -73,7 +85,8 @@ private:
 
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data.c_str());
 
-            struct curl_slist* headers = NULL; headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
+            struct curl_slist* headers = NULL;
+            headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
             headers = curl_slist_append(headers, "User-Agent: LicenseVerifier/1.0");
             curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
@@ -108,14 +121,18 @@ private:
         return createLicenseResponse(false, "Unable to verify license");
     }
 
-    /**   * Create standardized response */
+    /**
+     * Create standardized response
+     */
     LicenseResponse createLicenseResponse(bool valid, const std::string& message, json data = nullptr) {
         return LicenseResponse(valid, message, data, product_slug);
     }
 };
 
 // Usage example:
-/* int main() { LicenseVerifier verifier;
+/*
+int main() {
+    LicenseVerifier verifier;
 
     // Verify license
     auto result = verifier.verifyLicense("YOUR_PURCHASE_CODE", "yourdomain.com");

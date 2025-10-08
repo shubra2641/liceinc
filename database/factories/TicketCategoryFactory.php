@@ -6,13 +6,21 @@ use App\Models\TicketCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TicketCategory> */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TicketCategory>
+ */
 class TicketCategoryFactory extends Factory
 {
-    /**   * The name of the factory's corresponding model. *   * @var class-string<TicketCategory> */
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var class-string<TicketCategory> */
     protected $model = TicketCategory::class;
 
-    /**   * Define the model's default state. *   * @return array<string, mixed> */
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
@@ -30,7 +38,9 @@ class TicketCategoryFactory extends Factory
         ];
     }
 
-    /**   * Indicate that the category is inactive. */
+    /**
+     * Indicate that the category is inactive.
+     */
     public function inactive(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -38,7 +48,9 @@ class TicketCategoryFactory extends Factory
         ]);
     }
 
-    /**   * Set a specific department. */
+    /**
+     * Set a specific department.
+     */
     public function department(string $department): static
     {
         return $this->state(fn (array $attributes) => [
@@ -46,7 +58,9 @@ class TicketCategoryFactory extends Factory
         ]);
     }
 
-    /**   * Set a specific sort order. */
+    /**
+     * Set a specific sort order.
+     */
     public function sortOrder(int $order): static
     {
         return $this->state(fn (array $attributes) => [

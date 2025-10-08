@@ -104,7 +104,8 @@
                 <div class="stats-card-label">{{ trans('app.Paid Invoices') }}</div>
                 <div class="stats-card-trend positive">
                     <i class="stats-trend-icon positive"></i>
-                    <span>{{ number_format(($invoices->where('status', 'paid')->count() / max($invoices->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span> </div>
+                    <span>{{ number_format(($invoices->where('status', 'paid')->count() / max($invoices->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -128,7 +129,8 @@
                 <div class="stats-card-label">{{ trans('app.Pending Invoices') }}</div>
                 <div class="stats-card-trend negative">
                     <i class="stats-trend-icon negative"></i>
-                    <span>{{ number_format(($invoices->where('status', 'pending')->count() / max($invoices->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span> </div>
+                    <span>{{ number_format(($invoices->where('status', 'pending')->count() / max($invoices->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -152,7 +154,8 @@
                 <div class="stats-card-label">{{ trans('app.Overdue Invoices') }}</div>
                 <div class="stats-card-trend negative">
                     <i class="stats-trend-icon negative"></i>
-                    <span>{{ number_format(($invoices->where('status', 'overdue')->count() / max($invoices->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span> </div>
+                    <span>{{ number_format(($invoices->where('status', 'overdue')->count() / max($invoices->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span>
+                </div>
             </div>
         </div>
     </div>

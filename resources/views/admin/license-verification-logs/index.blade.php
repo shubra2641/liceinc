@@ -76,7 +76,8 @@
                     <div class="stats-card-label">{{ trans('license-logs.successful_attempts') }}</div>
                     <div class="stats-card-trend positive">
                         <i class="stats-trend-icon positive"></i>
-                        <span>{{ $stats['total_attempts'] > 0 ? round(($stats['successful_attempts'] / $stats['total_attempts']) * 100, 1) : 0 }}% {{ trans('app.of_total') }}</span> </div>
+                        <span>{{ $stats['total_attempts'] > 0 ? round(($stats['successful_attempts'] / $stats['total_attempts']) * 100, 1) : 0 }}% {{ trans('app.of_total') }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -100,7 +101,8 @@
                     <div class="stats-card-label">{{ trans('license-logs.failed_attempts') }}</div>
                     <div class="stats-card-trend negative">
                         <i class="stats-trend-icon negative"></i>
-                        <span>{{ $stats['total_attempts'] > 0 ? round(($stats['failed_attempts'] / $stats['total_attempts']) * 100, 1) : 0 }}% {{ trans('app.of_total') }}</span> </div>
+                        <span>{{ $stats['total_attempts'] > 0 ? round(($stats['failed_attempts'] / $stats['total_attempts']) * 100, 1) : 0 }}% {{ trans('app.of_total') }}</span>
+                    </div>
                 </div>
             </div>
         </div>

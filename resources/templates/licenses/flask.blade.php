@@ -1,6 +1,11 @@
 /**
- * License Verification System * Product: {{product}} * Language: Flask * Generated: {{date}} *
- * This is a generic template. Please customize according to Flask best practices. */
+ * License Verification System
+ * Product: {{product}}
+ * Language: Flask
+ * Generated: {{date}}
+ *
+ * This is a generic template. Please customize according to Flask best practices.
+ */
 
 # License verification for Flask
 # API URL: {{license_api_url}}

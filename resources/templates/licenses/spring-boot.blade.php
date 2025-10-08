@@ -1,6 +1,11 @@
 /**
- * License Verification System * Product: {{product}} * Language: Spring Boot * Generated: {{date}} *
- * This is a generic template. Please customize according to Spring Boot best practices. */
+ * License Verification System
+ * Product: {{product}}
+ * Language: Spring Boot
+ * Generated: {{date}}
+ *
+ * This is a generic template. Please customize according to Spring Boot best practices.
+ */
 
 // License verification for Spring Boot
 // API URL: {{license_api_url}}

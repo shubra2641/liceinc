@@ -109,7 +109,8 @@
                 <div class="stats-card-label">{{ trans('app.Active Templates') }}</div>
                 <div class="stats-card-trend positive">
                     <i class="stats-trend-icon positive"></i>
-                    <span>{{ number_format(($templates->where('is_active', true)->count() / max($templates->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span> </div>
+                    <span>{{ number_format(($templates->where('is_active', true)->count() / max($templates->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -133,7 +134,8 @@
                 <div class="stats-card-label">{{ trans('app.User Templates') }}</div>
                 <div class="stats-card-trend positive">
                     <i class="stats-trend-icon positive"></i>
-                    <span>{{ number_format(($templates->where('type', 'user')->count() / max($templates->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span> </div>
+                    <span>{{ number_format(($templates->where('type', 'user')->count() / max($templates->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -157,7 +159,8 @@
                 <div class="stats-card-label">{{ trans('app.Admin Templates') }}</div>
                 <div class="stats-card-trend positive">
                     <i class="stats-trend-icon positive"></i>
-                    <span>{{ number_format(($templates->where('type', 'admin')->count() / max($templates->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span> </div>
+                    <span>{{ number_format(($templates->where('type', 'admin')->count() / max($templates->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span>
+                </div>
             </div>
         </div>
     </div>

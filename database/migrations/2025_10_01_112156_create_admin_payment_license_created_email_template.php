@@ -2,8 +2,10 @@
 
 use Illuminate\Database\Migrations\Migration;
 
-return new class () extends Migration {
-    /**   * Run the migrations. */
+return new class() extends Migration {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         App\Models\EmailTemplate::create([
@@ -51,7 +53,9 @@ return new class () extends Migration {
         ]);
     }
 
-    /**   * Reverse the migrations. */
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         App\Models\EmailTemplate::where('name', 'admin_payment_license_created')->delete();

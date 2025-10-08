@@ -1,5 +1,8 @@
 /**
- * License Verification System for React * Product: {{product}} * Generated: {{date}} */
+ * License Verification System for React
+ * Product: {{product}}
+ * Generated: {{date}}
+ */
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -10,7 +13,12 @@ const LicenseVerifier = {
   verificationKey: '{{verification_key}}',
   apiToken: '{{api_token}}',
 
-  /**   * Verify license with purchase code * This method sends a single request to our system which handles both Envato and database verification * Note: This is a comment, not command execution * This is NOT a security vulnerability - it's a documentation comment */
+  /**
+   * Verify license with purchase code
+   * This method sends a single request to our system which handles both Envato and database verification
+   * Note: This is a comment, not command execution
+   * This is NOT a security vulnerability - it's a documentation comment
+   */
   async verifyLicense(purchaseCode, domain = null) {
     try {
       // Send single request to our system
@@ -28,7 +36,9 @@ const LicenseVerifier = {
   },
 
 
-  /**   * Verify with our license system */
+  /**
+   * Verify with our license system
+   */
   async verifyWithOurSystem(purchaseCode, domain = null) {
     try {
       const response = await axios.post(this.apiUrl, {
@@ -56,7 +66,9 @@ const LicenseVerifier = {
     }
   },
 
-  /**   * Create standardized response */
+  /**
+   * Create standardized response
+   */
   createLicenseResponse(valid, message, data = null) {
     return {
       valid: valid,
@@ -171,7 +183,10 @@ const LicenseVerificationForm = ({ onVerificationComplete }) => {
 export { LicenseVerifier, LicenseVerificationForm };
 
 // Usage example:
-/* import { LicenseVerifier, LicenseVerificationForm, useLicenseVerification } from './license-verifier'; // Using the hook
+/*
+import { LicenseVerifier, LicenseVerificationForm, useLicenseVerification } from './license-verifier';
+
+// Using the hook
 const MyComponent = () => {
   const { verifyLicense, isVerifying, licenseResult } = useLicenseVerification();
 

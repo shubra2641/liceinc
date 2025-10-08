@@ -6,13 +6,21 @@ use App\Models\ProgrammingLanguage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProgrammingLanguage> */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProgrammingLanguage>
+ */
 class ProgrammingLanguageFactory extends Factory
 {
-    /**   * The name of the factory's corresponding model. *   * @var class-string<ProgrammingLanguage> */
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var class-string<ProgrammingLanguage> */
     protected $model = ProgrammingLanguage::class;
 
-    /**   * Define the model's default state. *   * @return array<string, mixed> */
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         $languages = [
@@ -26,7 +34,7 @@ class ProgrammingLanguageFactory extends Factory
             'name' => $name,
             'slug' => strtolower((string)$name),
             'description' => $this->faker->sentence(),
-            'icon' => 'fab fa-' . strtolower((string)$name),
+            'icon' => 'fab fa-'.strtolower((string)$name),
             'color' => $this->faker->hexColor(),
             'is_active' => true,
             'sort_order' => $this->faker->numberBetween(1, 100),
@@ -35,7 +43,9 @@ class ProgrammingLanguageFactory extends Factory
         ];
     }
 
-    /**   * Create an inactive language. */
+    /**
+     * Create an inactive language.
+     */
     public function inactive(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -43,17 +53,21 @@ class ProgrammingLanguageFactory extends Factory
         ]);
     }
 
-    /**   * Create a specific language. */
+    /**
+     * Create a specific language.
+     */
     public function language(string $name): static
     {
         return $this->state(fn (array $attributes) => [
             'name' => $name,
             'slug' => strtolower($name),
-            'icon' => 'fab fa-' . strtolower($name),
+            'icon' => 'fab fa-'.strtolower($name),
         ]);
     }
 
-    /**   * Set a specific sort order. */
+    /**
+     * Set a specific sort order.
+     */
     public function sortOrder(int $order): static
     {
         return $this->state(fn (array $attributes) => [

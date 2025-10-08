@@ -8,14 +8,50 @@ use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Security Headers Middleware with enhanced security and validation. *
- * This middleware adds comprehensive security headers to all HTTP responses * to protect against common web vulnerabilities including XSS, clickjacking, * MIME sniffing, and other security threats with proper validation and error handling. *
- * Features: * - Comprehensive security header implementation * - Content Security Policy (CSP) support with reporting * - XSS protection and clickjacking prevention * - MIME sniffing protection and referrer policy control * - HTTPS enforcement with HSTS headers * - Server information removal for security * - Configuration-based header management * - Comprehensive error handling and logging *
+ * Security Headers Middleware with enhanced security and validation.
  *
- * @example * // Register in Kernel.php * protected $middleware = [ * \App\Http\Middleware\SecurityHeadersMiddleware::class, * ]; */
+ * This middleware adds comprehensive security headers to all HTTP responses
+ * to protect against common web vulnerabilities including XSS, clickjacking,
+ * MIME sniffing, and other security threats with proper validation and error handling.
+ *
+ * Features:
+ * - Comprehensive security header implementation
+ * - Content Security Policy (CSP) support with reporting
+ * - XSS protection and clickjacking prevention
+ * - MIME sniffing protection and referrer policy control
+ * - HTTPS enforcement with HSTS headers
+ * - Server information removal for security
+ * - Configuration-based header management
+ * - Comprehensive error handling and logging
+ *
+ *
+ * @example
+ * // Register in Kernel.php
+ * protected $middleware = [
+ *     \App\Http\Middleware\SecurityHeadersMiddleware::class,
+ * ];
+ */
 class SecurityHeadersMiddleware
 {
-    /**   * Handle an incoming request with comprehensive security header implementation. *   * Processes incoming requests and adds comprehensive security headers * to responses with proper validation, error handling, and configuration * management to protect against various web vulnerabilities. *   * @param Request $request The incoming HTTP request * @param Closure $next The next middleware in the pipeline *   * @return Response The response with security headers applied *   * @throws \Exception When security header processing fails *   * @example * // Middleware automatically processes all requests * // Adds security headers to all responses * // Continues to next middleware in pipeline */
+    /**
+     * Handle an incoming request with comprehensive security header implementation.
+     *
+     * Processes incoming requests and adds comprehensive security headers
+     * to responses with proper validation, error handling, and configuration
+     * management to protect against various web vulnerabilities.
+     *
+     * @param  Request  $request  The incoming HTTP request
+     * @param  Closure  $next  The next middleware in the pipeline
+     *
+     * @return Response The response with security headers applied
+     *
+     * @throws \Exception When security header processing fails
+     *
+     * @example
+     * // Middleware automatically processes all requests
+     * // Adds security headers to all responses
+     * // Continues to next middleware in pipeline
+     */
     public function handle(Request $request, Closure $next): Response
     {
         try {
@@ -27,11 +63,12 @@ class SecurityHeadersMiddleware
                 throw new \InvalidArgumentException('Invalid response received from next middleware');
             }
             // Apply security headers with validation
-            if ($response instanceof \Symfony\Component\HttpFoundation\Response) {
+            if ($response instanceof Response) {
                 $this->applySecurityHeaders($request, $response);
             }
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /** @var Response $typedResponse */
             $typedResponse = $response;
+
             return $typedResponse;
         } catch (\Exception $e) {
             Log::error('Error in SecurityHeadersMiddleware', [
@@ -43,12 +80,24 @@ class SecurityHeadersMiddleware
             ]);
             // In case of error, return response without security headers to prevent blocking
             $fallbackResponse = $response ?? $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /** @var Response $typedResponse */
             $typedResponse = $fallbackResponse;
+
             return $typedResponse;
         }
     }
-    /**   * Apply security headers to response with comprehensive validation. *   * Adds all configured security headers to the response with proper * validation and error handling to ensure security without breaking functionality. *   * @param Request $request The HTTP request * @param Response $response The HTTP response *   * @throws \Exception When security header application fails */
+
+    /**
+     * Apply security headers to response with comprehensive validation.
+     *
+     * Adds all configured security headers to the response with proper
+     * validation and error handling to ensure security without breaking functionality.
+     *
+     * @param  Request  $request  The HTTP request
+     * @param  Response  $response  The HTTP response
+     *
+     * @throws \Exception When security header application fails
+     */
     private function applySecurityHeaders(Request $request, Response $response): void
     {
         try {
@@ -72,41 +121,63 @@ class SecurityHeadersMiddleware
             throw $e;
         }
     }
-    /**   * Get security headers configuration with validation. *   * @return array<string, mixed> The validated security headers configuration */
+
+    /**
+     * Get security headers configuration with validation.
+     *
+     * @return array<string, mixed> The validated security headers configuration
+     */
     private function getSecurityHeaders(): array
     {
         try {
             $headers = config('security.headers', []);
             if (! is_array($headers)) {
                 Log::warning('Invalid security headers configuration, using defaults');
+
                 return $this->getDefaultSecurityHeaders();
             }
+
             return $this->getDefaultSecurityHeaders();
         } catch (\Exception $e) {
             Log::error('Error getting security headers configuration', [
                 'error' => $e->getMessage(),
             ]);
+
             return $this->getDefaultSecurityHeaders();
         }
     }
-    /**   * Get Content Security Policy configuration with validation. *   * @return array<string, mixed> The validated CSP configuration */
+
+    /**
+     * Get Content Security Policy configuration with validation.
+     *
+     * @return array<string, mixed> The validated CSP configuration
+     */
     private function getContentSecurityPolicy(): array
     {
         try {
             $csp = config('security.content_security_policy', []);
             if (is_array($csp) === false) {
                 Log::warning('Invalid CSP configuration, using defaults');
+
                 return $this->getDefaultCspConfiguration();
             }
+
             return $this->getDefaultCspConfiguration();
         } catch (\Exception $e) {
             Log::error('Error getting CSP configuration', [
                 'error' => $e->getMessage(),
             ]);
+
             return $this->getDefaultCspConfiguration();
         }
     }
-    /**   * Apply standard security headers to response. *   * @param Response $response The HTTP response * @param  array<string, mixed>  $headers  The security headers configuration */
+
+    /**
+     * Apply standard security headers to response.
+     *
+     * @param  Response  $response  The HTTP response
+     * @param  array<string, mixed>  $headers  The security headers configuration
+     */
     private function applyStandardHeaders(Response $response, array $headers): void
     {
         try {
@@ -138,7 +209,14 @@ class SecurityHeadersMiddleware
             throw $e;
         }
     }
-    /**   * Apply HTTPS-specific security headers. *   * @param Request $request The HTTP request * @param Response $response The HTTP response * @param  array<string, mixed>  $headers  The security headers configuration */
+
+    /**
+     * Apply HTTPS-specific security headers.
+     *
+     * @param  Request  $request  The HTTP request
+     * @param  Response  $response  The HTTP response
+     * @param  array<string, mixed>  $headers  The security headers configuration
+     */
     private function applyHttpsHeaders(Request $request, Response $response, array $headers): void
     {
         try {
@@ -158,7 +236,13 @@ class SecurityHeadersMiddleware
             throw $e;
         }
     }
-    /**   * Apply Content Security Policy headers. *   * @param Response $response The HTTP response * @param  array<string, mixed>  $csp  The CSP configuration */
+
+    /**
+     * Apply Content Security Policy headers.
+     *
+     * @param  Response  $response  The HTTP response
+     * @param  array<string, mixed>  $csp  The CSP configuration
+     */
     private function applyContentSecurityPolicy(Response $response, array $csp): void
     {
         try {
@@ -177,7 +261,12 @@ class SecurityHeadersMiddleware
             throw $e;
         }
     }
-    /**   * Remove server information for security. *   * @param Response $response The HTTP response */
+
+    /**
+     * Remove server information for security.
+     *
+     * @param  Response  $response  The HTTP response
+     */
     private function removeServerInformation(Response $response): void
     {
         try {
@@ -191,7 +280,14 @@ class SecurityHeadersMiddleware
             throw $e;
         }
     }
-    /**   * Set security header with validation. *   * @param Response $response The HTTP response * @param string $name The header name * @param string $value The header value */
+
+    /**
+     * Set security header with validation.
+     *
+     * @param  Response  $response  The HTTP response
+     * @param  string  $name  The header name
+     * @param  string  $value  The header value
+     */
     private function setSecurityHeader(Response $response, string $name, string $value): void
     {
         try {
@@ -214,7 +310,12 @@ class SecurityHeadersMiddleware
             throw $e;
         }
     }
-    /**   * Get default security headers configuration. *   * @return array<string, mixed> Default security headers */
+
+    /**
+     * Get default security headers configuration.
+     *
+     * @return array<string, mixed> Default security headers
+     */
     private function getDefaultSecurityHeaders(): array
     {
         return [
@@ -226,7 +327,12 @@ class SecurityHeadersMiddleware
             'strict_transport_security' => 'max-age=31536000; includeSubDomains',
         ];
     }
-    /**   * Get default Content Security Policy configuration. *   * @return array<string, mixed> Default CSP configuration */
+
+    /**
+     * Get default Content Security Policy configuration.
+     *
+     * @return array<string, mixed> Default CSP configuration
+     */
     private function getDefaultCspConfiguration(): array
     {
         return [
@@ -243,7 +349,24 @@ class SecurityHeadersMiddleware
             ],
         ];
     }
-    /**   * Build Content Security Policy header value with comprehensive validation. *   * Constructs a properly formatted Content Security Policy header value * from configuration directives with proper validation and error handling. *   * @param  array<string, mixed>  $csp  The CSP configuration array *   * @return string The formatted CSP header value *   * @throws \Exception When CSP building fails *   * @example * $csp = ['directives' => ['default-src' => "'self'", 'script-src' => "'self' 'unsafe-inline'"]]; * $header = $this->buildContentSecurityPolicy($csp); * // Returns: "default-src 'self'; script-src 'self' 'unsafe-inline'" */
+
+    /**
+     * Build Content Security Policy header value with comprehensive validation.
+     *
+     * Constructs a properly formatted Content Security Policy header value
+     * from configuration directives with proper validation and error handling.
+     *
+     * @param  array<string, mixed>  $csp  The CSP configuration array
+     *
+     * @return string The formatted CSP header value
+     *
+     * @throws \Exception When CSP building fails
+     *
+     * @example
+     * $csp = ['directives' => ['default-src' => "'self'", 'script-src' => "'self' 'unsafe-inline'"]];
+     * $header = $this->buildContentSecurityPolicy($csp);
+     * // Returns: "default-src 'self'; script-src 'self' 'unsafe-inline'"
+     */
     private function buildContentSecurityPolicy(array $csp): string
     {
         try {
@@ -275,12 +398,14 @@ class SecurityHeadersMiddleware
                     Log::warning('Invalid CSP directive name format', ['directive' => $directive]);
                     continue;
                 }
-                $policy[] = $directive . ' ' . $value;
+                $policy[] = $directive.' '.$value;
             }
             if (empty($policy)) {
                 Log::warning('No valid CSP directives found, using default policy');
+
                 return "default-src 'self'";
             }
+
             return implode('; ', $policy);
         } catch (\Exception $e) {
             Log::error('Error building Content Security Policy', [

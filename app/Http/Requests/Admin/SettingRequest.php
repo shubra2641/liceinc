@@ -5,18 +5,37 @@ namespace App\Http\Requests\Admin;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * Setting Request with enhanced security. *
- * This unified request class handles validation for both updating system settings * and testing API connections with comprehensive security measures and input sanitization. *
- * Features: * - Unified validation for both update and test operations * - XSS protection and input sanitization * - Custom validation messages for better user experience * - Proper type hints and return types * - Security validation rules (XSS protection, SQL injection prevention) * - File upload validation with security checks * - API token validation and testing */
+ * Setting Request with enhanced security.
+ *
+ * This unified request class handles validation for both updating system settings
+ * and testing API connections with comprehensive security measures and input sanitization.
+ *
+ * Features:
+ * - Unified validation for both update and test operations
+ * - XSS protection and input sanitization
+ * - Custom validation messages for better user experience
+ * - Proper type hints and return types
+ * - Security validation rules (XSS protection, SQL injection prevention)
+ * - File upload validation with security checks
+ * - API token validation and testing
+ */
 class SettingRequest extends FormRequest
 {
-    /**   * Determine if the user is authorized to make this request. */
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         $user = auth()->user();
+
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
-    /**   * Get the validation rules that apply to the request. *   * @return array<string, mixed> */
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         $route = $this->route();
@@ -33,6 +52,7 @@ class SettingRequest extends FormRequest
                 ],
             ];
         }
+
         // Update settings validation
         return [
             'site_name' => [
@@ -523,7 +543,12 @@ class SettingRequest extends FormRequest
             ],
         ];
     }
-    /**   * Get custom validation messages. *   * @return array<string, string> */
+
+    /**
+     * Get custom validation messages.
+     *
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [
@@ -590,7 +615,12 @@ class SettingRequest extends FormRequest
             'token.regex' => 'API token can only contain letters and numbers.',
         ];
     }
-    /**   * Get custom attributes for validator errors. *   * @return array<string, string> */
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
+     */
     public function attributes(): array
     {
         return [
@@ -642,7 +672,10 @@ class SettingRequest extends FormRequest
             'token' => 'API token',
         ];
     }
-    /**   * Prepare the data for validation. */
+
+    /**
+     * Prepare the data for validation.
+     */
     protected function prepareForValidation(): void
     {
         // Sanitize input to prevent XSS
@@ -683,14 +716,21 @@ class SettingRequest extends FormRequest
             'time_format' => $this->time_format ?? 'H:i:s',
         ]);
     }
-    /**   * Sanitize input to prevent XSS attacks. *   * @param mixed $input The input to sanitize *   * @return string|null The sanitized input */
+
+    /**
+     * Sanitize input to prevent XSS attacks.
+     *
+     * @param  mixed  $input  The input to sanitize
+     *
+     * @return string|null The sanitized input
+     */
     private function sanitizeInput(mixed $input): ?string
     {
         if ($input === null || $input === '') {
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

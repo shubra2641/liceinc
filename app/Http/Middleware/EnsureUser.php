@@ -11,11 +11,35 @@ use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Ensure User Middleware with enhanced security and comprehensive user validation. *
- * This middleware ensures that users are authenticated and have verified email addresses. * It implements comprehensive security measures, input validation, and error handling * for reliable user authentication and email verification operations. */
+ * Ensure User Middleware with enhanced security and comprehensive user validation.
+ *
+ * This middleware ensures that users are authenticated and have verified email addresses.
+ * It implements comprehensive security measures, input validation, and error handling
+ * for reliable user authentication and email verification operations.
+ */
 class EnsureUser
 {
-    /**   * Handle an incoming request with enhanced security and comprehensive user validation. *   * Ensures that users are authenticated and have verified email addresses. * Includes comprehensive validation, security measures, and error handling * for reliable user authentication and email verification operations. *   * @param Request $request The incoming HTTP request * @param Closure $next The next middleware in the pipeline *   * @return Response The HTTP response *   * @throws InvalidArgumentException When user data is invalid * @throws \Exception When authentication or verification fails *   * @example * // This middleware is automatically applied to routes that require user authentication * Route::middleware('ensure.user')->group(function () { * Route::get('/dashboard', [DashboardController::class, 'index']); * }); */
+    /**
+     * Handle an incoming request with enhanced security and comprehensive user validation.
+     *
+     * Ensures that users are authenticated and have verified email addresses.
+     * Includes comprehensive validation, security measures, and error handling
+     * for reliable user authentication and email verification operations.
+     *
+     * @param  Request  $request  The incoming HTTP request
+     * @param  Closure  $next  The next middleware in the pipeline
+     *
+     * @return Response The HTTP response
+     *
+     * @throws InvalidArgumentException When user data is invalid
+     * @throws \Exception When authentication or verification fails
+     *
+     * @example
+     * // This middleware is automatically applied to routes that require user authentication
+     * Route::middleware('ensure.user')->group(function () {
+     *     Route::get('/dashboard', [DashboardController::class, 'index']);
+     * });
+     */
     public function handle(Request $request, Closure $next): Response
     {
         try {
@@ -44,8 +68,9 @@ class EnsureUser
                 }
             }
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /** @var Response $typedResponse */
             $typedResponse = $response;
+
             return $typedResponse;
         } catch (\Exception $e) {
             Log::error('EnsureUser middleware failed', [
@@ -58,13 +83,25 @@ class EnsureUser
             throw $e;
         }
     }
-    /**   * Validate request with enhanced security and comprehensive validation. *   * @param Request $request The request to validate */
+
+    /**
+     * Validate request with enhanced security and comprehensive validation.
+     *
+     * @param  Request  $request  The request to validate
+     */
     private function validateRequest(Request $request): void
     {
         // Request is already typed as Request, no need to check instanceof
         // This method is kept for future validation logic
     }
-    /**   * Validate user with enhanced security and comprehensive validation. *   * @param mixed $user The user object to validate *   * @throws InvalidArgumentException When user is invalid */
+
+    /**
+     * Validate user with enhanced security and comprehensive validation.
+     *
+     * @param  mixed  $user  The user object to validate
+     *
+     * @throws InvalidArgumentException When user is invalid
+     */
     private function validateUser($user): void
     {
         if (! $user) {
@@ -82,7 +119,16 @@ class EnsureUser
             throw new InvalidArgumentException('User object must have email_verified_at property or method');
         }
     }
-    /**   * Check if email is a test email with enhanced security and validation. *   * @param string $email Email address to check *   * @return bool True if email is a test email, false otherwise *   * @throws InvalidArgumentException When email is invalid */
+
+    /**
+     * Check if email is a test email with enhanced security and validation.
+     *
+     * @param  string  $email  Email address to check
+     *
+     * @return bool True if email is a test email, false otherwise
+     *
+     * @throws InvalidArgumentException When email is invalid
+     */
     private function isTestEmail(string $email): bool
     {
         if (empty($email)) {
@@ -104,7 +150,14 @@ class EnsureUser
                 return true;
             }
         }
+
         return false;
     }
-    /**   * Sanitize email for logging with enhanced security and XSS protection. *   * @param string $email Email address to sanitize *   * @return string Sanitized email address */
+    /**
+     * Sanitize email for logging with enhanced security and XSS protection.
+     *
+     * @param  string  $email  Email address to sanitize
+     *
+     * @return string Sanitized email address
+     */
 }

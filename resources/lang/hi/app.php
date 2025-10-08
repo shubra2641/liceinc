@@ -2255,5 +2255,4 @@ return [
     'Custom Service' => 'कस्टम सेवा',
     'Buy Again' => 'फिर से खरीदें',
     'You don\'t have any invoices yet' => 'आपके पास अभी तक कोई चालान नहीं है',
-
 ];

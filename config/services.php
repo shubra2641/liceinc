@@ -1,7 +1,9 @@
 <?php
 
 return [
-    /* |-------------------------------------------------------------------------- | Third Party Services
+    /*
+    |--------------------------------------------------------------------------
+    | Third Party Services
     |--------------------------------------------------------------------------
     |
     | This file is for storing the credentials for third party services such
@@ -35,7 +37,7 @@ return [
     'envato' => [
         'client_id' => env('ENVATO_CLIENT_ID'),
         'client_secret' => env('ENVATO_CLIENT_SECRET'),
-        'redirect' => env('ENVATO_REDIRECT_URI', env('APP_URL') . '/auth/envato/callback'),
+        'redirect' => env('ENVATO_REDIRECT_URI', env('APP_URL').'/auth/envato/callback'),
         'token' => env('ENVATO_TOKEN'), // For license verification API
     ],
 ];

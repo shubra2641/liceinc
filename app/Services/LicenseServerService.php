@@ -5,27 +5,64 @@ namespace App\Services;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Helpers\SecureFileHelper;
 
 /**
- * License Server Service with enhanced security and performance. *
- * This service provides comprehensive license server integration including * update checking, version management, product information, and file downloads * with enhanced security measures and error handling. *
- * Features: * - License update checking and version management * - Product information retrieval and caching * - File download management with security validation * - Comprehensive error handling and logging * - Performance optimization with intelligent caching * - Enhanced security measures for API communication * - Input validation and sanitization * - Network error handling and retry logic *
+ * License Server Service with enhanced security and performance.
  *
- * @example * // Check for updates * $updates = $licenseServer->checkUpdates($licenseKey, $currentVersion, $productSlug); *
- * // Get latest version * $latest = $licenseServer->getLatestVersion($licenseKey, $productSlug); *
- * // Download update * $download = $licenseServer->downloadUpdate($licenseKey, $version, $productSlug); */
+ * This service provides comprehensive license server integration including
+ * update checking, version management, product information, and file downloads
+ * with enhanced security measures and error handling.
+ *
+ * Features:
+ * - License update checking and version management
+ * - Product information retrieval and caching
+ * - File download management with security validation
+ * - Comprehensive error handling and logging
+ * - Performance optimization with intelligent caching
+ * - Enhanced security measures for API communication
+ * - Input validation and sanitization
+ * - Network error handling and retry logic
+ *
+ *
+ * @example
+ * // Check for updates
+ * $updates = $licenseServer->checkUpdates($licenseKey, $currentVersion, $productSlug);
+ *
+ * // Get latest version
+ * $latest = $licenseServer->getLatestVersion($licenseKey, $productSlug);
+ *
+ * // Download update
+ * $download = $licenseServer->downloadUpdate($licenseKey, $version, $productSlug);
+ */
 class LicenseServerService
 {
-    /**   * Base URL for the license server API. */
+    /**
+     * Base URL for the license server API.
+     */
     protected string $baseUrl;
-    /**   * Request timeout in seconds. */
+
+    /**
+     * Request timeout in seconds.
+     */
     protected int $timeout;
-    /**   * Cache duration constants for different operations. */
+
+    /**
+     * Cache duration constants for different operations.
+     */
     private const CACHE_DURATION_UPDATES = 300; // 5 minutes
+
     private const CACHE_DURATION_HISTORY = 600; // 10 minutes
+
     private const CACHE_DURATION_PRODUCTS = 1800; // 30 minutes
-    /**   * Create a new LicenseServerService instance. *   * Initializes the service with configuration from the license server * configuration file and sets up default values for API communication. *   * @return void */
+
+    /**
+     * Create a new LicenseServerService instance.
+     *
+     * Initializes the service with configuration from the license server
+     * configuration file and sets up default values for API communication.
+     *
+     * @return void
+     */
     public function __construct()
     {
         // Always use my-logos.com for central API
@@ -33,7 +70,18 @@ class LicenseServerService
         $timeoutConfig = config('license_server.timeout', 30);
         $this->timeout = is_numeric($timeoutConfig) ? (int)$timeoutConfig : 30;
     }
-    /**   * Get license server domain with enhanced validation. *   * Retrieves the configured license server domain with fallback * to application URL if not specifically configured. *   * @return string The license server domain *   * @example * $domain = $licenseServer->getDomain(); */
+
+    /**
+     * Get license server domain with enhanced validation.
+     *
+     * Retrieves the configured license server domain with fallback
+     * to application URL if not specifically configured.
+     *
+     * @return string The license server domain
+     *
+     * @example
+     * $domain = $licenseServer->getDomain();
+     */
     public function getDomain(): string
     {
         try {
@@ -43,25 +91,56 @@ class LicenseServerService
                 $appUrl = config('app.url');
                 $appUrlString = is_string($appUrl) ? $appUrl : '';
                 $parsedDomain = parse_url($appUrlString, PHP_URL_HOST);
+
                 return $parsedDomain ?: 'localhost';
             }
             $domainString = is_string($domain) ? $domain : '';
+
             return $this->sanitizeDomain($domainString);
         } catch (\Exception $e) {
             Log::error('Failed to get license server domain', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return 'localhost';
         }
     }
-    /**   * Get license server base URL with validation. *   * @return string The base URL for the license server *   * @example * $baseUrl = $licenseServer->getBaseUrl(); */
+
+    /**
+     * Get license server base URL with validation.
+     *
+     * @return string The base URL for the license server
+     *
+     * @example
+     * $baseUrl = $licenseServer->getBaseUrl();
+     */
     public function getBaseUrl(): string
     {
         return $this->baseUrl;
     }
-    /**   * Check for available updates from license server with enhanced security. *   * Checks for available updates for a specific license and product with * comprehensive error handling, caching, and security validation. *   * @param string $licenseKey The license key to check * @param string $currentVersion The current version of the product * @param string $productSlug The product slug identifier * @param  string|null  $domain  The domain to check for (optional) *   * @return array<mixed, mixed> Array containing update information or error details *   * @throws \InvalidArgumentException When invalid parameters are provided *   * @example * $updates = $licenseServer->checkUpdates('ABC123', '1.0.0', 'my-product', 'example.com'); */
-    /**   * @return array<mixed, mixed> */
+
+    /**
+     * Check for available updates from license server with enhanced security.
+     *
+     * Checks for available updates for a specific license and product with
+     * comprehensive error handling, caching, and security validation.
+     *
+     * @param  string  $licenseKey  The license key to check
+     * @param  string  $currentVersion  The current version of the product
+     * @param  string  $productSlug  The product slug identifier
+     * @param  string|null  $domain  The domain to check for (optional)
+     *
+     * @return array<mixed, mixed> Array containing update information or error details
+     *
+     * @throws \InvalidArgumentException When invalid parameters are provided
+     *
+     * @example
+     * $updates = $licenseServer->checkUpdates('ABC123', '1.0.0', 'my-product', 'example.com');
+     */
+    /**
+     * @return array<mixed, mixed>
+     */
     public function checkUpdates(
         string $licenseKey,
         string $currentVersion,
@@ -89,6 +168,7 @@ class LicenseServerService
                 if (is_array($data) && $this->validateUpdateResponse($data)) {
                     // Cache successful response
                     Cache::put($cacheKey, $data, self::CACHE_DURATION_UPDATES);
+
                     return $this->convertToTypedArray($data);
                 } else {
                     return $this->createErrorResponse(
@@ -106,11 +186,31 @@ class LicenseServerService
                 'product_slug' => $productSlug,
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
+
+            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
         }
     }
-    /**   * Get version history from license server with enhanced security. *   * Retrieves version history for a specific license and product with * comprehensive error handling and caching. *   * @param string $licenseKey The license key * @param string $productSlug The product slug identifier * @param  string|null  $domain  The domain to check for (optional) *   * @return array<mixed, mixed> Array containing version history or error details *   * @throws \InvalidArgumentException When invalid parameters are provided *   * @example * $history = $licenseServer->getVersionHistory('ABC123', 'my-product', 'example.com'); */
-    /**   * @return array<mixed, mixed> */
+
+    /**
+     * Get version history from license server with enhanced security.
+     *
+     * Retrieves version history for a specific license and product with
+     * comprehensive error handling and caching.
+     *
+     * @param  string  $licenseKey  The license key
+     * @param  string  $productSlug  The product slug identifier
+     * @param  string|null  $domain  The domain to check for (optional)
+     *
+     * @return array<mixed, mixed> Array containing version history or error details
+     *
+     * @throws \InvalidArgumentException When invalid parameters are provided
+     *
+     * @example
+     * $history = $licenseServer->getVersionHistory('ABC123', 'my-product', 'example.com');
+     */
+    /**
+     * @return array<mixed, mixed>
+     */
     public function getVersionHistory(string $licenseKey, string $productSlug, ?string $domain = null): array
     {
         try {
@@ -132,11 +232,13 @@ class LicenseServerService
                 // Cache successful response
                 if (is_array($data)) {
                     Cache::put($cacheKey, $data, self::CACHE_DURATION_HISTORY);
+
                     return $this->convertToTypedArray($data);
                 }
             } else {
                 return $this->createErrorResponse('Failed to get version history', 'SERVER_ERROR');
             }
+
             return $this->createErrorResponse('Failed to get version history', 'SERVER_ERROR');
         } catch (\Exception $e) {
             Log::error('License server version history exception', [
@@ -145,11 +247,30 @@ class LicenseServerService
                 'product_slug' => $productSlug,
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
+
+            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
         }
     }
-    /**   * Get update information without license verification with enhanced security. *   * Retrieves update information for a product without requiring license * verification, useful for public update checking. *   * @param string $productSlug The product slug identifier * @param string $currentVersion The current version *   * @return array<mixed, mixed> Array containing update information or error details *   * @throws \InvalidArgumentException When invalid parameters are provided *   * @example * $updateInfo = $licenseServer->getUpdateInfo('my-product', '1.0.0'); */
-    /**   * @return array<mixed, mixed> */
+
+    /**
+     * Get update information without license verification with enhanced security.
+     *
+     * Retrieves update information for a product without requiring license
+     * verification, useful for public update checking.
+     *
+     * @param  string  $productSlug  The product slug identifier
+     * @param  string  $currentVersion  The current version
+     *
+     * @return array<mixed, mixed> Array containing update information or error details
+     *
+     * @throws \InvalidArgumentException When invalid parameters are provided
+     *
+     * @example
+     * $updateInfo = $licenseServer->getUpdateInfo('my-product', '1.0.0');
+     */
+    /**
+     * @return array<mixed, mixed>
+     */
     public function getUpdateInfo(string $productSlug, string $currentVersion): array
     {
         try {
@@ -160,7 +281,7 @@ class LicenseServerService
             if ($cached) {
                 return is_array($cached) ? $cached : [];
             }
-            $url = $this->getBaseUrl() . '/license/update-info';
+            $url = $this->getBaseUrl().'/license/update-info';
             $ch = curl_init();
             curl_setopt_array($ch, [
                 CURLOPT_URL => $url,
@@ -189,7 +310,8 @@ class LicenseServerService
                     'error' => $curlError,
                     'url' => $url,
                 ]);
-                return $this->createErrorResponse('Network error: ' . $curlError, 'NETWORK_ERROR');
+
+                return $this->createErrorResponse('Network error: '.$curlError, 'NETWORK_ERROR');
             }
             if ($httpCode === 200) {
                 $data = json_decode(is_string($responseBody) ? $responseBody : '', true);
@@ -197,16 +319,19 @@ class LicenseServerService
                     Log::error('Invalid JSON response from update-info API', [
                         'response' => $responseBody,
                     ]);
+
                     return $this->createErrorResponse('Invalid response from license server', 'INVALID_JSON');
                 }
                 // Cache successful response
                 if (is_array($data)) {
                     Cache::put($cacheKey, $data, self::CACHE_DURATION_HISTORY);
+
                     return $this->convertToTypedArray($data);
                 }
             } else {
                 return $this->createErrorResponse('Failed to get update info', 'SERVER_ERROR');
             }
+
             return $this->createErrorResponse('Failed to get update info', 'SERVER_ERROR');
         } catch (\Exception $e) {
             Log::error('License server update info exception', [
@@ -215,14 +340,33 @@ class LicenseServerService
                 'current_version' => $currentVersion,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $this->createErrorResponse(
-                'An error occurred while fetching update info: ' . $e->getMessage(),
+                'An error occurred while fetching update info: '.$e->getMessage(),
                 'EXCEPTION_ERROR',
             );
         }
     }
-    /**   * Get latest version from license server with enhanced security. *   * Retrieves the latest version information for a specific license and product. *   * @param string $licenseKey The license key * @param string $productSlug The product slug identifier * @param  string|null  $domain  The domain to check for (optional) *   * @return array<mixed, mixed> Array containing latest version information or error details *   * @throws \InvalidArgumentException When invalid parameters are provided *   * @example * $latest = $licenseServer->getLatestVersion('ABC123', 'my-product', 'example.com'); */
-    /**   * @return array<mixed, mixed> */
+
+    /**
+     * Get latest version from license server with enhanced security.
+     *
+     * Retrieves the latest version information for a specific license and product.
+     *
+     * @param  string  $licenseKey  The license key
+     * @param  string  $productSlug  The product slug identifier
+     * @param  string|null  $domain  The domain to check for (optional)
+     *
+     * @return array<mixed, mixed> Array containing latest version information or error details
+     *
+     * @throws \InvalidArgumentException When invalid parameters are provided
+     *
+     * @example
+     * $latest = $licenseServer->getLatestVersion('ABC123', 'my-product', 'example.com');
+     */
+    /**
+     * @return array<mixed, mixed>
+     */
     public function getLatestVersion(string $licenseKey, string $productSlug, ?string $domain = null): array
     {
         try {
@@ -244,11 +388,13 @@ class LicenseServerService
                 // Cache successful response
                 if (is_array($data)) {
                     Cache::put($cacheKey, $data, self::CACHE_DURATION_UPDATES);
+
                     return $this->convertToTypedArray($data);
                 }
             } else {
                 return $this->createErrorResponse('Failed to get latest version', 'SERVER_ERROR');
             }
+
             return $this->createErrorResponse('Failed to get latest version', 'SERVER_ERROR');
         } catch (\Exception $e) {
             Log::error('License server latest version exception', [
@@ -257,10 +403,29 @@ class LicenseServerService
                 'product_slug' => $productSlug,
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
+
+            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
         }
     }
-    /**   * Download update file from license server with enhanced security. *   * Downloads an update file for a specific license and version with * comprehensive security validation and error handling. *   * @param string $licenseKey The license key * @param string $version The version to download * @param string $productSlug The product slug identifier * @param  string|null  $domain  The domain to check for (optional) *   * @return array<mixed, mixed> Array containing download information or error details *   * @throws \InvalidArgumentException When invalid parameters are provided *   * @example * $download = $licenseServer->downloadUpdate('ABC123', '1.1.0', 'my-product', 'example.com'); */
+
+    /**
+     * Download update file from license server with enhanced security.
+     *
+     * Downloads an update file for a specific license and version with
+     * comprehensive security validation and error handling.
+     *
+     * @param  string  $licenseKey  The license key
+     * @param  string  $version  The version to download
+     * @param  string  $productSlug  The product slug identifier
+     * @param  string|null  $domain  The domain to check for (optional)
+     *
+     * @return array<mixed, mixed> Array containing download information or error details
+     *
+     * @throws \InvalidArgumentException When invalid parameters are provided
+     *
+     * @example
+     * $download = $licenseServer->downloadUpdate('ABC123', '1.1.0', 'my-product', 'example.com');
+     */
     public function downloadUpdate(
         string $licenseKey,
         string $version,
@@ -269,7 +434,7 @@ class LicenseServerService
     ): array {
         try {
             $this->validateDownloadParameters($licenseKey, $version, $productSlug, $domain);
-            $url = "{$this->getBaseUrl()}/license/download-update/" .
+            $url = "{$this->getBaseUrl()}/license/download-update/".
                 "{$this->sanitizeInput($licenseKey)}/{$this->sanitizeInput($version)}";
             $params = [
                 'product_slug' => $this->sanitizeInput($productSlug),
@@ -288,11 +453,12 @@ class LicenseServerService
                             'product_slug' => $productSlug,
                             'version' => $version,
                         ]);
+
                         return $this->createErrorResponse('Failed to create temporary directory', 'DIRECTORY_ERROR');
                     }
                 }
                 // Save file to temporary location with security validation
-                $tempPath = $tempDir . '/update_' . $this->sanitizeFilename($version) . '_' . time() . '.zip';
+                $tempPath = $tempDir.'/update_'.$this->sanitizeFilename($version).'_'.time().'.zip';
                 if (file_put_contents($tempPath, $response->body()) === false) {
                     Log::error('Failed to save update file', [
                         'temp_path' => $tempPath,
@@ -300,11 +466,13 @@ class LicenseServerService
                         'product_slug' => $productSlug,
                         'version' => $version,
                     ]);
+
                     return $this->createErrorResponse(
                         'Failed to save update file to temporary location',
                         'FILE_SAVE_ERROR',
                     );
                 }
+
                 return [
                     'success' => true,
                     'file_path' => $tempPath,
@@ -321,11 +489,25 @@ class LicenseServerService
                 'version' => $version,
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->createErrorResponse('Download error: ' . $e->getMessage(), 'NETWORK_ERROR');
+
+            return $this->createErrorResponse('Download error: '.$e->getMessage(), 'NETWORK_ERROR');
         }
     }
-    /**   * Get available products from license server with enhanced security. *   * Retrieves a list of available products from the license server with * comprehensive error handling and caching. *   * @return array<mixed, mixed> Array containing products information or error details *   * @example * $products = $licenseServer->getProducts(); */
-    /**   * @return array<mixed, mixed> */
+
+    /**
+     * Get available products from license server with enhanced security.
+     *
+     * Retrieves a list of available products from the license server with
+     * comprehensive error handling and caching.
+     *
+     * @return array<mixed, mixed> Array containing products information or error details
+     *
+     * @example
+     * $products = $licenseServer->getProducts();
+     */
+    /**
+     * @return array<mixed, mixed>
+     */
     public function getProducts(): array
     {
         try {
@@ -335,7 +517,7 @@ class LicenseServerService
             if ($cached) {
                 return is_array($cached) ? $cached : [];
             }
-            $url = $this->getBaseUrl() . '/license/products';
+            $url = $this->getBaseUrl().'/license/products';
             // Use cURL directly for better control
             $ch = curl_init();
             curl_setopt_array($ch, [
@@ -360,7 +542,8 @@ class LicenseServerService
                     'error' => $curlError,
                     'url' => $url,
                 ]);
-                return $this->createErrorResponse('Network error: ' . $curlError, 'NETWORK_ERROR');
+
+                return $this->createErrorResponse('Network error: '.$curlError, 'NETWORK_ERROR');
             }
             if ($httpCode === 200) {
                 $data = json_decode(is_string($responseBody) ? $responseBody : '', true);
@@ -368,26 +551,41 @@ class LicenseServerService
                     Log::error('Invalid JSON response from products API', [
                         'response' => $responseBody,
                     ]);
+
                     return $this->createErrorResponse('Invalid response from license server', 'INVALID_JSON');
                 }
                 // Cache successful response
                 if (is_array($data)) {
                     Cache::put($cacheKey, $data, self::CACHE_DURATION_PRODUCTS);
+
                     return $this->convertToTypedArray($data);
                 }
             } else {
                 return $this->createErrorResponse('Failed to get products', 'SERVER_ERROR');
             }
+
             return $this->createErrorResponse('Failed to get products', 'SERVER_ERROR');
         } catch (\Exception $e) {
             Log::error('License server products exception', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
+
+            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
         }
     }
-    /**   * Clear cache for specific license with enhanced security. *   * Clears cached data for a specific license and product combination. *   * @param string $licenseKey The license key * @param string $productSlug The product slug *   * @example * $licenseServer->clearCache('ABC123', 'my-product'); */
+
+    /**
+     * Clear cache for specific license with enhanced security.
+     *
+     * Clears cached data for a specific license and product combination.
+     *
+     * @param  string  $licenseKey  The license key
+     * @param  string  $productSlug  The product slug
+     *
+     * @example
+     * $licenseServer->clearCache('ABC123', 'my-product');
+     */
     public function clearCache(string $licenseKey, string $productSlug): void
     {
         try {
@@ -408,7 +606,16 @@ class LicenseServerService
             ]);
         }
     }
-    /**   * Clear all license cache with enhanced security. *   * Clears all cached license server data. *   *   * @example * $licenseServer->clearAllCache(); */
+
+    /**
+     * Clear all license cache with enhanced security.
+     *
+     * Clears all cached license server data.
+     *
+     *
+     * @example
+     * $licenseServer->clearAllCache();
+     */
     public function clearAllCache(): void
     {
         try {
@@ -421,7 +628,17 @@ class LicenseServerService
             ]);
         }
     }
-    /**   * Validate update parameters. *   * @param string $licenseKey The license key * @param string $currentVersion The current version * @param string $productSlug The product slug * @param  string|null  $domain  The domain *   * @throws \InvalidArgumentException When validation fails */
+
+    /**
+     * Validate update parameters.
+     *
+     * @param  string  $licenseKey  The license key
+     * @param  string  $currentVersion  The current version
+     * @param  string  $productSlug  The product slug
+     * @param  string|null  $domain  The domain
+     *
+     * @throws \InvalidArgumentException When validation fails
+     */
     private function validateUpdateParameters(
         string $licenseKey,
         string $currentVersion,
@@ -441,7 +658,16 @@ class LicenseServerService
             throw new \InvalidArgumentException('Invalid domain format');
         }
     }
-    /**   * Validate history parameters. *   * @param string $licenseKey The license key * @param string $productSlug The product slug * @param  string|null  $domain  The domain *   * @throws \InvalidArgumentException When validation fails */
+
+    /**
+     * Validate history parameters.
+     *
+     * @param  string  $licenseKey  The license key
+     * @param  string  $productSlug  The product slug
+     * @param  string|null  $domain  The domain
+     *
+     * @throws \InvalidArgumentException When validation fails
+     */
     private function validateHistoryParameters(string $licenseKey, string $productSlug, ?string $domain): void
     {
         if (empty($licenseKey)) {
@@ -454,7 +680,15 @@ class LicenseServerService
             throw new \InvalidArgumentException('Invalid domain format');
         }
     }
-    /**   * Validate update info parameters. *   * @param string $productSlug The product slug * @param string $currentVersion The current version *   * @throws \InvalidArgumentException When validation fails */
+
+    /**
+     * Validate update info parameters.
+     *
+     * @param  string  $productSlug  The product slug
+     * @param  string  $currentVersion  The current version
+     *
+     * @throws \InvalidArgumentException When validation fails
+     */
     private function validateUpdateInfoParameters(string $productSlug, string $currentVersion): void
     {
         if (empty($productSlug)) {
@@ -464,7 +698,16 @@ class LicenseServerService
             throw new \InvalidArgumentException('Current version cannot be empty');
         }
     }
-    /**   * Validate latest version parameters. *   * @param string $licenseKey The license key * @param string $productSlug The product slug * @param  string|null  $domain  The domain *   * @throws \InvalidArgumentException When validation fails */
+
+    /**
+     * Validate latest version parameters.
+     *
+     * @param  string  $licenseKey  The license key
+     * @param  string  $productSlug  The product slug
+     * @param  string|null  $domain  The domain
+     *
+     * @throws \InvalidArgumentException When validation fails
+     */
     private function validateLatestVersionParameters(string $licenseKey, string $productSlug, ?string $domain): void
     {
         if (empty($licenseKey)) {
@@ -477,7 +720,17 @@ class LicenseServerService
             throw new \InvalidArgumentException('Invalid domain format');
         }
     }
-    /**   * Validate download parameters. *   * @param string $licenseKey The license key * @param string $version The version * @param string $productSlug The product slug * @param  string|null  $domain  The domain *   * @throws \InvalidArgumentException When validation fails */
+
+    /**
+     * Validate download parameters.
+     *
+     * @param  string  $licenseKey  The license key
+     * @param  string  $version  The version
+     * @param  string  $productSlug  The product slug
+     * @param  string|null  $domain  The domain
+     *
+     * @throws \InvalidArgumentException When validation fails
+     */
     private function validateDownloadParameters(
         string $licenseKey,
         string $version,
@@ -497,13 +750,30 @@ class LicenseServerService
             throw new \InvalidArgumentException('Invalid domain format');
         }
     }
-    /**   * Validate update response data. *   * @param array $data The response data *   * @return bool True if valid, false otherwise */
-    /**   * @param array<mixed, mixed> $data */
+
+    /**
+     * Validate update response data.
+     *
+     * @param  array  $data  The response data
+     *
+     * @return bool True if valid, false otherwise
+     */
+    /**
+     * @param array<mixed, mixed> $data
+     */
     private function validateUpdateResponse(array $data): bool
     {
         return isset($data['success']) && is_bool($data['success']);
     }
-    /**   * Create standardized error response. *   * @param string $message The error message * @param string $errorCode The error code *   * @return array<mixed, mixed> The error response array */
+
+    /**
+     * Create standardized error response.
+     *
+     * @param  string  $message  The error message
+     * @param  string  $errorCode  The error code
+     *
+     * @return array<mixed, mixed> The error response array
+     */
     private function createErrorResponse(string $message, string $errorCode): array
     {
         return [
@@ -513,42 +783,85 @@ class LicenseServerService
         ];
     }
 
-    /**   * Convert mixed array to typed array. * @return array<mixed, mixed> */
+    /**
+     * Convert mixed array to typed array.
+     *
+     * @return array<mixed, mixed>
+     */
     private function convertToTypedArray(mixed $data): array
     {
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             return [];
         }
+
         return (array)$data;
     }
-    /**   * Sanitize input to prevent XSS attacks. *   * @param string $input The input to sanitize *   * @return string The sanitized input */
+
+    /**
+     * Sanitize input to prevent XSS attacks.
+     *
+     * @param  string  $input  The input to sanitize
+     *
+     * @return string The sanitized input
+     */
     private function sanitizeInput(string $input): string
     {
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
-    /**   * Sanitize domain for security. *   * @param string $domain The domain to sanitize *   * @return string The sanitized domain */
+
+    /**
+     * Sanitize domain for security.
+     *
+     * @param  string  $domain  The domain to sanitize
+     *
+     * @return string The sanitized domain
+     */
     private function sanitizeDomain(string $domain): string
     {
         return strtolower(trim($domain));
     }
-    /**   * Sanitize filename for security. *   * @param string $filename The filename to sanitize *   * @return string The sanitized filename */
+
+    /**
+     * Sanitize filename for security.
+     *
+     * @param  string  $filename  The filename to sanitize
+     *
+     * @return string The sanitized filename
+     */
     private function sanitizeFilename(string $filename): ?string
     {
         $result = preg_replace('/[^a-zA-Z0-9._-]/', '', $filename);
+
         return $result !== null ? $result : null;
     }
-    /**   * Hash data for cache keys. *   * @param string $data The data to hash *   * @return string The hashed data */
+
+    /**
+     * Hash data for cache keys.
+     *
+     * @param  string  $data  The data to hash
+     *
+     * @return string The hashed data
+     */
     private function hashForCache(string $data): string
     {
         $appKey = config('app.key');
         $keyString = is_string($appKey) ? $appKey : '';
-        return hash('sha256', $data . $keyString);
+
+        return hash('sha256', $data.$keyString);
     }
-    /**   * Hash data for logging. *   * @param string $data The data to hash *   * @return string The hashed data */
+
+    /**
+     * Hash data for logging.
+     *
+     * @param  string  $data  The data to hash
+     *
+     * @return string The hashed data
+     */
     private function hashForLogging(string $data): string
     {
         $appKey = config('app.key');
         $keyString = is_string($appKey) ? $appKey : '';
-        return substr(hash('sha256', $data . $keyString), 0, 8) . '...';
+
+        return substr(hash('sha256', $data.$keyString), 0, 8).'...';
     }
 }

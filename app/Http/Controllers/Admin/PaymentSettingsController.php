@@ -15,12 +15,43 @@ use Illuminate\View\View;
 // use PayPal\PayPalServerSDK\Orders\OrdersCreateRequest;
 
 /**
- * Payment Settings Controller with enhanced security. *
- * This controller handles payment gateway settings management including * PayPal and Stripe configuration, testing, and validation. *
- * Features: * - Payment gateway settings management * - PayPal and Stripe configuration * - Connection testing functionality * - Credential validation and security * - Webhook URL management * - Comprehensive error handling with database transactions * - Enhanced security measures (XSS protection, input validation) * - Proper logging for errors and warnings only * - Model scope integration for optimized queries */
+ * Payment Settings Controller with enhanced security.
+ *
+ * This controller handles payment gateway settings management including
+ * PayPal and Stripe configuration, testing, and validation.
+ *
+ * Features:
+ * - Payment gateway settings management
+ * - PayPal and Stripe configuration
+ * - Connection testing functionality
+ * - Credential validation and security
+ * - Webhook URL management
+ * - Comprehensive error handling with database transactions
+ * - Enhanced security measures (XSS protection, input validation)
+ * - Proper logging for errors and warnings only
+ * - Model scope integration for optimized queries
+ */
 class PaymentSettingsController extends Controller
 {
-    /**   * Display payment settings with enhanced security. *   * Shows payment gateway settings for PayPal and Stripe with proper * error handling and security measures. *   * @return View The payment settings view *   * @throws \Exception When database operations fail *   * @example * // Access payment settings: * GET /admin/payment-settings *   * // Returns view with: * // - PayPal configuration settings * // - Stripe configuration settings * // - Connection status indicators */
+    /**
+     * Display payment settings with enhanced security.
+     *
+     * Shows payment gateway settings for PayPal and Stripe with proper
+     * error handling and security measures.
+     *
+     * @return View The payment settings view
+     *
+     * @throws \Exception When database operations fail
+     *
+     * @example
+     * // Access payment settings:
+     * GET /admin/payment-settings
+     *
+     * // Returns view with:
+     * // - PayPal configuration settings
+     * // - Stripe configuration settings
+     * // - Connection status indicators
+     */
     public function index(): View
     {
         try {
@@ -28,6 +59,7 @@ class PaymentSettingsController extends Controller
             $paypalSettings = PaymentSetting::getByGateway('paypal');
             $stripeSettings = PaymentSetting::getByGateway('stripe');
             DB::commit();
+
             return view('admin.payment-settings.index', ['paypalSettings' => $paypalSettings, 'stripeSettings' => $stripeSettings]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -35,6 +67,7 @@ class PaymentSettingsController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Return empty settings on error
             return view('admin.payment-settings.index', [
                 'paypalSettings' => null,
@@ -42,7 +75,33 @@ class PaymentSettingsController extends Controller
             ]);
         }
     }
-    /**   * Update payment settings with enhanced security. *   * Updates payment gateway settings with comprehensive validation, * credential security, and proper error handling. *   * @param PaymentSettingsRequest $request The HTTP request containing payment settings *   * @return RedirectResponse Redirect response with update result *   * @throws \Exception When database operations fail *   * @example * // Update PayPal settings: * POST /admin/payment-settings * { * "gateway": "paypal", * "is_enabled": true, * "is_sandbox": true, * "credentials": { * "client_id": "your_client_id", * "client_secret": "your_client_secret" * }, * "webhook_url": "https://example.com/webhook" * } */
+
+    /**
+     * Update payment settings with enhanced security.
+     *
+     * Updates payment gateway settings with comprehensive validation,
+     * credential security, and proper error handling.
+     *
+     * @param  PaymentSettingsRequest  $request  The HTTP request containing payment settings
+     *
+     * @return RedirectResponse Redirect response with update result
+     *
+     * @throws \Exception When database operations fail
+     *
+     * @example
+     * // Update PayPal settings:
+     * POST /admin/payment-settings
+     * {
+     *     "gateway": "paypal",
+     *     "is_enabled": true,
+     *     "is_sandbox": true,
+     *     "credentials": {
+     *         "client_id": "your_client_id",
+     *         "client_secret": "your_client_secret"
+     *     },
+     *     "webhook_url": "https://example.com/webhook"
+     * }
+     */
     public function update(PaymentSettingsRequest $request): RedirectResponse
     {
         try {
@@ -52,6 +111,7 @@ class PaymentSettingsController extends Controller
             $settings = PaymentSetting::getByGateway(is_string($gateway) ? $gateway : '');
             if (! $settings) {
                 DB::rollBack();
+
                 return redirect()->back()->with('error', trans('app.Payment gateway not found'));
             }
             // Get validated credentials (already sanitized by Request class)
@@ -64,6 +124,7 @@ class PaymentSettingsController extends Controller
                 'webhook_url' => $webhookUrl,
             ]);
             DB::commit();
+
             return redirect()->back()->with('success', trans('app.Payment settings updated successfully'));
         } catch (\Exception $e) {
             DB::rollBack();
@@ -72,10 +133,34 @@ class PaymentSettingsController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'gateway' => $request->gateway ?? 'unknown',
             ]);
+
             return redirect()->back()->with('error', trans('app.Failed to update payment settings'));
         }
     }
-    /**   * Test payment gateway connection with enhanced security. *   * Tests payment gateway connection with provided credentials * using secure validation and proper error handling. *   * @param PaymentSettingsRequest $request The HTTP request containing gateway credentials *   * @return JsonResponse JSON response with test result *   * @throws \Exception When connection test fails *   * @example * // Test PayPal connection: * POST /admin/payment-settings/test-connection * { * "gateway": "paypal", * "credentials": { * "client_id": "your_client_id", * "client_secret": "your_client_secret" * } * } */
+
+    /**
+     * Test payment gateway connection with enhanced security.
+     *
+     * Tests payment gateway connection with provided credentials
+     * using secure validation and proper error handling.
+     *
+     * @param  PaymentSettingsRequest  $request  The HTTP request containing gateway credentials
+     *
+     * @return JsonResponse JSON response with test result
+     *
+     * @throws \Exception When connection test fails
+     *
+     * @example
+     * // Test PayPal connection:
+     * POST /admin/payment-settings/test-connection
+     * {
+     *     "gateway": "paypal",
+     *     "credentials": {
+     *         "client_id": "your_client_id",
+     *         "client_secret": "your_client_secret"
+     *     }
+     * }
+     */
     public function testConnection(PaymentSettingsRequest $request): JsonResponse
     {
         try {
@@ -96,6 +181,7 @@ class PaymentSettingsController extends Controller
                     'message' => trans('app.Unsupported payment gateway'),
                 ], 400);
             }
+
             return response()->json($result);
         } catch (\Exception $e) {
             Log::error('Payment gateway connection test failed', [
@@ -103,14 +189,31 @@ class PaymentSettingsController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'gateway' => $request->gateway ?? 'unknown',
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => trans('app.Connection test failed: :error', ['error' => $e->getMessage()]),
             ], 500);
         }
     }
-    /**   * Test PayPal connection with enhanced security. *   * Tests PayPal API connection using provided credentials * with proper error handling and security measures. *   * @param array $credentials The PayPal credentials to test *   * @return array Test result with success status and message *   * @throws \Exception When PayPal API operations fail */
-    /**   * @param array<string, mixed> $credentials * @return array<string, mixed> */
+
+    /**
+     * Test PayPal connection with enhanced security.
+     *
+     * Tests PayPal API connection using provided credentials
+     * with proper error handling and security measures.
+     *
+     * @param  array  $credentials  The PayPal credentials to test
+     *
+     * @return array Test result with success status and message
+     *
+     * @throws \Exception When PayPal API operations fail
+     */
+    /**
+     * @param array<string, mixed> $credentials
+     *
+     * @return array<string, mixed>
+     */
     protected function testPayPalConnection(array $credentials): array
     {
         try {
@@ -121,23 +224,25 @@ class PaymentSettingsController extends Controller
                     'message' => trans('app.PayPal credentials are incomplete'),
                 ];
             }
-            $paypal = new class {
+            $paypal = new class() {
                 public function __construct()
                 {
                     // Mock PayPal SDK implementation
                 }
+
                 public function execute(mixed $request): object
                 {
-                    return (object) ['statusCode' => 201];
+                    return (object)['statusCode' => 201];
                 }
             };
             // Try to create a simple order to test connection
-            $request = new class {
+            $request = new class() {
                 public function prefer(string $preference): mixed
                 {
                     // Mock implementation
                     return $this;
                 }
+
                 /** @var array<string, mixed> */
                 public array $body = [];
             };
@@ -169,16 +274,33 @@ class PaymentSettingsController extends Controller
         } catch (\Exception $e) {
             Log::warning('PayPal connection test failed', [
                 'error' => $e->getMessage(),
-                'client_id' => substr(is_string($credentials['client_id'] ?? null) ? $credentials['client_id'] : '', 0, 8) . '...',
+                'client_id' => substr(is_string($credentials['client_id'] ?? null) ? $credentials['client_id'] : '', 0, 8).'...',
             ]);
+
             return [
                 'success' => false,
                 'message' => trans('app.PayPal connection error: :error', ['error' => $e->getMessage()]),
             ];
         }
     }
-    /**   * Test Stripe connection with enhanced security. *   * Tests Stripe API connection using provided credentials * with proper error handling and security measures. *   * @param array $credentials The Stripe credentials to test *   * @return array Test result with success status and message *   * @throws \Exception When Stripe API operations fail */
-    /**   * @param array<string, mixed> $credentials * @return array<string, mixed> */
+
+    /**
+     * Test Stripe connection with enhanced security.
+     *
+     * Tests Stripe API connection using provided credentials
+     * with proper error handling and security measures.
+     *
+     * @param  array  $credentials  The Stripe credentials to test
+     *
+     * @return array Test result with success status and message
+     *
+     * @throws \Exception When Stripe API operations fail
+     */
+    /**
+     * @param array<string, mixed> $credentials
+     *
+     * @return array<string, mixed>
+     */
     protected function testStripeConnection(array $credentials): array
     {
         try {
@@ -208,8 +330,9 @@ class PaymentSettingsController extends Controller
         } catch (\Exception $e) {
             Log::warning('Stripe connection test failed', [
                 'error' => $e->getMessage(),
-                'secret_key' => substr(is_string($credentials['secret_key']) ? $credentials['secret_key'] : '', 0, 8) . '...',
+                'secret_key' => substr(is_string($credentials['secret_key']) ? $credentials['secret_key'] : '', 0, 8).'...',
             ]);
+
             return [
                 'success' => false,
                 'message' => trans('app.Stripe connection error: :error', ['error' => $e->getMessage()]),

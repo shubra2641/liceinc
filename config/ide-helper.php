@@ -1,8 +1,9 @@
 <?php
 
 return [
-
-    /* |-------------------------------------------------------------------------- | Filename
+    /*
+    |--------------------------------------------------------------------------
+    | Filename
     |--------------------------------------------------------------------------
     |
     | The default filename.
@@ -11,7 +12,9 @@ return [
 
     'filename' => '_ide_helper.php',
 
-    /* |-------------------------------------------------------------------------- | Models filename
+    /*
+    |--------------------------------------------------------------------------
+    | Models filename
     |--------------------------------------------------------------------------
     |
     | The default filename for the models helper file.
@@ -20,7 +23,9 @@ return [
 
     'models_filename' => '_ide_helper_models.php',
 
-    /* |-------------------------------------------------------------------------- | PhpStorm meta filename
+    /*
+    |--------------------------------------------------------------------------
+    | PhpStorm meta filename
     |--------------------------------------------------------------------------
     |
     | PhpStorm also supports the directory `.phpstorm.meta.php/` with arbitrary
@@ -30,7 +35,9 @@ return [
     */
     'meta_filename' => '.phpstorm.meta.php',
 
-    /* |-------------------------------------------------------------------------- | Fluent helpers
+    /*
+    |--------------------------------------------------------------------------
+    | Fluent helpers
     |--------------------------------------------------------------------------
     |
     | Set to true to generate commonly used Fluent methods.
@@ -39,7 +46,9 @@ return [
 
     'include_fluent' => false,
 
-    /* |-------------------------------------------------------------------------- | Factory builders
+    /*
+    |--------------------------------------------------------------------------
+    | Factory builders
     |--------------------------------------------------------------------------
     |
     | Set to true to generate factory generators for better factory()
@@ -51,7 +60,9 @@ return [
 
     'include_factory_builders' => false,
 
-    /* |-------------------------------------------------------------------------- | Write model magic methods
+    /*
+    |--------------------------------------------------------------------------
+    | Write model magic methods
     |--------------------------------------------------------------------------
     |
     | Set to false to disable write magic methods of model.
@@ -60,7 +71,9 @@ return [
 
     'write_model_magic_where' => true,
 
-    /* |-------------------------------------------------------------------------- | Write model external Eloquent builder methods
+    /*
+    |--------------------------------------------------------------------------
+    | Write model external Eloquent builder methods
     |--------------------------------------------------------------------------
     |
     | Set to false to disable write external Eloquent builder methods.
@@ -69,7 +82,9 @@ return [
 
     'write_model_external_builder_methods' => true,
 
-    /* |-------------------------------------------------------------------------- | Write model relation count and exists properties
+    /*
+    |--------------------------------------------------------------------------
+    | Write model relation count and exists properties
     |--------------------------------------------------------------------------
     |
     | Set to false to disable writing of relation count and exists properties
@@ -80,7 +95,9 @@ return [
     'write_model_relation_count_properties' => true,
     'write_model_relation_exists_properties' => false,
 
-    /* |-------------------------------------------------------------------------- | Write Eloquent model mixins
+    /*
+    |--------------------------------------------------------------------------
+    | Write Eloquent model mixins
     |--------------------------------------------------------------------------
     |
     | This will add the necessary DocBlock mixins to the model class
@@ -93,7 +110,9 @@ return [
 
     'write_eloquent_model_mixins' => false,
 
-    /* |-------------------------------------------------------------------------- | Helper files to include
+    /*
+    |--------------------------------------------------------------------------
+    | Helper files to include
     |--------------------------------------------------------------------------
     |
     | Include helper files. By default not included, but can be toggled with the
@@ -104,25 +123,30 @@ return [
     'include_helpers' => false,
 
     'helper_files' => [
-        base_path() . '/vendor/laravel/framework/src/Illuminate/Support/helpers.php',
-        base_path() . '/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php',
+        base_path().'/vendor/laravel/framework/src/Illuminate/Support/helpers.php',
+        base_path().'/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php',
     ],
 
-    /* |-------------------------------------------------------------------------- | Model locations to include
+    /*
+    |--------------------------------------------------------------------------
+    | Model locations to include
     |--------------------------------------------------------------------------
     |
     | Define in which directories the ide-helper:models command should look
     | for models.
     |
     | glob patterns are supported to easier reach models in sub-directories,
-    | e.g. `app/Services/* /Models` (without the space). |
+    | e.g. `app/Services/* /Models` (without the space).
+    |
     */
 
     'model_locations' => [
         'app',
     ],
 
-    /* |-------------------------------------------------------------------------- | Models to ignore
+    /*
+    |--------------------------------------------------------------------------
+    | Models to ignore
     |--------------------------------------------------------------------------
     |
     | Define which models should be ignored.
@@ -133,7 +157,9 @@ return [
         // App\MyModel::class,
     ],
 
-    /* |-------------------------------------------------------------------------- | Models hooks
+    /*
+    |--------------------------------------------------------------------------
+    | Models hooks
     |--------------------------------------------------------------------------
     |
     | Define which hook classes you want to run for models to add custom information.
@@ -146,7 +172,9 @@ return [
         // App\Support\IdeHelper\MyModelHook::class
     ],
 
-    /* |-------------------------------------------------------------------------- | Extra classes
+    /*
+    |--------------------------------------------------------------------------
+    | Extra classes
     |--------------------------------------------------------------------------
     |
     | These implementations are not really extended, but called with magic functions.
@@ -160,7 +188,9 @@ return [
 
     'magic' => [],
 
-    /* |-------------------------------------------------------------------------- | Interface implementations
+    /*
+    |--------------------------------------------------------------------------
+    | Interface implementations
     |--------------------------------------------------------------------------
     |
     | These interfaces will be replaced with the implementing class. Some interfaces
@@ -172,7 +202,9 @@ return [
         // App\MyInterface::class => App\MyImplementation::class,
     ],
 
-    /* |-------------------------------------------------------------------------- | Support for camel cased models
+    /*
+     |--------------------------------------------------------------------------
+     | Support for camel cased models
      |--------------------------------------------------------------------------
      |
      | There are some Laravel packages (such as Eloquence) that allow for accessing
@@ -183,16 +215,22 @@ return [
      |
      | For example, normally you would see this:
      |
-     |  * @property \Illuminate\Support\Carbon $created_at |  * @property \Illuminate\Support\Carbon $updated_at |
+     |  * @property \Illuminate\Support\Carbon $created_at
+     |  * @property \Illuminate\Support\Carbon $updated_at
+     |
      | With this enabled, the properties will be this:
      |
-     |  * @property \Illuminate\Support\Carbon $createdAt |  * @property \Illuminate\Support\Carbon $updatedAt |
+     |  * @property \Illuminate\Support\Carbon $createdAt
+     |  * @property \Illuminate\Support\Carbon $updatedAt
+     |
      | Note, it is currently an all-or-nothing option.
      |
      */
     'model_camel_case_properties' => false,
 
-    /* |-------------------------------------------------------------------------- | Property casts
+    /*
+    |--------------------------------------------------------------------------
+    | Property casts
     |--------------------------------------------------------------------------
     |
     | Cast the given "real type" to the given "type".
@@ -203,7 +241,9 @@ return [
         'boolean' => 'bool',
     ],
 
-    /* |-------------------------------------------------------------------------- | Include DocBlocks from classes
+    /*
+    |--------------------------------------------------------------------------
+    | Include DocBlocks from classes
     |--------------------------------------------------------------------------
     |
     | Include DocBlocks from classes to allow additional code inspection for
@@ -212,7 +252,9 @@ return [
     */
     'include_class_docblocks' => false,
 
-    /* |-------------------------------------------------------------------------- | Force FQN usage
+    /*
+    |--------------------------------------------------------------------------
+    | Force FQN usage
     |--------------------------------------------------------------------------
     |
     | Use the fully qualified (class) name in DocBlocks,
@@ -222,7 +264,9 @@ return [
     */
     'force_fqn' => false,
 
-    /* |-------------------------------------------------------------------------- | Use generics syntax
+    /*
+    |--------------------------------------------------------------------------
+    | Use generics syntax
     |--------------------------------------------------------------------------
     |
     | Use generics syntax within DocBlocks,
@@ -231,7 +275,9 @@ return [
     */
     'use_generics_annotations' => true,
 
-    /* |-------------------------------------------------------------------------- | Default return types for macros
+    /*
+    |--------------------------------------------------------------------------
+    | Default return types for macros
     |--------------------------------------------------------------------------
     |
     | Define default return types for macros without explicit return types.
@@ -243,7 +289,9 @@ return [
         Illuminate\Http\Client\Factory::class => Illuminate\Http\Client\PendingRequest::class,
     ],
 
-    /* |-------------------------------------------------------------------------- | Additional relation types
+    /*
+    |--------------------------------------------------------------------------
+    | Additional relation types
     |--------------------------------------------------------------------------
     |
     | Sometimes it's needed to create custom relation types. The key of the array
@@ -253,7 +301,9 @@ return [
     */
     'additional_relation_types' => [],
 
-    /* |-------------------------------------------------------------------------- | Additional relation return types
+    /*
+    |--------------------------------------------------------------------------
+    | Additional relation return types
     |--------------------------------------------------------------------------
     |
     | When using custom relation types its possible for the class name to not contain
@@ -265,7 +315,9 @@ return [
     */
     'additional_relation_return_types' => [],
 
-    /* |-------------------------------------------------------------------------- | Enforce nullable Eloquent relationships on not null columns
+    /*
+    |--------------------------------------------------------------------------
+    | Enforce nullable Eloquent relationships on not null columns
     |--------------------------------------------------------------------------
     |
     | When set to true (default), this option enforces nullable Eloquent relationships.
@@ -274,15 +326,21 @@ return [
     |
     | Default: true
     | A not null column with no foreign key constraint will have a "nullable" relationship.
-    |  * @property int $not_null_column_with_no_foreign_key_constraint |  * @property-read BelongsToVariation|null $notNullColumnWithNoForeignKeyConstraint |
+    |  * @property int $not_null_column_with_no_foreign_key_constraint
+    |  * @property-read BelongsToVariation|null $notNullColumnWithNoForeignKeyConstraint
+    |
     | Option: false
     | A not null column with no foreign key constraint will have a "not nullable" relationship.
-    |  * @property int $not_null_column_with_no_foreign_key_constraint |  * @property-read BelongsToVariation $notNullColumnWithNoForeignKeyConstraint |
+    |  * @property int $not_null_column_with_no_foreign_key_constraint
+    |  * @property-read BelongsToVariation $notNullColumnWithNoForeignKeyConstraint
+    |
     */
 
     'enforce_nullable_relationships' => true,
 
-    /* |-------------------------------------------------------------------------- | Run artisan commands after migrations to generate model helpers
+    /*
+    |--------------------------------------------------------------------------
+    | Run artisan commands after migrations to generate model helpers
     |--------------------------------------------------------------------------
     |
     | The specified commands should run after migrations are finished running.
@@ -291,5 +349,4 @@ return [
     'post_migrate' => [
         // 'ide-helper:models --nowrite',
     ],
-
 ];

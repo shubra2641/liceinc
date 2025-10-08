@@ -5,10 +5,16 @@ namespace App\Helpers;
 use Illuminate\Http\Request;
 
 /**
- * Server Helper Class * Provides secure access to server information without direct $_SERVER usage */
+ * Server Helper Class
+ * Provides secure access to server information without direct $_SERVER usage.
+ */
 class ServerHelper
 {
-    /**   * Get request time float safely * @return float */
+    /**
+     * Get request time float safely.
+     *
+     * @return float
+     */
     public static function getRequestTimeFloat(): float
     {
         // Use Laravel's request time if available
@@ -20,7 +26,11 @@ class ServerHelper
         return microtime(true);
     }
 
-    /**   * Get server software safely * @return string */
+    /**
+     * Get server software safely.
+     *
+     * @return string
+     */
     public static function getServerSoftware(): string
     {
         $request = request();
@@ -36,28 +46,47 @@ class ServerHelper
         return $serverSoftware;
     }
 
-    /**   * Get execution time safely * @return float */
+    /**
+     * Get execution time safely.
+     *
+     * @return float
+     */
     public static function getExecutionTime(): float
     {
         $startTime = self::getRequestTimeFloat();
+
         return microtime(true) - $startTime;
     }
 
-    /**   * Check if server is Apache * @return bool */
+    /**
+     * Check if server is Apache.
+     *
+     * @return bool
+     */
     public static function isApache(): bool
     {
         $software = self::getServerSoftware();
+
         return stripos($software, 'apache') !== false;
     }
 
-    /**   * Check if server is Nginx * @return bool */
+    /**
+     * Check if server is Nginx.
+     *
+     * @return bool
+     */
     public static function isNginx(): bool
     {
         $software = self::getServerSoftware();
+
         return stripos($software, 'nginx') !== false;
     }
 
-    /**   * Get current domain safely * @return string */
+    /**
+     * Get current domain safely.
+     *
+     * @return string
+     */
     public static function getCurrentDomain(): string
     {
         $request = request();
@@ -66,10 +95,14 @@ class ServerHelper
         $host = $request->getHost();
         $scheme = $request->getScheme();
 
-        return $scheme . '://' . $host;
+        return $scheme.'://'.$host;
     }
 
-    /**   * Get server information safely * @return array */
+    /**
+     * Get server information safely.
+     *
+     * @return array
+     */
     /** @return array<string, mixed> */
     public static function getServerInfo(): array
     {

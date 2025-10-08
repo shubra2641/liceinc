@@ -6,13 +6,22 @@ use App\Models\EmailTemplate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EmailTemplate> */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EmailTemplate>
+ */
 class EmailTemplateFactory extends Factory
 {
-    /**   * The name of the factory's corresponding model. *   * @var class-string<\Illuminate\Database\Eloquent\Model> */
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var class-string<\Illuminate\Database\Eloquent\Model>
+     */
     protected $model = EmailTemplate::class;
 
-    /**   * Define the model's default state. *   * @return array<string, mixed> */
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         $types = [
@@ -38,7 +47,9 @@ class EmailTemplateFactory extends Factory
         ];
     }
 
-    /**   * Create an inactive template. */
+    /**
+     * Create an inactive template.
+     */
     public function inactive(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -46,16 +57,20 @@ class EmailTemplateFactory extends Factory
         ]);
     }
 
-    /**   * Create a specific template type. */
+    /**
+     * Create a specific template type.
+     */
     public function ofType(string $type): static
     {
         return $this->state(fn (array $attributes) => [
             'type' => $type,
-            'name' => ucwords(str_replace('_', ' ', $type)) . ' Template',
+            'name' => ucwords(str_replace('_', ' ', $type)).' Template',
         ]);
     }
 
-    /**   * Create a welcome email template. */
+    /**
+     * Create a welcome email template.
+     */
     public function welcome(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -66,7 +81,9 @@ class EmailTemplateFactory extends Factory
         ]);
     }
 
-    /**   * Create a license notification template. */
+    /**
+     * Create a license notification template.
+     */
     public function licenseNotification(): static
     {
         return $this->state(fn (array $attributes) => [

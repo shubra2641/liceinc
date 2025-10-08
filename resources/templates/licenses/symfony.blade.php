@@ -1,6 +1,11 @@
 /**
- * License Verification System * Product: {{product}} * Language: Symfony * Generated: {{date}} *
- * This is a generic template. Please customize according to Symfony best practices. */
+ * License Verification System
+ * Product: {{product}}
+ * Language: Symfony
+ * Generated: {{date}}
+ *
+ * This is a generic template. Please customize according to Symfony best practices.
+ */
 
 // License verification for Symfony
 // API URL: {{license_api_url}}

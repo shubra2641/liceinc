@@ -3,8 +3,10 @@
 use App\Models\EmailTemplate;
 use Illuminate\Database\Migrations\Migration;
 
-return new class () extends Migration {
-    /**   * Run the migrations. */
+return new class() extends Migration {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         // Custom invoice payment confirmation for user
@@ -79,7 +81,9 @@ return new class () extends Migration {
         ]);
     }
 
-    /**   * Reverse the migrations. */
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         EmailTemplate::whereIn('name', [

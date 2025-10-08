@@ -1,6 +1,11 @@
 /**
- * License Verification System * Product: {{product}} * Language: Node.js * Generated: {{date}} *
- * This is a generic template. Please customize according to Node.js best practices. */
+ * License Verification System
+ * Product: {{product}}
+ * Language: Node.js
+ * Generated: {{date}}
+ *
+ * This is a generic template. Please customize according to Node.js best practices.
+ */
 
 // License verification for Node.js
 // API URL: {{license_api_url}}

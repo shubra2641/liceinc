@@ -8,17 +8,25 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Invoice> */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Invoice>
+ */
 class InvoiceFactory extends Factory
 {
-    /**   * The name of the factory's corresponding model. *   * @var class-string<\Illuminate\Database\Eloquent\Model> */
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var class-string<\Illuminate\Database\Eloquent\Model> */
     protected $model = Invoice::class;
 
-    /**   * Define the model's default state. *   * @return array<string, mixed> */
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
-            'invoice_number' => 'INV-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT),
+            'invoice_number' => 'INV-'.str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT),
             'total_amount' => 29.99,
             'currency' => 'USD',
             'status' => 'pending',
@@ -32,7 +40,9 @@ class InvoiceFactory extends Factory
         ];
     }
 
-    /**   * Indicate that the invoice is paid. */
+    /**
+     * Indicate that the invoice is paid.
+     */
     public function paid(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -42,7 +52,9 @@ class InvoiceFactory extends Factory
         ]);
     }
 
-    /**   * Indicate that the invoice is overdue. */
+    /**
+     * Indicate that the invoice is overdue.
+     */
     public function overdue(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -51,7 +63,9 @@ class InvoiceFactory extends Factory
         ]);
     }
 
-    /**   * Indicate that the invoice is cancelled. */
+    /**
+     * Indicate that the invoice is cancelled.
+     */
     public function cancelled(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -60,7 +74,9 @@ class InvoiceFactory extends Factory
         ]);
     }
 
-    /**   * Set a specific amount. */
+    /**
+     * Set a specific amount.
+     */
     public function amount(float $amount): static
     {
         return $this->state(fn (array $attributes) => [
@@ -68,7 +84,9 @@ class InvoiceFactory extends Factory
         ]);
     }
 
-    /**   * Associate with a user. */
+    /**
+     * Associate with a user.
+     */
     public function forUser(User $user): static
     {
         return $this->state(fn (array $attributes) => [
@@ -76,7 +94,9 @@ class InvoiceFactory extends Factory
         ]);
     }
 
-    /**   * Associate with a license. */
+    /**
+     * Associate with a license.
+     */
     public function forLicense(License $license): static
     {
         return $this->state(fn (array $attributes) => [

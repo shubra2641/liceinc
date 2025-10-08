@@ -384,7 +384,9 @@
             @if($results->count() > 10)
             <nav class="kb-search-pagination" aria-label="{{ trans('app.Search results pagination') }}">
                 <div class="pagination-info">
-                    <span>{{ trans('app.Showing') }} {{ (request('page', 1) - 1) * 10 + 1 }}-{{ min(request('page', 1) * 10, $results->count()) }} {{ trans('app.of') }} {{ $results->count() }} {{ trans('app.results') }}</span>
+                    <span>{{ trans('app.Showing') }} {{ (request('page', 1) - 1) * 10 + 1 }}-{{ min(request('page', 1) *
+                        10, $results->count()) }} {{ trans('app.of') }} {{ $results->count() }} {{ trans('app.results')
+                        }}</span>
                 </div>
                 <div class="pagination-links">
                     @if(request('page', 1) > 1)

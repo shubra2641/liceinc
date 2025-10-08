@@ -15,12 +15,30 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 /**
- * Setting Controller with enhanced security. *
- * This controller handles system settings management including CRUD operations, * API testing, and configuration management with comprehensive security measures. *
- * Features: * - System settings CRUD operations with Request class validation * - API connection testing with security validation * - File upload management with security checks * - Comprehensive error handling with database transactions * - Enhanced security measures (XSS protection, input validation, rate limiting) * - Proper logging for errors and warnings only * - Request class compatibility with comprehensive validation * - Authorization checks and middleware protection */
+ * Setting Controller with enhanced security.
+ *
+ * This controller handles system settings management including CRUD operations,
+ * API testing, and configuration management with comprehensive security measures.
+ *
+ * Features:
+ * - System settings CRUD operations with Request class validation
+ * - API connection testing with security validation
+ * - File upload management with security checks
+ * - Comprehensive error handling with database transactions
+ * - Enhanced security measures (XSS protection, input validation, rate limiting)
+ * - Proper logging for errors and warnings only
+ * - Request class compatibility with comprehensive validation
+ * - Authorization checks and middleware protection
+ */
 class SettingController extends Controller
 {
-    /**   * Create a new controller instance. *   * Apply middleware for authentication, authorization, and rate limiting. *   * @return void */
+    /**
+     * Create a new controller instance.
+     *
+     * Apply middleware for authentication, authorization, and rate limiting.
+     *
+     * @return void
+     */
     public function __construct()
     {
         $this->middleware('auth');
@@ -28,12 +46,31 @@ class SettingController extends Controller
         $this->middleware('verified');
     }
 
-    /**   * Display the settings management page with enhanced security. *   * Shows all system settings with their current values and provides * interface for updating them with proper error handling and security measures. *   * @return View The settings management view *   * @throws \Exception When database operations fail *   * @example * // Access settings page: * GET /admin/settings *   * // Returns view with: * // - All system settings * // - Current configuration values * // - Settings update form * // - API testing interface */
+    /**
+     * Display the settings management page with enhanced security.
+     *
+     * Shows all system settings with their current values and provides
+     * interface for updating them with proper error handling and security measures.
+     *
+     * @return View The settings management view
+     *
+     * @throws \Exception When database operations fail
+     *
+     * @example
+     * // Access settings page:
+     * GET /admin/settings
+     *
+     * // Returns view with:
+     * // - All system settings
+     * // - Current configuration values
+     * // - Settings update form
+     * // - API testing interface
+     */
     public function index(): View
     {
         try {
             // Rate limiting for security
-            $key = 'settings-index:' . request()->ip() . ':' . Auth::id();
+            $key = 'settings-index:'.request()->ip().':'.Auth::id();
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for settings page access', [
                     'ip' => request()->ip(),
@@ -81,7 +118,7 @@ class SettingController extends Controller
                     'envato_username' => '',
                     'envato_client_id' => '',
                     'envato_client_secret' => '',
-                    'envato_redirect_uri' => (is_string(config('app.url')) ? config('app.url') : '') . '/auth/envato/callback',
+                    'envato_redirect_uri' => (is_string(config('app.url')) ? config('app.url') : '').'/auth/envato/callback',
                     'envato_oauth_enabled' => false,
                     'auto_generate_license' => true,
                     'default_license_length' => 32,
@@ -139,7 +176,29 @@ class SettingController extends Controller
         }
     }
 
-    /**   * Update system settings with enhanced security. *   * Validates and updates all system settings including * general settings, license settings, and security options using Request classes. *   * @param SettingRequest $request The validated request containing settings data *   * @return RedirectResponse Redirect back with success/error message *   * @throws ValidationException When validation fails * @throws \Exception When database operations fail *   * @example * // Update settings: * POST /admin/settings * { * "site_name": "My License System", * "support_email": "support@example.com", * "maintenance_mode": false, * "license_api_token": "new_token_here" * } */
+    /**
+     * Update system settings with enhanced security.
+     *
+     * Validates and updates all system settings including
+     * general settings, license settings, and security options using Request classes.
+     *
+     * @param  SettingRequest  $request  The validated request containing settings data
+     *
+     * @return RedirectResponse Redirect back with success/error message
+     *
+     * @throws ValidationException When validation fails
+     * @throws \Exception When database operations fail
+     *
+     * @example
+     * // Update settings:
+     * POST /admin/settings
+     * {
+     *     "site_name": "My License System",
+     *     "support_email": "support@example.com",
+     *     "maintenance_mode": false,
+     *     "license_api_token": "new_token_here"
+     * }
+     */
     public function update(SettingRequest $request): RedirectResponse
     {
         try {
@@ -201,7 +260,7 @@ class SettingController extends Controller
             foreach ($validated as $key => $value) {
                 // Handle human_questions special case
                 if ($key === 'human_questions') {
-                    if (is_array($value) && !empty($value)) {
+                    if (is_array($value) && ! empty($value)) {
                         $decoded = $value;
                     } elseif (! empty($value)) {
                         try {
@@ -210,7 +269,7 @@ class SettingController extends Controller
                             DB::rollBack();
 
                             return back()->withErrors([
-                                'human_questions' => 'Invalid JSON: ' . $e->getMessage(),
+                                'human_questions' => 'Invalid JSON: '.$e->getMessage(),
                             ])->withInput();
                         }
                     } else {
@@ -274,12 +333,31 @@ class SettingController extends Controller
         }
     }
 
-    /**   * Test Envato API connection with enhanced security. *   * Validates the provided Envato API token by making * a test request to the Envato API with proper security measures. *   * @param SettingRequest $request The validated request containing API token *   * @return JsonResponse JSON response with test results *   * @throws ValidationException When validation fails * @throws \Exception When API test fails *   * @example * // Test API connection: * POST /admin/settings/test-api * { * "token": "your_envato_token_here" * } */
+    /**
+     * Test Envato API connection with enhanced security.
+     *
+     * Validates the provided Envato API token by making
+     * a test request to the Envato API with proper security measures.
+     *
+     * @param  SettingRequest  $request  The validated request containing API token
+     *
+     * @return JsonResponse JSON response with test results
+     *
+     * @throws ValidationException When validation fails
+     * @throws \Exception When API test fails
+     *
+     * @example
+     * // Test API connection:
+     * POST /admin/settings/test-api
+     * {
+     *     "token": "your_envato_token_here"
+     * }
+     */
     public function testApi(SettingRequest $request): JsonResponse
     {
         try {
             // Rate limiting for security
-            $key = 'settings-test-api:' . $request->ip() . ':' . Auth::id();
+            $key = 'settings-test-api:'.$request->ip().':'.Auth::id();
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for API testing', [
                     'ip' => $request->ip(),
@@ -322,7 +400,7 @@ class SettingController extends Controller
                 Log::warning('Envato API test failed - invalid token', [
                     'user_id' => Auth::id(),
                     'ip' => $request->ip(),
-                    'token_prefix' => substr(is_string($token) ? $token : '', 0, 8) . '...',
+                    'token_prefix' => substr(is_string($token) ? $token : '', 0, 8).'...',
                 ]);
 
                 return response()->json([
@@ -339,7 +417,7 @@ class SettingController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed: ' . implode(', ', is_array($e->errors()['token'] ?? null) ? $e->errors()['token'] : ['Invalid input']),
+                'message' => 'Validation failed: '.implode(', ', is_array($e->errors()['token'] ?? null) ? $e->errors()['token'] : ['Invalid input']),
             ], 422);
         } catch (\Exception $e) {
             Log::error('Envato API test failed with exception', [
@@ -351,17 +429,36 @@ class SettingController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'API test failed: ' . $e->getMessage(),
+                'message' => 'API test failed: '.$e->getMessage(),
             ], 500);
         }
     }
 
-    /**   * Display Envato integration guide with enhanced security. *   * Shows step-by-step instructions for setting up * Envato API integration and OAuth authentication with proper security measures. *   * @return View The Envato integration guide view *   * @throws \Exception When view rendering fails *   * @example * // Access Envato guide: * GET /admin/settings/envato-guide *   * // Returns view with: * // - Step-by-step integration instructions * // - API setup guidelines * // - OAuth configuration help * // - Security best practices */
+    /**
+     * Display Envato integration guide with enhanced security.
+     *
+     * Shows step-by-step instructions for setting up
+     * Envato API integration and OAuth authentication with proper security measures.
+     *
+     * @return View The Envato integration guide view
+     *
+     * @throws \Exception When view rendering fails
+     *
+     * @example
+     * // Access Envato guide:
+     * GET /admin/settings/envato-guide
+     *
+     * // Returns view with:
+     * // - Step-by-step integration instructions
+     * // - API setup guidelines
+     * // - OAuth configuration help
+     * // - Security best practices
+     */
     public function envatoGuide(): View
     {
         try {
             // Rate limiting for security
-            $key = 'settings-envato-guide:' . request()->ip() . ':' . Auth::id();
+            $key = 'settings-envato-guide:'.request()->ip().':'.Auth::id();
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for Envato guide access', [
                     'ip' => request()->ip(),

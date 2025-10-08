@@ -1,6 +1,11 @@
 /**
- * License Verification System * Product: {{product}} * Language: Vue.js * Generated: {{date}} *
- * This is a generic template. Please customize according to Vue.js best practices. */
+ * License Verification System
+ * Product: {{product}}
+ * Language: Vue.js
+ * Generated: {{date}}
+ *
+ * This is a generic template. Please customize according to Vue.js best practices.
+ */
 
 // License verification for Vue.js
 // API URL: {{license_api_url}}

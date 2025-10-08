@@ -18,9 +18,21 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Update Controller with enhanced security. *
- * This controller handles system update management functionality including * manual updates, auto updates, rollbacks, and version management. *
- * Features: * - System update management with comprehensive validation * - Auto update functionality with license verification * - System rollback capabilities with backup management * - Update package upload and processing * - Version history and latest version checking * - Comprehensive error handling with database transactions * - Enhanced security measures (input validation, file security) * - Proper logging for errors and warnings only */
+ * Update Controller with enhanced security.
+ *
+ * This controller handles system update management functionality including
+ * manual updates, auto updates, rollbacks, and version management.
+ *
+ * Features:
+ * - System update management with comprehensive validation
+ * - Auto update functionality with license verification
+ * - System rollback capabilities with backup management
+ * - Update package upload and processing
+ * - Version history and latest version checking
+ * - Comprehensive error handling with database transactions
+ * - Enhanced security measures (input validation, file security)
+ * - Proper logging for errors and warnings only
+ */
 class UpdateController extends Controller
 {
     protected LicenseServerService $licenseServerService;
@@ -33,7 +45,24 @@ class UpdateController extends Controller
         $this->updatePackageService = $updatePackageService;
     }
 
-    /**   * Display the update management page. *   * Shows current version, available updates, and update options with * comprehensive version information and update status. *   * @return \Illuminate\View\View The update management view *   * @example * // Access the update management page: * GET /admin/updates *   * // Returns view with: * // - Current version status * // - Available updates information * // - Product information * // - Update options and controls */
+    /**
+     * Display the update management page.
+     *
+     * Shows current version, available updates, and update options with
+     * comprehensive version information and update status.
+     *
+     * @return \Illuminate\View\View The update management view
+     *
+     * @example
+     * // Access the update management page:
+     * GET /admin/updates
+     *
+     * // Returns view with:
+     * // - Current version status
+     * // - Available updates information
+     * // - Product information
+     * // - Update options and controls
+     */
     public function index()
     {
         try {
@@ -66,7 +95,30 @@ class UpdateController extends Controller
         }
     }
 
-    /**   * Check for available updates. *   * Checks for available system updates and returns version status * information including current and latest versions. *   * @return \Illuminate\Http\JsonResponse JSON response with update status *   * @throws \Exception When version check fails *   * @example * // Check for updates: * GET /admin/updates/check *   * // Response: * { * "success": true, * "data": { * "current_version": "1.0.0", * "latest_version": "1.0.1", * "is_update_available": true * } * } */
+    /**
+     * Check for available updates.
+     *
+     * Checks for available system updates and returns version status
+     * information including current and latest versions.
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with update status
+     *
+     * @throws \Exception When version check fails
+     *
+     * @example
+     * // Check for updates:
+     * GET /admin/updates/check
+     *
+     * // Response:
+     * {
+     *     "success": true,
+     *     "data": {
+     *         "current_version": "1.0.0",
+     *         "latest_version": "1.0.1",
+     *         "is_update_available": true
+     *     }
+     * }
+     */
     public function checkUpdates()
     {
         try {
@@ -85,12 +137,42 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to check for updates: ' . $e->getMessage(),
+                'message' => 'Failed to check for updates: '.$e->getMessage(),
             ], 500);
         }
     }
 
-    /**   * Perform system update. *   * Updates the system to a specified version with comprehensive validation, * backup creation, and rollback capabilities. *   * @param SystemUpdateRequest $request The validated request containing update data *   * @return \Illuminate\Http\JsonResponse JSON response with update result *   * @throws \Exception When update process fails *   * @example * // Update system: * POST /admin/updates/update * { * "version": "1.0.1", * "confirm": true * } *   * // Response: * { * "success": true, * "message": "System updated successfully from 1.0.0 to 1.0.1", * "data": { * "from_version": "1.0.0", * "to_version": "1.0.1", * "steps_completed": ["backup created", "migrations run", "caches cleared"] * } * } */
+    /**
+     * Perform system update.
+     *
+     * Updates the system to a specified version with comprehensive validation,
+     * backup creation, and rollback capabilities.
+     *
+     * @param  SystemUpdateRequest  $request  The validated request containing update data
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with update result
+     *
+     * @throws \Exception When update process fails
+     *
+     * @example
+     * // Update system:
+     * POST /admin/updates/update
+     * {
+     *     "version": "1.0.1",
+     *     "confirm": true
+     * }
+     *
+     * // Response:
+     * {
+     *     "success": true,
+     *     "message": "System updated successfully from 1.0.0 to 1.0.1",
+     *     "data": {
+     *         "from_version": "1.0.0",
+     *         "to_version": "1.0.1",
+     *         "steps_completed": ["backup created", "migrations run", "caches cleared"]
+     *     }
+     * }
+     */
     public function update(SystemUpdateRequest $request)
     {
         try {
@@ -116,7 +198,7 @@ class UpdateController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Target version must be newer than current version. Current: '
-                        . $currentVersionStr . ', Target: ' . $targetVersionStr,
+                        .$currentVersionStr.', Target: '.$targetVersionStr,
                 ], 400);
             }
             // Check if target version exists in version.json
@@ -137,7 +219,7 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'System updated successfully from ' . $currentVersionStr . ' to ' . $targetVersionStr,
+                'message' => 'System updated successfully from '.$currentVersionStr.' to '.$targetVersionStr,
                 'data' => [
                     'from_version' => $currentVersion,
                     'to_version' => $targetVersion,
@@ -155,19 +237,23 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Update failed: ' . $e->getMessage(),
+                'message' => 'Update failed: '.$e->getMessage(),
             ], 500);
         }
     }
 
-    /**   * Perform the actual update steps. *   * @return array<string, mixed> */
+    /**
+     * Perform the actual update steps.
+     *
+     * @return array<string, mixed>
+     */
     private function performUpdate(string $targetVersion, string $currentVersion): array
     {
         $steps = [];
         try {
             // Step 1: Create backup before update
             $backupPath = $this->createSystemBackup($currentVersion);
-            $steps['backup'] = 'System backup created: ' . basename($backupPath);
+            $steps['backup'] = 'System backup created: '.basename($backupPath);
             // Step 2: Run database migrations
             Artisan::call('migrate', ['--force' => true]);
             $steps['migrations'] = 'Database migrations completed';
@@ -191,7 +277,7 @@ class UpdateController extends Controller
             if (! empty($instructions)) {
                 foreach ($instructions as $key => $instruction) {
                     // Here you could add custom update logic based on instructions
-                    $steps['instruction_' . $key] = 'Custom instruction: ' . (is_string($instruction) ? $instruction : '');
+                    $steps['instruction_'.$key] = 'Custom instruction: '.(is_string($instruction) ? $instruction : '');
                 }
             }
             // Step 9: Optimize application (if not in debug mode)
@@ -216,15 +302,23 @@ class UpdateController extends Controller
         return $steps;
     }
 
-    /**   * Create system backup before update. *   * @param string $version Current version to backup *   * @return string Path to created backup file *   * @throws \Exception If backup creation fails */
+    /**
+     * Create system backup before update.
+     *
+     * @param  string  $version  Current version to backup
+     *
+     * @return string Path to created backup file
+     *
+     * @throws \Exception If backup creation fails
+     */
     private function createSystemBackup(string $version): string
     {
         $backupDir = storage_path('app/backups');
         if (! SecureFileHelper::isDirectory($backupDir) && ! SecureFileHelper::createDirectory($backupDir, 0755, true)) {
             throw new \Exception('Failed to create backup directory');
         }
-        $backupName = 'backup_' . $version . '_' . date('Y-m-d_H-i-s') . '.zip';
-        $backupPath = $backupDir . DIRECTORY_SEPARATOR . $backupName;
+        $backupName = 'backup_'.$version.'_'.date('Y-m-d_H-i-s').'.zip';
+        $backupPath = $backupDir.DIRECTORY_SEPARATOR.$backupName;
         // Define files to backup with validation
         $filesToBackup = [
             '.env',
@@ -235,7 +329,7 @@ class UpdateController extends Controller
         $zip = new \ZipArchive();
         $result = $zip->open($backupPath, \ZipArchive::CREATE);
         if ($result !== true) {
-            throw new \Exception('Failed to create backup ZIP file: ' . $result);
+            throw new \Exception('Failed to create backup ZIP file: '.$result);
         }
         try {
             foreach ($filesToBackup as $file) {
@@ -256,7 +350,15 @@ class UpdateController extends Controller
         return $backupPath;
     }
 
-    /**   * Add directory to zip recursively. *   * @param  \ZipArchive  $zip  ZIP archive instance * @param string $dir Directory path to add * @param string $zipPath Path in ZIP archive *   * @throws \Exception If directory processing fails */
+    /**
+     * Add directory to zip recursively.
+     *
+     * @param  \ZipArchive  $zip  ZIP archive instance
+     * @param  string  $dir  Directory path to add
+     * @param  string  $zipPath  Path in ZIP archive
+     *
+     * @throws \Exception If directory processing fails
+     */
     private function addDirectoryToZip(\ZipArchive $zip, string $dir, string $zipPath): void
     {
         if (! SecureFileHelper::isDirectory($dir)) {
@@ -269,7 +371,7 @@ class UpdateController extends Controller
         foreach ($iterator as $file) {
             if ($file instanceof \SplFileInfo && $file->isFile()) {
                 $filePath = $file->getRealPath();
-                $relativePath = $zipPath . DIRECTORY_SEPARATOR .
+                $relativePath = $zipPath.DIRECTORY_SEPARATOR.
                     substr($filePath, strlen($dir) + 1);
                 // Normalize path separators for ZIP
                 $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
@@ -280,7 +382,14 @@ class UpdateController extends Controller
         }
     }
 
-    /**   * Update system information after successful update. *   * @param string $newVersion New version number * @param string $oldVersion Previous version number *   * @throws \Exception If system info update fails */
+    /**
+     * Update system information after successful update.
+     *
+     * @param  string  $newVersion  New version number
+     * @param  string  $oldVersion  Previous version number
+     *
+     * @throws \Exception If system info update fails
+     */
     private function updateSystemInfo(string $newVersion, string $oldVersion): void
     {
         try {
@@ -304,7 +413,11 @@ class UpdateController extends Controller
         }
     }
 
-    /**   * Get version information. *   * @return \Illuminate\Http\JsonResponse */
+    /**
+     * Get version information.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getVersionInfo(string $version)
     {
         try {
@@ -334,12 +447,42 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get version information: ' . $e->getMessage(),
+                'message' => 'Failed to get version information: '.$e->getMessage(),
             ], 500);
         }
     }
 
-    /**   * Rollback to previous version. *   * Rolls back the system to a previous version using available backups * with comprehensive validation and safety checks. *   * @param SystemUpdateRequest $request The validated request containing rollback data *   * @return \Illuminate\Http\JsonResponse JSON response with rollback result *   * @throws \Exception When rollback process fails *   * @example * // Rollback system: * POST /admin/updates/rollback * { * "version": "1.0.0", * "confirm": true * } *   * // Response: * { * "success": true, * "message": "System rolled back successfully from 1.0.1 to 1.0.0", * "data": { * "from_version": "1.0.1", * "to_version": "1.0.0", * "steps_completed": ["backup restored", "version updated", "caches cleared"] * } * } */
+    /**
+     * Rollback to previous version.
+     *
+     * Rolls back the system to a previous version using available backups
+     * with comprehensive validation and safety checks.
+     *
+     * @param  SystemUpdateRequest  $request  The validated request containing rollback data
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with rollback result
+     *
+     * @throws \Exception When rollback process fails
+     *
+     * @example
+     * // Rollback system:
+     * POST /admin/updates/rollback
+     * {
+     *     "version": "1.0.0",
+     *     "confirm": true
+     * }
+     *
+     * // Response:
+     * {
+     *     "success": true,
+     *     "message": "System rolled back successfully from 1.0.1 to 1.0.0",
+     *     "data": {
+     *         "from_version": "1.0.1",
+     *         "to_version": "1.0.0",
+     *         "steps_completed": ["backup restored", "version updated", "caches cleared"]
+     *     }
+     * }
+     */
     public function rollback(SystemUpdateRequest $request)
     {
         try {
@@ -374,7 +517,7 @@ class UpdateController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'message' => 'No backup found for version ' . $targetVersionStr . '. Rollback not possible.',
+                    'message' => 'No backup found for version '.$targetVersionStr.'. Rollback not possible.',
                 ], 400);
             }
             // Perform rollback
@@ -389,7 +532,7 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'System rolled back successfully from ' . $currentVersion . ' to ' . $targetVersion,
+                'message' => 'System rolled back successfully from '.$currentVersion.' to '.$targetVersion,
                 'data' => [
                     'from_version' => $currentVersion,
                     'to_version' => $targetVersion,
@@ -407,19 +550,23 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Rollback failed: ' . $e->getMessage(),
+                'message' => 'Rollback failed: '.$e->getMessage(),
             ], 500);
         }
     }
 
-    /**   * Get list of available backups. *   * @return \Illuminate\Http\JsonResponse */
+    /**
+     * Get list of available backups.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getBackups()
     {
         try {
             $backupDir = storage_path('app/backups');
             $backups = [];
             if (SecureFileHelper::isDirectory($backupDir)) {
-                $files = glob($backupDir . '/backup_*.zip');
+                $files = glob($backupDir.'/backup_*.zip');
                 if ($files !== false) {
                     foreach ($files as $file) {
                         $backups[] = [
@@ -448,12 +595,42 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get backups: ' . $e->getMessage(),
+                'message' => 'Failed to get backups: '.$e->getMessage(),
             ], 500);
         }
     }
 
-    /**   * Upload update package. *   * Uploads and processes an update package with comprehensive validation * and security checks. *   * @param UploadUpdatePackageRequest $request The validated request containing file data *   * @return \Illuminate\Http\JsonResponse JSON response with upload result *   * @throws \Exception When upload or processing fails *   * @example * // Upload update package: * POST /admin/updates/upload-package * Content-Type: multipart/form-data *   * // Form data: * // update_package: [ZIP file] *   * // Response: * { * "success": true, * "message": "Update package uploaded and processed successfully.", * "data": { * "filename": "update_2024-01-15_10-30-00.zip", * "path": "updates/update_2024-01-15_10-30-00.zip", * "processed_data": {...} * } * } */
+    /**
+     * Upload update package.
+     *
+     * Uploads and processes an update package with comprehensive validation
+     * and security checks.
+     *
+     * @param  UploadUpdatePackageRequest  $request  The validated request containing file data
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with upload result
+     *
+     * @throws \Exception When upload or processing fails
+     *
+     * @example
+     * // Upload update package:
+     * POST /admin/updates/upload-package
+     * Content-Type: multipart/form-data
+     *
+     * // Form data:
+     * // update_package: [ZIP file]
+     *
+     * // Response:
+     * {
+     *     "success": true,
+     *     "message": "Update package uploaded and processed successfully.",
+     *     "data": {
+     *         "filename": "update_2024-01-15_10-30-00.zip",
+     *         "path": "updates/update_2024-01-15_10-30-00.zip",
+     *         "processed_data": {...}
+     *     }
+     * }
+     */
     public function uploadUpdatePackage(UploadUpdatePackageRequest $request)
     {
         try {
@@ -464,9 +641,9 @@ class UpdateController extends Controller
             if (! SecureFileHelper::isDirectory($uploadDir)) {
                 SecureFileHelper::createDirectory($uploadDir, 0755, true);
             }
-            $filename = 'update_' . date('Y-m-d_H-i-s') . '.zip';
+            $filename = 'update_'.date('Y-m-d_H-i-s').'.zip';
             $filePath = $file->storeAs('updates', $filename);
-            $fullPath = storage_path('app/' . $filePath);
+            $fullPath = storage_path('app/'.$filePath);
             // Process the update package
             $updateService = new UpdatePackageService();
             $processResult = $updateService->processUpdatePackage($fullPath);
@@ -487,7 +664,7 @@ class UpdateController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'message' => 'Update package uploaded but processing failed: ' . (is_string($processResult['message'] ?? null) ? $processResult['message'] : 'Unknown error'),
+                    'message' => 'Update package uploaded but processing failed: '.(is_string($processResult['message'] ?? null) ? $processResult['message'] : 'Unknown error'),
                 ], 422);
             }
         } catch (\Exception $e) {
@@ -500,16 +677,18 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to upload update package: ' . $e->getMessage(),
+                'message' => 'Failed to upload update package: '.$e->getMessage(),
             ], 500);
         }
     }
 
-    /**   * Find backup for specific version. */
+    /**
+     * Find backup for specific version.
+     */
     private function findBackupForVersion(string $version): ?string
     {
         $backupDir = storage_path('app/backups');
-        $pattern = $backupDir . '/backup_' . $version . '_*.zip';
+        $pattern = $backupDir.'/backup_'.$version.'_*.zip';
         $files = glob($pattern);
         if (! empty($files)) {
             // Return the most recent backup for this version
@@ -519,7 +698,9 @@ class UpdateController extends Controller
         return null;
     }
 
-    /**   * Extract version from backup filename. */
+    /**
+     * Extract version from backup filename.
+     */
     private function extractVersionFromBackupName(string $filename): ?string
     {
         if (preg_match('/backup_([0-9]+\.[0-9]+\.[0-9]+)_/', $filename, $matches)) {
@@ -529,17 +710,21 @@ class UpdateController extends Controller
         return null;
     }
 
-    /**   * Perform rollback operations. *   * @return array<string, mixed> */
+    /**
+     * Perform rollback operations.
+     *
+     * @return array<string, mixed>
+     */
     private function performRollback(string $targetVersion, string $currentVersion, string $backupPath): array
     {
         $steps = [];
         try {
             // Step 1: Restore from backup
             $this->restoreFromBackup($backupPath);
-            $steps['restore'] = 'System restored from backup: ' . basename($backupPath);
+            $steps['restore'] = 'System restored from backup: '.basename($backupPath);
             // Step 2: Update version in database
             VersionHelper::updateVersion($targetVersion);
-            $steps['version_update'] = 'Version updated to ' . $targetVersion;
+            $steps['version_update'] = 'Version updated to '.$targetVersion;
             // Step 3: Clear all caches
             Artisan::call('cache:clear');
             Artisan::call('config:clear');
@@ -562,13 +747,15 @@ class UpdateController extends Controller
         return $steps;
     }
 
-    /**   * Restore system from backup. */
+    /**
+     * Restore system from backup.
+     */
     private function restoreFromBackup(string $backupPath): void
     {
         $zip = new \ZipArchive();
         if ($zip->open($backupPath) === true) {
             // Extract to temporary directory first
-            $tempDir = storage_path('app/temp/restore_' . time());
+            $tempDir = storage_path('app/temp/restore_'.time());
             SecureFileHelper::createDirectory($tempDir, 0755, true);
             $zip->extractTo($tempDir);
             $zip->close();
@@ -579,7 +766,9 @@ class UpdateController extends Controller
         }
     }
 
-    /**   * Restore files from temporary directory. */
+    /**
+     * Restore files from temporary directory.
+     */
     private function restoreFilesFromTemp(string $tempDir): void
     {
         $files = new \RecursiveIteratorIterator(
@@ -587,7 +776,7 @@ class UpdateController extends Controller
             \RecursiveIteratorIterator::LEAVES_ONLY,
         );
         foreach ($files as $file) {
-            if ($file instanceof \SplFileInfo && !$file->isDir()) {
+            if ($file instanceof \SplFileInfo && ! $file->isDir()) {
                 $relativePath = substr($file->getRealPath(), strlen($tempDir) + 1);
                 $targetPath = base_path($relativePath);
                 // Create directory if it doesn't exist
@@ -601,7 +790,9 @@ class UpdateController extends Controller
         }
     }
 
-    /**   * Delete directory recursively. */
+    /**
+     * Delete directory recursively.
+     */
     private function deleteDirectory(string $dir): void
     {
         if (! SecureFileHelper::isDirectory($dir)) {
@@ -609,13 +800,46 @@ class UpdateController extends Controller
         }
         $files = array_diff(scandir($dir), ['.', '..']);
         foreach ($files as $file) {
-            $path = $dir . '/' . $file;
+            $path = $dir.'/'.$file;
             SecureFileHelper::isDirectory($path) ? $this->deleteDirectory($path) : unlink($path);
         }
         rmdir($dir);
     }
 
-    /**   * Check for available updates with license verification. *   * Checks for available updates using license verification and automatically * performs updates if available. *   * @param AutoUpdateRequest $request The validated request containing license data *   * @return \Illuminate\Http\JsonResponse JSON response with update check result *   * @throws \Exception When update check or auto update fails *   * @example * // Check for auto updates: * POST /admin/updates/check-auto * { * "license_key": "abc123...", * "product_slug": "the-ultimate-license-management-system", * "domain": "example.com", * "current_version": "1.0.0" * } *   * // Response: * { * "success": true, * "message": "Auto update completed successfully! System updated to version 1.0.1", * "data": { * "update_available": true, * "current_version": "1.0.0", * "target_version": "1.0.1", * "files_installed": 15 * } * } */
+    /**
+     * Check for available updates with license verification.
+     *
+     * Checks for available updates using license verification and automatically
+     * performs updates if available.
+     *
+     * @param  AutoUpdateRequest  $request  The validated request containing license data
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with update check result
+     *
+     * @throws \Exception When update check or auto update fails
+     *
+     * @example
+     * // Check for auto updates:
+     * POST /admin/updates/check-auto
+     * {
+     *     "license_key": "abc123...",
+     *     "product_slug": "the-ultimate-license-management-system",
+     *     "domain": "example.com",
+     *     "current_version": "1.0.0"
+     * }
+     *
+     * // Response:
+     * {
+     *     "success": true,
+     *     "message": "Auto update completed successfully! System updated to version 1.0.1",
+     *     "data": {
+     *         "update_available": true,
+     *         "current_version": "1.0.0",
+     *         "target_version": "1.0.1",
+     *         "files_installed": 15
+     *     }
+     * }
+     */
     public function checkAutoUpdates(AutoUpdateRequest $request)
     {
         try {
@@ -649,7 +873,7 @@ class UpdateController extends Controller
                             is_string($nextVersion) ? $nextVersion : '',
                             $licenseKey,
                             $productSlug,
-                            $domain
+                            $domain,
                         );
                         if ($updateResult['success']) {
                             DB::commit();
@@ -657,7 +881,7 @@ class UpdateController extends Controller
                             return response()->json([
                                 'success' => true,
                                 'message' => 'Auto update completed successfully! System updated to version '
-                                    . (is_string($nextVersion) ? $nextVersion : ''),
+                                    .(is_string($nextVersion) ? $nextVersion : ''),
                                 'data' => [
                                     'update_available' => $isUpdateAvailable,
                                     'current_version' => $currentVersion,
@@ -671,7 +895,7 @@ class UpdateController extends Controller
 
                             return response()->json([
                                 'success' => false,
-                                'message' => 'Auto update failed: ' . (is_string($updateResult['message'] ?? null) ? $updateResult['message'] : 'Unknown error'),
+                                'message' => 'Auto update failed: '.(is_string($updateResult['message'] ?? null) ? $updateResult['message'] : 'Unknown error'),
                                 'error_code' => $updateResult['error_code'] ?? 'UPDATE_FAILED',
                             ], 500);
                         }
@@ -703,13 +927,17 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while checking for updates: ' . $e->getMessage(),
+                'message' => 'An error occurred while checking for updates: '.$e->getMessage(),
                 'error_code' => 'SERVER_ERROR',
             ], 500);
         }
     }
 
-    /**   * Perform auto update process. *   * @return array<string, mixed> */
+    /**
+     * Perform auto update process.
+     *
+     * @return array<string, mixed>
+     */
     private function performAutoUpdate(
         string $version,
         string $licenseKey,
@@ -731,8 +959,8 @@ class UpdateController extends Controller
 
                 return [
                     'success' => false,
-                    'message' => "Cannot update to version " . $version . ". Current version is " . $currentVersion . ". "
-                        . 'Only newer versions are allowed.',
+                    'message' => 'Cannot update to version '.$version.'. Current version is '.$currentVersion.'. '
+                        .'Only newer versions are allowed.',
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
                     'current_version' => $currentVersion,
                     'target_version' => $version,
@@ -749,7 +977,7 @@ class UpdateController extends Controller
 
                 return [
                     'success' => false,
-                    'message' => 'Download failed: ' . (is_string($downloadResult['message'] ?? null) ? $downloadResult['message'] : 'Unknown error'),
+                    'message' => 'Download failed: '.(is_string($downloadResult['message'] ?? null) ? $downloadResult['message'] : 'Unknown error'),
                     'error_code' => 'DOWNLOAD_FAILED',
                 ];
             }
@@ -781,7 +1009,7 @@ class UpdateController extends Controller
 
                 return [
                     'success' => true,
-                    'message' => 'Update installed successfully! System updated to version ' . $version,
+                    'message' => 'Update installed successfully! System updated to version '.$version,
                     'data' => [
                         'version' => $version,
                         'files_installed' => (is_array($installResult['data'] ?? null) && isset($installResult['data']['files_installed'])) ? $installResult['data']['files_installed'] : 0,
@@ -797,7 +1025,7 @@ class UpdateController extends Controller
 
                 return [
                     'success' => false,
-                    'message' => 'Installation failed: ' . (is_string($installResult['message'] ?? null) ? $installResult['message'] : 'Unknown error'),
+                    'message' => 'Installation failed: '.(is_string($installResult['message'] ?? null) ? $installResult['message'] : 'Unknown error'),
                     'error_code' => 'INSTALLATION_FAILED',
                 ];
             }
@@ -811,13 +1039,47 @@ class UpdateController extends Controller
 
             return [
                 'success' => false,
-                'message' => 'Auto update failed: ' . $e->getMessage(),
+                'message' => 'Auto update failed: '.$e->getMessage(),
                 'error_code' => 'PROCESS_FAILED',
             ];
         }
     }
 
-    /**   * Install update automatically with license verification. *   * Installs a specific version update with license verification and * comprehensive validation. *   * @param AutoUpdateRequest $request The validated request containing update data *   * @return \Illuminate\Http\JsonResponse JSON response with installation result *   * @throws \Exception When installation process fails *   * @example * // Install auto update: * POST /admin/updates/install-auto * { * "license_key": "abc123...", * "product_slug": "the-ultimate-license-management-system", * "domain": "example.com", * "version": "1.0.1", * "confirm": true * } *   * // Response: * { * "success": true, * "message": "Update installed successfully and version updated in database", * "data": { * "version": "1.0.1", * "installed_at": "2024-01-15T10:30:00Z", * "steps_completed": ["download", "extract", "install", "migrate"], * "database_version_updated": true * } * } */
+    /**
+     * Install update automatically with license verification.
+     *
+     * Installs a specific version update with license verification and
+     * comprehensive validation.
+     *
+     * @param  AutoUpdateRequest  $request  The validated request containing update data
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with installation result
+     *
+     * @throws \Exception When installation process fails
+     *
+     * @example
+     * // Install auto update:
+     * POST /admin/updates/install-auto
+     * {
+     *     "license_key": "abc123...",
+     *     "product_slug": "the-ultimate-license-management-system",
+     *     "domain": "example.com",
+     *     "version": "1.0.1",
+     *     "confirm": true
+     * }
+     *
+     * // Response:
+     * {
+     *     "success": true,
+     *     "message": "Update installed successfully and version updated in database",
+     *     "data": {
+     *         "version": "1.0.1",
+     *         "installed_at": "2024-01-15T10:30:00Z",
+     *         "steps_completed": ["download", "extract", "install", "migrate"],
+     *         "database_version_updated": true
+     *     }
+     * }
+     */
     public function installAutoUpdate(AutoUpdateRequest $request)
     {
         try {
@@ -846,8 +1108,8 @@ class UpdateController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cannot update to version ' . $version . '. Current version is ' . $currentVersion . '. '
-                        . 'Only newer versions are allowed.',
+                    'message' => 'Cannot update to version '.$version.'. Current version is '.$currentVersion.'. '
+                        .'Only newer versions are allowed.',
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
                     'current_version' => $currentVersion,
                     'target_version' => $version,
@@ -876,7 +1138,7 @@ class UpdateController extends Controller
                 ], 500);
             }
             // Save update file
-            $updateFileName = 'auto_update_' . $version . '_' . time() . '.zip';
+            $updateFileName = 'auto_update_'.$version.'_'.time().'.zip';
             $updateFilePath = storage_path("app/updates/{$updateFileName}");
             // Ensure updates directory exists
             if (! SecureFileHelper::isDirectory(storage_path('app/updates'))) {
@@ -942,7 +1204,12 @@ class UpdateController extends Controller
             ], 500);
         }
     }
-    /**   * Get update information for product without license verification. *   * @return array<string, mixed>|null */
+
+    /**
+     * Get update information for product without license verification.
+     *
+     * @return array<string, mixed>|null
+     */
     private function getUpdateInfoForProduct(string $productSlug, string $currentVersion): ?array
     {
         try {
@@ -1006,7 +1273,11 @@ class UpdateController extends Controller
         }
     }
 
-    /**   * Get specific product from central API. *   * @return array<string, mixed> */
+    /**
+     * Get specific product from central API.
+     *
+     * @return array<string, mixed>
+     */
     private function getSpecificProduct(string $productSlug): array
     {
         try {
@@ -1025,6 +1296,7 @@ class UpdateController extends Controller
                 // Filtered products for specific slug
                 /** @var array<string, mixed> $result */
                 $result = $filteredProducts[0] ?? [];
+
                 return $result;
             }
             Log::warning('Failed to get products from central API', [
@@ -1043,8 +1315,11 @@ class UpdateController extends Controller
         }
     }
 
-
-    /**   * Get current version from database. *   * @return \Illuminate\Http\JsonResponse */
+    /**
+     * Get current version from database.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getCurrentVersionFromDatabase()
     {
         try {
@@ -1067,12 +1342,43 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get current version: ' . $e->getMessage(),
+                'message' => 'Failed to get current version: '.$e->getMessage(),
             ], 500);
         }
     }
 
-    /**   * Get version history from central API. *   * Retrieves version history information from the central API using * license verification. *   * @param VersionManagementRequest $request The validated request containing license data *   * @return \Illuminate\Http\JsonResponse JSON response with version history *   * @throws \Exception When API request fails *   * @example * // Get version history: * POST /admin/updates/version-history * { * "license_key": "abc123...", * "product_slug": "the-ultimate-license-management-system", * "domain": "example.com" * } *   * // Response: * { * "success": true, * "data": { * "versions": [ * {"version": "1.0.1", "released_at": "2024-01-15", "changelog": "..."}, * {"version": "1.0.0", "released_at": "2024-01-01", "changelog": "..."} * ] * } * } */
+    /**
+     * Get version history from central API.
+     *
+     * Retrieves version history information from the central API using
+     * license verification.
+     *
+     * @param  VersionManagementRequest  $request  The validated request containing license data
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with version history
+     *
+     * @throws \Exception When API request fails
+     *
+     * @example
+     * // Get version history:
+     * POST /admin/updates/version-history
+     * {
+     *     "license_key": "abc123...",
+     *     "product_slug": "the-ultimate-license-management-system",
+     *     "domain": "example.com"
+     * }
+     *
+     * // Response:
+     * {
+     *     "success": true,
+     *     "data": {
+     *         "versions": [
+     *             {"version": "1.0.1", "released_at": "2024-01-15", "changelog": "..."},
+     *             {"version": "1.0.0", "released_at": "2024-01-01", "changelog": "..."}
+     *         ]
+     *     }
+     * }
+     */
     public function getVersionHistoryFromCentral(VersionManagementRequest $request)
     {
         try {
@@ -1104,13 +1410,44 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while getting version history: ' . $e->getMessage(),
+                'message' => 'An error occurred while getting version history: '.$e->getMessage(),
                 'error_code' => 'SERVER_ERROR',
             ], 500);
         }
     }
 
-    /**   * Get latest version from central API. *   * Retrieves the latest version information from the central API using * license verification. *   * @param VersionManagementRequest $request The validated request containing license data *   * @return \Illuminate\Http\JsonResponse JSON response with latest version info *   * @throws \Exception When API request fails *   * @example * // Get latest version: * POST /admin/updates/latest-version * { * "license_key": "abc123...", * "product_slug": "the-ultimate-license-management-system", * "domain": "example.com" * } *   * // Response: * { * "success": true, * "data": { * "latest_version": "1.0.1", * "release_date": "2024-01-15", * "changelog": "Bug fixes and improvements", * "download_url": "https://..." * } * } */
+    /**
+     * Get latest version from central API.
+     *
+     * Retrieves the latest version information from the central API using
+     * license verification.
+     *
+     * @param  VersionManagementRequest  $request  The validated request containing license data
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with latest version info
+     *
+     * @throws \Exception When API request fails
+     *
+     * @example
+     * // Get latest version:
+     * POST /admin/updates/latest-version
+     * {
+     *     "license_key": "abc123...",
+     *     "product_slug": "the-ultimate-license-management-system",
+     *     "domain": "example.com"
+     * }
+     *
+     * // Response:
+     * {
+     *     "success": true,
+     *     "data": {
+     *         "latest_version": "1.0.1",
+     *         "release_date": "2024-01-15",
+     *         "changelog": "Bug fixes and improvements",
+     *         "download_url": "https://..."
+     *     }
+     * }
+     */
     public function getLatestVersionFromCentral(VersionManagementRequest $request)
     {
         try {
@@ -1146,7 +1483,7 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while getting latest version: ' . $e->getMessage(),
+                'message' => 'An error occurred while getting latest version: '.$e->getMessage(),
                 'error_code' => 'SERVER_ERROR',
             ], 500);
         }

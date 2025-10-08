@@ -14,13 +14,46 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 /**
- * Email Service with enhanced security. *
- * A comprehensive email service that handles dynamic email sending * using database-stored templates with variable substitution and * comprehensive security measures. *
- * Features: * - Template-based email system with security validation * - Variable substitution support with XSS protection * - User and admin specific templates * - Queue support for performance * - Enhanced error handling and logging * - Template validation and sanitization * - Input validation and sanitization * - Comprehensive security measures * - Clean code structure with no duplicate patterns * - Proper type hints and return types */
+ * Email Service with enhanced security.
+ *
+ * A comprehensive email service that handles dynamic email sending
+ * using database-stored templates with variable substitution and
+ * comprehensive security measures.
+ *
+ * Features:
+ * - Template-based email system with security validation
+ * - Variable substitution support with XSS protection
+ * - User and admin specific templates
+ * - Queue support for performance
+ * - Enhanced error handling and logging
+ * - Template validation and sanitization
+ * - Input validation and sanitization
+ * - Comprehensive security measures
+ * - Clean code structure with no duplicate patterns
+ * - Proper type hints and return types
+ */
 class EmailService
 {
-    /**   * Send email using template name and data with enhanced security. *   * Sends an email using a database-stored template with comprehensive * validation, sanitization, and error handling. *   * @param string $templateName Template identifier * @param string $recipientEmail Recipient email address * @param array $data Variables for template substitution * @param  string|null  $recipientName  Optional recipient name *   * @return bool Success status *   * @throws \InvalidArgumentException When parameters are invalid *   * @version 1.0.6 *   *   *   *   */
-    /**   * @param array<string, mixed> $data */
+    /**
+     * Send email using template name and data with enhanced security.
+     *
+     * Sends an email using a database-stored template with comprehensive
+     * validation, sanitization, and error handling.
+     *
+     * @param  string  $templateName  Template identifier
+     * @param  string  $recipientEmail  Recipient email address
+     * @param  array  $data  Variables for template substitution
+     * @param  string|null  $recipientName  Optional recipient name
+     *
+     * @return bool Success status
+     *
+     * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @version 1.0.6
+     */
+    /**
+     * @param array<string, mixed> $data
+     */
     public function sendEmail(
         string $templateName,
         string $recipientEmail,
@@ -35,7 +68,8 @@ class EmailService
             $data = $this->sanitizeData($data);
             $template = EmailTemplate::getByName($templateName);
             if (! $template) {
-                Log::error('Email template not found: ' . $templateName);
+                Log::error('Email template not found: '.$templateName);
+
                 return false;
             }
             // Add common variables with sanitization
@@ -48,22 +82,43 @@ class EmailService
             ]);
             // Send email
             Mail::to($recipientEmail, $recipientName)->send(new DynamicEmail($template, $data));
+
             return true;
         } catch (Exception $e) {
-            Log::error('Failed to send email: ' . $e->getMessage(), [
+            Log::error('Failed to send email: '.$e->getMessage(), [
                 'template' => $templateName,
                 'recipient' => $recipientEmail,
                 'exception' => $e->getTraceAsString(),
             ]);
+
             return false;
         }
     }
-    /**   * Send email to user using template with enhanced security. *   * Sends an email to a specific user using a database-stored template * with comprehensive validation and sanitization. *   * @param User $user User instance * @param string $templateName Template identifier * @param array $data Variables for template substitution *   * @return bool Success status *   * @throws \InvalidArgumentException When parameters are invalid *   * @version 1.0.6 *   *   *   *   */
-    /**   * @param array<string, mixed> $data */
+
+    /**
+     * Send email to user using template with enhanced security.
+     *
+     * Sends an email to a specific user using a database-stored template
+     * with comprehensive validation and sanitization.
+     *
+     * @param  User  $user  User instance
+     * @param  string  $templateName  Template identifier
+     * @param  array  $data  Variables for template substitution
+     *
+     * @return bool Success status
+     *
+     * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @version 1.0.6
+     */
+    /**
+     * @param array<string, mixed> $data
+     */
     public function sendToUser(User $user, string $templateName, array $data = []): bool
     {
-        if (!$user->email) {
+        if (! $user->email) {
             Log::error('Invalid user provided for email sending');
+
             return false;
         }
         $userData = [
@@ -72,31 +127,76 @@ class EmailService
             'user_lastname' => $this->sanitizeString($user->lastname ?? ''),
             'user_id' => $user->id,
         ];
+
         return $this->sendEmail($templateName, $user->email, array_merge($data, $userData), $user->name);
     }
-    /**   * Send email to admin using template with enhanced security. *   * Sends an email to the admin using a database-stored template * with comprehensive validation and sanitization. *   * @param string $templateName Template identifier * @param array $data Variables for template substitution *   * @return bool Success status *   * @throws \InvalidArgumentException When parameters are invalid *   * @version 1.0.6 *   *   *   *   */
-    /**   * @param array<string, mixed> $data */
+
+    /**
+     * Send email to admin using template with enhanced security.
+     *
+     * Sends an email to the admin using a database-stored template
+     * with comprehensive validation and sanitization.
+     *
+     * @param  string  $templateName  Template identifier
+     * @param  array  $data  Variables for template substitution
+     *
+     * @return bool Success status
+     *
+     * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @version 1.0.6
+     */
+    /**
+     * @param array<string, mixed> $data
+     */
     public function sendToAdmin(string $templateName, array $data = []): bool
     {
         // Get admin email from settings or use default
         $adminEmail = Setting::get('support_email', config('mail.from.address'));
         if (empty($adminEmail)) {
             Log::error('Admin email not configured for email sending');
+
             return false;
         }
         $adminData = [
             'admin_name' => 'Administrator',
             'site_name' => config('app.name'),
         ];
+
         return $this->sendEmail($templateName, is_string($adminEmail) ? $adminEmail : 'admin@example.com', array_merge($data, $adminData), 'Administrator');
     }
-    /**   * Send bulk emails to multiple users with enhanced security. *   * Sends emails to multiple users using a database-stored template * with comprehensive validation and sanitization. *   * @param array $users Array of User instances or email addresses * @param string $templateName Template identifier * @param array $data Variables for template substitution *   * @return array<string, mixed> Results array with success/failure counts *   * @throws \InvalidArgumentException When parameters are invalid *   * @version 1.0.6 */
-    /**   * @param array<string, mixed> $users * @param array<string, mixed> $data */
-    /**   * @param array<string, mixed> $users * @param array<string, mixed> $data * @return array<string, mixed> */
+
+    /**
+     * Send bulk emails to multiple users with enhanced security.
+     *
+     * Sends emails to multiple users using a database-stored template
+     * with comprehensive validation and sanitization.
+     *
+     * @param  array  $users  Array of User instances or email addresses
+     * @param  string  $templateName  Template identifier
+     * @param  array  $data  Variables for template substitution
+     *
+     * @return array<string, mixed> Results array with success/failure counts
+     *
+     * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @version 1.0.6
+     */
+    /**
+     * @param array<string, mixed> $users
+     * @param array<string, mixed> $data
+     */
+    /**
+     * @param array<string, mixed> $users
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
     public function sendBulkEmail(array $users, string $templateName, array $data = []): array
     {
         if (empty($users)) {
             Log::error('Empty users array provided for bulk email sending');
+
             return ['total' => 0, 'success' => 0, 'failed' => 0, 'errors' => []];
         }
         $results = [
@@ -124,12 +224,28 @@ class EmailService
                 $results['failed']++;
                 $userEmail = $user instanceof User ? $user->email : $user;
                 $results['errors'][] = is_string($userEmail) ? $userEmail : '';
-                Log::error('Failed to send bulk email to user: ' . $e->getMessage());
+                Log::error('Failed to send bulk email to user: '.$e->getMessage());
             }
         }
+
         return $results;
     }
-    /**   * Get available templates by type and category with enhanced security. *   * Retrieves email templates filtered by type and category with * comprehensive validation and sanitization. *   * @param string $type Template type ('user' or 'admin') * @param  string|null  $category  Optional category filter *   * @return \Illuminate\Database\Eloquent\Collection<int, EmailTemplate> Collection of email templates *   * @throws \InvalidArgumentException When parameters are invalid *   * @version 1.0.6 *   *   *   *   */
+
+    /**
+     * Get available templates by type and category with enhanced security.
+     *
+     * Retrieves email templates filtered by type and category with
+     * comprehensive validation and sanitization.
+     *
+     * @param  string  $type  Template type ('user' or 'admin')
+     * @param  string|null  $category  Optional category filter
+     *
+     * @return Collection<int, EmailTemplate> Collection of email templates
+     *
+     * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @version 1.0.6
+     */
     public function getTemplates(string $type, ?string $category = null): Collection
     {
         $type = $this->validateTemplateType($type);
@@ -138,23 +254,60 @@ class EmailService
         if ($category) {
             $query->forCategory($category);
         }
+
         return $query->get();
     }
-    /**   * Create or update email template with enhanced security. *   * Creates or updates an email template with comprehensive * validation and sanitization. *   * @param array $templateData Template data *   * @return EmailTemplate The created or updated template *   * @throws \InvalidArgumentException When template data is invalid *   * @version 1.0.6 *   *   *   *   */
-    /**   * @param array<string, mixed> $templateData */
+
+    /**
+     * Create or update email template with enhanced security.
+     *
+     * Creates or updates an email template with comprehensive
+     * validation and sanitization.
+     *
+     * @param  array  $templateData  Template data
+     *
+     * @return EmailTemplate The created or updated template
+     *
+     * @throws \InvalidArgumentException When template data is invalid
+     *
+     * @version 1.0.6
+     */
+    /**
+     * @param array<string, mixed> $templateData
+     */
     public function createOrUpdateTemplate(array $templateData): EmailTemplate
     {
         if (empty($templateData['name'])) {
             throw new \InvalidArgumentException('Template name is required');
         }
         $templateData = $this->sanitizeData($templateData);
+
         return EmailTemplate::updateOrCreate(
             ['name' => $templateData['name']],
             $templateData,
         );
     }
-    /**   * Test email template rendering with enhanced security. *   * Tests email template rendering with comprehensive validation * and sanitization. *   * @param string $templateName Template identifier * @param array $data Test data *   * @return array Rendered content *   * @throws \InvalidArgumentException When template not found *   * @version 1.0.6 *   *   *   *   */
-    /**   * @param array<string, mixed> $data * @return array<string, mixed> */
+
+    /**
+     * Test email template rendering with enhanced security.
+     *
+     * Tests email template rendering with comprehensive validation
+     * and sanitization.
+     *
+     * @param  string  $templateName  Template identifier
+     * @param  array  $data  Test data
+     *
+     * @return array Rendered content
+     *
+     * @throws \InvalidArgumentException When template not found
+     *
+     * @version 1.0.6
+     */
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
     public function testTemplate(string $templateName, array $data = []): array
     {
         $validatedTemplateName = $this->validateTemplateName($templateName);
@@ -163,45 +316,112 @@ class EmailService
         if (! $template) {
             throw new \InvalidArgumentException("Template not found: {$validatedTemplateName}");
         }
+
         return $template->render($sanitizedData);
     }
-    /**   * Send user registration welcome email with enhanced security. *   * Sends a welcome email to a newly registered user with * comprehensive validation and sanitization. *   * @param User $user User instance *   * @return bool Success status *   * @throws \InvalidArgumentException When user is invalid *   * @version 1.0.6 *   *   *   *   */
+
+    /**
+     * Send user registration welcome email with enhanced security.
+     *
+     * Sends a welcome email to a newly registered user with
+     * comprehensive validation and sanitization.
+     *
+     * @param  User  $user  User instance
+     *
+     * @return bool Success status
+     *
+     * @throws \InvalidArgumentException When user is invalid
+     *
+     * @version 1.0.6
+     */
     public function sendUserWelcome(User $user): bool
     {
-        if (!$user->created_at) {
+        if (! $user->created_at) {
             Log::error('Invalid user provided for welcome email');
+
             return false;
         }
+
         return $this->sendToUser($user, 'user_welcome', [
             'registration_date' => $user->created_at->format('M d, Y'),
         ]);
     }
-    /**   * Send welcome email to user with additional data support and enhanced security. *   * Sends a welcome email to a user with additional data for template * substitution and comprehensive validation. *   * @param User $user User instance * @param array $data Additional data for template substitution *   * @return bool Success status *   * @throws \InvalidArgumentException When user is invalid *   * @version 1.0.6 *   *   *   *   */
-    /**   * @param array<string, mixed> $data */
+
+    /**
+     * Send welcome email to user with additional data support and enhanced security.
+     *
+     * Sends a welcome email to a user with additional data for template
+     * substitution and comprehensive validation.
+     *
+     * @param  User  $user  User instance
+     * @param  array  $data  Additional data for template substitution
+     *
+     * @return bool Success status
+     *
+     * @throws \InvalidArgumentException When user is invalid
+     *
+     * @version 1.0.6
+     */
+    /**
+     * @param array<string, mixed> $data
+     */
     public function sendWelcome(User $user, array $data = []): bool
     {
-        if (!$user->created_at) {
+        if (! $user->created_at) {
             Log::error('Invalid user provided for welcome email');
+
             return false;
         }
         $welcomeData = array_merge([
             'registration_date' => $user->created_at->format('M d, Y'),
         ], $this->sanitizeData($data));
+
         return $this->sendToUser($user, 'user_welcome', $welcomeData);
     }
-    /**   * Send email verification email with enhanced security. *   * Sends an email verification email to a user with comprehensive * validation and sanitization. *   * @param User $user User instance * @param string $verificationUrl Verification URL *   * @return bool Success status *   * @throws \InvalidArgumentException When parameters are invalid *   * @version 1.0.6 *   *   *   *   */
+
+    /**
+     * Send email verification email with enhanced security.
+     *
+     * Sends an email verification email to a user with comprehensive
+     * validation and sanitization.
+     *
+     * @param  User  $user  User instance
+     * @param  string  $verificationUrl  Verification URL
+     *
+     * @return bool Success status
+     *
+     * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @version 1.0.6
+     */
     public function sendEmailVerification(User $user, string $verificationUrl): bool
     {
         if (empty($verificationUrl)) {
             Log::error('Invalid user or verification URL provided');
+
             return false;
         }
+
         return $this->sendToUser($user, 'user_email_verification', [
             'verification_url' => $this->sanitizeString($verificationUrl),
             'verification_expires' => now()->addHours(24)->format('M d, Y \a\t g:i A'),
         ]);
     }
-    /**   * Send admin notification when a new user registers with enhanced security. *   * Sends an admin notification when a new user registers with * comprehensive validation and sanitization. *   * @param User $user User instance *   * @return bool Success status *   * @throws \InvalidArgumentException When user is invalid *   * @version 1.0.6 *   *   *   *   */
+
+    /**
+     * Send admin notification when a new user registers with enhanced security.
+     *
+     * Sends an admin notification when a new user registers with
+     * comprehensive validation and sanitization.
+     *
+     * @param  User  $user  User instance
+     *
+     * @return bool Success status
+     *
+     * @throws \InvalidArgumentException When user is invalid
+     *
+     * @version 1.0.6
+     */
     public function sendNewUserNotification(User $user): bool
     {
         // User parameter is non-nullable, so no need to check
@@ -217,13 +437,30 @@ class EmailService
             'user_agent' => $this->sanitizeString(request()->userAgent() ?? 'Unknown'),
         ]);
     }
-    /**   * Send payment confirmation email with enhanced security. *   * Sends a payment confirmation email to a user with comprehensive * validation and sanitization. *   * @param License $license License instance * @param Invoice $invoice Invoice instance *   * @return bool Success status *   * @throws \InvalidArgumentException When parameters are invalid *   * @version 1.0.6 *   *   *   *   */
+
+    /**
+     * Send payment confirmation email with enhanced security.
+     *
+     * Sends a payment confirmation email to a user with comprehensive
+     * validation and sanitization.
+     *
+     * @param  License  $license  License instance
+     * @param  Invoice  $invoice  Invoice instance
+     *
+     * @return bool Success status
+     *
+     * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @version 1.0.6
+     */
     public function sendPaymentConfirmation(License $license, Invoice $invoice): bool
     {
-        if (!$license->user) {
+        if (! $license->user) {
             Log::error('Invalid license or invoice provided for payment confirmation');
+
             return false;
         }
+
         return $this->sendToUser($license->user, 'payment_confirmation', [
             'customer_name' => $this->sanitizeString($license->user->name),
             'customer_email' => $this->sanitizeString($license->user->email),
@@ -239,7 +476,10 @@ class EmailService
                 $license->license_expires_at->format('M d, Y') : 'Never',
         ]);
     }
-    /**   * Send password reset email. */
+
+    /**
+     * Send password reset email.
+     */
     public function sendPasswordReset(User $user, string $resetUrl): bool
     {
         return $this->sendToUser($user, 'user_password_reset', [
@@ -247,8 +487,13 @@ class EmailService
             'reset_expires' => now()->addHours(1)->format('M d, Y \a\t g:i A'),
         ]);
     }
-    /**   * Send license expiration warning to user. */
-    /**   * @param array<string, mixed> $licenseData */
+
+    /**
+     * Send license expiration warning to user.
+     */
+    /**
+     * @param array<string, mixed> $licenseData
+     */
     public function sendLicenseExpiring(User $user, array $licenseData): bool
     {
         $licenseKey = $licenseData['license_key'] ?? '';
@@ -263,8 +508,13 @@ class EmailService
             'days_remaining' => is_numeric($daysRemaining) ? (int)$daysRemaining : 0,
         ]));
     }
-    /**   * Send license updated notification to user. */
-    /**   * @param array<string, mixed> $licenseData */
+
+    /**
+     * Send license updated notification to user.
+     */
+    /**
+     * @param array<string, mixed> $licenseData
+     */
     public function sendLicenseUpdated(User $user, array $licenseData): bool
     {
         return $this->sendToUser($user, 'user_license_updated', array_merge($licenseData, [
@@ -273,8 +523,13 @@ class EmailService
             'update_type' => $licenseData['update_type'] ?? 'updated',
         ]));
     }
-    /**   * Send product version update notification to user. */
-    /**   * @param array<string, mixed> $productData */
+
+    /**
+     * Send product version update notification to user.
+     */
+    /**
+     * @param array<string, mixed> $productData
+     */
     public function sendProductVersionUpdate(User $user, array $productData): bool
     {
         return $this->sendToUser($user, 'user_product_version_update', array_merge($productData, [
@@ -284,8 +539,13 @@ class EmailService
             'download_url' => $productData['download_url'] ?? '',
         ]));
     }
-    /**   * Send support ticket created notification to user. */
-    /**   * @param array<string, mixed> $ticketData */
+
+    /**
+     * Send support ticket created notification to user.
+     */
+    /**
+     * @param array<string, mixed> $ticketData
+     */
     public function sendTicketCreated(User $user, array $ticketData): bool
     {
         $ticketId = $ticketData['ticket_id'] ?? '';
@@ -298,8 +558,13 @@ class EmailService
             'ticket_status' => is_string($ticketStatus) ? $ticketStatus : 'open',
         ]));
     }
-    /**   * Send support ticket status update notification to user. */
-    /**   * @param array<string, mixed> $ticketData */
+
+    /**
+     * Send support ticket status update notification to user.
+     */
+    /**
+     * @param array<string, mixed> $ticketData
+     */
     public function sendTicketStatusUpdate(User $user, array $ticketData): bool
     {
         return $this->sendToUser($user, 'user_ticket_status_update', array_merge($ticketData, [
@@ -309,8 +574,13 @@ class EmailService
             'new_status' => $ticketData['new_status'] ?? '',
         ]));
     }
-    /**   * Send support ticket reply notification to user. */
-    /**   * @param array<string, mixed> $ticketData */
+
+    /**
+     * Send support ticket reply notification to user.
+     */
+    /**
+     * @param array<string, mixed> $ticketData
+     */
     public function sendTicketReply(User $user, array $ticketData): bool
     {
         return $this->sendToUser($user, 'user_ticket_reply', array_merge($ticketData, [
@@ -320,8 +590,13 @@ class EmailService
             'replied_by' => $ticketData['replied_by'] ?? 'Support Team',
         ]));
     }
-    /**   * Send invoice approaching due date notification to user. */
-    /**   * @param array<string, mixed> $invoiceData */
+
+    /**
+     * Send invoice approaching due date notification to user.
+     */
+    /**
+     * @param array<string, mixed> $invoiceData
+     */
     public function sendInvoiceApproachingDue(User $user, array $invoiceData): bool
     {
         $invoiceNumber = $invoiceData['invoice_number'] ?? '';
@@ -336,8 +611,13 @@ class EmailService
             'days_remaining' => is_numeric($daysRemaining) ? (int)$daysRemaining : 0,
         ]));
     }
-    /**   * Send invoice paid notification to user. */
-    /**   * @param array<string, mixed> $invoiceData */
+
+    /**
+     * Send invoice paid notification to user.
+     */
+    /**
+     * @param array<string, mixed> $invoiceData
+     */
     public function sendInvoicePaid(User $user, array $invoiceData): bool
     {
         return $this->sendToUser($user, 'user_invoice_paid', array_merge($invoiceData, [
@@ -347,8 +627,13 @@ class EmailService
             'payment_method' => $invoiceData['payment_method'] ?? '',
         ]));
     }
-    /**   * Send invoice cancelled notification to user. */
-    /**   * @param array<string, mixed> $invoiceData */
+
+    /**
+     * Send invoice cancelled notification to user.
+     */
+    /**
+     * @param array<string, mixed> $invoiceData
+     */
     public function sendInvoiceCancelled(User $user, array $invoiceData): bool
     {
         return $this->sendToUser($user, 'user_invoice_cancelled', array_merge($invoiceData, [
@@ -357,8 +642,13 @@ class EmailService
             'cancellation_reason' => $invoiceData['cancellation_reason'] ?? '',
         ]));
     }
-    /**   * Send admin notification for license created. */
-    /**   * @param array<string, mixed> $licenseData */
+
+    /**
+     * Send admin notification for license created.
+     */
+    /**
+     * @param array<string, mixed> $licenseData
+     */
     public function sendAdminLicenseCreated(array $licenseData): bool
     {
         $licenseKey = $licenseData['license_key'] ?? '';
@@ -373,8 +663,13 @@ class EmailService
             'customer_email' => is_string($customerEmail) ? $customerEmail : '',
         ]));
     }
-    /**   * Send admin notification for license expiring. */
-    /**   * @param array<string, mixed> $licenseData */
+
+    /**
+     * Send admin notification for license expiring.
+     */
+    /**
+     * @param array<string, mixed> $licenseData
+     */
     public function sendAdminLicenseExpiring(array $licenseData): bool
     {
         return $this->sendToAdmin('admin_license_expiring', array_merge($licenseData, [
@@ -386,8 +681,13 @@ class EmailService
             'days_remaining' => $licenseData['days_remaining'] ?? 0,
         ]));
     }
-    /**   * Send admin notification for license renewed. */
-    /**   * @param array<string, mixed> $licenseData */
+
+    /**
+     * Send admin notification for license renewed.
+     */
+    /**
+     * @param array<string, mixed> $licenseData
+     */
     public function sendAdminLicenseRenewed(array $licenseData): bool
     {
         return $this->sendToAdmin('admin_license_renewed', array_merge($licenseData, [
@@ -398,8 +698,13 @@ class EmailService
             'new_expires_at' => $licenseData['new_expires_at'] ?? '',
         ]));
     }
-    /**   * Send admin notification for support ticket created. */
-    /**   * @param array<string, mixed> $ticketData */
+
+    /**
+     * Send admin notification for support ticket created.
+     */
+    /**
+     * @param array<string, mixed> $ticketData
+     */
     public function sendAdminTicketCreated(array $ticketData): bool
     {
         $ticketId = $ticketData['ticket_id'] ?? '';
@@ -416,8 +721,13 @@ class EmailService
             'ticket_priority' => is_string($ticketPriority) ? $ticketPriority : 'normal',
         ]));
     }
-    /**   * Send renewal reminder to user. */
-    /**   * @param array<string, mixed> $renewalData */
+
+    /**
+     * Send renewal reminder to user.
+     */
+    /**
+     * @param array<string, mixed> $renewalData
+     */
     public function sendRenewalReminder(User $user, array $renewalData): bool
     {
         return $this->sendToUser($user, 'user_renewal_reminder', array_merge($renewalData, [
@@ -429,8 +739,13 @@ class EmailService
             'invoice_id' => $renewalData['invoice_id'] ?? '',
         ]));
     }
-    /**   * Send admin notification for renewal reminder. */
-    /**   * @param array<string, mixed> $renewalData */
+
+    /**
+     * Send admin notification for renewal reminder.
+     */
+    /**
+     * @param array<string, mixed> $renewalData
+     */
     public function sendAdminRenewalReminder(array $renewalData): bool
     {
         return $this->sendToAdmin('admin_renewal_reminder', array_merge($renewalData, [
@@ -443,8 +758,13 @@ class EmailService
             'invoice_id' => $renewalData['invoice_id'] ?? '',
         ]));
     }
-    /**   * Send admin notification for ticket reply from user. */
-    /**   * @param array<string, mixed> $ticketData */
+
+    /**
+     * Send admin notification for ticket reply from user.
+     */
+    /**
+     * @param array<string, mixed> $ticketData
+     */
     public function sendAdminTicketReply(array $ticketData): bool
     {
         return $this->sendToAdmin('admin_ticket_reply', array_merge($ticketData, [
@@ -455,8 +775,13 @@ class EmailService
             'reply_message' => $ticketData['reply_message'] ?? '',
         ]));
     }
-    /**   * Send admin notification for ticket closed by user. */
-    /**   * @param array<string, mixed> $ticketData */
+
+    /**
+     * Send admin notification for ticket closed by user.
+     */
+    /**
+     * @param array<string, mixed> $ticketData
+     */
     public function sendAdminTicketClosed(array $ticketData): bool
     {
         return $this->sendToAdmin('admin_ticket_closed', array_merge($ticketData, [
@@ -467,8 +792,13 @@ class EmailService
             'closure_reason' => $ticketData['closure_reason'] ?? '',
         ]));
     }
-    /**   * Send admin notification for invoice approaching due. */
-    /**   * @param array<string, mixed> $invoiceData */
+
+    /**
+     * Send admin notification for invoice approaching due.
+     */
+    /**
+     * @param array<string, mixed> $invoiceData
+     */
     public function sendAdminInvoiceApproachingDue(array $invoiceData): bool
     {
         return $this->sendToAdmin('admin_invoice_approaching_due', array_merge($invoiceData, [
@@ -480,8 +810,13 @@ class EmailService
             'days_remaining' => $invoiceData['days_remaining'] ?? 0,
         ]));
     }
-    /**   * Send admin notification for invoice cancelled. */
-    /**   * @param array<string, mixed> $invoiceData */
+
+    /**
+     * Send admin notification for invoice cancelled.
+     */
+    /**
+     * @param array<string, mixed> $invoiceData
+     */
     public function sendAdminInvoiceCancelled(array $invoiceData): bool
     {
         return $this->sendToAdmin('admin_invoice_cancelled', array_merge($invoiceData, [
@@ -492,7 +827,10 @@ class EmailService
             'cancellation_reason' => $invoiceData['cancellation_reason'] ?? '',
         ]));
     }
-    /**   * Send payment failure notification to admin. */
+
+    /**
+     * Send payment failure notification to admin.
+     */
     public function sendPaymentFailureNotification(Invoice $order): bool
     {
         return $this->sendToAdmin('admin_payment_failure', [
@@ -507,14 +845,19 @@ class EmailService
             'failure_date' => now()->format('M d, Y \a\t g:i A'),
         ]);
     }
-    /**   * Send license creation notification to user. */
+
+    /**
+     * Send license creation notification to user.
+     */
     public function sendLicenseCreated(License $license, ?User $user = null): bool
     {
         $targetUser = $user ?? $license->user;
-        if (!$targetUser) {
+        if (! $targetUser) {
             Log::error('No user found for license creation notification');
+
             return false;
         }
+
         return $this->sendToUser($targetUser, 'license_created', [
             'customer_name' => $license->user->name ?? '',
             'customer_email' => $license->user->email ?? '',
@@ -529,7 +872,10 @@ class EmailService
             'created_date' => $license->created_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
         ]);
     }
-    /**   * Send admin notification about payment and license creation. */
+
+    /**
+     * Send admin notification about payment and license creation.
+     */
     public function sendAdminPaymentNotification(License $license, Invoice $invoice): bool
     {
         return $this->sendToAdmin('admin_payment_license_created', [
@@ -547,7 +893,10 @@ class EmailService
             'max_domains' => $license->max_domains,
         ]);
     }
-    /**   * Send custom invoice payment confirmation to user. */
+
+    /**
+     * Send custom invoice payment confirmation to user.
+     */
     public function sendCustomInvoicePaymentConfirmation(Invoice $invoice): bool
     {
         // User parameter is non-nullable, so no need to check
@@ -563,7 +912,10 @@ class EmailService
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
         ]);
     }
-    /**   * Send admin notification for custom invoice payment. */
+
+    /**
+     * Send admin notification for custom invoice payment.
+     */
     public function sendAdminCustomInvoicePaymentNotification(Invoice $invoice): bool
     {
         return $this->sendToAdmin('admin_custom_invoice_payment', [
@@ -578,7 +930,21 @@ class EmailService
             'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
         ]);
     }
-    /**   * Validate and sanitize template name. *   * Validates the template name and returns a sanitized version * with proper security measures. *   * @param string $templateName The template name to validate *   * @return string The validated and sanitized template name *   * @throws \InvalidArgumentException When template name is invalid *   * @version 1.0.6 *   *   *   *   */
+
+    /**
+     * Validate and sanitize template name.
+     *
+     * Validates the template name and returns a sanitized version
+     * with proper security measures.
+     *
+     * @param  string  $templateName  The template name to validate
+     *
+     * @return string The validated and sanitized template name
+     *
+     * @throws \InvalidArgumentException When template name is invalid
+     *
+     * @version 1.0.6
+     */
     private function validateTemplateName(string $templateName): string
     {
         if (empty($templateName)) {
@@ -588,9 +954,24 @@ class EmailService
         if (empty($sanitized)) {
             throw new \InvalidArgumentException('Template name contains invalid characters');
         }
+
         return $sanitized;
     }
-    /**   * Validate and sanitize email address. *   * Validates the email address and returns a sanitized version * with proper security measures. *   * @param string $email The email address to validate *   * @return string The validated and sanitized email address *   * @throws \InvalidArgumentException When email is invalid *   * @version 1.0.6 *   *   *   *   */
+
+    /**
+     * Validate and sanitize email address.
+     *
+     * Validates the email address and returns a sanitized version
+     * with proper security measures.
+     *
+     * @param  string  $email  The email address to validate
+     *
+     * @return string The validated and sanitized email address
+     *
+     * @throws \InvalidArgumentException When email is invalid
+     *
+     * @version 1.0.6
+     */
     private function validateEmail(string $email): string
     {
         if (empty($email) === true) {
@@ -600,30 +981,75 @@ class EmailService
         if ($sanitized === false || ! filter_var($sanitized, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Invalid email address format');
         }
+
         return $sanitized;
     }
-    /**   * Validate and sanitize template type. *   * Validates the template type and returns a sanitized version * with proper security measures. *   * @param string $type The template type to validate *   * @return string The validated and sanitized template type *   * @throws \InvalidArgumentException When template type is invalid *   * @version 1.0.6 *   *   *   *   */
+
+    /**
+     * Validate and sanitize template type.
+     *
+     * Validates the template type and returns a sanitized version
+     * with proper security measures.
+     *
+     * @param  string  $type  The template type to validate
+     *
+     * @return string The validated and sanitized template type
+     *
+     * @throws \InvalidArgumentException When template type is invalid
+     *
+     * @version 1.0.6
+     */
     private function validateTemplateType(string $type): string
     {
         $allowedTypes = ['user', 'admin'];
         $sanitized = htmlspecialchars(trim($type), ENT_QUOTES, 'UTF-8');
         if (! in_array($sanitized, $allowedTypes, true)) {
             throw new \InvalidArgumentException(
-                'Invalid template type. Allowed values: ' . implode(', ', $allowedTypes),
+                'Invalid template type. Allowed values: '.implode(', ', $allowedTypes),
             );
         }
+
         return $sanitized;
     }
-    /**   * Sanitize string input with XSS protection. *   * Sanitizes string input to prevent XSS attacks and other * security vulnerabilities. *   * @param  string|null  $input  The input string to sanitize *   * @return string|null The sanitized string or null *   * @version 1.0.6 *   *   *   *   */
+
+    /**
+     * Sanitize string input with XSS protection.
+     *
+     * Sanitizes string input to prevent XSS attacks and other
+     * security vulnerabilities.
+     *
+     * @param  string|null  $input  The input string to sanitize
+     *
+     * @return string|null The sanitized string or null
+     *
+     * @version 1.0.6
+     */
     private function sanitizeString(?string $input): ?string
     {
         if ($input === null) {
             return null;
         }
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
-    /**   * Sanitize array data with XSS protection. *   * Recursively sanitizes array data to prevent XSS attacks * and other security vulnerabilities. *   * @param array $data The data array to sanitize *   * @return array The sanitized data array *   * @version 1.0.6 *   *   *   *   */
-    /**   * @param array<mixed, mixed> $data * @return array<string, mixed> */
+
+    /**
+     * Sanitize array data with XSS protection.
+     *
+     * Recursively sanitizes array data to prevent XSS attacks
+     * and other security vulnerabilities.
+     *
+     * @param  array  $data  The data array to sanitize
+     *
+     * @return array The sanitized data array
+     *
+     * @version 1.0.6
+     */
+    /**
+     * @param array<mixed, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
     private function sanitizeData(array $data): array
     {
         $sanitized = [];
@@ -638,6 +1064,7 @@ class EmailService
         }
         /** @var array<string, mixed> $typedResult */
         $typedResult = $sanitized;
+
         return $typedResult;
     }
 }

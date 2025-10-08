@@ -6,17 +6,25 @@ use App\Models\Setting;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Setting> */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Setting>
+ */
 class SettingFactory extends Factory
 {
-    /**   * The name of the factory's corresponding model. *   * @var class-string<Setting> */
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var class-string<Setting> */
     protected $model = Setting::class;
 
-    /**   * Define the model's default state. *   * @return array<string, mixed> */
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
-            'key' => 'test_setting_' . rand(1000, 9999),
+            'key' => 'test_setting_'.rand(1000, 9999),
             'value' => 'test_value',
             'type' => 'general',
             'site_name' => 'Test Site',
@@ -34,7 +42,9 @@ class SettingFactory extends Factory
         ];
     }
 
-    /**   * Indicate that the setting is public. */
+    /**
+     * Indicate that the setting is public.
+     */
     public function public(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -42,7 +52,9 @@ class SettingFactory extends Factory
         ]);
     }
 
-    /**   * Indicate that the setting is private. */
+    /**
+     * Indicate that the setting is private.
+     */
     public function private(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -50,7 +62,9 @@ class SettingFactory extends Factory
         ]);
     }
 
-    /**   * Set the setting type. */
+    /**
+     * Set the setting type.
+     */
     public function ofType(string $type): static
     {
         return $this->state(fn (array $attributes) => [

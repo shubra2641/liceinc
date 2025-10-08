@@ -15,23 +15,85 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Ticket API Controller. *
- * This controller handles ticket-related API endpoints including ticket listing, * purchase code verification for ticket creation, and support ticket management. * It provides comprehensive ticket management functionality with security measures. *
- * Features: * - Ticket listing with filtering and pagination * - Purchase code verification for ticket creation * - Database and Envato API integration * - Search functionality across tickets and users * - Comprehensive error handling with database transactions * - Support for multiple ticket statuses and priorities * - Enhanced security measures (XSS protection, input validation) * - Proper logging for errors and warnings only * - Model scope integration for optimized queries *
+ * Ticket API Controller.
  *
- * @example * // List tickets with filters * GET /api/tickets?status=open&priority=high&search=bug *
- * // Verify purchase code * GET /api/verify-purchase-code/ABC123-DEF456-GHI789 */
+ * This controller handles ticket-related API endpoints including ticket listing,
+ * purchase code verification for ticket creation, and support ticket management.
+ * It provides comprehensive ticket management functionality with security measures.
+ *
+ * Features:
+ * - Ticket listing with filtering and pagination
+ * - Purchase code verification for ticket creation
+ * - Database and Envato API integration
+ * - Search functionality across tickets and users
+ * - Comprehensive error handling with database transactions
+ * - Support for multiple ticket statuses and priorities
+ * - Enhanced security measures (XSS protection, input validation)
+ * - Proper logging for errors and warnings only
+ * - Model scope integration for optimized queries
+ *
+ *
+ * @example
+ * // List tickets with filters
+ * GET /api/tickets?status=open&priority=high&search=bug
+ *
+ * // Verify purchase code
+ * GET /api/verify-purchase-code/ABC123-DEF456-GHI789
+ */
 class TicketApiController extends Controller
 {
     protected EnvatoService $envatoService;
 
-    /**   * Create a new controller instance. *   * @param EnvatoService $envatoService The Envato service for API integration *   * @version 1.0.6 */
+    /**
+     * Create a new controller instance.
+     *
+     * @param  EnvatoService  $envatoService  The Envato service for API integration
+     *
+     * @version 1.0.6
+     */
     public function __construct(EnvatoService $envatoService)
     {
         $this->envatoService = $envatoService;
     }
 
-    /**   * Display a listing of tickets with enhanced security. *   * Retrieves a paginated list of tickets with optional filtering and search * capabilities. Supports filtering by status, priority, category, and user, * as well as searching across ticket content and user information. *   * @param TicketIndexRequest $request The validated request containing filter parameters *   * @return JsonResponse JSON response with tickets and pagination information *   * @throws \Exception When database operations fail *   * @example * // Request with filters: * GET /api/tickets?status=open&priority=high&search=bug&per_page=20 *   * // Success response: * { * "success": true, * "data": [ * { * "id": 1, * "subject": "Bug Report", * "status": "open", * "priority": "high", * "user": {...}, * "category": {...} * } * ], * "pagination": { * "current_page": 1, * "last_page": 5, * "per_page": 15, * "total": 75 * } * } */
+    /**
+     * Display a listing of tickets with enhanced security.
+     *
+     * Retrieves a paginated list of tickets with optional filtering and search
+     * capabilities. Supports filtering by status, priority, category, and user,
+     * as well as searching across ticket content and user information.
+     *
+     * @param  TicketIndexRequest  $request  The validated request containing filter parameters
+     *
+     * @return JsonResponse JSON response with tickets and pagination information
+     *
+     * @throws \Exception When database operations fail
+     *
+     * @example
+     * // Request with filters:
+     * GET /api/tickets?status=open&priority=high&search=bug&per_page=20
+     *
+     * // Success response:
+     * {
+     *     "success": true,
+     *     "data": [
+     *         {
+     *             "id": 1,
+     *             "subject": "Bug Report",
+     *             "status": "open",
+     *             "priority": "high",
+     *             "user": {...},
+     *             "category": {...}
+     *         }
+     *     ],
+     *     "pagination": {
+     *         "current_page": 1,
+     *         "last_page": 5,
+     *         "per_page": 15,
+     *         "total": 75
+     *     }
+     * }
+     */
     public function index(TicketIndexRequest $request): JsonResponse
     {
         try {
@@ -97,7 +159,56 @@ class TicketApiController extends Controller
         }
     }
 
-    /**   * Verify purchase code for ticket creation with enhanced security. *   * Verifies a purchase code by first checking the local database for existing * licenses, then falling back to Envato API verification. This method is * primarily used for ticket creation and support purposes. *   * @param VerifyPurchaseCodeRequest $request The validated request containing purchase code *   * @return JsonResponse JSON response with product information or error *   * @throws \Exception When database operations fail *   * @example * // Request: * POST /api/verify-purchase-code * { * "purchase_code": "ABC123-DEF456-GHI789" * } *   * // Success response (license exists in database): * { * "success": true, * "product": { * "slug": "my-product", * "name": "My Product", * "version": "1.0.0" * }, * "license_exists": true, * "license_id": 123 * } *   * // Success response (license found via Envato API): * { * "success": true, * "product": { * "slug": "my-product", * "name": "My Product", * "version": "1.0.0" * }, * "license_exists": false, * "sale": {...} * } *   * // Error response: * { * "success": false, * "message": "Purchase code not found or invalid" * } */
+    /**
+     * Verify purchase code for ticket creation with enhanced security.
+     *
+     * Verifies a purchase code by first checking the local database for existing
+     * licenses, then falling back to Envato API verification. This method is
+     * primarily used for ticket creation and support purposes.
+     *
+     * @param  VerifyPurchaseCodeRequest  $request  The validated request containing purchase code
+     *
+     * @return JsonResponse JSON response with product information or error
+     *
+     * @throws \Exception When database operations fail
+     *
+     * @example
+     * // Request:
+     * POST /api/verify-purchase-code
+     * {
+     *     "purchase_code": "ABC123-DEF456-GHI789"
+     * }
+     *
+     * // Success response (license exists in database):
+     * {
+     *     "success": true,
+     *     "product": {
+     *         "slug": "my-product",
+     *         "name": "My Product",
+     *         "version": "1.0.0"
+     *     },
+     *     "license_exists": true,
+     *     "license_id": 123
+     * }
+     *
+     * // Success response (license found via Envato API):
+     * {
+     *     "success": true,
+     *     "product": {
+     *         "slug": "my-product",
+     *         "name": "My Product",
+     *         "version": "1.0.0"
+     *     },
+     *     "license_exists": false,
+     *     "sale": {...}
+     * }
+     *
+     * // Error response:
+     * {
+     *     "success": false,
+     *     "message": "Purchase code not found or invalid"
+     * }
+     */
     public function verifyPurchaseCode(VerifyPurchaseCodeRequest $request): JsonResponse
     {
         $purchaseCode = null;
@@ -142,12 +253,12 @@ class TicketApiController extends Controller
                 }
             } catch (\Throwable $envatoError) {
                 Log::warning('Envato API error during purchase code verification', [
-                    'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4) . '...',
+                    'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4).'...',
                     'error' => $envatoError->getMessage(),
                 ]);
             }
             Log::warning('Purchase code not found in ticket verification', [
-                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4) . '...',
+                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4).'...',
             ]);
             DB::commit();
 
@@ -160,7 +271,7 @@ class TicketApiController extends Controller
             Log::error('Purchase code verification failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4) . '...',
+                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4).'...',
             ]);
 
             return response()->json([
@@ -170,7 +281,13 @@ class TicketApiController extends Controller
         }
     }
 
-    /**   * Sanitize output to prevent XSS attacks. *   * @param  string|null  $output  The output to sanitize *   * @return string The sanitized output */
+    /**
+     * Sanitize output to prevent XSS attacks.
+     *
+     * @param  string|null  $output  The output to sanitize
+     *
+     * @return string The sanitized output
+     */
     private function sanitizeOutput(?string $output): string
     {
         if ($output === null) {

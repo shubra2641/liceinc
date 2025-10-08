@@ -21,11 +21,33 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Enhanced License API Controller. *
- * Provides secure, well-structured API endpoints for license management * with comprehensive security measures and proper error handling. *
- * Features: * - License verification with Envato API integration * - License registration and status checking * - Enhanced security with rate limiting and IP blacklisting * - Domain verification and authorization * - Comprehensive error handling with database transactions * - API token authentication with enhanced security * - Suspicious activity detection and prevention * - XSS protection and input validation * - Proper logging for errors and warnings only * - Model scope integration for optimized queries *
+ * Enhanced License API Controller.
  *
- * @example * // Verify a license * POST /api/license/verify * { * "purchase_code": "ABC123-DEF456-GHI789", * "product_slug": "my-product", * "domain": "example.com" * } */
+ * Provides secure, well-structured API endpoints for license management
+ * with comprehensive security measures and proper error handling.
+ *
+ * Features:
+ * - License verification with Envato API integration
+ * - License registration and status checking
+ * - Enhanced security with rate limiting and IP blacklisting
+ * - Domain verification and authorization
+ * - Comprehensive error handling with database transactions
+ * - API token authentication with enhanced security
+ * - Suspicious activity detection and prevention
+ * - XSS protection and input validation
+ * - Proper logging for errors and warnings only
+ * - Model scope integration for optimized queries
+ *
+ *
+ * @example
+ * // Verify a license
+ * POST /api/license/verify
+ * {
+ *     "purchase_code": "ABC123-DEF456-GHI789",
+ *     "product_slug": "my-product",
+ *     "domain": "example.com"
+ * }
+ */
 class EnhancedLicenseApiController extends BaseController
 {
     public function __construct(
@@ -35,7 +57,39 @@ class EnhancedLicenseApiController extends BaseController
         $this->middleware('throttle:api');
     }
 
-    /**   * Verify license endpoint with enhanced security. *   * Verifies a license using purchase code and product slug with comprehensive * security measures including rate limiting, IP blacklisting, and domain verification. *   * @param LicenseVerifyRequest $request The validated request containing license verification data *   * @return JsonResponse Response with license verification result *   * @throws ValidationException When validation fails * @throws \Exception When database operations fail *   * @example * // Request: * POST /api/license/verify * { * "purchase_code": "ABC123-DEF456-GHI789", * "product_slug": "my-product", * "domain": "example.com" * } *   * // Success response: * { * "success": true, * "message": "License verified successfully", * "data": { * "license_id": 123, * "license_type": "regular", * "status": "active" * } * } */
+    /**
+     * Verify license endpoint with enhanced security.
+     *
+     * Verifies a license using purchase code and product slug with comprehensive
+     * security measures including rate limiting, IP blacklisting, and domain verification.
+     *
+     * @param  LicenseVerifyRequest  $request  The validated request containing license verification data
+     *
+     * @return JsonResponse Response with license verification result
+     *
+     * @throws ValidationException When validation fails
+     * @throws \Exception When database operations fail
+     *
+     * @example
+     * // Request:
+     * POST /api/license/verify
+     * {
+     *     "purchase_code": "ABC123-DEF456-GHI789",
+     *     "product_slug": "my-product",
+     *     "domain": "example.com"
+     * }
+     *
+     * // Success response:
+     * {
+     *     "success": true,
+     *     "message": "License verified successfully",
+     *     "data": {
+     *         "license_id": 123,
+     *         "license_type": "regular",
+     *         "status": "active"
+     *     }
+     * }
+     */
     public function verify(LicenseVerifyRequest $request): JsonResponse
     {
         try {
@@ -91,10 +145,11 @@ class EnhancedLicenseApiController extends BaseController
 
             /** @var array<string, mixed> $errors */
             $errors = $e->errors();
+
             return $this->errorResponse(
                 'Validation failed',
                 $errors,
-                Response::HTTP_UNPROCESSABLE_ENTITY
+                Response::HTTP_UNPROCESSABLE_ENTITY,
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -103,7 +158,38 @@ class EnhancedLicenseApiController extends BaseController
         }
     }
 
-    /**   * Register license endpoint with enhanced security. *   * Registers a new license using purchase code and product slug with comprehensive * security measures including rate limiting, IP blacklisting, and duplicate checking. *   * @param LicenseRegisterRequest $request The validated request containing license registration data *   * @return JsonResponse Response with license registration result *   * @throws ValidationException When validation fails * @throws \Exception When database operations fail *   * @example * // Request: * POST /api/license/register * { * "purchase_code": "ABC123-DEF456-GHI789", * "product_slug": "my-product", * "domain": "example.com" * } *   * // Success response: * { * "success": true, * "message": "License registered successfully", * "data": { * "license_id": 123, * "status": "created" * } * } */
+    /**
+     * Register license endpoint with enhanced security.
+     *
+     * Registers a new license using purchase code and product slug with comprehensive
+     * security measures including rate limiting, IP blacklisting, and duplicate checking.
+     *
+     * @param  LicenseRegisterRequest  $request  The validated request containing license registration data
+     *
+     * @return JsonResponse Response with license registration result
+     *
+     * @throws ValidationException When validation fails
+     * @throws \Exception When database operations fail
+     *
+     * @example
+     * // Request:
+     * POST /api/license/register
+     * {
+     *     "purchase_code": "ABC123-DEF456-GHI789",
+     *     "product_slug": "my-product",
+     *     "domain": "example.com"
+     * }
+     *
+     * // Success response:
+     * {
+     *     "success": true,
+     *     "message": "License registered successfully",
+     *     "data": {
+     *         "license_id": 123,
+     *         "status": "created"
+     *     }
+     * }
+     */
     public function register(LicenseRegisterRequest $request): JsonResponse
     {
         try {
@@ -154,10 +240,11 @@ class EnhancedLicenseApiController extends BaseController
 
             /** @var array<string, mixed> $errors */
             $errors = $e->errors();
+
             return $this->errorResponse(
                 'Validation failed',
                 $errors,
-                Response::HTTP_UNPROCESSABLE_ENTITY
+                Response::HTTP_UNPROCESSABLE_ENTITY,
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -166,7 +253,38 @@ class EnhancedLicenseApiController extends BaseController
         }
     }
 
-    /**   * Get license status endpoint with enhanced security. *   * Retrieves license status information using license key and product slug with * comprehensive security measures including rate limiting and IP blacklisting. *   * @param LicenseStatusRequest $request The validated request containing license status check data *   * @return JsonResponse Response with license status information *   * @throws ValidationException When validation fails * @throws \Exception When database operations fail *   * @example * // Request: * POST /api/license/status * { * "license_key": "ABC123-DEF456-GHI789", * "product_slug": "my-product" * } *   * // Success response: * { * "success": true, * "message": "License status retrieved", * "data": { * "license_id": 123, * "status": "active", * "is_active": true * } * } */
+    /**
+     * Get license status endpoint with enhanced security.
+     *
+     * Retrieves license status information using license key and product slug with
+     * comprehensive security measures including rate limiting and IP blacklisting.
+     *
+     * @param  LicenseStatusRequest  $request  The validated request containing license status check data
+     *
+     * @return JsonResponse Response with license status information
+     *
+     * @throws ValidationException When validation fails
+     * @throws \Exception When database operations fail
+     *
+     * @example
+     * // Request:
+     * POST /api/license/status
+     * {
+     *     "license_key": "ABC123-DEF456-GHI789",
+     *     "product_slug": "my-product"
+     * }
+     *
+     * // Success response:
+     * {
+     *     "success": true,
+     *     "message": "License status retrieved",
+     *     "data": {
+     *         "license_id": 123,
+     *         "status": "active",
+     *         "is_active": true
+     *     }
+     * }
+     */
     public function status(LicenseStatusRequest $request): JsonResponse
     {
         try {
@@ -224,10 +342,11 @@ class EnhancedLicenseApiController extends BaseController
 
             /** @var array<string, mixed> $errors */
             $errors = $e->errors();
+
             return $this->errorResponse(
                 'Validation failed',
                 $errors,
-                Response::HTTP_UNPROCESSABLE_ENTITY
+                Response::HTTP_UNPROCESSABLE_ENTITY,
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -236,7 +355,9 @@ class EnhancedLicenseApiController extends BaseController
         }
     }
 
-    /**   * Perform comprehensive security checks. */
+    /**
+     * Perform comprehensive security checks.
+     */
     private function performSecurityChecks(Request $request): void
     {
         // Check for suspicious activity
@@ -255,7 +376,9 @@ class EnhancedLicenseApiController extends BaseController
         }
     }
 
-    /**   * Perform common API request validation and security checks. */
+    /**
+     * Perform common API request validation and security checks.
+     */
     private function performCommonApiChecks(Request $request, string $rateLimitType = 'api_requests'): ?JsonResponse
     {
         // Security checks
@@ -283,42 +406,58 @@ class EnhancedLicenseApiController extends BaseController
         return null;
     }
 
-    /**   * Check if request is authorized. */
+    /**
+     * Check if request is authorized.
+     */
     private function isAuthorized(Request $request): bool
     {
         $authHeader = $request->header('Authorization');
-        $expectedToken = 'Bearer ' . $this->getApiToken();
+        $expectedToken = 'Bearer '.$this->getApiToken();
 
         return $authHeader === $expectedToken;
     }
 
-    /**   * Get API token from settings. */
+    /**
+     * Get API token from settings.
+     */
     private function getApiToken(): string
     {
         $token = \App\Helpers\ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
+
         return is_string($token) ? $token : '';
     }
 
-    /**   * Find product by slug. */
+    /**
+     * Find product by slug.
+     */
     private function findProduct(string $slug): ?Product
     {
         $result = Cache::remember("product_slug_{$slug}", 3600, function () use ($slug) {
             return Product::where('slug', $slug)->first();
         });
+
         return $result instanceof Product ? $result : null;
     }
 
-    /**   * Verify verification key. */
+    /**
+     * Verify verification key.
+     */
     private function verifyVerificationKey(Product $product, string $verificationKey): bool
     {
         $appKey = config('app.key');
         $appKeyStr = is_string($appKey) ? $appKey : (is_scalar($appKey) ? (string)$appKey : '');
-        $expectedKey = hash('sha256', $product->id . $product->slug . $appKeyStr);
+        $expectedKey = hash('sha256', $product->id.$product->slug.$appKeyStr);
 
         return hash_equals($expectedKey, $verificationKey);
     }
 
-    /**   * Process license verification. *   * @param array<string, mixed> $validated *   * @return array<string, mixed> */
+    /**
+     * Process license verification.
+     *
+     * @param array<string, mixed> $validated
+     *
+     * @return array<string, mixed>
+     */
     private function processLicenseVerification(Product $product, array $validated, Request $request): array
     {
         $purchaseCode = is_string($validated['purchase_code']) ? $validated['purchase_code'] : '';
@@ -335,7 +474,11 @@ class EnhancedLicenseApiController extends BaseController
         return $this->verifyWithEnvato($product, $purchaseCode, $domain, $request);
     }
 
-    /**   * Verify existing license. *   * @return array<string, mixed> */
+    /**
+     * Verify existing license.
+     *
+     * @return array<string, mixed>
+     */
     private function verifyExistingLicense(License $license, ?string $domain, Request $request): array
     {
         if (! $this->isLicenseActive($license)) {
@@ -364,7 +507,11 @@ class EnhancedLicenseApiController extends BaseController
         ];
     }
 
-    /**   * Verify with Envato API. *   * @return array<string, mixed> */
+    /**
+     * Verify with Envato API.
+     *
+     * @return array<string, mixed>
+     */
     private function verifyWithEnvato(Product $product, string $purchaseCode, ?string $domain, Request $request): array
     {
         $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
@@ -399,7 +546,9 @@ class EnhancedLicenseApiController extends BaseController
         ];
     }
 
-    /**   * Check if license is active. */
+    /**
+     * Check if license is active.
+     */
     private function isLicenseActive(License $license): bool
     {
         if ($license->status !== 'active') {
@@ -412,7 +561,9 @@ class EnhancedLicenseApiController extends BaseController
         return true;
     }
 
-    /**   * Verify domain authorization. */
+    /**
+     * Verify domain authorization.
+     */
     private function verifyDomain(License $license, string $domain): bool
     {
         // Clean domain
@@ -446,7 +597,9 @@ class EnhancedLicenseApiController extends BaseController
         return false;
     }
 
-    /**   * Register domain for license. */
+    /**
+     * Register domain for license.
+     */
     private function registerDomainForLicense(License $license, string $domain): void
     {
         $cleanDomain = preg_replace('/^https?:\/\//', '', $domain) ?? $domain;
@@ -466,7 +619,11 @@ class EnhancedLicenseApiController extends BaseController
         }
     }
 
-    /**   * Create license from Envato data. *   * @param array<string, mixed> $envatoData */
+    /**
+     * Create license from Envato data.
+     *
+     * @param array<string, mixed> $envatoData
+     */
     private function createLicenseFromEnvato(Product $product, string $purchaseCode, array $envatoData): License
     {
         return License::create([
@@ -480,7 +637,11 @@ class EnhancedLicenseApiController extends BaseController
         ]);
     }
 
-    /**   * Create new license. *   * @param array<string, mixed> $validated */
+    /**
+     * Create new license.
+     *
+     * @param array<string, mixed> $validated
+     */
     private function createLicense(Product $product, array $validated): License
     {
         $license = License::create([
@@ -502,13 +663,15 @@ class EnhancedLicenseApiController extends BaseController
         return $license;
     }
 
-    /**   * Generate unique license key. */
+    /**
+     * Generate unique license key.
+     */
     private function generateLicenseKey(): string
     {
         do {
-            $key = strtoupper(substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
-                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
-                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
+            $key = strtoupper(substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
                          substr(md5(uniqid((string)mt_rand(), true)), 0, 8));
         } while (License::where('license_key', $key)->exists());
 

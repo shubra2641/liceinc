@@ -103,7 +103,8 @@
                 <div class="stats-card-label">{{ trans('app.Administrators') }}</div>
                 <div class="stats-card-trend negative">
                     <i class="stats-trend-icon negative"></i>
-                    <span>{{ number_format(($users->where('is_admin', '1')->count() / max($users->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span> </div>
+                    <span>{{ number_format(($users->where('is_admin', '1')->count() / max($users->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -127,7 +128,8 @@
                 <div class="stats-card-label">{{ trans('app.Regular Users') }}</div>
                 <div class="stats-card-trend positive">
                     <i class="stats-trend-icon positive"></i>
-                    <span>{{ number_format(($users->where('role', '!=', 'admin')->count() / max($users->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span> </div>
+                    <span>{{ number_format(($users->where('role', '!=', 'admin')->count() / max($users->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span>
+                </div>
             </div>
         </div>
     </div>

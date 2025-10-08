@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Helpers\SecureFileHelper;
 use App\Models\Invoice;
 use App\Models\License;
 use App\Models\LicenseDomain;
@@ -18,18 +19,58 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Throwable;
-use App\Helpers\SecureFileHelper;
 
 /**
- * Reports Controller with enhanced security and comprehensive reporting functionality. *
- * This controller provides comprehensive reporting functionality including * dashboard metrics, data visualization, export capabilities, and enhanced security measures * with comprehensive error handling and logging. *
- * Features: * - Enhanced dashboard metrics and analytics * - Comprehensive data visualization with charts * - Export functionality for PDF and CSV formats * - License and user analytics * - API usage statistics and monitoring * - Revenue and financial reporting * - Comprehensive error handling and logging * - Input validation and sanitization * - Enhanced security measures for report operations * - Database transaction support for data integrity * - Proper error responses for different scenarios * - Comprehensive logging for security monitoring *
+ * Reports Controller with enhanced security and comprehensive reporting functionality.
  *
- * @example * // Get reports dashboard * GET /admin/reports *
- * // Export reports * POST /admin/reports/export * { * "format": "csv", * "date_from": "2024-01-01", * "date_to": "2024-12-31" * } */
+ * This controller provides comprehensive reporting functionality including
+ * dashboard metrics, data visualization, export capabilities, and enhanced security measures
+ * with comprehensive error handling and logging.
+ *
+ * Features:
+ * - Enhanced dashboard metrics and analytics
+ * - Comprehensive data visualization with charts
+ * - Export functionality for PDF and CSV formats
+ * - License and user analytics
+ * - API usage statistics and monitoring
+ * - Revenue and financial reporting
+ * - Comprehensive error handling and logging
+ * - Input validation and sanitization
+ * - Enhanced security measures for report operations
+ * - Database transaction support for data integrity
+ * - Proper error responses for different scenarios
+ * - Comprehensive logging for security monitoring
+ *
+ *
+ * @example
+ * // Get reports dashboard
+ * GET /admin/reports
+ *
+ * // Export reports
+ * POST /admin/reports/export
+ * {
+ *     "format": "csv",
+ *     "date_from": "2024-01-01",
+ *     "date_to": "2024-12-31"
+ * }
+ */
 class ReportsController extends Controller
 {
-    /**   * Display the reports dashboard with enhanced security and comprehensive metrics. *   * This method displays the comprehensive reports dashboard with various metrics, * charts, and analytics including license statistics, revenue data, user analytics, * and system overview with enhanced security measures. *   * @return View The reports dashboard view *   * @throws \Exception When dashboard data retrieval fails *   * @example * // Display reports dashboard * $view = $reportsController->index(); */
+    /**
+     * Display the reports dashboard with enhanced security and comprehensive metrics.
+     *
+     * This method displays the comprehensive reports dashboard with various metrics,
+     * charts, and analytics including license statistics, revenue data, user analytics,
+     * and system overview with enhanced security measures.
+     *
+     * @return View The reports dashboard view
+     *
+     * @throws \Exception When dashboard data retrieval fails
+     *
+     * @example
+     * // Display reports dashboard
+     * $view = $reportsController->index();
+     */
     public function index(): View
     {
         try {
@@ -77,7 +118,7 @@ class ReportsController extends Controller
                 $monthlyRevenueData = [];
                 foreach ($last3Months as $month) {
                     $found = $monthlyRevenueRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '') . '-' . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
+                        return (is_string($item->year) ? $item->year : '').'-'.str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
                     });
                     $monthlyRevenueData[] = $found ? (float)(is_numeric($found->revenue) ? $found->revenue : 0) : 0;
                 }
@@ -100,7 +141,7 @@ class ReportsController extends Controller
                 $monthlyLicensesData = [];
                 foreach ($last3Months as $month) {
                     $found = $monthlyLicensesRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '') . '-' . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
+                        return (is_string($item->year) ? $item->year : '').'-'.str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
                     });
                     $monthlyLicensesData[] = $found ? (int)(is_numeric($found->count) ? $found->count : 0) : 0;
                 }
@@ -126,7 +167,7 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $licenseTypeData = [
                     'labels' => $licenseTypeDataRaw->pluck('license_type')->map(function ($type) {
-                        return __('app.' . (is_string($type) ? $type : '')) ?: ucfirst(is_string($type) ? $type : '');
+                        return __('app.'.(is_string($type) ? $type : '')) ?: ucfirst(is_string($type) ? $type : '');
                     })->toArray(),
                     'datasets' => [[
                         'data' => $licenseTypeDataRaw->pluck('count')->toArray(),
@@ -141,7 +182,7 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $licenseStatusData = [
                     'labels' => $licenseStatusDataRaw->pluck('status')->map(function ($status) {
-                        return __('app.' . (is_string($status) ? $status : '')) ?: ucfirst(is_string($status) ? $status : '');
+                        return __('app.'.(is_string($status) ? $status : '')) ?: ucfirst(is_string($status) ? $status : '');
                     })->toArray(),
                     'datasets' => [[
                         'data' => $licenseStatusDataRaw->pluck('count')->toArray(),
@@ -168,7 +209,7 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $apiStatusData = [
                     'labels' => $apiStatusDataRaw->pluck('status')->map(function ($status) {
-                        return __('app.' . (is_string($status) ? $status : '')) ?: ucfirst(is_string($status) ? $status : '');
+                        return __('app.'.(is_string($status) ? $status : '')) ?: ucfirst(is_string($status) ? $status : '');
                     })->toArray(),
                     'datasets' => [[
                         'label' => __('app.api_calls'),
@@ -186,6 +227,7 @@ class ReportsController extends Controller
                         $product->revenue = $product->licenses->sum(function ($license) {
                             return $license->product->price ?? 0;
                         });
+
                         return $product;
                     });
                 // Recent license activities
@@ -211,7 +253,7 @@ class ReportsController extends Controller
                 $invoiceMonthlyData = [];
                 foreach ($last3Months as $month) {
                     $found = $invoiceMonthlyRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '') . '-' . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
+                        return (is_string($item->year) ? $item->year : '').'-'.str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
                     });
                     $invoiceMonthlyData[] = $found ? (float)(is_numeric($found->total) ? $found->total : 0) : 0;
                 }
@@ -257,7 +299,7 @@ class ReportsController extends Controller
                 $userRegistrationsData = [];
                 foreach ($last3Months as $month) {
                     $found = $userRegistrationsRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '') . '-' . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
+                        return (is_string($item->year) ? $item->year : '').'-'.str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
                     });
                     $userRegistrationsData[] = $found ? (int)(is_numeric($found->count) ? $found->count : 0) : 0;
                 }
@@ -331,6 +373,7 @@ class ReportsController extends Controller
                     ]);
                     $totalRateLimitedAttempts += is_numeric($failedCall->attempts) ? (int)$failedCall->attempts : 0;
                 }
+
                 return view('admin.reports', [
                     'totalLicenses' => $totalLicenses,
                     'activeLicenses' => $activeLicenses,
@@ -359,12 +402,14 @@ class ReportsController extends Controller
                     'invoiceMonthlyAmounts' => $invoiceMonthlyAmounts,
                 ]);
             });
+
             return $result;
         } catch (Throwable $e) {
             Log::error('Failed to load reports dashboard', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return view('admin.reports', [
                 'totalLicenses' => 0,
                 'activeLicenses' => 0,
@@ -394,7 +439,23 @@ class ReportsController extends Controller
             ])->with('error', 'Failed to load reports data. Please try again.');
         }
     }
-    /**   * Get license data for AJAX requests with enhanced security and validation. *   * This method retrieves license data for AJAX requests with comprehensive * validation and enhanced security measures. *   * @param Request $request The current HTTP request instance *   * @return JsonResponse JSON response with license data *   * @throws \Exception When license data retrieval fails *   * @example * // Get license data * $response = $reportsController->getLicenseData($request); */
+
+    /**
+     * Get license data for AJAX requests with enhanced security and validation.
+     *
+     * This method retrieves license data for AJAX requests with comprehensive
+     * validation and enhanced security measures.
+     *
+     * @param  Request  $request  The current HTTP request instance
+     *
+     * @return JsonResponse JSON response with license data
+     *
+     * @throws \Exception When license data retrieval fails
+     *
+     * @example
+     * // Get license data
+     * $response = $reportsController->getLicenseData($request);
+     */
     public function getLicenseData(Request $request): JsonResponse
     {
         try {
@@ -428,8 +489,10 @@ class ReportsController extends Controller
                     'records_count' => $data->count(),
                     'ip' => $request->ip(),
                 ]);
+
                 return $this->successResponse($data, 'License data retrieved successfully');
             });
+
             return $result;
         } catch (Throwable $e) {
             Log::error('Failed to retrieve license data', [
@@ -439,6 +502,7 @@ class ReportsController extends Controller
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $this->errorResponse(
                 'Failed to retrieve license data. Please try again.',
                 null,
@@ -446,7 +510,23 @@ class ReportsController extends Controller
             );
         }
     }
-    /**   * Get API status data with enhanced security and validation. *   * This method retrieves API status data for AJAX requests with comprehensive * validation and enhanced security measures. *   * @param Request $request The current HTTP request instance *   * @return JsonResponse JSON response with API status data *   * @throws \Exception When API status data retrieval fails *   * @example * // Get API status data * $response = $reportsController->getApiStatusData($request); */
+
+    /**
+     * Get API status data with enhanced security and validation.
+     *
+     * This method retrieves API status data for AJAX requests with comprehensive
+     * validation and enhanced security measures.
+     *
+     * @param  Request  $request  The current HTTP request instance
+     *
+     * @return JsonResponse JSON response with API status data
+     *
+     * @throws \Exception When API status data retrieval fails
+     *
+     * @example
+     * // Get API status data
+     * $response = $reportsController->getApiStatusData($request);
+     */
     public function getApiStatusData(Request $request): JsonResponse
     {
         try {
@@ -481,8 +561,10 @@ class ReportsController extends Controller
                     'records_count' => $data->count(),
                     'ip' => $request->ip(),
                 ]);
+
                 return $this->successResponse($data, 'API status data retrieved successfully');
             });
+
             return $result;
         } catch (Throwable $e) {
             Log::error('Failed to retrieve API status data', [
@@ -492,6 +574,7 @@ class ReportsController extends Controller
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $this->errorResponse(
                 'Failed to retrieve API status data. Please try again.',
                 null,
@@ -499,7 +582,23 @@ class ReportsController extends Controller
             );
         }
     }
-    /**   * Export reports data to PDF or CSV format with enhanced security and validation. *   * This method exports reports data to PDF or CSV format with comprehensive * validation and enhanced security measures. *   * @param Request $request The current HTTP request instance *   * @return \Illuminate\Http\Response The export file response *   * @throws \Exception When export operation fails *   * @example * // Export reports to CSV * $response = $reportsController->export($request); */
+
+    /**
+     * Export reports data to PDF or CSV format with enhanced security and validation.
+     *
+     * This method exports reports data to PDF or CSV format with comprehensive
+     * validation and enhanced security measures.
+     *
+     * @param  Request  $request  The current HTTP request instance
+     *
+     * @return \Illuminate\Http\Response The export file response
+     *
+     * @throws \Exception When export operation fails
+     *
+     * @example
+     * // Export reports to CSV
+     * $response = $reportsController->export($request);
+     */
     public function export(Request $request): \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
     {
         try {
@@ -511,7 +610,7 @@ class ReportsController extends Controller
                 // Get data for export
                 $data = $this->getExportData(
                     is_string($dateFrom) ? $dateFrom : null,
-                    is_string($dateTo) ? $dateTo : null
+                    is_string($dateTo) ? $dateTo : null,
                 );
                 Log::debug('Reports export initiated', [
                     'format' => $format,
@@ -526,6 +625,7 @@ class ReportsController extends Controller
                     return $this->exportToPdf($data);
                 }
             });
+
             return $result;
         } catch (Throwable $e) {
             Log::error('Failed to export reports', [
@@ -537,13 +637,24 @@ class ReportsController extends Controller
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to export reports. Please try again.',
             ], 500);
         }
     }
-    /**   * Get data for export with enhanced security and validation. *   * @param  string|null  $dateFrom  The start date for export * @param  string|null  $dateTo  The end date for export *   * @return array<string, mixed> The export data array *   * @throws \Exception When data retrieval fails */
+
+    /**
+     * Get data for export with enhanced security and validation.
+     *
+     * @param  string|null  $dateFrom  The start date for export
+     * @param  string|null  $dateTo  The end date for export
+     *
+     * @return array<string, mixed> The export data array
+     *
+     * @throws \Exception When data retrieval fails
+     */
     private function getExportData(?string $dateFrom = null, ?string $dateTo = null): array
     {
         $query = License::with(['user', 'product']);
@@ -554,6 +665,7 @@ class ReportsController extends Controller
             $query->where('created_at', '<=', $dateTo);
         }
         $licenses = $query->get();
+
         return [
             'licenses' => $licenses,
             'summary' => [
@@ -568,31 +680,40 @@ class ReportsController extends Controller
             'date_to' => $dateTo,
         ];
     }
-    /**   * Export data to CSV format with enhanced security and validation. *   * @param  array<string, mixed>  $data  The data to export *   * @return \Symfony\Component\HttpFoundation\StreamedResponse The CSV file response *   * @throws \Exception When CSV export fails */
+
+    /**
+     * Export data to CSV format with enhanced security and validation.
+     *
+     * @param  array<string, mixed>  $data  The data to export
+     *
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse The CSV file response
+     *
+     * @throws \Exception When CSV export fails
+     */
     private function exportToCsv(array $data): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        $filename = 'reports_' . now()->format('Y-m-d_H-i-s') . '.csv';
+        $filename = 'reports_'.now()->format('Y-m-d_H-i-s').'.csv';
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
         $callback = function () use ($data) {
             $file = fopen('php://output', 'w');
             if ($file !== false) {
                 // CSV headers
                 fputcsv($file, ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price']);
-            // CSV data
+                // CSV data
                 if (is_array($data['licenses'])) {
                     foreach ($data['licenses'] as $license) {
                         if (is_object($license) && isset($license->license_key)) {
                             $csvData = [
-                            is_string($license->license_key) ? $license->license_key : '',
-                            (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
-                            (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
-                            (isset($license->status) && is_string($license->status)) ? $license->status : '',
-                            (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
+                                is_string($license->license_key) ? $license->license_key : '',
+                                (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
+                                (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
+                                (isset($license->status) && is_string($license->status)) ? $license->status : '',
+                                (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
+                                (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
+                                (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
                             ];
                             /** @var array<int|string, bool|float|int|string|null> $typedCsvData */
                             $typedCsvData = $csvData;
@@ -603,17 +724,27 @@ class ReportsController extends Controller
                 SecureFileHelper::closeFile($file);
             }
         };
+
         return response()->stream($callback, 200, $headers);
     }
-    /**   * Export data to PDF format with enhanced security and validation. *   * @param  array<string, mixed>  $data  The data to export *   * @return \Symfony\Component\HttpFoundation\StreamedResponse The PDF file response *   * @throws \Exception When PDF export fails */
+
+    /**
+     * Export data to PDF format with enhanced security and validation.
+     *
+     * @param  array<string, mixed>  $data  The data to export
+     *
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse The PDF file response
+     *
+     * @throws \Exception When PDF export fails
+     */
     private function exportToPdf(array $data): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         // For now, return CSV as PDF generation requires additional packages
         // You can install dompdf or similar package for proper PDF generation
-        $filename = 'reports_' . now()->format('Y-m-d_H-i-s') . '.pdf';
+        $filename = 'reports_'.now()->format('Y-m-d_H-i-s').'.pdf';
         $headers = [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
         $callback = function () use ($data) {
             $file = fopen('php://output', 'w');
@@ -625,13 +756,13 @@ class ReportsController extends Controller
                     foreach ($data['licenses'] as $license) {
                         if (is_object($license) && isset($license->license_key)) {
                             $csvData = [
-                            is_string($license->license_key) ? $license->license_key : '',
-                            (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
-                            (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
-                            (isset($license->status) && is_string($license->status)) ? $license->status : '',
-                            (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
+                                is_string($license->license_key) ? $license->license_key : '',
+                                (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
+                                (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
+                                (isset($license->status) && is_string($license->status)) ? $license->status : '',
+                                (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
+                                (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
+                                (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
                             ];
                             /** @var array<int|string, bool|float|int|string|null> $typedCsvData */
                             $typedCsvData = $csvData;
@@ -642,6 +773,7 @@ class ReportsController extends Controller
                 SecureFileHelper::closeFile($file);
             }
         };
+
         return response()->stream($callback, 200, $headers);
     }
 }

@@ -1,6 +1,11 @@
 /**
- * License Verification System * Product: {{product}} * Language: Express.js * Generated: {{date}} *
- * This is a generic template. Please customize according to Express.js best practices. */
+ * License Verification System
+ * Product: {{product}}
+ * Language: Express.js
+ * Generated: {{date}}
+ *
+ * This is a generic template. Please customize according to Express.js best practices.
+ */
 
 // License verification for Express.js
 // API URL: {{license_api_url}}

@@ -672,7 +672,8 @@
                                 <div class="stats-card-label">{{ __('app.Active_products') }}</div>
                                 <div class="stats-card-trend positive">
                                     <i class="stats-trend-icon positive"></i>
-                                    <span>{{ round(($programming_language->products()->where('is_active', true)->count() / max($programming_language->products()->count(), 1)) * 100) }}% {{ __('app.of_total') }}</span> </div>
+                                    <span>{{ round(($programming_language->products()->where('is_active', true)->count() / max($programming_language->products()->count(), 1)) * 100) }}% {{ __('app.of_total') }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>

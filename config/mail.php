@@ -1,7 +1,9 @@
 <?php
 
 return [
-    /* |-------------------------------------------------------------------------- | Default Mailer
+    /*
+    |--------------------------------------------------------------------------
+    | Default Mailer
     |--------------------------------------------------------------------------
     |
     | This option controls the default mailer that is used to send all email
@@ -13,7 +15,9 @@ return [
 
     'default' => env('MAIL_MAILER', 'smtp'),
 
-    /* |-------------------------------------------------------------------------- | Mailer Configurations
+    /*
+    |--------------------------------------------------------------------------
+    | Mailer Configurations
     |--------------------------------------------------------------------------
     |
     | Here you may configure all of the mailers used by your application plus
@@ -42,7 +46,7 @@ return [
             'timeout' => null,
             'local_domain' => env(
                 'MAIL_EHLO_DOMAIN',
-                \App\Helpers\SecureFileHelper::parseUrl((string)env('APP_URL', 'http://localhost'), PHP_URL_HOST),
+                App\Helpers\SecureFileHelper::parseUrl((string)env('APP_URL', 'http://localhost'), PHP_URL_HOST),
             ),
         ],
 
@@ -95,7 +99,9 @@ return [
         ],
     ],
 
-    /* |-------------------------------------------------------------------------- | Global "From" Address
+    /*
+    |--------------------------------------------------------------------------
+    | Global "From" Address
     |--------------------------------------------------------------------------
     |
     | You may wish for all emails sent by your application to be sent from

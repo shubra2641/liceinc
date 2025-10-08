@@ -68,12 +68,6 @@
         "code-quality": [
             "@phpstan",
             "@php artisan pint"
-        ],
-        "phpcs": [
-            "vendor/bin/phpcs --standard=phpcs.xml"
-        ],
-        "phpcs-fix": [
-            "vendor/bin/phpcbf --standard=phpcs.xml"
         ]
     },
     "extra": {

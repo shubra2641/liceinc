@@ -69,7 +69,8 @@
     </div>
 </div>
 
-{{-- Preloader settings moved to data-* attributes to avoid inline JS --}} @endif
+{{-- Preloader settings moved to data-* attributes to avoid inline JS --}}
+@endif
 
 {{-- Progressive Enhancement: Fallback for users without JavaScript --}}
 <noscript>

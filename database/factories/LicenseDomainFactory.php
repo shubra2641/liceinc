@@ -7,13 +7,21 @@ use App\Models\LicenseDomain;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\LicenseDomain> */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\LicenseDomain>
+ */
 class LicenseDomainFactory extends Factory
 {
-    /**   * The name of the factory's corresponding model. *   * @var class-string<LicenseDomain> */
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var class-string<LicenseDomain> */
     protected $model = LicenseDomain::class;
 
-    /**   * Define the model's default state. *   * @return array<string, mixed> */
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
@@ -24,7 +32,9 @@ class LicenseDomainFactory extends Factory
         ];
     }
 
-    /**   * Create an unverified domain. */
+    /**
+     * Create an unverified domain.
+     */
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -32,7 +42,9 @@ class LicenseDomainFactory extends Factory
         ]);
     }
 
-    /**   * Set a specific domain. */
+    /**
+     * Set a specific domain.
+     */
     public function domain(string $domain): static
     {
         return $this->state(fn (array $attributes) => [
@@ -40,7 +52,9 @@ class LicenseDomainFactory extends Factory
         ]);
     }
 
-    /**   * Associate with a license. */
+    /**
+     * Associate with a license.
+     */
     public function forLicense(License $license): static
     {
         return $this->state(fn (array $attributes) => [

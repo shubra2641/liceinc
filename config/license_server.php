@@ -1,7 +1,9 @@
 <?php
 
 return [
-    /* |-------------------------------------------------------------------------- | License Server Configuration
+    /*
+    |--------------------------------------------------------------------------
+    | License Server Configuration
     |--------------------------------------------------------------------------
     |
     | Configuration for the main license server that manages updates
@@ -9,9 +11,9 @@ return [
     |
     */
 
-    'url' => env('LICENSE_SERVER_URL', env('APP_URL') . '/api'),
+    'url' => env('LICENSE_SERVER_URL', env('APP_URL').'/api'),
 
-    'domain' => env('LICENSE_SERVER_DOMAIN', \App\Helpers\SecureFileHelper::parseUrl(env('APP_URL'), PHP_URL_HOST) ?: 'my-logos.com'),
+    'domain' => env('LICENSE_SERVER_DOMAIN', App\Helpers\SecureFileHelper::parseUrl(env('APP_URL'), PHP_URL_HOST) ?: 'my-logos.com'),
 
     'timeout' => env('LICENSE_SERVER_TIMEOUT', 30),
 
@@ -26,7 +28,9 @@ return [
 
     'retry_delay' => env('LICENSE_RETRY_DELAY', 1000), // milliseconds
 
-    /* |-------------------------------------------------------------------------- | Default Product Configuration
+    /*
+    |--------------------------------------------------------------------------
+    | Default Product Configuration
     |--------------------------------------------------------------------------
     |
     | Default product settings when no specific product is specified
@@ -38,7 +42,9 @@ return [
         'name' => env('DEFAULT_PRODUCT_NAME', 'The Ultimate License Management System'),
     ],
 
-    /* |-------------------------------------------------------------------------- | Security Configuration
+    /*
+    |--------------------------------------------------------------------------
+    | Security Configuration
     |--------------------------------------------------------------------------
     |
     | Security settings for license verification and update downloads
@@ -55,7 +61,9 @@ return [
         ],
     ],
 
-    /* |-------------------------------------------------------------------------- | Logging Configuration
+    /*
+    |--------------------------------------------------------------------------
+    | Logging Configuration
     |--------------------------------------------------------------------------
     |
     | Logging settings for license server interactions

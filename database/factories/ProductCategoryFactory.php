@@ -6,13 +6,21 @@ use App\Models\ProductCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductCategory> */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductCategory>
+ */
 class ProductCategoryFactory extends Factory
 {
-    /**   * The name of the factory's corresponding model. *   * @var class-string<ProductCategory> */
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var class-string<ProductCategory> */
     protected $model = ProductCategory::class;
 
-    /**   * Define the model's default state. *   * @return array<string, mixed> */
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
@@ -31,7 +39,9 @@ class ProductCategoryFactory extends Factory
         ];
     }
 
-    /**   * Indicate that the category is featured. */
+    /**
+     * Indicate that the category is featured.
+     */
     public function featured(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -39,7 +49,9 @@ class ProductCategoryFactory extends Factory
         ]);
     }
 
-    /**   * Indicate that the category is inactive. */
+    /**
+     * Indicate that the category is inactive.
+     */
     public function inactive(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -47,7 +59,9 @@ class ProductCategoryFactory extends Factory
         ]);
     }
 
-    /**   * Set a specific sort order. */
+    /**
+     * Set a specific sort order.
+     */
     public function sortOrder(int $order): static
     {
         return $this->state(fn (array $attributes) => [

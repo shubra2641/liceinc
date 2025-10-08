@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\SecureFileHelper;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -10,22 +11,46 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 // use LicenseProtection\LicenseVerifier;
+use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use App\Helpers\SecureFileHelper;
 
 /**
- * Installation Controller with enhanced security and comprehensive setup. *
- * This controller handles the complete installation process for the application * including license verification, system requirements checking, database configuration, * admin user creation, and system settings with comprehensive security measures. *
- * Features: * - Multi-step installation wizard with progress tracking * - License verification with domain validation * - System requirements checking and validation * - Database configuration and connection testing * - Admin user creation with role assignment * - System settings configuration and storage * - Comprehensive error handling and logging * - Security validation for all installation steps *
+ * Installation Controller with enhanced security and comprehensive setup.
  *
- * @example * // Start installation process * GET /install *
- * // Verify license * POST /install/license */
+ * This controller handles the complete installation process for the application
+ * including license verification, system requirements checking, database configuration,
+ * admin user creation, and system settings with comprehensive security measures.
+ *
+ * Features:
+ * - Multi-step installation wizard with progress tracking
+ * - License verification with domain validation
+ * - System requirements checking and validation
+ * - Database configuration and connection testing
+ * - Admin user creation with role assignment
+ * - System settings configuration and storage
+ * - Comprehensive error handling and logging
+ * - Security validation for all installation steps
+ *
+ *
+ * @example
+ * // Start installation process
+ * GET /install
+ *
+ * // Verify license
+ * POST /install/license
+ */
 class InstallController extends Controller
 {
-    /**   * Get installation steps configuration. *   * Returns the installation steps array with proper localization * and route information for the installation wizard. *   * @return array<int, array<string, string>> The installation steps configuration */
+    /**
+     * Get installation steps configuration.
+     *
+     * Returns the installation steps array with proper localization
+     * and route information for the installation wizard.
+     *
+     * @return array<int, array<string, string>> The installation steps configuration
+     */
     private function getInstallationSteps()
     {
         return [
@@ -38,7 +63,14 @@ class InstallController extends Controller
             ['name' => trans('install.step_install'), 'route' => 'install.install'],           // 7
         ];
     }
-    /**   * Get timezones configuration. *   * Returns the timezones array with proper labels for the settings form. *   * @return array<string, mixed> The timezones configuration */
+
+    /**
+     * Get timezones configuration.
+     *
+     * Returns the timezones array with proper labels for the settings form.
+     *
+     * @return array<string, mixed> The timezones configuration
+     */
     private function getTimezones()
     {
         return [
@@ -60,15 +92,27 @@ class InstallController extends Controller
             'Australia/Sydney' => 'Sydney',
         ];
     }
-    /**   * Get installation steps with status information. *   * Returns the installation steps array with status information * for each step (completed, current, pending). *   * @param int $currentStep The current step number *   * @return array<int, array<string, mixed>> The installation steps with status information */
+
+    /**
+     * Get installation steps with status information.
+     *
+     * Returns the installation steps array with status information
+     * for each step (completed, current, pending).
+     *
+     * @param  int  $currentStep  The current step number
+     *
+     * @return array<int, array<string, mixed>> The installation steps with status information
+     */
     private function getInstallationStepsWithStatus($currentStep = 1)
     {
         $steps = $this->getInstallationSteps();
+
         return array_map(function ($index, $stepData) use ($currentStep) {
-            $stepNumber = (int) $index + 1;
+            $stepNumber = (int)$index + 1;
             $isCompleted = $stepNumber < $currentStep;
             $isCurrent = $stepNumber == $currentStep;
             $isPending = $stepNumber > $currentStep;
+
             return [
                 'name' => $stepData['name'],
                 'route' => $stepData['route'],
@@ -80,7 +124,24 @@ class InstallController extends Controller
             ];
         }, array_keys($steps), $steps);
     }
-    /**   * Show installation welcome page with language support. *   * Displays the initial installation welcome page with language switching * functionality and proper validation for supported locales. *   * @param Request $request The HTTP request *   * @return \Illuminate\View\View The welcome page view *   * @example * // Access welcome page * GET /install *   * // Switch language * GET /install?lang=ar */
+
+    /**
+     * Show installation welcome page with language support.
+     *
+     * Displays the initial installation welcome page with language switching
+     * functionality and proper validation for supported locales.
+     *
+     * @param  Request  $request  The HTTP request
+     *
+     * @return \Illuminate\View\View The welcome page view
+     *
+     * @example
+     * // Access welcome page
+     * GET /install
+     *
+     * // Switch language
+     * GET /install?lang=ar
+     */
     public function welcome(Request $request)
     {
         try {
@@ -93,6 +154,7 @@ class InstallController extends Controller
                 }
             }
             $steps = $this->getInstallationStepsWithStatus(1);
+
             return view('install.welcome', ['step' => 1, 'progressWidth' => 20, 'steps' => $steps]);
         } catch (\Exception $e) {
             Log::error('Error in installation welcome page', [
@@ -101,14 +163,28 @@ class InstallController extends Controller
             ]);
             // Return welcome page even if language switching fails
             $steps = $this->getInstallationStepsWithStatus(1);
+
             return view('install.welcome', ['step' => 1, 'progressWidth' => 20, 'steps' => $steps]);
         }
     }
-    /**   * Show license verification form with security validation. *   * Displays the license verification form for the installation process * with proper security measures and validation. *   * @return \Illuminate\View\View The license verification form view *   * @example * // Access license verification form * GET /install/license */
+
+    /**
+     * Show license verification form with security validation.
+     *
+     * Displays the license verification form for the installation process
+     * with proper security measures and validation.
+     *
+     * @return \Illuminate\View\View The license verification form view
+     *
+     * @example
+     * // Access license verification form
+     * GET /install/license
+     */
     public function license()
     {
         try {
             $steps = $this->getInstallationStepsWithStatus(2);
+
             return view('install.license', ['step' => 2, 'progressWidth' => 40, 'steps' => $steps]);
         } catch (\Exception $e) {
             Log::error('Error showing license verification form', [
@@ -116,10 +192,30 @@ class InstallController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
             $steps = $this->getInstallationStepsWithStatus(2);
+
             return view('install.license', ['step' => 2, 'progressWidth' => 40, 'steps' => $steps]);
         }
     }
-    /**   * Process license verification with comprehensive security validation. *   * Handles license verification with proper input validation, sanitization, * and security measures to ensure only valid licenses are accepted. *   * @param Request $request The HTTP request containing license data *   * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse The response *   * @throws \Exception When license verification fails *   * @example * // Verify license via AJAX * POST /install/license * { * "purchase_code": "ABC123DEF456" * } */
+
+    /**
+     * Process license verification with comprehensive security validation.
+     *
+     * Handles license verification with proper input validation, sanitization,
+     * and security measures to ensure only valid licenses are accepted.
+     *
+     * @param  Request  $request  The HTTP request containing license data
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse The response
+     *
+     * @throws \Exception When license verification fails
+     *
+     * @example
+     * // Verify license via AJAX
+     * POST /install/license
+     * {
+     *     "purchase_code": "ABC123DEF456"
+     * }
+     */
     public function licenseStore(Request $request)
     {
         try {
@@ -138,6 +234,7 @@ class InstallController extends Controller
                         'message' => $validator->errors()->first('purchase_code'),
                     ], 422);
                 }
+
                 return redirect()->back()
                     ->withErrors($validator)
                     ->withInput();
@@ -145,14 +242,16 @@ class InstallController extends Controller
             // Sanitize purchase code
             $purchaseCode = $this->sanitizeInput($request->purchase_code);
             $domain = $this->sanitizeInput($request->getHost());
-             $licenseVerifier = new class {
-                /**   * @return array<string, mixed> */
+            $licenseVerifier = new class() {
+                /**
+                 * @return array<string, mixed>
+                 */
                 public function verifyLicense(string $purchaseCode, string $domain): array
                 {
                     // Mock implementation for development
                     return ['valid' => true, 'message' => 'License verified'];
                 }
-             };
+            };
             $result = $licenseVerifier->verifyLicense(is_string($purchaseCode) ? $purchaseCode : '', is_string($domain) ? $domain : '');
             if ($result['valid']) {
                 // Store license information in session with validation
@@ -169,6 +268,7 @@ class InstallController extends Controller
                         'redirect' => route('install.requirements'),
                     ]);
                 }
+
                 return redirect()->route('install.requirements')
                     ->with('success', 'License verified successfully!');
             } else {
@@ -182,6 +282,7 @@ class InstallController extends Controller
                         'message' => $humanMessage,
                     ], 400);
                 }
+
                 return redirect()->back()
                     ->withErrors(['license' => $humanMessage])
                     ->withInput();
@@ -196,15 +297,26 @@ class InstallController extends Controller
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'License verification failed: ' . $e->getMessage(),
+                    'message' => 'License verification failed: '.$e->getMessage(),
                 ], 500);
             }
+
             return redirect()->back()
-                ->withErrors(['license' => 'License verification failed: ' . $e->getMessage()])
+                ->withErrors(['license' => 'License verification failed: '.$e->getMessage()])
                 ->withInput();
         }
     }
-    /**   * Attempt to extract an UPPER_SNAKE_CASE code from a message with security validation. *   * Extracts error codes from license verification messages with proper * validation and security measures to prevent code injection. *   * @param string $message The message to extract code from *   * @return string The extracted or default error code */
+
+    /**
+     * Attempt to extract an UPPER_SNAKE_CASE code from a message with security validation.
+     *
+     * Extracts error codes from license verification messages with proper
+     * validation and security measures to prevent code injection.
+     *
+     * @param  string  $message  The message to extract code from
+     *
+     * @return string The extracted or default error code
+     */
     private function extractCodeFromMessage(string $message): string
     {
         try {
@@ -230,6 +342,7 @@ class InstallController extends Controller
             if (preg_match('/[A-Z0-9_]{6, }/', is_string($message) ? $message : '', $m)) {
                 return $m[0];
             }
+
             return 'LICENSE_VERIFICATION_FAILED';
         } catch (\Exception $e) {
             Log::error('Error extracting code from message', [
@@ -237,10 +350,14 @@ class InstallController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return 'LICENSE_VERIFICATION_FAILED';
         }
     }
-    /**   * Show system requirements check. */
+
+    /**
+     * Show system requirements check.
+     */
     public function requirements(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if license is verified
@@ -252,12 +369,16 @@ class InstallController extends Controller
         $requirements = $this->checkRequirements();
         $allPassed = collect($requirements)->every(fn ($req) => is_array($req) && isset($req['passed']) ? $req['passed'] : false);
         $steps = $this->getInstallationStepsWithStatus(3);
+
         return view(
             'install.requirements',
             ['requirements' => $requirements, 'allPassed' => $allPassed, 'steps' => $steps, 'step' => 3, 'progressWidth' => 60],
         );
     }
-    /**   * Show database configuration form. */
+
+    /**
+     * Show database configuration form.
+     */
     public function database(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if license is verified
@@ -267,9 +388,13 @@ class InstallController extends Controller
                 ->with('error', 'Please verify your license first.');
         }
         $steps = $this->getInstallationStepsWithStatus(4);
+
         return view('install.database', ['step' => 4, 'progressWidth' => 80, 'steps' => $steps]);
     }
-    /**   * Process database configuration. */
+
+    /**
+     * Process database configuration.
+     */
     public function databaseStore(Request $request): \Illuminate\Http\RedirectResponse
     {
         $validator = Validator::make($request->all(), [
@@ -294,14 +419,18 @@ class InstallController extends Controller
             }
         } catch (\Exception $e) {
             return redirect()->back()
-                ->withErrors(['database' => 'Database connection failed: ' . $e->getMessage()])
+                ->withErrors(['database' => 'Database connection failed: '.$e->getMessage()])
                 ->withInput();
         }
         // Store database configuration
         session(['install.database' => $request->all()]);
+
         return redirect()->route('install.admin');
     }
-    /**   * Show admin account creation form. */
+
+    /**
+     * Show admin account creation form.
+     */
     public function admin(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if license is verified
@@ -316,9 +445,13 @@ class InstallController extends Controller
                 ->with('error', 'Please configure database settings first.');
         }
         $steps = $this->getInstallationStepsWithStatus(5);
+
         return view('install.admin', ['step' => 5, 'progressWidth' => 100, 'steps' => $steps]);
     }
-    /**   * Process admin account creation. */
+
+    /**
+     * Process admin account creation.
+     */
     public function adminStore(Request $request): \Illuminate\Http\RedirectResponse
     {
         $validator = Validator::make($request->all(), [
@@ -333,9 +466,13 @@ class InstallController extends Controller
         }
         // Store admin configuration
         session(['install.admin' => $request->all()]);
+
         return redirect()->route('install.settings');
     }
-    /**   * Show system settings form. */
+
+    /**
+     * Show system settings form.
+     */
     public function settings(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if license is verified
@@ -356,14 +493,18 @@ class InstallController extends Controller
         }
         $steps = $this->getInstallationStepsWithStatus(6);
         $timezones = $this->getTimezones();
+
         return view('install.settings', [
             'step' => 6,
             'progressWidth' => 100,
             'steps' => $steps,
-            'timezones' => $timezones
+            'timezones' => $timezones,
         ]);
     }
-    /**   * Process system settings. */
+
+    /**
+     * Process system settings.
+     */
     public function settingsStore(Request $request): \Illuminate\Http\RedirectResponse
     {
         $validator = Validator::make($request->all(), [
@@ -389,9 +530,13 @@ class InstallController extends Controller
         }
         // Store system settings
         session(['install.settings' => $request->all()]);
+
         return redirect()->route('install.install');
     }
-    /**   * Show installation progress. */
+
+    /**
+     * Show installation progress.
+     */
     public function install(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if all required configuration is available
@@ -416,13 +561,17 @@ class InstallController extends Controller
                 ->with('error', 'Please configure system settings first.');
         }
         $steps = $this->getInstallationStepsWithStatus(7);
+
         return view('install.install', [
             'step' => 7,
             'progressWidth' => 100,
-            'steps' => $steps
+            'steps' => $steps,
         ]);
     }
-    /**   * Process installation. */
+
+    /**
+     * Process installation.
+     */
     public function installProcess(Request $request): \Illuminate\Http\JsonResponse
     {
         // Installation process started
@@ -472,6 +621,7 @@ class InstallController extends Controller
             }
             // Step 10: Create installed file
             File::put(storage_path('.installed'), now()->toDateTimeString());
+
             // Installation completed successfully
             return response()->json([
                 'success' => true,
@@ -482,11 +632,14 @@ class InstallController extends Controller
             // Installation failed
             return response()->json([
                 'success' => false,
-                'message' => 'Installation failed: ' . $e->getMessage(),
+                'message' => 'Installation failed: '.$e->getMessage(),
             ], 500);
         }
     }
-    /**   * Show installation completion page. */
+
+    /**
+     * Show installation completion page.
+     */
     public function completion(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if system is installed
@@ -515,10 +668,16 @@ class InstallController extends Controller
         ];
         // Clear session data after passing to view
         session()->forget(['install.license', 'install.database', 'install.admin', 'install.settings']);
+
         return view('install.completion', $viewData);
     }
-    /**   * Check system requirements. */
-    /**   * @return array<string, mixed> */
+
+    /**
+     * Check system requirements.
+     */
+    /**
+     * @return array<string, mixed>
+     */
     public function checkRequirements()
     {
         return [
@@ -614,8 +773,15 @@ class InstallController extends Controller
             ],
         ];
     }
-    /**   * Test database connection. */
-    /**   * @param mixed $config * @return array<string, mixed> */
+
+    /**
+     * Test database connection.
+     */
+    /**
+     * @param mixed $config
+     *
+     * @return array<string, mixed>
+     */
     private function testDatabaseConnection($config)
     {
         try {
@@ -626,48 +792,55 @@ class InstallController extends Controller
             $dbPassword = is_array($config) ? ($config['db_password'] ?? null) : null;
 
             $connection = new \PDO(
-                "mysql:host=" . (is_string($dbHost) ? $dbHost : '') . ";port=" . (is_string($dbPort) ? $dbPort : '') . ";dbname=" . (is_string($dbName) ? $dbName : ''),
+                'mysql:host='.(is_string($dbHost) ? $dbHost : '').';port='.(is_string($dbPort) ? $dbPort : '').';dbname='.(is_string($dbName) ? $dbName : ''),
                 is_string($dbUsername) ? $dbUsername : null,
                 is_string($dbPassword) ? $dbPassword : null,
             );
             $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
             return ['success' => true, 'message' => 'Database connection successful'];
         } catch (\PDOException $e) {
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
-    /**   * Update .env file. *   * @param array<string, mixed> $databaseConfig * @param array<string, mixed> $settingsConfig */
+
+    /**
+     * Update .env file.
+     *
+     * @param array<string, mixed> $databaseConfig
+     * @param array<string, mixed> $settingsConfig
+     */
     private function updateEnvFile(array $databaseConfig, array $settingsConfig): void
     {
         $envPath = base_path('.env');
         $envContent = File::get($envPath);
         // Update database configuration
-        $envContent = preg_replace('/DB_HOST=.*/', "DB_HOST=" . (is_string($databaseConfig['db_host'] ?? null) ? $databaseConfig['db_host'] : ''), $envContent) ?? $envContent;
-        $envContent = preg_replace('/DB_PORT=.*/', "DB_PORT=" . (is_string($databaseConfig['db_port'] ?? null) ? $databaseConfig['db_port'] : ''), $envContent) ?? $envContent;
-        $envContent = preg_replace('/DB_DATABASE=.*/', "DB_DATABASE=" . (is_string($databaseConfig['db_name'] ?? null) ? $databaseConfig['db_name'] : ''), $envContent) ?? $envContent;
-        $envContent = preg_replace('/DB_USERNAME=.*/', "DB_USERNAME=" . (is_string($databaseConfig['db_username'] ?? null) ? $databaseConfig['db_username'] : ''), $envContent) ?? $envContent;
-        $envContent = preg_replace('/DB_PASSWORD=.*/', "DB_PASSWORD=" . (is_string($databaseConfig['db_password'] ?? null) ? $databaseConfig['db_password'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace('/DB_HOST=.*/', 'DB_HOST='.(is_string($databaseConfig['db_host'] ?? null) ? $databaseConfig['db_host'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace('/DB_PORT=.*/', 'DB_PORT='.(is_string($databaseConfig['db_port'] ?? null) ? $databaseConfig['db_port'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace('/DB_DATABASE=.*/', 'DB_DATABASE='.(is_string($databaseConfig['db_name'] ?? null) ? $databaseConfig['db_name'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace('/DB_USERNAME=.*/', 'DB_USERNAME='.(is_string($databaseConfig['db_username'] ?? null) ? $databaseConfig['db_username'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace('/DB_PASSWORD=.*/', 'DB_PASSWORD='.(is_string($databaseConfig['db_password'] ?? null) ? $databaseConfig['db_password'] : ''), $envContent) ?? $envContent;
         // Update application configuration
-        $envContent = preg_replace('/APP_NAME=.*/', "APP_NAME=\"" . (is_string($settingsConfig['site_name'] ?? null) ? $settingsConfig['site_name'] : '') . "\"", $envContent) ?? $envContent;
+        $envContent = preg_replace('/APP_NAME=.*/', 'APP_NAME="'.(is_string($settingsConfig['site_name'] ?? null) ? $settingsConfig['site_name'] : '').'"', $envContent) ?? $envContent;
         // Update APP_URL to current domain (this ensures emails use the correct domain)
         $currentUrl = request()->getSchemeAndHttpHost();
         $envContent = preg_replace('/APP_URL=.*/', "APP_URL={$currentUrl}", $envContent) ?? $envContent;
-        $envContent = preg_replace('/APP_TIMEZONE=.*/', "APP_TIMEZONE=" . (is_string($settingsConfig['timezone'] ?? null) ? $settingsConfig['timezone'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace('/APP_TIMEZONE=.*/', 'APP_TIMEZONE='.(is_string($settingsConfig['timezone'] ?? null) ? $settingsConfig['timezone'] : ''), $envContent) ?? $envContent;
         // Add APP_TIMEZONE if it doesn't exist
         if ($envContent && ! str_contains($envContent, 'APP_TIMEZONE=')) {
-            $envContent .= "\nAPP_TIMEZONE=" . (is_string($settingsConfig['timezone'] ?? null) ? $settingsConfig['timezone'] : '');
+            $envContent .= "\nAPP_TIMEZONE=".(is_string($settingsConfig['timezone'] ?? null) ? $settingsConfig['timezone'] : '');
         }
-        $envContent = preg_replace('/APP_LOCALE=.*/', "APP_LOCALE=" . (is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace('/APP_LOCALE=.*/', 'APP_LOCALE='.(is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : ''), $envContent) ?? $envContent;
         // Add APP_LOCALE if it doesn't exist
         if ($envContent && ! str_contains($envContent, 'APP_LOCALE=')) {
-            $envContent .= "\nAPP_LOCALE=" . (is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : '');
+            $envContent .= "\nAPP_LOCALE=".(is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : '');
         }
         // Update APP_FALLBACK_LOCALE
         $locale = $settingsConfig['locale'] ?? null;
         $localeStr = is_string($locale) ? $locale : '';
         $envContent = preg_replace(
             '/APP_FALLBACK_LOCALE=.*/',
-            "APP_FALLBACK_LOCALE=" . $localeStr,
+            'APP_FALLBACK_LOCALE='.$localeStr,
             $envContent,
         ) ?? $envContent;
         // Add APP_FALLBACK_LOCALE if it doesn't exist
@@ -692,32 +865,32 @@ class InstallController extends Controller
             $mailFromAddress = $settingsConfig['mail_from_address'] ?? null;
             $mailFromName = $settingsConfig['mail_from_name'] ?? null;
 
-            $envContent = preg_replace('/MAIL_MAILER=.*/', "MAIL_MAILER=" . (is_string($mailMailer) ? $mailMailer : ''), $envContent) ?? $envContent;
-            $envContent = preg_replace('/MAIL_HOST=.*/', "MAIL_HOST=" . (is_string($mailHost) ? $mailHost : ''), $envContent) ?? $envContent;
-            $envContent = preg_replace('/MAIL_PORT=.*/', "MAIL_PORT=" . (is_string($mailPort) ? $mailPort : ''), $envContent) ?? $envContent;
+            $envContent = preg_replace('/MAIL_MAILER=.*/', 'MAIL_MAILER='.(is_string($mailMailer) ? $mailMailer : ''), $envContent) ?? $envContent;
+            $envContent = preg_replace('/MAIL_HOST=.*/', 'MAIL_HOST='.(is_string($mailHost) ? $mailHost : ''), $envContent) ?? $envContent;
+            $envContent = preg_replace('/MAIL_PORT=.*/', 'MAIL_PORT='.(is_string($mailPort) ? $mailPort : ''), $envContent) ?? $envContent;
             $envContent = preg_replace(
                 '/MAIL_USERNAME=.*/',
-                "MAIL_USERNAME=" . (is_string($mailUsername) ? $mailUsername : ''),
+                'MAIL_USERNAME='.(is_string($mailUsername) ? $mailUsername : ''),
                 $envContent,
             ) ?? $envContent;
             $envContent = preg_replace(
                 '/MAIL_PASSWORD=.*/',
-                "MAIL_PASSWORD=" . (is_string($mailPassword) ? $mailPassword : ''),
+                'MAIL_PASSWORD='.(is_string($mailPassword) ? $mailPassword : ''),
                 $envContent,
             ) ?? $envContent;
             $envContent = preg_replace(
                 '/MAIL_ENCRYPTION=.*/',
-                "MAIL_ENCRYPTION=" . (is_string($mailEncryption) ? $mailEncryption : ''),
+                'MAIL_ENCRYPTION='.(is_string($mailEncryption) ? $mailEncryption : ''),
                 $envContent,
             ) ?? $envContent;
             $envContent = preg_replace(
                 '/MAIL_FROM_ADDRESS=.*/',
-                "MAIL_FROM_ADDRESS=" . (is_string($mailFromAddress) ? $mailFromAddress : ''),
+                'MAIL_FROM_ADDRESS='.(is_string($mailFromAddress) ? $mailFromAddress : ''),
                 $envContent,
             ) ?? $envContent;
             $envContent = preg_replace(
                 '/MAIL_FROM_NAME=.*/',
-                "MAIL_FROM_NAME=\"" . (is_string($mailFromName) ? $mailFromName : '') . "\"",
+                'MAIL_FROM_NAME="'.(is_string($mailFromName) ? $mailFromName : '').'"',
                 $envContent,
             ) ?? $envContent;
         }
@@ -730,7 +903,10 @@ class InstallController extends Controller
         $envContent = preg_replace('/APP_DEBUG=.*/', 'APP_DEBUG=false', $envContent) ?? $envContent;
         File::put($envPath, $envContent);
     }
-    /**   * Update session and cache drivers to database after migrations. */
+
+    /**
+     * Update session and cache drivers to database after migrations.
+     */
     private function updateSessionDrivers(): void
     {
         $envPath = base_path('.env');
@@ -741,7 +917,10 @@ class InstallController extends Controller
         $envContent = preg_replace('/QUEUE_CONNECTION=.*/', 'QUEUE_CONNECTION=database', $envContent) ?? $envContent;
         File::put($envPath, $envContent);
     }
-    /**   * Create roles and permissions. */
+
+    /**
+     * Create roles and permissions.
+     */
     private function createRolesAndPermissions(): void
     {
         try {
@@ -765,7 +944,12 @@ class InstallController extends Controller
             throw $e;
         }
     }
-    /**   * Create admin user. *   * @param array<string, mixed> $adminConfig */
+
+    /**
+     * Create admin user.
+     *
+     * @param array<string, mixed> $adminConfig
+     */
     private function createAdminUser(array $adminConfig): void
     {
         try {
@@ -784,7 +968,12 @@ class InstallController extends Controller
             throw $e;
         }
     }
-    /**   * Create default settings. *   * @param array<string, mixed> $settingsConfig */
+
+    /**
+     * Create default settings.
+     *
+     * @param array<string, mixed> $settingsConfig
+     */
     private function createDefaultSettings(array $settingsConfig): void
     {
         try {
@@ -812,7 +1001,10 @@ class InstallController extends Controller
             throw $e;
         }
     }
-    /**   * Test database connection. */
+
+    /**
+     * Test database connection.
+     */
     public function testDatabase(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -830,9 +1022,13 @@ class InstallController extends Controller
             ], 422);
         }
         $connection = $this->testDatabaseConnection($request->all());
+
         return response()->json($connection);
     }
-    /**   * Run specific database seeders. */
+
+    /**
+     * Run specific database seeders.
+     */
     private function runDatabaseSeeders(): void
     {
         // Run only the required seeders
@@ -855,7 +1051,12 @@ class InstallController extends Controller
         }
         // Required database seeders execution completed
     }
-    /**   * Store license information in database. *   * @param array<string, mixed> $licenseConfig */
+
+    /**
+     * Store license information in database.
+     *
+     * @param array<string, mixed> $licenseConfig
+     */
     private function storeLicenseInformation(array $licenseConfig): void
     {
         try {
@@ -886,7 +1087,13 @@ class InstallController extends Controller
             throw $e;
         }
     }
-    /**   * Sanitize input data for security. *   * Sanitizes input data to prevent XSS attacks and other security issues * by removing or encoding potentially dangerous characters. */
+
+    /**
+     * Sanitize input data for security.
+     *
+     * Sanitizes input data to prevent XSS attacks and other security issues
+     * by removing or encoding potentially dangerous characters.
+     */
     protected function sanitizeInput(mixed $input): mixed
     {
         if (is_array($input)) {
@@ -906,6 +1113,7 @@ class InstallController extends Controller
         $input = preg_replace('/[<>"\']/', '', $input);
         // Limit length to prevent buffer overflow attacks
         $input = substr($input ?? '', 0, 1000);
+
         return $input;
     }
 }

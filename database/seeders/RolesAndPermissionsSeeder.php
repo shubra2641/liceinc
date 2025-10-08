@@ -8,7 +8,9 @@ use Spatie\Permission\Models\Role;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
-    /**   * Run the database seeds. */
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
         // إعادة تعيين cached roles and permissions

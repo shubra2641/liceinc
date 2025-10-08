@@ -1,6 +1,11 @@
 /**
- * License Verification System * Product: {{product}} * Language: Ruby * Generated: {{date}} *
- * This is a generic template. Please customize according to Ruby best practices. */
+ * License Verification System
+ * Product: {{product}}
+ * Language: Ruby
+ * Generated: {{date}}
+ *
+ * This is a generic template. Please customize according to Ruby best practices.
+ */
 
 # License verification for Ruby
 # API URL: {{license_api_url}}

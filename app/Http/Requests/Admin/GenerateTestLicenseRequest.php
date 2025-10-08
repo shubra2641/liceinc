@@ -5,17 +5,33 @@ namespace App\Http\Requests\Admin;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * Generate Test License Request with comprehensive validation. *
- * This request class handles validation for generating test licenses * for products with proper security measures. *
- * Features: * - Comprehensive validation rules for test license generation * - Domain and email validation * - XSS protection and input sanitization * - Custom validation messages for better UX * - Security validation rules */
+ * Generate Test License Request with comprehensive validation.
+ *
+ * This request class handles validation for generating test licenses
+ * for products with proper security measures.
+ *
+ * Features:
+ * - Comprehensive validation rules for test license generation
+ * - Domain and email validation
+ * - XSS protection and input sanitization
+ * - Custom validation messages for better UX
+ * - Security validation rules
+ */
 class GenerateTestLicenseRequest extends FormRequest
 {
-    /**   * Determine if the user is authorized to make this request. */
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true; // Authorization handled by middleware
     }
-    /**   * Get the validation rules that apply to the request. *   * @return array<string, mixed> */
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [
@@ -38,7 +54,12 @@ class GenerateTestLicenseRequest extends FormRequest
             ],
         ];
     }
-    /**   * Get custom validation messages. *   * @return array<string, string> */
+
+    /**
+     * Get custom validation messages.
+     *
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [
@@ -52,7 +73,12 @@ class GenerateTestLicenseRequest extends FormRequest
             'name.regex' => 'Name contains invalid characters.',
         ];
     }
-    /**   * Get custom attributes for validator errors. *   * @return array<string, string> */
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
+     */
     public function attributes(): array
     {
         return [
@@ -61,7 +87,10 @@ class GenerateTestLicenseRequest extends FormRequest
             'name' => 'user name',
         ];
     }
-    /**   * Prepare the data for validation. */
+
+    /**
+     * Prepare the data for validation.
+     */
     protected function prepareForValidation(): void
     {
         // Sanitize input to prevent XSS

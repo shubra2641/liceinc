@@ -1,6 +1,11 @@
 /**
- * License Verification System * Product: {{product}} * Language: Angular * Generated: {{date}} *
- * This is a generic template. Please customize according to Angular best practices. */
+ * License Verification System
+ * Product: {{product}}
+ * Language: Angular
+ * Generated: {{date}}
+ *
+ * This is a generic template. Please customize according to Angular best practices.
+ */
 
 // License verification for Angular
 // API URL: {{license_api_url}}

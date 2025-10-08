@@ -1,36 +1,77 @@
 <?php
 
 /**
- * Navigation Helper Functions with enhanced security. *
- * This helper provides navigation utilities with proper security measures * and input validation for route checking and breadcrumb generation. *
- * @version 1.0.6 */
+ * Navigation Helper Functions with enhanced security.
+ *
+ * This helper provides navigation utilities with proper security measures
+ * and input validation for route checking and breadcrumb generation.
+ *
+ * @version 1.0.6
+ */
 
 use App\Helpers\SecureFileHelper;
 
 if (! function_exists('is_active_route')) {
-    /**   * Check if the current route matches the given route name with enhanced security. *   * Validates and checks if the current route matches the specified route name * with proper input sanitization and security measures. *   * @param string $routeName The route name to check against *   * @return bool True if the route matches, false otherwise *   * @throws InvalidArgumentException When route name is invalid *   * @version 1.0.6 *   *   *   *   */
+    /**
+     * Check if the current route matches the given route name with enhanced security.
+     *
+     * Validates and checks if the current route matches the specified route name
+     * with proper input sanitization and security measures.
+     *
+     * @param  string  $routeName  The route name to check against
+     *
+     * @return bool True if the route matches, false otherwise
+     *
+     * @throws InvalidArgumentException When route name is invalid
+     *
+     * @version 1.0.6
+     */
     function is_active_route(string $routeName): bool
     {
         if (empty($routeName)) {
             throw new InvalidArgumentException('Route name cannot be empty');
         }
         $sanitizedRouteName = htmlspecialchars(trim($routeName), ENT_QUOTES, 'UTF-8');
+
         return request()->routeIs($sanitizedRouteName);
     }
 }
 if (! function_exists('is_active_route_pattern')) {
-    /**   * Check if the current route matches the given pattern with enhanced security. *   * Validates and checks if the current route matches the specified pattern * with proper input sanitization and security measures. *   * @param string $pattern The route pattern to check against *   * @return bool True if the route matches the pattern, false otherwise *   * @throws InvalidArgumentException When pattern is invalid *   * @version 1.0.6 *   *   *   *   */
+    /**
+     * Check if the current route matches the given pattern with enhanced security.
+     *
+     * Validates and checks if the current route matches the specified pattern
+     * with proper input sanitization and security measures.
+     *
+     * @param  string  $pattern  The route pattern to check against
+     *
+     * @return bool True if the route matches the pattern, false otherwise
+     *
+     * @throws InvalidArgumentException When pattern is invalid
+     *
+     * @version 1.0.6
+     */
     function is_active_route_pattern(string $pattern): bool
     {
         if (empty($pattern)) {
             throw new InvalidArgumentException('Route pattern cannot be empty');
         }
         $sanitizedPattern = htmlspecialchars(trim($pattern), ENT_QUOTES, 'UTF-8');
+
         return request()->routeIs($sanitizedPattern);
     }
 }
 if (! function_exists('get_breadcrumbs')) {
-    /**   * Generate breadcrumbs for the current route with enhanced security. *   * Creates a breadcrumb navigation structure based on the current route * with proper input sanitization and error handling. *   * @return array Array of breadcrumb items with name, url, and active status *   * @version 1.0.6 *   *   *   *   */
+    /**
+     * Generate breadcrumbs for the current route with enhanced security.
+     *
+     * Creates a breadcrumb navigation structure based on the current route
+     * with proper input sanitization and error handling.
+     *
+     * @return array Array of breadcrumb items with name, url, and active status
+     *
+     * @version 1.0.6
+     */
     /** @return array<int, array<string, mixed>> */
     function get_breadcrumbs(): array
     {
@@ -43,7 +84,7 @@ if (! function_exists('get_breadcrumbs')) {
                 $currentPath = '';
                 foreach ($segments as $segment) {
                     // Ensure spacing around concatenation and assignment per PSR-12
-                    $currentPath = $currentPath . ($currentPath ? '.' : '') . $segment;
+                    $currentPath = $currentPath.($currentPath ? '.' : '').$segment;
                     try {
                         $breadcrumbs[] = [
                             'name' => htmlspecialchars(
@@ -60,6 +101,7 @@ if (! function_exists('get_breadcrumbs')) {
                     }
                 }
             }
+
             return $breadcrumbs;
         } catch (Exception $e) {
             return [];
@@ -67,7 +109,16 @@ if (! function_exists('get_breadcrumbs')) {
     }
 }
 if (! function_exists('get_navigation_tree')) {
-    /**   * Get navigation tree structure with enhanced security. *   * Returns a structured navigation tree for the admin panel with proper * sanitization and security measures. *   * @return array Array of navigation items with name, route, icon, and children *   * @version 1.0.6 *   *   *   *   */
+    /**
+     * Get navigation tree structure with enhanced security.
+     *
+     * Returns a structured navigation tree for the admin panel with proper
+     * sanitization and security measures.
+     *
+     * @return array Array of navigation items with name, route, icon, and children
+     *
+     * @version 1.0.6
+     */
     /** @return array<int, array<string, mixed>> */
     function get_navigation_tree(): array
     {
@@ -131,7 +182,16 @@ if (! function_exists('get_navigation_tree')) {
     }
 }
 if (function_exists('get_available_languages') === false) {
-    /**   * Get available languages from the lang directory with enhanced security. *   * Scans the language directory and returns available languages with proper * error handling and security measures. *   * @return array Array of language information with code, name, flag, and native name *   * @version 1.0.6 *   *   *   *   */
+    /**
+     * Get available languages from the lang directory with enhanced security.
+     *
+     * Scans the language directory and returns available languages with proper
+     * error handling and security measures.
+     *
+     * @return array Array of language information with code, name, flag, and native name
+     *
+     * @version 1.0.6
+     */
     /** @return array<int, array<string, string>> */
     function get_available_languages(): array
     {
@@ -143,7 +203,7 @@ if (function_exists('get_available_languages') === false) {
             }
             $directories = array_diff(scandir($langPath), ['.', '..']);
             foreach ($directories as $dir) {
-                if (SecureFileHelper::isDirectory($langPath . DIRECTORY_SEPARATOR . $dir)) {
+                if (SecureFileHelper::isDirectory($langPath.DIRECTORY_SEPARATOR.$dir)) {
                     $sanitizedCode = htmlspecialchars(trim($dir), ENT_QUOTES, 'UTF-8');
                     if (! empty($sanitizedCode)) {
                         $languages[] = [
@@ -155,6 +215,7 @@ if (function_exists('get_available_languages') === false) {
                     }
                 }
             }
+
             return $languages;
         } catch (Exception $e) {
             return [];
@@ -162,7 +223,20 @@ if (function_exists('get_available_languages') === false) {
     }
 }
 if (! function_exists('get_language_name')) {
-    /**   * Get language name by code with enhanced security. *   * Returns the English name for a given language code with proper * input validation and security measures. *   * @param string $code The language code to get the name for *   * @return string The English name of the language *   * @throws InvalidArgumentException When language code is invalid *   * @version 1.0.6 *   *   *   *   */
+    /**
+     * Get language name by code with enhanced security.
+     *
+     * Returns the English name for a given language code with proper
+     * input validation and security measures.
+     *
+     * @param  string  $code  The language code to get the name for
+     *
+     * @return string The English name of the language
+     *
+     * @throws InvalidArgumentException When language code is invalid
+     *
+     * @version 1.0.6
+     */
     function get_language_name(string $code): string
     {
         $names = [
@@ -266,11 +340,25 @@ if (! function_exists('get_language_name')) {
             throw new InvalidArgumentException('Language code cannot be empty');
         }
         $sanitizedCode = htmlspecialchars(trim($code), ENT_QUOTES, 'UTF-8');
+
         return $names[$sanitizedCode] ?? ucfirst($sanitizedCode);
     }
 }
 if (! function_exists('get_language_flag')) {
-    /**   * Get language flag emoji by code with enhanced security. *   * Returns the flag emoji for a given language code with proper * input validation and security measures. *   * @param string $code The language code to get the flag for *   * @return string The flag emoji for the language *   * @throws InvalidArgumentException When language code is invalid *   * @version 1.0.6 *   *   *   *   */
+    /**
+     * Get language flag emoji by code with enhanced security.
+     *
+     * Returns the flag emoji for a given language code with proper
+     * input validation and security measures.
+     *
+     * @param  string  $code  The language code to get the flag for
+     *
+     * @return string The flag emoji for the language
+     *
+     * @throws InvalidArgumentException When language code is invalid
+     *
+     * @version 1.0.6
+     */
     function get_language_flag(string $code): string
     {
         $flags = [
@@ -374,11 +462,25 @@ if (! function_exists('get_language_flag')) {
             throw new InvalidArgumentException('Language code cannot be empty');
         }
         $sanitizedCode = htmlspecialchars(trim($code), ENT_QUOTES, 'UTF-8');
+
         return $flags[$sanitizedCode] ?? '🌐';
     }
 }
 if (! function_exists('get_language_native_name')) {
-    /**   * Get language native name by code with enhanced security. *   * Returns the native name for a given language code with proper * input validation and security measures. *   * @param string $code The language code to get the native name for *   * @return string The native name of the language *   * @throws InvalidArgumentException When language code is invalid *   * @version 1.0.6 *   *   *   *   */
+    /**
+     * Get language native name by code with enhanced security.
+     *
+     * Returns the native name for a given language code with proper
+     * input validation and security measures.
+     *
+     * @param  string  $code  The language code to get the native name for
+     *
+     * @return string The native name of the language
+     *
+     * @throws InvalidArgumentException When language code is invalid
+     *
+     * @version 1.0.6
+     */
     function get_language_native_name(string $code): string
     {
         $nativeNames = [
@@ -482,6 +584,7 @@ if (! function_exists('get_language_native_name')) {
             throw new InvalidArgumentException('Language code cannot be empty');
         }
         $sanitizedCode = htmlspecialchars(trim($code), ENT_QUOTES, 'UTF-8');
+
         return $nativeNames[$sanitizedCode] ?? get_language_name($sanitizedCode);
     }
 }

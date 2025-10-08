@@ -131,7 +131,8 @@
                     <div class="stats-card-label">{{ trans('app.Protected Categories') }}</div>
                     <div class="stats-card-trend negative">
                         <i class="stats-trend-icon negative"></i>
-                        <span>{{ number_format(($categories->where('requires_serial', true)->count() / max($categories->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span> </div>
+                        <span>{{ number_format(($categories->where('requires_serial', true)->count() / max($categories->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -155,7 +156,8 @@
                     <div class="stats-card-label">{{ trans('app.Public Categories') }}</div>
                     <div class="stats-card-trend positive">
                         <i class="stats-trend-icon positive"></i>
-                        <span>{{ number_format(($categories->where('requires_serial', false)->count() / max($categories->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span> </div>
+                        <span>{{ number_format(($categories->where('requires_serial', false)->count() / max($categories->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span>
+                    </div>
                 </div>
             </div>
         </div>

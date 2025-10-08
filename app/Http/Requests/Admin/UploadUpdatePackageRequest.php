@@ -5,17 +5,34 @@ namespace App\Http\Requests\Admin;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * Upload Update Package Request with comprehensive validation. *
- * This request class handles validation for uploading update packages including * file validation, size limits, and security measures. *
- * Features: * - Comprehensive file upload validation * - File type and size validation * - XSS protection and input sanitization * - Custom validation messages for better UX * - Security validation rules * - Update package format validation */
+ * Upload Update Package Request with comprehensive validation.
+ *
+ * This request class handles validation for uploading update packages including
+ * file validation, size limits, and security measures.
+ *
+ * Features:
+ * - Comprehensive file upload validation
+ * - File type and size validation
+ * - XSS protection and input sanitization
+ * - Custom validation messages for better UX
+ * - Security validation rules
+ * - Update package format validation
+ */
 class UploadUpdatePackageRequest extends FormRequest
 {
-    /**   * Determine if the user is authorized to make this request. */
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true; // Authorization handled by middleware
     }
-    /**   * Get the validation rules that apply to the request. *   * @return array<string, mixed> */
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [
@@ -27,7 +44,12 @@ class UploadUpdatePackageRequest extends FormRequest
             ],
         ];
     }
-    /**   * Get custom validation messages. *   * @return array<string, string> */
+
+    /**
+     * Get custom validation messages.
+     *
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [
@@ -37,14 +59,22 @@ class UploadUpdatePackageRequest extends FormRequest
             'update_package.max' => 'Update package size must not exceed 50MB.',
         ];
     }
-    /**   * Get custom attributes for validator errors. *   * @return array<string, string> */
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
+     */
     public function attributes(): array
     {
         return [
             'update_package' => 'update package file',
         ];
     }
-    /**   * Prepare the data for validation. */
+
+    /**
+     * Prepare the data for validation.
+     */
     protected function prepareForValidation(): void
     {
         // No sanitization needed for file uploads

@@ -2636,5 +2636,4 @@ return [
     'PayPal connection error: :error' => 'خطأ في الاتصال بـ PayPal: :error',
     'Stripe connection error: :error' => 'خطأ في الاتصال بـ Stripe: :error',
     'You don\'t have any invoices yet' => 'ليس لديك أي فواتير بعد',
-
 ];

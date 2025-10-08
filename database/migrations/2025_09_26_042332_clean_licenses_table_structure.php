@@ -5,8 +5,10 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-return new class () extends Migration {
-    /**   * Run the migrations. */
+return new class() extends Migration {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         // Skip this migration in testing environment if using SQLite
@@ -65,7 +67,9 @@ return new class () extends Migration {
         }
     }
 
-    /**   * Reverse the migrations. */
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         // Skip this migration in testing environment if using SQLite

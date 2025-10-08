@@ -7,11 +7,21 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Language Controller. *
- * Handles switching the application language with validation and security. */
+ * Language Controller.
+ *
+ * Handles switching the application language with validation and security.
+ */
 class LanguageController extends Controller
 {
-    /**   * Switch application language. *   * @param string $locale Requested locale code *   * @return RedirectResponse Redirects back with status message *   * @throws \Exception On unexpected failure */
+    /**
+     * Switch application language.
+     *
+     * @param  string  $locale  Requested locale code
+     *
+     * @return RedirectResponse Redirects back with status message
+     *
+     * @throws \Exception On unexpected failure
+     */
     public function switch(string $locale): RedirectResponse
     {
         try {
@@ -20,6 +30,7 @@ class LanguageController extends Controller
                 Log::warning('Invalid locale format attempted', [
                     'locale' => $sanitizedLocale,
                 ]);
+
                 return back()->with('error', 'Invalid language format.');
             }
             $availableLanguages = $this->getAvailableLanguages();
@@ -28,19 +39,27 @@ class LanguageController extends Controller
                     'locale' => $sanitizedLocale,
                     'available_languages' => $availableLanguages,
                 ]);
+
                 return back()->with('error', 'Language not supported.');
             }
             session(['locale' => $sanitizedLocale]);
+
             return back();
         } catch (\Exception $e) {
             Log::error('Language switch error', [
                 'error' => $e->getMessage(),
                 'locale' => $locale,
             ]);
+
             return back()->with('error', 'Failed to switch language. Please try again.');
         }
     }
-    /**   * Get available languages from resources/lang directory. *   * @return array<string> */
+
+    /**
+     * Get available languages from resources/lang directory.
+     *
+     * @return array<string>
+     */
     private function getAvailableLanguages(): array
     {
         $available = [];
@@ -48,7 +67,7 @@ class LanguageController extends Controller
         if (Storage::disk('local')->exists($langPath)) {
             $directories = array_diff(scandir($langPath), ['.', '..']);
             foreach ($directories as $dir) {
-                if (Storage::disk('local')->exists($langPath . DIRECTORY_SEPARATOR . $dir)) {
+                if (Storage::disk('local')->exists($langPath.DIRECTORY_SEPARATOR.$dir)) {
                     $available[] = $dir;
                 }
             }
@@ -56,9 +75,15 @@ class LanguageController extends Controller
         if (empty($available)) {
             $available = ['en', 'ar'];
         }
+
         return $available;
     }
-    /**   * Get available languages with metadata for views. *   * @return array<int, array<string, string>> The available languages with metadata */
+
+    /**
+     * Get available languages with metadata for views.
+     *
+     * @return array<int, array<string, string>> The available languages with metadata
+     */
     public static function getAvailableLanguagesWithMetadata(): array
     {
         $languages = [];
@@ -66,7 +91,7 @@ class LanguageController extends Controller
         if (is_dir($langPath)) {
             $directories = array_diff(scandir($langPath), ['.', '..']);
             foreach ($directories as $dir) {
-                if (is_dir($langPath . DIRECTORY_SEPARATOR . $dir)) {
+                if (is_dir($langPath.DIRECTORY_SEPARATOR.$dir)) {
                     $languages[] = [
                         'code' => $dir,
                         'name' => ucfirst($dir),
@@ -82,6 +107,7 @@ class LanguageController extends Controller
                 ['code' => 'ar', 'name' => 'Arabic', 'native_name' => 'العربية', 'flag' => '🇸🇦'],
             ];
         }
+
         return $languages;
     }
 }

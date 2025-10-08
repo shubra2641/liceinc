@@ -3,7 +3,9 @@
 use Illuminate\Support\Str;
 
 return [
-    /* |-------------------------------------------------------------------------- | Default Cache Store
+    /*
+    |--------------------------------------------------------------------------
+    | Default Cache Store
     |--------------------------------------------------------------------------
     |
     | This option controls the default cache store that will be used by the
@@ -14,7 +16,9 @@ return [
 
     'default' => env('CACHE_STORE', 'database'),
 
-    /* |-------------------------------------------------------------------------- | Cache Stores
+    /*
+    |--------------------------------------------------------------------------
+    | Cache Stores
     |--------------------------------------------------------------------------
     |
     | Here you may define all of the cache "stores" for your application as
@@ -85,7 +89,9 @@ return [
         ],
     ],
 
-    /* |-------------------------------------------------------------------------- | Cache Key Prefix
+    /*
+    |--------------------------------------------------------------------------
+    | Cache Key Prefix
     |--------------------------------------------------------------------------
     |
     | When utilizing the APC, database, memcached, Redis, and DynamoDB cache
@@ -94,5 +100,5 @@ return [
     |
     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug((string)env('APP_NAME', 'laravel')) . '-cache-'),
+    'prefix' => env('CACHE_PREFIX', Str::slug((string)env('APP_NAME', 'laravel')).'-cache-'),
 ];

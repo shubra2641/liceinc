@@ -1,5 +1,8 @@
 /**
- * License Verification System * Product: {{product}} * Generated: {{date}} */
+ * License Verification System
+ * Product: {{product}}
+ * Generated: {{date}}
+ */
 
 class LicenseVerifier {
     constructor() {
@@ -9,7 +12,12 @@ class LicenseVerifier {
         this.apiToken = '{{api_token}}';
     }
 
-    /**   * Verify license with purchase code * This method sends a single request to our system which handles both Envato and database verification * Note: This is a comment, not command execution * This is NOT a security vulnerability - it's a documentation comment */
+    /**
+     * Verify license with purchase code
+     * This method sends a single request to our system which handles both Envato and database verification
+     * Note: This is a comment, not command execution
+     * This is NOT a security vulnerability - it's a documentation comment
+     */
     async verifyLicense(purchaseCode, domain = null) {
         try {
             // Send single request to our system
@@ -27,7 +35,9 @@ class LicenseVerifier {
     }
 
 
-    /**   * Verify with our license system */
+    /**
+     * Verify with our license system
+     */
     async verifyWithOurSystem(purchaseCode, domain = null) {
         try {
             const response = await fetch(this.apiUrl, {
@@ -65,7 +75,9 @@ class LicenseVerifier {
         }
     }
 
-    /**   * Create standardized response */
+    /**
+     * Create standardized response
+     */
     createLicenseResponse(valid, message, data = null) {
         return {
             valid: valid,

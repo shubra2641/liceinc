@@ -14,20 +14,62 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
 /**
- * Product File Controller with enhanced security and compliance. *
- * This controller handles product file management functionality including * file uploads, downloads, updates, and deletion with comprehensive security measures. *
- * Features: * - File upload and management with comprehensive validation * - Secure file downloads with access control and rate limiting * - File status management (activate/deactivate) with validation * - File statistics and analytics with error handling * - Comprehensive error handling with database transactions * - Enhanced security measures (XSS protection, input validation, rate limiting) * - Proper logging for errors and warnings only * - Request class integration for better validation * - CSRF protection and security headers * - Model scope integration for optimized queries */
+ * Product File Controller with enhanced security and compliance.
+ *
+ * This controller handles product file management functionality including
+ * file uploads, downloads, updates, and deletion with comprehensive security measures.
+ *
+ * Features:
+ * - File upload and management with comprehensive validation
+ * - Secure file downloads with access control and rate limiting
+ * - File status management (activate/deactivate) with validation
+ * - File statistics and analytics with error handling
+ * - Comprehensive error handling with database transactions
+ * - Enhanced security measures (XSS protection, input validation, rate limiting)
+ * - Proper logging for errors and warnings only
+ * - Request class integration for better validation
+ * - CSRF protection and security headers
+ * - Model scope integration for optimized queries
+ */
 class ProductFileController extends Controller
 {
     protected ProductFileService $productFileService;
 
-    /**   * Constructor with dependency injection. *   * Initializes the ProductFileController with the required ProductFileService * for handling file operations and business logic. *   * @param ProductFileService $productFileService The service for handling file operations */
+    /**
+     * Constructor with dependency injection.
+     *
+     * Initializes the ProductFileController with the required ProductFileService
+     * for handling file operations and business logic.
+     *
+     * @param  ProductFileService  $productFileService  The service for handling file operations
+     */
     public function __construct(ProductFileService $productFileService)
     {
         $this->productFileService = $productFileService;
     }
 
-    /**   * Display files for a product with enhanced security. *   * Shows a comprehensive list of files associated with a product * including file details, status, and management options. *   * @param Product $product The product to display files for *   * @return View The product files index view with file data *   * @throws \Exception When file retrieval fails *   * @example * // Display product files: * GET /admin/products/123/files *   * // Returns view with: * // - Product information * // - File list with details * // - Management options * // - Statistics and analytics */
+    /**
+     * Display files for a product with enhanced security.
+     *
+     * Shows a comprehensive list of files associated with a product
+     * including file details, status, and management options.
+     *
+     * @param  Product  $product  The product to display files for
+     *
+     * @return View The product files index view with file data
+     *
+     * @throws \Exception When file retrieval fails
+     *
+     * @example
+     * // Display product files:
+     * GET /admin/products/123/files
+     *
+     * // Returns view with:
+     * // - Product information
+     * // - File list with details
+     * // - Management options
+     * // - Statistics and analytics
+     */
     public function index(Product $product): View
     {
         try {
@@ -49,11 +91,36 @@ class ProductFileController extends Controller
         }
     }
 
-    /**   * Store a newly uploaded file with enhanced security. *   * Uploads a new file for a product with comprehensive validation, * rate limiting, and security measures. *   * @param ProductFileRequest $request The validated request containing file data * @param Product $product The product to attach the file to *   * @return JsonResponse JSON response with upload results *   * @throws \Exception When file upload operations fail *   * @example * // Upload a new file: * POST /admin/products/123/files * { * "file": [file upload], * "description": "Product documentation" * } *   * // Returns JSON with: * // - Success status * // - File details * // - Upload confirmation */
+    /**
+     * Store a newly uploaded file with enhanced security.
+     *
+     * Uploads a new file for a product with comprehensive validation,
+     * rate limiting, and security measures.
+     *
+     * @param  ProductFileRequest  $request  The validated request containing file data
+     * @param  Product  $product  The product to attach the file to
+     *
+     * @return JsonResponse JSON response with upload results
+     *
+     * @throws \Exception When file upload operations fail
+     *
+     * @example
+     * // Upload a new file:
+     * POST /admin/products/123/files
+     * {
+     *     "file": [file upload],
+     *     "description": "Product documentation"
+     * }
+     *
+     * // Returns JSON with:
+     * // - Success status
+     * // - File details
+     * // - Upload confirmation
+     */
     public function store(ProductFileRequest $request, Product $product): JsonResponse
     {
         // Rate limiting for file uploads
-        $key = 'product-file-upload:' . $request->ip();
+        $key = 'product-file-upload:'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, 10)) {
             return response()->json([
                 'success' => false,
@@ -99,11 +166,31 @@ class ProductFileController extends Controller
         }
     }
 
-    /**   * Download a file with enhanced security and rate limiting. *   * Downloads a product file with comprehensive security measures, * access control, and rate limiting to prevent abuse. *   * @param ProductFile $file The file to download *   * @return \Symfony\Component\HttpFoundation\Response File download response *   * @throws \Exception When download operations fail *   * @example * // Download a file: * GET /admin/product-files/123/download *   * // Returns file download with: * // - Proper headers * // - Security validation * // - Access control */
+    /**
+     * Download a file with enhanced security and rate limiting.
+     *
+     * Downloads a product file with comprehensive security measures,
+     * access control, and rate limiting to prevent abuse.
+     *
+     * @param  ProductFile  $file  The file to download
+     *
+     * @return \Symfony\Component\HttpFoundation\Response File download response
+     *
+     * @throws \Exception When download operations fail
+     *
+     * @example
+     * // Download a file:
+     * GET /admin/product-files/123/download
+     *
+     * // Returns file download with:
+     * // - Proper headers
+     * // - Security validation
+     * // - Access control
+     */
     public function download(ProductFile $file)
     {
         // Rate limiting for file downloads
-        $key = 'product-file-download:' . request()->ip();
+        $key = 'product-file-download:'.request()->ip();
         if (RateLimiter::tooManyAttempts($key, 20)) {
             abort(429, 'Too many download attempts. Please try again later.');
         }
@@ -117,7 +204,7 @@ class ProductFileController extends Controller
 
             return response(is_string($fileData['content'] ?? null) ? $fileData['content'] : '')
                 ->header('Content-Type', is_string($fileData['mime_type'] ?? null) ? $fileData['mime_type'] : 'application/octet-stream')
-                ->header('Content-Disposition', 'attachment; filename="' . (is_string($fileData['filename'] ?? null) ? $fileData['filename'] : 'file') . '"')
+                ->header('Content-Disposition', 'attachment; filename="'.(is_string($fileData['filename'] ?? null) ? $fileData['filename'] : 'file').'"')
                 ->header('Content-Length', is_numeric($fileData['size'] ?? null) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
@@ -132,7 +219,32 @@ class ProductFileController extends Controller
         }
     }
 
-    /**   * Update file status and description with enhanced security. *   * Updates a product file's status (activate/deactivate) and description * with comprehensive validation and security measures. *   * @param ProductFileRequest $request The validated request containing update data * @param ProductFile $file The file to update *   * @return JsonResponse JSON response with update results *   * @throws \Exception When update operations fail *   * @example * // Update file status: * PUT /admin/product-files/123 * { * "is_active": true, * "description": "Updated description" * } *   * // Returns JSON with: * // - Success status * // - Updated file details * // - Confirmation message */
+    /**
+     * Update file status and description with enhanced security.
+     *
+     * Updates a product file's status (activate/deactivate) and description
+     * with comprehensive validation and security measures.
+     *
+     * @param  ProductFileRequest  $request  The validated request containing update data
+     * @param  ProductFile  $file  The file to update
+     *
+     * @return JsonResponse JSON response with update results
+     *
+     * @throws \Exception When update operations fail
+     *
+     * @example
+     * // Update file status:
+     * PUT /admin/product-files/123
+     * {
+     *     "is_active": true,
+     *     "description": "Updated description"
+     * }
+     *
+     * // Returns JSON with:
+     * // - Success status
+     * // - Updated file details
+     * // - Confirmation message
+     */
     public function update(ProductFileRequest $request, ProductFile $file): JsonResponse
     {
         try {
@@ -168,11 +280,31 @@ class ProductFileController extends Controller
         }
     }
 
-    /**   * Delete a file with enhanced security and rate limiting. *   * Deletes a product file with comprehensive security measures, * access control, and rate limiting to prevent abuse. *   * @param ProductFile $file The file to delete *   * @return JsonResponse JSON response with deletion results *   * @throws \Exception When deletion operations fail *   * @example * // Delete a file: * DELETE /admin/product-files/123 *   * // Returns JSON with: * // - Success status * // - Deletion confirmation * // - Error details if failed */
+    /**
+     * Delete a file with enhanced security and rate limiting.
+     *
+     * Deletes a product file with comprehensive security measures,
+     * access control, and rate limiting to prevent abuse.
+     *
+     * @param  ProductFile  $file  The file to delete
+     *
+     * @return JsonResponse JSON response with deletion results
+     *
+     * @throws \Exception When deletion operations fail
+     *
+     * @example
+     * // Delete a file:
+     * DELETE /admin/product-files/123
+     *
+     * // Returns JSON with:
+     * // - Success status
+     * // - Deletion confirmation
+     * // - Error details if failed
+     */
     public function destroy(ProductFile $file): JsonResponse
     {
         // Rate limiting for file deletions
-        $key = 'product-file-delete:' . request()->ip();
+        $key = 'product-file-delete:'.request()->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
             return response()->json([
                 'success' => false,
@@ -213,7 +345,29 @@ class ProductFileController extends Controller
         }
     }
 
-    /**   * Get comprehensive file statistics for a product with enhanced security. *   * Retrieves detailed statistics about product files including counts, * sizes, and download metrics with proper error handling. *   * @param Product $product The product to get statistics for *   * @return JsonResponse JSON response with file statistics *   * @throws \Exception When statistics retrieval fails *   * @example * // Get file statistics: * GET /admin/products/123/files/statistics *   * // Returns JSON with: * // - Total file count * // - Active file count * // - Total downloads * // - Total size (bytes and formatted) * // - Success status */
+    /**
+     * Get comprehensive file statistics for a product with enhanced security.
+     *
+     * Retrieves detailed statistics about product files including counts,
+     * sizes, and download metrics with proper error handling.
+     *
+     * @param  Product  $product  The product to get statistics for
+     *
+     * @return JsonResponse JSON response with file statistics
+     *
+     * @throws \Exception When statistics retrieval fails
+     *
+     * @example
+     * // Get file statistics:
+     * GET /admin/products/123/files/statistics
+     *
+     * // Returns JSON with:
+     * // - Total file count
+     * // - Active file count
+     * // - Total downloads
+     * // - Total size (bytes and formatted)
+     * // - Success status
+     */
     public function statistics(Product $product): JsonResponse
     {
         try {
@@ -244,7 +398,23 @@ class ProductFileController extends Controller
         }
     }
 
-    /**   * Format bytes to human readable format with enhanced precision. *   * Converts byte values to human-readable format (B, KB, MB, GB, TB) * with configurable precision for better display. *   * @param int $bytes The number of bytes to format * @param int $precision The number of decimal places (default: 2) *   * @return string The formatted byte string with unit *   * @example * // Format bytes: * $this->formatBytes(1024); // Returns "1 KB" * $this->formatBytes(1048576); // Returns "1 MB" * $this->formatBytes(1073741824, 3); // Returns "1.000 GB" */
+    /**
+     * Format bytes to human readable format with enhanced precision.
+     *
+     * Converts byte values to human-readable format (B, KB, MB, GB, TB)
+     * with configurable precision for better display.
+     *
+     * @param  int  $bytes  The number of bytes to format
+     * @param  int  $precision  The number of decimal places (default: 2)
+     *
+     * @return string The formatted byte string with unit
+     *
+     * @example
+     * // Format bytes:
+     * $this->formatBytes(1024); // Returns "1 KB"
+     * $this->formatBytes(1048576); // Returns "1 MB"
+     * $this->formatBytes(1073741824, 3); // Returns "1.000 GB"
+     */
     private function formatBytes(int $bytes, int $precision = 2): string
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -253,6 +423,6 @@ class ProductFileController extends Controller
             $bytes /= 1024;
         }
 
-        return round($bytes, $precision) . ' ' . $units[$i];
+        return round($bytes, $precision).' '.$units[$i];
     }
 }

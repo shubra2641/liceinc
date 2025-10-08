@@ -14,28 +14,96 @@ use Illuminate\Validation\ValidationException;
 use ZipArchive;
 
 /**
- * Auto Update Controller with enhanced security. *
- * This controller handles automatic update functionality for the application, * including checking for updates, downloading update packages, and installing * updates with proper backup and rollback mechanisms. *
- * Features: * - Enhanced security measures (XSS protection, input validation) * - Comprehensive error handling with database transactions * - Proper logging for errors and warnings only * - Update package installation with backup/restore * - License verification for update access * - File system operations with proper permissions */
+ * Auto Update Controller with enhanced security.
+ *
+ * This controller handles automatic update functionality for the application,
+ * including checking for updates, downloading update packages, and installing
+ * updates with proper backup and rollback mechanisms.
+ *
+ * Features:
+ * - Enhanced security measures (XSS protection, input validation)
+ * - Comprehensive error handling with database transactions
+ * - Proper logging for errors and warnings only
+ * - Update package installation with backup/restore
+ * - License verification for update access
+ * - File system operations with proper permissions
+ */
 class AutoUpdateController extends Controller
 {
     protected LicenseServerService $licenseServerService;
 
-    /**   * Create a new controller instance. *   * @param LicenseServerService $licenseServerService The license server service */
+    /**
+     * Create a new controller instance.
+     *
+     * @param  LicenseServerService  $licenseServerService  The license server service
+     */
     public function __construct(LicenseServerService $licenseServerService)
     {
         $this->licenseServerService = $licenseServerService;
     }
 
-    /**   * Show the auto update page with enhanced security. *   * Displays the auto update interface where administrators can check * for available updates and install them with proper license verification. *   * @return \Illuminate\View\View The auto update view *   * @version 1.0.6 *   * @example * // Access the auto update page * GET /admin/auto-update *   * // Returns view with: * // - Update check interface * // - License verification form * // - Update installation controls */
+    /**
+     * Show the auto update page with enhanced security.
+     *
+     * Displays the auto update interface where administrators can check
+     * for available updates and install them with proper license verification.
+     *
+     * @return \Illuminate\View\View The auto update view
+     *
+     * @version 1.0.6
+     *
+     * @example
+     * // Access the auto update page
+     * GET /admin/auto-update
+     *
+     * // Returns view with:
+     * // - Update check interface
+     * // - License verification form
+     * // - Update installation controls
+     */
     public function index()
     {
         /** @var view-string $view */
         $view = 'admin.auto-update.index';
+
         return view($view);
     }
 
-    /**   * Check for available updates with enhanced security. *   * Verifies license and checks for available updates using the license server. * Includes comprehensive input validation, XSS protection, and proper error handling. *   * @param Request $request The HTTP request containing update check parameters *   * @return JsonResponse JSON response with update information or error *   * @throws ValidationException When validation fails * @throws \Exception When database operations fail *   * @version 1.0.6 *   * @example * // Request: * POST /admin/auto-update/check * { * "license_key": "ABC123-DEF456-GHI789", * "product_slug": "my-product", * "domain": "example.com", * "current_version": "1.0.0" * } *   * // Success response: * { * "success": true, * "data": { * "update_available": true, * "latest_version": "1.1.0", * "changelog": "Bug fixes and improvements" * } * } */
+    /**
+     * Check for available updates with enhanced security.
+     *
+     * Verifies license and checks for available updates using the license server.
+     * Includes comprehensive input validation, XSS protection, and proper error handling.
+     *
+     * @param  Request  $request  The HTTP request containing update check parameters
+     *
+     * @return JsonResponse JSON response with update information or error
+     *
+     * @throws ValidationException When validation fails
+     * @throws \Exception When database operations fail
+     *
+     * @version 1.0.6
+     *
+     * @example
+     * // Request:
+     * POST /admin/auto-update/check
+     * {
+     *     "license_key": "ABC123-DEF456-GHI789",
+     *     "product_slug": "my-product",
+     *     "domain": "example.com",
+     *     "current_version": "1.0.0"
+     * }
+     *
+     * // Success response:
+     * {
+     *     "success": true,
+     *     "data": {
+     *         "update_available": true,
+     *         "latest_version": "1.1.0",
+     *         "changelog": "Bug fixes and improvements"
+     *     }
+     * }
+     */
     public function checkUpdates(Request $request): JsonResponse
     {
         try {
@@ -94,7 +162,7 @@ class AutoUpdateController extends Controller
                 ]);
             } else {
                 Log::warning('Update check failed', [
-                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4) . '...',
+                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4).'...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'current_version' => $currentVersion,
@@ -123,13 +191,47 @@ class AutoUpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while checking for updates: ' . $e->getMessage(),
+                'message' => 'An error occurred while checking for updates: '.$e->getMessage(),
                 'error_code' => 'SERVER_ERROR',
             ], 500);
         }
     }
 
-    /**   * Download and install update with enhanced security. *   * Downloads and installs update packages with comprehensive security measures * including license verification, backup creation, and rollback capabilities. *   * @param Request $request The HTTP request containing update installation parameters *   * @return JsonResponse JSON response with installation result or error *   * @throws ValidationException When validation fails * @throws \Exception When database operations fail *   * @version 1.0.6 *   * @example * // Request: * POST /admin/auto-update/install * { * "license_key": "ABC123-DEF456-GHI789", * "product_slug": "my-product", * "domain": "example.com", * "version": "1.1.0" * } *   * // Success response: * { * "success": true, * "message": "Update installed successfully", * "data": { * "version": "1.1.0", * "installed_at": "2024-01-15T10:30:00Z" * } * } */
+    /**
+     * Download and install update with enhanced security.
+     *
+     * Downloads and installs update packages with comprehensive security measures
+     * including license verification, backup creation, and rollback capabilities.
+     *
+     * @param  Request  $request  The HTTP request containing update installation parameters
+     *
+     * @return JsonResponse JSON response with installation result or error
+     *
+     * @throws ValidationException When validation fails
+     * @throws \Exception When database operations fail
+     *
+     * @version 1.0.6
+     *
+     * @example
+     * // Request:
+     * POST /admin/auto-update/install
+     * {
+     *     "license_key": "ABC123-DEF456-GHI789",
+     *     "product_slug": "my-product",
+     *     "domain": "example.com",
+     *     "version": "1.1.0"
+     * }
+     *
+     * // Success response:
+     * {
+     *     "success": true,
+     *     "message": "Update installed successfully",
+     *     "data": {
+     *         "version": "1.1.0",
+     *         "installed_at": "2024-01-15T10:30:00Z"
+     *     }
+     * }
+     */
     public function installUpdate(Request $request): JsonResponse
     {
         try {
@@ -181,7 +283,7 @@ class AutoUpdateController extends Controller
             );
             if (! $updateData['success']) {
                 Log::warning('License verification failed during update installation', [
-                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4) . '...',
+                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4).'...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'version' => $version,
@@ -205,7 +307,7 @@ class AutoUpdateController extends Controller
             );
             if (! $downloadResult['success']) {
                 Log::error('Update download failed', [
-                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4) . '...',
+                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4).'...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'version' => $version,
@@ -220,7 +322,7 @@ class AutoUpdateController extends Controller
                 ], 500);
             }
             // Save update file
-            $updateFileName = 'update_' . (is_string($version) ? $version : '') . '_' . time() . '.zip';
+            $updateFileName = 'update_'.(is_string($version) ? $version : '').'_'.time().'.zip';
             $updateFilePath = storage_path("app/updates/{$updateFileName}");
             // Ensure updates directory exists
             if (! File::exists(storage_path('app/updates'))) {
@@ -274,7 +376,20 @@ class AutoUpdateController extends Controller
         }
     }
 
-    /**   * Install update package. *   * Handles the installation of update packages including extraction, * file installation, migration running, and cache clearing with * proper backup and rollback mechanisms. *   * @param string $updateFilePath The path to the update package file * @param string $version The version being installed *   * @return array Installation result with success status and message *   * @version 1.0.6 */
+    /**
+     * Install update package.
+     *
+     * Handles the installation of update packages including extraction,
+     * file installation, migration running, and cache clearing with
+     * proper backup and rollback mechanisms.
+     *
+     * @param  string  $updateFilePath  The path to the update package file
+     * @param  string  $version  The version being installed
+     *
+     * @return array Installation result with success status and message
+     *
+     * @version 1.0.6
+     */
     /** @return array<string, mixed> */
     private function installUpdatePackage(string $updateFilePath, string $version): array
     {
@@ -291,7 +406,7 @@ class AutoUpdateController extends Controller
             $backupPath = $this->createBackup();
             try {
                 // Extract to temporary directory
-                $tempPath = storage_path("app/temp/update_{$version}_" . time());
+                $tempPath = storage_path("app/temp/update_{$version}_".time());
                 $zip->extractTo($tempPath);
                 $zip->close();
                 // Install files
@@ -324,16 +439,25 @@ class AutoUpdateController extends Controller
 
             return [
                 'success' => false,
-                'message' => 'Failed to install update package: ' . $e->getMessage(),
+                'message' => 'Failed to install update package: '.$e->getMessage(),
             ];
         }
     }
 
-    /**   * Create system backup. *   * Creates a comprehensive system backup before installing updates * to ensure rollback capability in case of installation failures. *   * @return string|null The backup path or null if backup creation failed *   * @version 1.0.6 */
+    /**
+     * Create system backup.
+     *
+     * Creates a comprehensive system backup before installing updates
+     * to ensure rollback capability in case of installation failures.
+     *
+     * @return string|null The backup path or null if backup creation failed
+     *
+     * @version 1.0.6
+     */
     private function createBackup(): ?string
     {
         try {
-            $backupName = 'auto_update_backup_' . date('Y-m-d_H-i-s');
+            $backupName = 'auto_update_backup_'.date('Y-m-d_H-i-s');
             $backupPath = storage_path("app/backups/{$backupName}");
             if (! File::exists(storage_path('app/backups'))) {
                 File::makeDirectory(storage_path('app/backups'), 0755, true);
@@ -355,10 +479,19 @@ class AutoUpdateController extends Controller
         }
     }
 
-    /**   * Install files from update package. *   * Copies files from the extracted update package to the application * directory, maintaining proper file permissions and directory structure. *   * @param string $tempPath The temporary path where update files are extracted *   * @version 1.0.6 */
+    /**
+     * Install files from update package.
+     *
+     * Copies files from the extracted update package to the application
+     * directory, maintaining proper file permissions and directory structure.
+     *
+     * @param  string  $tempPath  The temporary path where update files are extracted
+     *
+     * @version 1.0.6
+     */
     private function installFiles(string $tempPath): void
     {
-        $sourcePath = $tempPath . '/files';
+        $sourcePath = $tempPath.'/files';
         if (! File::exists($sourcePath)) {
             return; // No files to install
         }
@@ -366,10 +499,19 @@ class AutoUpdateController extends Controller
         $this->copyDirectory($sourcePath, base_path());
     }
 
-    /**   * Run database migrations from update package. *   * Executes database migrations included in the update package * to ensure database schema compatibility with the new version. *   * @param string $tempPath The temporary path where migration files are located *   * @version 1.0.6 */
+    /**
+     * Run database migrations from update package.
+     *
+     * Executes database migrations included in the update package
+     * to ensure database schema compatibility with the new version.
+     *
+     * @param  string  $tempPath  The temporary path where migration files are located
+     *
+     * @version 1.0.6
+     */
     private function runMigrations(string $tempPath): void
     {
-        $migrationsPath = $tempPath . '/database/migrations';
+        $migrationsPath = $tempPath.'/database/migrations';
         if (! File::exists($migrationsPath)) {
             return; // No migrations to run
         }
@@ -380,7 +522,14 @@ class AutoUpdateController extends Controller
         Artisan::call('migrate', ['--force' => true]);
     }
 
-    /**   * Clear application caches. *   * Clears all application caches including application cache, config cache, * route cache, and view cache to ensure updated files are properly loaded. *   * @version 1.0.6 */
+    /**
+     * Clear application caches.
+     *
+     * Clears all application caches including application cache, config cache,
+     * route cache, and view cache to ensure updated files are properly loaded.
+     *
+     * @version 1.0.6
+     */
     private function clearCaches(): void
     {
         try {
@@ -395,7 +544,17 @@ class AutoUpdateController extends Controller
         }
     }
 
-    /**   * Copy directory recursively. *   * Recursively copies a directory and all its contents to a destination * directory, maintaining the directory structure and file permissions. *   * @param string $source The source directory path * @param string $destination The destination directory path *   * @version 1.0.6 */
+    /**
+     * Copy directory recursively.
+     *
+     * Recursively copies a directory and all its contents to a destination
+     * directory, maintaining the directory structure and file permissions.
+     *
+     * @param  string  $source  The source directory path
+     * @param  string  $destination  The destination directory path
+     *
+     * @version 1.0.6
+     */
     private function copyDirectory(string $source, string $destination): void
     {
         if (! File::exists($destination)) {
@@ -403,8 +562,8 @@ class AutoUpdateController extends Controller
         }
         $files = File::allFiles($source);
         foreach ($files as $file) {
-            $relativePath = str_replace($source . '/', '', $file->getPathname());
-            $targetPath = $destination . '/' . $relativePath;
+            $relativePath = str_replace($source.'/', '', $file->getPathname());
+            $targetPath = $destination.'/'.$relativePath;
             // Ensure target directory exists
             $targetDir = dirname($targetPath);
             if (! File::exists($targetDir)) {
@@ -414,7 +573,16 @@ class AutoUpdateController extends Controller
         }
     }
 
-    /**   * Restore from backup. *   * Restores the system from a backup in case of update installation failure. * This method provides rollback capability to ensure system stability. *   * @param string $backupPath The path to the backup to restore from *   * @version 1.0.6 */
+    /**
+     * Restore from backup.
+     *
+     * Restores the system from a backup in case of update installation failure.
+     * This method provides rollback capability to ensure system stability.
+     *
+     * @param  string  $backupPath  The path to the backup to restore from
+     *
+     * @version 1.0.6
+     */
     private function restoreFromBackup(string $backupPath): void
     {
         // Implementation depends on backup format

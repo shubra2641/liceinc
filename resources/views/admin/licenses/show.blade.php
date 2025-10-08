@@ -399,7 +399,8 @@
                         </label>
                         <div class="progress mb-2">
                             <div class="progress-bar" role="progressbar" 
-                                 data-width="{{ $license->max_domains > 0 ? ($license->active_domains_count / $license->max_domains) * 100 : 0 }}"> </div>
+                                 data-width="{{ $license->max_domains > 0 ? ($license->active_domains_count / $license->max_domains) * 100 : 0 }}">
+                            </div>
                         </div>
                         <p class="text-muted small mb-0">
                             {{ $license->active_domains_count }} / {{ $license->max_domains ?? 1 }} {{ trans('app.domains used') }}

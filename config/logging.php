@@ -6,7 +6,9 @@ use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
 return [
-    /* |-------------------------------------------------------------------------- | Default Log Channel
+    /*
+    |--------------------------------------------------------------------------
+    | Default Log Channel
     |--------------------------------------------------------------------------
     |
     | This option defines the default log channel that is utilized to write
@@ -17,7 +19,9 @@ return [
 
     'default' => env('LOG_CHANNEL', 'stack'),
 
-    /* |-------------------------------------------------------------------------- | Deprecations Log Channel
+    /*
+    |--------------------------------------------------------------------------
+    | Deprecations Log Channel
     |--------------------------------------------------------------------------
     |
     | This option controls the log channel that should be used to log warnings
@@ -31,7 +35,9 @@ return [
         'trace' => env('LOG_DEPRECATIONS_TRACE', false),
     ],
 
-    /* |-------------------------------------------------------------------------- | Log Channels
+    /*
+    |--------------------------------------------------------------------------
+    | Log Channels
     |--------------------------------------------------------------------------
     |
     | Here you may configure the log channels for your application. Laravel
@@ -81,7 +87,7 @@ return [
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
-                'connectionString' => 'tls://' . env('PAPERTRAIL_URL') . ':' . env('PAPERTRAIL_PORT'),
+                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],
