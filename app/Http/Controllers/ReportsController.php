@@ -187,7 +187,8 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $licenseStatusData = [
                     'labels' => $licenseStatusDataRaw->pluck('status')->map(function ($status) {
-                        return __('app.' . (is_string($status) ? $status : '')) ?: ucfirst(is_string($status) ? $status : '');
+                        return __('app.' . (is_string($status) ? $status : ''))
+                            ?: ucfirst(is_string($status) ? $status : '');
                     })->toArray(),
                     'datasets' => [[
                         'data' => $licenseStatusDataRaw->pluck('count')->toArray(),
@@ -214,7 +215,8 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $apiStatusData = [
                     'labels' => $apiStatusDataRaw->pluck('status')->map(function ($status) {
-                        return __('app.' . (is_string($status) ? $status : '')) ?: ucfirst(is_string($status) ? $status : '');
+                        return __('app.' . (is_string($status) ? $status : ''))
+                            ?: ucfirst(is_string($status) ? $status : '');
                     })->toArray(),
                     'datasets' => [[
                         'label' => __('app.api_calls'),
@@ -257,7 +259,9 @@ class ReportsController extends Controller
                 $invoiceMonthlyData = [];
                 foreach ($last3Months as $month) {
                     $found = $invoiceMonthlyRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '') . '-' . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
+                        return (is_string($item->year) ? $item->year : '') . '-'
+                            . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT)
+                            === $month;
                     });
                     $invoiceMonthlyData[] = $found ? (float)(is_numeric($found->total) ? $found->total : 0) : 0;
                 }
@@ -303,7 +307,9 @@ class ReportsController extends Controller
                 $userRegistrationsData = [];
                 foreach ($last3Months as $month) {
                     $found = $userRegistrationsRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '') . '-' . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
+                        return (is_string($item->year) ? $item->year : '') . '-'
+                            . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT)
+                            === $month;
                     });
                     $userRegistrationsData[] = $found ? (int)(is_numeric($found->count) ? $found->count : 0) : 0;
                 }
@@ -595,7 +601,8 @@ class ReportsController extends Controller
      * // Export reports to CSV
      * $response = $reportsController->export($request);
      */
-    public function export(Request $request): \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
+    public function export(Request $request): \Illuminate\Http\Response|JsonResponse|
+        \Symfony\Component\HttpFoundation\StreamedResponse
     {
         try {
             /**
@@ -700,9 +707,15 @@ class ReportsController extends Controller
                     foreach ($data['licenses'] as $license) {
                         if (is_object($license) && isset($license->licenseKey)) {
                             $csvData = [
-                            is_string($license->licenseKey) ? $license->licenseKey : '',
-                            (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
-                            (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
+                            is_string($license->licenseKey)
+                                ? $license->licenseKey
+                                : '',
+                            (isset($license->product) && is_object($license->product) && isset($license->product->name))
+                                ? $license->product->name
+                                : 'N/A',
+                            (isset($license->user) && is_object($license->user) && isset($license->user->name))
+                                ? $license->user->name
+                                : 'N/A',
                             (isset($license->status) && is_string($license->status)) ? $license->status : '',
                             (isset($license->createdAt) && is_object($license->createdAt) && method_exists($license->createdAt, 'format')) ? $license->createdAt->format('Y-m-d H:i:s') : 'N/A',
                             (isset($license->licenseExpiresAt) && is_object($license->licenseExpiresAt) && method_exists($license->licenseExpiresAt, 'format')) ? $license->licenseExpiresAt->format('Y-m-d H:i:s') : 'N/A',
@@ -749,9 +762,15 @@ class ReportsController extends Controller
                     foreach ($data['licenses'] as $license) {
                         if (is_object($license) && isset($license->licenseKey)) {
                             $csvData = [
-                            is_string($license->licenseKey) ? $license->licenseKey : '',
-                            (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
-                            (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
+                            is_string($license->licenseKey)
+                                ? $license->licenseKey
+                                : '',
+                            (isset($license->product) && is_object($license->product) && isset($license->product->name))
+                                ? $license->product->name
+                                : 'N/A',
+                            (isset($license->user) && is_object($license->user) && isset($license->user->name))
+                                ? $license->user->name
+                                : 'N/A',
                             (isset($license->status) && is_string($license->status)) ? $license->status : '',
                             (isset($license->createdAt) && is_object($license->createdAt) && method_exists($license->createdAt, 'format')) ? $license->createdAt->format('Y-m-d H:i:s') : 'N/A',
                             (isset($license->licenseExpiresAt) && is_object($license->licenseExpiresAt) && method_exists($license->licenseExpiresAt, 'format')) ? $license->licenseExpiresAt->format('Y-m-d H:i:s') : 'N/A',

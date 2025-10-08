@@ -115,7 +115,9 @@ class PaymentService
             $this->validatePayPalCredentials($credentials);
             // Create API context
             $clientId = is_string($credentials['client_id'] ?? '') ? (string)($credentials['client_id'] ?? '') : '';
-            $clientSecret = is_string($credentials['client_secret'] ?? '') ? (string)($credentials['client_secret'] ?? '') : '';
+            $clientSecret = is_string($credentials['client_secret'] ?? '')
+                ? (string)($credentials['client_secret'] ?? '')
+                : '';
 
             $apiContext = new ApiContext(
                 new OAuthTokenCredential($clientId, $clientSecret),
@@ -220,11 +222,18 @@ class PaymentService
                 'line_items' => [
                     [
                         'price_data' => [
-                            'currency' => is_string($orderData['currency'] ?? 'usd') ? (string)($orderData['currency'] ?? 'usd') : 'usd',
+                            'currency' => is_string($orderData['currency'] ?? 'usd')
+                                ? (string)($orderData['currency'] ?? 'usd')
+                                : 'usd',
                             'product_data' => [
                                 'name' => 'Product Purchase',
                             ],
-                            'unit_amount' => (int)((is_numeric($orderData['amount'] ?? 0) ? (float)($orderData['amount'] ?? 0) : 0.0) * 100), // Convert to cents
+                            'unit_amount' => (int)(
+                                (is_numeric($orderData['amount'] ?? 0)
+                                    ? (float)($orderData['amount'] ?? 0)
+                                    : 0.0
+                                ) * 100
+                            ), // Convert to cents
                         ],
                         'quantity' => 1,
                     ],
@@ -335,7 +344,9 @@ class PaymentService
             $this->validatePayPalCredentials($credentials);
             // Create API context
             $clientId = is_string($credentials['client_id'] ?? '') ? (string)($credentials['client_id'] ?? '') : '';
-            $clientSecret = is_string($credentials['client_secret'] ?? '') ? (string)($credentials['client_secret'] ?? '') : '';
+            $clientSecret = is_string($credentials['client_secret'] ?? '')
+                ? (string)($credentials['client_secret'] ?? '')
+                : '';
 
             $apiContext = new ApiContext(
                 new OAuthTokenCredential($clientId, $clientSecret),

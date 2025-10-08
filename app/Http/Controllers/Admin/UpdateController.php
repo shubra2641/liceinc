@@ -918,7 +918,11 @@ class UpdateController extends Controller
 
                             return response()->json([
                                 'success' => false,
-                                'message' => 'Auto update failed: ' . (is_string($updateResult['message'] ?? null) ? $updateResult['message'] : 'Unknown error'),
+                                'message' => 'Auto update failed: ' . (
+                                    is_string($updateResult['message'] ?? null)
+                                        ? $updateResult['message']
+                                        : 'Unknown error'
+                                ),
                                 'error_code' => $updateResult['error_code'] ?? 'UPDATE_FAILED',
                             ], 500);
                         }
@@ -982,8 +986,9 @@ class UpdateController extends Controller
 
                 return [
                     'success' => false,
-                    'message' => "Cannot update to version " . $version . ". Current version is " . $currentVersion . ". "
-                        . 'Only newer versions are allowed.',
+                    'message' => "Cannot update to version " . $version
+                        . ". Current version is " . $currentVersion
+                        . ". Only newer versions are allowed.",
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
                     'current_version' => $currentVersion,
                     'target_version' => $version,
@@ -1000,12 +1005,20 @@ class UpdateController extends Controller
 
                 return [
                     'success' => false,
-                    'message' => 'Download failed: ' . (is_string($downloadResult['message'] ?? null) ? $downloadResult['message'] : 'Unknown error'),
+                    'message' => 'Download failed: ' . (
+                        is_string($downloadResult['message'] ?? null)
+                            ? $downloadResult['message']
+                            : 'Unknown error'
+                    ),
                     'error_code' => 'DOWNLOAD_FAILED',
                 ];
             }
             // Install the update
-            $installResult = $this->updatePackageService->installUpdateFiles(is_string($downloadResult['filePath'] ?? null) ? $downloadResult['filePath'] : '');
+            $installResult = $this->updatePackageService->installUpdateFiles(
+                is_string($downloadResult['filePath'] ?? null)
+                    ? $downloadResult['filePath']
+                    : ''
+            );
             if ($installResult['success']) {
                 // Run migrations
                 Artisan::call('migrate', ['--force' => true]);
@@ -1025,7 +1038,8 @@ class UpdateController extends Controller
 
                     return [
                         'success' => false,
-                        'message' => 'Update installed but failed to update version in database. Please check logs.',
+                        'message' => 'Update installed but failed to update version in database. '
+                            . 'Please check logs.',
                         'error_code' => 'VERSION_UPDATE_FAILED',
                     ];
                 }
@@ -1185,7 +1199,8 @@ class UpdateController extends Controller
 
                     return response()->json([
                         'success' => false,
-                        'message' => 'Update installed but failed to update version in database. Please check logs.',
+                        'message' => 'Update installed but failed to update version in database. '
+                            . 'Please check logs.',
                         'error_code' => 'VERSION_UPDATE_FAILED',
                     ], 500);
                 }
