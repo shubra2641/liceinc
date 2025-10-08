@@ -79,7 +79,12 @@ class UpdateController extends Controller
                 $updateInfo = $this->getUpdateInfoForProduct('the-ultimate-license-management-system', '1.0.0');
             }
 
-            return view('admin.updates.index', ['versionStatus' => $versionStatus, 'versionInfo' => $versionInfo, 'products' => $products, 'updateInfo' => $updateInfo]);
+            return view('admin.updates.index', [
+                'versionStatus' => $versionStatus,
+                'versionInfo' => $versionInfo,
+                'products' => $products,
+                'updateInfo' => $updateInfo
+            ]);
         } catch (\Exception $e) {
             Log::error('Failed to load update management page', [
                 'error' => $e->getMessage(),
@@ -275,7 +280,9 @@ class UpdateController extends Controller
             Cache::flush();
             $steps['all_caches'] = 'All caches cleared';
             // Step 8: Run any version-specific update instructions
-            $instructions = VersionHelper::getUpdateInstructions($targetVersion);
+            $instructions = VersionHelper::getUpdateInstructions(
+                $targetVersion
+            );
             if (! empty($instructions)) {
                 foreach ($instructions as $key => $instruction) {
                     // Here you could add custom update logic based on instructions

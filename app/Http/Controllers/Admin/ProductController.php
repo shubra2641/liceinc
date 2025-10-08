@@ -78,7 +78,9 @@ class ProductController extends Controller
                     'purchase_url_buy' => $itemData['url'] ?? null, // Same as purchase URL for now
                     'supportDays' => $this->calculateSupportDays($itemData),
                     'version' => $itemData['version'] ?? null,
-                    'price' => isset($itemData['price_cents']) && is_numeric($itemData['price_cents']) ? ($itemData['price_cents'] / 100) : null,
+                    'price' => isset($itemData['price_cents']) && is_numeric($itemData['price_cents'])
+                        ? ($itemData['price_cents'] / 100)
+                        : null,
                     'name' => $itemData['name'] ?? null,
                     'description' => $itemData['description'] ?? null,
                 ],
@@ -124,7 +126,9 @@ class ProductController extends Controller
                     'id' => $item['id'],
                     'name' => $item['name'],
                     'url' => $item['url'],
-                    'price' => isset($item['price_cents']) && is_numeric($item['price_cents']) ? ($item['price_cents'] / 100) : 0,
+                    'price' => isset($item['price_cents']) && is_numeric($item['price_cents'])
+                        ? ($item['price_cents'] / 100)
+                        : 0,
                     'rating' => $item['rating'] ?? null,
                     'sales' => $item['number_of_sales'] ?? 0,
                 ];
