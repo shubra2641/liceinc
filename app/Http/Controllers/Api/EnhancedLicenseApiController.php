@@ -331,7 +331,7 @@ class EnhancedLicenseApiController extends BaseController
                 'licenseId' => $license->id,
                 'type' => $license->licenseType,
                 'expiresAt' => $license->licenseExpiresAt?->toISOString(),
-                'support_expiresAt' => $license->support_expiresAt?->toISOString(),
+                'support_expiresAt' => ($license->support_expiresAt instanceof \Carbon\Carbon) ? $license->support_expiresAt->toISOString() : null,
                 'status' => $license->status,
                 'isActive' => $isActive,
             ];
@@ -501,7 +501,7 @@ class EnhancedLicenseApiController extends BaseController
             'licenseId' => $license->id,
             'licenseType' => $license->licenseType,
             'expiresAt' => $license->licenseExpiresAt?->toISOString(),
-            'support_expiresAt' => $license->support_expiresAt?->toISOString(),
+            'support_expiresAt' => ($license->support_expiresAt instanceof \Carbon\Carbon) ? $license->support_expiresAt->toISOString() : null,
             'status' => $license->status,
             'verification_method' => 'database',
         ];
@@ -542,7 +542,7 @@ class EnhancedLicenseApiController extends BaseController
             'licenseId' => $license->id,
             'licenseType' => $license->licenseType,
             'expiresAt' => $license->licenseExpiresAt?->toISOString(),
-            'support_expiresAt' => $license->support_expiresAt?->toISOString(),
+            'support_expiresAt' => ($license->support_expiresAt instanceof \Carbon\Carbon) ? $license->support_expiresAt->toISOString() : null,
             'status' => $license->status,
             'verification_method' => 'envato_auto_created',
         ];

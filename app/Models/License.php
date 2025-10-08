@@ -16,14 +16,14 @@ use Illuminate\Support\Str;
  * @property int|null $productId
  * @property int|null $customer_id
  * @property int|null $userId
- * @property string $purchase_code
+ * @property string $purchaseCode
  * @property string $licenseKey
  * @property string $status
  * @property int $maxDomains
  * @property string $licenseType
- * @property string|null $supported_until
+ * @property string|null $supportedUntil
  * @property \Illuminate\Support\Carbon|null $licenseExpiresAt
- * @property \Illuminate\Support\Carbon|null $support_expiresAt
+ * @property \Illuminate\Support\Carbon|null $supportExpiresAt
  * @property string|null $purchase_date
  * @property string|null $notes
  * @property \Illuminate\Support\Carbon|null $createdAt
@@ -32,6 +32,7 @@ use Illuminate\Support\Str;
  * @property-read int|null $domains_count
  * @property-read int $active_domains_count
  * @property mixed $expiresAt
+ *
  * @property-read int $remaining_domains
  * @property-read mixed $support_active
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
@@ -101,12 +102,12 @@ class License extends Model
     protected static function booted(): void
     {
         static::creating(function (License $license): void {
-            // Ensure purchase_code exists; some flows (Envato) provide it explicitly
-            if (empty($license->purchase_code)) {
-                $license->purchase_code = static::generateUniquePurchaseCode();
+            // Ensure purchaseCode exists; some flows (Envato) provide it explicitly
+            if (empty($license->purchaseCode)) {
+                $license->purchaseCode = static::generateUniquePurchaseCode();
             }
-            // Always use purchase_code as licenseKey for consistency
-            $license->licenseKey = $license->purchase_code;
+            // Always use purchaseCode as licenseKey for consistency
+            $license->licenseKey = (string)$license->purchaseCode;
         });
     }
     protected static function generateUniquePurchaseCode(): string
@@ -114,7 +115,8 @@ class License extends Model
         do {
             $code = strtoupper(Str::random(16));
             // Format like XXXX-XXXX-XXXX-XXXX
-            $code = substr($code, 0, 4) . '-' . substr($code, 4, 4) . '-' . substr($code, 8, 4) . '-' . substr($code, 12, 4);
+            $code = substr($code, 0, 4) . '-' . substr($code, 4, 4) . '-'
+                . substr($code, 8, 4) . '-' . substr($code, 12, 4);
         } while (static::where('purchase_code', $code)->exists());
         return $code;
     }
@@ -123,7 +125,8 @@ class License extends Model
         do {
             $key = strtoupper(Str::random(32));
             // Format like XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX
-            $key = substr($key, 0, 8) . '-' . substr($key, 8, 8) . '-' . substr($key, 16, 8) . '-' . substr($key, 24, 8);
+            $key = substr($key, 0, 8) . '-' . substr($key, 8, 8) . '-'
+                . substr($key, 16, 8) . '-' . substr($key, 24, 8);
         } while (static::where('licenseKey', $key)->exists());
         return $key;
     }
@@ -166,6 +169,7 @@ class License extends Model
      * Scope a query to only active licenses (status = active and not expired).
      *
      * @param Builder<License> $query
+     *
      * @return Builder<License>
      */
     public function scopeActive(Builder $query): Builder
@@ -183,6 +187,7 @@ class License extends Model
      */
     /**
      * @param Builder<License> $query
+     *
      * @return Builder<License>
      */
     public function scopeForUser(Builder $query, User|int $user): Builder
@@ -200,6 +205,7 @@ class License extends Model
      */
     /**
      * @param Builder<License> $query
+     *
      * @return Builder<License>
      */
     public function scopeForCustomer(Builder $query, int $customerId): Builder
@@ -211,7 +217,7 @@ class License extends Model
      */
     public function getSupportActiveAttribute(): bool
     {
-        return $this->support_expiresAt && $this->support_expiresAt->isFuture();
+        return $this->supportExpiresAt && $this->supportExpiresAt->isFuture();
     }
     /**
      * Get expiresAt attribute (alias for licenseExpiresAt).
@@ -240,7 +246,7 @@ class License extends Model
     public function hasReachedDomainLimit(): bool
     {
         $maxDomains = $this->maxDomains ?? 1;
-        return $this->active_domains_count >= $maxDomains;
+        return $this->activeDomainsCount >= $maxDomains;
     }
     /**
      * Get remaining domains that can be added.
@@ -248,6 +254,6 @@ class License extends Model
     public function getRemainingDomainsAttribute(): int
     {
         $maxDomains = $this->maxDomains ?? 1;
-        return max(0, $maxDomains - $this->active_domains_count);
+        return max(0, $maxDomains - $this->activeDomainsCount);
     }
 }

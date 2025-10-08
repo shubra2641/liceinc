@@ -281,7 +281,7 @@ class LicenseApiController extends Controller
                     'current_domains' => $license->active_domains_count,
                     'remaining_domains' => $license->remaining_domains,
                     'expiresAt' => $license->licenseExpiresAt?->toISOString(),
-                    'support_expiresAt' => $license->support_expiresAt?->toISOString(),
+                    'support_expiresAt' => ($license->support_expiresAt instanceof \Carbon\Carbon) ? $license->support_expiresAt->toISOString() : null,
                     'status' => $license->status,
                     'verification_method' => $verificationMethod,
                     'envato_valid' => $envatoValid,
@@ -386,7 +386,8 @@ class LicenseApiController extends Controller
             }
         }
         foreach ($authorizedDomains as $authorizedDomain) {
-            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain ?? '') ?? $authorizedDomain->domain ?? '';
+            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain ?? '') 
+                ?? $authorizedDomain->domain ?? '';
             $authDomain = preg_replace('/^www\./', '', $authDomain) ?? $authDomain;
             if ($authDomain === $domain) {
                 // Update last used timestamp
@@ -455,7 +456,7 @@ class LicenseApiController extends Controller
         if ($license->hasReachedDomainLimit()) {
             \Log::warning('Domain limit exceeded for license', [
                 'licenseId' => $license->id,
-                'purchase_code' => substr($license->purchase_code, 0, 8) . '...',
+                'purchase_code' => is_string($license->purchase_code) ? substr($license->purchase_code, 0, 8) . '...' : 'unknown',
                 'domain' => $domain,
                 'current_domains' => $license->active_domains_count,
                 'maxDomains' => $license->maxDomains ?? 1,
@@ -747,7 +748,7 @@ class LicenseApiController extends Controller
                     'id' => $license->id,
                     'type' => $license->licenseType,
                     'expiresAt' => $license->licenseExpiresAt?->toISOString(),
-                    'support_expiresAt' => $license->support_expiresAt?->toISOString(),
+                    'support_expiresAt' => ($license->support_expiresAt instanceof \Carbon\Carbon) ? $license->support_expiresAt->toISOString() : null,
                     'status' => $license->status,
                 ],
                 'product' => [

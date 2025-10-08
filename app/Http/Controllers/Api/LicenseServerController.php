@@ -966,7 +966,7 @@ class LicenseServerController extends Controller
         if ($license->hasReachedDomainLimit() === true) {
             Log::warning('Domain limit exceeded for license', [
                 'licenseId' => $license->id,
-                'purchase_code' => substr($license->purchase_code, 0, 8) . '...',
+                'purchase_code' => is_string($license->purchase_code) ? substr($license->purchase_code, 0, 8) . '...' : 'unknown',
                 'domain' => $domain,
                 'current_domains' => $license->active_domains_count,
                 'maxDomains' => $license->maxDomains ?? 1,

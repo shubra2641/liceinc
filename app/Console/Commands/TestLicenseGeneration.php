@@ -141,7 +141,7 @@ class TestLicenseGeneration extends Command
      */
     private function displayTokenStatus(Setting $setting): void
     {
-        $this->info('API Token from DB: ' . ($setting->license_api_token ? 'Found' : 'Not found'));
+        $this->info('API Token from DB: ' . ($setting->licenseApiToken ? 'Found' : 'Not found'));
         $this->info('Envato Token from DB: ' . ($setting->envatoPersonalToken ? 'Found' : 'Not found'));
     }
     /**
@@ -293,7 +293,8 @@ class TestLicenseGeneration extends Command
     private function validateTokenInclusion(string $content, Setting $setting): void
     {
         // Check API token inclusion
-        if ($setting->license_api_token && strpos($content, $setting->license_api_token) !== false) {
+        $apiToken = $setting->licenseApiToken;
+        if ($apiToken && is_string($apiToken) && strpos($content, $apiToken) !== false) {
             $this->info("\n✅ API Token found in generated file!");
         } else {
             $this->error("\n❌ API Token NOT found in generated file!");

@@ -95,8 +95,8 @@ class LicenseStatusController extends Controller
                 // Rate limiting
                 $ip = $request->ip();
                 $settings = Setting::first();
-                $maxAttempts = $settings->license_max_attempts ?? 5;
-                $decayMinutes = $settings->license_lockout_minutes ?? 15;
+                $maxAttempts = $settings->licenseMaxAttempts ?? 5;
+                $decayMinutes = $settings->licenseLockoutMinutes ?? 15;
                 $key = 'license_check_' . md5($ip ?? '');
                 $attempts = Cache::get($key, 0);
                 if ($attempts >= $maxAttempts) {
@@ -112,7 +112,9 @@ class LicenseStatusController extends Controller
                         429,
                     );
                 }
-                Cache::put($key, (is_numeric($attempts) ? (int)$attempts : 0) + 1, now()->addMinutes($decayMinutes));
+                $attemptsCount = is_numeric($attempts) ? (int)$attempts : 0;
+                $decayMinutesInt = is_numeric($decayMinutes) ? (int)$decayMinutes : 15;
+                Cache::put($key, $attemptsCount + 1, now()->addMinutes($decayMinutesInt));
                 $validator = Validator::make($request->all(), [
                     'licenseKey' => 'required|string|max:255',
                     'email' => 'required|email|max:255',
@@ -132,7 +134,10 @@ class LicenseStatusController extends Controller
                 $licenseCode = $this->sanitizeInput($request->validated('licenseKey'));
                 $email = $this->sanitizeInput($request->validated('email'));
                 // Search for license by code and email
-                $license = $this->findLicenseByCodeAndEmail(is_string($licenseCode) ? $licenseCode : '', is_string($email) ? $email : '');
+                $license = $this->findLicenseByCodeAndEmail(
+                    is_string($licenseCode) ? $licenseCode : '',
+                    is_string($email) ? $email : ''
+                );
                 if (! $license) {
                     Log::warning('License not found', [
                         'licenseKey' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
@@ -150,13 +155,22 @@ class LicenseStatusController extends Controller
                 $licenseType = $this->determineLicenseType($license);
                 // For Envato licenses, verify with Envato API (optional additional check)
                 $envatoData = null;
-                if ($licenseType === __('license_status.envato') && $license->purchase_code) {
-                    $envatoData = $this->verifyWithEnvato($license->purchase_code);
+                if (
+                    $licenseType === __('license_status.envato')
+                    && !empty($license->purchaseCode)
+                ) {
+                    $envatoData = $this->verifyWithEnvato($license->purchaseCode);
                 }
                 // Check license status
                 $status = $this->getLicenseStatus($license);
                 // Get license details
-                $licenseDetails = $this->buildLicenseDetails($license, $status, $licenseType, $envatoData, is_string($email) ? $email : '');
+                $licenseDetails = $this->buildLicenseDetails(
+                    $license,
+                    $status,
+                    $licenseType,
+                    $envatoData,
+                    is_string($email) ? $email : ''
+                );
                 // Reset attempts on success
                 Cache::forget($key);
                 Log::debug('License status checked successfully', [
@@ -176,8 +190,16 @@ class LicenseStatusController extends Controller
         } catch (Throwable $e) {
             Log::error('License check error', [
                 'error' => $e->getMessage(),
-                'licenseKey' => $this->hashForLogging(is_string($request->validated('licenseKey')) ? $request->validated('licenseKey') : ''),
-                'email' => $this->hashForLogging(is_string($request->validated('email')) ? $request->validated('email') : ''),
+                'licenseKey' => $this->hashForLogging(
+                    is_string($request->validated('licenseKey'))
+                        ? $request->validated('licenseKey')
+                        : ''
+                ),
+                'email' => $this->hashForLogging(
+                    is_string($request->validated('email'))
+                        ? $request->validated('email')
+                        : ''
+                ),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
@@ -228,7 +250,10 @@ class LicenseStatusController extends Controller
                 }
                 $licenseCode = $this->sanitizeInput($request->validated('licenseKey'));
                 $email = $this->sanitizeInput($request->validated('email'));
-                $license = $this->findLicenseByCodeAndEmail(is_string($licenseCode) ? $licenseCode : '', is_string($email) ? $email : '');
+                $license = $this->findLicenseByCodeAndEmail(
+                    is_string($licenseCode) ? $licenseCode : '',
+                    is_string($email) ? $email : ''
+                );
                 if (! $license) {
                     Log::warning('License not found for history request', [
                         'licenseKey' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
@@ -251,15 +276,19 @@ class LicenseStatusController extends Controller
                             'action' => $log->action,
                             'status' => $log->status,
                             'ipAddress' => $log->ipAddress,
-                            'user_agent' => $log->user_agent,
+                            'user_agent' => $log->userAgent,
                             'createdAt' => $log->createdAt?->format('Y-m-d H:i:s'),
                             'message' => $log->message,
                         ];
                     });
                 Log::debug('License history retrieved successfully', [
                     'licenseId' => $license->id,
-                    'licenseKey' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
-                    'email' => $this->hashForLogging(is_string($email) ? $email : ''),
+                    'licenseKey' => $this->hashForLogging(
+                        is_string($licenseCode) ? $licenseCode : ''
+                    ),
+                    'email' => $this->hashForLogging(
+                        is_string($email) ? $email : ''
+                    ),
                     'logs_count' => $logs->count(),
                     'ip' => $request->ip(),
                 ]);
@@ -268,8 +297,16 @@ class LicenseStatusController extends Controller
         } catch (Throwable $e) {
             Log::error('License history error', [
                 'error' => $e->getMessage(),
-                'licenseKey' => $this->hashForLogging(is_string($request->validated('licenseKey')) ? $request->validated('licenseKey') : ''),
-                'email' => $this->hashForLogging(is_string($request->validated('email')) ? $request->validated('email') : ''),
+                'licenseKey' => $this->hashForLogging(
+                    is_string($request->validated('licenseKey'))
+                        ? $request->validated('licenseKey')
+                        : ''
+                ),
+                'email' => $this->hashForLogging(
+                    is_string($request->validated('email'))
+                        ? $request->validated('email')
+                        : ''
+                ),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
@@ -366,7 +403,7 @@ class LicenseStatusController extends Controller
     ): array {
         return [
             'licenseKey' => $license->licenseKey,
-            'purchase_code' => $license->purchase_code,
+            'purchase_code' => $license->purchaseCode,
             'email' => $license->user ? $license->user->email : $email,
             'status' => $status,
             'licenseType' => $licenseType,
@@ -380,7 +417,7 @@ class LicenseStatusController extends Controller
                 ? max(0, now()->diffInDays($license->licenseExpiresAt, false))
                 : null,
             'domains' => $license->domains->toArray(),
-            'supported_until' => $license->supported_until,
+            'supported_until' => $license->supportedUntil,
             'maxDomains' => $license->maxDomains ?? 1,
             'used_domains' => $license->domains->count(),
             // Attach envato verification results when available
@@ -398,7 +435,7 @@ class LicenseStatusController extends Controller
     private function determineLicenseType(License $license): string
     {
         try {
-            if ($license->purchase_code && strlen($license->purchase_code) > 10) {
+            if (!empty($license->purchaseCode) && strlen($license->purchaseCode) > 10) {
                 return __('license_status.envato');
             }
             return __('license_status.custom');

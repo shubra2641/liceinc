@@ -221,6 +221,7 @@ abstract class BaseController extends Controller
      */
     /**
      * @param array<mixed, mixed> $data
+     *
      * @return array<string, mixed>
      */
     protected function sanitizeLogData(array $data): array
@@ -354,6 +355,7 @@ abstract class BaseController extends Controller
      */
     /**
      * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, mixed> $paginator
+     *
      * @return array<string, mixed>
      */
     protected function getPaginationMeta(\Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator): array

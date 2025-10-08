@@ -109,7 +109,11 @@ class KbPublicController extends Controller
                 $articles = $this->getCategoryArticles($category);
                 $relatedCategories = $this->getRelatedCategories($category);
                 DB::commit();
-                return view('kb.category', ['category' => $category, 'articles' => $articles, 'relatedCategories' => $relatedCategories]);
+                return view('kb.category', [
+                    'category' => $category,
+                    'articles' => $articles,
+                    'relatedCategories' => $relatedCategories
+                ]);
             }
             // For protected categories, require authentication
             if (! auth()->check()) {
@@ -121,11 +125,14 @@ class KbPublicController extends Controller
             $accessSource = '';
             $providedRawCode = request()->query('raw_code');
             $error = null;
-            // If raw code provided, verify it and ensure the license's product actually grants access
+            // If raw code provided, verify it and ensure the license's product
+            // actually grants access
             if ($providedRawCode) {
                 $accessResult = $this->handleRawCodeAccess($category, $providedRawCode);
                 if ($accessResult['success']) {
-                    return $accessResult['redirect'] instanceof \Illuminate\Http\RedirectResponse ? $accessResult['redirect'] : redirect()->back();
+                    return $accessResult['redirect'] instanceof \Illuminate\Http\RedirectResponse 
+                        ? $accessResult['redirect'] 
+                        : redirect()->back();
                 } else {
                     $error = $accessResult['error'];
                     DB::rollBack();
@@ -146,7 +153,12 @@ class KbPublicController extends Controller
                 $articles = $this->getCategoryArticles($category);
                 $relatedCategories = $this->getRelatedCategories($category);
                 DB::commit();
-                return view('kb.category', ['category' => $category, 'articles' => $articles, 'relatedCategories' => $relatedCategories, 'accessSource' => $accessSource]);
+                return view('kb.category', [
+                    'category' => $category,
+                    'articles' => $articles,
+                    'relatedCategories' => $relatedCategories,
+                    'accessSource' => $accessSource
+                ]);
             }
             // No access - show purchase prompt
             DB::rollBack();
@@ -334,7 +346,7 @@ class KbPublicController extends Controller
     private function checkCategoryAccess($category, $user): bool
     {
         try {
-            $requiresAccess = (bool)($category->requires_serial || $category->productId);
+            $requiresAccess = (bool)($category->requiresSerial || $category->productId);
             if (! $requiresAccess) {
                 return true; // No access required
             }
@@ -378,10 +390,10 @@ class KbPublicController extends Controller
     private function checkArticleAccess($article, $user): bool
     {
         try {
-            $requiresAccess = (bool)($article->requires_serial ||
-                                     $article->requires_purchase_code ||
+            $requiresAccess = (bool)($article->requiresSerial ||
+                                     $article->requiresPurchaseCode ||
                                      $article->productId ||
-                                     ($article->category->requires_serial ||
+                                     ($article->category->requiresSerial ||
                                       $article->category->productId));
             if (! $requiresAccess) {
                 return true; // No access required
@@ -522,7 +534,7 @@ class KbPublicController extends Controller
      */
     private function categoryRequiresAccess(KbCategory $category): bool
     {
-        return (bool)($category->requires_serial || $category->productId);
+        return (bool)($category->requiresSerial || $category->productId);
     }
     /**
      * Get category articles with enhanced security and error handling.
@@ -536,7 +548,7 @@ class KbPublicController extends Controller
     private function getCategoryArticles(KbCategory $category)
     {
         try {
-            return KbArticle::where('kbCategory_id', $category->id)
+            return KbArticle::where('kbCategoryId', $category->id)
                 ->where('is_published', true)
                 ->whereHas('category', function ($query) {
                     $query->where('isActive', true);
@@ -706,9 +718,9 @@ class KbPublicController extends Controller
      */
     private function articleRequiresAccess(KbArticle $article): bool
     {
-        return (bool)($article->requires_serial ||
+        return (bool)($article->requiresSerial ||
                                  $article->productId ||
-                                 ($article->category->requires_serial ||
+                                 ($article->category->requiresSerial ||
                                   $article->category->productId));
     }
     /**
@@ -743,7 +755,7 @@ class KbPublicController extends Controller
     private function getRelatedArticles(KbArticle $article)
     {
         try {
-            return KbArticle::where('kbCategory_id', $article->kbCategory_id)
+            return KbArticle::where('kbCategoryId', $article->kbCategoryId)
                 ->where('id', '!=', $article->id)
                 ->where('is_published', true)
                 ->whereHas('category', function ($query) {
@@ -933,12 +945,12 @@ class KbPublicController extends Controller
                 })
                 ->with('product')
                 ->get();
-            // Add search_type to results
+            // Add searchType to results
             $articles->each(function ($article) {
-                $article->search_type = 'article';
+                $article->searchType = 'article';
             });
             $categories->each(function ($category) {
-                $category->search_type = 'category';
+                $category->searchType = 'category';
             });
             // Combine results
             $results = $articles->concat($categories);

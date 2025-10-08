@@ -280,6 +280,9 @@ class RegisteredUserController extends Controller
             ]);
         } catch (\Exception $e) {
             // Silently handle email errors to not fail registration
+            Log::warning('Failed to send welcome email to user: ' . $user->email, [
+                'error' => $e->getMessage()
+            ]);
         }
     }
     /**
@@ -293,6 +296,9 @@ class RegisteredUserController extends Controller
             $this->emailService->sendNewUserNotification($user);
         } catch (\Exception $e) {
             // Silently handle email errors to not fail registration
+            Log::warning('Failed to send admin notification for new user: ' . $user->email, [
+                'error' => $e->getMessage()
+            ]);
         }
     }
     /**

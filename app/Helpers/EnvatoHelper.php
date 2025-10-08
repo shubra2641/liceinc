@@ -148,8 +148,8 @@ class EnvatoHelper
                 }
                 return [
                     'personal_token' => self::sanitizeOutput($setting->envatoPersonalToken),
-                    'client_id' => self::sanitizeOutput($setting->envato_client_id),
-                    'client_secret' => self::sanitizeOutput($setting->envato_client_secret),
+                    'client_id' => self::sanitizeOutput(is_string($setting->envatoClientId) ? $setting->envatoClientId : null),
+                    'client_secret' => self::sanitizeOutput(is_string($setting->envatoClientSecret) ? $setting->envatoClientSecret : null),
                 ];
             });
             if (is_array($result)) {
