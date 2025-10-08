@@ -88,13 +88,13 @@ class SettingRequest extends FormRequest
                 'max:3',
                 'regex:/^[A-Z]{3}$/',
             ],
-            'date_format' => [
+            'dateFormat' => [
                 'nullable',
                 'string',
                 'max:20',
                 'regex:/^[a-zA-Z0-9\s\-_.,!?@#$%&*():YmdHis]+$/',
             ],
-            'time_format' => [
+            'timeFormat' => [
                 'nullable',
                 'string',
                 'max:20',
@@ -562,10 +562,10 @@ class SettingRequest extends FormRequest
             'timezone.regex' => 'Timezone contains invalid characters.',
             'currency.required' => 'Currency is required.',
             'currency.regex' => 'Currency must be a 3-letter code (e.g., USD).',
-            'date_format.required' => 'Date format is required.',
-            'date_format.regex' => 'Date format contains invalid characters.',
-            'time_format.required' => 'Time format is required.',
-            'time_format.regex' => 'Time format contains invalid characters.',
+            'dateFormat.required' => 'Date format is required.',
+            'dateFormat.regex' => 'Date format contains invalid characters.',
+            'timeFormat.required' => 'Time format is required.',
+            'timeFormat.regex' => 'Time format contains invalid characters.',
             'maintenance_message.regex' => 'Maintenance message contains invalid characters.',
             'license_api_token.regex' => 'License API token can only contain letters and numbers.',
             'license_api_url.url' => 'License API URL must be a valid URL.',
@@ -628,8 +628,8 @@ class SettingRequest extends FormRequest
             'admin_email' => 'admin email',
             'timezone' => 'timezone',
             'currency' => 'currency',
-            'date_format' => 'date format',
-            'time_format' => 'time format',
+            'dateFormat' => 'date format',
+            'timeFormat' => 'time format',
             'maintenance_mode' => 'maintenance mode',
             'maintenance_message' => 'maintenance message',
             'license_api_token' => 'license API token',
@@ -677,25 +677,63 @@ class SettingRequest extends FormRequest
         // Sanitize input to prevent XSS
         $this->merge([
             'site_name' => $this->sanitizeInput($this->input('site_name')),
-            'site_description' => $this->input('site_description') ? $this->sanitizeInput($this->input('site_description')) : null,
-            'site_keywords' => $this->input('site_keywords') ? $this->sanitizeInput($this->input('site_keywords')) : null,
-            'maintenance_message' => $this->input('maintenance_message') ? $this->sanitizeInput($this->input('maintenance_message')) : null,
-            'seo_og_title' => $this->input('seo_og_title') ? $this->sanitizeInput($this->input('seo_og_title')) : null,
-            'seo_og_description' => $this->input('seo_og_description') ? $this->sanitizeInput($this->input('seo_og_description')) : null,
-            'seo_og_type' => $this->input('seo_og_type') ? $this->sanitizeInput($this->input('seo_og_type')) : null,
-            'seo_og_site_name' => $this->input('seo_og_site_name') ? $this->sanitizeInput($this->input('seo_og_site_name')) : null,
-            'seo_twitter_card' => $this->input('seo_twitter_card') ? $this->sanitizeInput($this->input('seo_twitter_card')) : null,
-            'seo_twitter_site' => $this->input('seo_twitter_site') ? $this->sanitizeInput($this->input('seo_twitter_site')) : null,
-            'seo_twitter_creator' => $this->input('seo_twitter_creator') ? $this->sanitizeInput($this->input('seo_twitter_creator')) : null,
-            'analytics_google_analytics' => $this->input('analytics_google_analytics') ? $this->sanitizeInput($this->input('analytics_google_analytics')) : null,
-            'analytics_google_tag_manager' => $this->input('analytics_google_tag_manager') ? $this->sanitizeInput($this->input('analytics_google_tag_manager')) : null,
-            'analytics_facebook_pixel' => $this->input('analytics_facebook_pixel') ? $this->sanitizeInput($this->input('analytics_facebook_pixel')) : null,
-            'contact_phone' => $this->input('contact_phone') ? $this->sanitizeInput($this->input('contact_phone')) : null,
-            'contact_address' => $this->input('contact_address') ? $this->sanitizeInput($this->input('contact_address')) : null,
-            'contact_city' => $this->input('contact_city') ? $this->sanitizeInput($this->input('contact_city')) : null,
-            'contact_state' => $this->input('contact_state') ? $this->sanitizeInput($this->input('contact_state')) : null,
-            'contact_country' => $this->input('contact_country') ? $this->sanitizeInput($this->input('contact_country')) : null,
-            'contact_postal_code' => $this->input('contact_postal_code') ? $this->sanitizeInput($this->input('contact_postal_code')) : null,
+            'site_description' => $this->input('site_description')
+                ? $this->sanitizeInput($this->input('site_description'))
+                : null,
+            'site_keywords' => $this->input('site_keywords')
+                ? $this->sanitizeInput($this->input('site_keywords'))
+                : null,
+            'maintenance_message' => $this->input('maintenance_message')
+                ? $this->sanitizeInput($this->input('maintenance_message'))
+                : null,
+            'seo_og_title' => $this->input('seo_og_title')
+                ? $this->sanitizeInput($this->input('seo_og_title'))
+                : null,
+            'seo_og_description' => $this->input('seo_og_description')
+                ? $this->sanitizeInput($this->input('seo_og_description'))
+                : null,
+            'seo_og_type' => $this->input('seo_og_type')
+                ? $this->sanitizeInput($this->input('seo_og_type'))
+                : null,
+            'seo_og_site_name' => $this->input('seo_og_site_name')
+                ? $this->sanitizeInput($this->input('seo_og_site_name'))
+                : null,
+            'seo_twitter_card' => $this->input('seo_twitter_card')
+                ? $this->sanitizeInput($this->input('seo_twitter_card'))
+                : null,
+            'seo_twitter_site' => $this->input('seo_twitter_site')
+                ? $this->sanitizeInput($this->input('seo_twitter_site'))
+                : null,
+            'seo_twitter_creator' => $this->input('seo_twitter_creator')
+                ? $this->sanitizeInput($this->input('seo_twitter_creator'))
+                : null,
+            'analytics_google_analytics' => $this->input('analytics_google_analytics')
+                ? $this->sanitizeInput($this->input('analytics_google_analytics'))
+                : null,
+            'analytics_google_tag_manager' => $this->input('analytics_google_tag_manager')
+                ? $this->sanitizeInput($this->input('analytics_google_tag_manager'))
+                : null,
+            'analytics_facebook_pixel' => $this->input('analytics_facebook_pixel')
+                ? $this->sanitizeInput($this->input('analytics_facebook_pixel'))
+                : null,
+            'contact_phone' => $this->input('contact_phone')
+                ? $this->sanitizeInput($this->input('contact_phone'))
+                : null,
+            'contact_address' => $this->input('contact_address')
+                ? $this->sanitizeInput($this->input('contact_address'))
+                : null,
+            'contact_city' => $this->input('contact_city')
+                ? $this->sanitizeInput($this->input('contact_city'))
+                : null,
+            'contact_state' => $this->input('contact_state')
+                ? $this->sanitizeInput($this->input('contact_state'))
+                : null,
+            'contact_country' => $this->input('contact_country')
+                ? $this->sanitizeInput($this->input('contact_country'))
+                : null,
+            'contact_postal_code' => $this->input('contact_postal_code')
+                ? $this->sanitizeInput($this->input('contact_postal_code'))
+                : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -708,8 +746,8 @@ class SettingRequest extends FormRequest
         $this->merge([
             'currency' => $this->currency ?? 'USD',
             'timezone' => $this->timezone ?? 'UTC',
-            'date_format' => $this->date_format ?? 'Y-m-d',
-            'time_format' => $this->time_format ?? 'H:i:s',
+            'dateFormat' => $this->dateFormat ?? 'Y-m-d',
+            'timeFormat' => $this->timeFormat ?? 'H:i:s',
         ]);
     }
     /**

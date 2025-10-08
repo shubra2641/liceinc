@@ -60,13 +60,13 @@ class LicenseVerificationLogRequest extends FormRequest
                     'max:50',
                     'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
                 ],
-                'include_breakdown' => [
+                'includeBreakdown' => [
                     'boolean',
                 ],
-                'include_trends' => [
+                'includeTrends' => [
                     'boolean',
                 ],
-                'include_comparison' => [
+                'includeComparison' => [
                     'boolean',
                 ],
                 'dateFrom' => [
@@ -89,22 +89,22 @@ class LicenseVerificationLogRequest extends FormRequest
                     'min:1',
                     'max:168', // 1 week
                 ],
-                'min_attempts' => [
+                'minAttempts' => [
                     'nullable',
                     'integer',
                     'min:1',
                     'max:1000',
                 ],
-                'include_details' => [
+                'includeDetails' => [
                     'boolean',
                 ],
-                'include_risk_assessment' => [
+                'includeRiskAssessment' => [
                     'boolean',
                 ],
-                'include_geolocation' => [
+                'includeGeolocation' => [
                     'boolean',
                 ],
-                'include_user_agents' => [
+                'includeUserAgents' => [
                     'boolean',
                 ],
                 'threshold_type' => [
@@ -135,7 +135,7 @@ class LicenseVerificationLogRequest extends FormRequest
                     'boolean',
                     'accepted',
                 ],
-                'backup_before_cleanup' => [
+                'backupBeforeCleanup' => [
                     'boolean',
                 ],
                 'cleanup_type' => [
@@ -144,13 +144,13 @@ class LicenseVerificationLogRequest extends FormRequest
                     'max:50',
                     'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
                 ],
-                'include_failed_verifications' => [
+                'includeFailedVerifications' => [
                     'boolean',
                 ],
-                'include_successful_verifications' => [
+                'includeSuccessfulVerifications' => [
                     'boolean',
                 ],
-                'include_suspicious_activity' => [
+                'includeSuspiciousActivity' => [
                     'boolean',
                 ],
                 'dry_run' => [
@@ -197,13 +197,13 @@ class LicenseVerificationLogRequest extends FormRequest
                 'date',
                 'after_or_equal:dateFrom',
             ],
-            'per_page' => [
+            'perPage' => [
                 'nullable',
                 'integer',
                 'min:1',
                 'max:100',
             ],
-            'sort_by' => [
+            'sortBy' => [
                 'nullable',
                 'string',
                 'max:50',
@@ -215,16 +215,16 @@ class LicenseVerificationLogRequest extends FormRequest
                 'max:10',
                 'regex:/^[a-zA-Z0-9\s\-_.,!?@#$%&*()]+$/',
             ],
-            'include_details' => [
+            'includeDetails' => [
                 'boolean',
             ],
-            'include_metadata' => [
+            'includeMetadata' => [
                 'boolean',
             ],
-            'include_response_data' => [
+            'includeResponseData' => [
                 'boolean',
             ],
-            'include_error_details' => [
+            'includeErrorDetails' => [
                 'boolean',
             ],
         ];
@@ -242,8 +242,8 @@ class LicenseVerificationLogRequest extends FormRequest
             'days.max' => 'Days cannot exceed 365.',
             'hours.min' => 'Hours must be at least 1.',
             'hours.max' => 'Hours cannot exceed 168 (1 week).',
-            'min_attempts.min' => 'Minimum attempts must be at least 1.',
-            'min_attempts.max' => 'Minimum attempts cannot exceed 1000.',
+            'minAttempts.min' => 'Minimum attempts must be at least 1.',
+            'minAttempts.max' => 'Minimum attempts cannot exceed 1000.',
             'confirm.required' => 'Confirmation is required for this operation.',
             'confirm.accepted' => 'You must confirm this operation to proceed.',
             'status.regex' => 'Status contains invalid characters.',
@@ -254,29 +254,29 @@ class LicenseVerificationLogRequest extends FormRequest
             'dateFrom.date' => 'Date from must be a valid date.',
             'dateTo.date' => 'Date to must be a valid date.',
             'dateTo.after_or_equal' => 'Date to must be after or equal to date from.',
-            'per_page.min' => 'Per page must be at least 1.',
-            'per_page.max' => 'Per page cannot exceed 100.',
-            'sort_by.regex' => 'Sort by contains invalid characters.',
+            'perPage.min' => 'Per page must be at least 1.',
+            'perPage.max' => 'Per page cannot exceed 100.',
+            'sortBy.regex' => 'Sort by contains invalid characters.',
             'sortOrder.regex' => 'Sort order contains invalid characters.',
             'group_by.regex' => 'Group by contains invalid characters.',
             'threshold_type.regex' => 'Threshold type contains invalid characters.',
             'risk_level.regex' => 'Risk level contains invalid characters.',
             'cleanup_type.regex' => 'Cleanup type contains invalid characters.',
-            'include_breakdown.boolean' => 'Include breakdown must be true or false.',
-            'include_trends.boolean' => 'Include trends must be true or false.',
-            'include_comparison.boolean' => 'Include comparison must be true or false.',
-            'include_details.boolean' => 'Include details must be true or false.',
-            'include_risk_assessment.boolean' => 'Include risk assessment must be true or false.',
-            'include_geolocation.boolean' => 'Include geolocation must be true or false.',
-            'include_user_agents.boolean' => 'Include user agents must be true or false.',
-            'backup_before_cleanup.boolean' => 'Backup before cleanup must be true or false.',
-            'include_failed_verifications.boolean' => 'Include failed verifications must be true or false.',
-            'include_successful_verifications.boolean' => 'Include successful verifications must be true or false.',
-            'include_suspicious_activity.boolean' => 'Include suspicious activity must be true or false.',
+            'includeBreakdown.boolean' => 'Include breakdown must be true or false.',
+            'includeTrends.boolean' => 'Include trends must be true or false.',
+            'includeComparison.boolean' => 'Include comparison must be true or false.',
+            'includeDetails.boolean' => 'Include details must be true or false.',
+            'includeRiskAssessment.boolean' => 'Include risk assessment must be true or false.',
+            'includeGeolocation.boolean' => 'Include geolocation must be true or false.',
+            'includeUserAgents.boolean' => 'Include user agents must be true or false.',
+            'backupBeforeCleanup.boolean' => 'Backup before cleanup must be true or false.',
+            'includeFailedVerifications.boolean' => 'Include failed verifications must be true or false.',
+            'includeSuccessfulVerifications.boolean' => 'Include successful verifications must be true or false.',
+            'includeSuspiciousActivity.boolean' => 'Include suspicious activity must be true or false.',
             'dry_run.boolean' => 'Dry run must be true or false.',
-            'include_metadata.boolean' => 'Include metadata must be true or false.',
-            'include_response_data.boolean' => 'Include response data must be true or false.',
-            'include_error_details.boolean' => 'Include error details must be true or false.',
+            'includeMetadata.boolean' => 'Include metadata must be true or false.',
+            'includeResponseData.boolean' => 'Include response data must be true or false.',
+            'includeErrorDetails.boolean' => 'Include error details must be true or false.',
         ];
     }
     /**
@@ -289,7 +289,7 @@ class LicenseVerificationLogRequest extends FormRequest
         return [
             'days' => 'number of days',
             'hours' => 'number of hours',
-            'min_attempts' => 'minimum attempts',
+            'minAttempts' => 'minimum attempts',
             'confirm' => 'confirmation',
             'status' => 'verification status',
             'source' => 'verification source',
@@ -298,28 +298,28 @@ class LicenseVerificationLogRequest extends FormRequest
             'licenseKey' => 'license key',
             'dateFrom' => 'date from',
             'dateTo' => 'date to',
-            'per_page' => 'per page',
-            'sort_by' => 'sort by',
+            'perPage' => 'per page',
+            'sortBy' => 'sort by',
             'sortOrder' => 'sort order',
             'group_by' => 'group by',
-            'include_breakdown' => 'include breakdown',
-            'include_trends' => 'include trends',
-            'include_comparison' => 'include comparison',
-            'include_details' => 'include details',
-            'include_risk_assessment' => 'include risk assessment',
-            'include_geolocation' => 'include geolocation',
-            'include_user_agents' => 'include user agents',
+            'includeBreakdown' => 'include breakdown',
+            'includeTrends' => 'include trends',
+            'includeComparison' => 'include comparison',
+            'includeDetails' => 'include details',
+            'includeRiskAssessment' => 'include risk assessment',
+            'includeGeolocation' => 'include geolocation',
+            'includeUserAgents' => 'include user agents',
             'threshold_type' => 'threshold type',
             'risk_level' => 'risk level',
-            'backup_before_cleanup' => 'backup before cleanup',
+            'backupBeforeCleanup' => 'backup before cleanup',
             'cleanup_type' => 'cleanup type',
-            'include_failed_verifications' => 'include failed verifications',
-            'include_successful_verifications' => 'include successful verifications',
-            'include_suspicious_activity' => 'include suspicious activity',
+            'includeFailedVerifications' => 'include failed verifications',
+            'includeSuccessfulVerifications' => 'include successful verifications',
+            'includeSuspiciousActivity' => 'include suspicious activity',
             'dry_run' => 'dry run',
-            'include_metadata' => 'include metadata',
-            'include_response_data' => 'include response data',
-            'include_error_details' => 'include error details',
+            'includeMetadata' => 'include metadata',
+            'includeResponseData' => 'include response data',
+            'includeErrorDetails' => 'include error details',
         ];
     }
     /**
@@ -333,7 +333,7 @@ class LicenseVerificationLogRequest extends FormRequest
             'source' => $this->input('source') ? $this->sanitizeInput($this->input('source')) : null,
             'domain' => $this->input('domain') ? $this->sanitizeInput($this->input('domain')) : null,
             'licenseKey' => $this->input('licenseKey') ? $this->sanitizeInput($this->input('licenseKey')) : null,
-            'sort_by' => $this->input('sort_by') ? $this->sanitizeInput($this->input('sort_by')) : null,
+            'sortBy' => $this->input('sortBy') ? $this->sanitizeInput($this->input('sortBy')) : null,
             'sortOrder' => $this->input('sortOrder') ? $this->sanitizeInput($this->input('sortOrder')) : null,
             'group_by' => $this->input('group_by') ? $this->sanitizeInput($this->input('group_by')) : null,
             'threshold_type' => $this->input('threshold_type') ? $this->sanitizeInput($this->input('threshold_type')) : null,
@@ -343,44 +343,44 @@ class LicenseVerificationLogRequest extends FormRequest
         // Handle checkbox values
         $this->merge([
             'confirm' => $this->has('confirm'),
-            'include_breakdown' => $this->has('include_breakdown'),
-            'include_trends' => $this->has('include_trends'),
-            'include_comparison' => $this->has('include_comparison'),
-            'include_details' => $this->has('include_details'),
-            'include_risk_assessment' => $this->has('include_risk_assessment'),
-            'include_geolocation' => $this->has('include_geolocation'),
-            'include_user_agents' => $this->has('include_user_agents'),
-            'backup_before_cleanup' => $this->has('backup_before_cleanup'),
-            'include_failed_verifications' => $this->has('include_failed_verifications'),
-            'include_successful_verifications' => $this->has('include_successful_verifications'),
-            'include_suspicious_activity' => $this->has('include_suspicious_activity'),
+            'includeBreakdown' => $this->has('includeBreakdown'),
+            'includeTrends' => $this->has('includeTrends'),
+            'includeComparison' => $this->has('includeComparison'),
+            'includeDetails' => $this->has('includeDetails'),
+            'includeRiskAssessment' => $this->has('includeRiskAssessment'),
+            'includeGeolocation' => $this->has('includeGeolocation'),
+            'includeUserAgents' => $this->has('includeUserAgents'),
+            'backupBeforeCleanup' => $this->has('backupBeforeCleanup'),
+            'includeFailedVerifications' => $this->has('includeFailedVerifications'),
+            'includeSuccessfulVerifications' => $this->has('includeSuccessfulVerifications'),
+            'includeSuspiciousActivity' => $this->has('includeSuspiciousActivity'),
             'dry_run' => $this->has('dry_run'),
-            'include_metadata' => $this->has('include_metadata'),
-            'include_response_data' => $this->has('include_response_data'),
-            'include_error_details' => $this->has('include_error_details'),
+            'includeMetadata' => $this->has('includeMetadata'),
+            'includeResponseData' => $this->has('includeResponseData'),
+            'includeErrorDetails' => $this->has('includeErrorDetails'),
         ]);
         // Set default values
         $this->merge([
             'days' => $this->days ?? 30,
             'hours' => $this->hours ?? 24,
-            'min_attempts' => $this->min_attempts ?? 3,
-            'per_page' => $this->per_page ?? 20,
-            'sort_by' => $this->sort_by ?? 'createdAt',
+            'minAttempts' => $this->minAttempts ?? 3,
+            'perPage' => $this->perPage ?? 20,
+            'sortBy' => $this->sortBy ?? 'createdAt',
             'sortOrder' => $this->sortOrder ?? 'desc',
-            'include_breakdown' => $this->include_breakdown ?? true,
-            'include_trends' => $this->include_trends ?? true,
-            'include_comparison' => $this->include_comparison ?? false,
-            'include_details' => $this->include_details ?? true,
-            'include_risk_assessment' => $this->include_risk_assessment ?? true,
-            'include_geolocation' => $this->include_geolocation ?? false,
-            'include_user_agents' => $this->include_user_agents ?? false,
-            'backup_before_cleanup' => $this->backup_before_cleanup ?? true,
-            'include_failed_verifications' => $this->include_failed_verifications ?? true,
-            'include_successful_verifications' => $this->include_successful_verifications ?? true,
-            'include_suspicious_activity' => $this->include_suspicious_activity ?? true,
-            'include_metadata' => $this->include_metadata ?? false,
-            'include_response_data' => $this->include_response_data ?? false,
-            'include_error_details' => $this->include_error_details ?? false,
+            'includeBreakdown' => $this->includeBreakdown ?? true,
+            'includeTrends' => $this->includeTrends ?? true,
+            'includeComparison' => $this->includeComparison ?? false,
+            'includeDetails' => $this->includeDetails ?? true,
+            'includeRiskAssessment' => $this->includeRiskAssessment ?? true,
+            'includeGeolocation' => $this->includeGeolocation ?? false,
+            'includeUserAgents' => $this->includeUserAgents ?? false,
+            'backupBeforeCleanup' => $this->backupBeforeCleanup ?? true,
+            'includeFailedVerifications' => $this->includeFailedVerifications ?? true,
+            'includeSuccessfulVerifications' => $this->includeSuccessfulVerifications ?? true,
+            'includeSuspiciousActivity' => $this->includeSuspiciousActivity ?? true,
+            'includeMetadata' => $this->includeMetadata ?? false,
+            'includeResponseData' => $this->includeResponseData ?? false,
+            'includeErrorDetails' => $this->includeErrorDetails ?? false,
         ]);
     }
     /**

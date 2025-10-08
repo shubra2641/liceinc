@@ -79,7 +79,7 @@ class ProductFileController extends Controller
                 abort(401, 'Authentication required');
             }
             // Check if product is downloadable
-            if (! $file->product->is_downloadable) {
+            if (! $file->product->isDownloadable) {
                 abort(403, 'This product does not support file downloads');
             }
             // Check if file is active
@@ -87,11 +87,17 @@ class ProductFileController extends Controller
                 abort(404, 'File not available');
             }
             // Check user permissions
-            $permissions = $this->productFileService->userCanDownloadFiles($file->product, auth()->id() ? (int)auth()->id() : 0);
+            $permissions = $this->productFileService->userCanDownloadFiles(
+                $file->product,
+                auth()->id() ? (int)auth()->id() : 0
+            );
             if (! $permissions['can_download']) {
                 abort(403, is_string($permissions['message']) ? $permissions['message'] : 'Access denied');
             }
-            $fileData = $this->productFileService->downloadFile($file, auth()->id() ? (int)auth()->id() : 0);
+            $fileData = $this->productFileService->downloadFile(
+                $file,
+                auth()->id() ? (int)auth()->id() : 0
+            );
             if (! $fileData) {
                 abort(403, 'File download failed');
             }
@@ -124,7 +130,7 @@ class ProductFileController extends Controller
             abort(401, 'Authentication required');
         }
         // Check if product is downloadable
-        if (! $product->is_downloadable) {
+        if (! $product->isDownloadable) {
             abort(403, 'This product does not support file downloads');
         }
         // Check user permissions
@@ -164,7 +170,7 @@ class ProductFileController extends Controller
             abort(401, 'Authentication required');
         }
         // Check if product is downloadable
-        if (! $product->is_downloadable) {
+        if (! $product->isDownloadable) {
             abort(403, 'This product does not support file downloads');
         }
         // Check user permissions
@@ -181,7 +187,10 @@ class ProductFileController extends Controller
             if ($update->filePath === null) {
                 abort(404, 'Update file not available');
             }
-            $fileData = $this->productFileService->downloadUpdateFile($update, auth()->id() ? (int)auth()->id() : 0);
+            $fileData = $this->productFileService->downloadUpdateFile(
+                $update,
+                auth()->id() ? (int)auth()->id() : 0
+            );
             // Return file download response
             return response(is_string($fileData['content']) ? $fileData['content'] : '')
                 ->header('Content-Type', is_string($fileData['mime_type']) ? $fileData['mime_type'] : 'application/octet-stream')
@@ -210,7 +219,7 @@ class ProductFileController extends Controller
             abort(401, 'Authentication required');
         }
         // Check if product is downloadable
-        if (! $product->is_downloadable) {
+        if (! $product->isDownloadable) {
             abort(403, 'This product does not support file downloads');
         }
         // Check user permissions
@@ -267,7 +276,7 @@ class ProductFileController extends Controller
             abort(401, 'Authentication required');
         }
         // Check if product is downloadable
-        if (! $product->is_downloadable) {
+        if (! $product->isDownloadable) {
             abort(403, 'This product does not support file downloads');
         }
         // Check user permissions
