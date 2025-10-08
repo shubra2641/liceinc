@@ -212,7 +212,7 @@ class InvoiceService
             $this->validateInvoice($invoice);
             DB::beginTransaction();
             $invoice->status = 'paid';
-            $invoice->paid_at = now();
+            $invoice->paidAt = now();
             $invoice->save();
             DB::commit();
         } catch (\Exception $e) {
@@ -221,7 +221,7 @@ class InvoiceService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'invoice_id' => $invoice->id,
-                'invoice_number' => $invoice->invoice_number,
+                'invoice_number' => $invoice->invoiceNumber,
             ]);
             throw $e;
         }
@@ -254,7 +254,7 @@ class InvoiceService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'invoice_id' => $invoice->id,
-                'invoice_number' => $invoice->invoice_number,
+                'invoice_number' => $invoice->invoiceNumber,
             ]);
             throw $e;
         }
@@ -338,7 +338,7 @@ class InvoiceService
                 'status' => 'paid',
                 'paid_at' => now(),
                 'due_date' => now()->addDays(30),
-                'billing_address' => $this->sanitizeInput($user->billing_address ?? null),
+                'billing_address' => $this->sanitizeInput($user->billingAddress ?? null),
                 'tax_rate' => 0,
                 'tax_amount' => 0,
                 'total_amount' => $this->sanitizeAmount($amount),

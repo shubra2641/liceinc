@@ -245,7 +245,7 @@ class AILicenseAnalyticsService
             $performance[] = [
                 'productId' => $product->id,
                 'name' => $product->name,
-                'license_count' => $product->licenses_count,
+                'license_count' => $product->licensesCount,
                 'revenue' => $this->calculateProductRevenue($product->id),
                 'growth_rate' => $this->calculateProductGrowthRate($product->id),
                 'market_share' => $this->calculateMarketShare($product->id),
@@ -1027,8 +1027,8 @@ class AILicenseAnalyticsService
             $predictions[] = [
                 'productId' => $product->id,
                 'name' => $product->name,
-                'current_sales' => $product->licenses_count,
-                'predicted_sales' => (int)($product->licenses_count * 1.1),
+                'current_sales' => $product->licensesCount,
+                'predicted_sales' => is_numeric($product->licensesCount) ? (int)($product->licensesCount * 1.1) : 0,
                 'confidence' => 0.85,
             ];
         }

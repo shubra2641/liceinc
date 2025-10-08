@@ -119,11 +119,12 @@ class LicenseGeneratorService
             // Delete old files for this product first
             $this->deleteOldLicenseFiles($product);
             // Check if we need to generate a new file
-            $existingPath = $product->integration_filePath;
-            $shouldGenerateNew = $this->shouldGenerateNewFile($product, $existingPath);
-            if (! $shouldGenerateNew && $existingPath && Storage::disk('public')->exists($existingPath)) {
+            $existingPath = $product->integrationFilePath;
+            $existingPathStr = is_string($existingPath) ? $existingPath : null;
+            $shouldGenerateNew = $this->shouldGenerateNewFile($product, $existingPathStr);
+            if (! $shouldGenerateNew && $existingPathStr && Storage::disk('public')->exists($existingPathStr)) {
                 // Return existing file path without regenerating
-                return $existingPath;
+                return $existingPathStr;
             }
             // Generate new file
             $template = $this->getLicenseTemplate($language);
@@ -131,7 +132,7 @@ class LicenseGeneratorService
             $fileName = $this->generateFileName($product, $language);
             $filePath = $this->saveLicenseFile($fileContent, $fileName, $product);
             // Update product with new integration file path
-            $product->update(['integration_filePath' => $filePath]);
+            $product->update(['integrationFilePath' => $filePath]);
             return $filePath;
         } catch (\Exception $e) {
             Log::error('Error generating license file', [
@@ -275,7 +276,9 @@ class LicenseGeneratorService
             }
             // Build the license API URL from environment/app url and the configured verification endpoint
             $apiDomain = rtrim(is_string(config('app.url')) ? config('app.url') : '', '/');
-            $verificationEndpoint = is_string(config('license.verification_endpoint', '/api/license/verify')) ? config('license.verification_endpoint', '/api/license/verify') : '/api/license/verify';
+            $verificationEndpoint = is_string(config('license.verification_endpoint', '/api/license/verify'))
+                ? config('license.verification_endpoint', '/api/license/verify')
+                : '/api/license/verify';
             $licenseApiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
             // Validate and sanitize data
             $data = [
