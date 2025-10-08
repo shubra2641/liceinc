@@ -441,13 +441,9 @@ class EmailService
             'customer_name' => $this->sanitizeString($license->user->name),
             'customer_email' => $this->sanitizeString($license->user->email),
             'product_name' => $this->sanitizeString($license->product->name ?? ''),
-            'order_number' => $this->sanitizeString(
-                is_string($invoice->invoiceNumber) ? $invoice->invoiceNumber : ''
-            ),
+            'order_number' => $this->sanitizeString($invoice->invoiceNumber),
             'licenseKey' => $this->sanitizeString($license->licenseKey),
-            'invoiceNumber' => $this->sanitizeString(is_string($invoice->invoiceNumber)
-                ? $invoice->invoiceNumber
-                : ''),
+            'invoiceNumber' => $this->sanitizeString($invoice->invoiceNumber),
             'amount' => $invoice->amount,
             'currency' => $this->sanitizeString($invoice->currency),
             'payment_method' => $this->sanitizeString(ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown')),

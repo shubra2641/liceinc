@@ -222,7 +222,12 @@ class KbArticleController extends Controller
             $validatedArray['meta_title'] = $this->sanitizeInput($validatedArray['meta_title'] ?? '');
             $validatedArray['meta_description'] = $this->sanitizeInput($validatedArray['meta_description'] ?? '');
             $validatedArray['meta_keywords'] = $this->sanitizeInput($validatedArray['meta_keywords'] ?? '');
-            $validatedArray['slug'] = $validatedArray['slug'] ?: Str::slug(is_string($validatedArray['title'] ?? null) ? $validatedArray['title'] : '');
+            $validatedArray['slug'] = $validatedArray['slug']
+                ?: Str::slug(
+                    is_string($validatedArray['title'] ?? null)
+                        ? $validatedArray['title']
+                        : ''
+                );
             $validatedArray['is_published'] = $request->boolean('is_published');
             // Handle checkbox values
             $validatedArray['allow_comments'] = $request->has('allow_comments');

@@ -70,6 +70,7 @@ class Controller extends BaseController
      */
     /**
      * @param callable(): mixed $callback
+     *
      * @return mixed
      */
     protected function transaction(callable $callback)
@@ -263,6 +264,7 @@ class Controller extends BaseController
     /**
      * @param array<string, string> $rules
      * @param array<string, string> $messages
+     *
      * @return array<string, mixed>
      */
     protected function validateRequest(Request $request, array $rules, array $messages = []): array

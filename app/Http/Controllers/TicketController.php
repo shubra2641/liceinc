@@ -513,7 +513,7 @@ class TicketController extends Controller
     private function shouldCloseTicket(Request $request): bool
     {
         return ($request->has('action') && $request->action === 'reply_and_close') ||
-               ($request->has('close_ticket') && $request->close_ticket);
+               ($request->has('close_ticket') && $request->closeTicket);
     }
     /**
      * Check if user can view ticket.

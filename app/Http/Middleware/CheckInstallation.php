@@ -33,7 +33,7 @@ class CheckInstallation
     /**
      * Installation file path constant.
      */
-    private const INSTALLED_filePath = '.installed';
+    private const INSTALLED_FILEPATH = '.installed';
     /**
      * Routes that should skip installation check.
      */
@@ -57,7 +57,7 @@ class CheckInstallation
     {
         try {
             // Request is validated by type hint
-            $installedFile = storage_path(self::INSTALLED_filePath);
+            $installedFile = storage_path(self::INSTALLED_FILEPATH);
             $currentRoute = $this->getCurrentRouteName($request);
             // Skip installation check for certain routes
             if ($this->shouldSkipRoute($currentRoute)) {

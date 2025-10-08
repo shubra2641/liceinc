@@ -117,8 +117,16 @@ class ProductApiController extends Controller
             // If not found in database, try Envato API
             $sale = $this->envatoService->verifyPurchase(is_string($purchaseCode) ? $purchaseCode : '');
             if ($sale) {
-                $productSlug = $this->sanitizeOutput(is_string(data_get($sale, 'item.slug')) ? data_get($sale, 'item.slug') : null);
-                $productName = $this->sanitizeOutput(is_string(data_get($sale, 'item.name')) ? data_get($sale, 'item.name') : null);
+                $productSlug = $this->sanitizeOutput(
+                    is_string(data_get($sale, 'item.slug'))
+                        ? data_get($sale, 'item.slug')
+                        : null
+                );
+                $productName = $this->sanitizeOutput(
+                    is_string(data_get($sale, 'item.name'))
+                        ? data_get($sale, 'item.name')
+                        : null
+                );
                 DB::commit();
                 return response()->json([
                     'success' => true,

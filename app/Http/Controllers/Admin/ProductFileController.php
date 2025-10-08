@@ -205,8 +205,20 @@ class ProductFileController extends Controller
             }
 
             return response(is_string($fileData['content'] ?? null) ? $fileData['content'] : '')
-                ->header('Content-Type', is_string($fileData['mime_type'] ?? null) ? $fileData['mime_type'] : 'application/octet-stream')
-                ->header('Content-Disposition', 'attachment; filename="' . (is_string($fileData['filename'] ?? null) ? $fileData['filename'] : 'file') . '"')
+                ->header(
+                    'Content-Type',
+                    is_string($fileData['mime_type'] ?? null)
+                        ? $fileData['mime_type']
+                        : 'application/octet-stream'
+                )
+                ->header(
+                    'Content-Disposition',
+                    'attachment; filename="' . (
+                        is_string($fileData['filename'] ?? null)
+                            ? $fileData['filename']
+                            : 'file'
+                    ) . '"'
+                )
                 ->header('Content-Length', is_numeric($fileData['size'] ?? null) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
@@ -379,7 +391,11 @@ class ProductFileController extends Controller
                 'active_files' => $files->where('isActive', true)->count(),
                 'total_downloads' => $files->sum('downloadCount'),
                 'total_size' => $files->sum('file_size'),
-                'formatted_total_size' => $this->formatBytes(is_numeric($files->sum('file_size')) ? (int)$files->sum('file_size') : 0),
+                'formatted_total_size' => $this->formatBytes(
+                    is_numeric($files->sum('file_size'))
+                        ? (int)$files->sum('file_size')
+                        : 0
+                ),
             ];
 
             return response()->json([

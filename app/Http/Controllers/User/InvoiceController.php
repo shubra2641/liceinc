@@ -74,7 +74,11 @@ class InvoiceController extends Controller
                 ->with(['product', 'license']);
             // Filter by status with validation
             if ($request->filled('status')) {
-                $status = $this->validateStatus(is_string($request->validated('status')) ? $request->validated('status') : '');
+                $status = $this->validateStatus(
+                    is_string($request->validated('status'))
+                        ? $request->validated('status')
+                        : ''
+                );
                 $query->where('status', $status);
             }
             $invoices = $query->latest()->paginate(self::PAGINATION_LIMIT);
@@ -137,7 +141,9 @@ class InvoiceController extends Controller
             $hasLicense = $invoice->license && $invoice->license->product;
             $hasProduct = $invoice->product;
             $isCustomInvoice = ! $hasLicense && ! $hasProduct; // Custom invoice for additional services
-            $productForPayment = $hasLicense && $invoice->license ? $invoice->license->product : ($invoice->product ?? null);
+            $productForPayment = $hasLicense && $invoice->license
+                ? $invoice->license->product
+                : ($invoice->product ?? null);
             // Get enabled payment gateways
             $enabledGateways = \App\Models\PaymentSetting::getEnabledGateways();
             DB::commit();

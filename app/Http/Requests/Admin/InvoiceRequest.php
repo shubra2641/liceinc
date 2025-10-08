@@ -225,7 +225,9 @@ class InvoiceRequest extends FormRequest
         // Sanitize input to prevent XSS
         $this->merge([
             'invoice_number' => $this->sanitizeInput($this->input('invoice_number')),
-            'payment_reference' => $this->input('payment_reference') ? $this->sanitizeInput($this->input('payment_reference')) : null,
+            'payment_reference' => $this->input('payment_reference')
+                ? $this->sanitizeInput($this->input('payment_reference'))
+                : null,
             'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
             'notes' => $this->input('notes') ? $this->sanitizeInput($this->input('notes')) : null,
         ]);
@@ -237,7 +239,7 @@ class InvoiceRequest extends FormRequest
         $this->merge([
             'status' => $this->status ?? 'pending',
             'currency' => $this->currency ?? 'USD',
-            'billing_type' => $this->billing_type ?? 'one_time',
+            'billing_type' => $this->billingType ?? 'one_time',
         ]);
     }
     /**

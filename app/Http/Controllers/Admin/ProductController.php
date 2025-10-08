@@ -237,7 +237,12 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
         // Provide all products collection for grouped/category displays in the admin index
         $allProducts = Product::with(['category', 'programmingLanguage'])->get();
 
-        return view('admin.products.index', ['products' => $products, 'categories' => $categories, 'programmingLanguages' => $programmingLanguages, 'allProducts' => $allProducts]);
+        return view('admin.products.index', [
+            'products' => $products,
+            'categories' => $categories,
+            'programmingLanguages' => $programmingLanguages,
+            'allProducts' => $allProducts
+        ]);
     }
 
     /**
@@ -277,7 +282,10 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
             if (isset($validated['requires_domain'])) {
                 $validated['requires_domain'] = (bool)$validated['requires_domain'];
             }
-            $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
+            $validated['slug'] = $validated['slug']
+                ?? Str::slug(
+                    is_string($validated['name'] ?? null) ? $validated['name'] : ''
+                );
             // Handle main image upload
             if ($request->hasFile('image')) {
                 $validated['image'] = $request->file('image')->store('products', 'public');
@@ -452,7 +460,11 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
         // Load product files
         $product->load('files');
 
-        return view('admin.products.edit', ['product' => $product, 'categories' => $categories, 'programmingLanguages' => $programmingLanguages]);
+        return view('admin.products.edit', [
+            'product' => $product,
+            'categories' => $categories,
+            'programmingLanguages' => $programmingLanguages
+        ]);
     }
 
     /**
@@ -484,7 +496,11 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
         } catch (\Exception $e) {
             // Fallback to old method if new service fails
             $apiDomain = rtrim(is_string(config('app.url')) ? config('app.url') : '', '/');
-            $verificationEndpoint = is_string(config('license.verification_endpoint', '/api/license/verify')) ? config('license.verification_endpoint', '/api/license/verify') : '/api/license/verify';
+            $verificationEndpoint = is_string(
+                config('license.verification_endpoint', '/api/license/verify')
+            )
+                ? config('license.verification_endpoint', '/api/license/verify')
+                : '/api/license/verify';
             $apiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
             $integrationCode = $this->getIntegrationCodeTemplate($product, $apiUrl);
             // Save to storage/app/public/integration/
@@ -507,7 +523,11 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
     public function downloadIntegration(Product $product)
     {
         $integrationFilePath = $product->integrationFilePath;
-        if (! $integrationFilePath || ! is_string($integrationFilePath) || ! Storage::disk('public')->exists($integrationFilePath)) {
+        if (
+            ! $integrationFilePath
+            || ! is_string($integrationFilePath)
+            || ! Storage::disk('public')->exists($integrationFilePath)
+        ) {
             return redirect()->back()->with('error', 'Integration file not found. Please regenerate it.');
         }
 

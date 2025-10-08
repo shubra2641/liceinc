@@ -113,7 +113,7 @@ class TicketIndexRequest extends FormRequest
             'status' => $this->status && is_string($this->status) ? trim($this->status) : null,
             'priority' => $this->priority && is_string($this->priority) ? trim($this->priority) : null,
             'search' => $this->search && is_string($this->search) ? trim($this->search) : null,
-            'per_page' => $this->per_page && is_numeric($this->per_page) ? (int)$this->per_page : null,
+            'per_page' => $this->perPage && is_numeric($this->perPage) ? (int)$this->perPage : null,
         ]);
     }
 }

@@ -253,10 +253,16 @@ class ProductRequest extends FormRequest
         $this->merge([
             'name' => $this->sanitizeInput($this->input('name')),
             'description' => $this->sanitizeInput($this->input('description')),
-            'short_description' => $this->input('short_description') ? $this->sanitizeInput($this->input('short_description')) : null,
+            'short_description' => $this->input('short_description')
+                ? $this->sanitizeInput($this->input('short_description'))
+                : null,
             'meta_title' => $this->input('meta_title') ? $this->sanitizeInput($this->input('meta_title')) : null,
-            'meta_description' => $this->input('meta_description') ? $this->sanitizeInput($this->input('meta_description')) : null,
-            'meta_keywords' => $this->input('meta_keywords') ? $this->sanitizeInput($this->input('meta_keywords')) : null,
+            'meta_description' => $this->input('meta_description')
+                ? $this->sanitizeInput($this->input('meta_description'))
+                : null,
+            'meta_keywords' => $this->input('meta_keywords')
+                ? $this->sanitizeInput($this->input('meta_keywords'))
+                : null,
         ]);
         // Handle checkbox values
         $this->merge([

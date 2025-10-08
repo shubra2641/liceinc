@@ -392,13 +392,19 @@ class ProductUpdateApiRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'current_version' => $this->input('current_version') ? $this->sanitizeInput($this->input('current_version')) : null,
+            'current_version' => $this->input('current_version')
+                ? $this->sanitizeInput($this->input('current_version'))
+                : null,
             'licenseKey' => $this->sanitizeInput($this->input('licenseKey')),
             'domain' => $this->sanitizeInput($this->input('domain')),
             'version' => $this->input('version') ? $this->sanitizeInput($this->input('version')) : null,
-            'filter_version' => $this->input('filter_version') ? $this->sanitizeInput($this->input('filter_version')) : null,
+            'filter_version' => $this->input('filter_version')
+                ? $this->sanitizeInput($this->input('filter_version'))
+                : null,
             'sortOrder' => $this->input('sortOrder') ? $this->sanitizeInput($this->input('sortOrder')) : null,
-            'download_type' => $this->input('download_type') ? $this->sanitizeInput($this->input('download_type')) : null,
+            'download_type' => $this->input('download_type')
+                ? $this->sanitizeInput($this->input('download_type'))
+                : null,
         ]);
         // Handle checkbox values
         $this->merge([

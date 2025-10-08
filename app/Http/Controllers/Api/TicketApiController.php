@@ -237,8 +237,16 @@ class TicketApiController extends Controller
             try {
                 $sale = $this->envatoService->verifyPurchase(is_string($purchaseCode) ? $purchaseCode : '');
                 if ($sale && isset($sale['item'])) {
-                    $productSlug = $this->sanitizeOutput(is_string(data_get($sale, 'item.slug')) ? data_get($sale, 'item.slug') : null);
-                    $productName = $this->sanitizeOutput(is_string(data_get($sale, 'item.name')) ? data_get($sale, 'item.name') : null);
+                    $productSlug = $this->sanitizeOutput(
+                        is_string(data_get($sale, 'item.slug'))
+                            ? data_get($sale, 'item.slug')
+                            : null
+                    );
+                    $productName = $this->sanitizeOutput(
+                        is_string(data_get($sale, 'item.name'))
+                            ? data_get($sale, 'item.name')
+                            : null
+                    );
                     DB::commit();
 
                     return response()->json([

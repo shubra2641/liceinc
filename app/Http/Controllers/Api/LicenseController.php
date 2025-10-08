@@ -307,7 +307,9 @@ class LicenseController extends Controller
             }
             // Check if the purchase belongs to the correct product
             $envatoItemIdValue = data_get($envatoData, 'item.id');
-            $envatoItemId = is_string($envatoItemIdValue) ? $envatoItemIdValue : (is_scalar($envatoItemIdValue) ? (string)$envatoItemIdValue : '');
+            $envatoItemId = is_string($envatoItemIdValue)
+                ? $envatoItemIdValue
+                : (is_scalar($envatoItemIdValue) ? (string)$envatoItemIdValue : '');
             if (is_string($product->envatoItemId) && $product->envatoItemId !== $envatoItemId) {
                 Log::warning('Envato item ID mismatch', [
                     'expected_item_id' => $product->envatoItemId,
@@ -479,7 +481,9 @@ declare(strict_types=1);\nclass LicenseManager...",
     private function generateIntegrationCode(Product $product): string
     {
         $apiDomain = rtrim(is_string(config('app.url')) ? config('app.url') : '', '/');
-        $verificationEndpoint = is_string(config('license.verification_endpoint')) ? config('license.verification_endpoint') : '/api/license/verify';
+        $verificationEndpoint = is_string(config('license.verification_endpoint'))
+            ? config('license.verification_endpoint')
+            : '/api/license/verify';
         $apiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
 
         return "<?php

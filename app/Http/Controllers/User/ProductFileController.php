@@ -214,7 +214,12 @@ class ProductFileController extends Controller
                 ->header('Content-Type', is_string($fileData['mime_type'])
                     ? $fileData['mime_type']
                     : 'application/octet-stream')
-                ->header('Content-Disposition', 'attachment; filename="' . (is_string($fileData['filename']) ? $fileData['filename'] : '') . '"')
+                ->header(
+                    'Content-Disposition',
+                    'attachment; filename="' . (is_string($fileData['filename'])
+                        ? $fileData['filename']
+                        : '') . '"'
+                )
                 ->header('Content-Length', is_numeric($fileData['size']) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
@@ -269,7 +274,10 @@ class ProductFileController extends Controller
                 if (! $update) {
                     abort(404, 'Update file not found');
                 }
-                $fileData = $this->productFileService->downloadUpdateFile($update, auth()->id() ? (int)auth()->id() : 0);
+                $fileData = $this->productFileService->downloadUpdateFile(
+                    $update,
+                    auth()->id() ? (int)auth()->id() : 0
+                );
             } else {
                 // It's a regular product file
                 $fileData = $this->productFileService->downloadFile($latestFile, auth()->id() ? (int)auth()->id() : 0);
@@ -284,7 +292,12 @@ class ProductFileController extends Controller
                 ->header('Content-Type', is_string($fileData['mime_type'])
                     ? $fileData['mime_type']
                     : 'application/octet-stream')
-                ->header('Content-Disposition', 'attachment; filename="' . (is_string($fileData['filename']) ? $fileData['filename'] : '') . '"')
+                ->header(
+                    'Content-Disposition',
+                    'attachment; filename="' . (is_string($fileData['filename'])
+                        ? $fileData['filename']
+                        : '') . '"'
+                )
                 ->header('Content-Length', is_numeric($fileData['size']) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
@@ -341,7 +354,10 @@ class ProductFileController extends Controller
             foreach ($files as $file) {
                 $fileData = $this->productFileService->downloadFile($file, auth()->id() ? (int)auth()->id() : 0);
                 if ($fileData) {
-                    $zip->addFromString($file->originalName, is_string($fileData['content']) ? $fileData['content'] : '');
+                    $zip->addFromString(
+                        $file->originalName,
+                        is_string($fileData['content']) ? $fileData['content'] : ''
+                    );
                     $addedFiles++;
                 }
             }

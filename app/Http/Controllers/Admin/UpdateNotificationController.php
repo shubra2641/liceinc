@@ -127,8 +127,16 @@ class UpdateNotificationController extends Controller
             $dismissUntil = $request->validated()['dismiss_until'] ?? null;
             if ($dismissUntil) {
                 // Dismiss until specific date
-                Cache::put('update_notification_dismissed', true, now()->parse(is_string($dismissUntil) ? $dismissUntil : ''));
-                Cache::put('update_notification_dismissed_until', $dismissUntil, now()->parse(is_string($dismissUntil) ? $dismissUntil : ''));
+                Cache::put(
+                    'update_notification_dismissed',
+                    true,
+                    now()->parse(is_string($dismissUntil) ? $dismissUntil : '')
+                );
+                Cache::put(
+                    'update_notification_dismissed_until',
+                    $dismissUntil,
+                    now()->parse(is_string($dismissUntil) ? $dismissUntil : '')
+                );
             } else {
                 // Dismiss for 24 hours
                 Cache::put('update_notification_dismissed', true, now()->addHours(24));

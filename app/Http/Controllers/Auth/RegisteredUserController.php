@@ -157,7 +157,13 @@ class RegisteredUserController extends Controller
                 response()->json(['errors' => ['g-recaptcha-response' => [__('Please complete the captcha')]]], 422)
             );
         }
-        if (! $this->verifyRecaptcha(is_string($token) ? $token : '', is_string($captchaSecret) ? $captchaSecret : '', $request->ip())) {
+        if (
+            ! $this->verifyRecaptcha(
+                is_string($token) ? $token : '',
+                is_string($captchaSecret) ? $captchaSecret : '',
+                $request->ip()
+            )
+        ) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
                 response()->json(['errors' => ['g-recaptcha-response' => [__('Captcha verification failed')]]], 422)
@@ -178,12 +184,19 @@ class RegisteredUserController extends Controller
             return;
         }
         $humanQuestions = $this->getHumanQuestions();
-        $given = strtolower(trim(is_string($request->validated('human_answer', '')) ? $request->validated('human_answer', '') : ''));
+        $given = strtolower(trim(
+            is_string($request->validated('human_answer', ''))
+                ? $request->validated('human_answer', '')
+                : ''
+        ));
         $index = $request->validated('human_question_index', null);
         if (! $this->isValidHumanAnswer($given, is_numeric($index) ? (int)$index : 0, $humanQuestions)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
-                response()->json(['errors' => ['human_answer' => [__('Incorrect answer to the anti-spam question')]]], 422)
+                response()->json(
+                    ['errors' => ['human_answer' => [__('Incorrect answer to the anti-spam question')]]],
+                    422
+                )
             );
         }
     }
@@ -247,7 +260,11 @@ class RegisteredUserController extends Controller
     private function createUser(RegisterRequest $request): User
     {
         return User::create([
-            'name' => (is_string($this->sanitizeInput($request->firstname)) ? $this->sanitizeInput($request->firstname) : '') . ' ' . (is_string($this->sanitizeInput($request->lastname)) ? $this->sanitizeInput($request->lastname) : ''),
+            'name' => (is_string($this->sanitizeInput($request->firstname))
+                ? $this->sanitizeInput($request->firstname)
+                : '') . ' ' . (is_string($this->sanitizeInput($request->lastname))
+                ? $this->sanitizeInput($request->lastname)
+                : ''),
             'firstname' => $this->sanitizeInput($request->firstname),
             'lastname' => $this->sanitizeInput($request->lastname),
             'email' => $this->sanitizeInput($request->email),
@@ -353,7 +370,9 @@ class RegisteredUserController extends Controller
         if (! empty($humanQuestions)) {
             $selectedQuestionIndex = array_rand($humanQuestions);
             $selectedQuestion = $humanQuestions[$selectedQuestionIndex] ?? null;
-            $selectedQuestionText = (is_array($selectedQuestion) && isset($selectedQuestion['question'])) ? $selectedQuestion['question'] : null;
+            $selectedQuestionText = (is_array($selectedQuestion) && isset($selectedQuestion['question']))
+                ? $selectedQuestion['question']
+                : null;
         }
         return [
             'enableCaptcha' => $enableCaptcha,

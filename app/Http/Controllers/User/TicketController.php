@@ -243,7 +243,10 @@ class TicketController extends Controller
             } else {
                 // For guests, redirect to support ticket view
                 return redirect()->route('support.tickets.show', $ticket)
-                    ->with('success', 'Ticket created successfully. You can view it using the ticket ID: ' . $ticket->id);
+                    ->with(
+                        'success',
+                        'Ticket created successfully. You can view it using the ticket ID: ' . $ticket->id
+                    );
             }
         } catch (Exception $e) {
             DB::rollBack();
@@ -554,7 +557,11 @@ class TicketController extends Controller
                 // Try to verify via Envato service if available
                 try {
                     $envatoService = app(EnvatoService::class);
-                    $sale = $envatoService->verifyPurchase(is_string($validated['purchase_code']) ? $validated['purchase_code'] : '');
+                    $sale = $envatoService->verifyPurchase(
+                        is_string($validated['purchase_code'])
+                            ? $validated['purchase_code']
+                            : ''
+                    );
                 } catch (\Throwable $e) {
                     Log::error('Envato verification failed: ' . $e->getMessage());
                     $sale = null;
@@ -698,7 +705,8 @@ class TicketController extends Controller
     {
         $user = Auth::user();
         return ! $ticket->userId || // Guest ticket
-               (Auth::check() && ($ticket->userId === Auth::id() || ($user && $user->hasRole('admin')))); // Logged in user
+               (Auth::check() && ($ticket->userId === Auth::id()
+                   || ($user && $user->hasRole('admin')))); // Logged in user
     }
     /**
      * Check if user can modify ticket.

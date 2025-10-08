@@ -272,7 +272,11 @@ class EmailTemplateController extends Controller
         $types = ['user', 'admin'];
         $categories = ['registration', 'license', 'product', 'ticket', 'invoice'];
 
-        return view('admin.email-templates.edit', ['emailTemplate' => $emailTemplate, 'types' => $types, 'categories' => $categories]);
+        return view('admin.email-templates.edit', [
+            'emailTemplate' => $emailTemplate,
+            'types' => $types,
+            'categories' => $categories
+        ]);
     }
 
     /**
@@ -601,7 +605,8 @@ class EmailTemplateController extends Controller
             'site_name' => config('app.name'),
             'site_url' => config('app.url'),
             'current_year' => date('Y'),
-            'verification_url' => (is_string(config('app.url')) ? config('app.url') : '') . '/verify-email?token=test-token',
+            'verification_url' => (is_string(config('app.url')) ? config('app.url') : '')
+                . '/verify-email?token=test-token',
             'reset_url' => (is_string(config('app.url')) ? config('app.url') : '') . '/reset-password?token=test-token',
             'licenseKey' => 'LIC-' . strtoupper(substr(md5((string)time()), 0, 8)),
             'product_name' => 'Test Product',

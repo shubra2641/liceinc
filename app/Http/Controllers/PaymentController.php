@@ -331,7 +331,10 @@ class PaymentController extends Controller
             }
             $user = Auth::user();
             // Verify payment with gateway
-            $verificationResult = $this->paymentService->verifyPayment($gateway, is_string($transactionId) ? $transactionId : '');
+            $verificationResult = $this->paymentService->verifyPayment(
+                $gateway,
+                is_string($transactionId) ? $transactionId : ''
+            );
             if ($verificationResult['success']) {
                 // Check if this is a custom invoice payment
                 $isCustom = session('payment_is_custom', false);
@@ -417,18 +420,30 @@ class PaymentController extends Controller
                     );
                     Log::warning('License and invoice creation result', [
                         'success' => $result['success'] ?? false,
-                        'licenseId' => (is_object($result['license'] ?? null) && isset($result['license']->id)) ? $result['license']->id : 'N/A',
-                        'invoice_id' => (is_object($result['invoice'] ?? null) && isset($result['invoice']->id)) ? $result['invoice']->id : 'N/A',
+                        'licenseId' => (is_object($result['license'] ?? null)
+                            && isset($result['license']->id))
+                            ? $result['license']->id
+                            : 'N/A',
+                        'invoice_id' => (is_object($result['invoice'] ?? null)
+                            && isset($result['invoice']->id))
+                            ? $result['invoice']->id
+                            : 'N/A',
                     ]);
                     if ($result['success']) {
                         // Clear payment session
                         session()->forget(['payment_productId', 'payment_invoice_id']);
                         // Send emails
                         try {
-                            if ($result['license'] instanceof \App\Models\License && $result['invoice'] instanceof \App\Models\Invoice) {
+                            if (
+                                $result['license'] instanceof \App\Models\License
+                                && $result['invoice'] instanceof \App\Models\Invoice
+                            ) {
                                 $this->emailService->sendPaymentConfirmation($result['license'], $result['invoice']);
                                 $this->emailService->sendLicenseCreated($result['license']);
-                                $this->emailService->sendAdminPaymentNotification($result['license'], $result['invoice']);
+                                $this->emailService->sendAdminPaymentNotification(
+                                    $result['license'],
+                                    $result['invoice']
+                                );
                             }
                         } catch (\Exception $e) {
                             Log::error('Failed to send payment emails', [
@@ -556,7 +571,10 @@ class PaymentController extends Controller
                 'ip' => request()->ip(),
             ]);
             return redirect()->route('payment.failure', $gateway)
-                ->with('error_message', trans('app.Payment failed: :error', ['error' => is_string($error) ? $error : 'Unknown error']));
+                ->with('error_message', trans(
+                    'app.Payment failed: :error',
+                    ['error' => is_string($error) ? $error : 'Unknown error']
+                ));
         } catch (\Exception $e) {
             Log::error('Payment failure handling failed', [
                 'error' => $e->getMessage(),

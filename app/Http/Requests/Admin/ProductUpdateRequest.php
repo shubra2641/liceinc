@@ -179,7 +179,9 @@ class ProductUpdateRequest extends FormRequest
             'title' => $this->sanitizeInput($this->input('title')),
             'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
             'changelog' => $this->input('changelog') ? $this->sanitizeInput($this->input('changelog')) : null,
-            'release_notes' => $this->input('release_notes') ? $this->sanitizeInput($this->input('release_notes')) : null,
+            'release_notes' => $this->input('release_notes')
+                ? $this->sanitizeInput($this->input('release_notes'))
+                : null,
         ]);
         // Handle checkbox values
         $this->merge([

@@ -461,8 +461,13 @@ class EnvatoController extends Controller
                 'userId' => auth()->id(),
                 'licenseType' => 'regular',
                 'status' => 'active',
-                'support_expiresAt' => data_get($sale, 'supported_until') ?
-                    Carbon::parse(is_string(data_get($sale, 'supported_until')) ? data_get($sale, 'supported_until') : '')->format('Y-m-d') : null,
+                'support_expiresAt' => data_get($sale, 'supported_until')
+                    ? Carbon::parse(
+                        is_string(data_get($sale, 'supported_until'))
+                            ? data_get($sale, 'supported_until')
+                            : ''
+                    )->format('Y-m-d')
+                    : null,
                 'verified_at' => now(),
             ]);
             DB::commit();

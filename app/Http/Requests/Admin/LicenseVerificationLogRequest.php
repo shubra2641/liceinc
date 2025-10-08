@@ -336,7 +336,9 @@ class LicenseVerificationLogRequest extends FormRequest
             'sortBy' => $this->input('sortBy') ? $this->sanitizeInput($this->input('sortBy')) : null,
             'sortOrder' => $this->input('sortOrder') ? $this->sanitizeInput($this->input('sortOrder')) : null,
             'group_by' => $this->input('group_by') ? $this->sanitizeInput($this->input('group_by')) : null,
-            'threshold_type' => $this->input('threshold_type') ? $this->sanitizeInput($this->input('threshold_type')) : null,
+            'threshold_type' => $this->input('threshold_type')
+                ? $this->sanitizeInput($this->input('threshold_type'))
+                : null,
             'risk_level' => $this->input('risk_level') ? $this->sanitizeInput($this->input('risk_level')) : null,
             'cleanup_type' => $this->input('cleanup_type') ? $this->sanitizeInput($this->input('cleanup_type')) : null,
         ]);

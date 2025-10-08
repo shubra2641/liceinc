@@ -315,7 +315,14 @@ class SettingController extends Controller
             DB::commit();
             // Check if API token was auto-generated
             $message = 'Settings updated successfully.';
-            if (empty($request->input('license_api_token')) || strlen(is_string($request->input('license_api_token')) ? $request->input('license_api_token') : '') < 32) {
+            if (
+                empty($request->input('license_api_token'))
+                || strlen(
+                    is_string($request->input('license_api_token'))
+                        ? $request->input('license_api_token')
+                        : ''
+                ) < 32
+            ) {
                 $message .= ' A new API token has been automatically generated for you.';
             }
 
@@ -425,7 +432,12 @@ class SettingController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed: ' . implode(', ', is_array($e->errors()['token'] ?? null) ? $e->errors()['token'] : ['Invalid input']),
+                'message' => 'Validation failed: ' . implode(
+                    ', ',
+                    is_array($e->errors()['token'] ?? null)
+                        ? $e->errors()['token']
+                        : ['Invalid input']
+                ),
             ], 422);
         } catch (\Exception $e) {
             Log::error('Envato API test failed with exception', [

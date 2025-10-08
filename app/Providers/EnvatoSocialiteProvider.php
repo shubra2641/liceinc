@@ -102,13 +102,21 @@ class EnvatoSocialiteProvider extends ServiceProvider
             // Validate required settings
             $this->validateRequiredSettings($settings);
             // Create provider with validated settings
-            $request = (is_array($app) && isset($app['request']) && is_object($app['request'])) ? $app['request'] : null;
+            $request = (is_array($app) && isset($app['request']) && is_object($app['request']))
+                ? $app['request']
+                : null;
             if (!$request instanceof \Illuminate\Http\Request) {
                 throw new \InvalidArgumentException('Request instance not available');
             }
-            $clientId = is_string($settings['client_id'] ?? config('services.envato.client_id') ?? '') ? ($settings['client_id'] ?? config('services.envato.client_id') ?? '') : '';
-            $clientSecret = is_string($settings['client_secret'] ?? config('services.envato.client_secret') ?? '') ? ($settings['client_secret'] ?? config('services.envato.client_secret') ?? '') : '';
-            $redirect = is_string($settings['redirect'] ?? config('services.envato.redirect') ?? '') ? ($settings['redirect'] ?? config('services.envato.redirect') ?? '') : '';
+            $clientId = is_string($settings['client_id'] ?? config('services.envato.client_id') ?? '')
+                ? ($settings['client_id'] ?? config('services.envato.client_id') ?? '')
+                : '';
+            $clientSecret = is_string($settings['client_secret'] ?? config('services.envato.client_secret') ?? '')
+                ? ($settings['client_secret'] ?? config('services.envato.client_secret') ?? '')
+                : '';
+            $redirect = is_string($settings['redirect'] ?? config('services.envato.redirect') ?? '')
+                ? ($settings['redirect'] ?? config('services.envato.redirect') ?? '')
+                : '';
             return new EnvatoProvider(
                 $request,
                 $this->sanitizeSetting($clientId) ?? '',

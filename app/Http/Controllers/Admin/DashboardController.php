@@ -122,7 +122,12 @@ class DashboardController extends Controller
             // Read maintenance mode from cached settings. If true -> site is in maintenance (Offline)
             $isMaintenance = Setting::get('maintenance_mode', false);
             DB::commit();
-            return view('admin.dashboard', ['stats' => $stats, 'latestTickets' => $latestTickets, 'latestLicenses' => $latestLicenses, 'isMaintenance' => $isMaintenance]);
+            return view('admin.dashboard', [
+                'stats' => $stats,
+                'latestTickets' => $latestTickets,
+                'latestLicenses' => $latestLicenses,
+                'isMaintenance' => $isMaintenance
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Dashboard data loading failed', [
@@ -277,7 +282,9 @@ class DashboardController extends Controller
             ]);
             $validatedArray = is_array($validated) ? $validated : [];
             $period = $this->sanitizeInput($validatedArray['period'] ?? 'monthly');
-            $year = isset($validatedArray['year']) && is_numeric($validatedArray['year']) ? (int)$validatedArray['year'] : (int)date('Y');
+            $year = isset($validatedArray['year']) && is_numeric($validatedArray['year'])
+                ? (int)$validatedArray['year']
+                : (int)date('Y');
             if ($period === 'monthly') {
                 $data = [];
                 $labels = [];
@@ -570,7 +577,9 @@ class DashboardController extends Controller
             ]);
             $validatedArray = is_array($validated) ? $validated : [];
             $period = $this->sanitizeInput($validatedArray['period'] ?? 'daily');
-            $days = isset($validatedArray['days']) && is_numeric($validatedArray['days']) ? (int)$validatedArray['days'] : 7;
+            $days = isset($validatedArray['days']) && is_numeric($validatedArray['days'])
+                ? (int)$validatedArray['days']
+                : 7;
             $data = [];
             $labels = [];
             $successData = [];

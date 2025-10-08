@@ -147,7 +147,9 @@ class AutoUpdateController extends Controller
             $validatedArray = is_array($validated) ? $validated : [];
             $licenseKey = $this->sanitizeInput($validatedArray['licenseKey'] ?? '');
             $productSlug = $this->sanitizeInput($validatedArray['product_slug'] ?? '');
-            $domain = isset($validatedArray['domain']) && $validatedArray['domain'] ? $this->sanitizeInput($validatedArray['domain']) : null;
+            $domain = isset($validatedArray['domain']) && $validatedArray['domain']
+                ? $this->sanitizeInput($validatedArray['domain'])
+                : null;
             $currentVersion = $this->sanitizeInput($validatedArray['current_version'] ?? '');
             // Check for updates using LicenseServerService
             $updateData = $this->licenseServerService->checkUpdates(
@@ -275,7 +277,9 @@ class AutoUpdateController extends Controller
             $validatedArray = is_array($validated) ? $validated : [];
             $licenseKey = $this->sanitizeInput($validatedArray['licenseKey'] ?? '');
             $productSlug = $this->sanitizeInput($validatedArray['product_slug'] ?? '');
-            $domain = isset($validatedArray['domain']) && $validatedArray['domain'] ? $this->sanitizeInput($validatedArray['domain']) : null;
+            $domain = isset($validatedArray['domain']) && $validatedArray['domain']
+                ? $this->sanitizeInput($validatedArray['domain'])
+                : null;
             $version = $this->sanitizeInput($validatedArray['version'] ?? '');
             // First verify license again
             $updateData = $this->licenseServerService->checkUpdates(

@@ -109,7 +109,7 @@ class ProcessOverdueInvoices implements ShouldQueue
             } catch (\Exception $e) {
                 Log::warning('Failed to process overdue invoice', [
                     'invoice_id' => $invoice->id,
-                    'invoice_number' => $invoice->invoice_number,
+                    'invoice_number' => $invoice->invoiceNumber,
                     'error' => $e->getMessage(),
                 ]);
             }

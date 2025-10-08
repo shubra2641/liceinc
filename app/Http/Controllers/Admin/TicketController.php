@@ -181,7 +181,9 @@ class TicketController extends Controller
                                 'annual' => 365,
                             ];
                             $metadata['recurrence'] = $billingType;
-                            $metadata['renewalPeriod_days'] = (is_string($billingType) && isset($map[$billingType])) ? $map[$billingType] : $duration;
+                            $metadata['renewalPeriod_days'] = (is_string($billingType) && isset($map[$billingType]))
+                                ? $map[$billingType]
+                                : $duration;
                             $metadata['renewalPrice'] = $amount;
                         }
                     }
@@ -196,7 +198,9 @@ class TicketController extends Controller
                     $amount = $request->input('invoice_amount') ?: $product->price;
                     $duration = $request->input('invoice_durationDays') ?: $product->durationDays ?: null;
                     $dueDate = $request->input('invoice_due_date')
-                        ?: ($duration ? now()->addDays(is_numeric($duration) ? (int)$duration : 0)->toDateString() : null);
+                        ?: ($duration
+                            ? now()->addDays(is_numeric($duration) ? (int)$duration : 0)->toDateString()
+                            : null);
                     $metadata = [];
                     if ($billingType !== 'one_time') {
                         $map = [
@@ -213,7 +217,8 @@ class TicketController extends Controller
                                 ?: $product->renewalPeriod ?: ($duration ?: 30);
                         } else {
                             $metadata['recurrence'] = $billingType;
-                            $metadata['renewalPeriod_days'] = (is_string($billingType) && array_key_exists($billingType, $map))
+                            $metadata['renewalPeriod_days'] = (is_string($billingType)
+                                && array_key_exists($billingType, $map))
                                 ? $map[$billingType] : ($product->renewalPeriod ?? $duration);
                             $metadata['renewalPrice'] = $product->renewalPrice ?? $amount;
                         }

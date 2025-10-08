@@ -46,7 +46,6 @@
     <link rel="stylesheet" href="{{ asset('assets/front/css/user-dashboard.css') }}">
     
     <!-- Laravel Mix Compiled Assets -->
-    <link rel="stylesheet" href="{{ mix('assets/front/css/app.css') }}">
     @yield('styles')
 
 </head>

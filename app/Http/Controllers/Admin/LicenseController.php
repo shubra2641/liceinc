@@ -76,7 +76,11 @@ class LicenseController extends Controller
         $users = User::all();
         $products = Product::all();
         $selectedUserId = null;
-        return view('admin.licenses.create', ['users' => $users, 'products' => $products, 'selectedUserId' => $selectedUserId]);
+        return view('admin.licenses.create', [
+            'users' => $users,
+            'products' => $products,
+            'selectedUserId' => $selectedUserId
+        ]);
     }
     /**
      * Store a newly created resource in storage with enhanced security.
@@ -130,13 +134,17 @@ class LicenseController extends Controller
             // Calculate license expiration date based on product duration
             if (empty($validated['licenseExpiresAt'])) {
                 if ($product->durationDays) {
-                    $validated['licenseExpiresAt'] = now()->addDays(is_numeric($product->durationDays) ? (int)$product->durationDays : 0);
+                    $validated['licenseExpiresAt'] = now()->addDays(
+                        is_numeric($product->durationDays) ? (int)$product->durationDays : 0
+                    );
                 }
             }
             // Calculate support expiration date based on product support days
             if (empty($validated['support_expiresAt'])) {
                 if ($product->supportDays) {
-                    $validated['support_expiresAt'] = now()->addDays(is_numeric($product->supportDays) ? (int)$product->supportDays : 0);
+                    $validated['support_expiresAt'] = now()->addDays(
+                        is_numeric($product->supportDays) ? (int)$product->supportDays : 0
+                    );
                 }
             }
             $license = License::create($validated);
@@ -144,8 +152,12 @@ class LicenseController extends Controller
             $invoiceService = app(InvoiceService::class);
             $invoice = $invoiceService->createInitialInvoice(
                 $license,
-                is_string($validated['invoice_payment_status'] ?? null) ? $validated['invoice_payment_status'] : 'pending',
-                ($validated['invoice_due_date'] ?? null) instanceof \DateTimeInterface ? $validated['invoice_due_date'] : null,
+                is_string($validated['invoice_payment_status'] ?? null)
+                    ? $validated['invoice_payment_status']
+                    : 'pending',
+                ($validated['invoice_due_date'] ?? null) instanceof \DateTimeInterface
+                    ? $validated['invoice_due_date']
+                    : null,
             );
             // Send email notifications
             try {
@@ -240,7 +252,9 @@ class LicenseController extends Controller
             if (array_key_exists('expiresAt', $validated)) {
                 $validated['licenseExpiresAt'] = ($validated['expiresAt'] !== null
                 && $validated['expiresAt'] !== '')
-                    ? \Carbon\Carbon::parse(is_string($validated['expiresAt']) ? $validated['expiresAt'] : '')->format('Y-m-d H:i:s')
+                    ? \Carbon\Carbon::parse(
+                        is_string($validated['expiresAt']) ? $validated['expiresAt'] : ''
+                    )->format('Y-m-d H:i:s')
                     : null;
                 unset($validated['expiresAt']);
             }

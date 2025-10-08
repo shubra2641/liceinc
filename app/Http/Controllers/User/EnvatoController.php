@@ -233,6 +233,8 @@ class EnvatoController extends Controller
                     // This is a regular user, no need to assign any specific role
                     // The default behavior will work fine
                     // Regular users don't need additional role assignments
+                    // No action needed for regular users
+                    Log::info('Regular user logged in via Envato', ['user_id' => $user->id]);
                 }
                 Auth::login($user, true);
                 // Determine redirect route based on user role (same logic as AuthenticatedSessionController)

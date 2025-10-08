@@ -1049,8 +1049,14 @@ class UpdateController extends Controller
                     'message' => 'Update installed successfully! System updated to version ' . $version,
                     'data' => [
                         'version' => $version,
-                        'files_installed' => (is_array($installResult['data'] ?? null) && isset($installResult['data']['files_installed'])) ? $installResult['data']['files_installed'] : 0,
-                        'steps' => (is_array($installResult['data'] ?? null) && isset($installResult['data']['steps'])) ? $installResult['data']['steps'] : [],
+                        'files_installed' => (is_array($installResult['data'] ?? null)
+                            && isset($installResult['data']['files_installed']))
+                            ? $installResult['data']['files_installed']
+                            : 0,
+                        'steps' => (is_array($installResult['data'] ?? null)
+                            && isset($installResult['data']['steps']))
+                            ? $installResult['data']['steps']
+                            : [],
                     ],
                 ];
             } else {
@@ -1062,7 +1068,11 @@ class UpdateController extends Controller
 
                 return [
                     'success' => false,
-                    'message' => 'Installation failed: ' . (is_string($installResult['message'] ?? null) ? $installResult['message'] : 'Unknown error'),
+                    'message' => 'Installation failed: ' . (
+                        is_string($installResult['message'] ?? null)
+                            ? $installResult['message']
+                            : 'Unknown error'
+                    ),
                     'error_code' => 'INSTALLATION_FAILED',
                 ];
             }
@@ -1145,7 +1155,8 @@ class UpdateController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cannot update to version ' . $version . '. Current version is ' . $currentVersion . '. '
+                    'message' => 'Cannot update to version ' . $version
+                        . '. Current version is ' . $currentVersion . '. '
                         . 'Only newer versions are allowed.',
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
                     'current_version' => $currentVersion,
@@ -1184,7 +1195,9 @@ class UpdateController extends Controller
             // Use the downloaded file directly
             $updateFilePath = $downloadResult['filePath'];
             // Extract and install update
-            $installResult = $this->updatePackageService->installUpdateFiles(is_string($updateFilePath) ? $updateFilePath : '');
+            $installResult = $this->updatePackageService->installUpdateFiles(
+                is_string($updateFilePath) ? $updateFilePath : ''
+            );
             if ($installResult['success']) {
                 // Clean up update file
                 unlink(is_string($updateFilePath) ? $updateFilePath : '');
@@ -1261,7 +1274,9 @@ class UpdateController extends Controller
             if ($latestVersionData['success']) {
                 $data = $latestVersionData['data'];
                 // Check if update is available
-                $isUpdateAvailable = (is_array($data) && isset($data['is_update_available'])) ? $data['is_update_available'] : false;
+                $isUpdateAvailable = (is_array($data) && isset($data['is_update_available']))
+                    ? $data['is_update_available']
+                    : false;
                 $nextVersion = (is_array($data) && isset($data['next_version'])) ? $data['next_version'] : null;
                 // Additional validation: Check if next version is actually newer than current
                 if ($isUpdateAvailable && $nextVersion) {
@@ -1323,11 +1338,17 @@ class UpdateController extends Controller
             $productsData = $this->licenseServerService->getProducts();
             // Products API response received
             if ($productsData['success']) {
-                $allProducts = (is_array($productsData['data'] ?? null) && isset($productsData['data']['products'])) ? $productsData['data']['products'] : [];
+                $allProducts = (is_array($productsData['data'] ?? null)
+                    && isset($productsData['data']['products']))
+                    ? $productsData['data']['products']
+                    : [];
                 // Filter for specific product
-                $specificProduct = array_filter(is_array($allProducts) ? $allProducts : [], function ($product) use ($productSlug) {
-                    return is_array($product) && isset($product['slug']) && $product['slug'] === $productSlug;
-                });
+                $specificProduct = array_filter(
+                    is_array($allProducts) ? $allProducts : [],
+                    function ($product) use ($productSlug) {
+                        return is_array($product) && isset($product['slug']) && $product['slug'] === $productSlug;
+                    }
+                );
                 $filteredProducts = array_values($specificProduct);
 
                 // Filtered products for specific slug

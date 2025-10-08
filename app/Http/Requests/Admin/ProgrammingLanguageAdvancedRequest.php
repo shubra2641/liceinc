@@ -236,9 +236,15 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
             'template_description' => $this->input('template_description')
                 ? $this->sanitizeInput($this->input('template_description'))
                 : null,
-            'template_name' => $this->input('template_name') ? $this->sanitizeInput($this->input('template_name')) : null,
-            'version' => $this->input('version') === true ? $this->sanitizeInput((string)$this->input('version')) : null,
-            'compatibility' => $this->input('compatibility') ? $this->sanitizeInput($this->input('compatibility')) : null,
+            'template_name' => $this->input('template_name')
+                ? $this->sanitizeInput($this->input('template_name'))
+                : null,
+            'version' => $this->input('version') === true
+                ? $this->sanitizeInput((string)$this->input('version'))
+                : null,
+            'compatibility' => $this->input('compatibility')
+                ? $this->sanitizeInput($this->input('compatibility'))
+                : null,
             'author' => $this->input('author') ? $this->sanitizeInput($this->input('author')) : null,
             'license' => $this->input('license') ? $this->sanitizeInput($this->input('license')) : null,
         ]);
@@ -261,8 +267,8 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
         // Set default values
         $this->merge([
             'isActive' => $this->isActive ?? true,
-            'indentation_size' => $this->indentation_size ?? 4,
-            'line_ending' => $this->line_ending ?? 'lf',
+            'indentation_size' => $this->indentationSize ?? 4,
+            'line_ending' => $this->lineEnding ?? 'lf',
             'encoding' => $this->encoding ?? 'utf-8',
         ]);
     }

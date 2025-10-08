@@ -78,7 +78,9 @@ class VerifyPurchaseCodeRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'purchase_code' => $this->purchase_code && is_string($this->purchase_code) ? trim($this->purchase_code) : null,
+            'purchase_code' => $this->purchaseCode && is_string($this->purchaseCode)
+                ? trim($this->purchaseCode)
+                : null,
         ]);
     }
 }

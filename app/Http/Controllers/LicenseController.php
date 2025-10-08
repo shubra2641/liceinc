@@ -109,7 +109,11 @@ class LicenseController extends Controller
             if ($selectedUserId && (! is_numeric($selectedUserId) || $selectedUserId <= 0)) {
                 $selectedUserId = null;
             }
-            return view('admin.licenses.create', ['users' => $users, 'products' => $products, 'selectedUserId' => $selectedUserId]);
+            return view('admin.licenses.create', [
+                'users' => $users,
+                'products' => $products,
+                'selectedUserId' => $selectedUserId
+            ]);
         } catch (\Exception $e) {
             Log::error('Error showing license creation form', [
                 'userId' => auth()->id(),
@@ -292,7 +296,8 @@ class LicenseController extends Controller
             $maxAttempts = 100;
             do {
                 $key = strtoupper(substr(md5(microtime() . uniqid()), 0, 16));
-                $key = substr($key, 0, 4) . '-' . substr($key, 4, 4) . '-' . substr($key, 8, 4) . '-' . substr($key, 12, 4);
+                $key = substr($key, 0, 4) . '-' . substr($key, 4, 4) . '-'
+                    . substr($key, 8, 4) . '-' . substr($key, 12, 4);
                 $attempts++;
                 if ($attempts >= $maxAttempts) {
                     throw new \Exception('Unable to generate unique license key after ' . $maxAttempts . ' attempts');

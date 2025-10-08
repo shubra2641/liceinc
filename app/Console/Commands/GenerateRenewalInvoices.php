@@ -144,7 +144,9 @@ class GenerateRenewalInvoices extends Command
         $days = (int)$this->option('days');
         // Validate days range (1-365 days)
         if ($days < 1 || $days > 365) {
-            throw new \InvalidArgumentException("Days must be between 1 and 365, got: " . SecurityHelper::escapeVariable((string)$days));
+            throw new \InvalidArgumentException(
+                "Days must be between 1 and 365, got: " . SecurityHelper::escapeVariable((string)$days)
+            );
         }
         return $days;
     }
@@ -358,7 +360,7 @@ class GenerateRenewalInvoices extends Command
                             ? $license->licenseExpiresAt->format('Y-m-d')
                             : 'Unknown',
                         'invoice_amount' => $invoice->amount,
-                        'invoice_due_date' => $invoice->due_date->format('Y-m-d'),
+                        'invoice_due_date' => $invoice->dueDate->format('Y-m-d'),
                         'invoice_id' => $invoice->id,
                     ];
                     /**
@@ -436,7 +438,9 @@ class GenerateRenewalInvoices extends Command
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $this->error("Failed to send renewal notifications for license {$license->licenseKey}: " . $e->getMessage());
+            $this->error(
+                "Failed to send renewal notifications for license {$license->licenseKey}: " . $e->getMessage()
+            );
             return false;
         }
     }

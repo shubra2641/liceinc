@@ -417,8 +417,8 @@ class ApiUpdateRequest extends FormRequest
             'version' => $this->input('version')
                 ? $this->sanitizeInput($this->input('version'))
                 : null,
-            'filter_version' => $this->input('filter_version') 
-                ? $this->sanitizeInput($this->input('filter_version')) 
+            'filter_version' => $this->input('filter_version')
+                ? $this->sanitizeInput($this->input('filter_version'))
                 : null,
             'sortOrder' => $this->input('sortOrder') ? $this->sanitizeInput($this->input('sortOrder')) : null,
         ]);

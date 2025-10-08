@@ -184,7 +184,9 @@ class ProductUpdateController extends Controller
             $fileHash = hash_file('sha256', $file->getRealPath());
             // Convert changelog text to array
             $changelogText = $validated['changelog'] ?? null;
-            $changelogArray = $changelogText ? array_filter(array_map('trim', explode("\n", is_string($changelogText) ? $changelogText : ''))) : [];
+            $changelogArray = $changelogText
+                ? array_filter(array_map('trim', explode("\n", is_string($changelogText) ? $changelogText : '')))
+                : [];
             // Create update record
             $update = ProductUpdate::create([
                 'productId' => $product->id,
@@ -323,7 +325,9 @@ class ProductUpdateController extends Controller
             }
             // Convert changelog text to array
             $changelogText = $validated['changelog'] ?? null;
-            $changelogArray = $changelogText ? array_filter(array_map('trim', explode("\n", is_string($changelogText) ? $changelogText : ''))) : [];
+            $changelogArray = $changelogText
+                ? array_filter(array_map('trim', explode("\n", is_string($changelogText) ? $changelogText : '')))
+                : [];
             $updateData = [
                 'productId' => $validated['productId'],
                 'version' => $validated['version'],
@@ -340,7 +344,9 @@ class ProductUpdateController extends Controller
             // Handle file upload if provided
             if ($request->hasFile('update_file')) {
                 $file = $request->file('update_file');
-                $fileName = 'update_' . $productUpdate->product->slug . '_' . (is_string($validated['version'] ?? null) ? $validated['version'] : '') . '_' . time() . '.zip';
+                $fileName = 'update_' . $productUpdate->product->slug . '_'
+                    . (is_string($validated['version'] ?? null) ? $validated['version'] : '')
+                    . '_' . time() . '.zip';
                 $filePath = $file->storeAs('product-updates', $fileName);
                 $fileHash = hash_file('sha256', $file->getRealPath());
                 // Delete old file

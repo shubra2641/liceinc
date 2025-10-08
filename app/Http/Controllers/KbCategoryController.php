@@ -151,7 +151,12 @@ class KbCategoryController extends Controller
                 // Sanitize input data
                 $validated = $this->sanitizeCategoryData($validated);
                 // Generate slug if not provided
-                $validated['slug'] = $validated['slug'] ?: Str::slug(is_string($validated['name']) ? $validated['name'] : '');
+                $validated['slug'] = $validated['slug']
+                    ?: Str::slug(
+                        is_string($validated['name'])
+                            ? $validated['name']
+                            : ''
+                    );
                 $category = KbCategory::create($validated);
                 Log::debug('Knowledge base category created successfully', [
                     'category_id' => $category->id,

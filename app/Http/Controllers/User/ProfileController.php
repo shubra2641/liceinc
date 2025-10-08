@@ -216,7 +216,7 @@ class ProfileController extends Controller
             $user->envatoId = null;
             $user->envatoToken = null;
             $user->envatoRefreshToken = null;
-            $user->envatoToken_expiresAt = null;
+            $user->envatoTokenExpiresAt = null;
             $user->save();
             DB::commit();
             return Redirect::route('profile.edit')

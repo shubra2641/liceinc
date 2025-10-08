@@ -622,7 +622,11 @@ class KbPublicController extends Controller
                 );
                 $product = $productId ? Product::find($productId) : null;
                 if ($product && $product->id == $category->productId) {
-                    $accessToken = 'kb_access_' . $category->id . '_' . time() . '_' . substr(md5($license instanceof \App\Models\License ? $license->licenseKey : ''), 0, 8);
+                    $accessToken = 'kb_access_' . $category->id . '_' . time() . '_' . substr(
+                        md5($license instanceof \App\Models\License ? $license->licenseKey : ''),
+                        0,
+                        8
+                    );
                     session([$accessToken => [
                         'licenseId' => $license instanceof \App\Models\License ? $license->id : null,
                         'productId' => $product->id,
@@ -673,7 +677,13 @@ class KbPublicController extends Controller
         try {
             if (session()->has($accessToken)) {
                 $tokenData = session($accessToken);
-                if (is_array($tokenData) && isset($tokenData['expiresAt']) && isset($tokenData['category_id']) && $tokenData['expiresAt'] > now() && $tokenData['category_id'] == $categoryId) {
+                if (
+                    is_array($tokenData)
+                    && isset($tokenData['expiresAt'])
+                    && isset($tokenData['category_id'])
+                    && $tokenData['expiresAt'] > now()
+                    && $tokenData['category_id'] == $categoryId
+                ) {
                     return ['valid' => true];
                 } else {
                     session()->forget($accessToken);
@@ -861,7 +871,13 @@ class KbPublicController extends Controller
         try {
             if (session()->has($accessToken)) {
                 $tokenData = session($accessToken);
-                if (is_array($tokenData) && isset($tokenData['expiresAt']) && isset($tokenData['article_id']) && $tokenData['expiresAt'] > now() && $tokenData['article_id'] == $articleId) {
+                if (
+                    is_array($tokenData)
+                    && isset($tokenData['expiresAt'])
+                    && isset($tokenData['article_id'])
+                    && $tokenData['expiresAt'] > now()
+                    && $tokenData['article_id'] == $articleId
+                ) {
                     return ['valid' => true];
                 } else {
                     session()->forget($accessToken);
@@ -985,7 +1001,10 @@ class KbPublicController extends Controller
                 }
             }
             // Add pagination for results (limit to 10 per page)
-            $resultsWithAccess = $resultsWithAccess->forPage(is_numeric(request('page', 1)) ? (int)request('page', 1) : 1, 10);
+            $resultsWithAccess = $resultsWithAccess->forPage(
+                is_numeric(request('page', 1)) ? (int)request('page', 1) : 1,
+                10
+            );
             return [
                 'results' => $results,
                 'resultsWithAccess' => $resultsWithAccess,
@@ -1013,6 +1032,10 @@ class KbPublicController extends Controller
         if (empty($query)) {
             return $text;
         }
-        return preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark class="search-highlight">$1</mark>', $text) ?? $text;
+        return preg_replace(
+            '/(' . preg_quote($query, '/') . ')/i',
+            '<mark class="search-highlight">$1</mark>',
+            $text
+        ) ?? $text;
     }
 }

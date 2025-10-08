@@ -169,7 +169,10 @@ class ProgrammingLanguageController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
+            $validated['slug'] = $validated['slug']
+                ?? Str::slug(
+                    is_string($validated['name'] ?? null) ? $validated['name'] : ''
+                );
             ProgrammingLanguage::create($validated);
             DB::commit();
 
@@ -206,7 +209,10 @@ class ProgrammingLanguageController extends Controller
     {
         $availableTemplates = ProgrammingLanguage::getAvailableTemplateFiles();
 
-        return view('admin.programming-languages.show', ['programmingLanguage' => $programmingLanguage, 'availableTemplates' => $availableTemplates]);
+        return view('admin.programming-languages.show', [
+            'programmingLanguage' => $programmingLanguage,
+            'availableTemplates' => $availableTemplates
+        ]);
     }
 
     /**
@@ -248,7 +254,10 @@ class ProgrammingLanguageController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
+            $validated['slug'] = $validated['slug']
+                ?? Str::slug(
+                    is_string($validated['name'] ?? null) ? $validated['name'] : ''
+                );
             $programmingLanguage->update($validated);
             DB::commit();
 
@@ -428,7 +437,9 @@ class ProgrammingLanguageController extends Controller
             $availableTemplates = ProgrammingLanguage::getAvailableTemplateFiles();
             $validationResults = [];
             foreach ($availableTemplates as $templateName => $templateInfo) {
-                $templatePath = (is_array($templateInfo) && isset($templateInfo['filePath'])) ? $templateInfo['filePath'] : '';
+                $templatePath = (is_array($templateInfo) && isset($templateInfo['filePath']))
+                    ? $templateInfo['filePath']
+                    : '';
                 $content = file_get_contents(is_string($templatePath) ? $templatePath : '');
                 $result = [
                     'template' => $templateName,
@@ -590,7 +601,10 @@ class ProgrammingLanguageController extends Controller
             }
             $filename = $programmingLanguage->slug . '.php';
             $filePath = $templateDir . '/' . $filename;
-            SecureFileHelper::putContents($filePath, is_string($request->templateContent ?? null) ? $request->templateContent : '');
+            SecureFileHelper::putContents(
+                $filePath,
+                is_string($request->templateContent ?? null) ? $request->templateContent : ''
+            );
 
             return response()->json([
                 'success' => true,

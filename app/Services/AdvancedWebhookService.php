@@ -136,6 +136,7 @@ class AdvancedWebhookService
      */
     /**
      * @param array<string, mixed> $payload
+     *
      * @return array<string, mixed>
      */
     private function prepareWebhookData(Webhook $webhook, string $eventType, array $payload): array
@@ -201,7 +202,9 @@ class AdvancedWebhookService
             'Content-Type' => 'application/json',
             'User-Agent' => 'Sekuret-Webhook/1.0',
             'X-Webhook-Event' => $data['event'],
-            'X-Webhook-Timestamp' => is_numeric($data['timestamp'] ?? time()) ? (string)($data['timestamp'] ?? time()) : (string)time(),
+            'X-Webhook-Timestamp' => is_numeric($data['timestamp'] ?? time())
+                ? (string)($data['timestamp'] ?? time())
+                : (string)time(),
             'X-Webhook-Nonce' => $data['nonce'],
         ];
         if (isset($data['signature'])) {
@@ -335,7 +338,7 @@ class AdvancedWebhookService
             'event_type' => $eventType,
         ]);
         // Optionally disable webhook after repeated failures
-        if ($webhook->failed_attempts > 10) {
+        if ($webhook->failedAttempts > 10) {
             $webhook->update(['isActive' => false]);
         }
     }
@@ -460,8 +463,8 @@ class AdvancedWebhookService
             'success_rate' => round((float) $successRate, 2),
             'average_response_time' => round((float) $avgResponseTime, 3),
             'events_breakdown' => $events,
-            'last_successful' => $webhook->last_successful_at,
-            'last_failed' => $webhook->last_failed_at,
+            'last_successful' => $webhook->lastSuccessfulAt,
+            'last_failed' => $webhook->lastFailedAt,
         ];
     }
     /**

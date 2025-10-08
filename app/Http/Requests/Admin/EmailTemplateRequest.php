@@ -211,9 +211,9 @@ class EmailTemplateRequest extends FormRequest
             'priority' => $this->priority ?? 5,
         ]);
         // Sanitize test data if present
-        if ($this->test_data && is_array($this->test_data)) {
+        if ($this->testData && is_array($this->testData)) {
             $sanitizedTestData = [];
-            foreach ($this->test_data as $key => $value) {
+            foreach ($this->testData as $key => $value) {
                 $sanitizedTestData[$key] = $this->sanitizeInput($value);
             }
             $this->merge(['test_data' => $sanitizedTestData]);

@@ -159,8 +159,9 @@ class ProductFileRequest extends FormRequest
             'name.regex' => 'File name contains invalid characters.',
             'description.regex' => 'Description contains invalid characters.',
             'file.required' => 'File upload is required.',
-            'file.mimes' => 'File must be a valid file type (zip, rar, 7z, tar, gz, java, cpp, c, cs, go, rb, '
-                . 'swift, kt, scala, rs, html, css, json, xml, yaml, yml, md, txt, pdf, doc, docx, xls, xlsx, ppt, pptx).',
+            'file.mimes' => 'File must be a valid file type (zip, rar, 7z, tar, gz, java, cpp, c, cs, go, rb, ' .
+                'swift, kt, scala, rs, html, css, json, xml, yaml, yml, md, txt, pdf, doc, docx, xls, xlsx, ' .
+                'ppt, pptx).',
             'file.max' => 'File size must not exceed 100MB.',
             'version.required' => 'File version is required.',
             'version.regex' => 'Version must be in format: x.y.z (e.g., 1.0.0).',
@@ -221,7 +222,9 @@ class ProductFileRequest extends FormRequest
                 ? $this->sanitizeInput($this->input('release_notes'))
                 : null,
             'changelog' => $this->input('changelog') ? $this->sanitizeInput($this->input('changelog')) : null,
-            'compatibility' => $this->input('compatibility') ? $this->sanitizeInput($this->input('compatibility')) : null,
+            'compatibility' => $this->input('compatibility')
+                ? $this->sanitizeInput($this->input('compatibility'))
+                : null,
             'requirements' => $this->input('requirements') ? $this->sanitizeInput($this->input('requirements')) : null,
             'installation_instructions' => $this->input('installation_instructions')
                 ? $this->sanitizeInput($this->input('installation_instructions'))

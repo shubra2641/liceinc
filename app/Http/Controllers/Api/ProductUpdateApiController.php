@@ -135,7 +135,7 @@ class ProductUpdateApiController extends Controller
                         'isRequired'  => $update->isRequired,
                         'file_size' => $update->formattedFileSize,
                         'releasedAt'  => $update->releasedAt?->toISOString(),
-                        'download_url' => $update->download_url,
+                        'downloadUrl' => $update->downloadUrl,
                         'requirements'  => $update->requirements,
                         'compatibility' => $update->compatibility,
                     ];
@@ -242,7 +242,7 @@ class ProductUpdateApiController extends Controller
                 'isRequired'  => $latestUpdate->isRequired,
                 'file_size' => $latestUpdate->formattedFileSize,
                 'releasedAt'  => $latestUpdate->releasedAt?->toISOString(),
-                'download_url' => $latestUpdate->download_url,
+                'downloadUrl' => $latestUpdate->downloadUrl,
                 'requirements'  => $latestUpdate->requirements,
                 'compatibility' => $latestUpdate->compatibility,
             ];

@@ -297,7 +297,11 @@ class ProductCategoryController extends Controller
         try {
             // Rate limiting for security
             // Build a namespaced rate-limit key (not SQL) - explicit formatting to avoid false positive
-            $key = sprintf('product-category-update:%s:%s', $request->ip(), Auth::id()); // security-ignore: SQL_STRING_CONCAT
+            $key = sprintf(
+                'product-category-update:%s:%s',
+                $request->ip(),
+                Auth::id()
+            ); // security-ignore: SQL_STRING_CONCAT
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for product category update', [
                     'ip' => $request->ip(),

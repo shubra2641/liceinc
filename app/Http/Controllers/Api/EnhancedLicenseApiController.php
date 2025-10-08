@@ -528,7 +528,12 @@ class EnhancedLicenseApiController extends BaseController
     ): array {
         $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
 
-        if (! is_array($envatoData) || ! isset($envatoData['item']) || ! is_array($envatoData['item']) || ! isset($envatoData['item']['id'])) {
+        if (
+            ! is_array($envatoData)
+            || ! isset($envatoData['item'])
+            || ! is_array($envatoData['item'])
+            || ! isset($envatoData['item']['id'])
+        ) {
             $this->logSecurityEvent('Invalid Envato verification', $request, [
                 'purchase_code' => $this->securityService->hashForLogging($purchaseCode),
                 'productId' => $product->id,

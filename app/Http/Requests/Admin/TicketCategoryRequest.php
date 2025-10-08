@@ -49,7 +49,9 @@ class TicketCategoryRequest extends FormRequest
                 'string',
                 'max:255',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
-                $isUpdate ? Rule::unique('ticket_categories', 'name')->ignore($categoryId) : 'unique:ticket_categories, name',
+                $isUpdate
+                    ? Rule::unique('ticket_categories', 'name')->ignore($categoryId)
+                    : 'unique:ticket_categories, name',
             ],
             'description' => [
                 'nullable',
@@ -188,8 +190,12 @@ class TicketCategoryRequest extends FormRequest
             'name' => $this->sanitizeInput($this->input('name')),
             'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
             'icon' => $this->input('icon') ? $this->sanitizeInput($this->input('icon')) : null,
-            'template_subject' => $this->input('template_subject') ? $this->sanitizeInput($this->input('template_subject')) : null,
-            'templateContent' => $this->input('templateContent') ? $this->sanitizeInput($this->input('templateContent')) : null,
+            'template_subject' => $this->input('template_subject')
+                ? $this->sanitizeInput($this->input('template_subject'))
+                : null,
+            'templateContent' => $this->input('templateContent')
+                ? $this->sanitizeInput($this->input('templateContent'))
+                : null,
         ]);
         // Handle checkbox values
         $this->merge([

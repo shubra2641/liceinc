@@ -61,7 +61,10 @@ class PaymentSettingsController extends Controller
             $paypalSettings = PaymentSetting::getByGateway('paypal');
             $stripeSettings = PaymentSetting::getByGateway('stripe');
             DB::commit();
-            return view('admin.payment-settings.index', ['paypalSettings' => $paypalSettings, 'stripeSettings' => $stripeSettings]);
+            return view('admin.payment-settings.index', [
+                'paypalSettings' => $paypalSettings,
+                'stripeSettings' => $stripeSettings
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Payment settings loading failed', [
@@ -207,6 +210,7 @@ class PaymentSettingsController extends Controller
      */
     /**
      * @param array<string, mixed> $credentials
+     *
      * @return array<string, mixed>
      */
     protected function testPayPalConnection(array $credentials): array
@@ -269,7 +273,11 @@ class PaymentSettingsController extends Controller
         } catch (\Exception $e) {
             Log::warning('PayPal connection test failed', [
                 'error' => $e->getMessage(),
-                'client_id' => substr(is_string($credentials['client_id'] ?? null) ? $credentials['client_id'] : '', 0, 8) . '...',
+                'client_id' => substr(
+                    is_string($credentials['client_id'] ?? null) ? $credentials['client_id'] : '',
+                    0,
+                    8
+                ) . '...',
             ]);
             return [
                 'success' => false,
@@ -291,6 +299,7 @@ class PaymentSettingsController extends Controller
      */
     /**
      * @param array<string, mixed> $credentials
+     *
      * @return array<string, mixed>
      */
     protected function testStripeConnection(array $credentials): array
@@ -311,7 +320,7 @@ class PaymentSettingsController extends Controller
                     'success' => true,
                     'message' => trans('app.Stripe connection successful'),
                     'account_id' => $account->id,
-                    'account_name' => $account->business_profile->name ?? 'N/A',
+                    'account_name' => 'N/A', // Stripe account name not available in this context
                 ];
             } else {
                 return [
@@ -322,7 +331,11 @@ class PaymentSettingsController extends Controller
         } catch (\Exception $e) {
             Log::warning('Stripe connection test failed', [
                 'error' => $e->getMessage(),
-                'secret_key' => substr(is_string($credentials['secret_key']) ? $credentials['secret_key'] : '', 0, 8) . '...',
+                'secret_key' => substr(
+                    is_string($credentials['secret_key']) ? $credentials['secret_key'] : '',
+                    0,
+                    8
+                ) . '...',
             ]);
             return [
                 'success' => false,

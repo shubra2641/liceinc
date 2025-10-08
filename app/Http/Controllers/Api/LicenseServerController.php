@@ -390,7 +390,13 @@ class LicenseServerController extends Controller
             $licenseKeyStr = $licenseKey;
             $domainStr = $domain;
             $productSlugStr = $productSlug;
-            if (! $this->verifyLicense($licenseKeyStr, is_string($domainStr) ? $domainStr : null, is_string($productSlugStr) ? $productSlugStr : '')) {
+            if (
+                ! $this->verifyLicense(
+                    $licenseKeyStr,
+                    is_string($domainStr) ? $domainStr : null,
+                    is_string($productSlugStr) ? $productSlugStr : ''
+                )
+            ) {
                 DB::rollBack();
 
                 return response()->json([
@@ -669,10 +675,17 @@ class LicenseServerController extends Controller
                 ], 404);
             }
             // Check if update is available and validate version progression
-            $isUpdateAvailable = version_compare($nextUpdate->version, is_string($currentVersion) ? $currentVersion : '', '>');
+            $isUpdateAvailable = version_compare(
+                $nextUpdate->version,
+                is_string($currentVersion) ? $currentVersion : '',
+                '>'
+            );
             // Additional validation: Ensure the update is actually newer
             if ($isUpdateAvailable) {
-                $versionComparison = version_compare($nextUpdate->version, is_string($currentVersion) ? $currentVersion : '');
+                $versionComparison = version_compare(
+                    $nextUpdate->version,
+                    is_string($currentVersion) ? $currentVersion : ''
+                );
                 // If not newer, mark as no update available
                 if ($versionComparison <= 0) {
                     $isUpdateAvailable = false;
@@ -928,7 +941,8 @@ class LicenseServerController extends Controller
             }
         }
         foreach ($authorizedDomains as $authorizedDomain) {
-            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain ?? '') ?? $authorizedDomain->domain ?? '';
+            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain ?? '')
+                ?? $authorizedDomain->domain ?? '';
             $authDomain = preg_replace('/^www\./', '', $authDomain) ?? $authDomain;
             if ($authDomain === $domain) {
                 // Update last used timestamp
@@ -1005,7 +1019,9 @@ class LicenseServerController extends Controller
         if ($license->hasReachedDomainLimit() === true) {
             Log::warning('Domain limit exceeded for license', [
                 'licenseId' => $license->id,
-                'purchaseCode' => !empty($license->purchaseCode) ? substr($license->purchaseCode, 0, 8) . '...' : 'unknown',
+                'purchaseCode' => !empty($license->purchaseCode)
+                    ? substr($license->purchaseCode, 0, 8) . '...'
+                    : 'unknown',
                 'domain' => $domain,
                 'current_domains' => $license->activeDomainsCount,
                 'maxDomains' => $license->maxDomains ?? 1,

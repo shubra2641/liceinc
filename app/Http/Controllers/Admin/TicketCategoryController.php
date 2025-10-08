@@ -125,7 +125,10 @@ class TicketCategoryController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
+            $validated['slug'] = $validated['slug']
+                ?? Str::slug(
+                    is_string($validated['name'] ?? null) ? $validated['name'] : ''
+                );
             TicketCategory::create($validated);
             DB::commit();
             return redirect()->route('admin.ticket-categories.index')
@@ -251,7 +254,10 @@ class TicketCategoryController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
+            $validated['slug'] = $validated['slug']
+                ?? Str::slug(
+                    is_string($validated['name'] ?? null) ? $validated['name'] : ''
+                );
             $ticketCategory->update($validated);
             DB::commit();
             return redirect()->route('admin.ticket-categories.index')

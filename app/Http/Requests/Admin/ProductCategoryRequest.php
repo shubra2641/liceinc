@@ -201,8 +201,12 @@ class ProductCategoryRequest extends FormRequest
             'name' => $this->sanitizeInput($this->input('name')),
             'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
             'meta_title' => $this->input('meta_title') ? $this->sanitizeInput($this->input('meta_title')) : null,
-            'meta_keywords' => $this->input('meta_keywords') ? $this->sanitizeInput($this->input('meta_keywords')) : null,
-            'meta_description' => $this->input('meta_description') ? $this->sanitizeInput($this->input('meta_description')) : null,
+            'meta_keywords' => $this->input('meta_keywords')
+                ? $this->sanitizeInput($this->input('meta_keywords'))
+                : null,
+            'meta_description' => $this->input('meta_description')
+                ? $this->sanitizeInput($this->input('meta_description'))
+                : null,
             'icon' => $this->input('icon') ? $this->sanitizeInput($this->input('icon')) : null,
         ]);
         // Auto-generate slug if not provided
