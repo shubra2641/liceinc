@@ -73,7 +73,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read int|null $license_logs_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\License> $licenses
  * @property-read int|null $licenses_count
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int,
+ * \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
  * @property-read int|null $permissions_count
@@ -156,8 +157,9 @@ class User extends AuthenticatableBase implements
      * @phpstan-ignore-next-line
      */
     protected static $factory = UserFactory::class;
+
+    // Traits
     use HasRoles;
-    // Provides the email verification notification & helpers
     use MustVerifyEmailTrait;
     use Notifiable;
 
