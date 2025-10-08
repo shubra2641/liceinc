@@ -130,7 +130,7 @@ class LayoutComposer
      */
     private function getSiteLogo(): ?string
     {
-        $siteLogo = Setting::get('site_logo', null);
+        $siteLogo = Setting::get('siteLogo', null);
         return $siteLogo ? $this->sanitizeOutput(is_string($siteLogo) ? $siteLogo : '') : null;
     }
     /**
@@ -201,7 +201,9 @@ class LayoutComposer
     private function getTicketsSeoDescription(): ?string
     {
         $ticketsSeoDescription = Setting::get('seo_tickets_description', null);
-        return $ticketsSeoDescription ? $this->sanitizeOutput(is_string($ticketsSeoDescription) ? $ticketsSeoDescription : '') : null;
+        return $ticketsSeoDescription
+            ? $this->sanitizeOutput(is_string($ticketsSeoDescription) ? $ticketsSeoDescription : '')
+            : null;
     }
     /**
      * Get available languages with metadata.
@@ -250,16 +252,16 @@ class LayoutComposer
     {
         $settings = Setting::first();
         return [
-            'preloaderEnabled' => $settings->preloader_enabled ?? true,
-            'preloaderType' => $settings->preloader_type ?? 'spinner',
-            'preloaderColor' => $settings->preloader_color ?? '#3b82f6',
-            'preloaderBgColor' => $settings->preloader_background_color ?? '#ffffff',
-            'preloaderDuration' => $settings->preloader_duration ?? 2000,
-            'preloaderMinDuration' => $settings->preloader_min_duration ?? 0, // 0 means hide as soon as ready
+            'preloaderEnabled' => $settings->preloaderEnabled ?? true,
+            'preloaderType' => $settings->preloaderType ?? 'spinner',
+            'preloaderColor' => $settings->preloaderColor ?? '#3b82f6',
+            'preloaderBgColor' => $settings->preloaderBackgroundColor ?? '#ffffff',
+            'preloaderDuration' => $settings->preloaderDuration ?? 2000,
+            'preloaderMinDuration' => $settings->preloaderMinDuration ?? 0, // 0 means hide as soon as ready
             'preloaderText' => trans('app.Loading...'),
-            'siteLogo' => $settings->site_logo ?? null,
-            'logoText' => $settings->logo_text ?? config('app.name'),
-            'logoShowText' => $settings->logo_show_text ?? true,
+            'siteLogo' => $settings->siteLogo ?? null,
+            'logoText' => $settings->logoText ?? config('app.name'),
+            'logoShowText' => $settings->logoShowText ?? true,
         ];
     }
     /**

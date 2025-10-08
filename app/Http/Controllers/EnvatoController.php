@@ -91,7 +91,9 @@ class EnvatoController extends Controller
             }
             DB::beginTransaction();
             // Verify purchase with Envato API
-            $sale = $envato->verifyPurchase(is_string($data['purchase_code']) ? $data['purchase_code'] : '');
+            $sale = $envato->verifyPurchase(
+                is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+            );
             if ($sale === null) {
                 DB::rollBack();
                 Log::warning('Failed to verify purchase code', [
@@ -109,14 +111,18 @@ class EnvatoController extends Controller
             $buyerName = data_get($sale, 'buyer', 'Unknown Buyer');
             $buyerEmail = data_get($sale, 'buyer_email');
             $supportEnd = data_get($sale, 'supported_until');
-            $itemId = is_string(data_get($sale, 'item.id')) ? data_get($sale, 'item.id') : '';
+            $itemId = is_string(data_get($sale, 'item.id'))
+                ? data_get($sale, 'item.id')
+                : '';
             // Validate product ownership
-            if ((string)$product->envato_item_id !== $itemId) {
+            if (is_string($product->envatoItemId) && $product->envatoItemId !== $itemId) {
                 DB::rollBack();
                 Log::warning('Purchase code does not match product', [
-                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
+                    'purchase_code' => $this->maskPurchaseCode(
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                    ),
                     'productId' => $product->id,
-                    'expected_item_id' => $product->envato_item_id,
+                    'expected_item_id' => $product->envatoItemId,
                     'actual_item_id' => $itemId,
                 ]);
                 return back()->withErrors(['purchase_code' => 'Purchase code does not belong to this product.']);
@@ -136,7 +142,9 @@ class EnvatoController extends Controller
                 [
                     'productId' => $product->id,
                     'userId' => $user->id,
-                    'support_expiresAt' => $supportEnd ? Carbon::parse(is_string($supportEnd) ? $supportEnd : '')->format('Y-m-d') : null,
+                    'support_expiresAt' => $supportEnd
+                        ? Carbon::parse(is_string($supportEnd) ? $supportEnd : '')->format('Y-m-d')
+                        : null,
                     'status' => 'active',
                     'verified_at' => now(),
                 ],
@@ -395,12 +403,16 @@ class EnvatoController extends Controller
             }
             $this->setRateLimit($rateLimitKey, 'ajax_verify_');
             DB::beginTransaction();
-            $sale = $envato->verifyPurchase(is_string($data['purchase_code']) ? $data['purchase_code'] : '');
+            $sale = $envato->verifyPurchase(
+                is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+            );
             if ($sale === null) {
                 DB::rollBack();
                 Log::warning('AJAX purchase verification failed', [
                     'userId' => auth()->id(),
-                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
+                    'purchase_code' => $this->maskPurchaseCode(
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                    ),
                     'productId' => $data['productId'],
                     'ip' => $request->ip(),
                 ]);
@@ -410,14 +422,18 @@ class EnvatoController extends Controller
                 ]);
             }
             $product = Product::findOrFail($data['productId']);
-            $itemId = is_string(data_get($sale, 'item.id')) ? data_get($sale, 'item.id') : '';
-            if ($product->envato_item_id && $product->envato_item_id !== $itemId) {
+            $itemId = is_string(data_get($sale, 'item.id'))
+                ? data_get($sale, 'item.id')
+                : '';
+            if ($product->envatoItemId && $product->envatoItemId !== $itemId) {
                 DB::rollBack();
                 Log::warning('AJAX purchase code does not match product', [
                     'userId' => auth()->id(),
-                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
+                    'purchase_code' => $this->maskPurchaseCode(
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                    ),
                     'productId' => $product->id,
-                    'expected_item_id' => $product->envato_item_id,
+                    'expected_item_id' => $product->envatoItemId,
                     'actual_item_id' => $itemId,
                     'ip' => $request->ip(),
                 ]);

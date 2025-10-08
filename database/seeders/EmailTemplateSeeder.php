@@ -74,9 +74,11 @@ class EmailTemplateSeeder extends Seeder
                 'name' => 'user_license_expiring',
                 'subject' => 'License Expiring Soon - {{product_name}}',
                 'body' => '<h2>License Expiring Soon</h2><p>Hello {{user_name}},</p>' .
-                    '<p>Your license for <strong>{{product_name}}</strong> will expire in {{days_remaining}} days on {{expires_at}}.</p>' .
+                    '<p>Your license for <strong>{{product_name}}</strong> will expire in ' .
+                        '{{days_remaining}} days on {{expires_at}}.</p>' .
                     '<div class="info-box warning"><h4>Action Required</h4>' .
-                    '<p>To continue using this product without interruption, please renew your license before it expires.</p></div>',
+                    '<p>To continue using this product without interruption, please renew your ' .
+                        'license before it expires.</p></div>',
                 'type' => 'user',
                 'category' => 'license',
                 'variables' => ['license_key', 'product_name', 'expires_at', 'days_remaining', 'user_name'],
@@ -86,7 +88,8 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_license_updated',
                 'subject' => 'License Updated - {{product_name}}',
-                'body' => '<h2>License Updated</h2><p>Hello {{user_name}},</p><p>Your license for <strong>{{product_name}}</strong> has been {{update_type}}.</p>',
+                'body' => '<h2>License Updated</h2><p>Hello {{user_name}},</p>' .
+                    '<p>Your license for <strong>{{product_name}}</strong> has been {{update_type}}.</p>',
                 'type' => 'user',
                 'category' => 'license',
                 'variables' => ['license_key', 'product_name', 'update_type', 'user_name'],
@@ -96,7 +99,9 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_product_version_update',
                 'subject' => 'Product Update Available - {{product_name}}',
-                'body' => '<h2>Product Update Available</h2><p>Hello {{user_name}},</p><p>A new version of <strong>{{product_name}}</strong> is now available! We\'ve released version {{new_version}} with new features and improvements.</p>',
+                'body' => '<h2>Product Update Available</h2><p>Hello {{user_name}},</p>' .
+                    '<p>A new version of <strong>{{product_name}}</strong> is now available! ' .
+                    'We\'ve released version {{new_version}} with new features and improvements.</p>',
                 'type' => 'user',
                 'category' => 'product',
                 'variables' => ['product_name', 'old_version', 'new_version', 'download_url', 'user_name'],
@@ -106,7 +111,9 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'user_ticket_created',
                 'subject' => 'Support Ticket Created - #{{ticket_id}}',
-                'body' => '<h2>Support Ticket Created</h2><p>Hello {{user_name}},</p><p>Thank you for contacting our support team. We\'ve received your support ticket and will get back to you as soon as possible.</p>',
+                'body' => '<h2>Support Ticket Created</h2><p>Hello {{user_name}},</p>' .
+                    '<p>Thank you for contacting our support team. We\'ve received your support ticket ' .
+                    'and will get back to you as soon as possible.</p>',
                 'type' => 'user',
                 'category' => 'ticket',
                 'variables' => ['ticket_id', 'ticket_subject', 'ticket_status', 'user_name'],
@@ -139,10 +146,17 @@ class EmailTemplateSeeder extends Seeder
                 'name' => 'user_invoice_approaching_due',
                 'subject' => 'Invoice Due Soon - #{{invoice_number}}',
                 'body' => '<h2>Invoice Due Soon</h2><p>Hello {{user_name}},</p>' .
-                    '<p>This is a friendly reminder that your invoice #{{invoice_number}} is due in {{days_remaining}} days on {{due_date}}.</p>',
+                    '<p>This is a friendly reminder that your invoice #{{invoice_number}} is due in ' .
+                        '{{days_remaining}} days on {{due_date}}.</p>',
                 'type' => 'user',
                 'category' => 'invoice',
-                'variables' => ['invoice_number', 'invoice_amount', 'due_date', 'days_remaining', 'user_name'],
+                'variables' => [
+                    'invoice_number',
+                    'invoice_amount',
+                    'due_date',
+                    'days_remaining',
+                    'user_name'
+                ],
                 'is_active' => true,
                 'description' => 'Reminder sent when invoice is approaching due date',
             ],
@@ -173,7 +187,8 @@ class EmailTemplateSeeder extends Seeder
             [
                 'name' => 'admin_license_created',
                 'subject' => 'New License Created - {{product_name}}',
-                'body' => '<h2>New License Created</h2><p>A new license has been created in the system.</p>' .
+                'body' => '<h2>New License Created</h2>' .
+                    '<p>A new license has been created in the system.</p>' .
                     '<table class="email-table"><tr><th>Product</th><td>{{product_name}}</td></tr>' .
                     '<tr><th>License Key</th><td style="font-family: monospace;">{{license_key}}</td></tr>' .
                     '<tr><th>Customer</th><td>{{customer_name}} ({{customer_email}})</td></tr></table>',

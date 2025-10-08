@@ -104,7 +104,13 @@ class LicenseServerController extends Controller
             $domain = $validated['domain'];
             $productSlug = $validated['product_slug'];
             // Verify license
-            if (! $this->verifyLicense(is_string($licenseKey) ? $licenseKey : '', is_string($domain) ? $domain : null, is_string($productSlug) ? $productSlug : '')) {
+            if (
+                ! $this->verifyLicense(
+                    is_string($licenseKey) ? $licenseKey : '',
+                    is_string($domain) ? $domain : null,
+                    is_string($productSlug) ? $productSlug : ''
+                )
+            ) {
                 DB::rollBack();
 
                 return response()->json([
@@ -186,7 +192,13 @@ class LicenseServerController extends Controller
             DB::rollBack();
             Log::error('Update check failed', [
                 'error' => $e->getMessage(),
-                'licenseKey' => substr(is_string($request->input('licenseKey', '')) ? $request->input('licenseKey', '') : '', 0, 8) . '...',
+                'licenseKey' => substr(
+                    is_string($request->input('licenseKey', ''))
+                        ? $request->input('licenseKey', '')
+                        : '',
+                    0,
+                    8
+                ) . '...',
                 'product_slug' => $request->input('product_slug', ''),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -247,7 +259,13 @@ class LicenseServerController extends Controller
             $domain = $validated['domain'];
             $productSlug = $validated['product_slug'];
             // Verify license
-            if (! $this->verifyLicense(is_string($licenseKey) ? $licenseKey : '', is_string($domain) ? $domain : null, is_string($productSlug) ? $productSlug : '')) {
+            if (
+                ! $this->verifyLicense(
+                    is_string($licenseKey) ? $licenseKey : '',
+                    is_string($domain) ? $domain : null,
+                    is_string($productSlug) ? $productSlug : ''
+                )
+            ) {
                 DB::rollBack();
 
                 return response()->json([
@@ -305,7 +323,13 @@ class LicenseServerController extends Controller
             DB::rollBack();
             Log::error('Version history request failed', [
                 'error' => $e->getMessage(),
-                'licenseKey' => substr(is_string($request->input('licenseKey', '')) ? $request->input('licenseKey', '') : '', 0, 8) . '...',
+                'licenseKey' => substr(
+                    is_string($request->input('licenseKey', ''))
+                        ? $request->input('licenseKey', '')
+                        : '',
+                    0,
+                    8
+                ) . '...',
                 'product_slug' => $request->input('product_slug', ''),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -485,7 +509,13 @@ class LicenseServerController extends Controller
             $domain = $validated['domain'];
             $productSlug = $validated['product_slug'];
             // Verify license
-            if (! $this->verifyLicense(is_string($licenseKey) ? $licenseKey : '', is_string($domain) ? $domain : null, is_string($productSlug) ? $productSlug : '')) {
+            if (
+                ! $this->verifyLicense(
+                    is_string($licenseKey) ? $licenseKey : '',
+                    is_string($domain) ? $domain : null,
+                    is_string($productSlug) ? $productSlug : ''
+                )
+            ) {
                 DB::rollBack();
 
                 return response()->json([
@@ -546,7 +576,13 @@ class LicenseServerController extends Controller
             DB::rollBack();
             Log::error('Latest version request failed', [
                 'error' => $e->getMessage(),
-                'licenseKey' => substr(is_string($request->input('licenseKey', '')) ? $request->input('licenseKey', '') : '', 0, 8) . '...',
+                'licenseKey' => substr(
+                    is_string($request->input('licenseKey', ''))
+                        ? $request->input('licenseKey', '')
+                        : '',
+                    0,
+                    8
+                ) . '...',
                 'product_slug' => $request->input('product_slug', ''),
                 'trace' => $e->getTraceAsString(),
             ]);
