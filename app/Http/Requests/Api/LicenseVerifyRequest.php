@@ -27,7 +27,6 @@ class LicenseVerifyRequest extends FormRequest
     {
         return true; // API endpoint - authorization handled by middleware
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -63,7 +62,6 @@ class LicenseVerifyRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -73,19 +71,18 @@ class LicenseVerifyRequest extends FormRequest
     {
         return [
             'purchase_code.required' => 'Purchase code is required.',
-            'purchase_code.regex' => 'Purchase code contains invalid characters. '.
+            'purchase_code.regex' => 'Purchase code contains invalid characters. ' .
                 'Only uppercase letters, numbers, and hyphens are allowed.',
             'purchase_code.min' => 'Purchase code must be at least 10 characters long.',
             'purchase_code.max' => 'Purchase code may not be greater than 100 characters.',
             'product_slug.required' => 'Product slug is required.',
-            'product_slug.regex' => 'Product slug contains invalid characters. '.
+            'product_slug.regex' => 'Product slug contains invalid characters. ' .
                 'Only lowercase letters, numbers, and hyphens are allowed.',
             'domain.required' => 'Domain is required.',
             'domain.regex' => 'Domain contains invalid characters.',
             'verification_key.regex' => 'Verification key contains invalid characters.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -100,7 +97,6 @@ class LicenseVerifyRequest extends FormRequest
             'verification_key' => 'verification key',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */
@@ -114,7 +110,6 @@ class LicenseVerifyRequest extends FormRequest
             'verification_key' => $this->input('verification_key') ? $this->sanitizeInput($this->input('verification_key')) : null,
         ]);
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -127,14 +122,13 @@ class LicenseVerifyRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-
-        if (! is_string($input)) {
+        
+        if (!is_string($input)) {
             return null;
         }
-
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
-
     /**
      * Sanitize domain input with special handling for URLs.
      *
@@ -147,17 +141,16 @@ class LicenseVerifyRequest extends FormRequest
         if ($domain === null || $domain === '') {
             return null;
         }
-
-        if (! is_string($domain)) {
+        
+        if (!is_string($domain)) {
             return null;
         }
-
+        
         // Extract host from URL if it's a full URL
         $host = parse_url($domain, PHP_URL_HOST);
         if ($host) {
             return htmlspecialchars(trim($host), ENT_QUOTES, 'UTF-8');
         }
-
         return htmlspecialchars(trim($domain), ENT_QUOTES, 'UTF-8');
     }
 }

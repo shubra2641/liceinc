@@ -13,7 +13,6 @@ use Illuminate\Http\RedirectResponse;
  * This controller handles the verification of user email addresses
  * through the email verification process. It ensures that users
  * can only verify their email addresses through secure, signed URLs.
- *
  * @version 1.0.6
  */
 class VerifyEmailController extends Controller
@@ -47,10 +46,8 @@ class VerifyEmailController extends Controller
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
         }
-
         return $this->redirectToDashboard();
     }
-
     /**
      * Redirect to dashboard with verification status.
      *
@@ -62,6 +59,6 @@ class VerifyEmailController extends Controller
      */
     private function redirectToDashboard(): RedirectResponse
     {
-        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        return redirect()->intended(route('dashboard', absolute: false) . '?verified=1');
     }
 }

@@ -56,7 +56,6 @@ class HomeController extends Controller
             // Get system statistics with enhanced security
             $stats = $this->getSystemStatistics();
             DB::commit();
-
             return view('welcome', ['products' => $products, 'stats' => $stats]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -65,7 +64,6 @@ class HomeController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_url' => $request->fullUrl(),
             ]);
-
             // Return home page with empty data on error
             return view('welcome', [
                 'products' => collect(),
@@ -73,7 +71,6 @@ class HomeController extends Controller
             ]);
         }
     }
-
     /**
      * Get active products with enhanced security and error handling.
      *
@@ -99,7 +96,6 @@ class HomeController extends Controller
             throw $e;
         }
     }
-
     /**
      * Get system statistics with enhanced security and error handling.
      *
@@ -128,7 +124,6 @@ class HomeController extends Controller
             throw $e;
         }
     }
-
     /**
      * Get default statistics for error fallback.
      *
@@ -147,7 +142,6 @@ class HomeController extends Controller
             'open_tickets' => 0,
         ];
     }
-
     /**
      * Get user count with enhanced security and error handling.
      *
@@ -164,11 +158,9 @@ class HomeController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return 0;
         }
     }
-
     /**
      * Get license count with enhanced security and error handling.
      *
@@ -185,11 +177,9 @@ class HomeController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return 0;
         }
     }
-
     /**
      * Get ticket count with enhanced security and error handling.
      *
@@ -206,11 +196,9 @@ class HomeController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return 0;
         }
     }
-
     /**
      * Get invoice count with enhanced security and error handling.
      *
@@ -227,11 +215,9 @@ class HomeController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return 0;
         }
     }
-
     /**
      * Get product count with enhanced security and error handling.
      *
@@ -248,11 +234,9 @@ class HomeController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return 0;
         }
     }
-
     /**
      * Get active license count with enhanced security and error handling.
      *
@@ -269,11 +253,9 @@ class HomeController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return 0;
         }
     }
-
     /**
      * Get paid invoice count with enhanced security and error handling.
      *
@@ -290,11 +272,9 @@ class HomeController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return 0;
         }
     }
-
     /**
      * Get open ticket count with enhanced security and error handling.
      *
@@ -311,7 +291,6 @@ class HomeController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return 0;
         }
     }

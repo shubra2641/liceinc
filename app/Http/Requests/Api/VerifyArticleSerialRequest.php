@@ -26,7 +26,6 @@ class VerifyArticleSerialRequest extends FormRequest
     {
         return true; // Authorization handled by middleware
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -44,7 +43,6 @@ class VerifyArticleSerialRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -57,11 +55,10 @@ class VerifyArticleSerialRequest extends FormRequest
             'serial.string' => 'Serial code must be a valid string.',
             'serial.max' => 'Serial code cannot exceed 255 characters.',
             'serial.min' => 'Serial code must be at least 3 characters long.',
-            'serial.regex' => 'Serial code contains invalid characters. '.
+            'serial.regex' => 'Serial code contains invalid characters. ' .
                 'Only letters, numbers, hyphens, and underscores are allowed.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -73,7 +70,6 @@ class VerifyArticleSerialRequest extends FormRequest
             'serial' => 'serial code',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */

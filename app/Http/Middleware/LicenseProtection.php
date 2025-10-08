@@ -56,33 +56,29 @@ class LicenseProtection
             // Skip license check for installation routes
             if ($this->isInstallationRoute($request)) {
                 $response = $next($request);
-                /** @var Response $typedResponse */
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
                 $typedResponse = $response;
-
                 return $typedResponse;
             }
             // Skip license check for API routes (they have their own protection)
             if ($this->isApiRoute($request)) {
                 $response = $next($request);
-                /** @var Response $typedResponse */
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
                 $typedResponse = $response;
-
                 return $typedResponse;
             }
             // Skip license check for public routes
             if ($this->isPublicRoute($request)) {
                 $response = $next($request);
-                /** @var Response $typedResponse */
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
                 $typedResponse = $response;
-
                 return $typedResponse;
             }
             // Check if system is installed
             if (! $this->isSystemInstalled()) {
                 $response = $next($request);
-                /** @var Response $typedResponse */
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
                 $typedResponse = $response;
-
                 return $typedResponse;
             }
             // Get license information from database
@@ -93,9 +89,8 @@ class LicenseProtection
             // Check if license is expired
             if ($this->isLicenseExpired($licenseInfo)) {
                 $response = $this->handleLicenseError('License has expired', $request);
-                /** @var Response $typedResponse */
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
                 $typedResponse = $response;
-
                 return $typedResponse;
             }
             // Verify license periodically (every 24 hours)
@@ -103,9 +98,8 @@ class LicenseProtection
                 $this->verifyLicensePeriodically($licenseInfo);
             }
             $response = $next($request);
-            /** @var Response $typedResponse */
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
             $typedResponse = $response;
-
             return $typedResponse;
         } catch (\Exception $e) {
             Log::error('License protection middleware failed', [
@@ -117,13 +111,11 @@ class LicenseProtection
             ]);
             // In case of error, allow the request to proceed
             $response = $next($request);
-            /** @var Response $typedResponse */
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
             $typedResponse = $response;
-
             return $typedResponse;
         }
     }
-
     /**
      * Check if the request is for installation routes.
      *
@@ -135,7 +127,6 @@ class LicenseProtection
     {
         return $request->is('install*');
     }
-
     /**
      * Check if the request is for API routes.
      *
@@ -147,7 +138,6 @@ class LicenseProtection
     {
         return $request->is('api*');
     }
-
     /**
      * Check if the request is for public routes.
      *
@@ -163,10 +153,8 @@ class LicenseProtection
                 return true;
             }
         }
-
         return false;
     }
-
     /**
      * Check if the system is installed.
      *
@@ -175,10 +163,8 @@ class LicenseProtection
     private function isSystemInstalled(): bool
     {
         $installedFile = storage_path('.installed');
-
         return File::exists($installedFile);
     }
-
     /**
      * Get license information from database with enhanced security.
      *
@@ -193,7 +179,6 @@ class LicenseProtection
             $settings = Setting::where('type', 'license')->get();
             if ($settings->isEmpty()) {
                 DB::commit();
-
                 return null;
             }
             $licenseInfo = [];
@@ -201,7 +186,6 @@ class LicenseProtection
                 $licenseInfo[$this->sanitizeInput($setting->key)] = $this->sanitizeInput($setting->value);
             }
             DB::commit();
-
             return $licenseInfo;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -209,11 +193,9 @@ class LicenseProtection
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return null;
         }
     }
-
     /**
      * Check if license is expired with enhanced validation.
      *
@@ -229,18 +211,15 @@ class LicenseProtection
         }
         try {
             $expiration = Carbon::parse(is_string($expirationDate) ? $expirationDate : '');
-
             return Carbon::now()->isAfter($expiration);
         } catch (\Exception $e) {
             Log::warning('Invalid license expiration date format', [
                 'expiration_date' => $expirationDate,
                 'error' => $e->getMessage(),
             ]);
-
             return false;
         }
     }
-
     /**
      * Check if we should verify license periodically with enhanced validation.
      *
@@ -257,7 +236,6 @@ class LicenseProtection
         try {
             $lastVerificationTime = Carbon::parse(is_string($lastVerification) ? $lastVerification : '');
             $now = Carbon::now();
-
             // Verify every 24 hours
             return $now->diffInHours($lastVerificationTime) >= 24;
         } catch (\Exception $e) {
@@ -265,11 +243,9 @@ class LicenseProtection
                 'last_verification' => $lastVerification,
                 'error' => $e->getMessage(),
             ]);
-
             return true; // If we can't parse the date, verify anyway
         }
     }
-
     /**
      * Verify license periodically with enhanced security.
      *
@@ -281,12 +257,11 @@ class LicenseProtection
     {
         try {
             DB::beginTransaction();
-            $licenseVerifier = new class() {
+            $licenseVerifier = new class {
                 /**
                  * @return array<string, mixed>
                  */
-                public function verifyLicense(string $purchaseCode, string $domain): array
-                {
+                public function verifyLicense(string $purchaseCode, string $domain): array {
                     // Mock implementation for development
                     return ['valid' => true, 'message' => 'License verified'];
                 }
@@ -317,7 +292,6 @@ class LicenseProtection
             ]);
         }
     }
-
     /**
      * Handle license error with enhanced security.
      *
@@ -334,13 +308,11 @@ class LicenseProtection
             'user_agent' => $request->userAgent(),
             'url' => $request->fullUrl(),
         ]);
-
         // Return a response or redirect to license verification page
         return response()->view('errors.license', [
             'message' => $this->sanitizeInput($message),
         ], 403);
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -353,10 +325,8 @@ class LicenseProtection
         if ($input === null) {
             return null;
         }
-
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
-
     /**
      * Mask purchase code for security.
      *
@@ -369,7 +339,6 @@ class LicenseProtection
         if (strlen($purchaseCode) <= 8) {
             return str_repeat('*', strlen($purchaseCode));
         }
-
-        return substr($purchaseCode, 0, 8).'...';
+        return substr($purchaseCode, 0, 8) . '...';
     }
 }

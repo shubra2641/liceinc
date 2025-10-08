@@ -25,6 +25,10 @@ if (! function_exists('is_active_route')) {
      * @throws InvalidArgumentException When route name is invalid
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     function is_active_route(string $routeName): bool
     {
@@ -32,7 +36,6 @@ if (! function_exists('is_active_route')) {
             throw new InvalidArgumentException('Route name cannot be empty');
         }
         $sanitizedRouteName = htmlspecialchars(trim($routeName), ENT_QUOTES, 'UTF-8');
-
         return request()->routeIs($sanitizedRouteName);
     }
 }
@@ -50,6 +53,10 @@ if (! function_exists('is_active_route_pattern')) {
      * @throws InvalidArgumentException When pattern is invalid
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     function is_active_route_pattern(string $pattern): bool
     {
@@ -57,7 +64,6 @@ if (! function_exists('is_active_route_pattern')) {
             throw new InvalidArgumentException('Route pattern cannot be empty');
         }
         $sanitizedPattern = htmlspecialchars(trim($pattern), ENT_QUOTES, 'UTF-8');
-
         return request()->routeIs($sanitizedPattern);
     }
 }
@@ -71,6 +77,10 @@ if (! function_exists('get_breadcrumbs')) {
      * @return array Array of breadcrumb items with name, url, and active status
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     /** @return array<int, array<string, mixed>> */
     function get_breadcrumbs(): array
@@ -84,7 +94,7 @@ if (! function_exists('get_breadcrumbs')) {
                 $currentPath = '';
                 foreach ($segments as $segment) {
                     // Ensure spacing around concatenation and assignment per PSR-12
-                    $currentPath = $currentPath.($currentPath ? '.' : '').$segment;
+                    $currentPath = $currentPath . ($currentPath ? '.' : '') . $segment;
                     try {
                         $breadcrumbs[] = [
                             'name' => htmlspecialchars(
@@ -101,7 +111,6 @@ if (! function_exists('get_breadcrumbs')) {
                     }
                 }
             }
-
             return $breadcrumbs;
         } catch (Exception $e) {
             return [];
@@ -118,6 +127,10 @@ if (! function_exists('get_navigation_tree')) {
      * @return array Array of navigation items with name, route, icon, and children
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     /** @return array<int, array<string, mixed>> */
     function get_navigation_tree(): array
@@ -191,6 +204,10 @@ if (function_exists('get_available_languages') === false) {
      * @return array Array of language information with code, name, flag, and native name
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     /** @return array<int, array<string, string>> */
     function get_available_languages(): array
@@ -203,7 +220,7 @@ if (function_exists('get_available_languages') === false) {
             }
             $directories = array_diff(scandir($langPath), ['.', '..']);
             foreach ($directories as $dir) {
-                if (SecureFileHelper::isDirectory($langPath.DIRECTORY_SEPARATOR.$dir)) {
+                if (SecureFileHelper::isDirectory($langPath . DIRECTORY_SEPARATOR . $dir)) {
                     $sanitizedCode = htmlspecialchars(trim($dir), ENT_QUOTES, 'UTF-8');
                     if (! empty($sanitizedCode)) {
                         $languages[] = [
@@ -215,7 +232,6 @@ if (function_exists('get_available_languages') === false) {
                     }
                 }
             }
-
             return $languages;
         } catch (Exception $e) {
             return [];
@@ -236,6 +252,10 @@ if (! function_exists('get_language_name')) {
      * @throws InvalidArgumentException When language code is invalid
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     function get_language_name(string $code): string
     {
@@ -340,7 +360,6 @@ if (! function_exists('get_language_name')) {
             throw new InvalidArgumentException('Language code cannot be empty');
         }
         $sanitizedCode = htmlspecialchars(trim($code), ENT_QUOTES, 'UTF-8');
-
         return $names[$sanitizedCode] ?? ucfirst($sanitizedCode);
     }
 }
@@ -358,6 +377,10 @@ if (! function_exists('get_language_flag')) {
      * @throws InvalidArgumentException When language code is invalid
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     function get_language_flag(string $code): string
     {
@@ -462,7 +485,6 @@ if (! function_exists('get_language_flag')) {
             throw new InvalidArgumentException('Language code cannot be empty');
         }
         $sanitizedCode = htmlspecialchars(trim($code), ENT_QUOTES, 'UTF-8');
-
         return $flags[$sanitizedCode] ?? '🌐';
     }
 }
@@ -480,6 +502,10 @@ if (! function_exists('get_language_native_name')) {
      * @throws InvalidArgumentException When language code is invalid
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     function get_language_native_name(string $code): string
     {
@@ -584,7 +610,6 @@ if (! function_exists('get_language_native_name')) {
             throw new InvalidArgumentException('Language code cannot be empty');
         }
         $sanitizedCode = htmlspecialchars(trim($code), ENT_QUOTES, 'UTF-8');
-
         return $nativeNames[$sanitizedCode] ?? get_language_name($sanitizedCode);
     }
 }

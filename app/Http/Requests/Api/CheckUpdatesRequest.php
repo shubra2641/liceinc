@@ -95,11 +95,11 @@ class CheckUpdatesRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-
-        if (! is_string($input)) {
+        
+        if (!is_string($input)) {
             return null;
         }
-
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

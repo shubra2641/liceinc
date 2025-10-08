@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ApiUpdateRequest;
 use App\Http\Requests\Api\CheckUpdatesRequest;
+use App\Http\Requests\Api\GetVersionHistoryRequest;
 use App\Http\Requests\Api\GetLatestVersionRequest;
 use App\Http\Requests\Api\GetUpdateInfoRequest;
-use App\Http\Requests\Api\GetVersionHistoryRequest;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\ProductUpdate;
@@ -411,7 +412,6 @@ class LicenseServerController extends Controller
             $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
             $response->headers->set('Pragma', 'no-cache');
             $response->headers->set('Expires', '0');
-
             return new JsonResponse(['success' => true, 'download_url' => $update->file_path]);
         } catch (\Exception $e) {
             DB::rollBack();

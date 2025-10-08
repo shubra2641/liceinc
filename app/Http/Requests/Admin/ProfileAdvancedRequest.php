@@ -29,7 +29,6 @@ class ProfileAdvancedRequest extends FormRequest
     {
         return auth()->check();
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -58,7 +57,6 @@ class ProfileAdvancedRequest extends FormRequest
                 ],
             ];
         }
-
         // Profile update validation
         return [
             'name' => [
@@ -72,7 +70,7 @@ class ProfileAdvancedRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
-                'unique:users,email,'.$userId,
+                'unique:users,email,' . $userId,
             ],
             'firstname' => [
                 'nullable',
@@ -227,7 +225,6 @@ class ProfileAdvancedRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -274,7 +271,6 @@ class ProfileAdvancedRequest extends FormRequest
             'password_confirmation.same' => 'Password confirmation does not match.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -319,7 +315,6 @@ class ProfileAdvancedRequest extends FormRequest
             'password_confirmation' => 'password confirmation',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */
@@ -363,7 +358,6 @@ class ProfileAdvancedRequest extends FormRequest
             'currency' => $this->currency ?? 'USD',
         ]);
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -376,11 +370,11 @@ class ProfileAdvancedRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-
-        if (! is_string($input)) {
+        
+        if (!is_string($input)) {
             return null;
         }
-
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

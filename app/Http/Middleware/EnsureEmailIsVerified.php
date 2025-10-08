@@ -31,7 +31,6 @@ class EnsureEmailIsVerified
      * HTTP status code for forbidden access.
      */
     private const FORBIDDEN_STATUS = 403;
-
     /**
      * Handle an incoming request with enhanced security.
      *
@@ -46,6 +45,10 @@ class EnsureEmailIsVerified
      * @throws \InvalidArgumentException When request is invalid
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -59,29 +62,25 @@ class EnsureEmailIsVerified
             // Check if user's email is verified
             if (! $this->isEmailVerified($user)) {
                 $response = $this->handleUnverifiedEmail($request);
-                /** @var Response $typedResponse */
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
                 $typedResponse = $response;
-
                 return $typedResponse;
             }
             $response = $next($request);
-            /** @var Response $typedResponse */
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
             $typedResponse = $response;
-
             return $typedResponse;
         } catch (Exception $e) {
-            Log::error('Email verification middleware failed: '.$e->getMessage(), [
+            Log::error('Email verification middleware failed: ' . $e->getMessage(), [
                 'request_url' => $request->fullUrl(),
                 'request_method' => $request->method(),
                 'user_id' => $request->user()?->id,
                 'trace' => $e->getTraceAsString(),
             ]);
-
             // Fail safe - redirect to verification notice
             return $this->handleUnverifiedEmail($request);
         }
     }
-
     /**
      * Check if user's email is verified with validation.
      *
@@ -98,15 +97,12 @@ class EnsureEmailIsVerified
             if (! $user) {
                 return false;
             }
-
             return $user->hasVerifiedEmail();
         } catch (Exception $e) {
-            Log::error('Failed to check email verification status: '.$e->getMessage());
-
+            Log::error('Failed to check email verification status: ' . $e->getMessage());
             return false;
         }
     }
-
     /**
      * Handle unauthenticated user.
      *
@@ -123,10 +119,8 @@ class EnsureEmailIsVerified
                 self::FORBIDDEN_STATUS,
             );
         }
-
         return redirect()->route('login');
     }
-
     /**
      * Handle unverified email.
      *
@@ -143,10 +137,8 @@ class EnsureEmailIsVerified
                 self::FORBIDDEN_STATUS,
             );
         }
-
         return redirect()->route('verification.notice');
     }
-
     /**
      * Check if request expects JSON response.
      *
@@ -158,7 +150,6 @@ class EnsureEmailIsVerified
     {
         return $request->expectsJson() || $request->ajax() || $request->wantsJson();
     }
-
     /**
      * Create JSON response with validation.
      *
@@ -176,8 +167,7 @@ class EnsureEmailIsVerified
                 'message' => $message,
             ], $status);
         } catch (Exception $e) {
-            Log::error('Failed to create JSON response: '.$e->getMessage());
-
+            Log::error('Failed to create JSON response: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Internal server error',
                 'message' => 'An error occurred while processing your request',

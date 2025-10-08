@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Services;
 
 use App\Models\Setting;
@@ -28,25 +26,27 @@ use Illuminate\Support\Facades\Log;
  * - Clean code structure with no duplicate patterns
  * - Proper type hints and return types
  */
-class EnvatoService extends BaseService
+class EnvatoService
 {
     /**
      * The base URL for Envato API.
      */
     protected string $baseUrl = 'https://api.envato.com';
-
     /**
      * Get Envato settings from database with fallback to config and enhanced security.
      *
      * Retrieves Envato configuration settings from the database with fallback
      * to configuration files, including comprehensive validation and sanitization.
      *
+     * @return array The Envato settings array
      *
      * @throws Exception When settings retrieval fails
      *
-     * @return array The Envato settings array
-     *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     /**
      * @return array<string, mixed>
@@ -59,7 +59,6 @@ class EnvatoService extends BaseService
                 Log::error('No settings found in database for Envato configuration');
                 throw new Exception('Settings not found');
             }
-
             return [
                 'token' => $this->sanitizeString(
                     is_string($setting->envato_personal_token ?? null) ? $setting->envato_personal_token : (is_string(config('envato.token')) ? config('envato.token') : ''),
@@ -73,7 +72,7 @@ class EnvatoService extends BaseService
                     is_string($setting->envato_redirect_uri ?? null) ? $setting->envato_redirect_uri : (is_string(config('services.envato.redirect')) ? config('services.envato.redirect') : ''),
                 ),
                 'oauth_enabled' => (bool)($setting->envato_oauth_enabled ?? false),
-                'username' => $this->sanitizeString((string)($setting->envato_username ?? null)),
+                'username' => $this->sanitizeString((string) ($setting->envato_username ?? null)),
                 'auth_enabled' => (bool)($setting->envato_auth_enabled ?? false),
             ];
         } catch (Exception $e) {
@@ -81,20 +80,23 @@ class EnvatoService extends BaseService
             throw $e;
         }
     }
-
     /**
      * Verify purchase code with Envato API and enhanced security.
      *
      * Verifies a purchase code with Envato's API using secure authentication
      * and comprehensive error handling with caching for performance.
      *
-     * @param string $purchaseCode The purchase code to verify
-     *
-     * @throws \InvalidArgumentException When purchase code is invalid
+     * @param  string  $purchaseCode  The purchase code to verify
      *
      * @return array|null The purchase verification data or null if failed
      *
+     * @throws \InvalidArgumentException When purchase code is invalid
+     *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     /**
      * @return array<mixed, mixed>|null
@@ -107,7 +109,6 @@ class EnvatoService extends BaseService
             $token = $settings['token'];
             if (empty($token)) {
                 Log::error('Envato token not configured for purchase verification');
-
                 return null;
             }
             $cacheKey = 'envato_purchase_' . md5($purchaseCode);
@@ -126,40 +127,38 @@ class EnvatoService extends BaseService
                             'status' => $response->status(),
                             'response' => $response->body(),
                         ]);
-
                         return null;
                     }
                     $result = $response->json();
-
                     return is_array($result) ? $result : null;
                 } catch (Exception $e) {
                     Log::error('Exception during purchase verification: ' . $e->getMessage());
-
                     return null;
                 }
             });
-
             return is_array($result) ? $result : null;
         } catch (Exception $e) {
             Log::error('Failed to verify purchase code: ' . $e->getMessage());
-
             return null;
         }
     }
-
     /**
      * Get user information from Envato API with enhanced security.
      *
      * Retrieves user information from Envato's API using secure authentication
      * and comprehensive error handling with caching for performance.
      *
-     * @param string $username The username to retrieve information for
-     *
-     * @throws \InvalidArgumentException When username is invalid
+     * @param  string  $username  The username to retrieve information for
      *
      * @return array|null The user information data or null if failed
      *
+     * @throws \InvalidArgumentException When username is invalid
+     *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     /**
      * @return array<mixed, mixed>|null
@@ -172,7 +171,6 @@ class EnvatoService extends BaseService
             $token = $settings['token'];
             if (empty($token)) {
                 Log::error('Envato token not configured for user info retrieval');
-
                 return null;
             }
             $cacheKey = 'envato_user_' . md5($username);
@@ -188,40 +186,38 @@ class EnvatoService extends BaseService
                             'status' => $response->status(),
                             'response' => $response->body(),
                         ]);
-
                         return null;
                     }
                     $result = $response->json();
-
                     return is_array($result) ? $result : null;
                 } catch (Exception $e) {
                     Log::error('Exception during user info retrieval: ' . $e->getMessage());
-
                     return null;
                 }
             });
-
             return is_array($result) ? $result : null;
         } catch (Exception $e) {
             Log::error('Failed to get user info: ' . $e->getMessage());
-
             return null;
         }
     }
-
     /**
      * Get OAuth user information from Envato API with enhanced security.
      *
      * Retrieves OAuth user information from Envato's API using secure authentication
      * and comprehensive error handling with caching for performance.
      *
-     * @param string $accessToken The OAuth access token
-     *
-     * @throws \InvalidArgumentException When access token is invalid
+     * @param  string  $accessToken  The OAuth access token
      *
      * @return array|null The OAuth user information data or null if failed
      *
+     * @throws \InvalidArgumentException When access token is invalid
+     *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     /**
      * @return array<mixed, mixed>|null
@@ -242,40 +238,38 @@ class EnvatoService extends BaseService
                             'status' => $response->status(),
                             'response' => $response->body(),
                         ]);
-
                         return null;
                     }
                     $result = $response->json();
-
                     return is_array($result) ? $result : null;
                 } catch (Exception $e) {
                     Log::error('Exception during OAuth user info retrieval: ' . $e->getMessage());
-
                     return null;
                 }
             });
-
             return is_array($result) ? $result : null;
         } catch (Exception $e) {
             Log::error('Failed to get OAuth user info: ' . $e->getMessage());
-
             return null;
         }
     }
-
     /**
      * Test token validity with Envato API and enhanced security.
      *
      * Tests the validity of an Envato token by making a secure API call
      * with comprehensive error handling and timeout protection.
      *
-     * @param string $token The token to test
-     *
-     * @throws \InvalidArgumentException When token is invalid
+     * @param  string  $token  The token to test
      *
      * @return bool True if token is valid, false otherwise
      *
+     * @throws \InvalidArgumentException When token is invalid
+     *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function testToken(string $token): bool
     {
@@ -292,15 +286,12 @@ class EnvatoService extends BaseService
                     'response' => $response->body(),
                 ]);
             }
-
             return $isValid;
         } catch (Exception $e) {
             Log::error('Exception during token testing: ' . $e->getMessage());
-
             return false;
         }
     }
-
     /**
      * @return array<mixed, mixed>|null
      */
@@ -323,13 +314,10 @@ class EnvatoService extends BaseService
                 return null;
             }
             $result = $response->json();
-
             return is_array($result) ? $result : null;
         });
-
         return is_array($result) ? $result : null;
     }
-
     /**
      * @return array<mixed, mixed>|null
      */
@@ -351,27 +339,22 @@ class EnvatoService extends BaseService
                 return null;
             }
             $result = $response->json();
-
             return is_array($result) ? $result : null;
         });
-
         return is_array($result) ? $result : null;
     }
-
     public function validateToken(): bool
     {
         $settings = $this->getEnvatoSettings();
         $token = $settings['token'];
-        if (empty($token) || ! is_string($token)) {
+        if (empty($token) || !is_string($token)) {
             return false;
         }
         $response = Http::withToken($token)
             ->acceptJson()
             ->get("{$this->baseUrl}/v1/market/private/user/account.json");
-
         return $response->successful();
     }
-
     /**
      * Clear Envato API cache with enhanced security.
      *
@@ -380,6 +363,10 @@ class EnvatoService extends BaseService
      *
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function clearCache(): void
     {
@@ -406,20 +393,23 @@ class EnvatoService extends BaseService
             Log::error('Failed to clear Envato cache: ' . $e->getMessage());
         }
     }
-
     /**
      * Validate and sanitize purchase code.
      *
      * Validates the purchase code and returns a sanitized version
      * with proper security measures.
      *
-     * @param string $purchaseCode The purchase code to validate
-     *
-     * @throws \InvalidArgumentException When purchase code is invalid
+     * @param  string  $purchaseCode  The purchase code to validate
      *
      * @return string The validated and sanitized purchase code
      *
+     * @throws \InvalidArgumentException When purchase code is invalid
+     *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     private function validatePurchaseCode(string $purchaseCode): string
     {
@@ -430,23 +420,25 @@ class EnvatoService extends BaseService
         if (empty($sanitized) || strlen($sanitized) < 10) {
             throw new \InvalidArgumentException('Purchase code must be at least 10 characters long');
         }
-
         return $sanitized;
     }
-
     /**
      * Validate and sanitize username.
      *
      * Validates the username and returns a sanitized version
      * with proper security measures.
      *
-     * @param string $username The username to validate
-     *
-     * @throws \InvalidArgumentException When username is invalid
+     * @param  string  $username  The username to validate
      *
      * @return string The validated and sanitized username
      *
+     * @throws \InvalidArgumentException When username is invalid
+     *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     private function validateUsername(string $username): string
     {
@@ -457,23 +449,25 @@ class EnvatoService extends BaseService
         if (empty($sanitized) || strlen($sanitized) < 2) {
             throw new \InvalidArgumentException('Username must be at least 2 characters long');
         }
-
         return $sanitized;
     }
-
     /**
      * Validate and sanitize access token.
      *
      * Validates the access token and returns a sanitized version
      * with proper security measures.
      *
-     * @param string $accessToken The access token to validate
-     *
-     * @throws \InvalidArgumentException When access token is invalid
+     * @param  string  $accessToken  The access token to validate
      *
      * @return string The validated and sanitized access token
      *
+     * @throws \InvalidArgumentException When access token is invalid
+     *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     private function validateAccessToken(string $accessToken): string
     {
@@ -484,23 +478,25 @@ class EnvatoService extends BaseService
         if (empty($sanitized) || strlen($sanitized) < 20) {
             throw new \InvalidArgumentException('Access token must be at least 20 characters long');
         }
-
         return $sanitized;
     }
-
     /**
      * Validate and sanitize item ID.
      *
      * Validates the item ID and returns a sanitized version
      * with proper security measures.
      *
-     *
-     *
-     * @throws \InvalidArgumentException When item ID is invalid
+     * @param  int  $itemId  The item ID to validate
      *
      * @return int The validated item ID
      *
+     * @throws \InvalidArgumentException When item ID is invalid
+     *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     // private function validateItemId(int $itemId): int
     // {
@@ -515,18 +511,21 @@ class EnvatoService extends BaseService
      * Sanitizes string input to prevent XSS attacks and other
      * security vulnerabilities.
      *
-     * @param string|null $input The input string to sanitize
+     * @param  string|null  $input  The input string to sanitize
      *
      * @return string|null The sanitized string or null
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     private function sanitizeString(?string $input): ?string
     {
         if ($input === null) {
             return null;
         }
-
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

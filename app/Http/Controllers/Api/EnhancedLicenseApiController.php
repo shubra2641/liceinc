@@ -145,11 +145,10 @@ class EnhancedLicenseApiController extends BaseController
 
             /** @var array<string, mixed> $errors */
             $errors = $e->errors();
-
             return $this->errorResponse(
                 'Validation failed',
                 $errors,
-                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::HTTP_UNPROCESSABLE_ENTITY
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -240,11 +239,10 @@ class EnhancedLicenseApiController extends BaseController
 
             /** @var array<string, mixed> $errors */
             $errors = $e->errors();
-
             return $this->errorResponse(
                 'Validation failed',
                 $errors,
-                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::HTTP_UNPROCESSABLE_ENTITY
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -342,11 +340,10 @@ class EnhancedLicenseApiController extends BaseController
 
             /** @var array<string, mixed> $errors */
             $errors = $e->errors();
-
             return $this->errorResponse(
                 'Validation failed',
                 $errors,
-                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::HTTP_UNPROCESSABLE_ENTITY
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -423,7 +420,6 @@ class EnhancedLicenseApiController extends BaseController
     private function getApiToken(): string
     {
         $token = \App\Helpers\ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
-
         return is_string($token) ? $token : '';
     }
 
@@ -435,7 +431,6 @@ class EnhancedLicenseApiController extends BaseController
         $result = Cache::remember("product_slug_{$slug}", 3600, function () use ($slug) {
             return Product::where('slug', $slug)->first();
         });
-
         return $result instanceof Product ? $result : null;
     }
 
@@ -677,4 +672,5 @@ class EnhancedLicenseApiController extends BaseController
 
         return $key;
     }
+
 }

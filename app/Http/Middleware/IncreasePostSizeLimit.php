@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use App\Helpers\SecureFileHelper;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\SecureFileHelper;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -60,9 +60,8 @@ class IncreasePostSizeLimit
             // Apply PHP configuration adjustments with validation
             $this->adjustPhpConfiguration();
             $response = $next($request);
-            /** @var Response $typedResponse */
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
             $typedResponse = $response;
-
             return $typedResponse;
         } catch (\Exception $e) {
             Log::error('Error in IncreasePostSizeLimit middleware', [
@@ -74,13 +73,11 @@ class IncreasePostSizeLimit
             ]);
             // In case of error, continue to next middleware to prevent request blocking
             $response = $next($request);
-            /** @var Response $typedResponse */
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
             $typedResponse = $response;
-
             return $typedResponse;
         }
     }
-
     /**
      * Adjust PHP configuration settings for file uploads with security validation.
      *
@@ -96,7 +93,6 @@ class IncreasePostSizeLimit
             // Check if ini_set function is available
             if (! function_exists('ini_set')) {
                 Log::warning('ini_set function not available, skipping PHP configuration adjustments');
-
                 return;
             }
             // Define configuration settings with validation
@@ -119,7 +115,6 @@ class IncreasePostSizeLimit
             throw $e;
         }
     }
-
     /**
      * Set individual PHP configuration setting with validation.
      *

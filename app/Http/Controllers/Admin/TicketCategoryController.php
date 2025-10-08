@@ -52,21 +52,18 @@ class TicketCategoryController extends Controller
     {
         try {
             $categories = TicketCategory::orderBy('sort_order')->paginate(15);
-
             return view('admin.ticket-categories.index', ['categories' => $categories]);
         } catch (\Exception $e) {
             Log::error('Ticket categories listing failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             // Return view with empty categories collection
             return view('admin.ticket-categories.index', [
                 'categories' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15),
             ]);
         }
     }
-
     /**
      * Show the form for creating a new ticket category.
      *
@@ -88,7 +85,6 @@ class TicketCategoryController extends Controller
     {
         return view('admin.ticket-categories.create');
     }
-
     /**
      * Store a newly created ticket category with enhanced security.
      *
@@ -118,7 +114,7 @@ class TicketCategoryController extends Controller
     public function store(TicketCategoryRequest $request): RedirectResponse
     {
         // Rate limiting for category creation
-        $key = 'ticket-category-create:'.$request->ip();
+        $key = 'ticket-category-create:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
             return redirect()->back()
                 ->with('error', 'Too many creation attempts. Please try again later.');
@@ -130,7 +126,6 @@ class TicketCategoryController extends Controller
             $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
             TicketCategory::create($validated);
             DB::commit();
-
             return redirect()->route('admin.ticket-categories.index')
                 ->with('success', 'Ticket category created successfully.');
         } catch (\Exception $e) {
@@ -140,13 +135,11 @@ class TicketCategoryController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'data' => $request->except(['_token']),
             ]);
-
             return redirect()->back()
                 ->with('error', 'Failed to create ticket category. Please try again.')
                 ->withInput();
         }
     }
-
     /**
      * Display the specified ticket category with enhanced security.
      *
@@ -173,7 +166,6 @@ class TicketCategoryController extends Controller
         try {
             /** @var view-string $viewName */
             $viewName = 'admin.ticket-categories.show';
-
             return view($viewName, ['ticket_category' => $ticket_category]);
         } catch (\Exception $e) {
             Log::error('Ticket category view failed to load', [
@@ -183,14 +175,12 @@ class TicketCategoryController extends Controller
             ]);
             /** @var view-string $viewName */
             $viewName = 'admin.ticket-categories.show';
-
             return view($viewName, [
                 'ticket_category' => $ticket_category,
                 'error' => 'Unable to load the category details. Please try again later.',
             ]);
         }
     }
-
     /**
      * Show the form for editing the specified ticket category.
      *
@@ -216,7 +206,6 @@ class TicketCategoryController extends Controller
             'ticketCategory' => $ticket_category,
         ]);
     }
-
     /**
      * Update the specified ticket category with enhanced security.
      *
@@ -259,7 +248,6 @@ class TicketCategoryController extends Controller
             $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
             $ticket_category->update($validated);
             DB::commit();
-
             return redirect()->route('admin.ticket-categories.index')
                 ->with('success', 'Ticket category updated successfully.');
         } catch (\Exception $e) {
@@ -270,13 +258,11 @@ class TicketCategoryController extends Controller
                 'category_id' => $ticket_category->id,
                 'data' => $request->except(['_token', '_method']),
             ]);
-
             return redirect()->back()
                 ->with('error', 'Failed to update ticket category. Please try again.')
                 ->withInput();
         }
     }
-
     /**
      * Remove the specified ticket category with enhanced security.
      *
@@ -301,7 +287,7 @@ class TicketCategoryController extends Controller
     public function destroy(TicketCategory $ticket_category): RedirectResponse
     {
         // Rate limiting for category deletions
-        $key = 'ticket-category-delete:'.request()->ip();
+        $key = 'ticket-category-delete:' . request()->ip();
         if (RateLimiter::tooManyAttempts($key, 3)) {
             return redirect()->back()
                 ->with('error', 'Too many deletion attempts. Please try again later.');
@@ -311,7 +297,6 @@ class TicketCategoryController extends Controller
             DB::beginTransaction();
             $ticket_category->delete();
             DB::commit();
-
             return redirect()->route('admin.ticket-categories.index')
                 ->with('success', 'Ticket category deleted successfully.');
         } catch (\Exception $e) {
@@ -321,7 +306,6 @@ class TicketCategoryController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'category_id' => $ticket_category->id,
             ]);
-
             return redirect()->back()
                 ->with('error', 'Failed to delete ticket category. Please try again.');
         }

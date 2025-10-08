@@ -29,10 +29,8 @@ class EmailTemplateRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -63,7 +61,6 @@ class EmailTemplateRequest extends FormRequest
                 ],
             ];
         }
-
         // Store/Update validation
         return [
             'name' => [
@@ -134,7 +131,6 @@ class EmailTemplateRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -151,13 +147,13 @@ class EmailTemplateRequest extends FormRequest
             'body.required' => 'Email body is required.',
             'body.max' => 'Email body must not exceed 50, 000 characters.',
             'type.required' => 'Template type is required.',
-            'type.in' => 'Template type must be one of: user, admin, system, '.
+            'type.in' => 'Template type must be one of: user, admin, system, ' .
                 'notification, marketing.',
             'category.required' => 'Template category is required.',
-            'category.in' => 'Template category must be one of: registration, '.
+            'category.in' => 'Template category must be one of: registration, ' .
                 'license, ticket, invoice, update, notification, marketing, support.',
             'variables.*.regex' => 'Variable names can only contain letters, numbers, spaces, '
-                .'hyphens, and underscores.',
+                . 'hyphens, and underscores.',
             'description.regex' => 'Description contains invalid characters.',
             'priority.min' => 'Priority must be at least 1.',
             'priority.max' => 'Priority must not exceed 10.',
@@ -168,7 +164,6 @@ class EmailTemplateRequest extends FormRequest
             'test_data.*.max' => 'Test data values must not exceed 255 characters.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -192,7 +187,6 @@ class EmailTemplateRequest extends FormRequest
             'test_data' => 'test data',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */
@@ -223,7 +217,6 @@ class EmailTemplateRequest extends FormRequest
             $this->merge(['test_data' => $sanitizedTestData]);
         }
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -236,11 +229,11 @@ class EmailTemplateRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-
-        if (! is_string($input)) {
+        
+        if (!is_string($input)) {
             return null;
         }
-
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

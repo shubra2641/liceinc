@@ -31,9 +31,8 @@ use Illuminate\Support\Str;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductCategory> $children
  * @property-read int|null $children_count
  * @property-read ProductCategory|null $parent
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $products
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
  * @property-read int|null $products_count
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory active()
  * @method static \Database\Factories\ProductCategoryFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory featured()
@@ -61,7 +60,6 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereSortOrder($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereTextColor($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory whereUpdatedAt($value)
- *
  * @mixin \Eloquent
  */
 class ProductCategory extends Model
@@ -94,14 +92,12 @@ class ProductCategory extends Model
         'is_featured',
         'allow_subcategories',
     ];
-
     protected $casts = [
         'is_active' => 'boolean',
         'show_in_menu' => 'boolean',
         'is_featured' => 'boolean',
         'allow_subcategories' => 'boolean',
     ];
-
     /**
      * @return HasMany<Product, $this>
      */
@@ -109,7 +105,6 @@ class ProductCategory extends Model
     {
         return $this->hasMany(Product::class, 'category_id');
     }
-
     /**
      * Get the parent category.
      */
@@ -120,7 +115,6 @@ class ProductCategory extends Model
     {
         return $this->belongsTo(ProductCategory::class, 'parent_id');
     }
-
     /**
      * Get the child categories.
      */
@@ -131,59 +125,50 @@ class ProductCategory extends Model
     {
         return $this->hasMany(ProductCategory::class, 'parent_id');
     }
-
     /**
      * Scope a query to only include root categories (no parent).
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeRoots($query)
     {
         return $query->whereNull('parent_id');
     }
-
     /**
      * Scope a query to only include active categories.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
-
     /**
      * Scope a query to only include categories that show in menu.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeMenuVisible($query)
     {
         return $query->where('show_in_menu', true);
     }
-
     /**
      * Scope a query to only include featured categories.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);
     }
-
     protected static function boot()
     {
         parent::boot();

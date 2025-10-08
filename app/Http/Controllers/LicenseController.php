@@ -73,7 +73,6 @@ class LicenseController extends Controller
                 }
             }
             $licenses = $query->paginate(10)->appends(request()->query());
-
             return view('admin.licenses.index', ['licenses' => $licenses]);
         } catch (\Exception $e) {
             Log::error('Error displaying licenses index', [
@@ -81,11 +80,9 @@ class LicenseController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return view('admin.licenses.index', ['licenses' => collect()]);
         }
     }
-
     /**
      * Show the form for creating a new license with security validation.
      *
@@ -111,7 +108,6 @@ class LicenseController extends Controller
             if ($selectedUserId && (! is_numeric($selectedUserId) || $selectedUserId <= 0)) {
                 $selectedUserId = null;
             }
-
             return view('admin.licenses.create', ['users' => $users, 'products' => $products, 'selectedUserId' => $selectedUserId]);
         } catch (\Exception $e) {
             Log::error('Error showing license creation form', [
@@ -119,7 +115,6 @@ class LicenseController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return view('admin.licenses.create', [
                 'users' => collect(),
                 'products' => collect(),
@@ -127,7 +122,6 @@ class LicenseController extends Controller
             ]);
         }
     }
-
     /**
      * Store a newly created license with comprehensive security validation.
      *
@@ -202,7 +196,6 @@ class LicenseController extends Controller
             $validated = $validatedArray;
             // @phpstan-ignore-next-line
             $license = License::create($validated);
-
             return redirect()->route('admin.licenses.index')
                 ->with('success', trans('app.License created successfully.'));
         } catch (\Exception $e) {
@@ -212,23 +205,19 @@ class LicenseController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return redirect()->back()
                 ->withErrors(['error' => 'Failed to create license. Please try again.'])
                 ->withInput();
         }
     }
-
     /**
      * Display the specified resource.
      */
     public function show(License $license): \Illuminate\View\View
     {
         $license->load(['user', 'product', 'logs']);
-
         return view('admin.licenses.show', ['license' => $license]);
     }
-
     /**
      * Show the form for editing the specified resource.
      */
@@ -236,10 +225,8 @@ class LicenseController extends Controller
     {
         $users = \App\Models\User::all();
         $products = Product::all();
-
         return view('admin.licenses.edit', ['license' => $license, 'users' => $users, 'products' => $products]);
     }
-
     /**
      * Update the specified resource in storage.
      */
@@ -275,22 +262,18 @@ class LicenseController extends Controller
         }
         // @phpstan-ignore-next-line
         $license->update($validated);
-
         return redirect()->route('admin.licenses.index')
             ->with('success', trans('app.License updated successfully.'));
     }
-
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(License $license): \Illuminate\Http\RedirectResponse
     {
         $license->delete();
-
         return redirect()->route('admin.licenses.index')
             ->with('success', trans('app.License deleted successfully.'));
     }
-
     /**
      * Generate a unique license key with security validation.
      *
@@ -307,14 +290,13 @@ class LicenseController extends Controller
             $attempts = 0;
             $maxAttempts = 100;
             do {
-                $key = strtoupper(substr(md5(microtime().uniqid()), 0, 16));
-                $key = substr($key, 0, 4).'-'.substr($key, 4, 4).'-'.substr($key, 8, 4).'-'.substr($key, 12, 4);
+                $key = strtoupper(substr(md5(microtime() . uniqid()), 0, 16));
+                $key = substr($key, 0, 4) . '-' . substr($key, 4, 4) . '-' . substr($key, 8, 4) . '-' . substr($key, 12, 4);
                 $attempts++;
                 if ($attempts >= $maxAttempts) {
-                    throw new \Exception('Unable to generate unique license key after '.$maxAttempts.' attempts');
+                    throw new \Exception('Unable to generate unique license key after ' . $maxAttempts . ' attempts');
                 }
             } while (License::where('license_key', $key)->exists());
-
             return $key;
         } catch (\Exception $e) {
             Log::error('Error generating license key', [

@@ -29,10 +29,8 @@ class InvoiceRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -42,7 +40,6 @@ class InvoiceRequest extends FormRequest
     {
         $invoiceId = $this->route('invoice')->id ?? null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
-
         return [
             'user_id' => [
                 'required',
@@ -149,7 +146,6 @@ class InvoiceRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -190,7 +186,6 @@ class InvoiceRequest extends FormRequest
             'next_billing_date.after' => 'Next billing date must be in the future.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -220,7 +215,6 @@ class InvoiceRequest extends FormRequest
             'next_billing_date' => 'next billing date',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */
@@ -244,7 +238,6 @@ class InvoiceRequest extends FormRequest
             'billing_type' => $this->billing_type ?? 'one_time',
         ]);
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -257,11 +250,11 @@ class InvoiceRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-
-        if (! is_string($input)) {
+        
+        if (!is_string($input)) {
             return null;
         }
-
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

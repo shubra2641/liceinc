@@ -77,7 +77,6 @@ class DashboardController extends Controller
             // Get recent invoices for dashboard
             $recentInvoices = $user->invoices()->with('license.product')->orderBy('created_at', 'desc')->take(5)->get();
             DB::commit();
-
             return view('user.dashboard', array_merge(
                 [
                     'licenses' => $licenses,
@@ -97,7 +96,6 @@ class DashboardController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
-
             // Return empty dashboard with error message
             return view('user.dashboard', [
                 'licenses' => collect(),
@@ -113,7 +111,6 @@ class DashboardController extends Controller
             ]);
         }
     }
-
     /**
      * Get active licenses count for the user.
      *
@@ -137,15 +134,13 @@ class DashboardController extends Controller
                 'error' => $e->getMessage(),
                 'user_id' => $user->id,
             ]);
-
             return 0;
         }
     }
-
     /**
      * Get available products for suggestions.
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, Product> The available products
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> The available products
      *
      * @throws \Exception When database operations fail
      */
@@ -160,11 +155,9 @@ class DashboardController extends Controller
             Log::error('Failed to get available products', [
                 'error' => $e->getMessage(),
             ]);
-
             return Product::whereRaw('1 = 0')->get();
         }
     }
-
     /**
      * Get invoice statistics for the user.
      *
@@ -181,7 +174,6 @@ class DashboardController extends Controller
             $invoicePaid = $user->invoices()->where('status', 'paid')->count();
             $invoicePending = $user->invoices()->where('status', 'pending')->count();
             $invoiceCancelled = $user->invoices()->where('status', 'cancelled')->count();
-
             return [
                 'invoiceTotal' => $invoiceTotal,
                 'invoicePaid' => $invoicePaid,
@@ -193,7 +185,6 @@ class DashboardController extends Controller
                 'error' => $e->getMessage(),
                 'user_id' => $user->id,
             ]);
-
             return [
                 'invoiceTotal' => 0,
                 'invoicePaid' => 0,
@@ -202,7 +193,6 @@ class DashboardController extends Controller
             ];
         }
     }
-
     /**
      * Get SEO data from settings.
      *
@@ -215,7 +205,6 @@ class DashboardController extends Controller
         try {
             $seoTitle = Setting::get('seo_site_title', null);
             $seoDescription = Setting::get('seo_site_description', null);
-
             return [
                 'seoTitle' => $seoTitle,
                 'seoDescription' => $seoDescription,
@@ -224,7 +213,6 @@ class DashboardController extends Controller
             Log::error('Failed to get SEO data', [
                 'error' => $e->getMessage(),
             ]);
-
             return [
                 'seoTitle' => null,
                 'seoDescription' => null,

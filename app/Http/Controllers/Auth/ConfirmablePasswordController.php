@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Helpers\SecurityHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ConfirmPasswordRequest;
 use Illuminate\Http\RedirectResponse;
@@ -12,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use App\Helpers\SecurityHelper;
 
 /**
  * Controller for handling password confirmation requests with enhanced security.
@@ -25,7 +25,6 @@ use Illuminate\View\View;
  * - Comprehensive error handling with database transactions
  * - Proper logging for errors and warnings only
  * - Session-based password confirmation tracking
- *
  * @version 1.0.6
  */
 class ConfirmablePasswordController extends Controller
@@ -42,7 +41,6 @@ class ConfirmablePasswordController extends Controller
     {
         return view('auth.confirm-password');
     }
-
     /**
      * Confirm the user's password with enhanced security.
      *
@@ -76,7 +74,6 @@ class ConfirmablePasswordController extends Controller
             }
             $this->storePasswordConfirmation($request);
             DB::commit();
-
             return redirect()->intended(route('dashboard', absolute: false));
         } catch (ValidationException $e) {
             DB::rollBack();
@@ -95,7 +92,6 @@ class ConfirmablePasswordController extends Controller
             ]);
         }
     }
-
     /**
      * Validate the user's password.
      *
@@ -109,13 +105,11 @@ class ConfirmablePasswordController extends Controller
         if ($user === null) {
             return false;
         }
-
         return Auth::guard('web')->validate([
             'email' => $user->email,
             'password' => $request->password,
         ]);
     }
-
     /**
      * Store password confirmation timestamp in session.
      *

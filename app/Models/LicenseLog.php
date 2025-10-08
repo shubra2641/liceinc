@@ -20,8 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read string|null $action
  * @property-read string|null $message
- * @property-read License $license
- *
+ * @property-read \App\Models\License $license
  * @method static \Database\Factories\LicenseLogFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog newQuery()
@@ -37,7 +36,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereUserAgent($value)
- *
  * @mixin \Eloquent
  */
 class LicenseLog extends Model
@@ -62,12 +60,10 @@ class LicenseLog extends Model
         'request_data',
         'response_data',
     ];
-
     protected $casts = [
         'request_data' => 'array',
         'response_data' => 'array',
     ];
-
     /**
      * @return BelongsTo<License, $this>
      */
@@ -75,7 +71,6 @@ class LicenseLog extends Model
     {
         return $this->belongsTo(License::class);
     }
-
     /**
      * Virtual attribute to access the action from request_data.
      */
@@ -87,10 +82,8 @@ class LicenseLog extends Model
         }
         // Data is already type-hinted as array
         $action = $data['action'] ?? null;
-
         return is_string($action) ? $action : null;
     }
-
     /**
      * Virtual attribute to access the message from response_data.
      */
@@ -102,13 +95,10 @@ class LicenseLog extends Model
         }
         // Data is already type-hinted as array
         $message = $data['message'] ?? null;
-
         return is_string($message) ? $message : null;
     }
-
     /**
      * Get API calls grouped by date for the last N days.
-     *
      * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
      */
     public static function getApiCallsByDate(int $days = 30): \Illuminate\Database\Eloquent\Collection
@@ -119,10 +109,8 @@ class LicenseLog extends Model
             ->orderBy('date')
             ->get();
     }
-
     /**
      * Get API status distribution for the last N days.
-     *
      * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
      */
     public static function getApiStatusDistribution(int $days = 30): \Illuminate\Database\Eloquent\Collection
@@ -132,10 +120,8 @@ class LicenseLog extends Model
             ->groupBy('status')
             ->get();
     }
-
     /**
      * Get top domains by API calls.
-     *
      * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
      */
     public static function getTopDomainsByCalls(int $limit = 10): \Illuminate\Database\Eloquent\Collection
@@ -147,10 +133,8 @@ class LicenseLog extends Model
             ->limit($limit)
             ->get();
     }
-
     /**
      * Get API calls by hour for today.
-     *
      * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
      */
     public static function getApiCallsByHour(): \Illuminate\Database\Eloquent\Collection

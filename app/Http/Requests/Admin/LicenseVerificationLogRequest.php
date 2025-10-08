@@ -29,10 +29,8 @@ class LicenseVerificationLogRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -158,7 +156,6 @@ class LicenseVerificationLogRequest extends FormRequest
                 ],
             ];
         }
-
         // Filter validation (default)
         return [
             'status' => [
@@ -230,7 +227,6 @@ class LicenseVerificationLogRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -281,7 +277,6 @@ class LicenseVerificationLogRequest extends FormRequest
             'include_error_details.boolean' => 'Include error details must be true or false.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -325,7 +320,6 @@ class LicenseVerificationLogRequest extends FormRequest
             'include_error_details' => 'include error details',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */
@@ -387,7 +381,6 @@ class LicenseVerificationLogRequest extends FormRequest
             'include_error_details' => $this->include_error_details ?? false,
         ]);
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -400,11 +393,11 @@ class LicenseVerificationLogRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-
-        if (! is_string($input)) {
+        
+        if (!is_string($input)) {
             return null;
         }
-
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

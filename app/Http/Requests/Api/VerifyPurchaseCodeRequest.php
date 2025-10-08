@@ -26,7 +26,6 @@ class VerifyPurchaseCodeRequest extends FormRequest
     {
         return true; // Authorization handled by middleware
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -44,7 +43,6 @@ class VerifyPurchaseCodeRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -57,11 +55,10 @@ class VerifyPurchaseCodeRequest extends FormRequest
             'purchase_code.string' => 'Purchase code must be a valid string.',
             'purchase_code.min' => 'Purchase code must be at least 10 characters long.',
             'purchase_code.max' => 'Purchase code cannot exceed 100 characters.',
-            'purchase_code.regex' => 'Purchase code contains invalid characters. '.
+            'purchase_code.regex' => 'Purchase code contains invalid characters. ' .
                 'Only uppercase letters, numbers, and hyphens are allowed.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -73,7 +70,6 @@ class VerifyPurchaseCodeRequest extends FormRequest
             'purchase_code' => 'purchase code',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */

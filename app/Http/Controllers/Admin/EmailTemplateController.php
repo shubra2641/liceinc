@@ -616,7 +616,6 @@ class EmailTemplateController extends Controller
 
         /** @var array<string, mixed> $result */
         $result = array_merge($defaultData, is_array($testData) ? $testData : []);
-
         return $result;
     }
 }

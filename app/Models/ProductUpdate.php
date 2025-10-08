@@ -31,8 +31,7 @@ use Illuminate\Support\Facades\Storage;
  * @property-read string|null $download_url
  * @property-read string|null $file_url
  * @property-read string $formatted_file_size
- * @property-read Product $product
- *
+ * @property-read \App\Models\Product $product
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate active()
  * @method static \Database\Factories\ProductUpdateFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate major()
@@ -59,7 +58,6 @@ use Illuminate\Support\Facades\Storage;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereVersion($value)
- *
  * @mixin \Eloquent
  */
 class ProductUpdate extends Model
@@ -99,7 +97,6 @@ class ProductUpdate extends Model
         'compatibility',
         'released_at',
     ];
-
     /**
      * The attributes that should be cast.
      *
@@ -114,7 +111,6 @@ class ProductUpdate extends Model
         'compatibility' => 'array',
         'released_at' => 'datetime',
     ];
-
     /**
      * Get the product that owns the update.
      */
@@ -125,7 +121,6 @@ class ProductUpdate extends Model
     {
         return $this->belongsTo(Product::class);
     }
-
     /**
      * Get the update file URL.
      */
@@ -134,10 +129,8 @@ class ProductUpdate extends Model
         if (! $this->file_path) {
             return null;
         }
-
         return Storage::url($this->file_path);
     }
-
     /**
      * Get the update file download URL.
      */
@@ -146,13 +139,11 @@ class ProductUpdate extends Model
         if (! $this->file_path) {
             return null;
         }
-
         return route('api.product-updates.download', [
             'product' => $this->product_id,
             'version' => $this->version,
         ]);
     }
-
     /**
      * Check if this update is newer than given version.
      */
@@ -160,7 +151,6 @@ class ProductUpdate extends Model
     {
         return version_compare($this->version, $version, '>');
     }
-
     /**
      * Check if this update is compatible with given version.
      */
@@ -169,10 +159,8 @@ class ProductUpdate extends Model
         if (! $this->compatibility) {
             return true;
         }
-
         return in_array($version, $this->compatibility);
     }
-
     /**
      * Check if system meets requirements.
      */
@@ -205,10 +193,8 @@ class ProductUpdate extends Model
                 }
             }
         }
-
         return true;
     }
-
     /**
      * Get changelog as text (for editing).
      */
@@ -218,11 +204,9 @@ class ProductUpdate extends Model
         if (empty($changelog)) {
             return '';
         }
-
         // Changelog is already validated
         return implode("\n", $changelog);
     }
-
     /**
      * Get formatted file size.
      */
@@ -237,56 +221,47 @@ class ProductUpdate extends Model
         for ($i = 0; $bytes > 1024 && $i < $unitsCount - 1; $i++) {
             $bytes /= 1024;
         }
-
-        return round($bytes, 2).' '.$units[$i];
+        return round($bytes, 2) . ' ' . $units[$i];
     }
-
     /**
      * Scope for active updates.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
-
     /**
      * Scope for major updates.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeMajor($query)
     {
         return $query->where('is_major', true);
     }
-
     /**
      * Scope for required updates.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeRequired($query)
     {
         return $query->where('is_required', true);
     }
-
     /**
      * Scope for updates newer than version.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
      * @param string $version
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeNewerThan($query, string $version)

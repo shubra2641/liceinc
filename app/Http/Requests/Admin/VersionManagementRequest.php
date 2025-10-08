@@ -29,10 +29,8 @@ class VersionManagementRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -42,7 +40,7 @@ class VersionManagementRequest extends FormRequest
     {
         $route = $this->route();
         $routeName = $route?->getName() ?? '';
-
+        
         $isHistory = $this->isMethod('POST') && str_contains($routeName, 'history');
         $isLatest = $this->isMethod('POST') && str_contains($routeName, 'latest');
         // Version history validation
@@ -177,7 +175,6 @@ class VersionManagementRequest extends FormRequest
                 ],
             ];
         }
-
         // Default validation (for other version operations)
         return [
             'version' => [
@@ -203,7 +200,6 @@ class VersionManagementRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -219,11 +215,11 @@ class VersionManagementRequest extends FormRequest
             'domain.required' => 'Domain is required.',
             'domain.regex' => 'Domain can only contain letters, numbers, hyphens, underscores, and dots.',
             'version.required' => 'Version is required.',
-            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix '.
+            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
-            'current_version.regex' => 'Current version must be in format: x.y or x.y.z or x.y.z-suffix '.
+            'current_version.regex' => 'Current version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
-            'filter_version.regex' => 'Filter version must be in format: x.y or x.y.z or x.y.z-suffix '.
+            'filter_version.regex' => 'Filter version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
             'include_changelog.boolean' => 'Include changelog must be true or false.',
             'include_dependencies.boolean' => 'Include dependencies must be true or false.',
@@ -245,7 +241,6 @@ class VersionManagementRequest extends FormRequest
             'filter_date_to.after_or_equal' => 'Filter date to must be after or equal to filter date from.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -278,7 +273,6 @@ class VersionManagementRequest extends FormRequest
             'filter_date_to' => 'filter date to',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */
@@ -323,7 +317,6 @@ class VersionManagementRequest extends FormRequest
             'sort_order' => $this->sort_order ?? 'desc',
         ]);
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -336,11 +329,11 @@ class VersionManagementRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-
-        if (! is_string($input)) {
+        
+        if (!is_string($input)) {
             return null;
         }
-
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

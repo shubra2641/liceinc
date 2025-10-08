@@ -65,7 +65,6 @@ class AutoUpdateController extends Controller
     {
         /** @var view-string $view */
         $view = 'admin.auto-update.index';
-
         return view($view);
     }
 

@@ -518,7 +518,6 @@ class TicketController extends Controller
             DB::commit();
 
             $status = $ticket->status ?? 'open';
-
             return back()->with('success', 'Ticket status updated to '.ucfirst($status));
         } catch (\Exception $e) {
             DB::rollBack();

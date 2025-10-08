@@ -43,7 +43,6 @@ class KbArticleController extends Controller
     {
         $this->middleware(['auth', 'user', 'verified']);
     }
-
     /**
      * Display a listing of knowledge base articles with enhanced security.
      *
@@ -62,7 +61,7 @@ class KbArticleController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'kb-articles-index:'.(Auth::id() ?? request()->ip());
+            $key = 'kb-articles-index:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 20)) {
                 Log::warning('Rate limit exceeded for KB articles index', [
                     'user_id' => Auth::id(),
@@ -84,7 +83,6 @@ class KbArticleController extends Controller
             }
             $articles = KbArticle::with('category')->latest()->paginate(10);
             $categories = KbCategory::all();
-
             return view('admin.kb.articles.index', ['articles' => $articles, 'categories' => $categories]);
         } catch (\Exception $e) {
             Log::error('Failed to load KB articles index', [
@@ -98,7 +96,6 @@ class KbArticleController extends Controller
             abort(500, 'Failed to load articles');
         }
     }
-
     /**
      * Show the form for creating a new knowledge base article.
      *
@@ -117,7 +114,7 @@ class KbArticleController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'kb-articles-create:'.(Auth::id() ?? request()->ip());
+            $key = 'kb-articles-create:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for KB article creation form', [
                     'user_id' => Auth::id(),
@@ -138,7 +135,6 @@ class KbArticleController extends Controller
                 abort(403, 'Unauthorized access');
             }
             $categories = KbCategory::pluck('name', 'id');
-
             return view('admin.kb.articles.create', ['categories' => $categories]);
         } catch (\Exception $e) {
             Log::error('Failed to load KB article creation form', [
@@ -152,7 +148,6 @@ class KbArticleController extends Controller
             abort(500, 'Failed to load creation form');
         }
     }
-
     /**
      * Store a newly created knowledge base article with enhanced security.
      *
@@ -179,14 +174,13 @@ class KbArticleController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'kb-articles-store:'.(Auth::id() ?? request()->ip());
+            $key = 'kb-articles-store:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for KB article creation', [
                     'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
-
                 return back()->with('error', 'Too many requests. Please try again later.');
             }
             RateLimiter::hit($key, 300); // 5 minutes
@@ -242,7 +236,6 @@ class KbArticleController extends Controller
             // @phpstan-ignore-next-line
             KbArticle::create($validatedArray);
             DB::commit();
-
             return redirect()->route('admin.kb-articles.index')->with('success', 'Article created successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
@@ -251,7 +244,6 @@ class KbArticleController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
-
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -263,11 +255,9 @@ class KbArticleController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
-
             return back()->with('error', 'Failed to create article. Please try again.');
         }
     }
-
     /**
      * Show the form for editing the specified knowledge base article.
      *
@@ -288,7 +278,7 @@ class KbArticleController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'kb-articles-edit:'.(Auth::id() ?? request()->ip());
+            $key = 'kb-articles-edit:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for KB article editing form', [
                     'user_id' => Auth::id(),
@@ -309,7 +299,6 @@ class KbArticleController extends Controller
                 abort(403, 'Unauthorized access');
             }
             $categories = KbCategory::pluck('name', 'id');
-
             return view('admin.kb.articles.edit', ['article' => $kbArticle, 'categories' => $categories]);
         } catch (\Exception $e) {
             Log::error('Failed to load KB article editing form', [
@@ -323,7 +312,6 @@ class KbArticleController extends Controller
             abort(500, 'Failed to load editing form');
         }
     }
-
     /**
      * Update the specified knowledge base article with enhanced security.
      *
@@ -351,14 +339,13 @@ class KbArticleController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'kb-articles-update:'.(Auth::id() ?? request()->ip());
+            $key = 'kb-articles-update:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for KB article update', [
                     'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
-
                 return back()->with('error', 'Too many requests. Please try again later.');
             }
             RateLimiter::hit($key, 300); // 5 minutes
@@ -376,7 +363,7 @@ class KbArticleController extends Controller
             $validated = $request->validate([
                 'kb_category_id' => ['required', 'exists:kb_categories, id'],
                 'title' => ['required', 'string', 'max:255'],
-                'slug' => ['required', 'string', 'max:255', 'unique:kb_articles, slug, '.$kbArticle->id],
+                'slug' => ['required', 'string', 'max:255', 'unique:kb_articles, slug, ' . $kbArticle->id],
                 'excerpt' => ['nullable', 'string'],
                 'content' => ['required', 'string'],
                 'image' => ['nullable', 'image', 'max:2048'],
@@ -412,7 +399,6 @@ class KbArticleController extends Controller
             // @phpstan-ignore-next-line
             $kbArticle->update($validatedArray);
             DB::commit();
-
             return back()->with('success', 'Article updated successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
@@ -421,7 +407,6 @@ class KbArticleController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
-
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -433,11 +418,9 @@ class KbArticleController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
-
             return back()->with('error', 'Failed to update article. Please try again.');
         }
     }
-
     /**
      * Remove the specified knowledge base article with enhanced security.
      *
@@ -459,14 +442,13 @@ class KbArticleController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'kb-articles-destroy:'.(Auth::id() ?? request()->ip());
+            $key = 'kb-articles-destroy:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 3)) {
                 Log::warning('Rate limit exceeded for KB article deletion', [
                     'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
-
                 return back()->with('error', 'Too many requests. Please try again later.');
             }
             RateLimiter::hit($key, 300); // 5 minutes
@@ -483,7 +465,6 @@ class KbArticleController extends Controller
             DB::beginTransaction();
             $kbArticle->delete();
             DB::commit();
-
             return redirect()->route('admin.kb-articles.index')->with('success', 'Article deleted successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -495,7 +476,6 @@ class KbArticleController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
-
             return back()->with('error', 'Failed to delete article. Please try again.');
         }
     }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Helpers\SecureFileHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LicenseRequest;
 use App\Models\License;
@@ -14,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use App\Helpers\SecureFileHelper;
 
 /**
  * Admin License Controller with enhanced security.
@@ -37,51 +37,57 @@ use Illuminate\View\View;
 class LicenseController extends Controller
 {
     protected EmailService $emailService;
-
     /**
      * Create a new controller instance.
      *
      * @param  EmailService  $emailService  The email service for notifications
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function __construct(EmailService $emailService)
     {
         $this->emailService = $emailService;
     }
-
     /**
      * Display a listing of licenses with pagination.
      *
      * @return View The licenses index view
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function index(): View
     {
         $licenses = License::with(['user', 'product'])
             ->latest()
             ->paginate(10);
-
         return view('admin.licenses.index', ['licenses' => $licenses]);
     }
-
     /**
      * Show the form for creating a new license.
      *
      * @return View The license creation form view
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function create(): View
     {
         $users = User::all();
         $products = Product::all();
         $selectedUserId = null;
-
         return view('admin.licenses.create', ['users' => $users, 'products' => $products, 'selectedUserId' => $selectedUserId]);
     }
-
     /**
      * Store a newly created resource in storage with enhanced security.
      *
@@ -104,7 +110,6 @@ class LicenseController extends Controller
             $product = Product::find($validated['product_id']);
             if (! $product) {
                 DB::rollBack();
-
                 return back()->withErrors(['product_id' => 'Product not found.']);
             }
             // Inherit license type from product if not specified
@@ -173,7 +178,6 @@ class LicenseController extends Controller
                 ]);
             }
             DB::commit();
-
             return redirect()->route('admin.licenses.show', $license)
                 ->with('success', 'License created successfully with automatic invoice generation.');
         } catch (\Exception $e) {
@@ -183,14 +187,12 @@ class LicenseController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['notes']),
             ]);
-
             return redirect()
                 ->back()
                 ->withInput()
                 ->with('error', 'Failed to create license. Please try again.');
         }
     }
-
     /**
      * Display the specified license with related data.
      *
@@ -202,14 +204,16 @@ class LicenseController extends Controller
      * @return View The license details view
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function show(License $license): View
     {
         $license->load(['user', 'product', 'domains', 'logs']);
-
         return view('admin.licenses.show', ['license' => $license]);
     }
-
     /**
      * Show the form for editing the specified license.
      *
@@ -221,15 +225,17 @@ class LicenseController extends Controller
      * @return View The license edit form view
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function edit(License $license): View
     {
         $users = User::all();
         $products = Product::all();
-
         return view('admin.licenses.edit', ['license' => $license, 'users' => $users, 'products' => $products]);
     }
-
     /**
      * Update the specified resource in storage with enhanced security.
      *
@@ -260,7 +266,6 @@ class LicenseController extends Controller
             $product = Product::find($validated['product_id']);
             if (! $product) {
                 DB::rollBack();
-
                 return back()->withErrors(['product_id' => 'Product not found.']);
             }
             // Inherit license type from product if not specified
@@ -290,7 +295,6 @@ class LicenseController extends Controller
             $validated['max_domains'] = $validated['max_domains'];
             $license->update($validated);
             DB::commit();
-
             return redirect()->route('admin.licenses.show', $license)
                 ->with('success', 'License updated successfully.');
         } catch (\Exception $e) {
@@ -301,14 +305,12 @@ class LicenseController extends Controller
                 'license_id' => $license->id,
                 'request_data' => $request->except(['notes']),
             ]);
-
             return redirect()
                 ->back()
                 ->withInput()
                 ->with('error', 'Failed to update license. Please try again.');
         }
     }
-
     /**
      * Remove the specified resource from storage with enhanced security.
      *
@@ -326,7 +328,6 @@ class LicenseController extends Controller
             DB::beginTransaction();
             $license->delete();
             DB::commit();
-
             return redirect()->route('admin.licenses.index')
                 ->with('success', 'License deleted successfully.');
         } catch (\Exception $e) {
@@ -336,13 +337,11 @@ class LicenseController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'license_id' => $license->id,
             ]);
-
             return redirect()
                 ->back()
                 ->with('error', 'Failed to delete license. Please try again.');
         }
     }
-
     /**
      * Toggle license status with enhanced security.
      *
@@ -363,7 +362,6 @@ class LicenseController extends Controller
                 'status' => $license->status === 'active' ? 'inactive' : 'active',
             ]);
             DB::commit();
-
             return back()->with('success', 'License status updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -372,11 +370,9 @@ class LicenseController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'license_id' => $license->id,
             ]);
-
             return back()->with('error', 'Failed to update license status. Please try again.');
         }
     }
-
     /**
      * Export licenses to CSV format with comprehensive data.
      *
@@ -386,18 +382,22 @@ class LicenseController extends Controller
      * @return \Symfony\Component\HttpFoundation\StreamedResponse The CSV download response
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function export(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $licenses = License::with(['user', 'product'])->get();
-        $filename = 'licenses_'.date('Y-m-d_H-i-s').'.csv';
+        $filename = 'licenses_' . date('Y-m-d_H-i-s') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
         $callback = function () use ($licenses) {
             $file = SecureFileHelper::openOutput('w');
-            if (! is_resource($file)) {
+            if (!is_resource($file)) {
                 return;
             }
             // CSV Headers
@@ -426,7 +426,6 @@ class LicenseController extends Controller
             }
             SecureFileHelper::closeFile($file);
         };
-
         return response()->stream($callback, 200, $headers);
     }
 }

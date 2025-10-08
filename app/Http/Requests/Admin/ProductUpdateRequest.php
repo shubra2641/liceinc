@@ -29,10 +29,8 @@ class ProductUpdateRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -43,7 +41,6 @@ class ProductUpdateRequest extends FormRequest
         $update = $this->route('product_update');
         $updateId = $update && is_object($update) && property_exists($update, 'id') ? $update->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
-
         return [
             'product_id' => [
                 'required',
@@ -120,7 +117,6 @@ class ProductUpdateRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -148,7 +144,6 @@ class ProductUpdateRequest extends FormRequest
             'checksum.regex' => 'Checksum must be a valid hexadecimal string.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -172,7 +167,6 @@ class ProductUpdateRequest extends FormRequest
             'checksum' => 'file checksum',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */
@@ -196,7 +190,6 @@ class ProductUpdateRequest extends FormRequest
             'is_active' => $this->is_active ?? true,
         ]);
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -209,14 +202,14 @@ class ProductUpdateRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-
-        if (! is_string($input)) {
+        
+        if (!is_string($input)) {
             return null;
         }
-
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
-
+    
     /**
      * Get the product ID safely.
      *
@@ -225,7 +218,6 @@ class ProductUpdateRequest extends FormRequest
     private function getProductId(): ?int
     {
         $productId = $this->input('product_id');
-
-        return is_numeric($productId) ? (int)$productId : null;
+        return is_numeric($productId) ? (int) $productId : null;
     }
 }

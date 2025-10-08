@@ -71,7 +71,6 @@ class Controller extends BaseController
      */
     /**
      * @param callable(): mixed $callback
-     *
      * @return mixed
      */
     protected function transaction(callable $callback)
@@ -88,7 +87,6 @@ class Controller extends BaseController
             throw $e;
         }
     }
-
     /**
      * Create a standardized success response.
      *
@@ -116,7 +114,6 @@ class Controller extends BaseController
             'timestamp' => now()->toISOString(),
         ], $statusCode);
     }
-
     /**
      * Create a standardized error response.
      *
@@ -144,7 +141,6 @@ class Controller extends BaseController
             'timestamp' => now()->toISOString(),
         ], $statusCode);
     }
-
     /**
      * Create a standardized redirect response with flash message.
      *
@@ -172,7 +168,6 @@ class Controller extends BaseController
     ): RedirectResponse {
         return redirect()->route($route, $parameters)->with($type, $message);
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -194,10 +189,8 @@ class Controller extends BaseController
         if (is_array($input)) {
             return array_map([$this, 'sanitizeInput'], $input);
         }
-
         return $input;
     }
-
     /**
      * Hash data for logging purposes.
      *
@@ -213,9 +206,8 @@ class Controller extends BaseController
      */
     protected function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data.(is_string(config('app.key')) ? config('app.key') : '')), 0, 8).'...';
+        return substr(hash('sha256', $data . (is_string(config('app.key')) ? config('app.key') : '')), 0, 8) . '...';
     }
-
     /**
      * Log security event with comprehensive context.
      *
@@ -235,7 +227,7 @@ class Controller extends BaseController
     protected function logSecurityEvent(string $event, Request $request, array $context = []): void
     {
         try {
-            Log::warning('Security event: '.$event, array_merge([
+            Log::warning('Security event: ' . $event, array_merge([
                 'event' => $event,
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
@@ -252,7 +244,6 @@ class Controller extends BaseController
             ]);
         }
     }
-
     /**
      * Validate request with enhanced security and error handling.
      *
@@ -273,7 +264,6 @@ class Controller extends BaseController
     /**
      * @param array<string, string> $rules
      * @param array<string, string> $messages
-     *
      * @return array<string, mixed>
      */
     protected function validateRequest(Request $request, array $rules, array $messages = []): array
@@ -282,7 +272,6 @@ class Controller extends BaseController
             $validated = $request->validate($rules, $messages);
             /** @var array<string, mixed> $result */
             $result = $validated;
-
             return $result;
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::warning('Request validation failed', [
@@ -297,7 +286,6 @@ class Controller extends BaseController
             throw $e;
         }
     }
-
     /**
      * Handle controller errors with comprehensive logging.
      *
@@ -315,7 +303,7 @@ class Controller extends BaseController
      */
     protected function handleError(Throwable $e, Request $request, string $context = ''): JsonResponse
     {
-        Log::error('Controller error: '.$context, [
+        Log::error('Controller error: ' . $context, [
             'error' => $e->getMessage(),
             'context' => $context,
             'url' => $request->fullUrl(),
@@ -325,14 +313,12 @@ class Controller extends BaseController
             'user_id' => auth()->check() ? auth()->id() : 'guest',
             'trace' => $e->getTraceAsString(),
         ]);
-
         return $this->errorResponse(
             'An error occurred while processing your request.',
             null,
             500,
         );
     }
-
     /**
      * Check if user has permission with enhanced security.
      *
@@ -360,7 +346,6 @@ class Controller extends BaseController
             if ($resource) {
                 return $user->can($permission, $resource);
             }
-
             return $user->can($permission);
         } catch (Throwable $e) {
             Log::error('Permission check failed', [
@@ -369,11 +354,9 @@ class Controller extends BaseController
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return false;
         }
     }
-
     /**
      * Get current user with enhanced security.
      *
@@ -394,7 +377,6 @@ class Controller extends BaseController
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return null;
         }
     }

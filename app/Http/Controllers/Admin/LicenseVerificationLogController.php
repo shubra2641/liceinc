@@ -302,7 +302,7 @@ class LicenseVerificationLogController extends Controller
         // Rate limiting for export functionality
         $key = 'license-logs-export:'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
-            return new \Symfony\Component\HttpFoundation\StreamedResponse(function () {
+            return new \Symfony\Component\HttpFoundation\StreamedResponse(function() {
                 echo 'Too many export attempts. Please try again later.';
             }, 429);
         }
@@ -318,7 +318,7 @@ class LicenseVerificationLogController extends Controller
             ];
             $callback = function () use ($logs) {
                 $file = SecureFileHelper::openOutput('w');
-                if (! is_resource($file)) {
+                if (!is_resource($file)) {
                     return;
                 }
                 // CSV Headers
@@ -352,7 +352,7 @@ class LicenseVerificationLogController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return new \Symfony\Component\HttpFoundation\StreamedResponse(function () {
+            return new \Symfony\Component\HttpFoundation\StreamedResponse(function() {
                 echo 'Failed to export logs. Please try again.';
             }, 500);
         }

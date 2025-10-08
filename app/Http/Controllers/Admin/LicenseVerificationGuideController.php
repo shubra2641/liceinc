@@ -42,7 +42,6 @@ class LicenseVerificationGuideController extends Controller
         $this->middleware('user');
         $this->middleware('verified');
     }
-
     /**
      * Display the license verification guide for developers with enhanced security.
      *
@@ -72,14 +71,13 @@ class LicenseVerificationGuideController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'license-guide:'.$request->ip().':'.Auth::id();
+            $key = 'license-guide:' . $request->ip() . ':' . Auth::id();
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for license verification guide access', [
                     'ip' => $request->ip(),
                     'user_id' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
-
                 return view('admin.license-verification-guide.index', [
                     'error' => 'Too many requests. Please try again later.',
                     'rate_limited' => true,
@@ -95,7 +93,6 @@ class LicenseVerificationGuideController extends Controller
                     'is_admin' => $user ? $user->is_admin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
-
                 return view('admin.license-verification-guide.index', [
                     'error' => 'Access denied. Admin privileges required.',
                     'unauthorized' => true,
@@ -112,7 +109,6 @@ class LicenseVerificationGuideController extends Controller
                     'status' => url('api/license/status'),
                 ],
             ];
-
             return view('admin.license-verification-guide.index', $guideData);
         } catch (\Exception $e) {
             Log::error('License verification guide view failed to load', [
@@ -121,7 +117,6 @@ class LicenseVerificationGuideController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => $request->ip(),
             ]);
-
             // Return fallback view with error information
             return view('admin.license-verification-guide.index', [
                 'error' => 'Unable to load the license verification guide. Please try again later.',

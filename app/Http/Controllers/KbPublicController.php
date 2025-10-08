@@ -27,9 +27,7 @@ use InvalidArgumentException;
 class KbPublicController extends Controller
 {
     protected EnvatoService $envatoService;
-
     protected PurchaseCodeService $purchaseCodeService;
-
     /**
      * Constructor with enhanced security and dependency injection.
      *
@@ -41,7 +39,6 @@ class KbPublicController extends Controller
         $this->envatoService = $envatoService;
         $this->purchaseCodeService = $purchaseCodeService;
     }
-
     /**
      * Display the knowledge base index with enhanced security and error handling.
      *
@@ -66,7 +63,6 @@ class KbPublicController extends Controller
             // Get latest articles with enhanced security
             $latest = $this->getLatestArticles();
             DB::commit();
-
             return view('kb.index', ['categories' => $categories, 'latest' => $latest]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -74,7 +70,6 @@ class KbPublicController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             // Return KB index with empty data on error
             return view('kb.index', [
                 'categories' => collect(),
@@ -82,7 +77,6 @@ class KbPublicController extends Controller
             ]);
         }
     }
-
     /**
      * Display a knowledge base category with enhanced security and error handling.
      *
@@ -115,13 +109,11 @@ class KbPublicController extends Controller
                 $articles = $this->getCategoryArticles($category);
                 $relatedCategories = $this->getRelatedCategories($category);
                 DB::commit();
-
                 return view('kb.category', ['category' => $category, 'articles' => $articles, 'relatedCategories' => $relatedCategories]);
             }
             // For protected categories, require authentication
             if (! auth()->check()) {
                 DB::rollBack();
-
                 return redirect()->route('login')->with('error', 'You must be logged in to access this category.');
             }
             $user = auth()->user();
@@ -133,11 +125,10 @@ class KbPublicController extends Controller
             if ($providedRawCode) {
                 $accessResult = $this->handleRawCodeAccess($category, $providedRawCode);
                 if ($accessResult['success']) {
-                    return $accessResult['redirect'] instanceof RedirectResponse ? $accessResult['redirect'] : redirect()->back();
+                    return $accessResult['redirect'] instanceof \Illuminate\Http\RedirectResponse ? $accessResult['redirect'] : redirect()->back();
                 } else {
                     $error = $accessResult['error'];
                     DB::rollBack();
-
                     return redirect()->route('kb.category', ['slug' => $category->slug])->with('error', $error);
                 }
             }
@@ -155,12 +146,10 @@ class KbPublicController extends Controller
                 $articles = $this->getCategoryArticles($category);
                 $relatedCategories = $this->getRelatedCategories($category);
                 DB::commit();
-
                 return view('kb.category', ['category' => $category, 'articles' => $articles, 'relatedCategories' => $relatedCategories, 'accessSource' => $accessSource]);
             }
             // No access - show purchase prompt
             DB::rollBack();
-
             return view('kb.category-purchase', ['category' => $category])->with('error', $error);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -169,11 +158,9 @@ class KbPublicController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'slug' => $slug,
             ]);
-
             return redirect()->route('kb.index')->with('error', 'Category not found or access denied.');
         }
     }
-
     /**
      * Display a knowledge base article with enhanced security and error handling.
      *
@@ -207,13 +194,11 @@ class KbPublicController extends Controller
                 $this->incrementArticleViews($article);
                 $relatedArticles = $this->getRelatedArticles($article);
                 DB::commit();
-
                 return view('kb.article', ['article' => $article, 'relatedArticles' => $relatedArticles]);
             }
             // For protected articles, require authentication
             if (! auth()->check()) {
                 DB::rollBack();
-
                 return redirect()->route('login')->with('error', 'You must be logged in to access this article.');
             }
             $user = auth()->user();
@@ -230,11 +215,10 @@ class KbPublicController extends Controller
             if (! $hasAccess && $providedRawCode) {
                 $accessResult = $this->handleArticleRawCodeAccess($article, $providedRawCode);
                 if ($accessResult['success']) {
-                    return $accessResult['redirect'] instanceof RedirectResponse ? $accessResult['redirect'] : redirect()->back();
+                    return $accessResult['redirect'] instanceof \Illuminate\Http\RedirectResponse ? $accessResult['redirect'] : redirect()->back();
                 } else {
                     $error = $accessResult['error'];
                     DB::rollBack();
-
                     return redirect()->route('kb.article', ['slug' => $article->slug])->with('error', $error);
                 }
             }
@@ -251,12 +235,10 @@ class KbPublicController extends Controller
                 $this->incrementArticleViews($article);
                 $relatedArticles = $this->getRelatedArticles($article);
                 DB::commit();
-
                 return view('kb.article', ['article' => $article, 'relatedArticles' => $relatedArticles, 'accessSource' => $accessSource]);
             }
             // No access - show purchase prompt
             DB::rollBack();
-
             return view('kb.article-purchase', ['article' => $article])->with('error', $error);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -265,11 +247,9 @@ class KbPublicController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'slug' => $slug,
             ]);
-
             return redirect()->route('kb.index')->with('error', 'Article not found or access denied.');
         }
     }
-
     /**
      * Search knowledge base with enhanced security and error handling.
      *
@@ -317,7 +297,6 @@ class KbPublicController extends Controller
             DB::commit();
             // Add highlighting helper for search terms
             $highlightQuery = htmlspecialchars($q, ENT_QUOTES, 'UTF-8');
-
             return view('kb.search', [
                 'q' => $q,
                 'results' => $results,
@@ -332,7 +311,6 @@ class KbPublicController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'query' => $request->get('q', ''),
             ]);
-
             // Return search page with empty results on error
             return view('kb.search', [
                 'q' => '',
@@ -343,7 +321,6 @@ class KbPublicController extends Controller
             ]);
         }
     }
-
     /**
      * Check if user has access to a category with enhanced security and error handling.
      *
@@ -375,10 +352,8 @@ class KbPublicController extends Controller
                             ->orWhere('license_expires_at', '>', now());
                     })
                     ->exists() : false;
-
                 return $hasLicense;
             }
-
             return false; // Requires access but no product_id
         } catch (\Exception $e) {
             Log::error('Failed to check category access', [
@@ -387,11 +362,9 @@ class KbPublicController extends Controller
                 'category_id' => $category->id ?? null,
                 'user_id' => $user->id ?? null,
             ]);
-
             return false;
         }
     }
-
     /**
      * Check if user has access to an article with enhanced security and error handling.
      *
@@ -426,7 +399,6 @@ class KbPublicController extends Controller
                             ->orWhere('license_expires_at', '>', now());
                     })
                     ->exists() : false;
-
                 return $hasLicense;
             }
             // Otherwise, if category defines a product_id, check that product
@@ -440,10 +412,8 @@ class KbPublicController extends Controller
                             ->orWhere('license_expires_at', '>', now());
                     })
                     ->exists() : false;
-
                 return $hasLicense;
             }
-
             return false; // Requires access but no product mapping found
         } catch (\Exception $e) {
             Log::error('Failed to check article access', [
@@ -452,11 +422,9 @@ class KbPublicController extends Controller
                 'article_id' => $article->id ?? null,
                 'user_id' => $user->id ?? null,
             ]);
-
             return false;
         }
     }
-
     /**
      * Validate slug with enhanced security and comprehensive validation.
      *
@@ -472,11 +440,10 @@ class KbPublicController extends Controller
         // XSS protection
         $slug = htmlspecialchars($slug, ENT_QUOTES, 'UTF-8');
     }
-
     /**
      * Get active categories with enhanced security and error handling.
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, KbCategory>
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory>
      *
      * @throws \Exception When category retrieval fails
      */
@@ -496,11 +463,10 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-
     /**
      * Get latest articles with enhanced security and error handling.
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, KbArticle>
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle>
      *
      * @throws \Exception When article retrieval fails
      */
@@ -523,7 +489,6 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-
     /**
      * Get category by slug with enhanced security and error handling.
      *
@@ -548,7 +513,6 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-
     /**
      * Check if category requires access with enhanced security.
      *
@@ -560,13 +524,12 @@ class KbPublicController extends Controller
     {
         return (bool)($category->requires_serial || $category->product_id);
     }
-
     /**
      * Get category articles with enhanced security and error handling.
      *
      * @param  KbCategory  $category  The category
      *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, KbArticle>
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, \App\Models\KbArticle>
      *
      * @throws \Exception When article retrieval fails
      */
@@ -590,13 +553,12 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-
     /**
      * Get related categories with enhanced security and error handling.
      *
      * @param  KbCategory  $category  The category
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, KbCategory>
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory>
      *
      * @throws \Exception When category retrieval fails
      */
@@ -618,7 +580,6 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-
     /**
      * Handle raw code access for category with enhanced security.
      *
@@ -638,17 +599,16 @@ class KbPublicController extends Controller
             );
             if ($rawResult['success']) {
                 $license = $rawResult['license'] ?? null;
-                $productId = $rawResult['product_id'] ?? ($license instanceof License ? $license->product_id : null);
+                $productId = $rawResult['product_id'] ?? ($license instanceof \App\Models\License ? $license->product_id : null);
                 $product = $productId ? Product::find($productId) : null;
                 if ($product && $product->id == $category->product_id) {
-                    $accessToken = 'kb_access_'.$category->id.'_'.time().'_'.substr(md5($license instanceof License ? $license->license_key : ''), 0, 8);
+                    $accessToken = 'kb_access_' . $category->id . '_' . time() . '_' . substr(md5($license instanceof \App\Models\License ? $license->license_key : ''), 0, 8);
                     session([$accessToken => [
-                        'license_id' => $license instanceof License ? $license->id : null,
+                        'license_id' => $license instanceof \App\Models\License ? $license->id : null,
                         'product_id' => $product->id,
                         'category_id' => $category->id,
                         'expires_at' => now()->addHours(24),
                     ]]);
-
                     return [
                         'success' => true,
                         'redirect' => redirect()->route('kb.category', [
@@ -674,14 +634,12 @@ class KbPublicController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'category_id' => $category->id,
             ]);
-
             return [
                 'success' => false,
                 'error' => 'Access verification failed',
             ];
         }
     }
-
     /**
      * Validate access token with enhanced security.
      *
@@ -701,7 +659,6 @@ class KbPublicController extends Controller
                     session()->forget($accessToken);
                 }
             }
-
             return ['valid' => false];
         } catch (\Exception $e) {
             Log::error('Failed to validate access token', [
@@ -709,11 +666,9 @@ class KbPublicController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'category_id' => $categoryId,
             ]);
-
             return ['valid' => false];
         }
     }
-
     /**
      * Get article by slug with enhanced security and error handling.
      *
@@ -742,7 +697,6 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-
     /**
      * Check if article requires access with enhanced security.
      *
@@ -757,7 +711,6 @@ class KbPublicController extends Controller
                                  ($article->category->requires_serial ||
                                   $article->category->product_id));
     }
-
     /**
      * Increment article views with enhanced security and error handling.
      *
@@ -778,13 +731,12 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-
     /**
      * Get related articles with enhanced security and error handling.
      *
      * @param  KbArticle  $article  The article
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, KbArticle>
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle>
      *
      * @throws \Exception When article retrieval fails
      */
@@ -810,7 +762,6 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-
     /**
      * Handle raw code access for article with enhanced security.
      *
@@ -831,20 +782,19 @@ class KbPublicController extends Controller
             );
             if ($rawResult['success']) {
                 $license = $rawResult['license'] ?? null;
-                $productId = $rawResult['product_id'] ?? ($license instanceof License ? $license->product_id : null);
+                $productId = $rawResult['product_id'] ?? ($license instanceof \App\Models\License ? $license->product_id : null);
                 $product = $productId ? Product::find($productId) : null;
                 $articleProductId = $article->product_id ?:
                     $article->category->product_id;
                 if ($product && $product->id == $articleProductId) {
-                    $accessToken = 'kb_article_access_'.$article->id.'_'.time().'_'.
-                        substr(md5($license instanceof License ? $license->license_key : ''), 0, 8);
+                    $accessToken = 'kb_article_access_' . $article->id . '_' . time() . '_' .
+                        substr(md5($license instanceof \App\Models\License ? $license->license_key : ''), 0, 8);
                     session([$accessToken => [
-                        'license_id' => $license instanceof License ? $license->id : null,
+                        'license_id' => $license instanceof \App\Models\License ? $license->id : null,
                         'product_id' => $product->id,
                         'article_id' => $article->id,
                         'expires_at' => now()->addHours(24),
                     ]]);
-
                     return [
                         'success' => true,
                         'redirect' => redirect()->route('kb.article', [
@@ -870,14 +820,12 @@ class KbPublicController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'article_id' => $article->id,
             ]);
-
             return [
                 'success' => false,
                 'error' => 'Access verification failed',
             ];
         }
     }
-
     /**
      * Validate article access token with enhanced security.
      *
@@ -897,7 +845,6 @@ class KbPublicController extends Controller
                     session()->forget($accessToken);
                 }
             }
-
             return ['valid' => false];
         } catch (\Exception $e) {
             Log::error('Failed to validate article access token', [
@@ -905,11 +852,9 @@ class KbPublicController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'article_id' => $articleId,
             ]);
-
             return ['valid' => false];
         }
     }
-
     /**
      * Sanitize search query with enhanced security and XSS protection.
      *
@@ -926,14 +871,12 @@ class KbPublicController extends Controller
         if (strlen($query) > 255) {
             $query = substr($query, 0, 255);
         }
-
         return $query;
     }
-
     /**
      * Get all categories with access information for display.
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, KbCategory>
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory>
      *
      * @throws \Exception When category retrieval fails
      */
@@ -947,7 +890,6 @@ class KbPublicController extends Controller
             $allCategories->each(function ($category) use ($user) {
                 $category->hasAccess = $this->checkCategoryAccess($category, $user);
             });
-
             return $allCategories;
         } catch (\Exception $e) {
             Log::error('Failed to retrieve all categories with access', [
@@ -957,7 +899,6 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-
     /**
      * Perform secure search with enhanced security and error handling.
      *
@@ -970,7 +911,7 @@ class KbPublicController extends Controller
     private function performSecureSearch(string $q): array
     {
         try {
-            $searchTerm = '%'.strtolower($q).'%';
+            $searchTerm = '%' . strtolower($q) . '%';
             $user = auth()->user();
             // Search articles with case-insensitive search (secure)
             $articles = KbArticle::where('is_published', true)
@@ -1023,7 +964,6 @@ class KbPublicController extends Controller
             }
             // Add pagination for results (limit to 10 per page)
             $resultsWithAccess = $resultsWithAccess->forPage(is_numeric(request('page', 1)) ? (int)request('page', 1) : 1, 10);
-
             return [
                 'results' => $results,
                 'resultsWithAccess' => $resultsWithAccess,
@@ -1038,7 +978,6 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-
     /**
      * Highlight search terms in text.
      *
@@ -1052,7 +991,6 @@ class KbPublicController extends Controller
         if (empty($query)) {
             return $text;
         }
-
-        return preg_replace('/('.preg_quote($query, '/').')/i', '<mark class="search-highlight">$1</mark>', $text) ?? $text;
+        return preg_replace('/(' . preg_quote($query, '/') . ')/i', '<mark class="search-highlight">$1</mark>', $text) ?? $text;
     }
 }

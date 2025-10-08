@@ -26,7 +26,6 @@ class GenerateTestLicenseRequest extends FormRequest
     {
         return true; // Authorization handled by middleware
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -54,7 +53,6 @@ class GenerateTestLicenseRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -73,7 +71,6 @@ class GenerateTestLicenseRequest extends FormRequest
             'name.regex' => 'Name contains invalid characters.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -87,7 +84,6 @@ class GenerateTestLicenseRequest extends FormRequest
             'name' => 'user name',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */
@@ -97,7 +93,7 @@ class GenerateTestLicenseRequest extends FormRequest
         $domain = $this->input('domain');
         $email = $this->input('email');
         $name = $this->input('name');
-
+        
         $this->merge([
             'domain' => $domain && is_string($domain) ? strtolower(trim($domain)) : null,
             'email' => $email && is_string($email) ? strtolower(trim($email)) : null,

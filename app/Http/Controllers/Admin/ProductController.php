@@ -86,7 +86,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => trans('app.Error fetching product data: ').$e->getMessage(),
+                'message' => trans('app.Error fetching product data: ') . $e->getMessage(),
             ], 500);
         }
     }

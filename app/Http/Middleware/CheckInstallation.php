@@ -32,12 +32,10 @@ class CheckInstallation
      * Installation file path constant.
      */
     private const INSTALLED_FILE_PATH = '.installed';
-
     /**
      * Routes that should skip installation check.
      */
     private const SKIP_ROUTES = ['up', 'health'];
-
     /**
      * Handle an incoming request with enhanced security.
      *
@@ -52,6 +50,10 @@ class CheckInstallation
      * @throws \InvalidArgumentException When request is invalid
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -62,9 +64,8 @@ class CheckInstallation
             // Skip installation check for certain routes
             if ($this->shouldSkipRoute($currentRoute)) {
                 $response = $next($request);
-                /** @var Response $typedResponse */
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
                 $typedResponse = $response;
-
                 return $typedResponse;
             }
             $isInstalled = $this->isSystemInstalled($installedFile);
@@ -72,39 +73,34 @@ class CheckInstallation
             // If system is not installed and not accessing install routes
             if (! $isInstalled && ! $isInstallRoute) {
                 $response = $this->handleNotInstalled($request);
-                /** @var Response $typedResponse */
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
                 $typedResponse = $response;
-
                 return $typedResponse;
             }
             // If system is installed and trying to access install routes
             if ($isInstalled && $isInstallRoute) {
                 $response = $this->handleAlreadyInstalled($request);
-                /** @var Response $typedResponse */
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
                 $typedResponse = $response;
-
                 return $typedResponse;
             }
             $response = $next($request);
-            /** @var Response $typedResponse */
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
             $typedResponse = $response;
-
             return $typedResponse;
         } catch (Exception $e) {
-            Log::error('Installation check middleware failed: '.$e->getMessage(), [
+            Log::error('Installation check middleware failed: ' . $e->getMessage(), [
                 'request_url' => $request->fullUrl(),
                 'request_method' => $request->method(),
                 'trace' => $e->getTraceAsString(),
             ]);
             // Fail safe - allow request to continue
             $response = $next($request);
-            /** @var Response $typedResponse */
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
             $typedResponse = $response;
-
             return $typedResponse;
         }
     }
-
     /**
      * Get current route name with validation.
      *
@@ -120,15 +116,12 @@ class CheckInstallation
                 return '';
             }
             $routeName = $route->getName();
-
             return $routeName ?? '';
         } catch (Exception $e) {
-            Log::error('Failed to get current route name: '.$e->getMessage());
-
+            Log::error('Failed to get current route name: ' . $e->getMessage());
             return '';
         }
     }
-
     /**
      * Check if route should be skipped.
      *
@@ -140,7 +133,6 @@ class CheckInstallation
     {
         return in_array($currentRoute, self::SKIP_ROUTES, true);
     }
-
     /**
      * Check if system is installed.
      *
@@ -153,12 +145,10 @@ class CheckInstallation
         try {
             return File::exists($installedFile);
         } catch (Exception $e) {
-            Log::error('Failed to check installation file: '.$e->getMessage());
-
+            Log::error('Failed to check installation file: ' . $e->getMessage());
             return false;
         }
     }
-
     /**
      * Check if current request is for install routes.
      *
@@ -173,7 +163,6 @@ class CheckInstallation
                str_contains($request->path(), 'install') ||
                str_starts_with($currentRoute, 'install.');
     }
-
     /**
      * Handle not installed system.
      *
@@ -191,10 +180,8 @@ class CheckInstallation
                 403,
             );
         }
-
         return redirect()->route('install.welcome');
     }
-
     /**
      * Handle already installed system.
      *
@@ -212,10 +199,8 @@ class CheckInstallation
                 403,
             );
         }
-
         return redirect()->route('login')->with('info', 'System is already installed.');
     }
-
     /**
      * Check if request is AJAX or wants JSON.
      *
@@ -227,7 +212,6 @@ class CheckInstallation
     {
         return $request->ajax() || $request->wantsJson();
     }
-
     /**
      * Create JSON response with validation.
      *
@@ -247,8 +231,7 @@ class CheckInstallation
                 'redirect' => $redirect,
             ], $status);
         } catch (Exception $e) {
-            Log::error('Failed to create JSON response: '.$e->getMessage());
-
+            Log::error('Failed to create JSON response: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Internal server error',

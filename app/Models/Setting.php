@@ -143,7 +143,6 @@ use Illuminate\Support\Facades\Cache;
  * @property string|null $seo_kb_description
  * @property string|null $seo_tickets_title
  * @property string|null $seo_tickets_description
- *
  * @method static \Database\Factories\SettingFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newQuery()
@@ -284,7 +283,6 @@ use Illuminate\Support\Facades\Cache;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereValue($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereVersion($value)
- *
  * @mixin \Eloquent
  */
 class Setting extends Model
@@ -424,7 +422,6 @@ class Setting extends Model
         'contact_country',
         'contact_postal_code',
     ];
-
     protected $casts = [
         'envato_auth_enabled' => 'boolean',
         'auto_generate_license' => 'boolean',
@@ -490,7 +487,6 @@ class Setting extends Model
         'license_auto_verification' => 'boolean',
         'auto_renewal_enabled' => 'boolean',
     ];
-
     /**
      * Get setting value by key with caching.
      */
@@ -499,7 +495,6 @@ class Setting extends Model
         try {
             return Cache::remember("setting_{$key}", 3600, function () use ($key, $default) {
                 $setting = static::first();
-
                 return $setting ? $setting->$key : $default;
             });
         } catch (\Illuminate\Database\QueryException $e) {
@@ -507,7 +502,6 @@ class Setting extends Model
             return $default;
         }
     }
-
     /**
      * Set setting value by key.
      */
@@ -519,17 +513,14 @@ class Setting extends Model
             $setting->save();
             // Clear cache
             Cache::forget("setting_{$key}");
-
             return $setting;
         } catch (\Illuminate\Database\QueryException $e) {
             // If DB is not migrated yet, return a new Setting instance with the key set (not persisted)
             $s = new self();
             $s->$key = $value;
-
             return $s;
         }
     }
-
     /**
      * Get all settings as array.
      */
@@ -539,13 +530,11 @@ class Setting extends Model
             $result = Cache::remember('all_settings', 3600, function () {
                 return static::first() ?? new self();
             });
-
             return $result instanceof self ? $result : new self();
         } catch (\Illuminate\Database\QueryException $e) {
             return new self();
         }
     }
-
     /**
      * Clear all settings cache.
      */

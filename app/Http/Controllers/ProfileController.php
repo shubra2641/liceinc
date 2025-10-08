@@ -43,7 +43,6 @@ class ProfileController extends Controller
     {
         $this->middleware(['auth', 'user', 'verified']);
     }
-
     /**
      * Display the user's profile with enhanced security.
      *
@@ -64,7 +63,7 @@ class ProfileController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'profile-index:'.(Auth::id() ?? request()->ip());
+            $key = 'profile-index:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 20)) {
                 Log::warning('Rate limit exceeded for profile index', [
                     'user_id' => Auth::id(),
@@ -80,14 +79,12 @@ class ProfileController extends Controller
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
-
                 return redirect()->route('login');
             }
             $user = $request->user();
             if ($user) {
                 $user->load(['licenses.product', 'licenses.domains', 'tickets']);
             }
-
             return view('profile.index', [
                 'user' => $user,
             ]);
@@ -103,7 +100,6 @@ class ProfileController extends Controller
             abort(500, 'Failed to load profile');
         }
     }
-
     /**
      * Display the user's profile editing form with enhanced security.
      *
@@ -124,7 +120,7 @@ class ProfileController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'profile-edit:'.(Auth::id() ?? request()->ip());
+            $key = 'profile-edit:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for profile edit form', [
                     'user_id' => Auth::id(),
@@ -140,12 +136,10 @@ class ProfileController extends Controller
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
-
                 return redirect()->route('login');
             }
             /** @var view-string $viewName */
             $viewName = 'user.profile.edit';
-
             return view($viewName, ['user' => $request->user()]);
         } catch (\Exception $e) {
             Log::error('Failed to load profile edit form', [
@@ -159,7 +153,6 @@ class ProfileController extends Controller
             abort(500, 'Failed to load profile edit form');
         }
     }
-
     /**
      * Update the user's profile information with enhanced security.
      *
@@ -184,14 +177,13 @@ class ProfileController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'profile-update:'.(Auth::id() ?? request()->ip());
+            $key = 'profile-update:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for profile update', [
                     'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
-
                 return redirect()->back()->with('error', 'Too many requests. Please try again later.');
             }
             RateLimiter::hit($key, 300); // 5 minutes
@@ -201,7 +193,6 @@ class ProfileController extends Controller
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
-
                 return redirect()->route('login');
             }
             DB::beginTransaction();
@@ -228,7 +219,6 @@ class ProfileController extends Controller
                 $user->save();
             }
             DB::commit();
-
             return Redirect::route('profile.edit')->with('success', 'profile-updated');
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
@@ -237,7 +227,6 @@ class ProfileController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
-
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -249,11 +238,9 @@ class ProfileController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
-
             return redirect()->back()->with('error', 'Failed to update profile. Please try again.');
         }
     }
-
     /**
      * Delete the user's account with enhanced security.
      *
@@ -277,14 +264,13 @@ class ProfileController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'profile-destroy:'.(Auth::id() ?? request()->ip());
+            $key = 'profile-destroy:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 3)) {
                 Log::warning('Rate limit exceeded for profile deletion', [
                     'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
-
                 return redirect()->back()->with('error', 'Too many requests. Please try again later.');
             }
             RateLimiter::hit($key, 300); // 5 minutes
@@ -294,7 +280,6 @@ class ProfileController extends Controller
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
-
                 return redirect()->route('login');
             }
             $validated = $request->validateWithBag('userDeletion', [
@@ -319,7 +304,6 @@ class ProfileController extends Controller
                 'deleted_user_id' => $user?->id,
                 'ip' => request()->ip(),
             ]);
-
             return Redirect::to('/');
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
@@ -328,7 +312,6 @@ class ProfileController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
-
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -340,7 +323,6 @@ class ProfileController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
-
             return redirect()->back()->with('error', 'Failed to delete account. Please try again.');
         }
     }

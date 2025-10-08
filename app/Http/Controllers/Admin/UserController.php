@@ -57,7 +57,6 @@ class UserController extends Controller
                 ->withCount(['licenses', 'tickets'])
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
-
             return view('admin.users.index', ['users' => $users]);
         } catch (\Exception $e) {
             Log::error('Failed to load users listing', [
@@ -65,14 +64,12 @@ class UserController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'user_id' => auth()->id(),
             ]);
-
             return view('admin.users.index', [
                 'users' => collect(),
                 'error' => 'Failed to load users. Please try again.',
             ]);
         }
     }
-
     /**
      * Show the form for creating a new user.
      *
@@ -94,7 +91,6 @@ class UserController extends Controller
     {
         return view('admin.users.create');
     }
-
     /**
      * Store a newly created user.
      *
@@ -154,7 +150,6 @@ class UserController extends Controller
                 // You can implement welcome email here
             }
             DB::commit();
-
             return redirect()->route('admin.users.show', $user)
                 ->with('success', 'User created successfully.');
         } catch (\Exception $e) {
@@ -164,12 +159,10 @@ class UserController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['password', 'password_confirmation']),
             ]);
-
             return redirect()->back()->withInput()
                 ->with('error', 'Failed to create user. Please try again.');
         }
     }
-
     /**
      * Display the specified user.
      *
@@ -200,7 +193,6 @@ class UserController extends Controller
                 ->forUser($user)
                 ->latest()
                 ->get();
-
             return view('admin.users.show', ['user' => $user, 'licenses' => $licenses]);
         } catch (\Exception $e) {
             Log::error('Failed to load user details', [
@@ -209,7 +201,6 @@ class UserController extends Controller
                 'user_id' => $user->id,
                 'requested_by' => auth()->id(),
             ]);
-
             return view('admin.users.show', [
                 'user' => $user,
                 'licenses' => collect(),
@@ -217,7 +208,6 @@ class UserController extends Controller
             ]);
         }
     }
-
     /**
      * Show the form for editing the specified user.
      *
@@ -241,7 +231,6 @@ class UserController extends Controller
     {
         return view('admin.users.edit', ['user' => $user]);
     }
-
     /**
      * Update the specified user.
      *
@@ -298,7 +287,6 @@ class UserController extends Controller
             // Update role
             $user->syncRoles([$validated['role']]);
             DB::commit();
-
             return redirect()->route('admin.users.show', $user)
                 ->with('success', 'User updated successfully.');
         } catch (\Exception $e) {
@@ -309,12 +297,10 @@ class UserController extends Controller
                 'user_id' => $user->id,
                 'request_data' => $request->except(['password', 'password_confirmation']),
             ]);
-
             return redirect()->back()->withInput()
                 ->with('error', 'Failed to update user. Please try again.');
         }
     }
-
     /**
      * Remove the specified user from storage.
      *
@@ -349,7 +335,6 @@ class UserController extends Controller
             DB::beginTransaction();
             $user->delete();
             DB::commit();
-
             return redirect()->route('admin.users.index')
                 ->with('success', 'User deleted successfully.');
         } catch (\Exception $e) {
@@ -360,12 +345,10 @@ class UserController extends Controller
                 'user_id' => $user->id,
                 'deleted_by' => auth()->id(),
             ]);
-
             return redirect()->route('admin.users.index')
                 ->with('error', 'Failed to delete user. Please try again.');
         }
     }
-
     /**
      * Toggle user admin role.
      *
@@ -399,7 +382,6 @@ class UserController extends Controller
                 $message = 'User promoted to administrator.';
             }
             DB::commit();
-
             return redirect()->back()->with('success', $message);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -409,12 +391,10 @@ class UserController extends Controller
                 'user_id' => $user->id,
                 'toggled_by' => auth()->id(),
             ]);
-
             return redirect()->back()
                 ->with('error', 'Failed to change user role. Please try again.');
         }
     }
-
     /**
      * Send password reset email to user.
      *
@@ -441,7 +421,7 @@ class UserController extends Controller
             // This would typically use Laravel's built-in password reset functionality
             // For now, we'll just return a success message
             return redirect()->back()
-                ->with('success', 'Password reset email sent to '.$user->email);
+                ->with('success', 'Password reset email sent to ' . $user->email);
         } catch (\Exception $e) {
             Log::error('Password reset email failed', [
                 'error' => $e->getMessage(),
@@ -449,12 +429,10 @@ class UserController extends Controller
                 'user_id' => $user->id,
                 'sent_by' => auth()->id(),
             ]);
-
             return redirect()->back()
                 ->with('error', 'Failed to send password reset email. Please try again.');
         }
     }
-
     /**
      * Get user licenses for API.
      *
@@ -500,7 +478,6 @@ class UserController extends Controller
                     'expires_at' => $license->expires_at,
                 ];
             });
-
             return response()->json([
                 'success' => true,
                 'licenses' => $licenses,
@@ -512,7 +489,6 @@ class UserController extends Controller
                 'user_id' => $userId,
                 'requested_by' => auth()->id(),
             ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'User not found',

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Services;
 
 use App\Models\License;
@@ -33,7 +31,7 @@ use Illuminate\Support\Facades\Log;
  * // Check user access to product
  * $hasAccess = $service->userHasProductAccess($user, $productId);
  */
-class PurchaseCodeService extends BaseService
+class PurchaseCodeService
 {
     /**
      * The Envato service instance for API operations.
@@ -41,17 +39,15 @@ class PurchaseCodeService extends BaseService
      * @var EnvatoService
      */
     protected $envatoService;
-
     /**
      * Create a new PurchaseCodeService instance.
      *
-     * @param EnvatoService $envatoService The Envato service for API operations
+     * @param  EnvatoService  $envatoService  The Envato service for API operations
      */
     public function __construct(EnvatoService $envatoService)
     {
         $this->envatoService = $envatoService;
     }
-
     /**
      * Clean and validate purchase code format with security validation.
      *
@@ -59,11 +55,11 @@ class PurchaseCodeService extends BaseService
      * converting to uppercase for consistency, and applying security measures
      * to prevent injection attacks.
      *
-     * @param string $purchaseCode The raw purchase code to clean
-     *
-     * @throws \InvalidArgumentException When purchase code is invalid
+     * @param  string  $purchaseCode  The raw purchase code to clean
      *
      * @return string The cleaned and sanitized purchase code
+     *
+     * @throws \InvalidArgumentException When purchase code is invalid
      *
      * @example
      * $cleaned = $service->cleanPurchaseCode('abc-123 def');
@@ -84,7 +80,6 @@ class PurchaseCodeService extends BaseService
             if (strlen($cleaned) < 8 || strlen($cleaned) > 50) {
                 throw new \InvalidArgumentException('Purchase code length is invalid');
             }
-
             return $cleaned;
         } catch (\Exception $e) {
             Log::error('Error cleaning purchase code', [
@@ -95,7 +90,6 @@ class PurchaseCodeService extends BaseService
             throw $e;
         }
     }
-
     /**
      * Validate purchase code format with comprehensive security checks.
      *
@@ -103,7 +97,7 @@ class PurchaseCodeService extends BaseService
      * alphanumeric character validation, length restrictions, and
      * security pattern detection to ensure code integrity.
      *
-     * @param string $purchaseCode The purchase code to validate
+     * @param  string  $purchaseCode  The purchase code to validate
      *
      * @return bool True if format is valid, false otherwise
      *
@@ -120,20 +114,17 @@ class PurchaseCodeService extends BaseService
                 return false;
             }
             $cleaned = $this->cleanPurchaseCode($purchaseCode);
-
             // Basic format validation - should be alphanumeric and reasonable length
-            return (bool)preg_match('/^[A-Z0-9]{8, 50}$/', $cleaned);
+            return (bool) preg_match('/^[A-Z0-9]{8, 50}$/', $cleaned);
         } catch (\Exception $e) {
             Log::error('Error validating purchase code format', [
                 'purchase_code_length' => strlen($purchaseCode),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return false;
         }
     }
-
     /**
      * Verify purchase code with dual verification system and comprehensive security.
      *
@@ -141,13 +132,13 @@ class PurchaseCodeService extends BaseService
      * and then falls back to Envato API verification. Includes comprehensive
      * security validation, error handling, and detailed logging.
      *
-     * @param string $purchaseCode The purchase code to verify
-     * @param int|null $productId Optional product ID for product-specific verification
-     * @param User|null $user Optional user for license creation
-     *
-     * @throws \Exception When verification fails or security validation errors occur
+     * @param  string  $purchaseCode  The purchase code to verify
+     * @param  int|null  $productId  Optional product ID for product-specific verification
+     * @param  User|null  $user  Optional user for license creation
      *
      * @return array Verification result with success status and details
+     *
+     * @throws \Exception When verification fails or security validation errors occur
      *
      * @example
      * $result = $service->verifyPurchaseCode('ABC123DEF456', $productId, $user);
@@ -184,7 +175,6 @@ class PurchaseCodeService extends BaseService
             if ($envatoResult['success']) {
                 return $envatoResult;
             }
-
             return [
                 'success' => false,
                 'error' => 'Invalid purchase code',
@@ -201,29 +191,41 @@ class PurchaseCodeService extends BaseService
             throw $e;
         }
     }
-
     /**
      * Sanitize input data to prevent XSS and injection attacks.
      *
      * Provides comprehensive input sanitization for purchase codes and other
      * user inputs to ensure security and prevent various types of injection attacks.
      *
+     * @param  string|null  $input  The input string to sanitize
      *
      * @return string The sanitized input string
      */
-
+    private function sanitizeInput(?string $input): string
+    {
+        if ($input === null) {
+            return '';
+        }
+        // Remove null bytes and control characters
+        $input = str_replace(["\0", "\x00"], '', $input);
+        // Trim whitespace
+        $input = trim($input);
+        // Escape HTML entities
+        $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
+        return $input;
+    }
     /**
      * Verify against our database with comprehensive security validation.
      *
      * Performs database verification of purchase codes with proper security
      * measures, license status validation, and expiration checks.
      *
-     * @param string $purchaseCode The cleaned purchase code to verify
-     * @param int|null $productId Optional product ID for product-specific verification
-     *
-     * @throws \Exception When database verification fails
+     * @param  string  $purchaseCode  The cleaned purchase code to verify
+     * @param  int|null  $productId  Optional product ID for product-specific verification
      *
      * @return array Database verification result
+     *
+     * @throws \Exception When database verification fails
      */
     /**
      * @return array<string, mixed>
@@ -260,7 +262,6 @@ class PurchaseCodeService extends BaseService
                     'product_id' => $license->product_id,
                 ];
             }
-
             return [
                 'success' => false,
                 'error' => 'Purchase code not found in our database',
@@ -276,7 +277,6 @@ class PurchaseCodeService extends BaseService
             throw $e;
         }
     }
-
     /**
      * Verify raw code directly against database with comprehensive validation.
      *
@@ -284,12 +284,12 @@ class PurchaseCodeService extends BaseService
      * useful for license key verification where exact format must be preserved.
      * Includes comprehensive status and expiration validation.
      *
-     * @param string $rawCode The raw code to verify (no cleaning applied)
-     * @param int|null $productId Optional product ID for product-specific verification
-     *
-     * @throws \Exception When raw code verification fails
+     * @param  string  $rawCode  The raw code to verify (no cleaning applied)
+     * @param  int|null  $productId  Optional product ID for product-specific verification
      *
      * @return array Raw code verification result with detailed status information
+     *
+     * @throws \Exception When raw code verification fails
      *
      * @example
      * $result = $service->verifyRawCode('ABC123DEF456', $productId);
@@ -341,7 +341,6 @@ class PurchaseCodeService extends BaseService
                     'expired' => trans('license_status.license_expired'),
                 ];
                 $message = $statusMessages[$license->status] ?? trans('license_status.license_inactive');
-
                 return [
                     'success' => false,
                     'error' => 'license_status',
@@ -360,7 +359,6 @@ class PurchaseCodeService extends BaseService
                     'source' => 'database_raw',
                 ];
             }
-
             // All checks passed
             return [
                 'success' => true,
@@ -378,7 +376,6 @@ class PurchaseCodeService extends BaseService
             throw $e;
         }
     }
-
     /**
      * @return array<string, mixed>
      */
@@ -386,7 +383,7 @@ class PurchaseCodeService extends BaseService
     {
         try {
             $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
-            if (! $envatoData || ! isset($envatoData['item']) || ! is_array($envatoData['item']) || ! isset($envatoData['item']['id'])) {
+            if (!$envatoData || !isset($envatoData['item']) || !is_array($envatoData['item']) || !isset($envatoData['item']['id'])) {
                 return [
                     'success' => false,
                     'error' => 'Invalid Envato purchase code',
@@ -398,7 +395,7 @@ class PurchaseCodeService extends BaseService
             // If product ID is specified, verify it matches the Envato item
             if ($productId) {
                 $product = Product::find($productId);
-                if (! $product || ! $product->envato_item_id || $product->envato_item_id != $envatoItemId) {
+                if (!$product || !$product->envato_item_id || $product->envato_item_id != $envatoItemId) {
                     return [
                         'success' => false,
                         'error' => 'Purchase code does not belong to this product',
@@ -410,7 +407,6 @@ class PurchaseCodeService extends BaseService
             if ($user) {
                 $this->createLicenseFromEnvato($user, $purchaseCode, $envatoData, $productId);
             }
-
             return [
                 'success' => true,
                 'envato_data' => $envatoData,
@@ -426,7 +422,6 @@ class PurchaseCodeService extends BaseService
             ];
         }
     }
-
     /**
      * Create license record from Envato data.
      */
@@ -474,7 +469,6 @@ class PurchaseCodeService extends BaseService
             return null;
         }
     }
-
     /**
      * Check if user has access to specific product via any license.
      */
@@ -489,7 +483,6 @@ class PurchaseCodeService extends BaseService
             })
             ->exists();
     }
-
     /**
      * Check if user has access to KB content via product license.
      */
@@ -499,11 +492,9 @@ class PurchaseCodeService extends BaseService
         if (! $kbItem->product_id) {
             return true;
         }
-
         // Check if user has license for the linked product
         return $this->userHasProductAccess($user, $kbItem->product_id);
     }
-
     /**
      * Get accessible KB content for user based on their licenses.
      */
@@ -520,7 +511,6 @@ class PurchaseCodeService extends BaseService
             })
             ->pluck('product_id')
             ->toArray();
-
         return [
             'categories' => \App\Models\KbCategory::where(function ($query) use ($userProductIds) {
                 $query->whereNull('product_id')
@@ -532,7 +522,6 @@ class PurchaseCodeService extends BaseService
             })->where('is_published', true)->get(),
         ];
     }
-
     /**
      * Check if user has access to KB category via product license.
      */
@@ -542,11 +531,9 @@ class PurchaseCodeService extends BaseService
         if (! $category->product_id) {
             return true;
         }
-
         // Check if user has license for the linked product
         return $this->userHasProductAccess($user, $category->product_id);
     }
-
     /**
      * Check if user has access to KB article considering both direct product and category product.
      */
@@ -560,7 +547,6 @@ class PurchaseCodeService extends BaseService
         if ($article->category->product_id) {
             return $this->userHasCategoryAccess($user, $article->category);
         }
-
         // No product restrictions
         return true;
     }

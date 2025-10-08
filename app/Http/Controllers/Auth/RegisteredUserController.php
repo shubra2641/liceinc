@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Helpers\ConfigHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ConfirmPasswordRequest;
 use App\Models\User;
 use App\Services\EmailService;
 use Illuminate\Auth\Events\Registered;
@@ -31,13 +32,11 @@ use Illuminate\View\View;
  * - Proper logging for errors and warnings only
  * - Anti-spam protection with reCAPTCHA and human questions
  * - Email verification and notification system
- *
  * @version 1.0.6
  */
 class RegisteredUserController extends Controller
 {
     protected EmailService $emailService;
-
     /**
      * Create a new controller instance.
      *
@@ -47,7 +46,6 @@ class RegisteredUserController extends Controller
     {
         $this->emailService = $emailService;
     }
-
     /**
      * Display the registration view.
      *
@@ -59,10 +57,8 @@ class RegisteredUserController extends Controller
     public function create(): View
     {
         $registrationSettings = $this->getRegistrationSettings();
-
         return view('auth.register', ['registrationSettings' => $registrationSettings]);
     }
-
     /**
      * Handle an incoming registration request with enhanced security.
      *
@@ -86,7 +82,6 @@ class RegisteredUserController extends Controller
             $this->handleUserRegistration($user);
             Auth::login($user);
             DB::commit();
-
             return redirect(route('dashboard', absolute: false));
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
@@ -99,12 +94,10 @@ class RegisteredUserController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
-
             return back()->withInput($request->except('password', 'password_confirmation'))
                 ->withErrors(['email' => 'Registration failed. Please try again.']);
         }
     }
-
     /**
      * Validate the basic registration request with enhanced security.
      *
@@ -117,7 +110,7 @@ class RegisteredUserController extends Controller
         $request->validate([
             'firstname' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
             'lastname' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'phonenumber' => ['nullable', 'string', 'max:50', 'regex:/^[\+]?[0-9\s\-\(\)]+$/'],
             'country' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-Z\s]+$/'],
@@ -128,7 +121,6 @@ class RegisteredUserController extends Controller
             'country.regex' => 'Country name can only contain letters and spaces.',
         ]);
     }
-
     /**
      * Validate anti-spam protection mechanisms.
      *
@@ -141,7 +133,6 @@ class RegisteredUserController extends Controller
         $this->validateCaptcha($request);
         $this->validateHumanQuestion($request);
     }
-
     /**
      * Validate Google reCAPTCHA if enabled.
      *
@@ -160,17 +151,16 @@ class RegisteredUserController extends Controller
         if (empty($token)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
-                response()->json(['errors' => ['g-recaptcha-response' => [__('Please complete the captcha')]]], 422),
+                response()->json(['errors' => ['g-recaptcha-response' => [__('Please complete the captcha')]]], 422)
             );
         }
         if (! $this->verifyRecaptcha(is_string($token) ? $token : '', is_string($captchaSecret) ? $captchaSecret : '', $request->ip())) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
-                response()->json(['errors' => ['g-recaptcha-response' => [__('Captcha verification failed')]]], 422),
+                response()->json(['errors' => ['g-recaptcha-response' => [__('Captcha verification failed')]]], 422)
             );
         }
     }
-
     /**
      * Validate human verification question if enabled.
      *
@@ -190,11 +180,10 @@ class RegisteredUserController extends Controller
         if (! $this->isValidHumanAnswer($given, is_numeric($index) ? (int)$index : 0, $humanQuestions)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
-                response()->json(['errors' => ['human_answer' => [__('Incorrect answer to the anti-spam question')]]], 422),
+                response()->json(['errors' => ['human_answer' => [__('Incorrect answer to the anti-spam question')]]], 422)
             );
         }
     }
-
     /**
      * Get human questions from configuration.
      *
@@ -211,13 +200,11 @@ class RegisteredUserController extends Controller
         }
         $decoded = json_decode(is_string($humanQuestionsJson) ? $humanQuestionsJson : '', true);
         $result = is_array($decoded) ? $decoded : [];
-
+        
         /** @var array<string, mixed> $typedResult */
         $typedResult = $result;
-
         return $typedResult;
     }
-
     /**
      * Check if the human answer is valid.
      *
@@ -237,17 +224,14 @@ class RegisteredUserController extends Controller
         }
         if (! isset($humanQuestions[(string)$index])) {
             $expected = ConfigHelper::getSetting('human_question_answer', '5');
-
             return strtolower(trim(is_string($expected) ? $expected : '')) === $given;
         }
-
+        
         $questionData = $humanQuestions[(string)$index] ?? null;
         $answer = is_array($questionData) ? ($questionData['answer'] ?? null) : null;
         $expected = strtolower(trim(is_string($answer) ? $answer : ''));
-
         return $expected === $given;
     }
-
     /**
      * Create a new user from the request data with enhanced security.
      *
@@ -258,7 +242,7 @@ class RegisteredUserController extends Controller
     private function createUser(RegisterRequest $request): User
     {
         return User::create([
-            'name' => (is_string($this->sanitizeInput($request->firstname)) ? $this->sanitizeInput($request->firstname) : '').' '.(is_string($this->sanitizeInput($request->lastname)) ? $this->sanitizeInput($request->lastname) : ''),
+            'name' => (is_string($this->sanitizeInput($request->firstname)) ? $this->sanitizeInput($request->firstname) : '') . ' ' . (is_string($this->sanitizeInput($request->lastname)) ? $this->sanitizeInput($request->lastname) : ''),
             'firstname' => $this->sanitizeInput($request->firstname),
             'lastname' => $this->sanitizeInput($request->lastname),
             'email' => $this->sanitizeInput($request->email),
@@ -267,7 +251,6 @@ class RegisteredUserController extends Controller
             'country' => $this->sanitizeInput($request->country),
         ]);
     }
-
     /**
      * Handle post-registration tasks.
      *
@@ -279,7 +262,6 @@ class RegisteredUserController extends Controller
         $this->sendWelcomeEmail($user);
         $this->sendAdminNotification($user);
     }
-
     /**
      * Send welcome email to the new user.
      *
@@ -295,7 +277,6 @@ class RegisteredUserController extends Controller
             // Silently handle email errors to not fail registration
         }
     }
-
     /**
      * Send admin notification about new user registration.
      *
@@ -309,7 +290,6 @@ class RegisteredUserController extends Controller
             // Silently handle email errors to not fail registration
         }
     }
-
     /**
      * Verify Google reCAPTCHA token with Google's API.
      *
@@ -332,13 +312,11 @@ class RegisteredUserController extends Controller
             }
             $body = $response->json();
             $success = is_array($body) ? ($body['success'] ?? null) : null;
-
             return is_array($body) && isset($body['success']) && $success === true;
         } catch (\Exception $e) {
             return false;
         }
     }
-
     /**
      * Get registration settings for the view.
      *
@@ -366,7 +344,6 @@ class RegisteredUserController extends Controller
             $selectedQuestion = $humanQuestions[$selectedQuestionIndex] ?? null;
             $selectedQuestionText = (is_array($selectedQuestion) && isset($selectedQuestion['question'])) ? $selectedQuestion['question'] : null;
         }
-
         return [
             'enableCaptcha' => $enableCaptcha,
             'captchaSiteKey' => $captchaSiteKey,

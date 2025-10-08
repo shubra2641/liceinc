@@ -73,7 +73,6 @@ class EnvatoController extends Controller
     {
         try {
             $this->validateVerifyRequest($request);
-
             return DB::transaction(function () use ($request, $envato) {
                 $data = $request->validate([
                     'purchase_code' => ['required', 'string', 'min:10', 'max:100'],
@@ -91,7 +90,6 @@ class EnvatoController extends Controller
                         'ip' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                     ]);
-
                     return back()->withErrors(['purchase_code' => 'Could not verify purchase.']);
                 }
                 $product = Product::where('slug', $productSlug)->firstOrFail();
@@ -108,11 +106,10 @@ class EnvatoController extends Controller
                         'ip' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                     ]);
-
                     return back()->withErrors(['purchase_code' => 'Purchase does not belong to this product.']);
                 }
                 $user = User::firstOrCreate(
-                    ['email' => $buyerEmail ?: Str::uuid().'@example.com'],
+                    ['email' => $buyerEmail ?: Str::uuid() . '@example.com'],
                     ['name' => $buyerName ?: 'Envato Buyer'],
                 );
                 $license = License::updateOrCreate(
@@ -130,7 +127,6 @@ class EnvatoController extends Controller
                     'product_id' => $product->id,
                     'purchase_code' => $this->hashForLogging(is_string($purchaseCode) ? $purchaseCode : ''),
                 ]);
-
                 return back()->with('success', 'Purchase verified and license updated.');
             });
         } catch (Throwable $e) {
@@ -142,11 +138,9 @@ class EnvatoController extends Controller
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return back()->withErrors(['general' => 'An error occurred while verifying the purchase.']);
         }
     }
-
     /**
      * Redirect to Envato OAuth with enhanced security.
      *
@@ -170,11 +164,9 @@ class EnvatoController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return redirect('/login')->withErrors(['envato' => 'Failed to redirect to Envato authentication.']);
         }
     }
-
     /**
      * Handle Envato OAuth callback with enhanced security and comprehensive validation.
      *
@@ -204,7 +196,6 @@ class EnvatoController extends Controller
                         'envato_user_name' => $envatoUser->getName(),
                         'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
                     ]);
-
                     return redirect('/login')->withErrors(['envato' => 'Could not retrieve username from Envato.']);
                 }
                 // Try to get detailed user info, but don't fail if it doesn't work
@@ -224,7 +215,7 @@ class EnvatoController extends Controller
                 $email = $envatoUser->getEmail();
                 if (! $email || str_contains($email, '@envato.temp')) {
                     // If we don't have a real email, create a temporary one
-                    $email = 'temp_'.$username.'@envato.local';
+                    $email = 'temp_' . $username . '@envato.local';
                 }
                 $user = User::updateOrCreate(
                     ['email' => $email],
@@ -244,7 +235,6 @@ class EnvatoController extends Controller
                 // But preserve the intended redirect for after profile update
                 if (str_contains($email, '@envato.local')) {
                     session(['url.intended' => $redirectRoute]);
-
                     return redirect('/profile')->with('warning', 'Please update your email address in your profile.');
                 }
                 Log::debug('Envato OAuth callback successful', [
@@ -253,7 +243,6 @@ class EnvatoController extends Controller
                     'email' => $this->hashForLogging($email),
                     'is_temp_email' => str_contains($email, '@envato.local'),
                 ]);
-
                 return redirect()->intended($redirectRoute)->with('success', 'Successfully logged in with Envato!');
             });
         } catch (Throwable $e) {
@@ -261,11 +250,9 @@ class EnvatoController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return redirect('/login')->withErrors(['envato' => 'Failed to process Envato authentication.']);
         }
     }
-
     /**
      * Link Envato account with enhanced security and comprehensive validation.
      *
@@ -298,7 +285,6 @@ class EnvatoController extends Controller
                         'ip' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                     ]);
-
                     return back()->withErrors(['envato' => 'Could not retrieve user information from Envato.']);
                 }
                 $user = auth()->user();
@@ -314,7 +300,6 @@ class EnvatoController extends Controller
                     'envato_username' => $envatoUser->getNickname(),
                     'envato_id' => $envatoUser->getId(),
                     ]);
-
                     return back()->with('success', 'Envato account linked successfully!');
                 }
             });
@@ -326,11 +311,9 @@ class EnvatoController extends Controller
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return back()->withErrors(['envato' => 'Failed to link Envato account.']);
         }
     }
-
     /**
      * Verify user purchase with enhanced security and comprehensive validation.
      *
@@ -352,7 +335,6 @@ class EnvatoController extends Controller
     {
         try {
             $this->validateVerifyUserPurchaseRequest($request);
-
             return DB::transaction(function () use ($request, $licenseService) {
                 $request->validate([
                     'purchase_code' => 'required|string|min:10|max:100',
@@ -364,7 +346,7 @@ class EnvatoController extends Controller
                 // Use the license auto-registration service
                 $registrationResult = $licenseService->autoRegisterLicense(
                     is_string($purchaseCode) ? $purchaseCode : '',
-                    $productId,
+                    $productId
                 );
                 if (! $registrationResult['success']) {
                     Log::warning('User purchase verification failed', [
@@ -375,7 +357,6 @@ class EnvatoController extends Controller
                         'ip' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                     ]);
-
                     return response()->json([
                         'valid' => false,
                         'message' => $registrationResult['message'],
@@ -388,7 +369,6 @@ class EnvatoController extends Controller
                     'product_id' => $productId,
                     'user_id' => auth()->id(),
                 ]);
-
                 return response()->json([
                     'valid' => true,
                     'message' => $registrationResult['message'],
@@ -405,14 +385,12 @@ class EnvatoController extends Controller
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return response()->json([
                 'valid' => false,
                 'message' => 'An error occurred while verifying the purchase.',
             ], 500);
         }
     }
-
     /**
      * Validate verify request parameters.
      *
@@ -426,7 +404,6 @@ class EnvatoController extends Controller
             throw new \InvalidArgumentException('Missing required parameters: purchase_code, product_slug');
         }
     }
-
     /**
      * Validate verify user purchase request parameters.
      *

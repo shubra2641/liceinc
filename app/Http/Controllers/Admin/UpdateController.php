@@ -776,7 +776,7 @@ class UpdateController extends Controller
             \RecursiveIteratorIterator::LEAVES_ONLY,
         );
         foreach ($files as $file) {
-            if ($file instanceof \SplFileInfo && ! $file->isDir()) {
+            if ($file instanceof \SplFileInfo && !$file->isDir()) {
                 $relativePath = substr($file->getRealPath(), strlen($tempDir) + 1);
                 $targetPath = base_path($relativePath);
                 // Create directory if it doesn't exist
@@ -873,7 +873,7 @@ class UpdateController extends Controller
                             is_string($nextVersion) ? $nextVersion : '',
                             $licenseKey,
                             $productSlug,
-                            $domain,
+                            $domain
                         );
                         if ($updateResult['success']) {
                             DB::commit();
@@ -959,7 +959,7 @@ class UpdateController extends Controller
 
                 return [
                     'success' => false,
-                    'message' => 'Cannot update to version '.$version.'. Current version is '.$currentVersion.'. '
+                    'message' => "Cannot update to version ".$version.". Current version is ".$currentVersion.". "
                         .'Only newer versions are allowed.',
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
                     'current_version' => $currentVersion,
@@ -1204,7 +1204,6 @@ class UpdateController extends Controller
             ], 500);
         }
     }
-
     /**
      * Get update information for product without license verification.
      *
@@ -1296,7 +1295,6 @@ class UpdateController extends Controller
                 // Filtered products for specific slug
                 /** @var array<string, mixed> $result */
                 $result = $filteredProducts[0] ?? [];
-
                 return $result;
             }
             Log::warning('Failed to get products from central API', [
@@ -1314,6 +1312,7 @@ class UpdateController extends Controller
             return [];
         }
     }
+
 
     /**
      * Get current version from database.

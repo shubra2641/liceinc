@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LicenseStatusRequest;
 use App\Models\License;
+use App\Models\LicenseDomain;
 use App\Models\Setting;
 use App\Services\EnvatoService;
 use Illuminate\Http\JsonResponse;
@@ -72,7 +73,6 @@ class LicenseStatusController extends Controller
             abort(500, 'Failed to load license status page. Please try again.');
         }
     }
-
     /**
      * Check license status with enhanced security and comprehensive validation.
      *
@@ -98,7 +98,7 @@ class LicenseStatusController extends Controller
                 $settings = Setting::first();
                 $maxAttempts = $settings->license_max_attempts ?? 5;
                 $decayMinutes = $settings->license_lockout_minutes ?? 15;
-                $key = 'license_check_'.md5($ip ?? '');
+                $key = 'license_check_' . md5($ip ?? '');
                 $attempts = Cache::get($key, 0);
                 if ($attempts >= $maxAttempts) {
                     Log::warning('License check rate limit exceeded', [
@@ -107,9 +107,8 @@ class LicenseStatusController extends Controller
                         'max_attempts' => $maxAttempts,
                         'user_agent' => $request->userAgent(),
                     ]);
-
                     return $this->errorResponse(
-                        __('license_status.verification_error').': Too many attempts. Please try again later.',
+                        __('license_status.verification_error') . ': Too many attempts. Please try again later.',
                         null,
                         429,
                     );
@@ -125,7 +124,6 @@ class LicenseStatusController extends Controller
                         'errors' => $validator->errors(),
                         'user_agent' => $request->userAgent(),
                     ]);
-
                     return $this->errorResponse(
                         'Please enter all required data correctly.',
                         $validator->errors(),
@@ -143,7 +141,6 @@ class LicenseStatusController extends Controller
                         'ip' => $ip,
                         'user_agent' => $request->userAgent(),
                     ]);
-
                     return $this->errorResponse(
                         __('license_status.license_not_found'),
                         null,
@@ -170,7 +167,6 @@ class LicenseStatusController extends Controller
                     'status' => $status,
                     'ip' => $ip,
                 ]);
-
                 return $this->successResponse(
                     $licenseDetails,
                     __('license_status.license_found_success'),
@@ -187,17 +183,14 @@ class LicenseStatusController extends Controller
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return $this->errorResponse(
                 __('license_status.unexpected_error'),
                 null,
                 500,
             );
         }
-
         return $result instanceof JsonResponse ? $result : $this->errorResponse('Unexpected error', null, 500);
     }
-
     /**
      * Get license history/logs with enhanced security and comprehensive validation.
      *
@@ -228,7 +221,6 @@ class LicenseStatusController extends Controller
                         'errors' => $validator->errors(),
                         'user_agent' => $request->userAgent(),
                     ]);
-
                     return $this->errorResponse(
                         __('license_status.validation_error'),
                         $validator->errors(),
@@ -245,7 +237,6 @@ class LicenseStatusController extends Controller
                         'ip' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                     ]);
-
                     return $this->errorResponse(
                         'No license found with this data.',
                         null,
@@ -273,7 +264,6 @@ class LicenseStatusController extends Controller
                     'logs_count' => $logs->count(),
                     'ip' => $request->ip(),
                 ]);
-
                 return $this->successResponse($logs, 'License history retrieved successfully');
             });
         } catch (Throwable $e) {
@@ -285,17 +275,14 @@ class LicenseStatusController extends Controller
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return $this->errorResponse(
                 'An error occurred while retrieving license history.',
                 null,
                 500,
             );
         }
-
         return $result instanceof JsonResponse ? $result : $this->errorResponse('Unexpected error', null, 500);
     }
-
     /**
      * Find license by code and email with enhanced security.
      *
@@ -323,7 +310,6 @@ class LicenseStatusController extends Controller
                     ->with(['product', 'user', 'domains'])
                     ->first();
             }
-
             return $license;
         } catch (Throwable $e) {
             Log::error('Failed to find license by code and email', [
@@ -332,11 +318,9 @@ class LicenseStatusController extends Controller
                 'email' => $this->hashForLogging($email),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return null;
         }
     }
-
     /**
      * Verify license with Envato API with enhanced security.
      *
@@ -351,7 +335,6 @@ class LicenseStatusController extends Controller
             $result = $envatoService->verifyPurchase($purchaseCode);
             /** @var array<string, mixed>|null $typedResult */
             $typedResult = $result;
-
             return $typedResult;
         } catch (Throwable $e) {
             Log::warning('Envato verification failed', [
@@ -359,11 +342,9 @@ class LicenseStatusController extends Controller
                 'purchase_code' => $this->hashForLogging($purchaseCode),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return null;
         }
     }
-
     /**
      * Build license details array with enhanced security.
      *
@@ -406,7 +387,6 @@ class LicenseStatusController extends Controller
             'envato_verification' => $envatoData ? 'success' : 'failed',
         ];
     }
-
     /**
      * Determine license type (Custom or Envato) with enhanced validation.
      *
@@ -420,7 +400,6 @@ class LicenseStatusController extends Controller
             if ($license->purchase_code && strlen($license->purchase_code) > 10) {
                 return __('license_status.envato');
             }
-
             return __('license_status.custom');
         } catch (Throwable $e) {
             Log::error('Failed to determine license type', [
@@ -428,11 +407,9 @@ class LicenseStatusController extends Controller
                 'license_id' => $license->id,
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return __('license_status.custom');
         }
     }
-
     /**
      * Get license status with enhanced validation and Arabic labels.
      *
@@ -447,7 +424,6 @@ class LicenseStatusController extends Controller
                 if ($license->license_expires_at && $license->license_expires_at->isPast()) {
                     return __('license_status.expired');
                 }
-
                 return __('license_status.active');
             } elseif ($license->status === 'inactive') {
                 return __('license_status.inactive');
@@ -456,7 +432,6 @@ class LicenseStatusController extends Controller
             } elseif ($license->status === 'expired') {
                 return __('license_status.expired');
             }
-
             return 'Unknown';
         } catch (Throwable $e) {
             Log::error('Failed to get license status', [
@@ -465,11 +440,9 @@ class LicenseStatusController extends Controller
                 'license_status' => $license->status,
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return 'Unknown';
         }
     }
-
     /**
      * Create a standardized success response with custom data key.
      *
@@ -492,7 +465,6 @@ class LicenseStatusController extends Controller
             'timestamp' => now()->toISOString(),
         ];
         $response[$dataKey] = $data;
-
         return response()->json($response, $statusCode);
     }
 }

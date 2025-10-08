@@ -26,8 +26,7 @@ use Illuminate\Support\Facades\Storage;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read mixed $file_extension
  * @property-read mixed $formatted_size
- * @property-read Product $product
- *
+ * @property-read \App\Models\Product $product
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductFile active()
  * @method static \Database\Factories\ProductFileFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductFile forProduct($productId)
@@ -48,7 +47,6 @@ use Illuminate\Support\Facades\Storage;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductFile whereOriginalName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductFile whereProductId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductFile whereUpdatedAt($value)
- *
  * @mixin \Eloquent
  */
 class ProductFile extends Model
@@ -76,19 +74,15 @@ class ProductFile extends Model
         'download_count',
         'is_active',
     ];
-
     protected $casts = [
         'file_size' => 'integer',
         'download_count' => 'integer',
         'is_active' => 'boolean',
     ];
-
     protected $hidden = [
         'encryption_key',
     ];
-
     public $timestamps = true;
-
     /**
      * Get the product that owns the file.
      */
@@ -99,7 +93,6 @@ class ProductFile extends Model
     {
         return $this->belongsTo(Product::class);
     }
-
     /**
      * Get formatted file size.
      */
@@ -111,10 +104,8 @@ class ProductFile extends Model
         for ($i = 0; $bytes > 1024 && $i < $unitsCount - 1; $i++) {
             $bytes /= 1024;
         }
-
-        return round($bytes, 2).' '.$units[$i];
+        return round($bytes, 2) . ' ' . $units[$i];
     }
-
     /**
      * Get file extension.
      */
@@ -122,7 +113,6 @@ class ProductFile extends Model
     {
         return pathinfo($this->original_name, PATHINFO_EXTENSION);
     }
-
     /**
      * Check if file exists in storage.
      */
@@ -130,7 +120,6 @@ class ProductFile extends Model
     {
         return Storage::disk('private')->exists($this->file_path);
     }
-
     /**
      * Get decrypted file content.
      */
@@ -152,15 +141,12 @@ class ProductFile extends Model
                 0,
                 substr(hash('sha256', $decryptionKey), 0, 16),
             );
-
             return $result !== false ? $result : null;
         } catch (\Exception $e) {
-            \Log::error('Failed to decrypt file: '.$e->getMessage());
-
+            \Log::error('Failed to decrypt file: ' . $e->getMessage());
             return null;
         }
     }
-
     /**
      * Increment download count.
      */
@@ -168,27 +154,23 @@ class ProductFile extends Model
     {
         $this->increment('download_count');
     }
-
     /**
      * Scope for active files.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductFile> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductFile>
      */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
-
     /**
      * Scope for files belonging to a product.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductFile> $query
      * @param int $productId
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductFile>
      */
     public function scopeForProduct($query, $productId)

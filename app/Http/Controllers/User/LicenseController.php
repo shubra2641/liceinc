@@ -60,7 +60,6 @@ class LicenseController extends Controller
             // Get user invoices with product and license information
             $invoices = $this->getUserInvoices($user);
             DB::commit();
-
             return view('user.licenses.index', ['licenses' => $licenses, 'invoices' => $invoices]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -69,11 +68,9 @@ class LicenseController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return redirect()->back()->with('error', 'Failed to load licenses. Please try again.');
         }
     }
-
     /**
      * Display the specified license with enhanced security and error handling.
      *
@@ -106,7 +103,6 @@ class LicenseController extends Controller
             // Get license with related data
             $license = $this->getUserLicense($user, $id);
             DB::commit();
-
             return view('user.licenses.show', ['license' => $license]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -116,12 +112,10 @@ class LicenseController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return redirect()->route('user.licenses.index')
                 ->with('error', 'License not found or access denied.');
         }
     }
-
     /**
      * Validate license ID with enhanced security and comprehensive validation.
      *
@@ -138,13 +132,12 @@ class LicenseController extends Controller
             throw new InvalidArgumentException('License ID is too large');
         }
     }
-
     /**
      * Get user licenses with enhanced security and error handling.
      *
      * @param  mixed  $user  The user object
      *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, License>
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, \App\Models\License>
      *
      * @throws \Exception When license retrieval fails
      */
@@ -157,7 +150,6 @@ class LicenseController extends Controller
                     ->latest()
                     ->paginate(10);
             }
-
             return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         } catch (\Exception $e) {
             Log::error('Failed to retrieve user licenses', [
@@ -168,7 +160,6 @@ class LicenseController extends Controller
             throw $e;
         }
     }
-
     /**
      * Get user invoices with enhanced security and error handling.
      *
@@ -187,7 +178,6 @@ class LicenseController extends Controller
                     ->latest()
                     ->paginate(10);
             }
-
             return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         } catch (\Exception $e) {
             Log::error('Failed to retrieve user invoices', [
@@ -198,7 +188,6 @@ class LicenseController extends Controller
             throw $e;
         }
     }
-
     /**
      * Get user license by ID with enhanced security and error handling.
      *

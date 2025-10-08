@@ -58,15 +58,13 @@ class EnsureAdmin
             // Skip authentication for static assets
             if ($this->isStaticAsset($request)) {
                 $response = $next($request);
-                /** @var Response $typedResponse */
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
                 $typedResponse = $response;
-
                 return $typedResponse;
             }
             // Check if user is authenticated
             if (! $request->user()) {
                 $this->logUnauthorizedAccess($request, 'not_authenticated');
-
                 return redirect()->route('login')->with('error', 'You must be logged in to access this page');
             }
             $user = $request->user();
@@ -78,9 +76,8 @@ class EnsureAdmin
             // Additional security: Check if user is active and email verified
             $this->validateUserEmailVerification($request, $user);
             $response = $next($request);
-            /** @var Response $typedResponse */
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
             $typedResponse = $response;
-
             return $typedResponse;
         } catch (Throwable $e) {
             Log::error('EnsureAdmin middleware processing error', [
@@ -96,7 +93,6 @@ class EnsureAdmin
             abort(403, 'Access denied due to system error');
         }
     }
-
     /**
      * Validate user email verification with enhanced security.
      *
@@ -135,7 +131,6 @@ class EnsureAdmin
             throw $e;
         }
     }
-
     /**
      * Check if email is a test email with enhanced validation.
      *
@@ -155,7 +150,6 @@ class EnsureAdmin
                     return true;
                 }
             }
-
             return false;
         } catch (Throwable $e) {
             Log::error('Test email validation error', [
@@ -163,11 +157,9 @@ class EnsureAdmin
                 'email' => $this->hashForLogging($email),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return false;
         }
     }
-
     /**
      * Log unauthorized access attempt for security monitoring.
      *
@@ -213,7 +205,6 @@ class EnsureAdmin
             ]);
         }
     }
-
     /**
      * Log test email access for security monitoring.
      *
@@ -230,7 +221,6 @@ class EnsureAdmin
     {
         // Test email access - no logging needed for successful access
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -281,7 +271,6 @@ class EnsureAdmin
                     return true;
                 }
             }
-
             return false;
         } catch (Throwable $e) {
             Log::error('Static asset detection error', [
@@ -290,11 +279,9 @@ class EnsureAdmin
                 'uri' => $request->getRequestUri(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return false;
         }
     }
-
     /**
      * Hash data for logging.
      *
@@ -304,6 +291,6 @@ class EnsureAdmin
      */
     private function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data.(is_string(config('app.key')) ? config('app.key') : '')), 0, 8).'...';
+        return substr(hash('sha256', $data . (is_string(config('app.key')) ? config('app.key') : '')), 0, 8) . '...';
     }
 }

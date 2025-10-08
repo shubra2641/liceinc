@@ -3,14 +3,14 @@
 namespace App\Helpers;
 
 /**
- * Security Helper.
+ * Security Helper
  *
  * Provides secure output escaping and XSS protection
  */
 class SecurityHelper
 {
     /**
-     * Escape output to prevent XSS.
+     * Escape output to prevent XSS
      */
     public static function escapeOutput(string $output): string
     {
@@ -18,7 +18,7 @@ class SecurityHelper
     }
 
     /**
-     * Escape output for translation strings.
+     * Escape output for translation strings
      */
     public static function escapeTranslation(string $translation): string
     {
@@ -26,7 +26,7 @@ class SecurityHelper
     }
 
     /**
-     * Escape output for exception messages.
+     * Escape output for exception messages
      */
     public static function escapeException(string $message): string
     {
@@ -34,7 +34,7 @@ class SecurityHelper
     }
 
     /**
-     * Escape output for variable interpolation.
+     * Escape output for variable interpolation
      */
     public static function escapeVariable(string $variable): string
     {

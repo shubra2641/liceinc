@@ -34,14 +34,12 @@ class ProcessInvoicesCommand extends Command
                             {--renewal : Process renewal invoices only}
                             {--overdue : Process overdue invoices only}
                             {--dry-run : Show what would be processed without executing}';
-
     /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Process renewal and overdue invoices with enhanced security and error handling';
-
     /**
      * Execute the console command with enhanced security.
      *
@@ -53,6 +51,10 @@ class ProcessInvoicesCommand extends Command
      * @throws \Exception When job dispatching fails
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function handle(): int
     {
@@ -64,7 +66,6 @@ class ProcessInvoicesCommand extends Command
             // Validate command options
             if ($renewalOnly && $overdueOnly) {
                 $this->error('Cannot specify both --renewal and --overdue options simultaneously.');
-
                 return Command::FAILURE;
             }
             if ($dryRun) {
@@ -83,7 +84,6 @@ class ProcessInvoicesCommand extends Command
                 $this->processOverdueInvoices($dryRun);
             }
             DB::commit();
-
             return Command::SUCCESS;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -96,12 +96,10 @@ class ProcessInvoicesCommand extends Command
                     'dry_run' => $this->option('dry-run'),
                 ],
             ]);
-            $this->error('Failed to process invoices: '.$e->getMessage());
-
+            $this->error('Failed to process invoices: ' . $e->getMessage());
             return Command::FAILURE;
         }
     }
-
     /**
      * Process renewal invoices with enhanced security.
      *
@@ -113,13 +111,16 @@ class ProcessInvoicesCommand extends Command
      * @throws \Exception When job dispatching fails
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     private function processRenewalInvoices(bool $dryRun = false): void
     {
         try {
             if ($dryRun) {
                 $this->info('Would process renewal invoices...');
-
                 return;
             }
             $this->info('Processing renewal invoices...');
@@ -137,7 +138,6 @@ class ProcessInvoicesCommand extends Command
             throw $e;
         }
     }
-
     /**
      * Process overdue invoices with enhanced security.
      *
@@ -149,13 +149,16 @@ class ProcessInvoicesCommand extends Command
      * @throws \Exception When job dispatching fails
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     private function processOverdueInvoices(bool $dryRun = false): void
     {
         try {
             if ($dryRun) {
                 $this->info('Would process overdue invoices...');
-
                 return;
             }
             $this->info('Processing overdue invoices...');

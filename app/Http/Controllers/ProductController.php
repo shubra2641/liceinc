@@ -46,7 +46,6 @@ class ProductController extends Controller
     {
         $this->middleware(['auth', 'user', 'verified'])->only(['index', 'show']);
     }
-
     /**
      * Authenticated user product listing with enhanced security.
      *
@@ -67,7 +66,6 @@ class ProductController extends Controller
     {
         return $this->publicIndex($request);
     }
-
     /**
      * Public product listing for users and guests with enhanced security.
      *
@@ -88,7 +86,7 @@ class ProductController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'products-index:'.(Auth::id() ?? request()->ip());
+            $key = 'products-index:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 30)) {
                 Log::warning('Rate limit exceeded for products index', [
                     'user_id' => Auth::id(),
@@ -104,8 +102,8 @@ class ProductController extends Controller
                 $search = $this->sanitizeInput($request->validated('search'));
                 if ($search) {
                     $productsQuery->where(function ($query) use ($search) {
-                        $query->where('name', 'like', '%'.(is_string($search) ? $search : '').'%')
-                            ->orWhere('description', 'like', '%'.(is_string($search) ? $search : '').'%');
+                        $query->where('name', 'like', "%" . (is_string($search) ? $search : '') . "%")
+                            ->orWhere('description', 'like', "%" . (is_string($search) ? $search : '') . "%");
                     });
                 }
             }
@@ -150,11 +148,10 @@ class ProductController extends Controller
             $products = $productsQuery->paginate(15)->withQueryString();
             $categories = ProductCategory::where('is_active', true)->orderBy('sort_order')->get();
             $programmingLanguages = ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get();
-
             return view('user.products.index', [
                 'products' => $products,
                 'categories' => $categories,
-                'programmingLanguages' => $programmingLanguages,
+                'programmingLanguages' => $programmingLanguages
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to load products index', [
@@ -168,7 +165,6 @@ class ProductController extends Controller
             abort(500, 'Failed to load products');
         }
     }
-
     /**
      * Show product details for authenticated users with enhanced security.
      *
@@ -189,7 +185,7 @@ class ProductController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'product-show:'.(Auth::id() ?? request()->ip()).':'.$product->id;
+            $key = 'product-show:' . (Auth::id() ?? request()->ip()) . ':' . $product->id;
             if (RateLimiter::tooManyAttempts($key, 20)) {
                 Log::warning('Rate limit exceeded for product show', [
                     'product_id' => $product->id,
@@ -239,12 +235,12 @@ class ProductController extends Controller
             $product->description_has_html = false;
             $product->requirements_has_html = false;
             $product->installation_guide_has_html = false;
-
+            
             // Check if fields are strings before processing
             $description = $product->description;
             $requirements = $product->requirements;
             $installationGuide = $product->installation_guide;
-
+            
             if (is_string($description)) {
                 $product->description_has_html = strip_tags($description) !== $description;
             }
@@ -276,7 +272,6 @@ class ProductController extends Controller
                     ? json_decode($product->screenshots, true)
                     : $product->screenshots;
             }
-
             return view('user.products.show', [
                 'product' => $product,
                 'relatedProducts' => $relatedProducts,
@@ -300,7 +295,6 @@ class ProductController extends Controller
             abort(500, 'Failed to load product details');
         }
     }
-
     /**
      * Public product details (by slug) for guests with enhanced security.
      *
@@ -321,7 +315,7 @@ class ProductController extends Controller
     {
         try {
             // Rate limiting
-            $key = 'product-public-show:'.(Auth::id() ?? request()->ip()).':'.$slug;
+            $key = 'product-public-show:' . (Auth::id() ?? request()->ip()) . ':' . $slug;
             if (RateLimiter::tooManyAttempts($key, 20)) {
                 Log::warning('Rate limit exceeded for public product show', [
                     'slug' => $slug,
@@ -376,12 +370,12 @@ class ProductController extends Controller
             $product->description_has_html = false;
             $product->requirements_has_html = false;
             $product->installation_guide_has_html = false;
-
+            
             // Check if fields are strings before processing
             $description = $product->description;
             $requirements = $product->requirements;
             $installationGuide = $product->installation_guide;
-
+            
             if (is_string($description)) {
                 $product->description_has_html = strip_tags($description) !== $description;
             }
@@ -406,7 +400,6 @@ class ProductController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->limit(3)
                 ->get();
-
             return view('user.products.show', [
                 'product' => $product,
                 'relatedProducts' => $relatedProducts,

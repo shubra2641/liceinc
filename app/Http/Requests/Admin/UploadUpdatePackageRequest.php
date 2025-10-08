@@ -27,7 +27,6 @@ class UploadUpdatePackageRequest extends FormRequest
     {
         return true; // Authorization handled by middleware
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -44,7 +43,6 @@ class UploadUpdatePackageRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -59,7 +57,6 @@ class UploadUpdatePackageRequest extends FormRequest
             'update_package.max' => 'Update package size must not exceed 50MB.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -71,7 +68,6 @@ class UploadUpdatePackageRequest extends FormRequest
             'update_package' => 'update package file',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */

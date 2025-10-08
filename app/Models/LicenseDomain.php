@@ -17,8 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $last_used_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read License $license
- *
+ * @property-read \App\Models\License $license
  * @method static \Database\Factories\LicenseDomainFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain newQuery()
@@ -33,7 +32,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain whereVerifiedAt($value)
- *
  * @mixin \Eloquent
  */
 class LicenseDomain extends Model
@@ -51,7 +49,6 @@ class LicenseDomain extends Model
     protected $fillable = [
         'license_id', 'domain', 'status', 'is_verified', 'verified_at', 'added_at', 'last_used_at',
     ];
-
     protected $casts = [
         'license_id' => 'integer',
         'is_verified' => 'boolean',
@@ -59,7 +56,6 @@ class LicenseDomain extends Model
         'added_at' => 'datetime',
         'last_used_at' => 'datetime',
     ];
-
     /**
      * @return BelongsTo<License, $this>
      */

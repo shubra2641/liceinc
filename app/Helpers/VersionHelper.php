@@ -55,7 +55,6 @@ class VersionHelper
                     return '1.0.1';
                 }
             });
-
             return is_string($result) ? $result : '1.0.1';
         } catch (\Exception $e) {
             Log::error('Failed to get current version from cache', [
@@ -337,7 +336,6 @@ class VersionHelper
                 $changelog = (is_array($versionData) && isset($versionData['changelog']) && is_array($versionData['changelog']) && isset($versionData['changelog'][$version])) ? $versionData['changelog'][$version] : [];
                 /** @var array<string, mixed> $result */
                 $result = is_array($changelog) ? $changelog : [];
-
                 return $result;
             }
 
@@ -349,10 +347,8 @@ class VersionHelper
                         $sanitizedData[$key] = $value;
                     }
                 }
-
                 return $sanitizedData;
             }
-
             return [];
         } catch (\Exception $e) {
             Log::error('Failed to get version info', [
@@ -420,7 +416,6 @@ class VersionHelper
             $instructions = (is_array($versionData) && isset($versionData['update_instructions']) && is_array($versionData['update_instructions']) && isset($versionData['update_instructions'][$version])) ? $versionData['update_instructions'][$version] : [];
             /** @var array<string, mixed> $result */
             $result = is_array($instructions) ? $instructions : [];
-
             return $result;
         } catch (\Exception $e) {
             Log::error('Failed to get update instructions', [
@@ -706,7 +701,6 @@ class VersionHelper
 
                 /** @var array<string, mixed> $result */
                 $result = $history;
-
                 return $result;
             } catch (\Exception $e) {
                 DB::rollBack();

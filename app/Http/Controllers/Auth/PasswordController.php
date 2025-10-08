@@ -14,7 +14,6 @@ use Illuminate\Validation\Rules\Password;
  * This controller manages password updates for authenticated users,
  * ensuring proper validation of current password and new password
  * requirements before updating the user's password.
- *
  * @version 1.0.6
  */
 class PasswordController extends Controller
@@ -38,10 +37,8 @@ class PasswordController extends Controller
         if ($user) {
             $this->updateUserPassword($user, is_string($validated['password']) ? $validated['password'] : '');
         }
-
         return back()->with('success', 'password-updated');
     }
-
     /**
      * Validate the password update request.
      *
@@ -60,13 +57,11 @@ class PasswordController extends Controller
             'current_password' => ['required', 'current_password'],
             'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
-
+        
         /** @var array<string, mixed> $result */
         $result = $validated;
-
         return $result;
     }
-
     /**
      * Update the user's password.
      *

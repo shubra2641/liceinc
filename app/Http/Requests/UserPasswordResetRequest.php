@@ -19,7 +19,6 @@ class UserPasswordResetRequest extends FormRequest
     {
         return $this->user() && $this->user()->hasRole('admin');
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -40,7 +39,6 @@ class UserPasswordResetRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -56,7 +54,6 @@ class UserPasswordResetRequest extends FormRequest
             'confirm_reset.accepted' => 'You must confirm the password reset action.',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */

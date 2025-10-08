@@ -40,19 +40,21 @@ use Illuminate\Support\Facades\Log;
 class ProductApiController extends Controller
 {
     protected EnvatoService $envatoService;
-
     /**
      * Create a new controller instance.
      *
      * @param  EnvatoService  $envatoService  The Envato service for API integration
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function __construct(EnvatoService $envatoService)
     {
         $this->envatoService = $envatoService;
     }
-
     /**
      * Product lookup by purchase code with enhanced security.
      *
@@ -107,7 +109,6 @@ class ProductApiController extends Controller
             $existingLicense = License::with('product')->where('purchase_code', $purchaseCode)->first();
             if ($existingLicense && $existingLicense->product) {
                 DB::commit();
-
                 return response()->json([
                     'success' => true,
                     'product_slug' => $this->sanitizeOutput($existingLicense->product->slug),
@@ -122,7 +123,6 @@ class ProductApiController extends Controller
                 $productSlug = $this->sanitizeOutput(is_string(data_get($sale, 'item.slug')) ? data_get($sale, 'item.slug') : null);
                 $productName = $this->sanitizeOutput(is_string(data_get($sale, 'item.name')) ? data_get($sale, 'item.name') : null);
                 DB::commit();
-
                 return response()->json([
                     'success' => true,
                     'product_slug' => $productSlug,
@@ -132,12 +132,11 @@ class ProductApiController extends Controller
                 ]);
             }
             Log::warning('Invalid purchase code lookup attempt', [
-                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4).'...',
+                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4) . '...',
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
             DB::commit();
-
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid purchase code',
@@ -150,14 +149,12 @@ class ProductApiController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Unable to verify purchase code',
             ], 500);
         }
     }
-
     /**
      * Sanitize output to prevent XSS attacks.
      *
@@ -170,7 +167,6 @@ class ProductApiController extends Controller
         if ($output === null) {
             return '';
         }
-
         return htmlspecialchars($output, ENT_QUOTES, 'UTF-8');
     }
 }

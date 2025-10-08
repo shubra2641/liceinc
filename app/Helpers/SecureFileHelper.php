@@ -2,11 +2,11 @@
 
 namespace App\Helpers;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 /**
- * Secure File Helper.
+ * Secure File Helper
  *
  * Provides secure alternatives to discouraged PHP functions
  * for file operations and system interactions.
@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 class SecureFileHelper
 {
     /**
-     * Secure alternative to filesize().
+     * Secure alternative to filesize()
      */
     public static function getFileSize(string $path): int
     {
@@ -22,116 +22,105 @@ class SecureFileHelper
             if (Storage::exists($path)) {
                 return Storage::size($path);
             }
-
             return 0;
         } catch (\Exception $e) {
-            Log::error('Failed to get file size: '.$e->getMessage());
-
+            Log::error('Failed to get file size: ' . $e->getMessage());
             return 0;
         }
     }
 
     /**
-     * Secure alternative to file_exists().
+     * Secure alternative to file_exists()
      */
     public static function fileExists(string $path): bool
     {
         try {
             return Storage::exists($path);
         } catch (\Exception $e) {
-            Log::error('Failed to check file existence: '.$e->getMessage());
-
+            Log::error('Failed to check file existence: ' . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Secure alternative to is_dir().
+     * Secure alternative to is_dir()
      */
     public static function isDirectory(string $path): bool
     {
         try {
-            if (! Storage::disk('local')->exists($path)) {
+            if (!Storage::disk('local')->exists($path)) {
                 return false;
             }
             // Use is_dir() as fallback since getMetadata() is not available
             $fullPath = Storage::disk('local')->path($path);
-
             return is_dir($fullPath);
         } catch (\Exception $e) {
-            Log::error('Failed to check directory: '.$e->getMessage());
-
+            Log::error('Failed to check directory: ' . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Secure alternative to is_writable().
+     * Secure alternative to is_writable()
      */
     public static function isWritable(string $path): bool
     {
         try {
             // Test write capability by creating a temporary file
-            $testFile = $path.'/.test_write_'.uniqid();
+            $testFile = $path . '/.test_write_' . uniqid();
             $result = Storage::put($testFile, 'test');
             if ($result) {
                 Storage::delete($testFile);
-
                 return true;
             }
-
             return false;
         } catch (\Exception $e) {
-            Log::error('Failed to check write permission: '.$e->getMessage());
-
+            Log::error('Failed to check write permission: ' . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Secure alternative to mkdir().
+     * Secure alternative to mkdir()
      */
     public static function createDirectory(string $path, int $permissions = 0755, bool $recursive = true): bool
     {
         try {
             return Storage::makeDirectory($path);
         } catch (\Exception $e) {
-            Log::error('Failed to create directory: '.$e->getMessage());
-
+            Log::error('Failed to create directory: ' . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Secure alternative to unlink().
+     * Secure alternative to unlink()
      */
     public static function deleteFile(string $path): bool
     {
         try {
             return Storage::delete($path);
         } catch (\Exception $e) {
-            Log::error('Failed to delete file: '.$e->getMessage());
-
+            Log::error('Failed to delete file: ' . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Secure alternative to file_put_contents().
+     * Secure alternative to file_put_contents()
      */
     public static function putContents(string $path, string $content): bool
     {
         try {
             return Storage::put($path, $content) !== false;
         } catch (\Exception $e) {
-            Log::error('Failed to write file contents: '.$e->getMessage());
-
+            Log::error('Failed to write file contents: ' . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Secure alternative to fopen() for output.
+     * Secure alternative to fopen() for output
      */
     public static function openOutput(string $mode = 'w'): mixed
     {
@@ -139,19 +128,18 @@ class SecureFileHelper
     }
 
     /**
-     * Secure alternative to fclose().
+     * Secure alternative to fclose()
      */
     public static function closeFile(mixed $handle): bool
     {
-        if (! is_resource($handle)) {
+        if (!is_resource($handle)) {
             return false;
         }
-
         return fclose($handle);
     }
 
     /**
-     * Secure alternative to dirname().
+     * Secure alternative to dirname()
      */
     public static function getDirectoryName(string $path): string
     {
@@ -159,7 +147,7 @@ class SecureFileHelper
     }
 
     /**
-     * Secure alternative to chr().
+     * Secure alternative to chr()
      */
     public static function getCharacter(int $ascii): string
     {
@@ -167,7 +155,7 @@ class SecureFileHelper
     }
 
     /**
-     * Secure alternative to gettype().
+     * Secure alternative to gettype()
      */
     public static function getType(mixed $variable): string
     {
@@ -175,7 +163,7 @@ class SecureFileHelper
     }
 
     /**
-     * Secure alternative to parse_url().
+     * Secure alternative to parse_url()
      */
     public static function parseUrl(string $url, int $component = -1): mixed
     {
@@ -183,22 +171,19 @@ class SecureFileHelper
         if ($parsed === false) {
             throw new \InvalidArgumentException('Invalid URL provided');
         }
-
         return $parsed;
     }
 
     /**
-     * Secure alternative to ini_set().
+     * Secure alternative to ini_set()
      */
     public static function setIniSetting(string $setting, string $value): bool
     {
         try {
             $result = ini_set($setting, $value);
-
             return $result !== false;
         } catch (\Exception $e) {
-            Log::error('Failed to set ini setting: '.$e->getMessage());
-
+            Log::error('Failed to set ini setting: ' . $e->getMessage());
             return false;
         }
     }

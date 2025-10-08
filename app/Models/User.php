@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
-use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Foundation\Auth\User as AuthenticatableBase;
 use Illuminate\Notifications\Notifiable;
@@ -65,11 +65,11 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Invoice> $invoices
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
  * @property-read int|null $invoices_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, LicenseLog> $licenseLogs
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LicenseLog> $licenseLogs
  * @property-read int|null $license_logs_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, License> $licenses
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\License> $licenses
  * @property-read int|null $licenses_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
@@ -77,9 +77,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Ticket> $tickets
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Ticket> $tickets
  * @property-read int|null $tickets_count
- *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
@@ -136,7 +135,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
- *
  * @mixin \Eloquent
  */
 class User extends AuthenticatableBase implements
@@ -151,15 +149,15 @@ class User extends AuthenticatableBase implements
      * @phpstan-ignore-next-line
      */
     use HasFactory;
-    use HasRoles;
-    // Provides the email verification notification & helpers
-    use MustVerifyEmailTrait;
-    use Notifiable;
 
     /**
      * @phpstan-ignore-next-line
      */
     protected static $factory = UserFactory::class;
+    use HasRoles;
+    // Provides the email verification notification & helpers
+    use MustVerifyEmailTrait;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -212,7 +210,6 @@ class User extends AuthenticatableBase implements
         'envato_refresh_token',
         'envato_token_expires_at',
     ];
-
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -229,7 +226,6 @@ class User extends AuthenticatableBase implements
         'startdate',
         'expdate',
     ];
-
     /**
      * The attributes that should be cast.
      *
@@ -257,7 +253,6 @@ class User extends AuthenticatableBase implements
         'status' => 'string',
         'email_preferences' => 'array',
     ];
-
     /**
      * @return HasMany<License, $this>
      */
@@ -265,7 +260,6 @@ class User extends AuthenticatableBase implements
     {
         return $this->hasMany(License::class);
     }
-
     /**
      * @return HasMany<Ticket, $this>
      */
@@ -273,7 +267,6 @@ class User extends AuthenticatableBase implements
     {
         return $this->hasMany(Ticket::class);
     }
-
     /**
      * Invoices belonging to the user.
      */
@@ -284,12 +277,10 @@ class User extends AuthenticatableBase implements
     {
         return $this->hasMany(Invoice::class);
     }
-
     public function hasEnvatoAccount(): bool
     {
         return ! empty($this->envato_username) && ! empty($this->envato_token);
     }
-
     /**
      * License logs that belong to the user through licenses.
      */

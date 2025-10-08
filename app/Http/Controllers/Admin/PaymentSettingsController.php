@@ -10,7 +10,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-
 // use PayPal\PayPalServerSDK\PayPalServerSDK;
 // use PayPal\PayPalServerSDK\Orders\OrdersCreateRequest;
 
@@ -59,7 +58,6 @@ class PaymentSettingsController extends Controller
             $paypalSettings = PaymentSetting::getByGateway('paypal');
             $stripeSettings = PaymentSetting::getByGateway('stripe');
             DB::commit();
-
             return view('admin.payment-settings.index', ['paypalSettings' => $paypalSettings, 'stripeSettings' => $stripeSettings]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -67,7 +65,6 @@ class PaymentSettingsController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             // Return empty settings on error
             return view('admin.payment-settings.index', [
                 'paypalSettings' => null,
@@ -75,7 +72,6 @@ class PaymentSettingsController extends Controller
             ]);
         }
     }
-
     /**
      * Update payment settings with enhanced security.
      *
@@ -111,7 +107,6 @@ class PaymentSettingsController extends Controller
             $settings = PaymentSetting::getByGateway(is_string($gateway) ? $gateway : '');
             if (! $settings) {
                 DB::rollBack();
-
                 return redirect()->back()->with('error', trans('app.Payment gateway not found'));
             }
             // Get validated credentials (already sanitized by Request class)
@@ -124,7 +119,6 @@ class PaymentSettingsController extends Controller
                 'webhook_url' => $webhookUrl,
             ]);
             DB::commit();
-
             return redirect()->back()->with('success', trans('app.Payment settings updated successfully'));
         } catch (\Exception $e) {
             DB::rollBack();
@@ -133,11 +127,9 @@ class PaymentSettingsController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'gateway' => $request->gateway ?? 'unknown',
             ]);
-
             return redirect()->back()->with('error', trans('app.Failed to update payment settings'));
         }
     }
-
     /**
      * Test payment gateway connection with enhanced security.
      *
@@ -181,7 +173,6 @@ class PaymentSettingsController extends Controller
                     'message' => trans('app.Unsupported payment gateway'),
                 ], 400);
             }
-
             return response()->json($result);
         } catch (\Exception $e) {
             Log::error('Payment gateway connection test failed', [
@@ -189,14 +180,12 @@ class PaymentSettingsController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'gateway' => $request->gateway ?? 'unknown',
             ]);
-
             return response()->json([
                 'success' => false,
                 'message' => trans('app.Connection test failed: :error', ['error' => $e->getMessage()]),
             ], 500);
         }
     }
-
     /**
      * Test PayPal connection with enhanced security.
      *
@@ -211,7 +200,6 @@ class PaymentSettingsController extends Controller
      */
     /**
      * @param array<string, mixed> $credentials
-     *
      * @return array<string, mixed>
      */
     protected function testPayPalConnection(array $credentials): array
@@ -224,25 +212,20 @@ class PaymentSettingsController extends Controller
                     'message' => trans('app.PayPal credentials are incomplete'),
                 ];
             }
-            $paypal = new class() {
-                public function __construct()
-                {
+            $paypal = new class {
+                public function __construct() {
                     // Mock PayPal SDK implementation
                 }
-
-                public function execute(mixed $request): object
-                {
-                    return (object)['statusCode' => 201];
+                public function execute(mixed $request): object {
+                    return (object) ['statusCode' => 201];
                 }
             };
             // Try to create a simple order to test connection
-            $request = new class() {
-                public function prefer(string $preference): mixed
-                {
+            $request = new class {
+                public function prefer(string $preference): mixed {
                     // Mock implementation
                     return $this;
                 }
-
                 /** @var array<string, mixed> */
                 public array $body = [];
             };
@@ -274,16 +257,14 @@ class PaymentSettingsController extends Controller
         } catch (\Exception $e) {
             Log::warning('PayPal connection test failed', [
                 'error' => $e->getMessage(),
-                'client_id' => substr(is_string($credentials['client_id'] ?? null) ? $credentials['client_id'] : '', 0, 8).'...',
+                'client_id' => substr(is_string($credentials['client_id'] ?? null) ? $credentials['client_id'] : '', 0, 8) . '...',
             ]);
-
             return [
                 'success' => false,
                 'message' => trans('app.PayPal connection error: :error', ['error' => $e->getMessage()]),
             ];
         }
     }
-
     /**
      * Test Stripe connection with enhanced security.
      *
@@ -298,7 +279,6 @@ class PaymentSettingsController extends Controller
      */
     /**
      * @param array<string, mixed> $credentials
-     *
      * @return array<string, mixed>
      */
     protected function testStripeConnection(array $credentials): array
@@ -330,9 +310,8 @@ class PaymentSettingsController extends Controller
         } catch (\Exception $e) {
             Log::warning('Stripe connection test failed', [
                 'error' => $e->getMessage(),
-                'secret_key' => substr(is_string($credentials['secret_key']) ? $credentials['secret_key'] : '', 0, 8).'...',
+                'secret_key' => substr(is_string($credentials['secret_key']) ? $credentials['secret_key'] : '', 0, 8) . '...',
             ]);
-
             return [
                 'success' => false,
                 'message' => trans('app.Stripe connection error: :error', ['error' => $e->getMessage()]),

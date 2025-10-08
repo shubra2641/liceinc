@@ -560,14 +560,14 @@ class SecurityAuditCommand extends Command
         foreach ($files as $file) {
             if (is_writable($file) && (fileperms($file) & 0002)) {
                 $relativePath = $file->getRelativePathname();
-                if (! is_string($relativePath)) {
+                if (!is_string($relativePath)) {
                     continue;
                 }
                 $permissions = fileperms($file);
                 $writableFiles[$relativePath] = [
                     'path' => $relativePath,
                     'permissions' => $permissions !== false ? $permissions : 0,
-                    'is_writable' => true,
+                    'is_writable' => true
                 ];
             }
         }

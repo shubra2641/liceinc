@@ -58,7 +58,6 @@ abstract class BaseController extends Controller
     /**
      * @param array<string, string> $rules
      * @param array<string, string> $messages
-     *
      * @return array<string, mixed>
      */
     protected function validateRequest(Request $request, array $rules, array $messages = []): array
@@ -69,13 +68,11 @@ abstract class BaseController extends Controller
             throw new ValidationException($validator);
         }
         $validated = $validator->validated();
-
+        
         /** @var array<string, mixed> $result */
         $result = $validated;
-
         return $result;
     }
-
     /**
      * Create standardized JSON response with enhanced security.
      *
@@ -113,10 +110,8 @@ abstract class BaseController extends Controller
         if (! empty($meta)) {
             $response['meta'] = $meta;
         }
-
         return response()->json($response, $statusCode);
     }
-
     /**
      * Create error response with enhanced security.
      *
@@ -151,10 +146,8 @@ abstract class BaseController extends Controller
         if (! empty($errors)) {
             $response['errors'] = $errors;
         }
-
         return response()->json($response, $statusCode);
     }
-
     /**
      * Log validation errors with enhanced security.
      *
@@ -180,7 +173,6 @@ abstract class BaseController extends Controller
             'input' => $this->sanitizeLogData($request->all()),
         ]);
     }
-
     /**
      * Log security events with enhanced context.
      *
@@ -202,7 +194,7 @@ abstract class BaseController extends Controller
      */
     protected function logSecurityEvent(string $event, Request $request, array $context = []): void
     {
-        Log::warning('Security event: '.$event, array_merge([
+        Log::warning('Security event: ' . $event, array_merge([
             'url' => $request->fullUrl(),
             'method' => $request->method(),
             'ip' => $request->ip(),
@@ -210,7 +202,6 @@ abstract class BaseController extends Controller
             'user_id' => Auth::id(),
         ], $context));
     }
-
     /**
      * Sanitize data for logging with enhanced security.
      *
@@ -227,7 +218,6 @@ abstract class BaseController extends Controller
      */
     /**
      * @param array<mixed, mixed> $data
-     *
      * @return array<string, mixed>
      */
     protected function sanitizeLogData(array $data): array
@@ -254,10 +244,8 @@ abstract class BaseController extends Controller
         }
         /** @var array<string, mixed> $result */
         $result = $data;
-
         return $result;
     }
-
     /**
      * Handle exceptions with proper logging and response.
      *
@@ -286,7 +274,7 @@ abstract class BaseController extends Controller
             $message = 'Validation failed';
             $statusCode = Response::HTTP_UNPROCESSABLE_ENTITY;
         }
-        Log::error('Controller exception: '.$context, [
+        Log::error('Controller exception: ' . $context, [
             'exception' => $exception->getMessage(),
             'file' => $exception->getFile(),
             'line' => $exception->getLine(),
@@ -296,10 +284,8 @@ abstract class BaseController extends Controller
             'ip' => $request->ip(),
             'user_id' => Auth::id(),
         ]);
-
         return $this->errorResponse($message, null, $statusCode);
     }
-
     /**
      * Check if user has permission with enhanced validation.
      *
@@ -319,10 +305,8 @@ abstract class BaseController extends Controller
     protected function hasPermission(string $permission, mixed $resource = null): bool
     {
         $user = Auth::user();
-
         return Auth::check() && $user !== null && $user->can($permission);
     }
-
     /**
      * Require permission or abort with enhanced security.
      *
@@ -348,7 +332,6 @@ abstract class BaseController extends Controller
             abort(Response::HTTP_FORBIDDEN, 'Insufficient permissions');
         }
     }
-
     /**
      * Get pagination metadata with enhanced validation.
      *
@@ -366,7 +349,6 @@ abstract class BaseController extends Controller
      */
     /**
      * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, mixed> $paginator
-     *
      * @return array<string, mixed>
      */
     protected function getPaginationMeta(\Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator): array
@@ -385,11 +367,9 @@ abstract class BaseController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return [];
         }
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      */
@@ -407,7 +387,6 @@ abstract class BaseController extends Controller
         if (is_object($input)) {
             return $input;
         }
-
         return $input;
     }
 }

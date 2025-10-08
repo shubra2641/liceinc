@@ -27,10 +27,8 @@ class SettingRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -52,7 +50,6 @@ class SettingRequest extends FormRequest
                 ],
             ];
         }
-
         // Update settings validation
         return [
             'site_name' => [
@@ -543,7 +540,6 @@ class SettingRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -615,7 +611,6 @@ class SettingRequest extends FormRequest
             'token.regex' => 'API token can only contain letters and numbers.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -672,7 +667,6 @@ class SettingRequest extends FormRequest
             'token' => 'API token',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */
@@ -716,7 +710,6 @@ class SettingRequest extends FormRequest
             'time_format' => $this->time_format ?? 'H:i:s',
         ]);
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -729,11 +722,11 @@ class SettingRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-
-        if (! is_string($input)) {
+        
+        if (!is_string($input)) {
             return null;
         }
-
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

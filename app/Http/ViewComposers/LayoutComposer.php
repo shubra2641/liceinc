@@ -38,12 +38,10 @@ class LayoutComposer
      * Cache key prefix for layout data.
      */
     private const CACHE_PREFIX = 'layout_composer_';
-
     /**
      * Cache duration in minutes.
      */
     private const CACHE_DURATION = 60;
-
     /**
      * Bind data to the view with enhanced security and performance.
      *
@@ -73,7 +71,6 @@ class LayoutComposer
             $view->with($this->getFallbackData());
         }
     }
-
     /**
      * Get layout data with caching and error handling.
      *
@@ -87,7 +84,7 @@ class LayoutComposer
     private function getLayoutData(): array
     {
         $result = Cache::remember(
-            self::CACHE_PREFIX.'layout_data',
+            self::CACHE_PREFIX . 'layout_data',
             self::CACHE_DURATION,
             function () {
                 return [
@@ -111,10 +108,8 @@ class LayoutComposer
         $arrayResult = is_array($result) ? $result : [];
         /** @var array<string, mixed> $typedResult */
         $typedResult = $arrayResult;
-
         return $typedResult;
     }
-
     /**
      * Get site name with validation and fallback.
      *
@@ -123,10 +118,8 @@ class LayoutComposer
     private function getSiteName(): string
     {
         $siteName = Setting::get('site_name', config('app.name', 'Laravel'));
-
         return $this->sanitizeOutput(is_string($siteName) ? $siteName : '');
     }
-
     /**
      * Get site logo with validation.
      *
@@ -135,10 +128,8 @@ class LayoutComposer
     private function getSiteLogo(): ?string
     {
         $siteLogo = Setting::get('site_logo', null);
-
         return $siteLogo ? $this->sanitizeOutput(is_string($siteLogo) ? $siteLogo : '') : null;
     }
-
     /**
      * Get site SEO title with validation.
      *
@@ -147,10 +138,8 @@ class LayoutComposer
     private function getSiteSeoTitle(): ?string
     {
         $seoTitle = Setting::get('seo_site_title', null);
-
         return $seoTitle ? $this->sanitizeOutput(is_string($seoTitle) ? $seoTitle : '') : null;
     }
-
     /**
      * Get site SEO description with validation.
      *
@@ -159,10 +148,8 @@ class LayoutComposer
     private function getSiteSeoDescription(): ?string
     {
         $seoDescription = Setting::get('seo_site_description', null);
-
         return $seoDescription ? $this->sanitizeOutput(is_string($seoDescription) ? $seoDescription : '') : null;
     }
-
     /**
      * Get Open Graph image with validation.
      *
@@ -171,10 +158,8 @@ class LayoutComposer
     private function getOgImage(): ?string
     {
         $ogImage = Setting::get('seo_og_image', null);
-
         return $ogImage ? $this->sanitizeOutput(is_string($ogImage) ? $ogImage : '') : null;
     }
-
     /**
      * Get Knowledge Base SEO title with validation.
      *
@@ -183,10 +168,8 @@ class LayoutComposer
     private function getKbSeoTitle(): ?string
     {
         $kbSeoTitle = Setting::get('seo_kb_title', null);
-
         return $kbSeoTitle ? $this->sanitizeOutput(is_string($kbSeoTitle) ? $kbSeoTitle : '') : null;
     }
-
     /**
      * Get Knowledge Base SEO description with validation.
      *
@@ -195,10 +178,8 @@ class LayoutComposer
     private function getKbSeoDescription(): ?string
     {
         $kbSeoDescription = Setting::get('seo_kb_description', null);
-
         return $kbSeoDescription ? $this->sanitizeOutput(is_string($kbSeoDescription) ? $kbSeoDescription : '') : null;
     }
-
     /**
      * Get Tickets SEO title with validation.
      *
@@ -207,10 +188,8 @@ class LayoutComposer
     private function getTicketsSeoTitle(): ?string
     {
         $ticketsSeoTitle = Setting::get('seo_tickets_title', null);
-
         return $ticketsSeoTitle ? $this->sanitizeOutput(is_string($ticketsSeoTitle) ? $ticketsSeoTitle : '') : null;
     }
-
     /**
      * Get Tickets SEO description with validation.
      *
@@ -219,10 +198,8 @@ class LayoutComposer
     private function getTicketsSeoDescription(): ?string
     {
         $ticketsSeoDescription = Setting::get('seo_tickets_description', null);
-
         return $ticketsSeoDescription ? $this->sanitizeOutput(is_string($ticketsSeoDescription) ? $ticketsSeoDescription : '') : null;
     }
-
     /**
      * Get available languages with metadata.
      *
@@ -232,7 +209,6 @@ class LayoutComposer
     {
         return LanguageController::getAvailableLanguagesWithMetadata();
     }
-
     /**
      * Get current locale.
      *
@@ -242,7 +218,6 @@ class LayoutComposer
     {
         return app()->getLocale();
     }
-
     /**
      * Get current language metadata.
      *
@@ -252,10 +227,8 @@ class LayoutComposer
     {
         $currentLocale = $this->getCurrentLocale();
         $availableLanguages = $this->getAvailableLanguages();
-
         return collect($availableLanguages)->firstWhere('code', $currentLocale);
     }
-
     /**
      * @return array<string, mixed>|null
      */
@@ -263,10 +236,8 @@ class LayoutComposer
     {
         $availableLanguages = $this->getAvailableLanguages();
         $currentLocale = $this->getCurrentLocale();
-
         return collect($availableLanguages)->firstWhere('code', '!=', $currentLocale);
     }
-
     /**
      * Get preloader settings.
      *
@@ -275,7 +246,6 @@ class LayoutComposer
     private function getPreloaderSettings(): array
     {
         $settings = Setting::first();
-
         return [
             'preloaderEnabled' => $settings->preloader_enabled ?? true,
             'preloaderType' => $settings->preloader_type ?? 'spinner',
@@ -289,7 +259,6 @@ class LayoutComposer
             'logoShowText' => $settings->logo_show_text ?? true,
         ];
     }
-
     /**
      * Get fallback data for error scenarios.
      *
@@ -319,7 +288,6 @@ class LayoutComposer
                 'otherLanguage' => ['code' => 'ar', 'name' => 'Arabic', 'native_name' => 'العربية', 'flag' => '🇸🇦'],
         ];
     }
-
     /**
      * Clear layout composer cache.
      *
@@ -328,7 +296,7 @@ class LayoutComposer
     public static function clearCache(): void
     {
         try {
-            Cache::forget(self::CACHE_PREFIX.'layout_data');
+            Cache::forget(self::CACHE_PREFIX . 'layout_data');
         } catch (\Exception $e) {
             Log::error('Failed to clear layout composer cache', [
                 'error' => $e->getMessage(),
@@ -336,7 +304,6 @@ class LayoutComposer
             ]);
         }
     }
-
     /**
      * Sanitize output to prevent XSS attacks.
      *

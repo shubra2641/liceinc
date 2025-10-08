@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Helpers\SecureFileHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\KbArticle;
@@ -20,6 +19,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use App\Helpers\SecureFileHelper;
 
 /**
  * Admin Dashboard Controller with enhanced security.
@@ -121,7 +121,6 @@ class DashboardController extends Controller
             // Read maintenance mode from cached settings. If true -> site is in maintenance (Offline)
             $isMaintenance = Setting::get('maintenance_mode', false);
             DB::commit();
-
             return view('admin.dashboard', ['stats' => $stats, 'latestTickets' => $latestTickets, 'latestLicenses' => $latestLicenses, 'isMaintenance' => $isMaintenance]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -151,11 +150,9 @@ class DashboardController extends Controller
                 'api_errors_this_month' => 0,
             ];
             $isMaintenance = Setting::get('maintenance_mode', false);
-
             return view('admin.dashboard', ['stats' => $stats, 'isMaintenance' => $isMaintenance]);
         }
     }
-
     /**
      * Get system overview chart data with enhanced security.
      *
@@ -185,7 +182,6 @@ class DashboardController extends Controller
             $pendingRequests = Ticket::whereIn('status', ['open', 'pending'])->count();
             $totalProducts = Product::count();
             DB::commit();
-
             return response()->json([
                 'labels' => ['Active Licenses', 'Expired Licenses', 'Pending Requests', 'Total Products'],
                 'data' => [$activeLicenses, $expiredLicenses, $pendingRequests, $totalProducts],
@@ -196,7 +192,6 @@ class DashboardController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             // Return fallback data
             return response()->json([
                 'labels' => ['Active Licenses', 'Expired Licenses', 'Pending Requests', 'Total Products'],
@@ -204,7 +199,6 @@ class DashboardController extends Controller
             ]);
         }
     }
-
     /**
      * Get license distribution chart data.
      *
@@ -214,6 +208,10 @@ class DashboardController extends Controller
      * @return JsonResponse JSON response with license distribution data
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      *
      * @example
      * // Request:
@@ -231,7 +229,6 @@ class DashboardController extends Controller
             // Use actual enum values defined in the licenses table: regular / extended
             $regularLicenses = License::where('license_type', 'regular')->count();
             $extendedLicenses = License::where('license_type', 'extended')->count();
-
             return response()->json([
                 'labels' => ['Regular', 'Extended'],
                 'data' => [$regularLicenses, $extendedLicenses],
@@ -246,7 +243,6 @@ class DashboardController extends Controller
             ]);
         }
     }
-
     /**
      * Get revenue chart data with enhanced security.
      *
@@ -326,7 +322,6 @@ class DashboardController extends Controller
                 }
             }
             DB::commit();
-
             return response()->json([
                 'labels' => $labels,
                 'data' => $data,
@@ -342,7 +337,6 @@ class DashboardController extends Controller
                 'period' => $request->get('period'),
                 'year' => $request->get('year'),
             ]);
-
             // Return fallback data
             return response()->json([
                 'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -350,7 +344,6 @@ class DashboardController extends Controller
             ]);
         }
     }
-
     /**
      * Get activity timeline chart data.
      *
@@ -360,6 +353,10 @@ class DashboardController extends Controller
      * @return JsonResponse JSON response with activity timeline data
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      *
      * @example
      * // Request:
@@ -389,7 +386,6 @@ class DashboardController extends Controller
                 $data[] = $dailyTotal;
                 $labels[] = $date->format('M j');
             }
-
             return response()->json([
                 'labels' => $labels,
                 'data' => $data,
@@ -404,7 +400,6 @@ class DashboardController extends Controller
             ]);
         }
     }
-
     /**
      * Get dashboard statistics.
      *
@@ -414,6 +409,10 @@ class DashboardController extends Controller
      * @return JsonResponse JSON response with dashboard statistics
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      *
      * @example
      * // Request:
@@ -442,7 +441,6 @@ class DashboardController extends Controller
                 'tickets_closed' => Ticket::where('status', 'closed')->count(),
                 'kb_articles' => KbArticle::count(),
             ];
-
             return response()->json($stats);
         } catch (\Exception $e) {
             // Log the error for debugging
@@ -459,7 +457,6 @@ class DashboardController extends Controller
             ]);
         }
     }
-
     /**
      * Calculate API success rate.
      *
@@ -469,6 +466,10 @@ class DashboardController extends Controller
      * @return float The API success rate as a percentage
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     private function calculateApiSuccessRate(): float
     {
@@ -477,10 +478,8 @@ class DashboardController extends Controller
             return 0.0;
         }
         $successfulRequests = LicenseLog::where('status', 'success')->count();
-
         return round(($successfulRequests / $totalRequests) * 100, 2);
     }
-
     /**
      * Get API errors today from Laravel logs.
      *
@@ -490,6 +489,10 @@ class DashboardController extends Controller
      * @return int The number of API errors today
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     private function getApiErrorsToday(): int
     {
@@ -511,10 +514,8 @@ class DashboardController extends Controller
             }
             SecureFileHelper::closeFile($handle);
         }
-
         return $errorCount;
     }
-
     /**
      * Get API errors this month from Laravel logs.
      *
@@ -524,6 +525,10 @@ class DashboardController extends Controller
      * @return int The number of API errors this month
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     private function getApiErrorsThisMonth(): int
     {
@@ -545,10 +550,8 @@ class DashboardController extends Controller
             }
             SecureFileHelper::closeFile($handle);
         }
-
         return $errorCount;
     }
-
     /**
      * Get API requests chart data with enhanced security.
      *
@@ -627,7 +630,6 @@ class DashboardController extends Controller
                 }
             }
             DB::commit();
-
             return response()->json([
                 'labels' => $labels,
                 'datasets' => [
@@ -665,14 +667,12 @@ class DashboardController extends Controller
                 'period' => $request->get('period'),
                 'days' => $request->get('days'),
             ]);
-
             return response()->json([
                 'labels' => [],
                 'datasets' => [],
             ]);
         }
     }
-
     /**
      * Get API performance metrics.
      *
@@ -682,6 +682,10 @@ class DashboardController extends Controller
      * @return JsonResponse JSON response with API performance data
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      *
      * @example
      * // Request:
@@ -727,7 +731,6 @@ class DashboardController extends Controller
                 ->orderBy('count', 'desc')
                 ->limit(5)
                 ->get();
-
             return response()->json([
                 'today' => [
                     'total' => $todayRequests,
@@ -753,7 +756,6 @@ class DashboardController extends Controller
             ]);
         }
     }
-
     /**
      * Clear all application caches with enhanced security.
      *
@@ -788,7 +790,6 @@ class DashboardController extends Controller
             // Clear license-specific caches if any
             Cache::flush(); // Clear all cache keys
             DB::commit();
-
             return redirect()->back()->with('success', 'All caches cleared successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -796,7 +797,6 @@ class DashboardController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return redirect()->back()->with('error', 'Failed to clear caches. Please try again.');
         }
     }

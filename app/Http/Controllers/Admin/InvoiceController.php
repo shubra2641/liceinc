@@ -49,7 +49,6 @@ use Illuminate\View\View;
 class InvoiceController extends Controller
 {
     protected InvoiceService $invoiceService;
-
     /**
      * Create a new controller instance.
      *
@@ -59,7 +58,6 @@ class InvoiceController extends Controller
     {
         $this->invoiceService = $invoiceService;
     }
-
     /**
      * Display a listing of invoices with filtering and pagination and enhanced security.
      *
@@ -108,7 +106,6 @@ class InvoiceController extends Controller
             $invoices = $query->latest()->paginate(10);
             $stats = $this->invoiceService->getInvoiceStats();
             DB::commit();
-
             return view('admin.invoices.index', ['invoices' => $invoices, 'stats' => $stats]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -116,7 +113,6 @@ class InvoiceController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             // Return empty results on error
             return view('admin.invoices.index', [
                 'invoices' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
@@ -124,7 +120,6 @@ class InvoiceController extends Controller
             ]);
         }
     }
-
     /**
      * Show the form for creating a new invoice.
      *
@@ -146,10 +141,8 @@ class InvoiceController extends Controller
     public function create(): View
     {
         $users = User::select('id', 'name', 'email')->get();
-
         return view('admin.invoices.create', ['users' => $users]);
     }
-
     /**
      * Store a newly created invoice in storage with enhanced security.
      *
@@ -224,7 +217,6 @@ class InvoiceController extends Controller
                 ] : null,
             ]);
             DB::commit();
-
             return redirect()->route('admin.invoices.show', $invoice)
                 ->with('success', 'Invoice created successfully');
         } catch (\Exception $e) {
@@ -234,14 +226,12 @@ class InvoiceController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['notes']),
             ]);
-
             return redirect()
                 ->back()
                 ->withInput()
                 ->with('error', 'Failed to create invoice. Please try again.');
         }
     }
-
     /**
      * Display the specified invoice.
      *
@@ -253,6 +243,10 @@ class InvoiceController extends Controller
      * @return View The invoice details view
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      *
      * @example
      * // Access invoice details:
@@ -268,10 +262,8 @@ class InvoiceController extends Controller
     public function show(Invoice $invoice): View
     {
         $invoice->load(['user', 'product', 'license']);
-
         return view('admin.invoices.show', ['invoice' => $invoice]);
     }
-
     /**
      * Mark invoice as paid with enhanced security.
      *
@@ -297,7 +289,6 @@ class InvoiceController extends Controller
             DB::beginTransaction();
             $this->invoiceService->markAsPaid($invoice);
             DB::commit();
-
             return redirect()->back()->with('success', 'Invoice marked as paid successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -306,13 +297,11 @@ class InvoiceController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'invoice_id' => $invoice->id,
             ]);
-
             return redirect()
                 ->back()
                 ->with('error', 'Failed to mark invoice as paid. Please try again.');
         }
     }
-
     /**
      * Cancel invoice with enhanced security.
      *
@@ -338,7 +327,6 @@ class InvoiceController extends Controller
             DB::beginTransaction();
             $invoice->update(['status' => 'cancelled']);
             DB::commit();
-
             return redirect()->back()->with('success', 'Invoice cancelled successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -347,13 +335,11 @@ class InvoiceController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'invoice_id' => $invoice->id,
             ]);
-
             return redirect()
                 ->back()
                 ->with('error', 'Failed to cancel invoice. Please try again.');
         }
     }
-
     /**
      * Show the form for editing the specified invoice.
      *
@@ -365,6 +351,10 @@ class InvoiceController extends Controller
      * @return View The invoice edit form view
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      *
      * @example
      * // Access the edit form:
@@ -380,10 +370,8 @@ class InvoiceController extends Controller
     {
         $users = User::select('id', 'name', 'email')->get();
         $invoice->load(['user', 'license.product']);
-
         return view('admin.invoices.edit', ['invoice' => $invoice, 'users' => $users]);
     }
-
     /**
      * Update the specified invoice in storage.
      *
@@ -450,7 +438,6 @@ class InvoiceController extends Controller
                 ] : null,
             ]);
             DB::commit();
-
             return redirect()->route('admin.invoices.show', $invoice)
                 ->with('success', 'Invoice updated successfully');
         } catch (\Exception $e) {
@@ -461,14 +448,12 @@ class InvoiceController extends Controller
                 'invoice_id' => $invoice->id,
                 'request_data' => $request->except(['notes']),
             ]);
-
             return redirect()
                 ->back()
                 ->withInput()
                 ->with('error', 'Failed to update invoice. Please try again.');
         }
     }
-
     /**
      * Remove the specified invoice from storage with enhanced security.
      *
@@ -498,12 +483,10 @@ class InvoiceController extends Controller
             // Check if invoice can be deleted (not paid)
             if ($invoice->status === 'paid') {
                 DB::rollBack();
-
                 return redirect()->back()->with('error', 'Cannot delete a paid invoice');
             }
             $invoice->delete();
             DB::commit();
-
             return redirect()->route('admin.invoices.index')
                 ->with('success', 'Invoice deleted successfully');
         } catch (\Exception $e) {
@@ -513,7 +496,6 @@ class InvoiceController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'invoice_id' => $invoice->id,
             ]);
-
             return redirect()
                 ->back()
                 ->with('error', 'Failed to delete invoice. Please try again.');

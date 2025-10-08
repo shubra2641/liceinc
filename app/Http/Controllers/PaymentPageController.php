@@ -22,7 +22,6 @@ class PaymentPageController extends Controller
     {
         return $this->renderPage('payment.success', $gateway, 'success');
     }
-
     /**
      * Show failure page.
      *
@@ -32,7 +31,6 @@ class PaymentPageController extends Controller
     {
         return $this->renderPage('payment.failure', $gateway, 'failure');
     }
-
     /**
      * Show cancel page.
      *
@@ -42,7 +40,6 @@ class PaymentPageController extends Controller
     {
         return $this->renderPage('payment.cancel', $gateway, 'cancel');
     }
-
     /**
      * Validate gateway and render the given view.
      *
@@ -58,19 +55,16 @@ class PaymentPageController extends Controller
                 Log::warning("Invalid gateway format in {$context} page", [
                     'gateway' => $sanitizedGateway,
                 ]);
-
                 return redirect()->route('home')->with('error', 'Invalid payment gateway.');
             }
             /** @var view-string $viewString */
             $viewString = $view;
-
             return view($viewString, ['gateway' => $sanitizedGateway]);
         } catch (\Exception $e) {
             Log::error("Payment {$context} page error", [
                 'error' => $e->getMessage(),
                 'gateway' => $gateway,
             ]);
-
             return redirect()->route('home')->with('error', 'Payment processing error. Please contact support.');
         }
     }

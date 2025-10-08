@@ -19,7 +19,6 @@ class LicenseStatusRequest extends FormRequest
     {
         return true; // Authorization handled by middleware
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -42,7 +41,6 @@ class LicenseStatusRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -57,7 +55,6 @@ class LicenseStatusRequest extends FormRequest
             'product_slug.regex' => 'Product slug contains invalid characters.',
         ];
     }
-
     /**
      * Get custom attribute names for validation errors.
      *
@@ -70,7 +67,6 @@ class LicenseStatusRequest extends FormRequest
             'product_slug' => 'product slug',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */
@@ -88,7 +84,6 @@ class LicenseStatusRequest extends FormRequest
             ]);
         }
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -101,11 +96,11 @@ class LicenseStatusRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-
-        if (! is_string($input)) {
+        
+        if (!is_string($input)) {
             return null;
         }
-
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

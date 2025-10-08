@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Webhook Model.
+ * Webhook Model
  *
  * @property int $id
  * @property string $name
@@ -81,7 +81,6 @@ class Webhook extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<Webhook> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<Webhook>
      */
     public function scopeActive($query)
@@ -94,7 +93,6 @@ class Webhook extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<Webhook> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<Webhook>
      */
     public function scopeFailed($query)

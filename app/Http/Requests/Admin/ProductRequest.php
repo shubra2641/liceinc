@@ -30,10 +30,8 @@ class ProductRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -43,7 +41,6 @@ class ProductRequest extends FormRequest
     {
         $productId = $this->route('product')->id ?? null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
-
         return [
             'name' => [
                 'required',
@@ -171,7 +168,6 @@ class ProductRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -211,7 +207,6 @@ class ProductRequest extends FormRequest
             'support_url.url' => 'Support URL must be a valid URL.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -247,7 +242,6 @@ class ProductRequest extends FormRequest
             'support_url' => 'support URL',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */
@@ -278,7 +272,6 @@ class ProductRequest extends FormRequest
             'currency' => $this->currency ?? 'USD',
         ]);
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -291,11 +284,11 @@ class ProductRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-
-        if (! is_string($input)) {
+        
+        if (!is_string($input)) {
             return null;
         }
-
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

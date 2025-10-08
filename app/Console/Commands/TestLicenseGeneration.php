@@ -31,14 +31,12 @@ class TestLicenseGeneration extends Command
      * @var string
      */
     protected $signature = 'test:license-generation';
-
     /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Test license generation with database tokens';
-
     /**
      * Execute the console command with enhanced security and validation.
      *
@@ -71,7 +69,6 @@ class TestLicenseGeneration extends Command
             $setting = $this->validateAndGetSettings();
             if (! $setting) {
                 DB::rollBack();
-
                 return 1;
             }
             // Display token status with security considerations
@@ -80,7 +77,6 @@ class TestLicenseGeneration extends Command
             $product = $this->validateAndGetProduct();
             if (! $product) {
                 DB::rollBack();
-
                 return 1;
             }
             // Display product information
@@ -89,14 +85,12 @@ class TestLicenseGeneration extends Command
             $filePath = $this->generateLicenseFile($product);
             if (! $filePath) {
                 DB::rollBack();
-
                 return 1;
             }
             // Validate generated file
             $validationResult = $this->validateGeneratedFile($filePath, $setting);
             if (! $validationResult) {
                 DB::rollBack();
-
                 return 1;
             }
             DB::commit();
@@ -107,16 +101,13 @@ class TestLicenseGeneration extends Command
                 'trace' => $e->getTraceAsString(),
                 'command' => 'test:license-generation',
             ]);
-            $this->error('Error: '.$e->getMessage());
-            $this->error("Stack trace:\n".$e->getTraceAsString());
-
+            $this->error('Error: ' . $e->getMessage());
+            $this->error("Stack trace:\n" . $e->getTraceAsString());
             return 1;
         }
         $this->info("\n=== Test Complete ===");
-
         return 0;
     }
-
     /**
      * Validate and get settings with security checks.
      *
@@ -129,22 +120,18 @@ class TestLicenseGeneration extends Command
             if (! $setting) {
                 $this->error('No settings found in database!');
                 Log::warning('No settings found during license generation test');
-
                 return null;
             }
-
             return $setting;
         } catch (\Exception $e) {
-            $this->error('Failed to retrieve settings: '.$e->getMessage());
+            $this->error('Failed to retrieve settings: ' . $e->getMessage());
             Log::error('Failed to retrieve settings during license generation test', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return null;
         }
     }
-
     /**
      * Display token status with security considerations.
      *
@@ -152,10 +139,9 @@ class TestLicenseGeneration extends Command
      */
     private function displayTokenStatus(Setting $setting): void
     {
-        $this->info('API Token from DB: '.($setting->license_api_token ? 'Found' : 'Not found'));
-        $this->info('Envato Token from DB: '.($setting->envato_personal_token ? 'Found' : 'Not found'));
+        $this->info('API Token from DB: ' . ($setting->license_api_token ? 'Found' : 'Not found'));
+        $this->info('Envato Token from DB: ' . ($setting->envato_personal_token ? 'Found' : 'Not found'));
     }
-
     /**
      * Validate and get product with security checks.
      *
@@ -168,7 +154,6 @@ class TestLicenseGeneration extends Command
             if (! $product) {
                 $this->error('No products found in database!');
                 Log::warning('No products found during license generation test');
-
                 return null;
             }
             if (! $product->programmingLanguage) {
@@ -176,22 +161,18 @@ class TestLicenseGeneration extends Command
                 Log::warning('Product missing programming language during license generation test', [
                     'product_id' => $product->id,
                 ]);
-
                 return null;
             }
-
             return $product;
         } catch (\Exception $e) {
-            $this->error('Failed to retrieve product: '.$e->getMessage());
+            $this->error('Failed to retrieve product: ' . $e->getMessage());
             Log::error('Failed to retrieve product during license generation test', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return null;
         }
     }
-
     /**
      * Display product information with validation.
      *
@@ -207,7 +188,6 @@ class TestLicenseGeneration extends Command
         $languageName = $programmingLanguage ? $programmingLanguage->name : 'Not set';
         $this->info("Programming Language: {$languageName}");
     }
-
     /**
      * Generate license file with validation and error handling.
      *
@@ -225,24 +205,20 @@ class TestLicenseGeneration extends Command
                 Log::error('License generation service returned null file path', [
                     'product_id' => $product->id,
                 ]);
-
                 return null;
             }
             $this->info("Generated file: {$filePath}");
-
             return $filePath;
         } catch (\Exception $e) {
-            $this->error('Failed to generate license file: '.$e->getMessage());
+            $this->error('Failed to generate license file: ' . $e->getMessage());
             Log::error('Failed to generate license file', [
                 'product_id' => $product->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return null;
         }
     }
-
     /**
      * Validate generated file with comprehensive checks.
      *
@@ -261,7 +237,6 @@ class TestLicenseGeneration extends Command
                     'file_path' => $fullPath,
                     'relative_path' => $filePath,
                 ]);
-
                 return false;
             }
             $this->info('✅ File exists and was created successfully!');
@@ -272,27 +247,23 @@ class TestLicenseGeneration extends Command
                 Log::error('Failed to read generated license file content', [
                     'file_path' => $fullPath,
                 ]);
-
                 return false;
             }
             // Display first few lines of the file
             $this->displayFileContent($content);
             // Validate token inclusion
             $this->validateTokenInclusion($content, $setting);
-
             return true;
         } catch (\Exception $e) {
-            $this->error('Failed to validate generated file: '.$e->getMessage());
+            $this->error('Failed to validate generated file: ' . $e->getMessage());
             Log::error('Failed to validate generated license file', [
                 'file_path' => $filePath,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return false;
         }
     }
-
     /**
      * Display first few lines of the generated file content.
      *
@@ -306,10 +277,9 @@ class TestLicenseGeneration extends Command
         $linesCount = count($lines);
         $maxLines = min(10, $linesCount);
         for ($i = 0; $i < $maxLines; $i++) {
-            $this->line(($i + 1).': '.$lines[$i]);
+            $this->line(($i + 1) . ': ' . $lines[$i]);
         }
     }
-
     /**
      * Validate token inclusion in the generated file.
      *

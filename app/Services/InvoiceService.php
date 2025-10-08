@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Services;
 
-use App\Helpers\SecurityHelper;
 use App\Models\Invoice;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\SecurityHelper;
 use Illuminate\Support\Str;
 
 /**
@@ -41,7 +39,7 @@ use Illuminate\Support\Str;
  * // Get invoice statistics
  * $stats = $invoiceService->getInvoiceStats();
  */
-class InvoiceService extends BaseService
+class InvoiceService
 {
     /**
      * Create initial invoice for a license with enhanced security.
@@ -49,14 +47,14 @@ class InvoiceService extends BaseService
      * Creates the first invoice for a license with proper validation,
      * error handling, and database transactions for data integrity.
      *
-     * @param License $license The license to create invoice for
-     * @param string $paymentStatus The payment status (paid, pending, overdue)
-     * @param \DateTimeInterface|null $dueDate The due date for the invoice
+     * @param  License  $license  The license to create invoice for
+     * @param  string  $paymentStatus  The payment status (paid, pending, overdue)
+     * @param  \DateTimeInterface|null  $dueDate  The due date for the invoice
+     *
+     * @return Invoice The created invoice
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
      * @throws \Exception When database operations fail
-     *
-     * @return Invoice The created invoice
      *
      * @example
      * $invoice = $invoiceService->createInitialInvoice($license, 'paid', now()->addDays(30));
@@ -81,7 +79,6 @@ class InvoiceService extends BaseService
                 'notes' => 'Initial license invoice',
             ]);
             DB::commit();
-
             return $invoice;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -94,17 +91,15 @@ class InvoiceService extends BaseService
             throw $e;
         }
     }
-
     /**
      * Generate unique invoice number with enhanced validation.
      *
      * Generates a unique invoice number with proper validation and
      * collision detection to ensure uniqueness.
      *
+     * @return string The generated invoice number
      *
      * @throws \Exception When invoice number generation fails
-     *
-     * @return string The generated invoice number
      */
     protected function generateInvoiceNumber(): string
     {
@@ -118,7 +113,6 @@ class InvoiceService extends BaseService
                     throw new \Exception('Failed to generate unique invoice number after ' . $maxAttempts . ' attempts');
                 }
             } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
-
             return $invoiceNumber;
         } catch (\Exception $e) {
             Log::error('Invoice number generation failed', [
@@ -128,20 +122,19 @@ class InvoiceService extends BaseService
             throw $e;
         }
     }
-
     /**
      * Create renewal invoice with enhanced security.
      *
      * Creates a renewal invoice for an existing license with proper
      * validation and error handling.
      *
-     * @param License $license The license to create renewal invoice for
-     * @param array $options Additional options for the invoice
+     * @param  License  $license  The license to create renewal invoice for
+     * @param  array  $options  Additional options for the invoice
+     *
+     * @return Invoice The created renewal invoice
      *
      * @throws \InvalidArgumentException When invalid license is provided
      * @throws \Exception When database operations fail
-     *
-     * @return Invoice The created renewal invoice
      *
      * @example
      * $renewalInvoice = $invoiceService->createRenewalInvoice($license);
@@ -186,7 +179,6 @@ class InvoiceService extends BaseService
             }
 
             DB::commit();
-
             return $invoice;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -199,14 +191,13 @@ class InvoiceService extends BaseService
             throw $e;
         }
     }
-
     /**
      * Mark invoice as paid with enhanced validation.
      *
      * Updates invoice status to paid with proper validation and
      * error handling.
      *
-     * @param Invoice $invoice The invoice to mark as paid
+     * @param  Invoice  $invoice  The invoice to mark as paid
      *
      * @throws \InvalidArgumentException When invalid invoice is provided
      * @throws \Exception When database operations fail
@@ -234,14 +225,13 @@ class InvoiceService extends BaseService
             throw $e;
         }
     }
-
     /**
      * Mark invoice as overdue with enhanced validation.
      *
      * Updates invoice status to overdue with proper validation and
      * error handling.
      *
-     * @param Invoice $invoice The invoice to mark as overdue
+     * @param  Invoice  $invoice  The invoice to mark as overdue
      *
      * @throws \InvalidArgumentException When invalid invoice is provided
      * @throws \Exception When database operations fail
@@ -268,17 +258,15 @@ class InvoiceService extends BaseService
             throw $e;
         }
     }
-
     /**
      * Get invoice statistics with enhanced performance.
      *
      * Retrieves comprehensive invoice statistics with optimized queries
      * and proper error handling.
      *
+     * @return array<string, mixed> Array of invoice statistics
      *
      * @throws \Exception When database operations fail
-     *
-     * @return array<string, mixed> Array of invoice statistics
      *
      * @example
      * $stats = $invoiceService->getInvoiceStats();
@@ -305,25 +293,24 @@ class InvoiceService extends BaseService
             throw $e;
         }
     }
-
     /**
      * Create invoice for payment system with enhanced security.
      *
      * Creates a comprehensive invoice for payment processing with proper
      * validation, error handling, and security measures.
      *
-     * @param User $user The user for the invoice
-     * @param License $license The license for the invoice
-     * @param Product $product The product for the invoice
-     * @param float $amount The invoice amount
-     * @param string $currency The currency code
-     * @param string $gateway The payment gateway used
-     * @param string|null $transactionId The transaction ID
+     * @param  User  $user  The user for the invoice
+     * @param  License  $license  The license for the invoice
+     * @param  Product  $product  The product for the invoice
+     * @param  float  $amount  The invoice amount
+     * @param  string  $currency  The currency code
+     * @param  string  $gateway  The payment gateway used
+     * @param  string|null  $transactionId  The transaction ID
+     *
+     * @return Invoice The created invoice
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
      * @throws \Exception When database operations fail
-     *
-     * @return Invoice The created invoice
      *
      * @example
      * $invoice = $invoiceService->createInvoice($user, $license, $product, 99.99, 'USD', 'stripe', 'txn_123');
@@ -350,7 +337,7 @@ class InvoiceService extends BaseService
                 'status' => 'paid',
                 'paid_at' => now(),
                 'due_date' => now()->addDays(30),
-                'billing_address' => $this->sanitizeInput(is_string($user->billing_address) ? $user->billing_address : ''),
+                'billing_address' => $this->sanitizeInput($user->billing_address ?? null),
                 'tax_rate' => 0,
                 'tax_amount' => 0,
                 'total_amount' => $this->sanitizeAmount($amount),
@@ -361,7 +348,6 @@ class InvoiceService extends BaseService
                 ],
             ]);
             DB::commit();
-
             return $invoice;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -377,12 +363,11 @@ class InvoiceService extends BaseService
             throw $e;
         }
     }
-
     /**
      * Validate invoice parameters.
      *
-     * @param License $license The license to validate
-     * @param string $paymentStatus The payment status to validate
+     * @param  License  $license  The license to validate
+     * @param  string  $paymentStatus  The payment status to validate
      *
      * @throws \InvalidArgumentException When validation fails
      */
@@ -394,11 +379,10 @@ class InvoiceService extends BaseService
             throw new \InvalidArgumentException('Invalid payment status: ' . SecurityHelper::escapeVariable($paymentStatus));
         }
     }
-
     /**
      * Validate license.
      *
-     * @param License $license The license to validate
+     * @param  License  $license  The license to validate
      *
      * @throws \InvalidArgumentException When license is invalid
      */
@@ -414,11 +398,10 @@ class InvoiceService extends BaseService
             throw new \InvalidArgumentException('License must have a product');
         }
     }
-
     /**
      * Validate invoice.
      *
-     * @param Invoice $invoice The invoice to validate
+     * @param  Invoice  $invoice  The invoice to validate
      *
      * @throws \InvalidArgumentException When invoice is invalid
      */
@@ -428,16 +411,15 @@ class InvoiceService extends BaseService
             throw new \InvalidArgumentException('Invoice does not exist');
         }
     }
-
     /**
      * Validate payment invoice parameters.
      *
-     * @param User $user The user to validate
-     * @param License $license The license to validate
-     * @param Product $product The product to validate
-     * @param float $amount The amount to validate
-     * @param string $currency The currency to validate
-     * @param string $gateway The gateway to validate
+     * @param  User  $user  The user to validate
+     * @param  License  $license  The license to validate
+     * @param  Product  $product  The product to validate
+     * @param  float  $amount  The amount to validate
+     * @param  string  $currency  The currency to validate
+     * @param  string  $gateway  The gateway to validate
      *
      * @throws \InvalidArgumentException When validation fails
      */
@@ -466,46 +448,60 @@ class InvoiceService extends BaseService
             throw new \InvalidArgumentException('Gateway cannot be empty');
         }
     }
-
     /**
      * Sanitize amount for security.
      *
-     * @param mixed $amount The amount to sanitize
+     * @param  mixed  $amount  The amount to sanitize
      *
      * @return float The sanitized amount
      */
     private function sanitizeAmount(mixed $amount): float
     {
-        if (! is_numeric($amount)) {
+        if (!is_numeric($amount)) {
             return 0.0;
         }
-
         return max(0, round((float)$amount, 2));
     }
-
     /**
      * Sanitize status for security.
      *
-     * @param string $status The status to sanitize
+     * @param  string  $status  The status to sanitize
      *
      * @return string The sanitized status
      */
     private function sanitizeStatus(string $status): string
     {
         $validStatuses = ['paid', 'pending', 'overdue', 'cancelled'];
-
         return in_array($status, $validStatuses) ? $status : 'pending';
     }
-
     /**
      * Sanitize currency for security.
      *
-     * @param string $currency The currency to sanitize
+     * @param  string  $currency  The currency to sanitize
      *
      * @return string The sanitized currency
      */
     private function sanitizeCurrency(string $currency): string
     {
         return strtoupper(trim($currency));
+    }
+    /**
+     * Sanitize input to prevent XSS attacks.
+     *
+     * @param  mixed  $input  The input to sanitize
+     *
+     * @return string|null The sanitized input
+     */
+    private function sanitizeInput(mixed $input): ?string
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
+        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

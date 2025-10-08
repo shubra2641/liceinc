@@ -40,17 +40,14 @@ class TicketController extends Controller
      * Pagination limit for ticket listing.
      */
     private const PAGINATION_LIMIT = 15;
-
     /**
      * Valid ticket priorities.
      */
     private const VALID_PRIORITIES = ['low', 'medium', 'high'];
-
     /**
      * Valid ticket statuses.
      */
     private const VALID_STATUSES = ['open', 'pending', 'resolved', 'closed'];
-
     /**
      * Display a listing of user tickets with enhanced security.
      *
@@ -84,22 +81,19 @@ class TicketController extends Controller
             DB::commit();
             /** @var view-string $viewName */
             $viewName = 'tickets.index';
-
             return view($viewName, ['tickets' => $tickets]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load user tickets: '.$e->getMessage(), [
+            Log::error('Failed to load user tickets: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
             /** @var view-string $viewName */
             $viewName = 'tickets.index';
-
             return view($viewName, ['tickets' => collect()])
                 ->with('error', 'Failed to load tickets. Please try again.');
         }
     }
-
     /**
      * Show the form for creating a new ticket with enhanced security.
      *
@@ -122,18 +116,15 @@ class TicketController extends Controller
         try {
             /** @var view-string $viewName */
             $viewName = 'tickets.create';
-
             return view($viewName);
         } catch (Exception $e) {
-            Log::error('Failed to load ticket creation form: '.$e->getMessage(), [
+            Log::error('Failed to load ticket creation form: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return redirect()->back()->with('error', 'Failed to load ticket creation form. Please try again.');
         }
     }
-
     /**
      * Store a newly created ticket with enhanced security.
      *
@@ -174,20 +165,17 @@ class TicketController extends Controller
                 'license_id' => $license instanceof \App\Models\License ? $license->id : null,
             ]);
             DB::commit();
-
             return redirect()->route('tickets.show', $ticket)->with('success', 'Ticket created successfully');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to create ticket: '.$e->getMessage(), [
+            Log::error('Failed to create ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return back()->with('error', 'Failed to create ticket. Please try again.')->withInput();
         }
     }
-
     /**
      * Display the specified ticket with enhanced security.
      *
@@ -228,11 +216,10 @@ class TicketController extends Controller
             DB::commit();
             /** @var view-string $viewName */
             $viewName = 'tickets.show';
-
             return view($viewName, ['ticket' => $ticket]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load ticket details: '.$e->getMessage(), [
+            Log::error('Failed to load ticket details: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
@@ -240,7 +227,6 @@ class TicketController extends Controller
             abort(500, 'Failed to load ticket details. Please try again.');
         }
     }
-
     /**
      * Show the form for editing the specified ticket.
      *
@@ -252,7 +238,6 @@ class TicketController extends Controller
     {
         // Not implemented
     }
-
     /**
      * Update the specified ticket with enhanced security.
      *
@@ -292,21 +277,18 @@ class TicketController extends Controller
             DB::beginTransaction();
             $ticket->update($validated);
             DB::commit();
-
             return back()->with('success', 'Ticket updated');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to update ticket: '.$e->getMessage(), [
+            Log::error('Failed to update ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return back()->with('error', 'Failed to update ticket. Please try again.');
         }
     }
-
     /**
      * Remove the specified ticket with enhanced security.
      *
@@ -338,20 +320,17 @@ class TicketController extends Controller
             DB::beginTransaction();
             $ticket->delete();
             DB::commit();
-
             return redirect()->route('tickets.index')->with('success', 'Ticket deleted');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to delete ticket: '.$e->getMessage(), [
+            Log::error('Failed to delete ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return back()->with('error', 'Failed to delete ticket. Please try again.');
         }
     }
-
     /**
      * Add a reply to the specified ticket with enhanced security.
      *
@@ -405,21 +384,18 @@ class TicketController extends Controller
                 $ticket->update(['status' => 'closed']);
             }
             DB::commit();
-
             return back()->with('success', $message);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to add ticket reply: '.$e->getMessage(), [
+            Log::error('Failed to add ticket reply: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return back()->with('error', 'Failed to add reply. Please try again.');
         }
     }
-
     /**
      * Validate ticket creation data.
      *
@@ -433,18 +409,16 @@ class TicketController extends Controller
     {
         $validated = $request->validate([
             'subject' => ['required', 'string', 'max:255'],
-            'priority' => ['required', 'in:'.implode(', ', self::VALID_PRIORITIES)],
+            'priority' => ['required', 'in:' . implode(', ', self::VALID_PRIORITIES)],
             'content' => ['required', 'string'],
             'purchase_code' => ['nullable', 'string'],
             'product_slug' => ['nullable', 'string'],
         ]);
-
+        
         /** @var array<string, mixed> $result */
         $result = $validated;
-
         return $result;
     }
-
     /**
      * Validate ticket update data.
      *
@@ -458,17 +432,15 @@ class TicketController extends Controller
     {
         $validated = $request->validate([
             'subject' => ['sometimes', 'string', 'max:255'],
-            'priority' => ['sometimes', 'in:'.implode(', ', self::VALID_PRIORITIES)],
-            'status' => ['sometimes', 'in:'.implode(', ', self::VALID_STATUSES)],
+            'priority' => ['sometimes', 'in:' . implode(', ', self::VALID_PRIORITIES)],
+            'status' => ['sometimes', 'in:' . implode(', ', self::VALID_STATUSES)],
             'content' => ['sometimes', 'string'],
         ]);
-
+        
         /** @var array<string, mixed> $result */
         $result = $validated;
-
         return $result;
     }
-
     /**
      * Validate reply data.
      *
@@ -483,13 +455,11 @@ class TicketController extends Controller
             'close_ticket' => ['sometimes', 'boolean'],
             'action' => ['sometimes', 'in:reply, reply_and_close'],
         ]);
-
+        
         /** @var array<string, mixed> $result */
         $result = $validated;
-
         return $result;
     }
-
     /**
      * Handle license registration for ticket.
      *
@@ -510,15 +480,13 @@ class TicketController extends Controller
         }
         $registrationResult = $licenseService->autoRegisterLicense(
             is_string($validated['purchase_code']) ? $validated['purchase_code'] : '',
-            $productId,
+            $productId
         );
         if ($registrationResult['success']) {
             return $registrationResult['license'];
         }
-
         return null;
     }
-
     /**
      * Check if ticket should be closed.
      *
@@ -531,7 +499,6 @@ class TicketController extends Controller
         return ($request->has('action') && $request->action === 'reply_and_close') ||
                ($request->has('close_ticket') && $request->close_ticket);
     }
-
     /**
      * Check if user can view ticket.
      *
@@ -543,7 +510,6 @@ class TicketController extends Controller
     {
         return $ticket->user_id === Auth::id() || Auth::user()?->hasRole('admin');
     }
-
     /**
      * Check if user can modify ticket.
      *

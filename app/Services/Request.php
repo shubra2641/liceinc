@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Services;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -40,7 +38,7 @@ class Request extends FormRequest
         // Base sanitization for all service requests
         $data = $this->all();
         $sanitizedData = [];
-
+        
         foreach ($data as $key => $value) {
             if (is_string($value)) {
                 $sanitizedData[$key] = $this->sanitizeInput($value);
@@ -48,7 +46,7 @@ class Request extends FormRequest
                 $sanitizedData[$key] = $value;
             }
         }
-
+        
         $this->merge($sanitizedData);
     }
 
@@ -60,7 +58,6 @@ class Request extends FormRequest
         if ($input === null) {
             return null;
         }
-
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

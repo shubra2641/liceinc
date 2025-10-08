@@ -6,13 +6,12 @@ use Illuminate\Http\Request;
 
 /**
  * Server Helper Class
- * Provides secure access to server information without direct $_SERVER usage.
+ * Provides secure access to server information without direct $_SERVER usage
  */
 class ServerHelper
 {
     /**
-     * Get request time float safely.
-     *
+     * Get request time float safely
      * @return float
      */
     public static function getRequestTimeFloat(): float
@@ -27,8 +26,7 @@ class ServerHelper
     }
 
     /**
-     * Get server software safely.
-     *
+     * Get server software safely
      * @return string
      */
     public static function getServerSoftware(): string
@@ -47,44 +45,37 @@ class ServerHelper
     }
 
     /**
-     * Get execution time safely.
-     *
+     * Get execution time safely
      * @return float
      */
     public static function getExecutionTime(): float
     {
         $startTime = self::getRequestTimeFloat();
-
         return microtime(true) - $startTime;
     }
 
     /**
-     * Check if server is Apache.
-     *
+     * Check if server is Apache
      * @return bool
      */
     public static function isApache(): bool
     {
         $software = self::getServerSoftware();
-
         return stripos($software, 'apache') !== false;
     }
 
     /**
-     * Check if server is Nginx.
-     *
+     * Check if server is Nginx
      * @return bool
      */
     public static function isNginx(): bool
     {
         $software = self::getServerSoftware();
-
         return stripos($software, 'nginx') !== false;
     }
 
     /**
-     * Get current domain safely.
-     *
+     * Get current domain safely
      * @return string
      */
     public static function getCurrentDomain(): string
@@ -95,12 +86,11 @@ class ServerHelper
         $host = $request->getHost();
         $scheme = $request->getScheme();
 
-        return $scheme.'://'.$host;
+        return $scheme . '://' . $host;
     }
 
     /**
-     * Get server information safely.
-     *
+     * Get server information safely
      * @return array
      */
     /** @return array<string, mixed> */

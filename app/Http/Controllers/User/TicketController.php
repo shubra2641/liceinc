@@ -44,22 +44,18 @@ class TicketController extends Controller
      * Pagination limit for ticket listing.
      */
     private const PAGINATION_LIMIT = 10;
-
     /**
      * Valid ticket priorities.
      */
     private const VALID_PRIORITIES = ['low', 'medium', 'high'];
-
     /**
      * Valid ticket statuses.
      */
     private const VALID_STATUSES = ['open', 'pending', 'resolved', 'closed'];
-
     /**
      * The email service instance.
      */
     protected EmailService $emailService;
-
     /**
      * Create a new controller instance.
      *
@@ -69,7 +65,6 @@ class TicketController extends Controller
     {
         $this->emailService = $emailService;
     }
-
     /**
      * Display a listing of user tickets with enhanced security.
      *
@@ -101,20 +96,17 @@ class TicketController extends Controller
                 ->latest()
                 ->paginate(self::PAGINATION_LIMIT);
             DB::commit();
-
             return view('user.tickets.index', ['tickets' => $tickets]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load user tickets: '.$e->getMessage(), [
+            Log::error('Failed to load user tickets: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return view('user.tickets.index', ['tickets' => collect()])
                 ->with('error', 'Failed to load tickets. Please try again.');
         }
     }
-
     /**
      * Show the form for creating a new ticket with enhanced security.
      *
@@ -150,26 +142,22 @@ class TicketController extends Controller
             // If all categories require login and user is not logged in
             if ($totalCount > 0 && $requiresLoginCount === $totalCount && ! auth()->check()) {
                 DB::commit();
-
                 return redirect()->route('login')->with('error', __('app.You must login to create a ticket.'));
             }
             // Get user's licenses for the related license dropdown
             $user = auth()->user();
             $licenses = $user ? $user->licenses()->with('product')->get() : collect();
             DB::commit();
-
             return view('user.tickets.create', ['categories' => $categories, 'licenses' => $licenses]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load ticket creation form: '.$e->getMessage(), [
+            Log::error('Failed to load ticket creation form: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return redirect()->back()->with('error', 'Failed to load ticket creation form. Please try again.');
         }
     }
-
     /**
      * Store a newly created ticket with enhanced security.
      *
@@ -202,13 +190,11 @@ class TicketController extends Controller
             $category = TicketCategory::find($validated['category_id']);
             if (! $category || $category instanceof \Illuminate\Database\Eloquent\Collection) {
                 DB::rollBack();
-
                 return back()->withErrors(['category_id' => 'Invalid category selected'])->withInput();
             }
             // If category requires login, ensure user is authenticated
             if ($category->requires_login && ! Auth::check()) {
                 DB::rollBack();
-
                 return redirect()->route('login');
             }
             // If category requires a valid purchase code, validate it
@@ -216,14 +202,12 @@ class TicketController extends Controller
             if ($category->requires_valid_purchase_code) {
                 if (empty($validated['purchase_code'])) {
                     DB::rollBack();
-
                     return back()->withErrors(['purchase_code' => 'Purchase code is required for this category'])
                         ->withInput();
                 }
                 $license = $this->validateAndCreateLicense($validated);
                 if (! $license) {
                     DB::rollBack();
-
                     return back()->withErrors(['purchase_code' => 'Invalid purchase code'])->withInput();
                 }
             } else {
@@ -251,20 +235,18 @@ class TicketController extends Controller
             } else {
                 // For guests, redirect to support ticket view
                 return redirect()->route('support.tickets.show', $ticket)
-                    ->with('success', 'Ticket created successfully. You can view it using the ticket ID: '.$ticket->id);
+                    ->with('success', 'Ticket created successfully. You can view it using the ticket ID: ' . $ticket->id);
             }
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to create ticket: '.$e->getMessage(), [
+            Log::error('Failed to create ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return back()->with('error', 'Failed to create ticket. Please try again.')->withInput();
         }
     }
-
     /**
      * Display the specified ticket with enhanced security.
      *
@@ -305,11 +287,10 @@ class TicketController extends Controller
             DB::beginTransaction();
             $ticket->load(['user', 'replies.user']);
             DB::commit();
-
             return view('user.tickets.show', ['ticket' => $ticket]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load ticket details: '.$e->getMessage(), [
+            Log::error('Failed to load ticket details: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
@@ -317,7 +298,6 @@ class TicketController extends Controller
             abort(500, 'Failed to load ticket details. Please try again.');
         }
     }
-
     /**
      * Show the form for editing the specified ticket.
      *
@@ -329,7 +309,6 @@ class TicketController extends Controller
     {
         // Not implemented
     }
-
     /**
      * Update the specified ticket with enhanced security.
      *
@@ -369,21 +348,18 @@ class TicketController extends Controller
             DB::beginTransaction();
             $ticket->update($validated);
             DB::commit();
-
             return back()->with('success', 'Ticket updated');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to update ticket: '.$e->getMessage(), [
+            Log::error('Failed to update ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return back()->with('error', 'Failed to update ticket. Please try again.');
         }
     }
-
     /**
      * Remove the specified ticket with enhanced security.
      *
@@ -415,20 +391,17 @@ class TicketController extends Controller
             DB::beginTransaction();
             $ticket->delete();
             DB::commit();
-
             return redirect()->route('tickets.index')->with('success', 'Ticket deleted');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to delete ticket: '.$e->getMessage(), [
+            Log::error('Failed to delete ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return back()->with('error', 'Failed to delete ticket. Please try again.');
         }
     }
-
     /**
      * Add a reply to the specified ticket with enhanced security.
      *
@@ -472,21 +445,18 @@ class TicketController extends Controller
             // Send email notification to admin when user replies
             $this->sendReplyNotification($ticket, is_string($validated['message']) ? $validated['message'] : '');
             DB::commit();
-
             return back()->with('success', 'Reply added');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to add ticket reply: '.$e->getMessage(), [
+            Log::error('Failed to add ticket reply: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return back()->with('error', 'Failed to add reply. Please try again.');
         }
     }
-
     /**
      * Validate ticket creation data.
      *
@@ -500,7 +470,7 @@ class TicketController extends Controller
     {
         $validated = $request->validate([
             'subject' => ['required', 'string', 'max:255'],
-            'priority' => ['required', 'in:'.implode(', ', self::VALID_PRIORITIES)],
+            'priority' => ['required', 'in:' . implode(', ', self::VALID_PRIORITIES)],
             'content' => ['required', 'string'],
             'purchase_code' => ['nullable', 'string'],
             'product_slug' => ['nullable', 'string'],
@@ -509,13 +479,11 @@ class TicketController extends Controller
             'invoice_id' => ['nullable', 'exists:invoices,id'],
             'category_id' => ['required', 'exists:ticket_categories,id'],
         ]);
-
+        
         /** @var array<string, mixed> $result */
         $result = $validated;
-
         return $result;
     }
-
     /**
      * Validate ticket update data.
      *
@@ -529,17 +497,15 @@ class TicketController extends Controller
     {
         $validated = $request->validate([
             'subject' => ['sometimes', 'string', 'max:255'],
-            'priority' => ['sometimes', 'in:'.implode(', ', self::VALID_PRIORITIES)],
-            'status' => ['sometimes', 'in:'.implode(', ', self::VALID_STATUSES)],
+            'priority' => ['sometimes', 'in:' . implode(', ', self::VALID_PRIORITIES)],
+            'status' => ['sometimes', 'in:' . implode(', ', self::VALID_STATUSES)],
             'content' => ['sometimes', 'string'],
         ]);
-
+        
         /** @var array<string, mixed> $result */
         $result = $validated;
-
         return $result;
     }
-
     /**
      * Validate reply data.
      *
@@ -552,13 +518,11 @@ class TicketController extends Controller
         $validated = $request->validate([
             'message' => ['required', 'string'],
         ]);
-
+        
         /** @var array<string, mixed> $result */
         $result = $validated;
-
         return $result;
     }
-
     /**
      * Validate and create license from purchase code.
      *
@@ -577,7 +541,7 @@ class TicketController extends Controller
                     $envatoService = app(EnvatoService::class);
                     $sale = $envatoService->verifyPurchase(is_string($validated['purchase_code']) ? $validated['purchase_code'] : '');
                 } catch (\Throwable $e) {
-                    Log::error('Envato verification failed: '.$e->getMessage());
+                    Log::error('Envato verification failed: ' . $e->getMessage());
                     $sale = null;
                 }
                 if (! $sale) {
@@ -603,15 +567,12 @@ class TicketController extends Controller
                     }
                 }
             }
-
             return $license;
         } catch (Exception $e) {
-            Log::error('Failed to validate and create license: '.$e->getMessage());
-
+            Log::error('Failed to validate and create license: ' . $e->getMessage());
             return null;
         }
     }
-
     /**
      * Prepare ticket data for creation.
      *
@@ -635,7 +596,6 @@ class TicketController extends Controller
             'browser_info' => $validated['browser_info'] ?? null,
         ];
     }
-
     /**
      * Attach invoice data to ticket data.
      *
@@ -658,10 +618,8 @@ class TicketController extends Controller
                 $ticketData['purchase_code'] = $invoice->license->purchase_code;
             }
         }
-
         return $ticketData;
     }
-
     /**
      * Send ticket creation notifications.
      *
@@ -687,10 +645,9 @@ class TicketController extends Controller
                 'ticket_priority' => $ticket->priority,
             ]);
         } catch (Exception $e) {
-            Log::error('Failed to send ticket notifications: '.$e->getMessage());
+            Log::error('Failed to send ticket notifications: ' . $e->getMessage());
         }
     }
-
     /**
      * Send reply notification.
      *
@@ -708,10 +665,9 @@ class TicketController extends Controller
                 'reply_message' => $message,
             ]);
         } catch (Exception $e) {
-            Log::error('Failed to send reply notification: '.$e->getMessage());
+            Log::error('Failed to send reply notification: ' . $e->getMessage());
         }
     }
-
     /**
      * Check if user can view ticket.
      *
@@ -722,11 +678,9 @@ class TicketController extends Controller
     private function canViewTicket(Ticket $ticket): bool
     {
         $user = Auth::user();
-
         return ! $ticket->user_id || // Guest ticket
                (Auth::check() && ($ticket->user_id === Auth::id() || ($user && $user->hasRole('admin')))); // Logged in user
     }
-
     /**
      * Check if user can modify ticket.
      *

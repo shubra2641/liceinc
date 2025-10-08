@@ -32,14 +32,12 @@ class CreateRenewalInvoices implements ShouldQueue
      * @var int
      */
     public $tries = 3;
-
     /**
      * The number of seconds the job can run before timing out.
      *
      * @var int
      */
     public $timeout = 300;
-
     /**
      * Create a new job instance with enhanced configuration.
      *
@@ -50,7 +48,6 @@ class CreateRenewalInvoices implements ShouldQueue
     {
         $this->onQueue('invoices');
     }
-
     /**
      * Execute the job with enhanced security and error handling.
      *
@@ -85,7 +82,6 @@ class CreateRenewalInvoices implements ShouldQueue
             throw $e;
         }
     }
-
     /**
      * Handle a job failure with enhanced logging and monitoring.
      *

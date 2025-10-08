@@ -81,7 +81,6 @@ class XssProtectionMiddleware
         '/window\.(location|open|alert)/i',
         '/\b(alert|prompt|confirm)\s*\(/i',
     ];
-
     /**
      * Malicious content detection patterns.
      *
@@ -106,7 +105,6 @@ class XssProtectionMiddleware
         '/window\.(location|open|alert)/i',
         '/\b(alert|prompt|confirm)\s*\(/i',
     ];
-
     /**
      * Handle an incoming request with enhanced XSS protection and comprehensive validation.
      *
@@ -137,9 +135,8 @@ class XssProtectionMiddleware
                 $this->sanitizeInput($request, $typedConfig);
             }
             $response = $next($request);
-            /** @var Response $typedResponse */
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
             $typedResponse = $response;
-
             return $typedResponse;
         } catch (Throwable $e) {
             Log::error('XSS Protection middleware processing error', [
@@ -153,13 +150,11 @@ class XssProtectionMiddleware
             ]);
             // Continue processing even if XSS protection fails to prevent service disruption
             $response = $next($request);
-            /** @var Response $typedResponse */
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
             $typedResponse = $response;
-
             return $typedResponse;
         }
     }
-
     /**
      * Sanitize input data to prevent XSS attacks with enhanced security.
      *
@@ -197,7 +192,6 @@ class XssProtectionMiddleware
             throw $e;
         }
     }
-
     /**
      * Recursively sanitize array data with enhanced security.
      *
@@ -219,13 +213,11 @@ class XssProtectionMiddleware
                 foreach ($data as $key => $value) {
                     $data[$key] = $this->recursiveSanitize($value, $config);
                 }
-
                 return $data;
             }
             if (is_string($data)) {
                 return $this->sanitizeString($data, $config);
             }
-
             return $data;
         } catch (Throwable $e) {
             Log::error('Recursive sanitization error', [
@@ -233,11 +225,9 @@ class XssProtectionMiddleware
                 'data_type' => gettype($data),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return $data; // Return original data if sanitization fails
         }
     }
-
     /**
      * Sanitize string data with enhanced security measures.
      *
@@ -268,7 +258,6 @@ class XssProtectionMiddleware
             }
             // Remove dangerous JavaScript patterns
             $data = $this->removeDangerousPatterns($data);
-
             return $data;
         } catch (Throwable $e) {
             Log::error('String sanitization error', [
@@ -276,11 +265,9 @@ class XssProtectionMiddleware
                 'data_length' => strlen($data),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return $data; // Return original data if sanitization fails
         }
     }
-
     /**
      * Remove dangerous JavaScript patterns with enhanced security.
      *
@@ -300,7 +287,6 @@ class XssProtectionMiddleware
             foreach (self::DANGEROUS_PATTERNS as $pattern) {
                 $data = preg_replace($pattern, '', $data) ?? $data;
             }
-
             return $data;
         } catch (Throwable $e) {
             Log::error('Dangerous pattern removal error', [
@@ -308,11 +294,9 @@ class XssProtectionMiddleware
                 'data_length' => strlen($data),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return $data; // Return original data if pattern removal fails
         }
     }
-
     /**
      * Check if the request contains potentially malicious content with enhanced detection.
      *
@@ -334,7 +318,6 @@ class XssProtectionMiddleware
                     return true;
                 }
             }
-
             return false;
         } catch (Throwable $e) {
             Log::error('Malicious content detection error', [
@@ -342,11 +325,9 @@ class XssProtectionMiddleware
                 'data_length' => strlen($data),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return true; // Assume malicious if detection fails to be safe
         }
     }
-
     /**
      * Log suspicious XSS attempts with enhanced security monitoring.
      *
@@ -391,7 +372,6 @@ class XssProtectionMiddleware
             ]);
         }
     }
-
     /**
      * Get a safe sample of data for logging purposes.
      *
@@ -407,10 +387,8 @@ class XssProtectionMiddleware
             }
             if (is_array($data)) {
                 $jsonResult = json_encode(array_slice($data, 0, 5)); // First 5 elements
-
                 return $jsonResult !== false ? $jsonResult : 'Data sample unavailable';
             }
-
             return '';
         } catch (Throwable $e) {
             return 'Data sample unavailable';

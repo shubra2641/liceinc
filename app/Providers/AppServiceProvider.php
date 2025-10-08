@@ -38,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
      * @throws \InvalidArgumentException When service registration fails
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function register(): void
     {
@@ -52,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Exception $e) {
             // Log error but don't break the application
             if (app()->bound('log')) {
-                app('log')->error('Failed to register EnvatoSocialiteProvider: '.$e->getMessage());
+                app('log')->error('Failed to register EnvatoSocialiteProvider: ' . $e->getMessage());
             }
             // Re-throw if it's a critical error
             if ($e instanceof \InvalidArgumentException) {
@@ -60,7 +64,6 @@ class AppServiceProvider extends ServiceProvider
             }
         }
     }
-
     /**
      * Bootstrap any application services with enhanced security.
      *
@@ -71,6 +74,10 @@ class AppServiceProvider extends ServiceProvider
      * @throws \InvalidArgumentException When service bootstrapping fails
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function boot(): void
     {
@@ -87,7 +94,7 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Exception $e) {
             // Log error but don't break the application
             if (app()->bound('log')) {
-                app('log')->error('Failed to bootstrap AppServiceProvider: '.$e->getMessage());
+                app('log')->error('Failed to bootstrap AppServiceProvider: ' . $e->getMessage());
             }
             // Re-throw if it's a critical error
             if ($e instanceof \InvalidArgumentException) {
@@ -104,7 +111,7 @@ class AppServiceProvider extends ServiceProvider
      */
     private function configureAppUrl(): void
     {
-        if (! app()->runningInConsole()) {
+        if (!app()->runningInConsole()) {
             $currentHost = request()->getHost();
             $currentScheme = request()->getScheme();
             $appUrl = config('app.url');
@@ -120,10 +127,10 @@ class AppServiceProvider extends ServiceProvider
             ) {
                 // Build proper base URL without /public
                 $path = trim(dirname(request()->getScriptName()), '/');
-                $baseUrl = $currentScheme.'://'.$currentHost;
+                $baseUrl = $currentScheme . '://' . $currentHost;
 
                 if ($path && $path !== '.') {
-                    $baseUrl .= '/'.$path;
+                    $baseUrl .= '/' . $path;
                 }
 
                 // Update the URL configuration
@@ -142,6 +149,10 @@ class AppServiceProvider extends ServiceProvider
      * @throws \InvalidArgumentException When view composer registration fails
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     private function registerViewComposers(): void
     {
@@ -149,14 +160,13 @@ class AppServiceProvider extends ServiceProvider
         // Validate view paths (hardcoded values are always valid)
         // $viewPaths = ['layouts.*', 'welcome']; - these are always valid
         // Validate LayoutComposer class
-        if (! class_exists(LayoutComposer::class)) {
+        if (!class_exists(LayoutComposer::class)) {
             throw new \InvalidArgumentException(
                 'LayoutComposer class not found. Please ensure the view composer is properly implemented.',
             );
         }
         View::composer($viewPaths, LayoutComposer::class);
     }
-
     /**
      * Configure pagination with enhanced security.
      *
@@ -166,6 +176,10 @@ class AppServiceProvider extends ServiceProvider
      * @throws \InvalidArgumentException When pagination configuration fails
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     private function configurePagination(): void
     {
@@ -175,7 +189,6 @@ class AppServiceProvider extends ServiceProvider
         Paginator::defaultView($defaultView);
         Paginator::defaultSimpleView($defaultSimpleView);
     }
-
     /**
      * Configure rate limiters with enhanced security.
      *
@@ -189,7 +202,6 @@ class AppServiceProvider extends ServiceProvider
             if (is_object($request) && method_exists($request, 'ip')) {
                 return Limit::perMinute(10)->by($request->ip());
             }
-
             return Limit::perMinute(10)->by('127.0.0.1');
         });
         // Configure API rate limiter
@@ -198,10 +210,8 @@ class AppServiceProvider extends ServiceProvider
                 $user = $request->user();
                 $userId = is_object($user) && property_exists($user, 'id') ? $user->id : null;
                 $ip = $request->ip();
-
                 return Limit::perMinute(60)->by($userId ?: $ip);
             }
-
             return Limit::perMinute(60)->by('127.0.0.1');
         });
     }

@@ -29,10 +29,8 @@ class TicketRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -42,7 +40,7 @@ class TicketRequest extends FormRequest
     {
         $route = $this->route();
         $routeName = $route?->getName() ?? '';
-
+        
         $isReply = $this->isMethod('POST') && str_contains($routeName, 'reply');
         $isStatusUpdate = $this->isMethod('PATCH') && str_contains($routeName, 'status');
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
@@ -67,7 +65,6 @@ class TicketRequest extends FormRequest
                 ],
             ];
         }
-
         // Store/Update validation
         return [
             'user_id' => [
@@ -141,7 +138,6 @@ class TicketRequest extends FormRequest
             ],
         ];
     }
-
     /**
      * Get custom validation messages.
      *
@@ -179,7 +175,6 @@ class TicketRequest extends FormRequest
             'message.regex' => 'Reply message contains invalid characters.',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
@@ -204,7 +199,6 @@ class TicketRequest extends FormRequest
             'message' => 'reply message',
         ];
     }
-
     /**
      * Prepare the data for validation.
      */
@@ -227,7 +221,6 @@ class TicketRequest extends FormRequest
             'priority' => $this->priority ?? 'medium',
         ]);
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -240,7 +233,6 @@ class TicketRequest extends FormRequest
         if ($input === null) {
             return null;
         }
-
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

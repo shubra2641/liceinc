@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -29,9 +29,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $is_featured
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read KbCategory $category
- * @property-read Product|null $product
- *
+ * @property-read \App\Models\KbCategory $category
+ * @property-read \App\Models\Product|null $product
  * @method static \Database\Factories\KbArticleFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbArticle newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbArticle newQuery()
@@ -58,7 +57,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbArticle whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbArticle whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbArticle whereViews($value)
- *
  * @mixin \Eloquent
  */
 class KbArticle extends Model
@@ -78,13 +76,11 @@ class KbArticle extends Model
         'serial', 'requires_serial', 'serial_message', 'image', 'meta_title', 'meta_description', 'meta_keywords',
         'allow_comments', 'is_featured',
     ];
-
     protected $casts = [
         'is_published' => 'boolean',
         'allow_comments' => 'boolean',
         'is_featured' => 'boolean',
     ];
-
     /**
      * @return BelongsTo<KbCategory, $this>
      */
@@ -92,7 +88,6 @@ class KbArticle extends Model
     {
         return $this->belongsTo(KbCategory::class, 'kb_category_id');
     }
-
     /**
      * @return BelongsTo<Product, $this>
      */
@@ -100,10 +95,8 @@ class KbArticle extends Model
     {
         return $this->belongsTo(Product::class);
     }
-
     /**
      * @param Builder<KbArticle> $query
-     *
      * @return Builder<KbArticle>
      */
     public function scopePublished(Builder $query): Builder

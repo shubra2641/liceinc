@@ -68,9 +68,8 @@ class EnsureUser
                 }
             }
             $response = $next($request);
-            /** @var Response $typedResponse */
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
             $typedResponse = $response;
-
             return $typedResponse;
         } catch (\Exception $e) {
             Log::error('EnsureUser middleware failed', [
@@ -83,7 +82,6 @@ class EnsureUser
             throw $e;
         }
     }
-
     /**
      * Validate request with enhanced security and comprehensive validation.
      *
@@ -94,7 +92,6 @@ class EnsureUser
         // Request is already typed as Request, no need to check instanceof
         // This method is kept for future validation logic
     }
-
     /**
      * Validate user with enhanced security and comprehensive validation.
      *
@@ -119,7 +116,6 @@ class EnsureUser
             throw new InvalidArgumentException('User object must have email_verified_at property or method');
         }
     }
-
     /**
      * Check if email is a test email with enhanced security and validation.
      *
@@ -150,7 +146,6 @@ class EnsureUser
                 return true;
             }
         }
-
         return false;
     }
     /**

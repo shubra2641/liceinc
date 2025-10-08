@@ -14,7 +14,6 @@ use Illuminate\View\View;
  * This controller manages the sending of password reset links to users
  * who have forgotten their passwords. It validates email addresses and
  * sends reset links via email.
- *
  * @version 1.0.6
  */
 class PasswordResetLinkController extends Controller
@@ -31,7 +30,6 @@ class PasswordResetLinkController extends Controller
     {
         return view('auth.forgot-password');
     }
-
     /**
      * Handle an incoming password reset link request.
      *
@@ -47,10 +45,8 @@ class PasswordResetLinkController extends Controller
     public function store(PasswordResetRequest $request): RedirectResponse
     {
         $status = $this->sendPasswordResetLink($request);
-
         return $this->handlePasswordResetResponse($request, $status);
     }
-
     /**
      * Send password reset link to user.
      *
@@ -64,7 +60,6 @@ class PasswordResetLinkController extends Controller
             $request->only('email'),
         );
     }
-
     /**
      * Handle the password reset response.
      *
@@ -78,7 +73,6 @@ class PasswordResetLinkController extends Controller
         if ($status == Password::RESET_LINK_SENT) {
             return back()->with('success', __($status));
         }
-
         return back()->withInput($request->only('email'))
             ->withErrors(['email' => __($status)]);
     }

@@ -260,7 +260,7 @@ class SettingController extends Controller
             foreach ($validated as $key => $value) {
                 // Handle human_questions special case
                 if ($key === 'human_questions') {
-                    if (is_array($value) && ! empty($value)) {
+                    if (is_array($value) && !empty($value)) {
                         $decoded = $value;
                     } elseif (! empty($value)) {
                         try {

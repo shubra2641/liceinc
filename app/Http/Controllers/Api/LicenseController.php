@@ -148,7 +148,7 @@ class LicenseController extends Controller
                     'support_expires_at' => property_exists($localLicense, 'support_expires_at') && is_object($localLicense->support_expires_at) && method_exists($localLicense->support_expires_at, 'toDateString') ? $localLicense->support_expires_at->toDateString() : null,
                     'license_expires_at' => property_exists($localLicense, 'license_expires_at') && is_object($localLicense->license_expires_at) && method_exists($localLicense->license_expires_at, 'toDateString') ? $localLicense->license_expires_at->toDateString() : null,
                 ];
-                $this->logLicenseVerification($localLicense instanceof License ? $localLicense : null, $domainStr, $request, $response, 'success');
+                $this->logLicenseVerification($localLicense instanceof \App\Models\License ? $localLicense : null, $domainStr, $request, $response, 'success');
                 DB::commit();
 
                 return response()->json($response);

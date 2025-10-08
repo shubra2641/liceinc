@@ -63,7 +63,6 @@ class ProfileController extends Controller
             // Load user with related data
             $user->load(['licenses.product', 'licenses.domains', 'tickets']);
             DB::commit();
-
             return view('profile.index', [
                 'user' => $user,
             ]);
@@ -76,7 +75,6 @@ class ProfileController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
-
             // Return empty profile with error message
             return view('profile.index', [
                 'user' => $request->user(),
@@ -84,7 +82,6 @@ class ProfileController extends Controller
             ]);
         }
     }
-
     /**
      * Display the user's profile form with enhanced security.
      *
@@ -112,7 +109,6 @@ class ProfileController extends Controller
             if (! $user) {
                 throw new \Exception('User not authenticated');
             }
-
             return view('profile.index', [
                 'user' => $user,
             ]);
@@ -124,14 +120,12 @@ class ProfileController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
-
             return view('profile.index', [
                 'user' => $request->user(),
                 'error' => 'Failed to load profile form. Please try again.',
             ]);
         }
     }
-
     /**
      * Update the user's profile information with enhanced security.
      *
@@ -173,10 +167,8 @@ class ProfileController extends Controller
             $intendedUrl = session('url.intended');
             if ($intendedUrl) {
                 session()->forget('url.intended');
-
                 return redirect(is_string($intendedUrl) ? $intendedUrl : '')->with('success', 'profile-updated');
             }
-
             return Redirect::route('profile.edit')->with('success', 'profile-updated');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -187,12 +179,10 @@ class ProfileController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
-
             return Redirect::route('profile.edit')
                 ->with('error', 'Failed to update profile. Please try again.');
         }
     }
-
     /**
      * Unlink Envato account from user profile with enhanced security.
      *
@@ -227,7 +217,6 @@ class ProfileController extends Controller
             $user->envato_token_expires_at = null;
             $user->save();
             DB::commit();
-
             return Redirect::route('profile.edit')
                 ->with('success', 'envato-unlinked');
         } catch (\Exception $e) {
@@ -239,12 +228,10 @@ class ProfileController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
-
             return Redirect::route('profile.edit')
                 ->with('error', 'Failed to unlink Envato account. Please try again.');
         }
     }
-
     /**
      * Delete the user's account with enhanced security.
      *
@@ -283,7 +270,6 @@ class ProfileController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
             DB::commit();
-
             return Redirect::to('/');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -294,12 +280,10 @@ class ProfileController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
-
             return Redirect::route('profile.edit')
                 ->with('error', 'Failed to delete account. Please try again.');
         }
     }
-
     /**
      * Link Envato account to user profile with enhanced security.
      *
@@ -337,7 +321,6 @@ class ProfileController extends Controller
                 'envato_username' => $this->sanitizeInput($request->envato_username),
             ]);
             DB::commit();
-
             return redirect()->route('profile.edit')->with('success', 'envato-linked');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -348,7 +331,6 @@ class ProfileController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
-
             return redirect()->route('profile.edit')
                 ->with('error', 'Failed to link Envato account. Please try again.');
         }

@@ -77,7 +77,7 @@ class ConfigHelper
             }
         }
         $sanitizedKey = $validationResult['sanitized'] ?? '';
-        if (! is_string($sanitizedKey)) {
+        if (!is_string($sanitizedKey)) {
             throw new \InvalidArgumentException('Invalid sanitized key');
         }
         $cacheKey = self::CACHE_PREFIX.md5($sanitizedKey);
@@ -385,7 +385,6 @@ class ConfigHelper
 
         /** @var array<string, mixed> $result */
         $result = $settings;
-
         return $result;
     }
 
@@ -429,14 +428,12 @@ class ConfigHelper
                     if (is_numeric($value)) {
                         return (int)(string)$value;
                     }
-
                     return is_int($default) ? $default : 0;
                 case 'double':
                 case 'float':
                     if (is_numeric($value)) {
                         return (float)(string)$value;
                     }
-
                     return is_float($default) ? $default : 0.0;
                 case 'array':
                     if (is_array($value)) {
@@ -642,14 +639,12 @@ class ConfigHelper
                 if (is_string($value)) {
                     return $value;
                 }
-
                 return is_string($default) ? $default : '';
             case 'int':
             case 'integer':
                 if (is_numeric($value)) {
                     return (int)(string)$value;
                 }
-
                 return is_int($default) ? $default : 0;
             case 'bool':
             case 'boolean':
@@ -659,7 +654,6 @@ class ConfigHelper
                 if (is_numeric($value)) {
                     return (float)(string)$value;
                 }
-
                 return is_float($default) ? $default : 0.0;
             case 'array':
                 if (is_array($value)) {

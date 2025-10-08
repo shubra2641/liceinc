@@ -13,7 +13,6 @@ use Illuminate\View\View;
  * This controller handles the display of email verification prompts
  * to users who need to verify their email addresses. It redirects
  * already verified users to the dashboard.
- *
  * @version 1.0.6
  */
 class EmailVerificationPromptController extends Controller
@@ -37,7 +36,6 @@ class EmailVerificationPromptController extends Controller
         if ($user->hasVerifiedEmail() === true) {
             return redirect()->intended(route('dashboard', absolute: false));
         }
-
         return view('auth.verify-email');
     }
 }

@@ -22,9 +22,7 @@ use InvalidArgumentException;
 class LicenseAutoRegistrationService
 {
     protected PurchaseCodeService $purchaseCodeService;
-
     protected InvoiceService $invoiceService;
-
     /**
      * Constructor with dependency injection and enhanced error handling.
      *
@@ -32,15 +30,14 @@ class LicenseAutoRegistrationService
      * verification and invoice management. Includes proper type hints and
      * validation for dependency injection.
      *
-     * @param PurchaseCodeService $purchaseCodeService Service for purchase code verification
-     * @param InvoiceService $invoiceService Service for invoice management
+     * @param  PurchaseCodeService  $purchaseCodeService  Service for purchase code verification
+     * @param  InvoiceService  $invoiceService  Service for invoice management
      */
     public function __construct(PurchaseCodeService $purchaseCodeService, InvoiceService $invoiceService)
     {
         $this->purchaseCodeService = $purchaseCodeService;
         $this->invoiceService = $invoiceService;
     }
-
     /**
      * Automatically register a license for the authenticated user with enhanced security and error handling.
      *
@@ -48,13 +45,13 @@ class LicenseAutoRegistrationService
      * and not already registered. Includes comprehensive validation, security measures,
      * database transactions, and error handling for reliable license registration.
      *
-     * @param string $purchaseCode The purchase code to register
-     * @param int|null $productId Optional product ID for the license
+     * @param  string  $purchaseCode  The purchase code to register
+     * @param  int|null  $productId  Optional product ID for the license
+     *
+     * @return array<string, mixed> Registration result with success status, license object, and message
      *
      * @throws InvalidArgumentException When purchase code is invalid
      * @throws \Exception When license registration fails
-     *
-     * @return array<string, mixed> Registration result with success status, license object, and message
      *
      * @example
      * $result = $service->autoRegisterLicense('ABC123DEF456', 1);
@@ -76,7 +73,6 @@ class LicenseAutoRegistrationService
                     'message' => 'User must be authenticated',
                 ];
             }
-
             return DB::transaction(function () use ($purchaseCode, $productId, $user) {
                 // Check if user already has this license
                 $existingLicense = $this->findExistingLicense($purchaseCode, $user->id);
@@ -120,7 +116,6 @@ class LicenseAutoRegistrationService
                 $this->createInitialInvoice($license);
                 // Decrease product stock
                 $this->decreaseProductStock($product);
-
                 return [
                     'success' => true,
                     'license' => $license,
@@ -138,7 +133,6 @@ class LicenseAutoRegistrationService
             throw $e;
         }
     }
-
     /**
      * Check if a purchase code is valid without registering it with enhanced security and error handling.
      *
@@ -146,13 +140,13 @@ class LicenseAutoRegistrationService
      * comprehensive validation, security measures, and error handling for
      * reliable purchase code verification.
      *
-     * @param string $purchaseCode The purchase code to validate
-     * @param int|null $productId Optional product ID for validation
+     * @param  string  $purchaseCode  The purchase code to validate
+     * @param  int|null  $productId  Optional product ID for validation
+     *
+     * @return array Validation result with validity status, message, and existing license
      *
      * @throws InvalidArgumentException When purchase code is invalid
      * @throws \Exception When purchase code validation fails
-     *
-     * @return array Validation result with validity status, message, and existing license
      *
      * @example
      * $result = $service->checkPurchaseCode('ABC123DEF456', 1);
@@ -195,7 +189,6 @@ class LicenseAutoRegistrationService
                     'existing_license' => null,
                 ];
             }
-
             return [
                 'valid' => true,
                 'message' => 'Purchase code is valid',
@@ -212,11 +205,10 @@ class LicenseAutoRegistrationService
             throw $e;
         }
     }
-
     /**
      * Validate purchase code format and content with enhanced security.
      *
-     * @param string $purchaseCode The purchase code to validate
+     * @param  string  $purchaseCode  The purchase code to validate
      *
      * @throws InvalidArgumentException When purchase code is invalid
      */
@@ -233,11 +225,10 @@ class LicenseAutoRegistrationService
             throw new InvalidArgumentException('Purchase code contains invalid characters');
         }
     }
-
     /**
      * Validate product ID with enhanced security.
      *
-     * @param int|null $productId The product ID to validate
+     * @param  int|null  $productId  The product ID to validate
      *
      * @throws InvalidArgumentException When product ID is invalid
      */
@@ -247,16 +238,15 @@ class LicenseAutoRegistrationService
             throw new InvalidArgumentException('Product ID must be between 1 and 999999');
         }
     }
-
     /**
      * Find existing license for user with enhanced error handling.
      *
-     * @param string $purchaseCode The purchase code to search for
-     * @param int $userId The user ID to search for
-     *
-     * @throws \Exception When database query fails
+     * @param  string  $purchaseCode  The purchase code to search for
+     * @param  int  $userId  The user ID to search for
      *
      * @return License|null The existing license or null
+     *
+     * @throws \Exception When database query fails
      */
     private function findExistingLicense(string $purchaseCode, int $userId): ?License
     {
@@ -274,12 +264,11 @@ class LicenseAutoRegistrationService
             throw $e;
         }
     }
-
     /**
      * Determine product ID from verification result or provided parameter.
      *
-     * @param int|null $productId Provided product ID
-     * @param array $verificationResult Verification result from service
+     * @param  int|null  $productId  Provided product ID
+     * @param  array  $verificationResult  Verification result from service
      *
      * @return int|null Determined product ID
      */
@@ -291,18 +280,16 @@ class LicenseAutoRegistrationService
         if ($productId) {
             return $productId;
         }
-
         return is_numeric($verificationResult['product_id'] ?? null) ? (int)$verificationResult['product_id'] : null;
     }
-
     /**
      * Find product by ID with enhanced error handling.
      *
-     * @param int $productId The product ID to find
-     *
-     * @throws \Exception When database query fails
+     * @param  int  $productId  The product ID to find
      *
      * @return Product|null The product or null
+     *
+     * @throws \Exception When database query fails
      */
     private function findProduct(int $productId): ?Product
     {
@@ -317,18 +304,17 @@ class LicenseAutoRegistrationService
             throw $e;
         }
     }
-
     /**
      * Create license with enhanced security and error handling.
      *
-     * @param string $purchaseCode The purchase code
-     * @param int $productId The product ID
-     * @param int $userId The user ID
-     * @param array $verificationResult Verification result data
-     *
-     * @throws \Exception When license creation fails
+     * @param  string  $purchaseCode  The purchase code
+     * @param  int  $productId  The product ID
+     * @param  int  $userId  The user ID
+     * @param  array  $verificationResult  Verification result data
      *
      * @return License The created license
+     *
+     * @throws \Exception When license creation fails
      */
     /**
      * @param array<string, mixed> $verificationResult
@@ -348,7 +334,6 @@ class LicenseAutoRegistrationService
                 'status' => 'active',
                 'support_expires_at' => $verificationResult['support_expires_at'] ?? null,
             ];
-
             return License::create($licenseData);
         } catch (\Exception $e) {
             Log::error('Failed to create license', [
@@ -361,11 +346,10 @@ class LicenseAutoRegistrationService
             throw $e;
         }
     }
-
     /**
      * Create initial invoice with enhanced error handling.
      *
-     * @param License $license The license to create invoice for
+     * @param  License  $license  The license to create invoice for
      *
      * @throws \Exception When invoice creation fails
      */
@@ -382,11 +366,10 @@ class LicenseAutoRegistrationService
             throw $e;
         }
     }
-
     /**
      * Decrease product stock with enhanced error handling.
      *
-     * @param Product $product The product to decrease stock for
+     * @param  Product  $product  The product to decrease stock for
      *
      * @throws \Exception When stock decrease fails
      */

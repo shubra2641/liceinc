@@ -26,22 +26,18 @@ class Modal extends Component
      * The modal name/identifier.
      */
     public string $name;
-
     /**
      * Whether the modal should be shown.
      */
     public bool $show;
-
     /**
      * The maximum width of the modal.
      */
     public string $maxWidth;
-
     /**
      * The CSS class for maximum width.
      */
     public string $maxWidthClass;
-
     /**
      * Create a new component instance with enhanced security.
      *
@@ -55,6 +51,10 @@ class Modal extends Component
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function __construct(string $name, bool $show = false, string $maxWidth = '2xl')
     {
@@ -67,7 +67,6 @@ class Modal extends Component
         $this->maxWidth = $this->validateMaxWidth($maxWidth);
         $this->maxWidthClass = $this->getMaxWidthClass();
     }
-
     /**
      * Get the max width CSS class with enhanced security.
      *
@@ -77,6 +76,10 @@ class Modal extends Component
      * @return string The CSS class for maximum width
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     protected function getMaxWidthClass(): string
     {
@@ -92,10 +95,8 @@ class Modal extends Component
             '6xl' => 'sm:max-w-6xl',
             '7xl' => 'sm:max-w-7xl',
         ];
-
         return $maxWidthClasses[$this->maxWidth] ?? 'sm:max-w-2xl';
     }
-
     /**
      * Get the view / contents that represent the component with enhanced security.
      *
@@ -105,6 +106,10 @@ class Modal extends Component
      * @return View The view for the modal component
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function render(): View
     {
@@ -115,7 +120,6 @@ class Modal extends Component
             'maxWidthClass' => $this->maxWidthClass,
         ]);
     }
-
     /**
      * Validate and sanitize the maximum width parameter.
      *
@@ -129,6 +133,10 @@ class Modal extends Component
      * @throws \InvalidArgumentException When max width is invalid
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     private function validateMaxWidth(string $maxWidth): string
     {
@@ -136,10 +144,9 @@ class Modal extends Component
         $sanitizedMaxWidth = htmlspecialchars(trim($maxWidth), ENT_QUOTES, 'UTF-8');
         if (! in_array($sanitizedMaxWidth, $allowedSizes, true)) {
             throw new \InvalidArgumentException(
-                'Invalid max width. Allowed values: '.implode(', ', $allowedSizes),
+                'Invalid max width. Allowed values: ' . implode(', ', $allowedSizes),
             );
         }
-
         return $sanitizedMaxWidth;
     }
 }

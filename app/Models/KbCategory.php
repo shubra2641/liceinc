@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -28,13 +28,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $meta_keywords
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, KbArticle> $articles
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle> $articles
  * @property-read int|null $articles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, KbCategory> $children
  * @property-read int|null $children_count
  * @property-read KbCategory|null $parent
- * @property-read Product|null $product
- *
+ * @property-read \App\Models\Product|null $product
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbCategory active()
  * @method static \Database\Factories\KbCategoryFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbCategory newModelQuery()
@@ -59,7 +58,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbCategory whereSlug($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbCategory whereSortOrder($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbCategory whereUpdatedAt($value)
- *
  * @mixin \Eloquent
  */
 class KbCategory extends Model
@@ -79,7 +77,6 @@ class KbCategory extends Model
         'sort_order', 'product_id', 'meta_title', 'meta_description', 'meta_keywords', 'icon',
         'is_featured', 'is_active',
     ];
-
     protected $casts = [
         'parent_id' => 'integer',
         'requires_serial' => 'boolean',
@@ -87,7 +84,6 @@ class KbCategory extends Model
         'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
-
     /**
      * @return BelongsTo<KbCategory, $this>
      */
@@ -95,7 +91,6 @@ class KbCategory extends Model
     {
         return $this->belongsTo(KbCategory::class, 'parent_id');
     }
-
     /**
      * @return HasMany<KbCategory, $this>
      */
@@ -103,7 +98,6 @@ class KbCategory extends Model
     {
         return $this->hasMany(KbCategory::class, 'parent_id');
     }
-
     /**
      * @return HasMany<KbArticle, $this>
      */
@@ -111,7 +105,6 @@ class KbCategory extends Model
     {
         return $this->hasMany(KbArticle::class, 'kb_category_id');
     }
-
     /**
      * @return BelongsTo<Product, $this>
      */
@@ -119,12 +112,9 @@ class KbCategory extends Model
     {
         return $this->belongsTo(Product::class);
     }
-
     /**
      * Scope to get only active categories.
-     *
      * @param Builder<KbCategory> $query
-     *
      * @return Builder<KbCategory>
      */
     public function scopeActive(Builder $query): Builder

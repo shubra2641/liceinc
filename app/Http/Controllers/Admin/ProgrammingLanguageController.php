@@ -492,7 +492,6 @@ class ProgrammingLanguageController extends Controller
 
     /**
      * Validate PHP syntax.
-     *
      * @return array<string, mixed>
      */
     private function validatePHPSyntax(string $code): array
@@ -637,21 +636,21 @@ class ProgrammingLanguageController extends Controller
                 'Created At',
                 'Updated At',
             ]);
-                // CSV Data
-                foreach ($languages as $language) {
-                    fputcsv($file, [
-                        $language->id,
-                        $language->name,
-                        $language->slug,
-                        $language->description,
-                        $language->icon,
-                        $language->file_extension,
-                        $language->is_active ? 'Yes' : 'No',
-                        $language->sort_order,
-                        $language->created_at?->format('Y-m-d H:i:s'),
-                        $language->updated_at?->format('Y-m-d H:i:s'),
-                    ]);
-                }
+            // CSV Data
+            foreach ($languages as $language) {
+                fputcsv($file, [
+                    $language->id,
+                    $language->name,
+                    $language->slug,
+                    $language->description,
+                    $language->icon,
+                    $language->file_extension,
+                    $language->is_active ? 'Yes' : 'No',
+                    $language->sort_order,
+                    $language->created_at?->format('Y-m-d H:i:s'),
+                    $language->updated_at?->format('Y-m-d H:i:s'),
+                ]);
+            }
                 fclose($file);
             }
         };

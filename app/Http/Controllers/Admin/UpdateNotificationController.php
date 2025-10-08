@@ -38,6 +38,10 @@ class UpdateNotificationController extends Controller
      * @throws \Exception When update checking fails
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function checkAndNotify(): JsonResponse
     {
@@ -45,14 +49,12 @@ class UpdateNotificationController extends Controller
             $versionStatus = VersionHelper::getVersionStatus();
             if ($versionStatus['is_update_available']) {
                 $this->sendUpdateNotification($versionStatus);
-
                 return response()->json([
                     'success' => true,
                     'message' => 'Update notification sent',
                     'data' => $versionStatus,
                 ]);
             }
-
             return response()->json([
                 'success' => true,
                 'message' => 'No updates available',
@@ -64,14 +66,12 @@ class UpdateNotificationController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to check for updates: '.$e->getMessage(),
+                'message' => 'Failed to check for updates: ' . $e->getMessage(),
             ], 500);
         }
     }
-
     /**
      * Get update notification status with comprehensive information.
      *
@@ -83,6 +83,10 @@ class UpdateNotificationController extends Controller
      * @throws \Exception When status retrieval fails
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function getNotificationStatus(): JsonResponse
     {
@@ -90,7 +94,6 @@ class UpdateNotificationController extends Controller
             $versionStatus = VersionHelper::getVersionStatus();
             $lastNotification = Cache::get('last_update_notification');
             $notificationDismissed = Cache::get('update_notification_dismissed', false);
-
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -104,14 +107,12 @@ class UpdateNotificationController extends Controller
             Log::error('Failed to get notification status', [
                 'error' => $e->getMessage(),
             ]);
-
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get notification status: '.$e->getMessage(),
+                'message' => 'Failed to get notification status: ' . $e->getMessage(),
             ], 500);
         }
     }
-
     /**
      * Dismiss update notification with enhanced security.
      *
@@ -125,6 +126,10 @@ class UpdateNotificationController extends Controller
      * @throws \Exception When dismissal operation fails
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     public function dismissNotification(UpdateNotificationRequest $request): JsonResponse
     {
@@ -138,7 +143,6 @@ class UpdateNotificationController extends Controller
                 // Dismiss for 24 hours
                 Cache::put('update_notification_dismissed', true, now()->addHours(24));
             }
-
             return response()->json([
                 'success' => true,
                 'message' => 'Update notification dismissed',
@@ -148,14 +152,12 @@ class UpdateNotificationController extends Controller
                 'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
             ]);
-
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to dismiss notification: '.$e->getMessage(),
+                'message' => 'Failed to dismiss notification: ' . $e->getMessage(),
             ], 500);
         }
     }
-
     /**
      * Send update notification with enhanced security.
      *
@@ -167,6 +169,10 @@ class UpdateNotificationController extends Controller
      * @throws \Exception When notification sending fails
      *
      * @version 1.0.6
+     *
+     *
+     *
+     *
      */
     /**
      * @param array<string, mixed> $versionStatus

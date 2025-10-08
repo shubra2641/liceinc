@@ -56,16 +56,14 @@ class ApiTrackingMiddleware
         $response = $next($request);
         // Only track API license verification requests
         if ($request->is('api/license/verify') && $request->isMethod('post')) {
-            if ($response instanceof Response) {
+            if ($response instanceof \Symfony\Component\HttpFoundation\Response) {
                 $this->trackApiCall($request, $response);
             }
         }
-        /** @var Response $typedResponse */
+        /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
         $typedResponse = $response;
-
         return $typedResponse;
     }
-
     /**
      * Track API call details with enhanced security.
      *
@@ -128,7 +126,6 @@ class ApiTrackingMiddleware
             ]);
         }
     }
-
     /**
      * Sanitize request data to prevent XSS attacks.
      *
@@ -148,10 +145,8 @@ class ApiTrackingMiddleware
                 $sanitized[$key] = $value;
             }
         }
-
         return $sanitized;
     }
-
     /**
      * Sanitize response data to prevent XSS attacks.
      *
@@ -165,10 +160,8 @@ class ApiTrackingMiddleware
         $sanitizedData = is_array($responseData) ? $this->sanitizeRequestData($responseData) : [];
         /** @var array<string, mixed> $typedResult */
         $typedResult = $sanitizedData;
-
         return $typedResult;
     }
-
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -181,10 +174,8 @@ class ApiTrackingMiddleware
         if ($input === null) {
             return null;
         }
-
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
-
     /**
      * Validate license key format.
      *
@@ -196,7 +187,6 @@ class ApiTrackingMiddleware
     {
         return preg_match('/^[a-zA-Z0-9\-_]+$/', $licenseKey) === 1;
     }
-
     /**
      * Determine API call status based on response.
      *
@@ -212,7 +202,6 @@ class ApiTrackingMiddleware
         } elseif ($response->getStatusCode() >= 400) {
             return 'failed';
         }
-
         return 'error';
     }
 }

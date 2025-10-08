@@ -2,13 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Helpers\SecurityHelper;
 use App\Models\License;
 use App\Models\Product;
 use App\Services\EmailService;
 use App\Services\InvoiceService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use App\Helpers\SecurityHelper;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -35,25 +35,21 @@ class GenerateRenewalInvoices extends Command
      * @var string
      */
     protected $signature = 'licenses:generate-renewal-invoices '
-        .'{--days=7 : Number of days before expiry to generate invoices}';
-
+        . '{--days=7 : Number of days before expiry to generate invoices}';
     /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Generate renewal invoices for licenses that are about to expire with enhanced security';
-
     /**
      * The invoice service instance.
      */
     protected InvoiceService $invoiceService;
-
     /**
      * The email service instance.
      */
     protected EmailService $emailService;
-
     /**
      * Create a new command instance with enhanced security.
      *
@@ -66,7 +62,6 @@ class GenerateRenewalInvoices extends Command
         $this->invoiceService = $invoiceService;
         $this->emailService = $emailService;
     }
-
     /**
      * Execute the console command with enhanced security and database transactions.
      *
@@ -96,7 +91,7 @@ class GenerateRenewalInvoices extends Command
                     if ($invoice) {
                         $generatedCount++;
                         $this->line("Generated renewal invoice for license {$license->license_key} "
-                            .'(Product: '.($license->product->name ?? 'Unknown Product').')');
+                            . "(Product: " . ($license->product->name ?? 'Unknown Product') . ")");
                         // Send email notifications
                         if ($this->sendRenewalNotifications($license, $invoice)) {
                             $emailSentCount++;
@@ -115,27 +110,24 @@ class GenerateRenewalInvoices extends Command
                         'trace' => $e->getTraceAsString(),
                     ]);
                     $this->error("Failed to generate renewal invoice for license {$license->license_key}: "
-                        .$e->getMessage());
+                        . $e->getMessage());
                 }
             }
             $this->info("Generated {$generatedCount} renewal invoices and sent {$emailSentCount} "
-                .'email notifications.');
+                . 'email notifications.');
             if ($errorCount > 0) {
                 $this->warn("Encountered {$errorCount} errors during processing. Check logs for details.");
             }
-
             return Command::SUCCESS;
         } catch (\Exception $e) {
             Log::error('GenerateRenewalInvoices command failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $this->error('Command failed: '.$e->getMessage());
-
+            $this->error('Command failed: ' . $e->getMessage());
             return Command::FAILURE;
         }
     }
-
     /**
      * Validate and sanitize the days option with enhanced security.
      *
@@ -148,18 +140,16 @@ class GenerateRenewalInvoices extends Command
         $days = (int)$this->option('days');
         // Validate days range (1-365 days)
         if ($days < 1 || $days > 365) {
-            throw new \InvalidArgumentException('Days must be between 1 and 365, got: '.SecurityHelper::escapeVariable((string)$days));
+            throw new \InvalidArgumentException("Days must be between 1 and 365, got: " . SecurityHelper::escapeVariable((string)$days));
         }
-
         return $days;
     }
-
     /**
      * Get expiring licenses with enhanced security and validation.
      *
      * @param  Carbon  $expiryDate  The expiry date to check against
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, License> The collection of expiring licenses
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\License> The collection of expiring licenses
      *
      * @throws \Exception When database query fails
      */
@@ -187,7 +177,6 @@ class GenerateRenewalInvoices extends Command
             throw $e;
         }
     }
-
     /**
      * Generate renewal invoice for a license with enhanced security.
      *
@@ -205,7 +194,6 @@ class GenerateRenewalInvoices extends Command
                 Log::warning('No product found for license', [
                     'license_key' => $license->license_key ?? 'unknown',
                 ]);
-
                 return null;
             }
 
@@ -219,8 +207,7 @@ class GenerateRenewalInvoices extends Command
                     'license_key' => $license->license_key ?? 'unknown',
                 ]);
                 $this->warn("No renewal price set for product {$product->name}, "
-                    .'skipping invoice generation.');
-
+                    . 'skipping invoice generation.');
                 return null;
             }
             // Validate renewal price
@@ -231,7 +218,7 @@ class GenerateRenewalInvoices extends Command
                     'license_key' => $license->license_key ?? 'unknown',
                 ]);
                 throw new \InvalidArgumentException('Renewal price exceeds maximum allowed value: '
-                    .$renewalPrice);
+                    . $renewalPrice);
             }
             // Calculate new expiry date based on renewal period
             $newExpiryDate = $this->calculateNewExpiryDate($license, $product);
@@ -248,7 +235,6 @@ class GenerateRenewalInvoices extends Command
                 'due_date' => Carbon::now()->addDays(30), // 30 days to pay
                 'new_expiry_date' => $newExpiryDate,
             ]);
-
             return $invoice;
         } catch (\Exception $e) {
             Log::error('Failed to generate renewal invoice', [
@@ -260,7 +246,6 @@ class GenerateRenewalInvoices extends Command
             throw $e;
         }
     }
-
     /**
      * Calculate new expiry date based on renewal period with enhanced validation.
      *
@@ -319,7 +304,6 @@ class GenerateRenewalInvoices extends Command
                         ]);
                         $durationDays = 365;
                     }
-
                     return $currentExpiry->copy()->addDays($durationDays);
             }
         } catch (\Exception $e) {
@@ -333,7 +317,6 @@ class GenerateRenewalInvoices extends Command
             throw $e;
         }
     }
-
     /**
      * Send renewal notifications with enhanced security and validation.
      *
@@ -435,7 +418,6 @@ class GenerateRenewalInvoices extends Command
                     'total' => $totalNotifications,
                 ]);
             }
-
             return $notificationsSent > 0;
         } catch (\Exception $e) {
             Log::error('Failed to send renewal notifications', [
@@ -444,8 +426,7 @@ class GenerateRenewalInvoices extends Command
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $this->error("Failed to send renewal notifications for license {$license->license_key}: ".$e->getMessage());
-
+            $this->error("Failed to send renewal notifications for license {$license->license_key}: " . $e->getMessage());
             return false;
         }
     }

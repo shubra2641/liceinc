@@ -57,7 +57,6 @@ class LicenseApiController extends Controller
     private function getApiToken(): string
     {
         $token = \App\Helpers\ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
-
         return is_string($token) ? $token : '';
     }
 
