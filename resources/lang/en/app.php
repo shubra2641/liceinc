@@ -2709,5 +2709,5 @@ return [
     'PayPal connection error: :error' => 'PayPal connection error: :error',
     'Stripe connection error: :error' => 'Stripe connection error: :error',
 
-    'You don\'t have any invoices yet' => 'You don\'t have any invoices yet',
+    'You don\'t have any invoices yet' =>    'You don\'t have any invoices yet',
 ];

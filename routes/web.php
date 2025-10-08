@@ -30,12 +30,13 @@ use App\Http\Controllers\Admin\UpdateController;
 use App\Http\Controllers\Admin\UpdateNotificationController;
 // User Controllers
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\User\TicketController as UserTicketController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\KbArticleController;
 use App\Http\Controllers\KbCategoryController;
-use App\Http\Controllers\KbPublicController;
 // Admin Controllers
+use App\Http\Controllers\KbPublicController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LicenseDomainController;
 use App\Http\Controllers\LicenseStatusController;
@@ -49,7 +50,6 @@ use App\Http\Controllers\User\InvoiceController as UserInvoiceController;
 use App\Http\Controllers\User\LicenseController as UserLicenseController;
 use App\Http\Controllers\User\ProductFileController as UserProductFileController;
 use App\Http\Controllers\User\ProfileController as UserProfileController;
-use App\Http\Controllers\User\TicketController as UserTicketController;
 // API Controllers
 
 // Legacy Controllers (to be reviewed)

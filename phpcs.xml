@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<ruleset name="My Logos PHP CodeSniffer Configuration">
+    <description>PHP CodeSniffer configuration for My Logos project with PHPStan Level 10 compatibility</description>
+    
+    <!-- Files to check -->
+    <file>app</file>
+    <file>config</file>
+    <file>database</file>
+    <file>routes</file>
+    
+    <!-- Exclude patterns -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/storage/*</exclude-pattern>
+    <exclude-pattern>*/bootstrap/cache/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/public/*</exclude-pattern>
+    <exclude-pattern>*/tests/*</exclude-pattern>
+    <exclude-pattern>*/database/migrations/*</exclude-pattern>
+    <exclude-pattern>*/stubs/*</exclude-pattern>
+    
+    <!-- Standards to use -->
+    <rule ref="PSR12"/>
+    <rule ref="PSR1"/>
+    
+    <!-- PHPDoc Standards -->
+    <rule ref="Squiz.Commenting.FunctionComment"/>
+    <rule ref="Squiz.Commenting.VariableComment"/>
+    <rule ref="Squiz.Commenting.ClassComment"/>
+    
+    <!-- PHP 8+ compatibility -->
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
+    <rule ref="Generic.PHP.DisallowShortOpenTag"/>
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
+    
+    <!-- Array formatting -->
+    <rule ref="Generic.Arrays.ArrayIndent"/>
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
+    
+    <!-- Import statements -->
+    <rule ref="PSR12.Files.FileHeader"/>
+    <rule ref="Generic.Files.LineEndings"/>
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="140"/>
+        </properties>
+    </rule>
+    
+    <!-- Disable rules that conflict with PHPStan Level 10 -->
+    <rule ref="Generic.Commenting.DocComment">
+        <exclude name="Generic.Commenting.DocComment.MissingShort"/>
+        <exclude name="Generic.Commenting.DocComment.SpacingBeforeShort"/>
+        <exclude name="Generic.Commenting.DocComment.SpacingAfterShort"/>
+    </rule>
+    
+    <!-- Allow mixed types for PHPStan Level 10 compatibility -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingParamComment">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamComment"/>
+    </rule>
+    
+    <!-- Allow array type hints -->
+    <rule ref="Generic.Commenting.DocComment.TagValueIndent">
+        <exclude name="Generic.Commenting.DocComment.TagValueIndent"/>
+    </rule>
+    
+    <!-- PHP 8.1+ features -->
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
+    <rule ref="Generic.PHP.DisallowShortOpenTag"/>
+    
+    <!-- Performance optimizations -->
+    <rule ref="Generic.PHP.NoSilencedErrors"/>
+    <rule ref="Generic.PHP.DisallowAlternativePHPTags"/>
+    
+    <!-- Security -->
+    <rule ref="Generic.PHP.ForbiddenFunctions"/>
+    <rule ref="Generic.PHP.DeprecatedFunctions"/>
+    
+    <!-- Code quality -->
+    <rule ref="Generic.CodeAnalysis.EmptyStatement"/>
+    <rule ref="Generic.CodeAnalysis.UnconditionalIfStatement"/>
+    <rule ref="Generic.CodeAnalysis.UselessOverridingMethod"/>
+    
+    <!-- Naming conventions -->
+    <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
+    <rule ref="Squiz.NamingConventions.ValidVariableName"/>
+    <rule ref="Squiz.NamingConventions.ValidFunctionName"/>
+    <rule ref="Squiz.NamingConventions.ValidClassName"/>
+    
+    <!-- Disable rules that might conflict with PHPStan -->
+    <rule ref="Generic.Commenting.DocComment.MissingParamTag">
+        <exclude name="Generic.Commenting.DocComment.MissingParamTag"/>
+    </rule>
+    
+    <rule ref="Generic.Commenting.DocComment.MissingReturn">
+        <exclude name="Generic.Commenting.DocComment.MissingReturn"/>
+    </rule>
+    
+    <!-- Allow mixed return types for PHPStan Level 10 -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingReturn">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturn"/>
+    </rule>
+    
+    <!-- Allow array type hints without full specification -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamTag"/>
+    </rule>
+    
+    <!-- PHP 8.1+ union types support -->
+    <rule ref="Generic.Commenting.DocComment.TagValueIndent">
+        <exclude name="Generic.Commenting.DocComment.TagValueIndent"/>
+    </rule>
+    
+    <!-- Allow mixed types in PHPDoc -->
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidReturn">
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidReturn"/>
+    </rule>
+    
+    <!-- Allow array type hints -->
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidParamComment">
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidParamComment"/>
+    </rule>
+    
+    <!-- PHP 8.1+ features compatibility -->
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
+    <rule ref="Generic.PHP.DisallowShortOpenTag"/>
+    
+    <!-- Performance and security -->
+    <rule ref="Generic.PHP.NoSilencedErrors"/>
+    <rule ref="Generic.PHP.DisallowAlternativePHPTags"/>
+    <rule ref="Generic.PHP.ForbiddenFunctions"/>
+    <rule ref="Generic.PHP.DeprecatedFunctions"/>
+    
+    <!-- Code quality rules -->
+    <rule ref="Generic.CodeAnalysis.EmptyStatement"/>
+    <rule ref="Generic.CodeAnalysis.UnconditionalIfStatement"/>
+    <rule ref="Generic.CodeAnalysis.UselessOverridingMethod"/>
+    
+    <!-- Naming conventions -->
+    <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
+    <rule ref="Squiz.NamingConventions.ValidVariableName"/>
+    <rule ref="Squiz.NamingConventions.ValidFunctionName"/>
+    <rule ref="Squiz.NamingConventions.ValidClassName"/>
+</ruleset>
