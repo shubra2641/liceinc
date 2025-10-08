@@ -1,14 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * Security Service with enhanced security.
@@ -38,12 +37,12 @@ class SecurityService extends BaseService
      * Validates and sanitizes input data with comprehensive security measures
      * including XSS protection, length validation, and custom rule application.
      *
-     * @param  array  $data  The input data to validate and sanitize
-     * @param  array  $rules  Custom validation rules to apply
-     *
-     * @return array The validated and sanitized data
+     * @param array $data The input data to validate and sanitize
+     * @param array $rules Custom validation rules to apply
      *
      * @throws \InvalidArgumentException When input data is invalid
+     *
+     * @return array The validated and sanitized data
      *
      * @version 1.0.6
      */
@@ -87,7 +86,7 @@ class SecurityService extends BaseService
 
             return $sanitized;
         } catch (Exception $e) {
-            Log::error('Failed to validate and sanitize input: '.$e->getMessage());
+            Log::error('Failed to validate and sanitize input: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -98,11 +97,11 @@ class SecurityService extends BaseService
      * Sanitizes HTML content by removing dangerous patterns, converting
      * special characters, and applying comprehensive XSS protection.
      *
-     * @param  string  $content  The HTML content to sanitize
-     *
-     * @return string The sanitized HTML content
+     * @param string $content The HTML content to sanitize
      *
      * @throws \InvalidArgumentException When content is invalid
+     *
+     * @return string The sanitized HTML content
      *
      * @version 1.0.6
      */
@@ -126,7 +125,7 @@ class SecurityService extends BaseService
 
             return $content;
         } catch (Exception $e) {
-            Log::error('Failed to sanitize HTML content: '.$e->getMessage());
+            Log::error('Failed to sanitize HTML content: ' . $e->getMessage());
 
             return '';
         }
@@ -138,7 +137,7 @@ class SecurityService extends BaseService
      * Removes dangerous JavaScript patterns, malicious scripts, and
      * other security threats from content.
      *
-     * @param  string  $content  The content to clean
+     * @param string $content The content to clean
      *
      * @return string The cleaned content
      *
@@ -169,14 +168,14 @@ class SecurityService extends BaseService
                 try {
                     $content = preg_replace($pattern, '', (string)$content);
                 } catch (Exception $e) {
-                    Log::error('Failed to apply dangerous pattern filter: '.$e->getMessage());
+                    Log::error('Failed to apply dangerous pattern filter: ' . $e->getMessage());
                     continue;
                 }
             }
 
             return (string)$content;
         } catch (Exception $e) {
-            Log::error('Failed to remove dangerous patterns: '.$e->getMessage());
+            Log::error('Failed to remove dangerous patterns: ' . $e->getMessage());
 
             return (string)$content;
         }
@@ -188,12 +187,12 @@ class SecurityService extends BaseService
      * Applies specific validation rules to values with comprehensive
      * error handling and security measures.
      *
-     * @param  mixed  $value  The value to validate
-     * @param  string  $rule  The validation rule to apply
-     *
-     * @return mixed The validated value
+     * @param mixed $value The value to validate
+     * @param string $rule The validation rule to apply
      *
      * @throws \InvalidArgumentException When rule is invalid
+     *
+     * @return mixed The validated value
      *
      * @version 1.0.6
      */
@@ -202,7 +201,7 @@ class SecurityService extends BaseService
         try {
             $allowedRules = ['email', 'url', 'int', 'float', 'string'];
             if (! in_array($rule, $allowedRules, true)) {
-                throw new \InvalidArgumentException('Invalid validation rule: '.$rule);
+                throw new \InvalidArgumentException('Invalid validation rule: ' . $rule);
             }
             switch ($rule) {
                 case 'email':
@@ -219,7 +218,7 @@ class SecurityService extends BaseService
                     return $value;
             }
         } catch (Exception $e) {
-            Log::error('Failed to apply validation rule: '.$e->getMessage());
+            Log::error('Failed to apply validation rule: ' . $e->getMessage());
 
             return $value;
         }
@@ -231,11 +230,11 @@ class SecurityService extends BaseService
      * Analyzes the request for suspicious indicators including rate limiting,
      * user agent analysis, header inspection, and attack pattern detection.
      *
-     * @param  Request  $request  The HTTP request to analyze
-     *
-     * @return bool True if request is suspicious, false otherwise
+     * @param Request $request The HTTP request to analyze
      *
      * @throws \InvalidArgumentException When request is invalid
+     *
+     * @return bool True if request is suspicious, false otherwise
      *
      * @version 1.0.6
      */
@@ -261,7 +260,7 @@ class SecurityService extends BaseService
 
             return $isSuspicious;
         } catch (Exception $e) {
-            Log::error('Failed to check suspicious request: '.$e->getMessage());
+            Log::error('Failed to check suspicious request: ' . $e->getMessage());
 
             return false;
         }
@@ -272,7 +271,7 @@ class SecurityService extends BaseService
      */
     private function hasHighRequestRate(Request $request): bool
     {
-        $key = 'rate_limit:'.$request->ip();
+        $key = 'rate_limit:' . $request->ip();
         $maxRequests = config('security.rate_limiting.api_requests_per_minute', 60);
         $maxRequestsInt = is_numeric($maxRequests) ? (int)$maxRequests : 60;
 
@@ -389,9 +388,9 @@ class SecurityService extends BaseService
      * Logs security events with comprehensive context and proper
      * error handling for security monitoring and analysis.
      *
-     * @param  string  $event  The security event type
-     * @param  array  $data  Additional event data
-     * @param  string  $level  The log level (warning, error, info)
+     * @param string $event The security event type
+     * @param array $data Additional event data
+     * @param string $level The log level (warning, error, info)
      *
      * @throws \InvalidArgumentException When parameters are invalid
      *
@@ -408,7 +407,7 @@ class SecurityService extends BaseService
             }
             $allowedLevels = ['warning', 'error', 'info'];
             if (! in_array($level, $allowedLevels, true)) {
-                throw new \InvalidArgumentException('Invalid log level: '.$level);
+                throw new \InvalidArgumentException('Invalid log level: ' . $level);
             }
             $logData = array_merge([
                 'event' => $event,
@@ -418,9 +417,9 @@ class SecurityService extends BaseService
                 'url' => request()->fullUrl(),
                 'method' => request()->method(),
             ], $data);
-            Log::channel('single')->{$level}('Security event: '.$event, $logData);
+            Log::channel('single')->{$level}('Security event: ' . $event, $logData);
         } catch (Exception $e) {
-            Log::error('Failed to log security event: '.$e->getMessage());
+            Log::error('Failed to log security event: ' . $e->getMessage());
         }
     }
 
@@ -430,11 +429,11 @@ class SecurityService extends BaseService
      * Generates a cryptographically secure random token with
      * proper validation and error handling.
      *
-     * @param  int  $length  The length of the token in characters
-     *
-     * @return string The generated secure token
+     * @param int $length The length of the token in characters
      *
      * @throws \InvalidArgumentException When length is invalid
+     *
+     * @return string The generated secure token
      *
      * @version 1.0.6
      */
@@ -450,7 +449,7 @@ class SecurityService extends BaseService
 
             return bin2hex(random_bytes(max(1, (int)($length / 2))));
         } catch (Exception $e) {
-            Log::error('Failed to generate secure token: '.$e->getMessage());
+            Log::error('Failed to generate secure token: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -461,11 +460,11 @@ class SecurityService extends BaseService
      * Validates file uploads for security threats including size limits,
      * file type validation, MIME type checking, and content scanning.
      *
-     * @param  mixed  $file  The uploaded file to validate
-     *
-     * @return array Validation result with valid flag and errors
+     * @param mixed $file The uploaded file to validate
      *
      * @throws \InvalidArgumentException When file is invalid
+     *
+     * @return array Validation result with valid flag and errors
      *
      * @version 1.0.6
      */
@@ -545,7 +544,7 @@ class SecurityService extends BaseService
 
             return $result;
         } catch (Exception $e) {
-            Log::error('Failed to validate file upload: '.$e->getMessage());
+            Log::error('Failed to validate file upload: ' . $e->getMessage());
 
             return [
                 'valid' => false,
@@ -560,7 +559,7 @@ class SecurityService extends BaseService
      * Validates MIME types against a whitelist of allowed types
      * with comprehensive security measures.
      *
-     * @param  string  $mimeType  The MIME type to validate
+     * @param string $mimeType The MIME type to validate
      *
      * @return bool True if MIME type is allowed, false otherwise
      *
@@ -590,7 +589,7 @@ class SecurityService extends BaseService
 
             return in_array($mimeType, $allowedMimeTypes, true);
         } catch (Exception $e) {
-            Log::error('Failed to validate MIME type: '.$e->getMessage());
+            Log::error('Failed to validate MIME type: ' . $e->getMessage());
 
             return false;
         }
@@ -602,7 +601,7 @@ class SecurityService extends BaseService
      * Scans content for malicious patterns including PHP code, JavaScript,
      * and other potentially dangerous content.
      *
-     * @param  string  $content  The content to scan
+     * @param string $content The content to scan
      *
      * @return bool True if malicious content is found, false otherwise
      *
@@ -637,14 +636,14 @@ class SecurityService extends BaseService
                         return true;
                     }
                 } catch (Exception $e) {
-                    Log::error('Failed to check malicious pattern: '.$e->getMessage());
+                    Log::error('Failed to check malicious pattern: ' . $e->getMessage());
                     continue;
                 }
             }
 
             return false;
         } catch (Exception $e) {
-            Log::error('Failed to scan content for malicious patterns: '.$e->getMessage());
+            Log::error('Failed to scan content for malicious patterns: ' . $e->getMessage());
 
             return true; // Fail safe - assume malicious if scan fails
         }
@@ -656,13 +655,13 @@ class SecurityService extends BaseService
      * Checks if rate limit has been exceeded for a specific action
      * with proper validation and error handling.
      *
-     * @param  string  $key  The rate limit key
-     * @param  int  $maxAttempts  Maximum number of attempts allowed
-     * @param  int  $decayMinutes  Decay time in minutes
-     *
-     * @return bool True if rate limit exceeded, false otherwise
+     * @param string $key The rate limit key
+     * @param int $maxAttempts Maximum number of attempts allowed
+     * @param int $decayMinutes Decay time in minutes
      *
      * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @return bool True if rate limit exceeded, false otherwise
      *
      * @version 1.0.6
      */
@@ -681,7 +680,7 @@ class SecurityService extends BaseService
 
             return (bool)RateLimiter::tooManyAttempts($key, $maxAttempts);
         } catch (Exception $e) {
-            Log::error('Failed to check rate limit: '.$e->getMessage());
+            Log::error('Failed to check rate limit: ' . $e->getMessage());
 
             return false;
         }
@@ -693,7 +692,7 @@ class SecurityService extends BaseService
      * Clears the rate limit for a specific key with proper
      * validation and error handling.
      *
-     * @param  string  $key  The rate limit key to clear
+     * @param string $key The rate limit key to clear
      *
      * @throws \InvalidArgumentException When key is invalid
      *
@@ -707,7 +706,7 @@ class SecurityService extends BaseService
             }
             RateLimiter::clear($key);
         } catch (Exception $e) {
-            Log::error('Failed to clear rate limit: '.$e->getMessage());
+            Log::error('Failed to clear rate limit: ' . $e->getMessage());
         }
     }
 }

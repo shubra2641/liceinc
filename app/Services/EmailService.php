@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Mail\DynamicEmail;
@@ -40,14 +42,14 @@ class EmailService extends BaseService
      * Sends an email using a database-stored template with comprehensive
      * validation, sanitization, and error handling.
      *
-     * @param  string  $templateName  Template identifier
-     * @param  string  $recipientEmail  Recipient email address
-     * @param  array  $data  Variables for template substitution
-     * @param  string|null  $recipientName  Optional recipient name
-     *
-     * @return bool Success status
+     * @param string $templateName Template identifier
+     * @param string $recipientEmail Recipient email address
+     * @param array $data Variables for template substitution
+     * @param string|null $recipientName Optional recipient name
      *
      * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @return bool Success status
      *
      * @version 1.0.6
      */
@@ -63,12 +65,12 @@ class EmailService extends BaseService
         try {
             // Validate and sanitize inputs
             $templateName = $this->validateTemplateName($templateName);
-            $recipientEmail = $this->validateEmail($recipientEmail);
+            $this->validateEmail($recipientEmail, 'Recipient Email');
             $recipientName = $this->sanitizeString($recipientName);
             $data = $this->sanitizeData($data);
             $template = EmailTemplate::getByName($templateName);
             if (! $template) {
-                Log::error('Email template not found: '.$templateName);
+                Log::error('Email template not found: ' . $templateName);
 
                 return false;
             }
@@ -85,7 +87,7 @@ class EmailService extends BaseService
 
             return true;
         } catch (Exception $e) {
-            Log::error('Failed to send email: '.$e->getMessage(), [
+            Log::error('Failed to send email: ' . $e->getMessage(), [
                 'template' => $templateName,
                 'recipient' => $recipientEmail,
                 'exception' => $e->getTraceAsString(),
@@ -101,13 +103,13 @@ class EmailService extends BaseService
      * Sends an email to a specific user using a database-stored template
      * with comprehensive validation and sanitization.
      *
-     * @param  User  $user  User instance
-     * @param  string  $templateName  Template identifier
-     * @param  array  $data  Variables for template substitution
-     *
-     * @return bool Success status
+     * @param User $user User instance
+     * @param string $templateName Template identifier
+     * @param array $data Variables for template substitution
      *
      * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @return bool Success status
      *
      * @version 1.0.6
      */
@@ -137,12 +139,12 @@ class EmailService extends BaseService
      * Sends an email to the admin using a database-stored template
      * with comprehensive validation and sanitization.
      *
-     * @param  string  $templateName  Template identifier
-     * @param  array  $data  Variables for template substitution
-     *
-     * @return bool Success status
+     * @param string $templateName Template identifier
+     * @param array $data Variables for template substitution
      *
      * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @return bool Success status
      *
      * @version 1.0.6
      */
@@ -172,13 +174,13 @@ class EmailService extends BaseService
      * Sends emails to multiple users using a database-stored template
      * with comprehensive validation and sanitization.
      *
-     * @param  array  $users  Array of User instances or email addresses
-     * @param  string  $templateName  Template identifier
-     * @param  array  $data  Variables for template substitution
-     *
-     * @return array<string, mixed> Results array with success/failure counts
+     * @param array $users Array of User instances or email addresses
+     * @param string $templateName Template identifier
+     * @param array $data Variables for template substitution
      *
      * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @return array<string, mixed> Results array with success/failure counts
      *
      * @version 1.0.6
      */
@@ -224,7 +226,7 @@ class EmailService extends BaseService
                 $results['failed']++;
                 $userEmail = $user instanceof User ? $user->email : $user;
                 $results['errors'][] = is_string($userEmail) ? $userEmail : '';
-                Log::error('Failed to send bulk email to user: '.$e->getMessage());
+                Log::error('Failed to send bulk email to user: ' . $e->getMessage());
             }
         }
 
@@ -237,12 +239,12 @@ class EmailService extends BaseService
      * Retrieves email templates filtered by type and category with
      * comprehensive validation and sanitization.
      *
-     * @param  string  $type  Template type ('user' or 'admin')
-     * @param  string|null  $category  Optional category filter
-     *
-     * @return Collection<int, EmailTemplate> Collection of email templates
+     * @param string $type Template type ('user' or 'admin')
+     * @param string|null $category Optional category filter
      *
      * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @return Collection<int, EmailTemplate> Collection of email templates
      *
      * @version 1.0.6
      */
@@ -264,11 +266,11 @@ class EmailService extends BaseService
      * Creates or updates an email template with comprehensive
      * validation and sanitization.
      *
-     * @param  array  $templateData  Template data
-     *
-     * @return EmailTemplate The created or updated template
+     * @param array $templateData Template data
      *
      * @throws \InvalidArgumentException When template data is invalid
+     *
+     * @return EmailTemplate The created or updated template
      *
      * @version 1.0.6
      */
@@ -294,12 +296,12 @@ class EmailService extends BaseService
      * Tests email template rendering with comprehensive validation
      * and sanitization.
      *
-     * @param  string  $templateName  Template identifier
-     * @param  array  $data  Test data
-     *
-     * @return array Rendered content
+     * @param string $templateName Template identifier
+     * @param array $data Test data
      *
      * @throws \InvalidArgumentException When template not found
+     *
+     * @return array Rendered content
      *
      * @version 1.0.6
      */
@@ -326,11 +328,11 @@ class EmailService extends BaseService
      * Sends a welcome email to a newly registered user with
      * comprehensive validation and sanitization.
      *
-     * @param  User  $user  User instance
-     *
-     * @return bool Success status
+     * @param User $user User instance
      *
      * @throws \InvalidArgumentException When user is invalid
+     *
+     * @return bool Success status
      *
      * @version 1.0.6
      */
@@ -353,12 +355,12 @@ class EmailService extends BaseService
      * Sends a welcome email to a user with additional data for template
      * substitution and comprehensive validation.
      *
-     * @param  User  $user  User instance
-     * @param  array  $data  Additional data for template substitution
-     *
-     * @return bool Success status
+     * @param User $user User instance
+     * @param array $data Additional data for template substitution
      *
      * @throws \InvalidArgumentException When user is invalid
+     *
+     * @return bool Success status
      *
      * @version 1.0.6
      */
@@ -385,12 +387,12 @@ class EmailService extends BaseService
      * Sends an email verification email to a user with comprehensive
      * validation and sanitization.
      *
-     * @param  User  $user  User instance
-     * @param  string  $verificationUrl  Verification URL
-     *
-     * @return bool Success status
+     * @param User $user User instance
+     * @param string $verificationUrl Verification URL
      *
      * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @return bool Success status
      *
      * @version 1.0.6
      */
@@ -414,11 +416,11 @@ class EmailService extends BaseService
      * Sends an admin notification when a new user registers with
      * comprehensive validation and sanitization.
      *
-     * @param  User  $user  User instance
-     *
-     * @return bool Success status
+     * @param User $user User instance
      *
      * @throws \InvalidArgumentException When user is invalid
+     *
+     * @return bool Success status
      *
      * @version 1.0.6
      */
@@ -444,12 +446,12 @@ class EmailService extends BaseService
      * Sends a payment confirmation email to a user with comprehensive
      * validation and sanitization.
      *
-     * @param  License  $license  License instance
-     * @param  Invoice  $invoice  Invoice instance
-     *
-     * @return bool Success status
+     * @param License $license License instance
+     * @param Invoice $invoice Invoice instance
      *
      * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @return bool Success status
      *
      * @version 1.0.6
      */
@@ -937,11 +939,11 @@ class EmailService extends BaseService
      * Validates the template name and returns a sanitized version
      * with proper security measures.
      *
-     * @param  string  $templateName  The template name to validate
-     *
-     * @return string The validated and sanitized template name
+     * @param string $templateName The template name to validate
      *
      * @throws \InvalidArgumentException When template name is invalid
+     *
+     * @return string The validated and sanitized template name
      *
      * @version 1.0.6
      */
@@ -959,43 +961,16 @@ class EmailService extends BaseService
     }
 
     /**
-     * Validate and sanitize email address.
-     *
-     * Validates the email address and returns a sanitized version
-     * with proper security measures.
-     *
-     * @param  string  $email  The email address to validate
-     *
-     * @return string The validated and sanitized email address
-     *
-     * @throws \InvalidArgumentException When email is invalid
-     *
-     * @version 1.0.6
-     */
-    private function validateEmail(string $email): string
-    {
-        if (empty($email) === true) {
-            throw new \InvalidArgumentException('Email address cannot be empty');
-        }
-        $sanitized = filter_var(trim($email), FILTER_SANITIZE_EMAIL);
-        if ($sanitized === false || ! filter_var($sanitized, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException('Invalid email address format');
-        }
-
-        return $sanitized;
-    }
-
-    /**
      * Validate and sanitize template type.
      *
      * Validates the template type and returns a sanitized version
      * with proper security measures.
      *
-     * @param  string  $type  The template type to validate
-     *
-     * @return string The validated and sanitized template type
+     * @param string $type The template type to validate
      *
      * @throws \InvalidArgumentException When template type is invalid
+     *
+     * @return string The validated and sanitized template type
      *
      * @version 1.0.6
      */
@@ -1005,7 +980,7 @@ class EmailService extends BaseService
         $sanitized = htmlspecialchars(trim($type), ENT_QUOTES, 'UTF-8');
         if (! in_array($sanitized, $allowedTypes, true)) {
             throw new \InvalidArgumentException(
-                'Invalid template type. Allowed values: '.implode(', ', $allowedTypes),
+                'Invalid template type. Allowed values: ' . implode(', ', $allowedTypes),
             );
         }
 
@@ -1018,7 +993,7 @@ class EmailService extends BaseService
      * Sanitizes string input to prevent XSS attacks and other
      * security vulnerabilities.
      *
-     * @param  string|null  $input  The input string to sanitize
+     * @param string|null $input The input string to sanitize
      *
      * @return string|null The sanitized string or null
      *
@@ -1039,7 +1014,7 @@ class EmailService extends BaseService
      * Recursively sanitizes array data to prevent XSS attacks
      * and other security vulnerabilities.
      *
-     * @param  array  $data  The data array to sanitize
+     * @param array $data The data array to sanitize
      *
      * @return array The sanitized data array
      *

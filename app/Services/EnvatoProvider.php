@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
@@ -46,11 +48,11 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
      * Constructs the secure authentication URL with proper state parameter
      * for CSRF protection and OAuth flow security.
      *
-     * @param  string  $state  The state parameter for CSRF protection
-     *
-     * @return string The complete authentication URL
+     * @param string $state The state parameter for CSRF protection
      *
      * @throws \Exception When URL construction fails
+     *
+     * @return string The complete authentication URL
      */
     protected function getAuthUrl($state): string
     {
@@ -77,11 +79,11 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
      * error handling, input validation, and security measures. Includes
      * proper token validation and response sanitization.
      *
-     * @param  string  $token  The OAuth access token for API authentication
-     *
-     * @return array<mixed, mixed> The raw user data from Envato API
+     * @param string $token The OAuth access token for API authentication
      *
      * @throws \Exception When API request fails or returns invalid data
+     *
+     * @return array<mixed, mixed> The raw user data from Envato API
      *
      * @example
      * $userData = $this->getUserByToken($accessToken);
@@ -99,20 +101,20 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
             }
             // Sanitize token to prevent injection attacks
             $sanitizedToken = htmlspecialchars($token, ENT_QUOTES, 'UTF-8');
-            $response = $this->getHttpClient()->get($this->baseUrl.'/v1/market/private/user/account.json', [
+            $response = $this->getHttpClient()->get($this->baseUrl . '/v1/market/private/user/account.json', [
                 'headers' => [
-                    'Authorization' => 'Bearer '.$sanitizedToken,
+                    'Authorization' => 'Bearer ' . $sanitizedToken,
                     'User-Agent' => 'Sekuret-License-Management/1.0',
                 ],
                 'timeout' => 30,
             ]);
             $statusCode = $response->getStatusCode();
             if ($statusCode >= 400) {
-                throw new \Exception('Failed to retrieve user data from Envato API: HTTP '.(int)$statusCode);
+                throw new \Exception('Failed to retrieve user data from Envato API: HTTP ' . (int)$statusCode);
             }
-            $data = json_decode($response->getBody(), true);
+            $data = json_decode((string) $response->getBody(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception('Invalid JSON response from Envato API: '.json_last_error_msg());
+                throw new \Exception('Invalid JSON response from Envato API: ' . json_last_error_msg());
             }
             if (! is_array($data)) {
                 throw new \Exception('Invalid response format from Envato API');
@@ -136,11 +138,11 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
      * object with comprehensive data validation, sanitization, and fallback
      * mechanisms for missing or invalid data.
      *
-     * @param  array  $user  The raw user data from Envato API
-     *
-     * @return User The mapped Socialite User instance
+     * @param array $user The raw user data from Envato API
      *
      * @throws \Exception When user data mapping fails
+     *
+     * @return User The mapped Socialite User instance
      *
      * @example
      * $user = $this->mapUserToObject($rawUserData);
@@ -166,21 +168,21 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
             $accountFirstname = $account['firstname'] ?? null;
             $accountSurname = $account['surname'] ?? null;
             $username = is_string($accountUsername) ? $accountUsername :
-                       strtolower((is_string($accountFirstname) ? $accountFirstname : 'user').
+                       strtolower((is_string($accountFirstname) ? $accountFirstname : 'user') .
                                  (is_string($accountSurname) ? $accountSurname : ''));
             $username = $this->sanitizeInput($username);
             // For OAuth, we might not get email from this endpoint
             // We'll need to get it from somewhere else or generate one
             $accountEmail = $account['email'] ?? null;
-            $email = is_string($accountEmail) ? $accountEmail : ($username.'@envato.temp');
+            $email = is_string($accountEmail) ? $accountEmail : ($username . '@envato.temp');
             $email = $this->sanitizeInput($email);
             // Validate email format
             if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $email = $username.'@envato.temp';
+                $email = $username . '@envato.temp';
             }
             $firstname = $account['firstname'] ?? '';
             $surname = $account['surname'] ?? '';
-            $name = trim((is_string($firstname) ? $firstname : '').' '.(is_string($surname) ? $surname : ''));
+            $name = trim((is_string($firstname) ? $firstname : '') . ' ' . (is_string($surname) ? $surname : ''));
             $name = $this->sanitizeInput($name);
             // Sanitize avatar URL if provided
             $avatar = $account['image'] ?? null;
@@ -212,11 +214,11 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
      * authorization code validation and proper grant type specification.
      * Includes input sanitization and security measures.
      *
-     * @param  string  $code  The authorization code from OAuth callback
-     *
-     * @return array<mixed, mixed> The token request fields with proper validation
+     * @param string $code The authorization code from OAuth callback
      *
      * @throws \InvalidArgumentException When authorization code is invalid
+     *
+     * @return array<mixed, mixed> The token request fields with proper validation
      */
     protected function getTokenFields($code): array
     {
@@ -247,7 +249,7 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
      * Provides comprehensive input sanitization for user data and API responses
      * to ensure security and prevent various types of injection attacks.
      *
-     * @param  string|null  $input  The input string to sanitize
+     * @param string|null $input The input string to sanitize
      *
      * @return string The sanitized input string
      */

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\License;
@@ -43,7 +45,7 @@ class PurchaseCodeService extends BaseService
     /**
      * Create a new PurchaseCodeService instance.
      *
-     * @param  EnvatoService  $envatoService  The Envato service for API operations
+     * @param EnvatoService $envatoService The Envato service for API operations
      */
     public function __construct(EnvatoService $envatoService)
     {
@@ -57,11 +59,11 @@ class PurchaseCodeService extends BaseService
      * converting to uppercase for consistency, and applying security measures
      * to prevent injection attacks.
      *
-     * @param  string  $purchaseCode  The raw purchase code to clean
-     *
-     * @return string The cleaned and sanitized purchase code
+     * @param string $purchaseCode The raw purchase code to clean
      *
      * @throws \InvalidArgumentException When purchase code is invalid
+     *
+     * @return string The cleaned and sanitized purchase code
      *
      * @example
      * $cleaned = $service->cleanPurchaseCode('abc-123 def');
@@ -101,7 +103,7 @@ class PurchaseCodeService extends BaseService
      * alphanumeric character validation, length restrictions, and
      * security pattern detection to ensure code integrity.
      *
-     * @param  string  $purchaseCode  The purchase code to validate
+     * @param string $purchaseCode The purchase code to validate
      *
      * @return bool True if format is valid, false otherwise
      *
@@ -139,13 +141,13 @@ class PurchaseCodeService extends BaseService
      * and then falls back to Envato API verification. Includes comprehensive
      * security validation, error handling, and detailed logging.
      *
-     * @param  string  $purchaseCode  The purchase code to verify
-     * @param  int|null  $productId  Optional product ID for product-specific verification
-     * @param  User|null  $user  Optional user for license creation
-     *
-     * @return array Verification result with success status and details
+     * @param string $purchaseCode The purchase code to verify
+     * @param int|null $productId Optional product ID for product-specific verification
+     * @param User|null $user Optional user for license creation
      *
      * @throws \Exception When verification fails or security validation errors occur
+     *
+     * @return array Verification result with success status and details
      *
      * @example
      * $result = $service->verifyPurchaseCode('ABC123DEF456', $productId, $user);
@@ -206,24 +208,9 @@ class PurchaseCodeService extends BaseService
      * Provides comprehensive input sanitization for purchase codes and other
      * user inputs to ensure security and prevent various types of injection attacks.
      *
-     * @param  string|null  $input  The input string to sanitize
      *
      * @return string The sanitized input string
      */
-    private function sanitizeInput(?string $input): string
-    {
-        if ($input === null) {
-            return '';
-        }
-        // Remove null bytes and control characters
-        $input = str_replace(["\0", "\x00"], '', $input);
-        // Trim whitespace
-        $input = trim($input);
-        // Escape HTML entities
-        $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
-
-        return $input;
-    }
 
     /**
      * Verify against our database with comprehensive security validation.
@@ -231,12 +218,12 @@ class PurchaseCodeService extends BaseService
      * Performs database verification of purchase codes with proper security
      * measures, license status validation, and expiration checks.
      *
-     * @param  string  $purchaseCode  The cleaned purchase code to verify
-     * @param  int|null  $productId  Optional product ID for product-specific verification
-     *
-     * @return array Database verification result
+     * @param string $purchaseCode The cleaned purchase code to verify
+     * @param int|null $productId Optional product ID for product-specific verification
      *
      * @throws \Exception When database verification fails
+     *
+     * @return array Database verification result
      */
     /**
      * @return array<string, mixed>
@@ -297,12 +284,12 @@ class PurchaseCodeService extends BaseService
      * useful for license key verification where exact format must be preserved.
      * Includes comprehensive status and expiration validation.
      *
-     * @param  string  $rawCode  The raw code to verify (no cleaning applied)
-     * @param  int|null  $productId  Optional product ID for product-specific verification
-     *
-     * @return array Raw code verification result with detailed status information
+     * @param string $rawCode The raw code to verify (no cleaning applied)
+     * @param int|null $productId Optional product ID for product-specific verification
      *
      * @throws \Exception When raw code verification fails
+     *
+     * @return array Raw code verification result with detailed status information
      *
      * @example
      * $result = $service->verifyRawCode('ABC123DEF456', $productId);
@@ -463,7 +450,7 @@ class PurchaseCodeService extends BaseService
         $licenseData = [
             'user_id' => $user->id,
             'purchase_code' => $purchaseCode,
-            'license_key' => 'envato_'.$purchaseCode,
+            'license_key' => 'envato_' . $purchaseCode,
             'license_type' => 'regular',
             'status' => 'active',
             'purchase_date' => data_get($envatoData, 'sold_at')

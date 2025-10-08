@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\LicenseVerificationLog;
@@ -34,18 +36,18 @@ class LicenseVerificationLogger
      * Logs license verification attempts with comprehensive validation,
      * sanitization, and security measures including purchase code hashing.
      *
-     * @param  string  $purchaseCode  The purchase code to log
-     * @param  string  $domain  The domain being verified
-     * @param  bool  $isValid  Whether the verification was successful
-     * @param  string  $message  The verification message
-     * @param  array|null  $responseData  Additional response data
-     * @param  string  $source  The verification source (install, api, admin)
-     * @param  Request|null  $request  The HTTP request object
-     * @param  string|null  $errorDetails  Additional error details
-     *
-     * @return LicenseVerificationLog The created log entry
+     * @param string $purchaseCode The purchase code to log
+     * @param string $domain The domain being verified
+     * @param bool $isValid Whether the verification was successful
+     * @param string $message The verification message
+     * @param array|null $responseData Additional response data
+     * @param string $source The verification source (install, api, admin)
+     * @param Request|null $request The HTTP request object
+     * @param string|null $errorDetails Additional error details
      *
      * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @return LicenseVerificationLog The created log entry
      *
      * @version 1.0.6
      */
@@ -131,11 +133,11 @@ class LicenseVerificationLogger
      * Retrieves comprehensive verification statistics with input validation
      * and sanitization for the specified time period.
      *
-     * @param  int  $days  Number of days to include in statistics
-     *
-     * @return array Statistics array with counts and metrics
+     * @param int $days Number of days to include in statistics
      *
      * @throws \InvalidArgumentException When days parameter is invalid
+     *
+     * @return array Statistics array with counts and metrics
      *
      * @version 1.0.6
      */
@@ -162,7 +164,7 @@ class LicenseVerificationLogger
                 'recent_failed_attempts' => LicenseVerificationLog::recent(24)->failed()->count(),
             ];
         } catch (Exception $e) {
-            Log::error('Failed to get verification statistics: '.$e->getMessage());
+            Log::error('Failed to get verification statistics: ' . $e->getMessage());
 
             return [
                 'total_attempts' => 0,
@@ -181,12 +183,12 @@ class LicenseVerificationLogger
      * Identifies suspicious activity patterns with input validation
      * and comprehensive error handling.
      *
-     * @param  int  $hours  Number of hours to look back
-     * @param  int  $minAttempts  Minimum number of attempts to consider suspicious
-     *
-     * @return array Array of suspicious activity records
+     * @param int $hours Number of hours to look back
+     * @param int $minAttempts Minimum number of attempts to consider suspicious
      *
      * @throws \InvalidArgumentException When parameters are invalid
+     *
+     * @return array Array of suspicious activity records
      *
      * @version 1.0.6
      */
@@ -211,7 +213,7 @@ class LicenseVerificationLogger
 
             return $typedResult;
         } catch (Exception $e) {
-            Log::error('Failed to get suspicious activity: '.$e->getMessage());
+            Log::error('Failed to get suspicious activity: ' . $e->getMessage());
 
             return [];
         }
@@ -223,11 +225,11 @@ class LicenseVerificationLogger
      * Retrieves recent verification attempts with input validation
      * and comprehensive error handling.
      *
-     * @param  int  $limit  Maximum number of attempts to retrieve
-     *
-     * @return Collection Collection of recent verification attempts
+     * @param int $limit Maximum number of attempts to retrieve
      *
      * @throws \InvalidArgumentException When limit is invalid
+     *
+     * @return Collection Collection of recent verification attempts
      *
      * @version 1.0.6
      */
@@ -244,7 +246,7 @@ class LicenseVerificationLogger
                 ->limit($limit)
                 ->get();
         } catch (Exception $e) {
-            Log::error('Failed to get recent attempts: '.$e->getMessage());
+            Log::error('Failed to get recent attempts: ' . $e->getMessage());
 
             return new Collection();
         }
@@ -256,11 +258,11 @@ class LicenseVerificationLogger
      * Removes old log entries with input validation and comprehensive
      * error handling for data cleanup operations.
      *
-     * @param  int  $days  Number of days to keep logs
-     *
-     * @return int Number of deleted log entries
+     * @param int $days Number of days to keep logs
      *
      * @throws \InvalidArgumentException When days parameter is invalid
+     *
+     * @return int Number of deleted log entries
      *
      * @version 1.0.6
      */
@@ -274,7 +276,7 @@ class LicenseVerificationLogger
             // Cleanup completed successfully - no logging needed for successful operations
             return is_numeric($deletedCount) ? (int)$deletedCount : 0;
         } catch (Exception $e) {
-            Log::error('Failed to clean old logs: '.$e->getMessage());
+            Log::error('Failed to clean old logs: ' . $e->getMessage());
 
             return 0;
         }
@@ -286,11 +288,11 @@ class LicenseVerificationLogger
      * Validates the purchase code and returns a sanitized version
      * with proper security measures.
      *
-     * @param  string  $purchaseCode  The purchase code to validate
-     *
-     * @return string The validated and sanitized purchase code
+     * @param string $purchaseCode The purchase code to validate
      *
      * @throws \InvalidArgumentException When purchase code is invalid
+     *
+     * @return string The validated and sanitized purchase code
      *
      * @version 1.0.6
      */
@@ -313,11 +315,11 @@ class LicenseVerificationLogger
      * Validates the domain and returns a sanitized version
      * with proper security measures.
      *
-     * @param  string  $domain  The domain to validate
-     *
-     * @return string The validated and sanitized domain
+     * @param string $domain The domain to validate
      *
      * @throws \InvalidArgumentException When domain is invalid
+     *
+     * @return string The validated and sanitized domain
      *
      * @version 1.0.6
      */
@@ -340,11 +342,11 @@ class LicenseVerificationLogger
      * Validates the verification source and returns a sanitized version
      * with proper security measures.
      *
-     * @param  string  $source  The source to validate
-     *
-     * @return string The validated and sanitized source
+     * @param string $source The source to validate
      *
      * @throws \InvalidArgumentException When source is invalid
+     *
+     * @return string The validated and sanitized source
      *
      * @version 1.0.6
      */
@@ -354,7 +356,7 @@ class LicenseVerificationLogger
         $sanitized = htmlspecialchars(trim($source), ENT_QUOTES, 'UTF-8');
         if (! in_array($sanitized, $allowedSources, true)) {
             throw new \InvalidArgumentException(
-                'Invalid verification source. Allowed values: '.implode(', ', $allowedSources),
+                'Invalid verification source. Allowed values: ' . implode(', ', $allowedSources),
             );
         }
 
@@ -367,7 +369,7 @@ class LicenseVerificationLogger
      * Extracts and validates IP address from request with proper
      * security measures and fallback handling.
      *
-     * @param  Request|null  $request  The HTTP request object
+     * @param Request|null $request The HTTP request object
      *
      * @return string The validated IP address
      *
@@ -389,7 +391,7 @@ class LicenseVerificationLogger
      * Extracts and validates user agent from request with proper
      * security measures and fallback handling.
      *
-     * @param  Request|null  $request  The HTTP request object
+     * @param Request|null $request The HTTP request object
      *
      * @return string The validated user agent
      *
@@ -410,11 +412,11 @@ class LicenseVerificationLogger
      *
      * Validates the days parameter for statistics and cleanup operations.
      *
-     * @param  int  $days  The days parameter to validate
-     *
-     * @return int The validated days parameter
+     * @param int $days The days parameter to validate
      *
      * @throws \InvalidArgumentException When days is invalid
+     *
+     * @return int The validated days parameter
      *
      * @version 1.0.6
      */
@@ -432,11 +434,11 @@ class LicenseVerificationLogger
      *
      * Validates the hours parameter for suspicious activity detection.
      *
-     * @param  int  $hours  The hours parameter to validate
-     *
-     * @return int The validated hours parameter
+     * @param int $hours The hours parameter to validate
      *
      * @throws \InvalidArgumentException When hours is invalid
+     *
+     * @return int The validated hours parameter
      *
      * @version 1.0.6
      */
@@ -454,11 +456,11 @@ class LicenseVerificationLogger
      *
      * Validates the minimum attempts parameter for suspicious activity detection.
      *
-     * @param  int  $minAttempts  The minimum attempts parameter to validate
-     *
-     * @return int The validated minimum attempts parameter
+     * @param int $minAttempts The minimum attempts parameter to validate
      *
      * @throws \InvalidArgumentException When minAttempts is invalid
+     *
+     * @return int The validated minimum attempts parameter
      *
      * @version 1.0.6
      */
@@ -476,11 +478,11 @@ class LicenseVerificationLogger
      *
      * Validates the limit parameter for data retrieval operations.
      *
-     * @param  int  $limit  The limit parameter to validate
-     *
-     * @return int The validated limit parameter
+     * @param int $limit The limit parameter to validate
      *
      * @throws \InvalidArgumentException When limit is invalid
+     *
+     * @return int The validated limit parameter
      *
      * @version 1.0.6
      */
@@ -499,8 +501,8 @@ class LicenseVerificationLogger
      * Determines the appropriate status based on validation results
      * and error details with proper validation.
      *
-     * @param  bool  $isValid  Whether the verification was successful
-     * @param  string|null  $errorDetails  Additional error details
+     * @param bool $isValid Whether the verification was successful
+     * @param string|null $errorDetails Additional error details
      *
      * @return string The determined status
      *
@@ -525,7 +527,7 @@ class LicenseVerificationLogger
      * Sanitizes string input to prevent XSS attacks and other
      * security vulnerabilities.
      *
-     * @param  string|null  $input  The input string to sanitize
+     * @param string|null $input The input string to sanitize
      *
      * @return string|null The sanitized string or null
      *

@@ -36,12 +36,12 @@ class AILicenseAnalyticsService
      * geographic distribution, and anomaly detection. All data is cached for performance
      * and includes comprehensive error handling and input validation.
      *
-     * @param  int  $days  Number of days to analyze (1-365, default: 30)
-     *
-     * @return array Comprehensive analytics dashboard data
+     * @param int $days Number of days to analyze (1-365, default: 30)
      *
      * @throws InvalidArgumentException When days parameter is invalid
      * @throws \Exception When analytics data retrieval fails
+     *
+     * @return array Comprehensive analytics dashboard data
      *
      * @example
      * $analytics = $service->getDashboardAnalytics(30);
@@ -94,11 +94,11 @@ class AILicenseAnalyticsService
      * revenue data, growth rates, and AI-powered insights. All data is validated and
      * includes proper error handling for database operations.
      *
-     * @param  int  $days  Number of days to analyze
-     *
-     * @return array Overview statistics with AI insights
+     * @param int $days Number of days to analyze
      *
      * @throws \Exception When statistics retrieval fails
+     *
+     * @return array Overview statistics with AI insights
      */
     /**
      * @return array<string, mixed>
@@ -622,8 +622,8 @@ class AILicenseAnalyticsService
      * comprehensive error handling and input validation to ensure reliable
      * event logging for analytics purposes.
      *
-     * @param  string  $eventType  Type of event to log
-     * @param  array  $eventData  Additional event data
+     * @param string $eventType Type of event to log
+     * @param array $eventData Additional event data
      *
      * @throws InvalidArgumentException When event type is invalid
      * @throws \Exception When event logging fails
@@ -669,9 +669,10 @@ class AILicenseAnalyticsService
      * system health information. All data is cached for performance and
      * includes comprehensive error handling.
      *
-     * @return array Real-time analytics data
      *
      * @throws \Exception When real-time data retrieval fails
+     *
+     * @return array Real-time analytics data
      *
      * @example
      * $realtimeData = $service->getRealTimeUpdates();
@@ -683,7 +684,7 @@ class AILicenseAnalyticsService
     public function getRealTimeUpdates(): array
     {
         try {
-            $cacheKey = 'realtime_analytics_'.now()->format('Y-m-d-H');
+            $cacheKey = 'realtime_analytics_' . now()->format('Y-m-d-H');
             $result = Cache::remember($cacheKey, 300, function (): array {
                 // 5 minutes cache
                 return DB::transaction(function (): array {
@@ -718,7 +719,7 @@ class AILicenseAnalyticsService
      * Ensures the days parameter is within acceptable range for analytics queries
      * to prevent performance issues and invalid data retrieval.
      *
-     * @param  int  $days  Number of days to validate
+     * @param int $days Number of days to validate
      *
      * @throws InvalidArgumentException When days parameter is invalid
      */
@@ -732,9 +733,10 @@ class AILicenseAnalyticsService
     /**
      * Get total licenses count with error handling.
      *
-     * @return int Total number of licenses
      *
      * @throws \Exception When database query fails
+     *
+     * @return int Total number of licenses
      */
     private function getTotalLicenses(): int
     {
@@ -752,9 +754,10 @@ class AILicenseAnalyticsService
     /**
      * Get active licenses count with error handling.
      *
-     * @return int Number of active licenses
      *
      * @throws \Exception When database query fails
+     *
+     * @return int Number of active licenses
      */
     private function getActiveLicenses(): int
     {
@@ -772,9 +775,10 @@ class AILicenseAnalyticsService
     /**
      * Get expired licenses count with error handling.
      *
-     * @return int Number of expired licenses
      *
      * @throws \Exception When database query fails
+     *
+     * @return int Number of expired licenses
      */
     private function getExpiredLicenses(): int
     {
@@ -792,9 +796,10 @@ class AILicenseAnalyticsService
     /**
      * Get suspended licenses count with error handling.
      *
-     * @return int Number of suspended licenses
      *
      * @throws \Exception When database query fails
+     *
+     * @return int Number of suspended licenses
      */
     private function getSuspendedLicenses(): int
     {
@@ -812,9 +817,10 @@ class AILicenseAnalyticsService
     /**
      * Get total customers count with error handling.
      *
-     * @return int Number of customers
      *
      * @throws \Exception When database query fails
+     *
+     * @return int Number of customers
      */
     private function getTotalCustomers(): int
     {
@@ -832,9 +838,10 @@ class AILicenseAnalyticsService
     /**
      * Get total products count with error handling.
      *
-     * @return int Number of products
      *
      * @throws \Exception When database query fails
+     *
+     * @return int Number of products
      */
     private function getTotalProducts(): int
     {
@@ -852,7 +859,7 @@ class AILicenseAnalyticsService
     /**
      * Calculate revenue for the specified period with enhanced error handling.
      *
-     * @param  Carbon  $startDate  Start date for revenue calculation
+     * @param Carbon $startDate Start date for revenue calculation
      *
      * @return float Calculated revenue amount
      */
@@ -866,11 +873,11 @@ class AILicenseAnalyticsService
     /**
      * Calculate growth rate with enhanced error handling and validation.
      *
-     * @param  int  $days  Number of days to analyze
-     *
-     * @return float Growth rate percentage
+     * @param int $days Number of days to analyze
      *
      * @throws \Exception When growth rate calculation fails
+     *
+     * @return float Growth rate percentage
      */
     private function calculateGrowthRate(int $days): float
     {
@@ -898,11 +905,11 @@ class AILicenseAnalyticsService
     /**
      * Calculate churn rate with enhanced error handling and validation.
      *
-     * @param  int  $days  Number of days to analyze
-     *
-     * @return float Churn rate percentage
+     * @param int $days Number of days to analyze
      *
      * @throws \Exception When churn rate calculation fails
+     *
+     * @return float Churn rate percentage
      */
     private function calculateChurnRate(int $days): float
     {
@@ -938,11 +945,11 @@ class AILicenseAnalyticsService
     /**
      * Assess risk level based on business metrics with enhanced error handling.
      *
-     * @param  array  $stats  Business statistics
-     *
-     * @return string Risk level (low, medium, high)
+     * @param array $stats Business statistics
      *
      * @throws \Exception When risk assessment fails
+     *
+     * @return string Risk level (low, medium, high)
      */
     /**
      * @param array<string, mixed> $stats
@@ -953,7 +960,8 @@ class AILicenseAnalyticsService
             $healthScore = $this->calculateHealthScore($stats);
             if ($healthScore >= 80) {
                 return 'low';
-            } elseif ($healthScore >= 60) {
+            }
+            if ($healthScore >= 60) {
                 return 'medium';
             } else {
                 return 'high';
@@ -1010,7 +1018,7 @@ class AILicenseAnalyticsService
      * Applies security sanitization to event data to prevent
      * XSS attacks and other security vulnerabilities.
      *
-     * @param  array  $eventData  The event data to sanitize
+     * @param array $eventData The event data to sanitize
      *
      * @return array The sanitized event data
      */

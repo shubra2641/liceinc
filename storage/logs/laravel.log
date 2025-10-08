@@ -2,3 +2,19 @@
 [2025-10-07 11:52:32] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/vendor/assets/bootstrap/css/bootstrap.min.css.map","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-07 11:52:32"} 
 [2025-10-07 22:45:23] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/vendor/assets/bootstrap/bootstrap.bundle.min.js.map","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-07 22:45:23"} 
 [2025-10-07 22:45:23] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/vendor/assets/bootstrap/css/bootstrap.min.css.map","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-07 22:45:23"} 
+[2025-10-08 12:25:28] local.ERROR: Access level to App\Services\EmailService::validateEmail() must be protected (as in class App\Services\BaseService) or weaker {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Access level to App\\Services\\EmailService::validateEmail() must be protected (as in class App\\Services\\BaseService) or weaker at D:\\xampp\\htdocs\\my-logos\\app\\Services\\EmailService.php:975)
+[stacktrace]
+#0 {main}
+"} 
+[2025-10-08 12:25:51] local.ERROR: Access level to App\Services\InvoiceService::sanitizeInput() must be protected (as in class App\Services\BaseService) or weaker {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Access level to App\\Services\\InvoiceService::sanitizeInput() must be protected (as in class App\\Services\\BaseService) or weaker at D:\\xampp\\htdocs\\my-logos\\app\\Services\\InvoiceService.php:516)
+[stacktrace]
+#0 {main}
+"} 
+[2025-10-08 12:26:19] local.ERROR: Access level to App\Services\InvoiceService::sanitizeInput() must be protected (as in class App\Services\BaseService) or weaker {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Access level to App\\Services\\InvoiceService::sanitizeInput() must be protected (as in class App\\Services\\BaseService) or weaker at D:\\xampp\\htdocs\\my-logos\\app\\Services\\InvoiceService.php:516)
+[stacktrace]
+#0 {main}
+"} 
+[2025-10-08 12:27:25] local.ERROR: Access level to App\Services\InvoiceService::sanitizeInput() must be protected (as in class App\Services\BaseService) or weaker {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Access level to App\\Services\\InvoiceService::sanitizeInput() must be protected (as in class App\\Services\\BaseService) or weaker at D:\\xampp\\htdocs\\my-logos\\app\\Services\\InvoiceService.php:516)
+[stacktrace]
+#0 {main}
+"} 

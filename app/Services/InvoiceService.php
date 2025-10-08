@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Helpers\SecurityHelper;
@@ -7,7 +9,6 @@ use App\Models\Invoice;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -48,14 +49,14 @@ class InvoiceService extends BaseService
      * Creates the first invoice for a license with proper validation,
      * error handling, and database transactions for data integrity.
      *
-     * @param  License  $license  The license to create invoice for
-     * @param  string  $paymentStatus  The payment status (paid, pending, overdue)
-     * @param  \DateTimeInterface|null  $dueDate  The due date for the invoice
-     *
-     * @return Invoice The created invoice
+     * @param License $license The license to create invoice for
+     * @param string $paymentStatus The payment status (paid, pending, overdue)
+     * @param \DateTimeInterface|null $dueDate The due date for the invoice
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
      * @throws \Exception When database operations fail
+     *
+     * @return Invoice The created invoice
      *
      * @example
      * $invoice = $invoiceService->createInitialInvoice($license, 'paid', now()->addDays(30));
@@ -100,9 +101,10 @@ class InvoiceService extends BaseService
      * Generates a unique invoice number with proper validation and
      * collision detection to ensure uniqueness.
      *
-     * @return string The generated invoice number
      *
      * @throws \Exception When invoice number generation fails
+     *
+     * @return string The generated invoice number
      */
     protected function generateInvoiceNumber(): string
     {
@@ -110,10 +112,10 @@ class InvoiceService extends BaseService
             $maxAttempts = 10;
             $attempts = 0;
             do {
-                $invoiceNumber = 'INV-'.strtoupper(Str::random(8));
+                $invoiceNumber = 'INV-' . strtoupper(Str::random(8));
                 $attempts++;
                 if ($attempts > $maxAttempts) {
-                    throw new \Exception('Failed to generate unique invoice number after '.$maxAttempts.' attempts');
+                    throw new \Exception('Failed to generate unique invoice number after ' . $maxAttempts . ' attempts');
                 }
             } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
 
@@ -133,13 +135,13 @@ class InvoiceService extends BaseService
      * Creates a renewal invoice for an existing license with proper
      * validation and error handling.
      *
-     * @param  License  $license  The license to create renewal invoice for
-     * @param  array  $options  Additional options for the invoice
-     *
-     * @return Invoice The created renewal invoice
+     * @param License $license The license to create renewal invoice for
+     * @param array $options Additional options for the invoice
      *
      * @throws \InvalidArgumentException When invalid license is provided
      * @throws \Exception When database operations fail
+     *
+     * @return Invoice The created renewal invoice
      *
      * @example
      * $renewalInvoice = $invoiceService->createRenewalInvoice($license);
@@ -204,7 +206,7 @@ class InvoiceService extends BaseService
      * Updates invoice status to paid with proper validation and
      * error handling.
      *
-     * @param  Invoice  $invoice  The invoice to mark as paid
+     * @param Invoice $invoice The invoice to mark as paid
      *
      * @throws \InvalidArgumentException When invalid invoice is provided
      * @throws \Exception When database operations fail
@@ -239,7 +241,7 @@ class InvoiceService extends BaseService
      * Updates invoice status to overdue with proper validation and
      * error handling.
      *
-     * @param  Invoice  $invoice  The invoice to mark as overdue
+     * @param Invoice $invoice The invoice to mark as overdue
      *
      * @throws \InvalidArgumentException When invalid invoice is provided
      * @throws \Exception When database operations fail
@@ -273,9 +275,10 @@ class InvoiceService extends BaseService
      * Retrieves comprehensive invoice statistics with optimized queries
      * and proper error handling.
      *
-     * @return array<string, mixed> Array of invoice statistics
      *
      * @throws \Exception When database operations fail
+     *
+     * @return array<string, mixed> Array of invoice statistics
      *
      * @example
      * $stats = $invoiceService->getInvoiceStats();
@@ -309,18 +312,18 @@ class InvoiceService extends BaseService
      * Creates a comprehensive invoice for payment processing with proper
      * validation, error handling, and security measures.
      *
-     * @param  User  $user  The user for the invoice
-     * @param  License  $license  The license for the invoice
-     * @param  Product  $product  The product for the invoice
-     * @param  float  $amount  The invoice amount
-     * @param  string  $currency  The currency code
-     * @param  string  $gateway  The payment gateway used
-     * @param  string|null  $transactionId  The transaction ID
-     *
-     * @return Invoice The created invoice
+     * @param User $user The user for the invoice
+     * @param License $license The license for the invoice
+     * @param Product $product The product for the invoice
+     * @param float $amount The invoice amount
+     * @param string $currency The currency code
+     * @param string $gateway The payment gateway used
+     * @param string|null $transactionId The transaction ID
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
      * @throws \Exception When database operations fail
+     *
+     * @return Invoice The created invoice
      *
      * @example
      * $invoice = $invoiceService->createInvoice($user, $license, $product, 99.99, 'USD', 'stripe', 'txn_123');
@@ -378,8 +381,8 @@ class InvoiceService extends BaseService
     /**
      * Validate invoice parameters.
      *
-     * @param  License  $license  The license to validate
-     * @param  string  $paymentStatus  The payment status to validate
+     * @param License $license The license to validate
+     * @param string $paymentStatus The payment status to validate
      *
      * @throws \InvalidArgumentException When validation fails
      */
@@ -388,14 +391,14 @@ class InvoiceService extends BaseService
         $this->validateLicense($license);
         $validStatuses = ['paid', 'pending', 'overdue', 'cancelled'];
         if (! in_array($paymentStatus, $validStatuses)) {
-            throw new \InvalidArgumentException('Invalid payment status: '.SecurityHelper::escapeVariable($paymentStatus));
+            throw new \InvalidArgumentException('Invalid payment status: ' . SecurityHelper::escapeVariable($paymentStatus));
         }
     }
 
     /**
      * Validate license.
      *
-     * @param  License  $license  The license to validate
+     * @param License $license The license to validate
      *
      * @throws \InvalidArgumentException When license is invalid
      */
@@ -415,7 +418,7 @@ class InvoiceService extends BaseService
     /**
      * Validate invoice.
      *
-     * @param  Invoice  $invoice  The invoice to validate
+     * @param Invoice $invoice The invoice to validate
      *
      * @throws \InvalidArgumentException When invoice is invalid
      */
@@ -429,12 +432,12 @@ class InvoiceService extends BaseService
     /**
      * Validate payment invoice parameters.
      *
-     * @param  User  $user  The user to validate
-     * @param  License  $license  The license to validate
-     * @param  Product  $product  The product to validate
-     * @param  float  $amount  The amount to validate
-     * @param  string  $currency  The currency to validate
-     * @param  string  $gateway  The gateway to validate
+     * @param User $user The user to validate
+     * @param License $license The license to validate
+     * @param Product $product The product to validate
+     * @param float $amount The amount to validate
+     * @param string $currency The currency to validate
+     * @param string $gateway The gateway to validate
      *
      * @throws \InvalidArgumentException When validation fails
      */
@@ -467,7 +470,7 @@ class InvoiceService extends BaseService
     /**
      * Sanitize amount for security.
      *
-     * @param  mixed  $amount  The amount to sanitize
+     * @param mixed $amount The amount to sanitize
      *
      * @return float The sanitized amount
      */
@@ -483,7 +486,7 @@ class InvoiceService extends BaseService
     /**
      * Sanitize status for security.
      *
-     * @param  string  $status  The status to sanitize
+     * @param string $status The status to sanitize
      *
      * @return string The sanitized status
      */
@@ -497,7 +500,7 @@ class InvoiceService extends BaseService
     /**
      * Sanitize currency for security.
      *
-     * @param  string  $currency  The currency to sanitize
+     * @param string $currency The currency to sanitize
      *
      * @return string The sanitized currency
      */
@@ -505,5 +508,4 @@ class InvoiceService extends BaseService
     {
         return strtoupper(trim($currency));
     }
-
 }

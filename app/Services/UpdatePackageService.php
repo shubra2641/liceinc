@@ -29,12 +29,12 @@ class UpdatePackageService
      * Installs update files from a package with comprehensive validation, security measures,
      * and error handling for reliable update file installation operations.
      *
-     * @param  string  $packagePath  Path to the update package file
-     *
-     * @return array Installation result with success status and installation details
+     * @param string $packagePath Path to the update package file
      *
      * @throws InvalidArgumentException When package path is invalid
      * @throws \Exception When file installation fails
+     *
+     * @return array Installation result with success status and installation details
      *
      * @example
      * $result = $service->installUpdateFiles('/path/to/update.zip');
@@ -51,10 +51,10 @@ class UpdatePackageService
             // Validate input parameters
             $this->validatePackagePath($packagePath);
             DB::beginTransaction();
-            $tempDir = storage_path('app/temp/update_'.(string)time());
+            $tempDir = storage_path('app/temp/update_' . (string)time());
             // Create temp directory with security validation
             if (! SecureFileHelper::isDirectory($tempDir)) {
-                if (! mkdir($tempDir, 0755, true)) {
+                if (! mkdir($tempDir, 0o755, true)) {
                     throw new \Exception('Failed to create temporary directory');
                 }
             }
@@ -91,7 +91,7 @@ class UpdatePackageService
 
             return [
                 'success' => false,
-                'message' => 'Failed to install update files: '.$e->getMessage(),
+                'message' => 'Failed to install update files: ' . $e->getMessage(),
             ];
         }
     }
@@ -102,12 +102,12 @@ class UpdatePackageService
      * Processes uploaded update packages with comprehensive validation, security measures,
      * and error handling for reliable update package processing operations.
      *
-     * @param  string  $packagePath  Path to the update package file
-     *
-     * @return array Processing result with success status and processing details
+     * @param string $packagePath Path to the update package file
      *
      * @throws InvalidArgumentException When package path is invalid
      * @throws \Exception When package processing fails
+     *
+     * @return array Processing result with success status and processing details
      *
      * @example
      * $result = $service->processUpdatePackage('/path/to/update.zip');
@@ -163,7 +163,7 @@ class UpdatePackageService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $result['message'] = 'Failed to process update package: '.$e->getMessage();
+            $result['message'] = 'Failed to process update package: ' . $e->getMessage();
         }
 
         return $result;
@@ -172,7 +172,7 @@ class UpdatePackageService
     /**
      * Validate package path with enhanced security and comprehensive validation.
      *
-     * @param  string  $packagePath  Package path to validate
+     * @param string $packagePath Package path to validate
      *
      * @throws InvalidArgumentException When package path is invalid
      */
@@ -205,11 +205,11 @@ class UpdatePackageService
     /**
      * Validate package structure with enhanced security and comprehensive validation.
      *
-     * @param  string  $packagePath  Path to the update package
-     *
-     * @return array Validation result with status and message
+     * @param string $packagePath Path to the update package
      *
      * @throws \Exception If validation fails critically
+     *
+     * @return array Validation result with status and message
      */
     /**
      * @return array<string, mixed>
@@ -233,7 +233,7 @@ class UpdatePackageService
         if ($result !== true) {
             return [
                 'valid' => false,
-                'message' => 'Invalid ZIP file format: '.$this->getZipErrorMessage($result),
+                'message' => 'Invalid ZIP file format: ' . $this->getZipErrorMessage($result),
             ];
         }
         try {
@@ -266,7 +266,7 @@ class UpdatePackageService
     /**
      * Get human-readable ZIP error message with enhanced error handling.
      *
-     * @param  int  $errorCode  ZIP error code
+     * @param int $errorCode ZIP error code
      *
      * @return string Error message
      */
@@ -305,18 +305,18 @@ class UpdatePackageService
     /**
      * Extract update package with enhanced security and error handling.
      *
-     * @param  string  $packagePath  Path to the package file
-     *
-     * @return string|null Path to extracted directory or null on failure
+     * @param string $packagePath Path to the package file
      *
      * @throws \Exception When extraction fails
+     *
+     * @return string|null Path to extracted directory or null on failure
      */
     private function extractPackage(string $packagePath): ?string
     {
         try {
-            $tempDir = storage_path('app/temp/update_'.(string)time());
+            $tempDir = storage_path('app/temp/update_' . (string)time());
             if (! SecureFileHelper::isDirectory($tempDir)) {
-                if (! mkdir($tempDir, 0755, true)) {
+                if (! mkdir($tempDir, 0o755, true)) {
                     throw new \Exception('Failed to create temporary directory');
                 }
             }
@@ -342,11 +342,11 @@ class UpdatePackageService
     /**
      * Process update files with enhanced security and error handling.
      *
-     * @param  string  $extractPath  Path to extracted files
-     *
-     * @return array Processing result with success status and processing details
+     * @param string $extractPath Path to extracted files
      *
      * @throws \Exception When file processing fails
+     *
+     * @return array Processing result with success status and processing details
      */
     /**
      * @return array<string, mixed>
@@ -386,7 +386,7 @@ class UpdatePackageService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $result['message'] = 'Failed to process update files: '.$e->getMessage();
+            $result['message'] = 'Failed to process update files: ' . $e->getMessage();
         }
 
         return $result;
@@ -395,11 +395,11 @@ class UpdatePackageService
     /**
      * Read update configuration with enhanced security and error handling.
      *
-     * @param  string  $extractPath  Path to extracted files
-     *
-     * @return array|null Configuration array or null on failure
+     * @param string $extractPath Path to extracted files
      *
      * @throws \Exception When configuration reading fails
+     *
+     * @return array|null Configuration array or null on failure
      */
     /**
      * @return array<string, mixed>|null
@@ -407,7 +407,7 @@ class UpdatePackageService
     private function readUpdateConfig(string $extractPath): ?array
     {
         try {
-            $configFile = $extractPath.'/update.json';
+            $configFile = $extractPath . '/update.json';
             if (! SecureFileHelper::fileExists($configFile)) {
                 return null;
             }
@@ -420,7 +420,7 @@ class UpdatePackageService
             }
             $config = json_decode($configContent, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception('Invalid JSON in configuration file: '.json_last_error_msg());
+                throw new \Exception('Invalid JSON in configuration file: ' . json_last_error_msg());
             }
             $arrayResult = is_array($config) ? $config : [];
             /** @var array<string, mixed> $typedResult */
@@ -440,12 +440,12 @@ class UpdatePackageService
     /**
      * Process file updates with enhanced security and error handling.
      *
-     * @param  string  $extractPath  Path to extracted files
-     * @param  array  $config  Update configuration
-     *
-     * @return array Array of processed files with their actions
+     * @param string $extractPath Path to extracted files
+     * @param array $config Update configuration
      *
      * @throws \Exception When file processing fails
+     *
+     * @return array Array of processed files with their actions
      */
     /**
      * @param array<string, mixed> $config
@@ -456,7 +456,7 @@ class UpdatePackageService
     {
         try {
             $processedFiles = [];
-            $filesDir = $extractPath.'/files';
+            $filesDir = $extractPath . '/files';
             if (! SecureFileHelper::isDirectory($filesDir)) {
                 return $processedFiles;
             }
@@ -512,12 +512,12 @@ class UpdatePackageService
     /**
      * Process database migrations with enhanced security and error handling.
      *
-     * @param  string  $extractPath  Path to extracted files
-     * @param  array  $config  Update configuration
-     *
-     * @return array Migration result with success status and migration details
+     * @param string $extractPath Path to extracted files
+     * @param array $config Update configuration
      *
      * @throws \Exception When migration processing fails
+     *
+     * @return array Migration result with success status and migration details
      */
     /**
      * @param array<string, mixed> $config
@@ -532,16 +532,16 @@ class UpdatePackageService
             'migrations' => [],
         ];
         try {
-            $migrationsDir = $extractPath.'/migrations';
+            $migrationsDir = $extractPath . '/migrations';
             if (SecureFileHelper::isDirectory($migrationsDir)) {
                 // Copy migration files
-                $migrationFiles = glob($migrationsDir.'/*.php');
+                $migrationFiles = glob($migrationsDir . '/*.php');
                 if ($migrationFiles === false) {
                     $migrationFiles = [];
                 }
                 foreach ($migrationFiles as $migrationFile) {
                     $filename = basename($migrationFile);
-                    $targetPath = database_path('migrations/'.$filename);
+                    $targetPath = database_path('migrations/' . $filename);
                     if (! copy($migrationFile, $targetPath)) {
                         throw new \Exception("Failed to copy migration file: {$filename}");
                     }
@@ -561,7 +561,7 @@ class UpdatePackageService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $migrationResult['message'] = 'Migration failed: '.$e->getMessage();
+            $migrationResult['message'] = 'Migration failed: ' . $e->getMessage();
         }
 
         return $migrationResult;
@@ -570,12 +570,12 @@ class UpdatePackageService
     /**
      * Update version information with enhanced security and error handling.
      *
-     * @param  string  $extractPath  Path to extracted files
-     * @param  array  $config  Update configuration
-     *
-     * @return array Version update result with success status and version details
+     * @param string $extractPath Path to extracted files
+     * @param array $config Update configuration
      *
      * @throws \Exception When version update fails
+     *
+     * @return array Version update result with success status and version details
      */
     /**
      * @param array<string, mixed> $config
@@ -590,9 +590,9 @@ class UpdatePackageService
             'version' => null,
         ];
         try {
-            $versionFile = $extractPath.'/version.json';
+            $versionFile = $extractPath . '/version.json';
             if (Storage::disk('local')->exists($versionFile)) {
-                if (! is_readable(storage_path('app/'.$versionFile))) {
+                if (! is_readable(storage_path('app/' . $versionFile))) {
                     throw new \Exception('Version file is not readable');
                 }
                 $versionContent = Storage::disk('local')->get($versionFile);
@@ -601,7 +601,7 @@ class UpdatePackageService
                 }
                 $versionData = json_decode($versionContent, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw new \Exception('Invalid JSON in version file: '.json_last_error_msg());
+                    throw new \Exception('Invalid JSON in version file: ' . json_last_error_msg());
                 }
                 // Update storage/version.json
                 $targetVersionFile = storage_path('version.json');
@@ -622,7 +622,7 @@ class UpdatePackageService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $versionResult['message'] = 'Failed to update version: '.$e->getMessage();
+            $versionResult['message'] = 'Failed to update version: ' . $e->getMessage();
         }
 
         return $versionResult;
@@ -631,23 +631,23 @@ class UpdatePackageService
     /**
      * Create backup of file with enhanced security and error handling.
      *
-     * @param  string  $filePath  Path to the file to backup
-     *
-     * @return string Path to the backup file
+     * @param string $filePath Path to the file to backup
      *
      * @throws \Exception When backup creation fails
+     *
+     * @return string Path to the backup file
      */
     private function createFileBackup(string $filePath): string
     {
         try {
             $backupDir = storage_path('app/backups/files');
             if (! SecureFileHelper::isDirectory($backupDir)) {
-                if (! mkdir($backupDir, 0755, true)) {
+                if (! mkdir($backupDir, 0o755, true)) {
                     throw new \Exception('Failed to create backup directory');
                 }
             }
             $relativePath = substr($filePath, strlen(base_path()) + 1);
-            $backupPath = $backupDir.'/'.str_replace('/', '_', $relativePath).'_'.time();
+            $backupPath = $backupDir . '/' . str_replace('/', '_', $relativePath) . '_' . time();
             if (! copy($filePath, $backupPath)) {
                 throw new \Exception("Failed to create backup of file: {$filePath}");
             }
@@ -666,7 +666,7 @@ class UpdatePackageService
     /**
      * Clean up temporary files with enhanced security and error handling.
      *
-     * @param  string  $tempDir  Path to temporary directory to clean up
+     * @param string $tempDir Path to temporary directory to clean up
      *
      * @throws \Exception When cleanup fails
      */
@@ -689,16 +689,15 @@ class UpdatePackageService
     /**
      * Install files from source to target directory with enhanced security and error handling.
      *
-     * @param  string  $sourceDir  Source directory path
-     * @param  string  $targetDir  Target directory path
-     * @param  array  $steps  Reference to steps array for logging
-     * @param  int  $filesInstalled  Reference to files installed counter
+     * @param string $sourceDir Source directory path
+     * @param string $targetDir Target directory path
+     * @param array $steps Reference to steps array for logging
+     * @param int $filesInstalled Reference to files installed counter
      *
      * @throws \Exception When file installation fails
      */
     /**
      * @param array<string, mixed> &$steps
-     * @param int &$filesInstalled
      */
     private function installFiles(string $sourceDir, string $targetDir, array &$steps, int &$filesInstalled): void
     {
@@ -715,10 +714,10 @@ class UpdatePackageService
                 $itemPathString = is_string($itemPath) ? $itemPath : '';
                 $sourcePath = str_replace('\\', '/', $itemPathString);
                 $relativePath = substr($sourcePath, strlen($sourceDir) + 1);
-                $targetPath = $targetDir.'/'.$relativePath;
+                $targetPath = $targetDir . '/' . $relativePath;
                 if (is_object($item) && method_exists($item, 'isDir') && $item->isDir()) {
                     if (! SecureFileHelper::isDirectory($targetPath)) {
-                        if (! mkdir($targetPath, 0755, true)) {
+                        if (! mkdir($targetPath, 0o755, true)) {
                             throw new \Exception("Failed to create directory: {$relativePath}");
                         }
                         $steps["Created directory: {$relativePath}"] = true;
@@ -731,7 +730,7 @@ class UpdatePackageService
                     // Create target directory if it doesn't exist
                     $targetDirPath = SecureFileHelper::getDirectoryName($targetPath);
                     if (! SecureFileHelper::isDirectory($targetDirPath)) {
-                        if (! mkdir($targetDirPath, 0755, true)) {
+                        if (! mkdir($targetDirPath, 0o755, true)) {
                             throw new \Exception("Failed to create target directory: {$targetDirPath}");
                         }
                     }
@@ -757,7 +756,7 @@ class UpdatePackageService
     /**
      * Delete directory recursively with enhanced security and error handling.
      *
-     * @param  string  $dir  Directory path to delete
+     * @param string $dir Directory path to delete
      *
      * @throws \Exception When directory deletion fails
      */
@@ -770,7 +769,7 @@ class UpdatePackageService
             $scandirResult = scandir($dir);
             $files = is_array($scandirResult) ? array_diff($scandirResult, ['.', '..']) : [];
             foreach ($files as $file) {
-                $path = $dir.'/'.$file;
+                $path = $dir . '/' . $file;
                 if (SecureFileHelper::isDirectory($path)) {
                     $this->deleteDirectory($path);
                 } else {

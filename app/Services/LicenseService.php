@@ -50,14 +50,14 @@ class LicenseService extends BaseService
      * Creates a new license for a user and product with comprehensive validation,
      * proper expiry calculation, and database transaction support.
      *
-     * @param  User  $user  The user to create the license for
-     * @param  Product  $product  The product to create the license for
-     * @param  string|null  $paymentGateway  The payment gateway used for purchase (optional)
-     *
-     * @return License The created license instance
+     * @param User $user The user to create the license for
+     * @param Product $product The product to create the license for
+     * @param string|null $paymentGateway The payment gateway used for purchase (optional)
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
      * @throws \Exception When database operations fail
+     *
+     * @return License The created license instance
      *
      * @example
      * $license = $licenseService->createLicense($user, $product, 'stripe');
@@ -107,11 +107,11 @@ class LicenseService extends BaseService
      * Calculates the license expiry date based on product configuration
      * with proper handling of lifetime licenses and renewal periods.
      *
-     * @param  Product  $product  The product to calculate expiry for
-     *
-     * @return Carbon|null The expiry date or null for lifetime licenses
+     * @param Product $product The product to calculate expiry for
      *
      * @throws \InvalidArgumentException When invalid product is provided
+     *
+     * @return Carbon|null The expiry date or null for lifetime licenses
      *
      * @example
      * $expiry = $licenseService->calculateLicenseExpiry($product);
@@ -151,11 +151,11 @@ class LicenseService extends BaseService
      * Calculates the support expiry date based on product configuration
      * with proper validation and error handling.
      *
-     * @param  Product  $product  The product to calculate support expiry for
-     *
-     * @return Carbon The support expiry date
+     * @param Product $product The product to calculate support expiry for
      *
      * @throws \InvalidArgumentException When invalid product is provided
+     *
+     * @return Carbon The support expiry date
      *
      * @example
      * $supportExpiry = $licenseService->calculateSupportExpiry($product);
@@ -188,7 +188,7 @@ class LicenseService extends BaseService
      * Converts renewal period strings to days with comprehensive
      * validation and error handling.
      *
-     * @param  string|null  $renewalPeriod  The renewal period string
+     * @param string|null $renewalPeriod The renewal period string
      *
      * @return int|null The number of days or null for lifetime
      *
@@ -218,12 +218,12 @@ class LicenseService extends BaseService
      * Validates if a user can purchase a specific product with comprehensive
      * checks for existing licenses, product availability, and pricing.
      *
-     * @param  User  $user  The user to check
-     * @param  Product  $product  The product to check
-     *
-     * @return array<string, mixed> Array containing purchase eligibility information
+     * @param User $user The user to check
+     * @param Product $product The product to check
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
+     *
+     * @return array<string, mixed> Array containing purchase eligibility information
      *
      * @example
      * $canPurchase = $licenseService->canUserPurchaseProduct($user, $product);
@@ -292,11 +292,11 @@ class LicenseService extends BaseService
      * Retrieves all active licenses for a user with comprehensive
      * validation and error handling.
      *
-     * @param  User  $user  The user to get licenses for
-     *
-     * @return Collection<License> Collection of active licenses
+     * @param User $user The user to get licenses for
      *
      * @throws \InvalidArgumentException When invalid user is provided
+     *
+     * @return Collection<License> Collection of active licenses
      *
      * @example
      * $licenses = $licenseService->getUserActiveLicenses($user);
@@ -335,12 +335,12 @@ class LicenseService extends BaseService
      * Validates a license key with comprehensive checks for existence,
      * status, expiry, and domain authorization.
      *
-     * @param  string  $licenseKey  The license key to validate
-     * @param  string|null  $domain  The domain to check authorization for (optional)
-     *
-     * @return array<string, mixed> Array containing validation results
+     * @param string $licenseKey The license key to validate
+     * @param string|null $domain The domain to check authorization for (optional)
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
+     *
+     * @return array<string, mixed> Array containing validation results
      *
      * @example
      * $validation = $licenseService->isLicenseValid($licenseKey, $domain);
@@ -430,12 +430,12 @@ class LicenseService extends BaseService
      * Activates a license for a specific domain with comprehensive
      * validation and database transaction support.
      *
-     * @param  string  $licenseKey  The license key to activate
-     * @param  string  $domain  The domain to activate for
-     *
-     * @return array<string, mixed> Array containing activation results
+     * @param string $licenseKey The license key to activate
+     * @param string $domain The domain to activate for
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
+     *
+     * @return array<string, mixed> Array containing activation results
      *
      * @example
      * $activation = $licenseService->activateLicenseForDomain($licenseKey, $domain);
@@ -512,9 +512,9 @@ class LicenseService extends BaseService
     /**
      * Validate create license parameters.
      *
-     * @param  User  $user  The user
-     * @param  Product  $product  The product
-     * @param  string|null  $paymentGateway  The payment gateway
+     * @param User $user The user
+     * @param Product $product The product
+     * @param string|null $paymentGateway The payment gateway
      *
      * @throws \InvalidArgumentException When validation fails
      */
@@ -529,8 +529,8 @@ class LicenseService extends BaseService
     /**
      * Validate can purchase parameters.
      *
-     * @param  User  $user  The user
-     * @param  Product  $product  The product
+     * @param User $user The user
+     * @param Product $product The product
      */
     private function validateCanPurchaseParameters(User $user, Product $product): void
     {
@@ -541,7 +541,7 @@ class LicenseService extends BaseService
     /**
      * Validate license key parameter.
      *
-     * @param  string  $licenseKey  The license key
+     * @param string $licenseKey The license key
      *
      * @throws \InvalidArgumentException When validation fails
      */
@@ -555,8 +555,8 @@ class LicenseService extends BaseService
     /**
      * Validate activation parameters.
      *
-     * @param  string  $licenseKey  The license key
-     * @param  string  $domain  The domain
+     * @param string $licenseKey The license key
+     * @param string $domain The domain
      *
      * @throws \InvalidArgumentException When validation fails
      */
@@ -576,19 +576,14 @@ class LicenseService extends BaseService
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string  $input  The input to sanitize
      *
      * @return string The sanitized input
      */
-    private function sanitizeInput(string $input): string
-    {
-        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-    }
 
     /**
      * Sanitize domain for security.
      *
-     * @param  string  $domain  The domain to sanitize
+     * @param string $domain The domain to sanitize
      *
      * @return string The sanitized domain
      */
@@ -600,7 +595,7 @@ class LicenseService extends BaseService
     /**
      * Hash data for logging.
      *
-     * @param  string  $data  The data to hash
+     * @param string $data The data to hash
      *
      * @return string The hashed data
      */
@@ -609,6 +604,6 @@ class LicenseService extends BaseService
         $appKey = config('app.key');
         $keyString = is_string($appKey) ? $appKey : '';
 
-        return substr(hash('sha256', $data.$keyString), 0, 8).'...';
+        return substr(hash('sha256', $data . $keyString), 0, 8) . '...';
     }
 }

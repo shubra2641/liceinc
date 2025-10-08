@@ -6,7 +6,6 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Throwable;
 
@@ -32,10 +31,11 @@ abstract class BaseService
      * Provides safe database transaction handling with automatic rollback
      * on exceptions and comprehensive error logging.
      *
-     * @param  callable  $callback  The callback to execute within transaction
-     * @return mixed The result of the callback execution
+     * @param callable $callback The callback to execute within transaction
      *
      * @throws \Exception When the callback execution fails
+     *
+     * @return mixed The result of the callback execution
      *
      * @example
      * $result = $this->executeInTransaction(function() {
@@ -45,7 +45,7 @@ abstract class BaseService
     protected function executeInTransaction(callable $callback): mixed
     {
         DB::beginTransaction();
-        
+
         try {
             $result = $callback();
             DB::commit();
@@ -67,9 +67,8 @@ abstract class BaseService
      * Provides centralized error logging with consistent format
      * and comprehensive context information.
      *
-     * @param  string  $message  The error message
-     * @param  array  $context  Additional context data
-     * @return void
+     * @param string $message The error message
+     * @param array $context Additional context data
      *
      * @example
      * $this->logError('User creation failed', [
@@ -94,9 +93,8 @@ abstract class BaseService
      * Provides centralized info logging with consistent format
      * and comprehensive context information.
      *
-     * @param  string  $message  The info message
-     * @param  array  $context  Additional context data
-     * @return void
+     * @param string $message The info message
+     * @param array $context Additional context data
      *
      * @example
      * $this->logInfo('User created successfully', [
@@ -121,11 +119,10 @@ abstract class BaseService
      * Provides input validation with clear error messages
      * and consistent validation logic.
      *
-     * @param  mixed  $value  The value to validate
-     * @param  string  $fieldName  The name of the field for error message
-     * @return void
+     * @param mixed $value The value to validate
+     * @param string $fieldName The name of the field for error message
      *
-     * @throws \InvalidArgumentException When the value is empty
+     * @throws InvalidArgumentException When the value is empty
      *
      * @example
      * $this->validateNotEmpty($email, 'Email');
@@ -133,7 +130,7 @@ abstract class BaseService
     protected function validateNotEmpty(mixed $value, string $fieldName): void
     {
         if (empty($value)) {
-            throw new \InvalidArgumentException("{$fieldName} cannot be empty");
+            throw new InvalidArgumentException("{$fieldName} cannot be empty");
         }
     }
 
@@ -143,11 +140,10 @@ abstract class BaseService
      * Provides numeric validation with clear error messages
      * and consistent validation logic.
      *
-     * @param  mixed  $value  The value to validate
-     * @param  string  $fieldName  The name of the field for error message
-     * @return void
+     * @param mixed $value The value to validate
+     * @param string $fieldName The name of the field for error message
      *
-     * @throws \InvalidArgumentException When the value is not a positive integer
+     * @throws InvalidArgumentException When the value is not a positive integer
      *
      * @example
      * $this->validatePositiveInteger($userId, 'User ID');
@@ -155,7 +151,7 @@ abstract class BaseService
     protected function validatePositiveInteger(mixed $value, string $fieldName): void
     {
         if (!is_numeric($value) || (int)$value <= 0) {
-            throw new \InvalidArgumentException("{$fieldName} must be a positive integer");
+            throw new InvalidArgumentException("{$fieldName} must be a positive integer");
         }
     }
 
@@ -165,11 +161,10 @@ abstract class BaseService
      * Provides email validation with clear error messages
      * and consistent validation logic.
      *
-     * @param  mixed  $value  The value to validate
-     * @param  string  $fieldName  The name of the field for error message
-     * @return void
+     * @param mixed $value The value to validate
+     * @param string $fieldName The name of the field for error message
      *
-     * @throws \InvalidArgumentException When the value is not a valid email
+     * @throws InvalidArgumentException When the value is not a valid email
      *
      * @example
      * $this->validateEmail($email, 'Email');
@@ -177,7 +172,7 @@ abstract class BaseService
     protected function validateEmail(mixed $value, string $fieldName): void
     {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException("{$fieldName} must be a valid email address");
+            throw new InvalidArgumentException("{$fieldName} must be a valid email address");
         }
     }
 
@@ -187,7 +182,8 @@ abstract class BaseService
      * Provides input sanitization with comprehensive security measures
      * and consistent sanitization logic.
      *
-     * @param  string|null  $input  The input string to sanitize
+     * @param string|null $input The input string to sanitize
+     *
      * @return string The sanitized input string
      *
      * @example
@@ -201,16 +197,16 @@ abstract class BaseService
 
         // Remove null bytes
         $input = str_replace("\0", '', $input);
-        
+
         // Trim whitespace
         $input = trim($input);
-        
+
         // Remove HTML tags
         $input = strip_tags($input);
-        
+
         // Escape special characters
         $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
-        
+
         return $input;
     }
 
@@ -220,7 +216,8 @@ abstract class BaseService
      * Provides secure token generation with configurable length
      * and consistent token format.
      *
-     * @param  int  $length  The length of the token (default: 32)
+     * @param int $length The length of the token (default: 32)
+     *
      * @return string The generated secure token
      *
      * @example
@@ -237,11 +234,10 @@ abstract class BaseService
      * Provides alphanumeric validation with clear error messages
      * and consistent validation logic.
      *
-     * @param  string  $value  The value to validate
-     * @param  string  $fieldName  The name of the field for error message
-     * @return void
+     * @param string $value The value to validate
+     * @param string $fieldName The name of the field for error message
      *
-     * @throws \InvalidArgumentException When the value contains non-alphanumeric characters
+     * @throws InvalidArgumentException When the value contains non-alphanumeric characters
      *
      * @example
      * $this->validateAlphanumeric($code, 'Purchase Code');
@@ -249,7 +245,7 @@ abstract class BaseService
     protected function validateAlphanumeric(string $value, string $fieldName): void
     {
         if (!ctype_alnum($value)) {
-            throw new \InvalidArgumentException("{$fieldName} must contain only alphanumeric characters");
+            throw new InvalidArgumentException("{$fieldName} must contain only alphanumeric characters");
         }
     }
 }

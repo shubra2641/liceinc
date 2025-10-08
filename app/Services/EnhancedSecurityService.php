@@ -128,12 +128,12 @@ class EnhancedSecurityService
      * Validates rate limits for various actions with proper error handling
      * and security measures to prevent abuse.
      *
-     * @param  string  $action  The action to check rate limit for
-     * @param  string  $identifier  Unique identifier (IP, user ID, etc.)
-     *
-     * @return bool True if rate limit is not exceeded, false otherwise
+     * @param string $action The action to check rate limit for
+     * @param string $identifier Unique identifier (IP, user ID, etc.)
      *
      * @throws \InvalidArgumentException When invalid action is provided
+     *
+     * @return bool True if rate limit is not exceeded, false otherwise
      *
      * @example
      * if (!$security->checkRateLimit('api_requests', $request->ip())) {
@@ -148,7 +148,7 @@ class EnhancedSecurityService
             }
             $config = self::RATE_LIMITS[$action] ?? self::RATE_LIMITS['api_requests'];
             $result = RateLimiter::attempt(
-                $action.':'.$identifier,
+                $action . ':' . $identifier,
                 $config['max_attempts'],
                 function () {
                     // Rate limit not exceeded
@@ -171,12 +171,12 @@ class EnhancedSecurityService
     /**
      * Get remaining attempts for rate limit with validation.
      *
-     * @param  string  $action  The action to check
-     * @param  string  $identifier  Unique identifier
-     *
-     * @return int Number of remaining attempts
+     * @param string $action The action to check
+     * @param string $identifier Unique identifier
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
+     *
+     * @return int Number of remaining attempts
      */
     public function getRemainingAttempts(string $action, string $identifier): int
     {
@@ -185,7 +185,7 @@ class EnhancedSecurityService
                 throw new \InvalidArgumentException('Action and identifier cannot be empty');
             }
             $config = self::RATE_LIMITS[$action] ?? self::RATE_LIMITS['api_requests'];
-            $key = $action.':'.$identifier;
+            $key = $action . ':' . $identifier;
 
             return RateLimiter::remaining($key, $config['max_attempts']);
         } catch (\Exception $e) {
@@ -202,8 +202,8 @@ class EnhancedSecurityService
     /**
      * Clear rate limit for specific action and identifier.
      *
-     * @param  string  $action  The action to clear
-     * @param  string  $identifier  Unique identifier
+     * @param string $action The action to clear
+     * @param string $identifier Unique identifier
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
      */
@@ -213,7 +213,7 @@ class EnhancedSecurityService
             if (empty($action) || empty($identifier)) {
                 throw new \InvalidArgumentException('Action and identifier cannot be empty');
             }
-            RateLimiter::clear($action.':'.$identifier);
+            RateLimiter::clear($action . ':' . $identifier);
         } catch (\Exception $e) {
             Log::error('Failed to clear rate limit', [
                 'error' => $e->getMessage(),
@@ -229,8 +229,8 @@ class EnhancedSecurityService
      * Provides comprehensive input sanitization with multiple layers of
      * protection against XSS, injection attacks, and malicious content.
      *
-     * @param  mixed  $data  The data to sanitize
-     * @param  bool  $allowHtml  Whether to allow HTML tags
+     * @param mixed $data The data to sanitize
+     * @param bool $allowHtml Whether to allow HTML tags
      *
      * @return mixed The sanitized data
      *
@@ -278,7 +278,7 @@ class EnhancedSecurityService
      * Performs extensive security validation on uploaded files including
      * size limits, MIME type validation, and malicious content detection.
      *
-     * @param  \Illuminate\Http\UploadedFile  $file  The uploaded file
+     * @param \Illuminate\Http\UploadedFile $file The uploaded file
      *
      * @return array<int, string> Array of validation errors
      *
@@ -329,7 +329,7 @@ class EnhancedSecurityService
     /**
      * Check if content contains malicious patterns.
      *
-     * @param  string  $content  The content to check
+     * @param string $content The content to check
      *
      * @return bool True if malicious content is detected
      */
@@ -355,7 +355,7 @@ class EnhancedSecurityService
     /**
      * Check if file is potentially executable.
      *
-     * @param  \Illuminate\Http\UploadedFile  $file  The file to check
+     * @param \Illuminate\Http\UploadedFile $file The file to check
      *
      * @return bool True if file is executable
      */
@@ -374,7 +374,7 @@ class EnhancedSecurityService
     /**
      * Check file content for malicious patterns.
      *
-     * @param  \Illuminate\Http\UploadedFile  $file  The file to check
+     * @param \Illuminate\Http\UploadedFile $file The file to check
      *
      * @return bool True if malicious content is found
      */
@@ -401,11 +401,11 @@ class EnhancedSecurityService
     /**
      * Generate secure random token with enhanced entropy.
      *
-     * @param  int  $length  Token length in characters
-     *
-     * @return string The generated secure token
+     * @param int $length Token length in characters
      *
      * @throws \InvalidArgumentException When invalid length is provided
+     *
+     * @return string The generated secure token
      */
     public function generateSecureToken(int $length = 32): string
     {
@@ -433,7 +433,7 @@ class EnhancedSecurityService
     /**
      * Hash sensitive data for logging with enhanced security.
      *
-     * @param  string  $data  The data to hash
+     * @param string $data The data to hash
      *
      * @return string The hashed data
      */
@@ -443,7 +443,7 @@ class EnhancedSecurityService
             $appKey = config('app.key');
             $keyString = is_string($appKey) ? $appKey : '';
 
-            return hash('sha256', $data.$keyString);
+            return hash('sha256', $data . $keyString);
         } catch (\Exception $e) {
             Log::error('Data hashing failed', [
                 'error' => $e->getMessage(),
@@ -456,14 +456,14 @@ class EnhancedSecurityService
     /**
      * Log security event with comprehensive context.
      *
-     * @param  string  $event  The security event type
-     * @param  Request  $request  The HTTP request
-     * @param  array<string, mixed>  $context  Additional context data
+     * @param string $event The security event type
+     * @param Request $request The HTTP request
+     * @param array<string, mixed> $context Additional context data
      */
     public function logSecurityEvent(string $event, Request $request, array $context = []): void
     {
         try {
-            Log::warning('Security event: '.$event, array_merge([
+            Log::warning('Security event: ' . $event, array_merge([
                 'event' => $event,
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
@@ -484,7 +484,7 @@ class EnhancedSecurityService
     /**
      * Detect suspicious activity patterns with enhanced detection.
      *
-     * @param  Request  $request  The HTTP request to analyze
+     * @param Request $request The HTTP request to analyze
      *
      * @return array<int, string> Array of detected suspicious activities
      */
@@ -536,7 +536,7 @@ class EnhancedSecurityService
     /**
      * Check if user agent is suspicious.
      *
-     * @param  string|null  $userAgent  The user agent string
+     * @param string|null $userAgent The user agent string
      *
      * @return bool True if user agent is suspicious
      */
@@ -567,7 +567,7 @@ class EnhancedSecurityService
     /**
      * Get client fingerprint for tracking with enhanced accuracy.
      *
-     * @param  Request  $request  The HTTP request
+     * @param Request $request The HTTP request
      *
      * @return string The client fingerprint
      */
@@ -595,7 +595,7 @@ class EnhancedSecurityService
     /**
      * Check if IP is in whitelist with enhanced validation.
      *
-     * @param  string  $ip  The IP address to check
+     * @param string $ip The IP address to check
      *
      * @return bool True if IP is whitelisted
      */
@@ -625,7 +625,7 @@ class EnhancedSecurityService
     /**
      * Check if IP is in blacklist with enhanced validation.
      *
-     * @param  string  $ip  The IP address to check
+     * @param string $ip The IP address to check
      *
      * @return bool True if IP is blacklisted
      */

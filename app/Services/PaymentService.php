@@ -41,13 +41,13 @@ class PaymentService
      * Includes comprehensive validation, security measures, and error handling for
      * reliable payment processing operations.
      *
-     * @param  array  $orderData  Order data including amount, currency, user_id, product_id
-     * @param  string  $gateway  Payment gateway to use ('paypal' or 'stripe')
-     *
-     * @return array Payment processing result with success status and redirect URL
+     * @param array $orderData Order data including amount, currency, user_id, product_id
+     * @param string $gateway Payment gateway to use ('paypal' or 'stripe')
      *
      * @throws InvalidArgumentException When gateway is unsupported or data is invalid
      * @throws \Exception When payment processing fails
+     *
+     * @return array Payment processing result with success status and redirect URL
      *
      * @example
      * $result = $service->processPayment([
@@ -93,11 +93,11 @@ class PaymentService
      * Processes PayPal payments with comprehensive validation, security measures,
      * and error handling for reliable payment processing operations.
      *
-     * @param  array  $orderData  Order data including amount, currency, user_id, product_id
-     *
-     * @return array PayPal payment processing result
+     * @param array $orderData Order data including amount, currency, user_id, product_id
      *
      * @throws \Exception When PayPal payment processing fails
+     *
+     * @return array PayPal payment processing result
      */
     /**
      * @param array<string, mixed> $orderData
@@ -143,13 +143,13 @@ class PaymentService
             $transaction->setDescription('Product Purchase');
             $userId = is_string($orderData['user_id'] ?? '') ? (string)($orderData['user_id'] ?? '') : '';
             $productId = is_string($orderData['product_id'] ?? '') ? (string)($orderData['product_id'] ?? '') : '';
-            $transaction->setCustom('user_id:'.$userId.', product_id:'.$productId);
+            $transaction->setCustom('user_id:' . $userId . ', product_id:' . $productId);
             // Create redirect URLs
             $redirectUrls = new RedirectUrls();
             $appUrl = config('app.url');
             $appUrlString = is_string($appUrl) ? $appUrl : '';
-            $redirectUrls->setReturnUrl($appUrlString.'/payment/success/paypal')
-                ->setCancelUrl($appUrlString.'/payment/cancel/paypal');
+            $redirectUrls->setReturnUrl($appUrlString . '/payment/success/paypal')
+                ->setCancelUrl($appUrlString . '/payment/cancel/paypal');
             // Create payment with proper structure
             $payment = new Payment();
             $payment->setIntent('sale');
@@ -182,7 +182,7 @@ class PaymentService
 
             return [
                 'success' => false,
-                'message' => 'PayPal payment processing failed: '.$e->getMessage(),
+                'message' => 'PayPal payment processing failed: ' . $e->getMessage(),
             ];
         }
     }
@@ -193,11 +193,11 @@ class PaymentService
      * Processes Stripe payments with comprehensive validation, security measures,
      * and error handling for reliable payment processing operations.
      *
-     * @param  array  $orderData  Order data including amount, currency, user_id, product_id
-     *
-     * @return array Stripe payment processing result
+     * @param array $orderData Order data including amount, currency, user_id, product_id
      *
      * @throws \Exception When Stripe payment processing fails
+     *
+     * @return array Stripe payment processing result
      */
     /**
      * @param array<string, mixed> $orderData
@@ -234,8 +234,8 @@ class PaymentService
                     ],
                 ],
                 'mode' => 'payment',
-                'success_url' => $appUrlString.'/payment/success/stripe',
-                'cancel_url' => $appUrlString.'/payment/cancel/stripe',
+                'success_url' => $appUrlString . '/payment/success/stripe',
+                'cancel_url' => $appUrlString . '/payment/cancel/stripe',
                 'metadata' => [
                     'user_id' => is_string($orderData['user_id'] ?? '') ? (string)($orderData['user_id'] ?? '') : '',
                     'product_id' => is_string($orderData['product_id'] ?? '') ? (string)($orderData['product_id'] ?? '') : '',
@@ -257,7 +257,7 @@ class PaymentService
 
             return [
                 'success' => false,
-                'message' => 'Stripe payment processing failed: '.$e->getMessage(),
+                'message' => 'Stripe payment processing failed: ' . $e->getMessage(),
             ];
         }
     }
@@ -269,13 +269,13 @@ class PaymentService
      * comprehensive validation, security measures, and error handling for
      * reliable payment verification operations.
      *
-     * @param  string  $gateway  Payment gateway to verify with ('paypal' or 'stripe')
-     * @param  string  $transactionId  Transaction ID to verify
-     *
-     * @return array Verification result with success status and transaction details
+     * @param string $gateway Payment gateway to verify with ('paypal' or 'stripe')
+     * @param string $transactionId Transaction ID to verify
      *
      * @throws InvalidArgumentException When gateway is unsupported or transaction ID is invalid
      * @throws \Exception When payment verification fails
+     *
+     * @return array Verification result with success status and transaction details
      *
      * @example
      * $result = $service->verifyPayment('stripe', 'pi_1234567890');
@@ -321,11 +321,11 @@ class PaymentService
     /**
      * Verify PayPal payment with enhanced security and error handling.
      *
-     * @param  string  $paymentId  PayPal payment ID to verify
-     *
-     * @return array PayPal payment verification result
+     * @param string $paymentId PayPal payment ID to verify
      *
      * @throws \Exception When PayPal verification fails
+     *
+     * @return array PayPal payment verification result
      */
     /**
      * @return array<string, mixed>
@@ -389,11 +389,11 @@ class PaymentService
     /**
      * Verify Stripe payment with enhanced security and error handling.
      *
-     * @param  string  $transactionId  Stripe transaction ID to verify
-     *
-     * @return array Stripe payment verification result
+     * @param string $transactionId Stripe transaction ID to verify
      *
      * @throws \Exception When Stripe verification fails
+     *
+     * @return array Stripe payment verification result
      */
     /**
      * @return array<string, mixed>
@@ -446,14 +446,14 @@ class PaymentService
      * Includes comprehensive validation, security measures, and error handling
      * for reliable license and invoice management.
      *
-     * @param  array  $orderData  Order data including user_id, product_id, amount, currency
-     * @param  string  $gateway  Payment gateway used ('paypal' or 'stripe')
-     * @param  string|null  $transactionId  Transaction ID from payment gateway
-     *
-     * @return array Creation result with license and invoice objects
+     * @param array $orderData Order data including user_id, product_id, amount, currency
+     * @param string $gateway Payment gateway used ('paypal' or 'stripe')
+     * @param string|null $transactionId Transaction ID from payment gateway
      *
      * @throws InvalidArgumentException When order data is invalid
      * @throws \Exception When license or invoice creation fails
+     *
+     * @return array Creation result with license and invoice objects
      *
      * @example
      * $result = $service->createLicenseAndInvoice([
@@ -639,7 +639,7 @@ class PaymentService
     /**
      * Validate order data with enhanced security and comprehensive validation.
      *
-     * @param  array  $orderData  Order data to validate
+     * @param array $orderData Order data to validate
      *
      * @throws InvalidArgumentException When order data is invalid
      */
@@ -673,7 +673,7 @@ class PaymentService
     /**
      * Validate payment gateway with enhanced security.
      *
-     * @param  string  $gateway  Payment gateway to validate
+     * @param string $gateway Payment gateway to validate
      *
      * @throws InvalidArgumentException When gateway is invalid
      */
@@ -688,7 +688,7 @@ class PaymentService
     /**
      * Validate PayPal credentials with enhanced security.
      *
-     * @param  array  $credentials  PayPal credentials to validate
+     * @param array $credentials PayPal credentials to validate
      *
      * @throws InvalidArgumentException When credentials are invalid
      */
@@ -710,7 +710,7 @@ class PaymentService
     /**
      * Validate Stripe credentials with enhanced security.
      *
-     * @param  array  $credentials  Stripe credentials to validate
+     * @param array $credentials Stripe credentials to validate
      *
      * @throws InvalidArgumentException When credentials are invalid
      */
@@ -731,7 +731,7 @@ class PaymentService
     /**
      * Validate transaction ID with enhanced security.
      *
-     * @param  string  $transactionId  Transaction ID to validate
+     * @param string $transactionId Transaction ID to validate
      *
      * @throws InvalidArgumentException When transaction ID is invalid
      */
@@ -752,15 +752,16 @@ class PaymentService
     /**
      * Generate unique invoice number with enhanced security and error handling.
      *
-     * @return string Unique invoice number
      *
      * @throws \Exception When invoice number generation fails
+     *
+     * @return string Unique invoice number
      */
     protected function generateInvoiceNumber(): string
     {
         try {
             do {
-                $invoiceNumber = 'INV-'.strtoupper(\Illuminate\Support\Str::random(8));
+                $invoiceNumber = 'INV-' . strtoupper(\Illuminate\Support\Str::random(8));
             } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
 
             return $invoiceNumber;
@@ -776,11 +777,11 @@ class PaymentService
     /**
      * Calculate license expiry date with enhanced error handling and validation.
      *
-     * @param  Product  $product  Product to calculate expiry for
-     *
-     * @return \DateTime|null License expiry date or null for lifetime licenses
+     * @param Product $product Product to calculate expiry for
      *
      * @throws \Exception When expiry calculation fails
+     *
+     * @return \DateTime|null License expiry date or null for lifetime licenses
      */
     protected function calculateLicenseExpiry(Product $product): ?\DateTime
     {
@@ -811,11 +812,11 @@ class PaymentService
     /**
      * Calculate support expiry date with enhanced error handling and validation.
      *
-     * @param  Product  $product  Product to calculate support expiry for
-     *
-     * @return \DateTime Support expiry date
+     * @param Product $product Product to calculate support expiry for
      *
      * @throws \Exception When support expiry calculation fails
+     *
+     * @return \DateTime Support expiry date
      */
     protected function calculateSupportExpiry(Product $product): \DateTime
     {
@@ -841,7 +842,7 @@ class PaymentService
     /**
      * Convert renewal period to days with enhanced validation.
      *
-     * @param  string|null  $renewalPeriod  Renewal period string
+     * @param string|null $renewalPeriod Renewal period string
      *
      * @return int|null Number of days or null for lifetime
      */

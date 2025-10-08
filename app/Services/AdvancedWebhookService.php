@@ -55,9 +55,9 @@ class AdvancedWebhookService
      * are configured to receive the specified event type. Includes comprehensive
      * error handling, retry logic, and performance tracking.
      *
-     * @param  string  $eventType  The type of event being sent (e.g., 'user.created', 'license.activated')
-     * @param  array  $payload  The event data payload to be sent
-     * @param  int|null  $webhookId  Optional specific webhook ID to send to (if null, sends to all matching webhooks)
+     * @param string $eventType The type of event being sent (e.g., 'user.created', 'license.activated')
+     * @param array $payload The event data payload to be sent
+     * @param int|null $webhookId Optional specific webhook ID to send to (if null, sends to all matching webhooks)
      *
      * @throws \Exception When webhook processing fails critically
      *
@@ -94,9 +94,9 @@ class AdvancedWebhookService
      * HTTP request sending, logging, and statistics updates. Implements proper
      * error handling with retry logic for failed deliveries.
      *
-     * @param  Webhook  $webhook  The webhook configuration to process
-     * @param  string  $eventType  The type of event being processed
-     * @param  array  $payload  The event data payload
+     * @param Webhook $webhook The webhook configuration to process
+     * @param string $eventType The type of event being processed
+     * @param array $payload The event data payload
      *
      * @throws \Exception When webhook processing fails and retry is not possible
      */
@@ -132,13 +132,13 @@ class AdvancedWebhookService
      * nonces, and HMAC signatures for security verification. Includes
      * comprehensive data validation and sanitization.
      *
-     * @param  Webhook  $webhook  The webhook configuration
-     * @param  string  $eventType  The type of event being sent
-     * @param  array  $payload  The original event data
-     *
-     * @return array The prepared webhook data with security features
+     * @param Webhook $webhook The webhook configuration
+     * @param string $eventType The type of event being sent
+     * @param array $payload The original event data
      *
      * @throws \Exception When data preparation fails
+     *
+     * @return array The prepared webhook data with security features
      */
     /**
      * @param array<string, mixed> $payload
@@ -171,8 +171,8 @@ class AdvancedWebhookService
      * Creates a cryptographically secure HMAC-SHA256 signature for webhook
      * payload verification. Uses constant-time comparison to prevent timing attacks.
      *
-     * @param  string  $secret  The webhook secret key for signing
-     * @param  array  $data  The webhook data to be signed
+     * @param string $secret The webhook secret key for signing
+     * @param array $data The webhook data to be signed
      *
      * @return string The HMAC-SHA256 signature in 'sha256=hash' format
      */
@@ -186,7 +186,7 @@ class AdvancedWebhookService
             $payload = '';
         }
 
-        return 'sha256='.hash_hmac('sha256', $payload, $secret);
+        return 'sha256=' . hash_hmac('sha256', $payload, $secret);
     }
 
     /**
@@ -196,12 +196,12 @@ class AdvancedWebhookService
      * timeout configuration, and proper error handling. Includes security
      * headers and user agent identification.
      *
-     * @param  Webhook  $webhook  The webhook configuration containing URL and settings
-     * @param  array  $data  The prepared webhook data to send
-     *
-     * @return Response The HTTP response from the webhook endpoint
+     * @param Webhook $webhook The webhook configuration containing URL and settings
+     * @param array $data The prepared webhook data to send
      *
      * @throws \Exception When HTTP request fails or times out
+     *
+     * @return Response The HTTP response from the webhook endpoint
      */
     /**
      * @param array<string, mixed> $data
@@ -231,12 +231,12 @@ class AdvancedWebhookService
      * success/failure status, response details, timing information, and error
      * messages for debugging and monitoring purposes.
      *
-     * @param  Webhook  $webhook  The webhook configuration
-     * @param  string  $eventType  The type of event being processed
-     * @param  array  $payload  The webhook payload data
-     * @param  Response|null  $response  The HTTP response (null if request failed)
-     * @param  bool  $success  Whether the webhook delivery was successful
-     * @param  string|null  $errorMessage  Error message if delivery failed
+     * @param Webhook $webhook The webhook configuration
+     * @param string $eventType The type of event being processed
+     * @param array $payload The webhook payload data
+     * @param Response|null $response The HTTP response (null if request failed)
+     * @param bool $success Whether the webhook delivery was successful
+     * @param string|null $errorMessage Error message if delivery failed
      */
     /**
      * @param array<string, mixed> $payload
@@ -270,8 +270,8 @@ class AdvancedWebhookService
      * tracking, and last successful/failed timestamps for monitoring
      * and health assessment purposes.
      *
-     * @param  Webhook  $webhook  The webhook configuration to update
-     * @param  bool  $success  Whether the delivery was successful
+     * @param Webhook $webhook The webhook configuration to update
+     * @param bool $success Whether the delivery was successful
      */
     private function updateWebhookStats(Webhook $webhook, bool $success): void
     {
@@ -292,9 +292,9 @@ class AdvancedWebhookService
      * to handle temporary failures. Automatically disables webhooks after
      * maximum retry attempts to prevent infinite retry loops.
      *
-     * @param  Webhook  $webhook  The webhook configuration to retry
-     * @param  string  $eventType  The type of event being retried
-     * @param  array  $payload  The event payload to retry
+     * @param Webhook $webhook The webhook configuration to retry
+     * @param string $eventType The type of event being retried
+     * @param array $payload The event payload to retry
      */
     /**
      * @param array<string, mixed> $payload
@@ -320,8 +320,8 @@ class AdvancedWebhookService
      * for the same webhook and event type within the last hour to implement
      * proper retry counting and exponential backoff.
      *
-     * @param  Webhook  $webhook  The webhook configuration
-     * @param  string  $eventType  The type of event being processed
+     * @param Webhook $webhook The webhook configuration
+     * @param string $eventType The type of event being processed
      *
      * @return int The current attempt number (1-based)
      */
@@ -342,8 +342,8 @@ class AdvancedWebhookService
      * the failure and optionally disabling the webhook if it has exceeded
      * the maximum allowed failure threshold.
      *
-     * @param  Webhook  $webhook  The webhook configuration that failed
-     * @param  string  $eventType  The type of event that failed
+     * @param Webhook $webhook The webhook configuration that failed
+     * @param string $eventType The type of event that failed
      */
     private function markWebhookAsFailed(Webhook $webhook, string $eventType): void
     {
@@ -364,9 +364,9 @@ class AdvancedWebhookService
      * Validates incoming webhook signatures using constant-time comparison
      * to prevent timing attacks. Ensures webhook authenticity and data integrity.
      *
-     * @param  string  $signature  The signature from the webhook request header
-     * @param  string  $payload  The raw payload body from the webhook request
-     * @param  string  $secret  The webhook secret key for verification
+     * @param string $signature The signature from the webhook request header
+     * @param string $payload The raw payload body from the webhook request
+     * @param string $secret The webhook secret key for verification
      *
      * @return bool True if signature is valid, false otherwise
      *
@@ -379,7 +379,7 @@ class AdvancedWebhookService
      */
     public function verifyWebhookSignature(string $signature, string $payload, string $secret): bool
     {
-        $expectedSignature = 'sha256='.hash_hmac('sha256', $payload, $secret);
+        $expectedSignature = 'sha256=' . hash_hmac('sha256', $payload, $secret);
 
         return hash_equals($expectedSignature, $signature);
     }
@@ -391,7 +391,7 @@ class AdvancedWebhookService
      * and performance metrics. Provides detailed results for troubleshooting
      * and configuration validation.
      *
-     * @param  Webhook  $webhook  The webhook configuration to test
+     * @param Webhook $webhook The webhook configuration to test
      *
      * @return array Test results including success status, response details, and timing
      *
@@ -447,8 +447,8 @@ class AdvancedWebhookService
      * including success rates, response times, event breakdowns, and
      * overall health indicators for monitoring and optimization.
      *
-     * @param  Webhook  $webhook  The webhook configuration to analyze
-     * @param  int  $days  Number of days to analyze (default: 30)
+     * @param Webhook $webhook The webhook configuration to analyze
+     * @param int $days Number of days to analyze (default: 30)
      *
      * @return array Comprehensive statistics including success rates, timing, and event breakdown
      *
@@ -495,7 +495,7 @@ class AdvancedWebhookService
      * database performance and storage efficiency. Returns the number of
      * deleted log entries.
      *
-     * @param  int  $days  Number of days to retain logs (default: 90)
+     * @param int $days Number of days to retain logs (default: 90)
      *
      * @return int Number of deleted log entries
      *
@@ -518,7 +518,7 @@ class AdvancedWebhookService
      * success rates, failure patterns, and response times. Provides actionable
      * health indicators for monitoring and alerting systems.
      *
-     * @param  Webhook  $webhook  The webhook configuration to analyze
+     * @param Webhook $webhook The webhook configuration to analyze
      *
      * @return array Health status including score, status level, and recent activity
      *
@@ -563,8 +563,8 @@ class AdvancedWebhookService
      * when managing large numbers of webhook configurations. Useful for
      * batch operations like enabling/disabling webhooks or updating settings.
      *
-     * @param  array  $webhookIds  Array of webhook IDs to update
-     * @param  array  $updates  Array of field updates to apply
+     * @param array $webhookIds Array of webhook IDs to update
+     * @param array $updates Array of field updates to apply
      *
      * @return int Number of webhooks updated
      *
@@ -593,7 +593,7 @@ class AdvancedWebhookService
      * time period, including success rates, health status, and performance
      * metrics for system monitoring and optimization.
      *
-     * @param  int  $days  Number of days to include in the report (default: 7)
+     * @param int $days Number of days to include in the report (default: 7)
      *
      * @return array Delivery report with webhook performance data
      *
@@ -656,9 +656,9 @@ class AdvancedWebhookService
      * performance and prevent blocking operations. Useful for high-volume
      * webhook scenarios where immediate delivery is not critical.
      *
-     * @param  string  $eventType  The type of event being sent
-     * @param  array  $payload  The event data payload
-     * @param  int|null  $webhookId  Optional specific webhook ID to send to
+     * @param string $eventType The type of event being sent
+     * @param array $payload The event data payload
+     * @param int|null $webhookId Optional specific webhook ID to send to
      *
      * @example
      * // Queue webhook for async processing
@@ -681,7 +681,7 @@ class AdvancedWebhookService
      * protocol verification, and security checks to prevent common webhook
      * configuration issues and security vulnerabilities.
      *
-     * @param  string  $url  The webhook URL to validate
+     * @param string $url The webhook URL to validate
      *
      * @return array Validation results with success status and error details
      *

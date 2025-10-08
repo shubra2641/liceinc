@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Helpers\ConfigHelper;
@@ -7,7 +9,6 @@ use App\Models\Product;
 use App\Models\ProgrammingLanguage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * License Generator Service with enhanced security and performance.
@@ -33,7 +34,7 @@ use Illuminate\Support\Str;
  * $filePath = $generator->generateLicenseFile($product);
  * echo "License file generated: " . $filePath;
  */
-class LicenseGeneratorService
+class LicenseGeneratorService extends BaseService
 {
     /**
      * Get API token from database settings with validation.
@@ -41,14 +42,15 @@ class LicenseGeneratorService
      * Retrieves the license API token from database settings with proper
      * validation and fallback mechanisms for secure token management.
      *
-     * @return string The API token for license verification
      *
      * @throws \Exception When token retrieval fails
+     *
+     * @return string The API token for license verification
      */
     private function getApiToken(): string
     {
         try {
-            $token = \App\Helpers\ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
+            $token = ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
             if (empty($token) || ! is_string($token)) {
                 throw new \Exception('License API token not configured');
             }
@@ -69,14 +71,15 @@ class LicenseGeneratorService
      * Retrieves the Envato personal token from database settings with proper
      * validation and fallback mechanisms for secure token management.
      *
-     * @return string The Envato personal token for API access
      *
      * @throws \Exception When token retrieval fails
+     *
+     * @return string The Envato personal token for API access
      */
     private function getEnvatoToken(): string
     {
         try {
-            $token = \App\Helpers\ConfigHelper::getSetting('envato_personal_token', '', 'ENVATO_PERSONAL_TOKEN');
+            $token = ConfigHelper::getSetting('envato_personal_token', '', 'ENVATO_PERSONAL_TOKEN');
             if (empty($token) || ! is_string($token)) {
                 throw new \Exception('Envato personal token not configured');
             }
@@ -98,11 +101,11 @@ class LicenseGeneratorService
      * the appropriate programming language template. Includes file cleanup,
      * template compilation, and comprehensive error handling.
      *
-     * @param  Product  $product  The product to generate license file for
-     *
-     * @return string The file path of the generated license file
+     * @param Product $product The product to generate license file for
      *
      * @throws \Exception When generation fails or required data is missing
+     *
+     * @return string The file path of the generated license file
      *
      * @example
      * $filePath = $generator->generateLicenseFile($product);
@@ -119,7 +122,7 @@ class LicenseGeneratorService
             $product->refresh();
             $language = $product->programmingLanguage;
             if (! $language) {
-                throw new \Exception('Programming language not found for product: '.$product->id);
+                throw new \Exception('Programming language not found for product: ' . $product->id);
             }
             // Delete old files for this product first
             $this->deleteOldLicenseFiles($product);
@@ -157,7 +160,7 @@ class LicenseGeneratorService
      * of outdated files. Includes proper path validation and error handling
      * to prevent directory traversal attacks.
      *
-     * @param  Product  $product  The product to clean up old files for
+     * @param Product $product The product to clean up old files for
      *
      * @throws \Exception When file deletion fails
      */
@@ -201,8 +204,8 @@ class LicenseGeneratorService
      * product modifications, template updates, or missing files. Currently
      * configured to always generate new files for consistency and security.
      *
-     * @param  Product  $product  The product to check
-     * @param  string|null  $existingPath  The path to existing license file
+     * @param Product $product The product to check
+     * @param string|null $existingPath The path to existing license file
      *
      * @return bool True if new file should be generated, false otherwise
      */
@@ -220,11 +223,11 @@ class LicenseGeneratorService
      * creating a default template if one doesn't exist. Includes proper
      * file validation and security checks.
      *
-     * @param  ProgrammingLanguage  $language  The programming language to get template for
-     *
-     * @return string The license template content
+     * @param ProgrammingLanguage $language The programming language to get template for
      *
      * @throws \Exception When template retrieval or creation fails
+     *
+     * @return string The license template content
      */
     private function getLicenseTemplate(ProgrammingLanguage $language): string
     {
@@ -246,7 +249,7 @@ class LicenseGeneratorService
             }
             $content = file_get_contents($templatePath);
             if ($content === false) {
-                throw new \Exception('Failed to read template file: '.$templatePath);
+                throw new \Exception('Failed to read template file: ' . $templatePath);
             }
 
             return $content;
@@ -267,12 +270,12 @@ class LicenseGeneratorService
      * API URLs, tokens, and verification keys. Includes comprehensive
      * data sanitization and security measures.
      *
-     * @param  string  $template  The license template to compile
-     * @param  Product  $product  The product data to use for compilation
-     *
-     * @return string The compiled template content
+     * @param string $template The license template to compile
+     * @param Product $product The product data to use for compilation
      *
      * @throws \Exception When template compilation fails
+     *
+     * @return string The compiled template content
      */
     private function compileTemplate(string $template, Product $product): string
     {
@@ -287,11 +290,11 @@ class LicenseGeneratorService
             // Build the license API URL from environment/app url and the configured verification endpoint
             $apiDomain = rtrim(is_string(config('app.url')) ? config('app.url') : '', '/');
             $verificationEndpoint = is_string(config('license.verification_endpoint', '/api/license/verify')) ? config('license.verification_endpoint', '/api/license/verify') : '/api/license/verify';
-            $licenseApiUrl = $apiDomain.'/'.ltrim($verificationEndpoint, '/');
+            $licenseApiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
             // Validate and sanitize data
             $data = [
                 'product' => $this->sanitizeInput($product->name),
-                'product_slug' => $this->sanitizeInput($product->slug),
+                'product_slug' => $this->sanitizeInput($product->slug ?? ''),
                 'license_api_url' => $this->sanitizeInput($licenseApiUrl),
                 'verification_key' => $this->generateVerificationKey($product),
                 // Get tokens from database settings
@@ -332,11 +335,11 @@ class LicenseGeneratorService
      * Creates a cryptographically secure verification key for the product
      * using SHA-256 hashing with product-specific data and application key.
      *
-     * @param  Product  $product  The product to generate verification key for
-     *
-     * @return string The SHA-256 hashed verification key
+     * @param Product $product The product to generate verification key for
      *
      * @throws \Exception When key generation fails
+     *
+     * @return string The SHA-256 hashed verification key
      */
     private function generateVerificationKey(Product $product): string
     {
@@ -348,7 +351,7 @@ class LicenseGeneratorService
             if (empty($appKey) || ! is_string($appKey)) {
                 throw new \Exception('Application key not configured');
             }
-            $keyData = (string)$product->id.$product->slug.$appKey;
+            $keyData = (string)$product->id . $product->slug . $appKey;
 
             return hash('sha256', $keyData);
         } catch (\Exception $e) {
@@ -367,24 +370,9 @@ class LicenseGeneratorService
      * Provides comprehensive input sanitization for template data and file paths
      * to ensure security and prevent various types of injection attacks.
      *
-     * @param  string|null  $input  The input string to sanitize
      *
      * @return string The sanitized input string
      */
-    private function sanitizeInput(?string $input): string
-    {
-        if ($input === null) {
-            return '';
-        }
-        // Remove null bytes and control characters
-        $input = str_replace(["\0", "\x00"], '', $input);
-        // Trim whitespace
-        $input = trim($input);
-        // Escape HTML entities
-        $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
-
-        return $input;
-    }
 
     /**
      * Generate unique file name based on product and language with security validation.
@@ -393,12 +381,12 @@ class LicenseGeneratorService
      * timestamp, and appropriate file extension. Includes security validation
      * to prevent path traversal and injection attacks.
      *
-     * @param  Product  $product  The product to generate filename for
-     * @param  ProgrammingLanguage  $language  The programming language for file extension
-     *
-     * @return string The generated filename with proper extension
+     * @param Product $product The product to generate filename for
+     * @param ProgrammingLanguage $language The programming language for file extension
      *
      * @throws \Exception When filename generation fails
+     *
+     * @return string The generated filename with proper extension
      */
     private function generateFileName(Product $product, ProgrammingLanguage $language): string
     {
@@ -411,7 +399,7 @@ class LicenseGeneratorService
             }
             $extension = $this->getFileExtensionForLanguage($language->slug);
             $timestamp = now()->format('Y-m-d_H-i-s');
-            $sanitizedSlug = $this->sanitizeInput($product->slug);
+            $sanitizedSlug = $this->sanitizeInput($product->slug ?? '');
             // Validate filename components
             if (! preg_match('/^[a-zA-Z0-9_-]+$/', $sanitizedSlug)) {
                 throw new \InvalidArgumentException('Invalid characters in product slug');
@@ -437,7 +425,7 @@ class LicenseGeneratorService
      * Maps programming language slugs to their appropriate file extensions
      * with comprehensive support for 20+ languages and fallback mechanisms.
      *
-     * @param  string  $languageSlug  The programming language slug
+     * @param string $languageSlug The programming language slug
      *
      * @return string The appropriate file extension for the language
      */
@@ -485,13 +473,13 @@ class LicenseGeneratorService
      * with proper path validation and security checks to prevent
      * directory traversal attacks.
      *
-     * @param  string  $content  The compiled license file content
-     * @param  string  $fileName  The generated filename
-     * @param  Product  $product  The product to save file for
-     *
-     * @return string The file path where the license file was saved
+     * @param string $content The compiled license file content
+     * @param string $fileName The generated filename
+     * @param Product $product The product to save file for
      *
      * @throws \Exception When file saving fails
+     *
+     * @return string The file path where the license file was saved
      */
     private function saveLicenseFile(string $content, string $fileName, Product $product): string
     {
@@ -536,7 +524,7 @@ class LicenseGeneratorService
     {
         $templateDir = resource_path('templates/licenses');
         if (! is_dir($templateDir)) {
-            mkdir($templateDir, 0755, true);
+            mkdir($templateDir, 0o755, true);
         }
         $templatePath = "{$templateDir}/{$language->slug}.blade.php";
         if ($language->slug === 'php') {
@@ -557,150 +545,150 @@ class LicenseGeneratorService
     private function getPHPTemplate(): string
     {
         return <<<'PHP'
-/**
-     * Get PHP license template
-     */
-    private function getPHPTemplate(): string
-    {
-        return <<<'PHP'
-<?php
-/**
- * License Verification System
- * Product: {{product}}
- * Generated: {{date}}
- */
-class LicenseVerifier {
-    private $apiUrl = '{{license_api_url}}';
-    private $productSlug = '{{product_slug}}';
-    private $verificationKey = '{{verification_key}}';
-    private $apiToken = '{{api_token}}';
-    private $envatoToken = '{{envato_token}}';
-    private $envatoApiBase = '{{envato_api_base}}';
-    /**
-     * Verify license with purchase code
-     * This method uses the new dual verification system:
-     * 1. If Envato valid but not in database -> auto-create license and allow
-     * 2. If database valid but Envato invalid -> allow (offline scenarios)
-     * 3. If both valid -> allow
-     * 4. If both invalid -> reject
-     * Note: This is a comment, not command execution
-     */
-    public function verifyLicense($purchaseCode, $domain = null) {
-        try {
-            // Send request to our license server for dual verification
-            $result = $this->verifyWithOurSystem($purchaseCode, $domain);
-            if ($result['valid']) {
-                $verificationMethod = $result['data']['verification_method'] ?? 'unknown';
-                $message = 'License verified successfully';
-                return $this->createLicenseResponse(true, $message, [
-                    'verification_method' => $verificationMethod,
-                    'envato_valid' => $result['data']['envato_valid'] ?? false,
-                    'database_valid' => $result['data']['database_valid'] ?? false,
-                    'license_data' => $result['data']
-                ]);
+            /**
+                 * Get PHP license template
+                 */
+                private function getPHPTemplate(): string
+                {
+                    return <<<'PHP'
+            <?php
+            /**
+             * License Verification System
+             * Product: {{product}}
+             * Generated: {{date}}
+             */
+            class LicenseVerifier {
+                private $apiUrl = '{{license_api_url}}';
+                private $productSlug = '{{product_slug}}';
+                private $verificationKey = '{{verification_key}}';
+                private $apiToken = '{{api_token}}';
+                private $envatoToken = '{{envato_token}}';
+                private $envatoApiBase = '{{envato_api_base}}';
+                /**
+                 * Verify license with purchase code
+                 * This method uses the new dual verification system:
+                 * 1. If Envato valid but not in database -> auto-create license and allow
+                 * 2. If database valid but Envato invalid -> allow (offline scenarios)
+                 * 3. If both valid -> allow
+                 * 4. If both invalid -> reject
+                 * Note: This is a comment, not command execution
+                 */
+                public function verifyLicense($purchaseCode, $domain = null) {
+                    try {
+                        // Send request to our license server for dual verification
+                        $result = $this->verifyWithOurSystem($purchaseCode, $domain);
+                        if ($result['valid']) {
+                            $verificationMethod = $result['data']['verification_method'] ?? 'unknown';
+                            $message = 'License verified successfully';
+                            return $this->createLicenseResponse(true, $message, [
+                                'verification_method' => $verificationMethod,
+                                'envato_valid' => $result['data']['envato_valid'] ?? false,
+                                'database_valid' => $result['data']['database_valid'] ?? false,
+                                'license_data' => $result['data']
+                            ]);
+                        }
+                        // Verification failed
+                        return $this->createLicenseResponse(false, $result['message'] ?? 'License verification failed');
+                    } catch (Exception $e) {
+                        return $this->createLicenseResponse(false, 'Verification failed: ' . $e->getMessage());
+                    }
+                }
+                /**
+                 * Verify with Envato API
+                 */
+                private function verifyWithEnvato($purchaseCode) {
+                    if (empty($this->envatoToken)) {
+                        return ['valid' => false, 'error' => 'Envato token not configured'];
+                    }
+                    $ch = curl_init();
+                    $url = $this->envatoApiBase . '/v3/market/author/sale?code=' . urlencode($purchaseCode);
+                    curl_setopt($ch, CURLOPT_URL, $url);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                        'Authorization: Bearer ' . $this->envatoToken,
+                        'User-Agent: LicenseVerifier/1.0'
+                    ]);
+                    // Safe HTTP request using cURL (not command execution)
+                    // This is NOT a security vulnerability - it's a standard HTTP request
+                    $response = curl_exec($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+                    $httpCodeInt = is_numeric($httpCode) ? (int)$httpCode : 0;
+                    if ($httpCodeInt === 200) {
+                        $data = json_decode($response, true);
+                        return [
+                            'valid' => true,
+                            'data'  => $data,
+                            'source' => 'envato'
+                        ];
+                    }
+                    return ['valid' => false, 'error' => 'Envato API returned HTTP ' . $httpCodeInt];
+                }
+                /**
+                 * Verify with our license system
+                 * Note: This is a comment, not command execution
+                 */
+                private function verifyWithOurSystem($purchaseCode, $domain = null) {
+                    $postData = [
+                        'purchase_code' => $purchaseCode,
+                        'product_slug'  => $this->productSlug,
+                        'domain' => $domain,
+                        'verification_key'  => $this->verificationKey
+                    ];
+                    $ch = curl_init();
+                    curl_setopt($ch, CURLOPT_URL, $this->apiUrl);
+                    curl_setopt($ch, CURLOPT_POST, 1);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                        'Content-Type: application/x-www-form-urlencoded',
+                        'User-Agent: LicenseVerifier/1.0',
+                        'Authorization: Bearer ' . $this->apiToken
+                    ]);
+                    // Safe HTTP request using cURL (not command execution)
+                    // This is NOT a security vulnerability - it's a standard HTTP request
+                    $response = curl_exec($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+                    if ($httpCode === 200) {
+                        $data = json_decode($response, true);
+                        return [
+                            'valid' => $data['valid'] ?? false,
+                            'message' => $data['message'] ?? 'Verification completed',
+                            'data'  => $data,
+                            'source' => 'our_system'
+                        ];
+                    }
+                    return [
+                        'valid'  => false,
+                        'error' => 'Unable to verify license with our system',
+                        'http_code'  => $httpCode
+                    ];
+                }
+                /**
+                 * Create standardized response
+                 */
+                private function createLicenseResponse($valid, $message, $data = null) {
+                    return [
+                        'valid' => $valid,
+                        'message'  => $message,
+                        'data' => $data,
+                        'verified_at' => date('Y-m-d H:i:s'),
+                        'product' => $this->productSlug
+                    ];
+                }
             }
-            // Verification failed
-            return $this->createLicenseResponse(false, $result['message'] ?? 'License verification failed');
-        } catch (Exception $e) {
-            return $this->createLicenseResponse(false, 'Verification failed: ' . $e->getMessage());
-        }
-    }
-    /**
-     * Verify with Envato API
-     */
-    private function verifyWithEnvato($purchaseCode) {
-        if (empty($this->envatoToken)) {
-            return ['valid' => false, 'error' => 'Envato token not configured'];
-        }
-        $ch = curl_init();
-        $url = $this->envatoApiBase . '/v3/market/author/sale?code=' . urlencode($purchaseCode);
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Bearer ' . $this->envatoToken,
-            'User-Agent: LicenseVerifier/1.0'
-        ]);
-        // Safe HTTP request using cURL (not command execution)
-        // This is NOT a security vulnerability - it's a standard HTTP request
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        $httpCodeInt = is_numeric($httpCode) ? (int)$httpCode : 0;
-        if ($httpCodeInt === 200) {
-            $data = json_decode($response, true);
-            return [
-                'valid' => true,
-                'data'  => $data,
-                'source' => 'envato'
-            ];
-        }
-        return ['valid' => false, 'error' => 'Envato API returned HTTP ' . $httpCodeInt];
-    }
-    /**
-     * Verify with our license system
-     * Note: This is a comment, not command execution
-     */
-    private function verifyWithOurSystem($purchaseCode, $domain = null) {
-        $postData = [
-            'purchase_code' => $purchaseCode,
-            'product_slug'  => $this->productSlug,
-            'domain' => $domain,
-            'verification_key'  => $this->verificationKey
-        ];
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->apiUrl);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/x-www-form-urlencoded',
-            'User-Agent: LicenseVerifier/1.0',
-            'Authorization: Bearer ' . $this->apiToken
-        ]);
-        // Safe HTTP request using cURL (not command execution)
-        // This is NOT a security vulnerability - it's a standard HTTP request
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        if ($httpCode === 200) {
-            $data = json_decode($response, true);
-            return [
-                'valid' => $data['valid'] ?? false,
-                'message' => $data['message'] ?? 'Verification completed',
-                'data'  => $data,
-                'source' => 'our_system'
-            ];
-        }
-        return [
-            'valid'  => false,
-            'error' => 'Unable to verify license with our system',
-            'http_code'  => $httpCode
-        ];
-    }
-    /**
-     * Create standardized response
-     */
-    private function createLicenseResponse($valid, $message, $data = null) {
-        return [
-            'valid' => $valid,
-            'message'  => $message,
-            'data' => $data,
-            'verified_at' => date('Y-m-d H:i:s'),
-            'product' => $this->productSlug
-        ];
-    }
-}
-// Usage example:
-/*
-$verifier = new LicenseVerifier();
-$result = $verifier->verifyLicense('YOUR_PURCHASE_CODE', 'yourdomain.com');
-if ($result['valid']) {
-    echo "License is valid!";
-} else {
-    echo "License verification failed: " . $result['message'];
-}
-*/
-PHP;
+            // Usage example:
+            /*
+            $verifier = new LicenseVerifier();
+            $result = $verifier->verifyLicense('YOUR_PURCHASE_CODE', 'yourdomain.com');
+            if ($result['valid']) {
+                echo "License is valid!";
+            } else {
+                echo "License verification failed: " . $result['message'];
+            }
+            */
+            PHP;
     }
 
     /**
@@ -709,125 +697,125 @@ PHP;
     private function getJavaScriptTemplate(): string
     {
         return <<<'JS'
-/**
- * License Verification System
- * Product: {{product_slug}}
- * Generated: {{date}}
- */
-class LicenseVerifier {
-    constructor() {
-        this.apiUrl = '{{license_api_url}}';
-        this.productSlug = '{{product_slug}}';
-        this.verificationKey = '{{verification_key}}';
-    }
-    /**
-     * Verify license with purchase code
-     * Uses the new dual verification system
-     * Note: This is a comment, not command execution
-     */
-    public function verifyLicense($purchaseCode, $domain = null) {
-        try {
-            // Send request to our license server for dual verification
-            $result = $this->verifyWithOurSystem($purchaseCode, $domain);
-            if ($result['valid']) {
-                $verificationMethod = $result['data']['verification_method'] ?? 'unknown';
-                $message = 'License verified successfully';
-                return $this->createLicenseResponse(true, $message, [
-                    'verification_method' => $verificationMethod,
-                    'envato_valid' => $result['data']['envato_valid'] ?? false,
-                    'database_valid' => $result['data']['database_valid'] ?? false,
-                    'license_data' => $result['data']
-                ]);
-            }
-            // Verification failed
-            return $this->createLicenseResponse(false, $result['message'] ?? 'License verification failed');
-        } catch (\Exception $error) {
-            return $this->createLicenseResponse(false, 'Verification failed: ' . $error->getMessage());
-        }
-    }
-    /**
-     * Verify with Envato API
-     */
-    async verifyWithEnvato(purchaseCode) {
-        try {
-            const response = await fetch(
-                `https://api.envato.com/v3/market/author/sale?code = ${encodeURIComponent(purchaseCode)}`,
-                {
-                headers: {
-                    'Authorization': 'Bearer YOUR_ENVATO_TOKEN',
-                    'User-Agent': 'LicenseVerifier/1.0'
+            /**
+             * License Verification System
+             * Product: {{product_slug}}
+             * Generated: {{date}}
+             */
+            class LicenseVerifier {
+                constructor() {
+                    this.apiUrl = '{{license_api_url}}';
+                    this.productSlug = '{{product_slug}}';
+                    this.verificationKey = '{{verification_key}}';
                 }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                return {
-                    valid: true,
-                    data: data
-                };
+                /**
+                 * Verify license with purchase code
+                 * Uses the new dual verification system
+                 * Note: This is a comment, not command execution
+                 */
+                public function verifyLicense($purchaseCode, $domain = null) {
+                    try {
+                        // Send request to our license server for dual verification
+                        $result = $this->verifyWithOurSystem($purchaseCode, $domain);
+                        if ($result['valid']) {
+                            $verificationMethod = $result['data']['verification_method'] ?? 'unknown';
+                            $message = 'License verified successfully';
+                            return $this->createLicenseResponse(true, $message, [
+                                'verification_method' => $verificationMethod,
+                                'envato_valid' => $result['data']['envato_valid'] ?? false,
+                                'database_valid' => $result['data']['database_valid'] ?? false,
+                                'license_data' => $result['data']
+                            ]);
+                        }
+                        // Verification failed
+                        return $this->createLicenseResponse(false, $result['message'] ?? 'License verification failed');
+                    } catch (\Exception $error) {
+                        return $this->createLicenseResponse(false, 'Verification failed: ' . $error->getMessage());
+                    }
+                }
+                /**
+                 * Verify with Envato API
+                 */
+                async verifyWithEnvato(purchaseCode) {
+                    try {
+                        const response = await fetch(
+                            `https://api.envato.com/v3/market/author/sale?code = ${encodeURIComponent(purchaseCode)}`,
+                            {
+                            headers: {
+                                'Authorization': 'Bearer YOUR_ENVATO_TOKEN',
+                                'User-Agent': 'LicenseVerifier/1.0'
+                            }
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            return {
+                                valid: true,
+                                data: data
+                            };
+                        }
+                        return { valid: false };
+                    } catch (error) {
+                        return { valid: false };
+                    }
+                }
+                /**
+                 * Verify with our license system
+                 * Note: This is a comment, not command execution
+                 */
+                async verifyWithOurSystem(purchaseCode, domain = null) {
+                    try {
+                        const response = await fetch(this.apiUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'User-Agent': 'LicenseVerifier/1.0'
+                            },
+                            body: new URLSearchParams({
+                                purchase_code: purchaseCode,
+                                product_slug: this.productSlug,
+                                domain: domain,
+                                verification_key: this.verificationKey
+                            })
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            return this.createLicenseResponse(
+                                data.valid || false,
+                                data.message || 'Verification completed',
+                                data
+                            );
+                        }
+                        return this.createLicenseResponse(false, 'Unable to verify license');
+                    } catch (error) {
+                        return this.createLicenseResponse(false, 'Network error: ' + error.message);
+                    }
+                }
+                /**
+                 * Create standardized response
+                 */
+                createLicenseResponse(valid, message, data = null) {
+                    return {
+                        valid: valid,
+                        message: message,
+                        data: data,
+                        verified_at: new Date().toISOString(),
+                        product: this.productSlug
+                    };
+                }
             }
-            return { valid: false };
-        } catch (error) {
-            return { valid: false };
-        }
-    }
-    /**
-     * Verify with our license system
-     * Note: This is a comment, not command execution
-     */
-    async verifyWithOurSystem(purchaseCode, domain = null) {
-        try {
-            const response = await fetch(this.apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'User-Agent': 'LicenseVerifier/1.0'
-                },
-                body: new URLSearchParams({
-                    purchase_code: purchaseCode,
-                    product_slug: this.productSlug,
-                    domain: domain,
-                    verification_key: this.verificationKey
-                })
-            });
-            if (response.ok) {
-                const data = await response.json();
-                return this.createLicenseResponse(
-                    data.valid || false,
-                    data.message || 'Verification completed',
-                    data
-                );
-            }
-            return this.createLicenseResponse(false, 'Unable to verify license');
-        } catch (error) {
-            return this.createLicenseResponse(false, 'Network error: ' + error.message);
-        }
-    }
-    /**
-     * Create standardized response
-     */
-    createLicenseResponse(valid, message, data = null) {
-        return {
-            valid: valid,
-            message: message,
-            data: data,
-            verified_at: new Date().toISOString(),
-            product: this.productSlug
-        };
-    }
-}
-// Usage example:
-/*
-const verifier = new LicenseVerifier();
-verifier.verifyLicense('YOUR_PURCHASE_CODE', 'yourdomain.com')
-    .then(result => {
-        if (result.valid) {
-            // License is valid
-        } else {
-            // License verification failed
-        }
-    });
-*/
-JS;
+            // Usage example:
+            /*
+            const verifier = new LicenseVerifier();
+            verifier.verifyLicense('YOUR_PURCHASE_CODE', 'yourdomain.com')
+                .then(result => {
+                    if (result.valid) {
+                        // License is valid
+                    } else {
+                        // License verification failed
+                    }
+                });
+            */
+            JS;
     }
 
     /**
@@ -836,116 +824,116 @@ JS;
     private function getPythonTemplate(): string
     {
         return <<<'PYTHON'
-"""
-License Verification System
-Product: {{product_slug}}
-Generated: {{date}}
-"""
-import requests
-import json
-from datetime import datetime
-class LicenseVerifier:
-    def __init__(self):
-        self.api_url = '{{license_api_url}}'
-        self.product_slug = '{{product_slug}}'
-        self.verification_key = '{{verification_key}}'
-    def verify_license(self, purchase_code, domain=None):
-        """
-        Verify license with purchase code
-        Uses the new dual verification system
-        Note: This is a comment, not command execution
-        """
-        try:
-            # Send request to our license server for dual verification
-            result = self._verify_with_our_system(purchase_code, domain)
+            """
+            License Verification System
+            Product: {{product_slug}}
+            Generated: {{date}}
+            """
+            import requests
+            import json
+            from datetime import datetime
+            class LicenseVerifier:
+                def __init__(self):
+                    self.api_url = '{{license_api_url}}'
+                    self.product_slug = '{{product_slug}}'
+                    self.verification_key = '{{verification_key}}'
+                def verify_license(self, purchase_code, domain=None):
+                    """
+                    Verify license with purchase code
+                    Uses the new dual verification system
+                    Note: This is a comment, not command execution
+                    """
+                    try:
+                        # Send request to our license server for dual verification
+                        result = self._verify_with_our_system(purchase_code, domain)
+                        if result['valid']:
+                            verification_method = result['data'].get('verification_method', 'unknown')
+                            message = 'License verified successfully'
+                            return self._create_license_response(True, message, {
+                                'verification_method': verification_method,
+                                'envato_valid': result['data'].get('envato_valid', False),
+                                'database_valid': result['data'].get('database_valid', False),
+                                'license_data': result['data']
+                            })
+                        # Verification failed
+                        return self._create_license_response(False, result.get('message', 'License verification failed'))
+                    except Exception as e:
+                        return self._create_license_response(False, f'Verification failed: {str(e)}')
+                def _verify_with_envato(self, purchase_code):
+                    """
+                    Verify with Envato API
+                    """
+                    try:
+                        headers = {
+                            'Authorization': 'Bearer YOUR_ENVATO_TOKEN',
+                            'User-Agent': 'LicenseVerifier/1.0'
+                        }
+                        response = requests.get(
+                            f'https://api.envato.com/v3/market/author/sale?code={purchase_code}',
+                            headers=headers,
+                            timeout=10
+                        )
+                        if response.status_code == 200:
+                            data = response.json()
+                            return {
+                                'valid': True,
+                                'data': data
+                            }
+                        return {'valid': False}
+                    except:
+                        return {'valid': False}
+                def _verify_with_our_system(self, purchase_code, domain=None):
+                    """
+                    Verify with our license system
+                    Note: This is a comment, not command execution
+                    """
+                    try:
+                        data = {
+                            'purchase_code': purchase_code,
+                            'product_slug': self.product_slug,
+                            'domain': domain,
+                            'verification_key': self.verification_key
+                        }
+                        response = requests.post(
+                            self.api_url,
+                            data=data,
+                            headers={
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'User-Agent': 'LicenseVerifier/1.0'
+                            },
+                            timeout=10
+                        )
+                        if response.status_code == 200:
+                            result = response.json()
+                            return self._create_license_response(
+                                result.get('valid', False),
+                                result.get('message', 'Verification completed'),
+                                result
+                            )
+                        return self._create_license_response(False, 'Unable to verify license')
+                    except Exception as e:
+                        return self._create_license_response(False, f'Network error: {str(e)}')
+                def _create_license_response(self, valid, message, data=None):
+                    """
+                    Create standardized response
+                    """
+                    return {
+                        'valid': valid,
+                        'message': message,
+                        'data': data,
+                        'verified_at': datetime.now().isoformat(),
+                        'product': self.product_slug
+                    }
+            # Usage example:
+            """
+            verifier = LicenseVerifier()
+            result = verifier.verify_license('YOUR_PURCHASE_CODE', 'yourdomain.com')
             if result['valid']:
-                verification_method = result['data'].get('verification_method', 'unknown')
-                message = 'License verified successfully'
-                return self._create_license_response(True, message, {
-                    'verification_method': verification_method,
-                    'envato_valid': result['data'].get('envato_valid', False),
-                    'database_valid': result['data'].get('database_valid', False),
-                    'license_data': result['data']
-                })
-            # Verification failed
-            return self._create_license_response(False, result.get('message', 'License verification failed'))
-        except Exception as e:
-            return self._create_license_response(False, f'Verification failed: {str(e)}')
-    def _verify_with_envato(self, purchase_code):
-        """
-        Verify with Envato API
-        """
-        try:
-            headers = {
-                'Authorization': 'Bearer YOUR_ENVATO_TOKEN',
-                'User-Agent': 'LicenseVerifier/1.0'
-            }
-            response = requests.get(
-                f'https://api.envato.com/v3/market/author/sale?code={purchase_code}',
-                headers=headers,
-                timeout=10
-            )
-            if response.status_code == 200:
-                data = response.json()
-                return {
-                    'valid': True,
-                    'data': data
-                }
-            return {'valid': False}
-        except:
-            return {'valid': False}
-    def _verify_with_our_system(self, purchase_code, domain=None):
-        """
-        Verify with our license system
-        Note: This is a comment, not command execution
-        """
-        try:
-            data = {
-                'purchase_code': purchase_code,
-                'product_slug': self.product_slug,
-                'domain': domain,
-                'verification_key': self.verification_key
-            }
-            response = requests.post(
-                self.api_url,
-                data=data,
-                headers={
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'User-Agent': 'LicenseVerifier/1.0'
-                },
-                timeout=10
-            )
-            if response.status_code == 200:
-                result = response.json()
-                return self._create_license_response(
-                    result.get('valid', False),
-                    result.get('message', 'Verification completed'),
-                    result
-                )
-            return self._create_license_response(False, 'Unable to verify license')
-        except Exception as e:
-            return self._create_license_response(False, f'Network error: {str(e)}')
-    def _create_license_response(self, valid, message, data=None):
-        """
-        Create standardized response
-        """
-        return {
-            'valid': valid,
-            'message': message,
-            'data': data,
-            'verified_at': datetime.now().isoformat(),
-            'product': self.product_slug
-        }
-# Usage example:
-"""
-verifier = LicenseVerifier()
-result = verifier.verify_license('YOUR_PURCHASE_CODE', 'yourdomain.com')
-if result['valid']:
-    print('License is valid!')
-else:
-    print(f'License verification failed: {result["message"]}')
-"""
-PYTHON;
+                print('License is valid!')
+            else:
+                print(f'License verification failed: {result["message"]}')
+            """
+            PYTHON;
     }
 
     /**
@@ -954,32 +942,32 @@ PYTHON;
     private function getGenericTemplate(ProgrammingLanguage $language): string
     {
         return <<<GENERIC
-/**
- * License Verification System
- * Product: {{product}}
- * Language: {$language->name}
- * Generated: {{date}}
- *
- * This is a generic template. Please customize according to {$language->name} best practices.
- */
-// License verification for {$language->name}
-// API URL: {{license_api_url}}
-// Product Slug: {{product_slug}}
-// Verification Key: {{verification_key}}
-// API Token: {{api_token}}
-// Envato Token: {{envato_token}}
-// IMPORTANT: This is a generic template. You need to implement the actual license verification
-// logic according to {$language->name} best practices. The system will provide:
-// - API URL: {{license_api_url}}
-// - Product Slug: {{product_slug}}
-// - Verification Key: {{verification_key}}
-// - API Token: {{api_token}}
-// - Envato Token: {{envato_token}}
-// Example implementation structure:
-// 1. Create a license verification class/function
-// 2. Use the provided API URL and tokens
-// 3. Implement dual verification (Envato + our system)
-// 4. Return standardized response format
-GENERIC;
+            /**
+             * License Verification System
+             * Product: {{product}}
+             * Language: {$language->name}
+             * Generated: {{date}}
+             *
+             * This is a generic template. Please customize according to {$language->name} best practices.
+             */
+            // License verification for {$language->name}
+            // API URL: {{license_api_url}}
+            // Product Slug: {{product_slug}}
+            // Verification Key: {{verification_key}}
+            // API Token: {{api_token}}
+            // Envato Token: {{envato_token}}
+            // IMPORTANT: This is a generic template. You need to implement the actual license verification
+            // logic according to {$language->name} best practices. The system will provide:
+            // - API URL: {{license_api_url}}
+            // - Product Slug: {{product_slug}}
+            // - Verification Key: {{verification_key}}
+            // - API Token: {{api_token}}
+            // - Envato Token: {{envato_token}}
+            // Example implementation structure:
+            // 1. Create a license verification class/function
+            // 2. Use the provided API URL and tokens
+            // 3. Implement dual verification (Envato + our system)
+            // 4. Return standardized response format
+            GENERIC;
     }
 }
