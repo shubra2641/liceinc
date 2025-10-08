@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Helpers\ConfigHelper;
 use App\Models\Product;
 use App\Models\ProgrammingLanguage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * License Generator Service with enhanced security and performance.
