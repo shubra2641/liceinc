@@ -58,6 +58,7 @@ abstract class BaseController extends Controller
     /**
      * @param array<string, string> $rules
      * @param array<string, string> $messages
+     *
      * @return array<string, mixed>
      */
     protected function validateRequest(Request $request, array $rules, array $messages = []): array

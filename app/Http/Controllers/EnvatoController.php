@@ -79,7 +79,9 @@ class EnvatoController extends Controller
             if ($clientIp && $this->isRateLimited($clientIp, 'verify_purchase_') === true) {
                 Log::warning('Rate limit exceeded for purchase verification', [
                     'ip' => $request->ip(),
-                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
+                    'purchase_code' => $this->maskPurchaseCode(
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                    ),
                 ]);
                 return back()->withErrors(['purchase_code' => 'Too many verification attempts. '
                     . 'Please try again later.']);
@@ -93,7 +95,9 @@ class EnvatoController extends Controller
             if ($sale === null) {
                 DB::rollBack();
                 Log::warning('Failed to verify purchase code', [
-                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
+                    'purchase_code' => $this->maskPurchaseCode(
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                    ),
                     'ip' => $request->ip(),
                 ]);
                 return back()->withErrors(['purchase_code' => 'Could not verify purchase code. '

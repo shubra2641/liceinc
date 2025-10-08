@@ -229,7 +229,9 @@ class InstallController extends Controller
                     ->withInput();
             }
             // Sanitize purchase code
-            $purchaseCode = $this->sanitizeInput($request->purchase_code);
+            $purchaseCode = $this->sanitizeInput(
+                $request->input('purchase_code', '')
+            );
             $domain = $this->sanitizeInput($request->getHost());
              $licenseVerifier = new class {
                 /**
@@ -241,7 +243,10 @@ class InstallController extends Controller
                     return ['valid' => true, 'message' => 'License verified'];
                 }
              };
-            $result = $licenseVerifier->verifyLicense(is_string($purchaseCode) ? $purchaseCode : '', is_string($domain) ? $domain : '');
+            $result = $licenseVerifier->verifyLicense(
+                is_string($purchaseCode) ? $purchaseCode : '',
+                is_string($domain) ? $domain : ''
+            );
             if ($result['valid']) {
                 // Store license information in session with validation
                 session(['install.license' => [
@@ -262,7 +267,9 @@ class InstallController extends Controller
             } else {
                 // Handle license verification failure
                 $humanMessage = $result['message'] ?? 'License verification failed.';
-                $errorCode = $result['error_code'] ?? $this->extractCodeFromMessage(is_string($humanMessage) ? $humanMessage : '');
+                $errorCode = $result['error_code'] ?? $this->extractCodeFromMessage(
+                    is_string($humanMessage) ? $humanMessage : ''
+                );
                 if ($request->ajax()) {
                     return response()->json([
                         'success' => false,
@@ -276,7 +283,9 @@ class InstallController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('License verification failed', [
-                'purchase_code_length' => strlen(is_string($request->purchase_code) ? $request->purchase_code : ''),
+                'purchase_code_length' => strlen(
+                    is_string($request->input('purchase_code', '')) ? $request->input('purchase_code', '') : ''
+                ),
                 'domain' => $request->getHost(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -349,11 +358,19 @@ class InstallController extends Controller
                 ->with('error', 'Please verify your license first.');
         }
         $requirements = $this->checkRequirements();
-        $allPassed = collect($requirements)->every(fn ($req) => is_array($req) && isset($req['passed']) ? $req['passed'] : false);
+        $allPassed = collect($requirements)->every(
+            fn ($req) => is_array($req) && isset($req['passed']) ? $req['passed'] : false
+        );
         $steps = $this->getInstallationStepsWithStatus(3);
         return view(
             'install.requirements',
-            ['requirements' => $requirements, 'allPassed' => $allPassed, 'steps' => $steps, 'step' => 3, 'progressWidth' => 60],
+            [
+                'requirements' => $requirements,
+                'allPassed' => $allPassed,
+                'steps' => $steps,
+                'step' => 3,
+                'progressWidth' => 60
+            ]
         );
     }
     /**
@@ -397,7 +414,9 @@ class InstallController extends Controller
             }
         } catch (\Exception $e) {
             return redirect()->back()
-                ->withErrors(['database' => 'Database connection failed: ' . $e->getMessage()])
+                ->withErrors([
+                    'database' => 'Database connection failed: ' . $e->getMessage()
+                ])
                 ->withInput();
         }
         // Store database configuration
@@ -592,9 +611,15 @@ class InstallController extends Controller
                 Artisan::call('storage:link');
             } catch (\Exception $e) {
                 // Storage link might already exist or fail, continue anyway
+                Log::debug('Storage link creation failed', [
+                    'error' => $e->getMessage(),
+                ]);
             }
             // Step 10: Create installed file
-            File::put(storage_path('.installed'), now()->toDateTimeString());
+            File::put(
+                storage_path('.installed'),
+                now()->toDateTimeString()
+            );
             // Installation completed successfully
             return response()->json([
                 'success' => true,
@@ -745,9 +770,9 @@ class InstallController extends Controller
     }
     /**
      * Test database connection.
-     */
-    /**
+     *
      * @param mixed $config
+     *
      * @return array<string, mixed>
      */
     private function testDatabaseConnection($config)
@@ -759,10 +784,14 @@ class InstallController extends Controller
             $dbUsername = is_array($config) ? ($config['db_username'] ?? null) : null;
             $dbPassword = is_array($config) ? ($config['db_password'] ?? null) : null;
 
+            $dsn = "mysql:host=" . (is_string($dbHost) ? $dbHost : '');
+            $dsn .= ";port=" . (is_string($dbPort) ? $dbPort : '');
+            $dsn .= ";dbname=" . (is_string($dbName) ? $dbName : '');
+
             $connection = new \PDO(
-                "mysql:host=" . (is_string($dbHost) ? $dbHost : '') . ";port=" . (is_string($dbPort) ? $dbPort : '') . ";dbname=" . (is_string($dbName) ? $dbName : ''),
+                $dsn,
                 is_string($dbUsername) ? $dbUsername : null,
-                is_string($dbPassword) ? $dbPassword : null,
+                is_string($dbPassword) ? $dbPassword : null
             );
             $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             return ['success' => true, 'message' => 'Database connection successful'];
@@ -781,25 +810,63 @@ class InstallController extends Controller
         $envPath = base_path('.env');
         $envContent = File::get($envPath);
         // Update database configuration
-        $envContent = preg_replace('/DB_HOST=.*/', "DB_HOST=" . (is_string($databaseConfig['db_host'] ?? null) ? $databaseConfig['db_host'] : ''), $envContent) ?? $envContent;
-        $envContent = preg_replace('/DB_PORT=.*/', "DB_PORT=" . (is_string($databaseConfig['db_port'] ?? null) ? $databaseConfig['db_port'] : ''), $envContent) ?? $envContent;
-        $envContent = preg_replace('/DB_DATABASE=.*/', "DB_DATABASE=" . (is_string($databaseConfig['db_name'] ?? null) ? $databaseConfig['db_name'] : ''), $envContent) ?? $envContent;
-        $envContent = preg_replace('/DB_USERNAME=.*/', "DB_USERNAME=" . (is_string($databaseConfig['db_username'] ?? null) ? $databaseConfig['db_username'] : ''), $envContent) ?? $envContent;
-        $envContent = preg_replace('/DB_PASSWORD=.*/', "DB_PASSWORD=" . (is_string($databaseConfig['db_password'] ?? null) ? $databaseConfig['db_password'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace(
+            '/DB_HOST=.*/',
+            "DB_HOST=" . (is_string($databaseConfig['db_host'] ?? null) ? $databaseConfig['db_host'] : ''),
+            $envContent
+        ) ?? $envContent;
+        $envContent = preg_replace(
+            '/DB_PORT=.*/',
+            "DB_PORT=" . (is_string($databaseConfig['db_port'] ?? null) ? $databaseConfig['db_port'] : ''),
+            $envContent
+        ) ?? $envContent;
+        $envContent = preg_replace(
+            '/DB_DATABASE=.*/',
+            "DB_DATABASE=" . (is_string($databaseConfig['db_name'] ?? null) ? $databaseConfig['db_name'] : ''),
+            $envContent
+        ) ?? $envContent;
+        $envContent = preg_replace(
+            '/DB_USERNAME=.*/',
+            "DB_USERNAME=" . (is_string($databaseConfig['db_username'] ?? null) ? $databaseConfig['db_username'] : ''),
+            $envContent
+        ) ?? $envContent;
+        $envContent = preg_replace(
+            '/DB_PASSWORD=.*/',
+            "DB_PASSWORD=" . (is_string($databaseConfig['db_password'] ?? null) ? $databaseConfig['db_password'] : ''),
+            $envContent
+        ) ?? $envContent;
         // Update application configuration
-        $envContent = preg_replace('/APP_NAME=.*/', "APP_NAME=\"" . (is_string($settingsConfig['site_name'] ?? null) ? $settingsConfig['site_name'] : '') . "\"", $envContent) ?? $envContent;
+        $envContent = preg_replace(
+            '/APP_NAME=.*/',
+            "APP_NAME=\"" . (
+                is_string($settingsConfig['site_name'] ?? null) ? $settingsConfig['site_name'] : ''
+            ) . "\"",
+            $envContent
+        ) ?? $envContent;
         // Update APP_URL to current domain (this ensures emails use the correct domain)
         $currentUrl = request()->getSchemeAndHttpHost();
         $envContent = preg_replace('/APP_URL=.*/', "APP_URL={$currentUrl}", $envContent) ?? $envContent;
-        $envContent = preg_replace('/APP_TIMEZONE=.*/', "APP_TIMEZONE=" . (is_string($settingsConfig['timezone'] ?? null) ? $settingsConfig['timezone'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace(
+            '/APP_TIMEZONE=.*/',
+            "APP_TIMEZONE=" . (is_string($settingsConfig['timezone'] ?? null) ? $settingsConfig['timezone'] : ''),
+            $envContent
+        ) ?? $envContent;
         // Add APP_TIMEZONE if it doesn't exist
         if ($envContent && ! str_contains($envContent, 'APP_TIMEZONE=')) {
-            $envContent .= "\nAPP_TIMEZONE=" . (is_string($settingsConfig['timezone'] ?? null) ? $settingsConfig['timezone'] : '');
+            $envContent .= "\nAPP_TIMEZONE=" . (
+                is_string($settingsConfig['timezone'] ?? null) ? $settingsConfig['timezone'] : ''
+            );
         }
-        $envContent = preg_replace('/APP_LOCALE=.*/', "APP_LOCALE=" . (is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace(
+            '/APP_LOCALE=.*/',
+            "APP_LOCALE=" . (is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : ''),
+            $envContent
+        ) ?? $envContent;
         // Add APP_LOCALE if it doesn't exist
         if ($envContent && ! str_contains($envContent, 'APP_LOCALE=')) {
-            $envContent .= "\nAPP_LOCALE=" . (is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : '');
+            $envContent .= "\nAPP_LOCALE=" . (
+                is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : ''
+            );
         }
         // Update APP_FALLBACK_LOCALE
         $locale = $settingsConfig['locale'] ?? null;
@@ -815,7 +882,11 @@ class InstallController extends Controller
         }
         // Update APP_FAKER_LOCALE
         $fakerLocale = $localeStr === 'ar' ? 'ar_SA' : 'en_US';
-        $envContent = preg_replace('/APP_FAKER_LOCALE=.*/', "APP_FAKER_LOCALE={$fakerLocale}", $envContent) ?? $envContent;
+        $envContent = preg_replace(
+            '/APP_FAKER_LOCALE=.*/',
+            "APP_FAKER_LOCALE={$fakerLocale}",
+            $envContent
+        ) ?? $envContent;
         // Add APP_FAKER_LOCALE if it doesn't exist
         if ($envContent && ! str_contains($envContent, 'APP_FAKER_LOCALE = ')) {
             $envContent .= "\nAPP_FAKER_LOCALE={$fakerLocale}";
@@ -831,9 +902,21 @@ class InstallController extends Controller
             $mailFromAddress = $settingsConfig['mail_from_address'] ?? null;
             $mailFromName = $settingsConfig['mail_from_name'] ?? null;
 
-            $envContent = preg_replace('/MAIL_MAILER=.*/', "MAIL_MAILER=" . (is_string($mailMailer) ? $mailMailer : ''), $envContent) ?? $envContent;
-            $envContent = preg_replace('/MAIL_HOST=.*/', "MAIL_HOST=" . (is_string($mailHost) ? $mailHost : ''), $envContent) ?? $envContent;
-            $envContent = preg_replace('/MAIL_PORT=.*/', "MAIL_PORT=" . (is_string($mailPort) ? $mailPort : ''), $envContent) ?? $envContent;
+            $envContent = preg_replace(
+                '/MAIL_MAILER=.*/',
+                "MAIL_MAILER=" . (is_string($mailMailer) ? $mailMailer : ''),
+                $envContent
+            ) ?? $envContent;
+            $envContent = preg_replace(
+                '/MAIL_HOST=.*/',
+                "MAIL_HOST=" . (is_string($mailHost) ? $mailHost : ''),
+                $envContent
+            ) ?? $envContent;
+            $envContent = preg_replace(
+                '/MAIL_PORT=.*/',
+                "MAIL_PORT=" . (is_string($mailPort) ? $mailPort : ''),
+                $envContent
+            ) ?? $envContent;
             $envContent = preg_replace(
                 '/MAIL_USERNAME=.*/',
                 "MAIL_USERNAME=" . (is_string($mailUsername) ? $mailUsername : ''),
@@ -1006,6 +1089,10 @@ class InstallController extends Controller
             } catch (\Exception $seederError) {
                 // Failed to run seeder
                 // Continue with other seeders even if one fails
+                Log::warning('Seeder execution failed', [
+                    'seeder' => $seeder,
+                    'error' => $seederError->getMessage(),
+                ]);
             }
         }
         // Required database seeders execution completed
@@ -1063,7 +1150,11 @@ class InstallController extends Controller
             return $input;
         }
         // Remove null bytes
-        $input = str_replace(SecureFileHelper::getCharacter(0), '', $input);
+        $input = str_replace(
+            SecureFileHelper::getCharacter(0),
+            '',
+            $input
+        );
         // Trim whitespace
         $input = trim($input);
         // Remove potentially dangerous characters

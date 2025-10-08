@@ -23,7 +23,6 @@
     <rule ref="PSR1"/>
     
     <!-- PHP 8+ compatibility -->
-    <rule ref="Generic.PHP.RequireStrictTypes"/>
     <rule ref="Generic.PHP.DisallowShortOpenTag"/>
     
     <!-- Array formatting -->
@@ -57,7 +56,6 @@
     </rule>
     
     <!-- PHP 8.1+ features -->
-    <rule ref="Generic.PHP.RequireStrictTypes"/>
     <rule ref="Generic.PHP.DisallowShortOpenTag"/>
     
     <!-- Performance optimizations -->
