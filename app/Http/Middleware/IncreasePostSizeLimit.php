@@ -24,7 +24,6 @@ use Symfony\Component\HttpFoundation\Response;
  * - Detailed logging for monitoring and debugging
  * - Graceful fallback when configuration changes fail
  *
- *
  * @example
  * // Register in Kernel.php
  * protected $middleware = [
@@ -60,7 +59,9 @@ class IncreasePostSizeLimit
             // Apply PHP configuration adjustments with validation
             $this->adjustPhpConfiguration();
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         } catch (\Exception $e) {
@@ -73,7 +74,9 @@ class IncreasePostSizeLimit
             ]);
             // In case of error, continue to next middleware to prevent request blocking
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         }
@@ -83,7 +86,6 @@ class IncreasePostSizeLimit
      *
      * Safely modifies PHP configuration settings to optimize file upload
      * handling while maintaining security and proper error handling.
-     *
      *
      * @throws \Exception When configuration adjustment fails
      */

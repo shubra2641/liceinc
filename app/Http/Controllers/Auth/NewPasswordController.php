@@ -18,6 +18,7 @@ use Illuminate\View\View;
  *
  * This controller manages password reset functionality, allowing users
  * to reset their passwords using valid reset tokens sent via email.
+ *
  * @version 1.0.6
  */
 class NewPasswordController extends Controller

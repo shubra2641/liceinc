@@ -33,7 +33,6 @@ use Throwable;
  * - Proper error responses for different scenarios
  * - Comprehensive logging for security monitoring
  *
- *
  * @example
  * // List categories
  * GET /admin/kb-categories
@@ -202,7 +201,9 @@ class KbCategoryController extends Controller
                     }
                 }
             }, 'parent', 'product']);
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'admin.kb.categories.show';
             return view($viewName, ['kbCategory' => $kbCategory]);
         } catch (Throwable $e) {

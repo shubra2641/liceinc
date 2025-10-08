@@ -288,7 +288,9 @@ class PaymentController extends Controller
             // Log PayPal payments only
             if ($gateway === 'paypal') {
                 $requestData = $request->all();
-                /** @var array<string, mixed> $sanitizedData */
+                /**
+ * @var array<string, mixed> $sanitizedData
+*/
                 $sanitizedData = $requestData;
                 Log::warning('PayPal Payment Success Callback', [
                     'gateway' => $gateway,

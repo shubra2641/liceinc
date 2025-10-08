@@ -85,6 +85,7 @@ class EmailTemplate extends Model
     ];
     /**
      * Scope a query to only include active templates.
+     *
      * @param Builder<EmailTemplate> $query
      * @return Builder<EmailTemplate>
      */
@@ -94,6 +95,7 @@ class EmailTemplate extends Model
     }
     /**
      * Scope a query to only include templates for a specific type.
+     *
      * @param Builder<EmailTemplate> $query
      * @return Builder<EmailTemplate>
      */
@@ -103,6 +105,7 @@ class EmailTemplate extends Model
     }
     /**
      * Scope a query to only include templates for a specific category.
+     *
      * @param Builder<EmailTemplate> $query
      * @return Builder<EmailTemplate>
      */

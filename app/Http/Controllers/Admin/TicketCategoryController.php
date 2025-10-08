@@ -164,7 +164,9 @@ class TicketCategoryController extends Controller
     public function show(TicketCategory $ticket_category): View
     {
         try {
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'admin.ticket-categories.show';
             return view($viewName, ['ticket_category' => $ticket_category]);
         } catch (\Exception $e) {
@@ -173,7 +175,9 @@ class TicketCategoryController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'category_id' => $ticket_category->id,
             ]);
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'admin.ticket-categories.show';
             return view($viewName, [
                 'ticket_category' => $ticket_category,

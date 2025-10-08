@@ -36,7 +36,6 @@ use Illuminate\Support\Facades\Log;
  * - Performance optimization with efficient queries
  * - Enhanced error handling and logging
  *
- *
  * @example
  * // Run basic security audit
  * php artisan security:audit
@@ -69,7 +68,7 @@ class SecurityAuditCommand extends Command
      * @var string
      */
     protected $description = 'Perform comprehensive security audit of the application with advanced '
-        .'reporting and auto-fix capabilities';
+        . 'reporting and auto-fix capabilities';
 
     /**
      * Security issues found during audit.
@@ -138,7 +137,7 @@ class SecurityAuditCommand extends Command
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $this->error('Security audit failed: '.$e->getMessage());
+            $this->error('Security audit failed: ' . $e->getMessage());
 
             return 1;
         }
@@ -149,7 +148,6 @@ class SecurityAuditCommand extends Command
      *
      * Executes all security audit checks in sequence with proper
      * error handling and performance tracking.
-     *
      *
      * @throws \Exception When critical security checks fail
      */
@@ -177,7 +175,7 @@ class SecurityAuditCommand extends Command
                 $this->addIssue(
                     'high',
                     $checkName,
-                    'Failed to perform security check: '.$e->getMessage(),
+                    'Failed to perform security check: ' . $e->getMessage(),
                 );
             }
         }
@@ -188,7 +186,6 @@ class SecurityAuditCommand extends Command
      *
      * Performs comprehensive database security analysis including
      * password validation, user role verification, and license integrity checks.
-     *
      *
      * @throws \Exception When database operations fail
      *
@@ -245,7 +242,7 @@ class SecurityAuditCommand extends Command
             $this->addIssue(
                 'high',
                 'Database Security',
-                'Failed to check database security: '.$e->getMessage(),
+                'Failed to check database security: ' . $e->getMessage(),
             );
         }
     }
@@ -270,8 +267,8 @@ class SecurityAuditCommand extends Command
                     $this->addIssue(
                         'high',
                         'File Permissions',
-                        "File {$file} has permissions ".decoct($currentPerms).
-                        ' but should have '.decoct($expectedPerms),
+                        "File {$file} has permissions " . decoct($currentPerms) .
+                        ' but should have ' . decoct($expectedPerms),
                     );
                 }
             } else {
@@ -283,14 +280,16 @@ class SecurityAuditCommand extends Command
             }
         }
         // Check for world-writable files
-        /** @var array<string, array<string, string|int|bool>> $writableFiles */
+        /**
+ * @var array<string, array<string, string|int|bool>> $writableFiles
+*/
         $writableFiles = [];
         $this->checkWorldWritableFiles(base_path(), $writableFiles);
         if (! empty($writableFiles)) {
             $this->addIssue(
                 'medium',
                 'File Permissions',
-                'Found '.count($writableFiles).' world-writable files',
+                'Found ' . count($writableFiles) . ' world-writable files',
             );
         }
     }
@@ -444,7 +443,7 @@ class SecurityAuditCommand extends Command
                 $this->addIssue(
                     'low',
                     'Log Files',
-                    'Log files are consuming '.round($totalSize / 1024 / 1024, 2).'MB of space',
+                    'Log files are consuming ' . round($totalSize / 1024 / 1024, 2) . 'MB of space',
                 );
             }
             // Check for publicly accessible log files
@@ -453,7 +452,7 @@ class SecurityAuditCommand extends Command
                     $this->addIssue(
                         'medium',
                         'Log Files',
-                        'Log file '.basename($file).' is world-readable',
+                        'Log file ' . basename($file) . ' is world-readable',
                     );
                 }
             }
@@ -499,7 +498,7 @@ class SecurityAuditCommand extends Command
             $this->addIssue(
                 'high',
                 'Environment',
-                'PHP version '.PHP_VERSION.' is outdated and may have security vulnerabilities',
+                'PHP version ' . PHP_VERSION . ' is outdated and may have security vulnerabilities',
             );
         }
         // Check for dangerous PHP functions
@@ -590,7 +589,7 @@ class SecurityAuditCommand extends Command
             ],
             'issues' => $this->issues,
         ];
-        $reportPath = storage_path('logs/security-audit-'.now()->format('Y-m-d-H-i-s').'.json');
+        $reportPath = storage_path('logs/security-audit-' . now()->format('Y-m-d-H-i-s') . '.json');
         $jsonContent = json_encode($report, JSON_PRETTY_PRINT);
         if ($jsonContent === false) {
             throw new \RuntimeException('Failed to encode security report to JSON');
@@ -620,7 +619,9 @@ class SecurityAuditCommand extends Command
     /**
      * Check if an issue can be automatically fixed.
      */
-    /** @param array<string, mixed> $issue */
+    /**
+ * @param array<string, mixed> $issue
+*/
     private function canAutoFix(array $issue): bool
     {
         // Define which types of issues can be automatically fixed
@@ -642,7 +643,9 @@ class SecurityAuditCommand extends Command
     /**
      * Automatically fix a security issue.
      */
-    /** @param array<string, mixed> $issue */
+    /**
+ * @param array<string, mixed> $issue
+*/
     private function autoFix(array $issue): bool
     {
         try {

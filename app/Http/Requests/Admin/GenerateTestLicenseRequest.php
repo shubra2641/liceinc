@@ -93,7 +93,7 @@ class GenerateTestLicenseRequest extends FormRequest
         $domain = $this->input('domain');
         $email = $this->input('email');
         $name = $this->input('name');
-        
+
         $this->merge([
             'domain' => $domain && is_string($domain) ? strtolower(trim($domain)) : null,
             'email' => $email && is_string($email) ? strtolower(trim($email)) : null,

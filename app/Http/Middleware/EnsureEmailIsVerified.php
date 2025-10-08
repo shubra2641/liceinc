@@ -45,10 +45,6 @@ class EnsureEmailIsVerified
      * @throws \InvalidArgumentException When request is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -62,12 +58,16 @@ class EnsureEmailIsVerified
             // Check if user's email is verified
             if (! $this->isEmailVerified($user)) {
                 $response = $this->handleUnverifiedEmail($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         } catch (Exception $e) {

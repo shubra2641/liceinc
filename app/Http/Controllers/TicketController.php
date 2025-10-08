@@ -79,7 +79,9 @@ class TicketController extends Controller
                 ->latest()
                 ->paginate(self::PAGINATION_LIMIT);
             DB::commit();
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'tickets.index';
             return view($viewName, ['tickets' => $tickets]);
         } catch (Exception $e) {
@@ -88,7 +90,9 @@ class TicketController extends Controller
                 'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'tickets.index';
             return view($viewName, ['tickets' => collect()])
                 ->with('error', 'Failed to load tickets. Please try again.');
@@ -114,7 +118,9 @@ class TicketController extends Controller
     public function create(): View|RedirectResponse
     {
         try {
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'tickets.create';
             return view($viewName);
         } catch (Exception $e) {
@@ -214,7 +220,9 @@ class TicketController extends Controller
             DB::beginTransaction();
             $ticket->load(['user', 'replies.user']);
             DB::commit();
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'tickets.show';
             return view($viewName, ['ticket' => $ticket]);
         } catch (Exception $e) {
@@ -414,8 +422,10 @@ class TicketController extends Controller
             'purchase_code' => ['nullable', 'string'],
             'product_slug' => ['nullable', 'string'],
         ]);
-        
-        /** @var array<string, mixed> $result */
+
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $validated;
         return $result;
     }
@@ -436,8 +446,10 @@ class TicketController extends Controller
             'status' => ['sometimes', 'in:' . implode(', ', self::VALID_STATUSES)],
             'content' => ['sometimes', 'string'],
         ]);
-        
-        /** @var array<string, mixed> $result */
+
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $validated;
         return $result;
     }
@@ -455,8 +467,10 @@ class TicketController extends Controller
             'close_ticket' => ['sometimes', 'boolean'],
             'action' => ['sometimes', 'in:reply, reply_and_close'],
         ]);
-        
-        /** @var array<string, mixed> $result */
+
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $validated;
         return $result;
     }

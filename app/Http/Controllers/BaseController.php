@@ -68,8 +68,10 @@ abstract class BaseController extends Controller
             throw new ValidationException($validator);
         }
         $validated = $validator->validated();
-        
-        /** @var array<string, mixed> $result */
+
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $validated;
         return $result;
     }
@@ -242,7 +244,9 @@ abstract class BaseController extends Controller
                 $data[$field] = '[REDACTED]';
             }
         }
-        /** @var array<string, mixed> $result */
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $data;
         return $result;
     }

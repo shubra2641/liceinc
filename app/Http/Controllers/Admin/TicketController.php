@@ -518,7 +518,7 @@ class TicketController extends Controller
             DB::commit();
 
             $status = $ticket->status ?? 'open';
-            return back()->with('success', 'Ticket status updated to '.ucfirst($status));
+            return back()->with('success', 'Ticket status updated to ' . ucfirst($status));
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to update ticket status', [
@@ -528,7 +528,7 @@ class TicketController extends Controller
                 'request_data' => $request->all(),
             ]);
 
-            return back()->withErrors(['status' => 'Error updating ticket status: '.$e->getMessage()]);
+            return back()->withErrors(['status' => 'Error updating ticket status: ' . $e->getMessage()]);
         }
     }
 }

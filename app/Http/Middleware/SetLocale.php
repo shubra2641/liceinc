@@ -52,7 +52,9 @@ class SetLocale
             // Set application locale
             $this->setApplicationLocale($validatedLocale);
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         } catch (\Exception $e) {
@@ -66,7 +68,9 @@ class SetLocale
             // Fallback to default locale and continue
             app()->setLocale(is_string(config('app.locale')) ? config('app.locale') : 'en');
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         }
@@ -183,7 +187,11 @@ class SetLocale
             // return the keys; otherwise return the flat array as-is
             $keys = array_keys($configLocales);
             $isAssociative = array_filter($keys, 'is_string') === $keys;
-            return $isAssociative ? array_map(function($key) { return $key; }, $keys) : array_map(function($value) { return $value; }, array_values($configLocales));
+            return $isAssociative ? array_map(function ($key) {
+                return $key;
+            }, $keys) : array_map(function ($value) {
+                return $value;
+            }, array_values($configLocales));
         }
         // Default supported locales
         return [

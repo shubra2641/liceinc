@@ -26,7 +26,6 @@ use Illuminate\Validation\Rule;
  * - Enhanced error handling and logging
  * - Input validation and sanitization
  *
- *
  * @example
  * // List all licenses
  * GET /admin/licenses

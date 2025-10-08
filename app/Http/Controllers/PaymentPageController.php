@@ -57,7 +57,9 @@ class PaymentPageController extends Controller
                 ]);
                 return redirect()->route('home')->with('error', 'Invalid payment gateway.');
             }
-            /** @var view-string $viewString */
+            /**
+ * @var view-string $viewString
+*/
             $viewString = $view;
             return view($viewString, ['gateway' => $sanitizedGateway]);
         } catch (\Exception $e) {

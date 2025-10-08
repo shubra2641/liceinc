@@ -25,7 +25,6 @@ use Illuminate\Support\Facades\Log;
  * - Comprehensive access control and authorization
  * - Enhanced error handling and security measures
  *
- *
  * @example
  * // Download a specific product file
  * GET /user/products/{product}/files/{file}/download

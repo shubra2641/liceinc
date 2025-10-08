@@ -12,6 +12,7 @@ class ServerHelper
 {
     /**
      * Get request time float safely
+     *
      * @return float
      */
     public static function getRequestTimeFloat(): float
@@ -27,6 +28,7 @@ class ServerHelper
 
     /**
      * Get server software safely
+     *
      * @return string
      */
     public static function getServerSoftware(): string
@@ -46,6 +48,7 @@ class ServerHelper
 
     /**
      * Get execution time safely
+     *
      * @return float
      */
     public static function getExecutionTime(): float
@@ -56,6 +59,7 @@ class ServerHelper
 
     /**
      * Check if server is Apache
+     *
      * @return bool
      */
     public static function isApache(): bool
@@ -66,6 +70,7 @@ class ServerHelper
 
     /**
      * Check if server is Nginx
+     *
      * @return bool
      */
     public static function isNginx(): bool
@@ -76,6 +81,7 @@ class ServerHelper
 
     /**
      * Get current domain safely
+     *
      * @return string
      */
     public static function getCurrentDomain(): string
@@ -91,9 +97,12 @@ class ServerHelper
 
     /**
      * Get server information safely
+     *
      * @return array
      */
-    /** @return array<string, mixed> */
+    /**
+ * @return array<string, mixed>
+*/
     public static function getServerInfo(): array
     {
         return [

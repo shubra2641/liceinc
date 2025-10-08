@@ -80,6 +80,7 @@ class LicenseVerificationLog extends Model
     ];
     /**
      * Scope for successful verifications.
+     *
      * @return Builder<LicenseVerificationLog>
      */
     /**
@@ -92,6 +93,7 @@ class LicenseVerificationLog extends Model
     }
     /**
      * Scope for failed verifications.
+     *
      * @param Builder<LicenseVerificationLog> $query
      * @return Builder<LicenseVerificationLog>
      */
@@ -101,6 +103,7 @@ class LicenseVerificationLog extends Model
     }
     /**
      * Scope for specific domain.
+     *
      * @param Builder<LicenseVerificationLog> $query
      * @return Builder<LicenseVerificationLog>
      */
@@ -110,6 +113,7 @@ class LicenseVerificationLog extends Model
     }
     /**
      * Scope for specific IP address.
+     *
      * @param Builder<LicenseVerificationLog> $query
      * @return Builder<LicenseVerificationLog>
      */
@@ -119,6 +123,7 @@ class LicenseVerificationLog extends Model
     }
     /**
      * Scope for specific verification source.
+     *
      * @param Builder<LicenseVerificationLog> $query
      * @return Builder<LicenseVerificationLog>
      */
@@ -128,6 +133,7 @@ class LicenseVerificationLog extends Model
     }
     /**
      * Scope for recent attempts (last 24 hours).
+     *
      * @param Builder<LicenseVerificationLog> $query
      * @return Builder<LicenseVerificationLog>
      */

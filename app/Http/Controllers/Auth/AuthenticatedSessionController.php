@@ -24,6 +24,7 @@ use Illuminate\View\View;
  * - Proper logging for errors and warnings only
  * - Session management with CSRF protection
  * - Email verification handling
+ *
  * @version 1.0.6
  */
 class AuthenticatedSessionController extends Controller

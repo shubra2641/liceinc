@@ -51,10 +51,6 @@ class Modal extends Component
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function __construct(string $name, bool $show = false, string $maxWidth = '2xl')
     {
@@ -76,10 +72,6 @@ class Modal extends Component
      * @return string The CSS class for maximum width
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     protected function getMaxWidthClass(): string
     {
@@ -106,10 +98,6 @@ class Modal extends Component
      * @return View The view for the modal component
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function render(): View
     {
@@ -133,10 +121,6 @@ class Modal extends Component
      * @throws \InvalidArgumentException When max width is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function validateMaxWidth(string $maxWidth): string
     {

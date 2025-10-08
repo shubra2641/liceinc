@@ -26,7 +26,6 @@ use Throwable;
  * - Proper error responses for different access scenarios
  * - Comprehensive logging for security monitoring
  *
- *
  * @example
  * // Applied to admin routes that require admin access
  * Route::middleware(['auth', 'admin'])->group(function () {
@@ -58,7 +57,9 @@ class EnsureAdmin
             // Skip authentication for static assets
             if ($this->isStaticAsset($request)) {
                 $response = $next($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
@@ -76,7 +77,9 @@ class EnsureAdmin
             // Additional security: Check if user is active and email verified
             $this->validateUserEmailVerification($request, $user);
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         } catch (Throwable $e) {

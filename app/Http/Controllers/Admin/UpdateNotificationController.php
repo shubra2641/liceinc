@@ -38,10 +38,6 @@ class UpdateNotificationController extends Controller
      * @throws \Exception When update checking fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function checkAndNotify(): JsonResponse
     {
@@ -83,10 +79,6 @@ class UpdateNotificationController extends Controller
      * @throws \Exception When status retrieval fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function getNotificationStatus(): JsonResponse
     {
@@ -126,10 +118,6 @@ class UpdateNotificationController extends Controller
      * @throws \Exception When dismissal operation fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function dismissNotification(UpdateNotificationRequest $request): JsonResponse
     {
@@ -169,10 +157,6 @@ class UpdateNotificationController extends Controller
      * @throws \Exception When notification sending fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @param array<string, mixed> $versionStatus

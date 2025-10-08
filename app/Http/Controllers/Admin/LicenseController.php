@@ -43,10 +43,6 @@ class LicenseController extends Controller
      * @param  EmailService  $emailService  The email service for notifications
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function __construct(EmailService $emailService)
     {
@@ -58,10 +54,6 @@ class LicenseController extends Controller
      * @return View The licenses index view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function index(): View
     {
@@ -76,10 +68,6 @@ class LicenseController extends Controller
      * @return View The license creation form view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function create(): View
     {
@@ -204,10 +192,6 @@ class LicenseController extends Controller
      * @return View The license details view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function show(License $license): View
     {
@@ -225,10 +209,6 @@ class LicenseController extends Controller
      * @return View The license edit form view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function edit(License $license): View
     {
@@ -382,10 +362,6 @@ class LicenseController extends Controller
      * @return \Symfony\Component\HttpFoundation\StreamedResponse The CSV download response
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function export(): \Symfony\Component\HttpFoundation\StreamedResponse
     {

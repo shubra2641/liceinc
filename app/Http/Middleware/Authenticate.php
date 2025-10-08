@@ -26,7 +26,6 @@ use Throwable;
  * - Proper error responses for different request types
  * - Comprehensive logging for security monitoring
  *
- *
  * @example
  * // Applied to routes that require authentication
  * Route::middleware('auth')->group(function () {

@@ -51,47 +51,61 @@ class DemoModeMiddleware
             // Check if demo mode is enabled
             if (! $this->isDemoModeEnabled()) {
                 $response = $next($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
             // Skip demo mode for installation routes
             if ($request->routeIs('install.*')) {
                 $response = $next($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
             // Skip demo mode for login and authentication routes
             if ($this->isAuthenticationRoute($request)) {
                 $response = $next($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
             // Skip demo mode for AJAX requests that are read-only
             if ($request->ajax() && $this->isReadOnlyAjaxRequest($request)) {
                 $response = $next($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
             // Block destructive HTTP methods (but allow login POST)
             if ($this->isDestructiveMethod($request->method()) && ! $this->isLoginPost($request)) {
                 $response = $this->handleDemoModeBlock($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
             // Block destructive form submissions
             if ($request->isMethod('POST') && $this->isDestructiveAction($request)) {
                 $response = $this->handleDemoModeBlock($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         } catch (\Exception $e) {
@@ -104,7 +118,9 @@ class DemoModeMiddleware
             ]);
             // In case of error, allow the request to proceed
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         }

@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\Log;
  * - Security measures for sensitive data
  * - Proper type hints and return types
  *
- *
  * @example
  * // Check if Envato is configured
  * if (EnvatoHelper::isEnvatoConfigured()) {
@@ -174,7 +173,6 @@ class EnvatoHelper
      *
      * Clears the cached Envato configuration and settings data.
      * Should be called when settings are updated.
-     *
      *
      * @example
      * // After updating Envato settings

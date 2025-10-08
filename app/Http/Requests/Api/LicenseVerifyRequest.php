@@ -122,11 +122,11 @@ class LicenseVerifyRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-        
+
         if (!is_string($input)) {
             return null;
         }
-        
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
     /**
@@ -141,11 +141,11 @@ class LicenseVerifyRequest extends FormRequest
         if ($domain === null || $domain === '') {
             return null;
         }
-        
+
         if (!is_string($domain)) {
             return null;
         }
-        
+
         // Extract host from URL if it's a full URL
         $host = parse_url($domain, PHP_URL_HOST);
         if ($host) {

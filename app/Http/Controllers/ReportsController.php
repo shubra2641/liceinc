@@ -41,7 +41,6 @@ use App\Helpers\SecureFileHelper;
  * - Proper error responses for different scenarios
  * - Comprehensive logging for security monitoring
  *
- *
  * @example
  * // Get reports dashboard
  * GET /admin/reports
@@ -74,7 +73,9 @@ class ReportsController extends Controller
     public function index(): View
     {
         try {
-            /** @var View $result */
+            /**
+ * @var View $result
+*/
             $result = $this->transaction(function () {
                 // Basic metrics
                 $totalLicenses = License::count();
@@ -454,7 +455,9 @@ class ReportsController extends Controller
     public function getLicenseData(Request $request): JsonResponse
     {
         try {
-            /** @var JsonResponse $result */
+            /**
+ * @var JsonResponse $result
+*/
             $result = $this->transaction(function () use ($request) {
                 $period = $this->sanitizeInput($request->get('period', 'month'));
                 switch ($period) {
@@ -521,7 +524,9 @@ class ReportsController extends Controller
     public function getApiStatusData(Request $request): JsonResponse
     {
         try {
-            /** @var JsonResponse $result */
+            /**
+ * @var JsonResponse $result
+*/
             $result = $this->transaction(function () use ($request) {
                 $period = $this->sanitizeInput($request->get('period', 'week'));
                 switch ($period) {
@@ -589,7 +594,9 @@ class ReportsController extends Controller
     public function export(Request $request): \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
     {
         try {
-            /** @var \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse $result */
+            /**
+ * @var \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse $result
+*/
             $result = $this->transaction(function () use ($request) {
                 $format = $this->sanitizeInput($request->get('format', 'pdf'));
                 $dateFrom = $this->sanitizeInput($request->get('date_from'));
@@ -685,10 +692,10 @@ class ReportsController extends Controller
                 // CSV headers
                 fputcsv($file, ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price']);
             // CSV data
-            if (is_array($data['licenses'])) {
-                foreach ($data['licenses'] as $license) {
-                    if (is_object($license) && isset($license->license_key)) {
-                        $csvData = [
+                if (is_array($data['licenses'])) {
+                    foreach ($data['licenses'] as $license) {
+                        if (is_object($license) && isset($license->license_key)) {
+                            $csvData = [
                             is_string($license->license_key) ? $license->license_key : '',
                             (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
                             (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
@@ -696,13 +703,15 @@ class ReportsController extends Controller
                             (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
                             (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
                             (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
-                        ];
-                        /** @var array<int|string, bool|float|int|string|null> $typedCsvData */
-                        $typedCsvData = $csvData;
-                        fputcsv($file, $typedCsvData);
+                            ];
+                            /**
+ * @var array<int|string, bool|float|int|string|null> $typedCsvData
+*/
+                            $typedCsvData = $csvData;
+                            fputcsv($file, $typedCsvData);
+                        }
                     }
                 }
-            }
                 SecureFileHelper::closeFile($file);
             }
         };
@@ -732,10 +741,10 @@ class ReportsController extends Controller
                 // For now, just output CSV content as PDF placeholder
                 // In production, use a proper PDF library like dompdf
                 fputcsv($file, ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price']);
-            if (is_array($data['licenses'])) {
-                foreach ($data['licenses'] as $license) {
-                    if (is_object($license) && isset($license->license_key)) {
-                        $csvData = [
+                if (is_array($data['licenses'])) {
+                    foreach ($data['licenses'] as $license) {
+                        if (is_object($license) && isset($license->license_key)) {
+                            $csvData = [
                             is_string($license->license_key) ? $license->license_key : '',
                             (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
                             (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
@@ -743,13 +752,15 @@ class ReportsController extends Controller
                             (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
                             (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
                             (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
-                        ];
-                        /** @var array<int|string, bool|float|int|string|null> $typedCsvData */
-                        $typedCsvData = $csvData;
-                        fputcsv($file, $typedCsvData);
+                            ];
+                            /**
+ * @var array<int|string, bool|float|int|string|null> $typedCsvData
+*/
+                            $typedCsvData = $csvData;
+                            fputcsv($file, $typedCsvData);
+                        }
                     }
                 }
-            }
                 SecureFileHelper::closeFile($file);
             }
         };

@@ -224,7 +224,9 @@ class ProductCategoryController extends Controller
             DB::beginTransaction();
             $product_category->load('products');
             DB::commit();
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'admin.product-categories.show';
             return view($viewName, ['product_category' => $product_category]);
         } catch (\Exception $e) {
@@ -258,7 +260,9 @@ class ProductCategoryController extends Controller
      */
     public function edit(ProductCategory $product_category): View
     {
-        /** @var view-string $viewName */
+        /**
+ * @var view-string $viewName
+*/
         $viewName = 'admin.product-categories.edit';
         return view($viewName, ['product_category' => $product_category]);
     }

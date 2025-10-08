@@ -245,7 +245,7 @@ class VersionHelper
                     'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
                 ]);
                 throw new \InvalidArgumentException('Cannot update to older or same version. '
-                    ."Current: {$currentVersion}, Target: {$newVersion}");
+                    . "Current: {$currentVersion}, Target: {$newVersion}");
             }
             // Update existing setting or create new one
             $setting = Setting::where('key', 'site_name')->first() ?? Setting::first();
@@ -292,7 +292,9 @@ class VersionHelper
      *
      * @throws \Exception When file operations fail
      */
-    /** @return array<string, mixed> */
+    /**
+ * @return array<string, mixed>
+*/
     public static function getVersionInfo(?string $version = null): array
     {
         try {
@@ -334,13 +336,17 @@ class VersionHelper
                 }
 
                 $changelog = (is_array($versionData) && isset($versionData['changelog']) && is_array($versionData['changelog']) && isset($versionData['changelog'][$version])) ? $versionData['changelog'][$version] : [];
-                /** @var array<string, mixed> $result */
+                /**
+ * @var array<string, mixed> $result
+*/
                 $result = is_array($changelog) ? $changelog : [];
                 return $result;
             }
 
             if (is_array($versionData)) {
-                /** @var array<string, mixed> $sanitizedData */
+                /**
+ * @var array<string, mixed> $sanitizedData
+*/
                 $sanitizedData = [];
                 foreach ($versionData as $key => $value) {
                     if (is_string($key)) {
@@ -374,7 +380,9 @@ class VersionHelper
      * @throws \InvalidArgumentException When version format is invalid
      * @throws \Exception When file operations fail
      */
-    /** @return array<string, mixed> */
+    /**
+ * @return array<string, mixed>
+*/
     public static function getUpdateInstructions(string $version): array
     {
         try {
@@ -414,7 +422,9 @@ class VersionHelper
             }
 
             $instructions = (is_array($versionData) && isset($versionData['update_instructions']) && is_array($versionData['update_instructions']) && isset($versionData['update_instructions'][$version])) ? $versionData['update_instructions'][$version] : [];
-            /** @var array<string, mixed> $result */
+            /**
+ * @var array<string, mixed> $result
+*/
             $result = is_array($instructions) ? $instructions : [];
             return $result;
         } catch (\Exception $e) {
@@ -477,7 +487,9 @@ class VersionHelper
      *
      * @throws \Exception When version operations fail
      */
-    /** @return array<string, mixed> */
+    /**
+ * @return array<string, mixed>
+*/
     public static function getVersionStatus(): array
     {
         try {
@@ -633,7 +645,7 @@ class VersionHelper
                     'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
                 ]);
                 throw new \InvalidArgumentException("Cannot update to older version. Current: {$currentVersion}, "
-                    ."Target: {$newVersion}");
+                    . "Target: {$newVersion}");
             }
             // Update or create setting
             $setting = Setting::updateOrCreate(
@@ -670,7 +682,9 @@ class VersionHelper
      *
      * @throws \Exception When database operations fail
      */
-    /** @return array<string, mixed> */
+    /**
+ * @return array<string, mixed>
+*/
     public static function getVersionHistory(): array
     {
         try {
@@ -699,7 +713,9 @@ class VersionHelper
                 })->filter()->values()->toArray();
                 DB::commit();
 
-                /** @var array<string, mixed> $result */
+                /**
+ * @var array<string, mixed> $result
+*/
                 $result = $history;
                 return $result;
             } catch (\Exception $e) {

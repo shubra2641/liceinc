@@ -27,7 +27,6 @@ use Throwable;
  * - Comprehensive logging for security monitoring
  * - Rate limiting protection against abuse
  *
- *
  * @example
  * // Applied to file download routes that require security protection
  * Route::middleware(['auth', 'file.security'])->group(function () {
@@ -71,7 +70,9 @@ class ProductFileSecurityMiddleware
                 $this->validateFileAccess($request);
             }
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         } catch (Throwable $e) {
@@ -343,5 +344,4 @@ class ProductFileSecurityMiddleware
      *
      * @return string The hashed data
      */
-
 }

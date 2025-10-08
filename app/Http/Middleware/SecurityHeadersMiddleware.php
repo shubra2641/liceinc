@@ -24,7 +24,6 @@ use Symfony\Component\HttpFoundation\Response;
  * - Configuration-based header management
  * - Comprehensive error handling and logging
  *
- *
  * @example
  * // Register in Kernel.php
  * protected $middleware = [
@@ -66,7 +65,9 @@ class SecurityHeadersMiddleware
             if ($response instanceof \Symfony\Component\HttpFoundation\Response) {
                 $this->applySecurityHeaders($request, $response);
             }
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         } catch (\Exception $e) {
@@ -79,7 +80,9 @@ class SecurityHeadersMiddleware
             ]);
             // In case of error, return response without security headers to prevent blocking
             $fallbackResponse = $response ?? $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $fallbackResponse;
             return $typedResponse;
         }

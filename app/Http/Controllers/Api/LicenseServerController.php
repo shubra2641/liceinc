@@ -38,7 +38,6 @@ use Illuminate\Support\Facades\Storage;
  * - Database transaction support for data integrity
  * - Rate limiting for all operations to prevent abuse
  *
- *
  * @example
  * // Check for updates
  * POST /api/license/check-updates
@@ -86,7 +85,7 @@ class LicenseServerController extends Controller
     public function checkUpdates(CheckUpdatesRequest $request): JsonResponse
     {
         // Rate limiting for update checks
-        $key = 'license-update-check:'.$request->ip();
+        $key = 'license-update-check:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 20)) {
             return response()->json([
                 'success' => false,
@@ -169,7 +168,7 @@ class LicenseServerController extends Controller
                     'download_url' => route('api.license.download-update', [
                         'license_key' => $licenseKey,
                         'version' => $latestUpdate->version,
-                    ]).'?product_slug='.(is_string($productSlug) ? $productSlug : ''),
+                    ]) . '?product_slug=' . (is_string($productSlug) ? $productSlug : ''),
                 ] : null,
             ];
             DB::commit();
@@ -182,7 +181,7 @@ class LicenseServerController extends Controller
             DB::rollBack();
             Log::error('Update check failed', [
                 'error' => $e->getMessage(),
-                'license_key' => substr(is_string($request->input('license_key', '')) ? $request->input('license_key', '') : '', 0, 8).'...',
+                'license_key' => substr(is_string($request->input('license_key', '')) ? $request->input('license_key', '') : '', 0, 8) . '...',
                 'product_slug' => $request->input('product_slug', ''),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -227,7 +226,7 @@ class LicenseServerController extends Controller
     public function getVersionHistory(GetVersionHistoryRequest $request): JsonResponse
     {
         // Rate limiting for version history requests
-        $key = 'license-version-history:'.$request->ip();
+        $key = 'license-version-history:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 10)) {
             return response()->json([
                 'success' => false,
@@ -281,7 +280,7 @@ class LicenseServerController extends Controller
                         'download_url' => route('api.license.download-update', [
                             'license_key' => $licenseKey,
                             'version' => $update->version,
-                        ]).'?product_slug='.(is_string($productSlug) ? $productSlug : ''),
+                        ]) . '?product_slug=' . (is_string($productSlug) ? $productSlug : ''),
                     ];
                 });
             DB::commit();
@@ -301,7 +300,7 @@ class LicenseServerController extends Controller
             DB::rollBack();
             Log::error('Version history request failed', [
                 'error' => $e->getMessage(),
-                'license_key' => substr(is_string($request->input('license_key', '')) ? $request->input('license_key', '') : '', 0, 8).'...',
+                'license_key' => substr(is_string($request->input('license_key', '')) ? $request->input('license_key', '') : '', 0, 8) . '...',
                 'product_slug' => $request->input('product_slug', ''),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -335,7 +334,7 @@ class LicenseServerController extends Controller
     public function downloadUpdate(Request $request, string $licenseKey, string $version): Response|JsonResponse
     {
         // Rate limiting for file downloads
-        $key = 'license-file-download:'.$request->ip();
+        $key = 'license-file-download:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
             return response()->json([
                 'success' => false,
@@ -417,7 +416,7 @@ class LicenseServerController extends Controller
             DB::rollBack();
             Log::error('Update download failed', [
                 'error' => $e->getMessage(),
-                'license_key' => substr($licenseKey, 0, 8).'...',
+                'license_key' => substr($licenseKey, 0, 8) . '...',
                 'product_slug' => $request->input('product_slug', ''),
                 'version' => $version,
                 'trace' => $e->getTraceAsString(),
@@ -465,7 +464,7 @@ class LicenseServerController extends Controller
     public function getLatestVersion(GetLatestVersionRequest $request): JsonResponse
     {
         // Rate limiting for latest version requests
-        $key = 'license-latest-version:'.$request->ip();
+        $key = 'license-latest-version:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 15)) {
             return response()->json([
                 'success' => false,
@@ -535,14 +534,14 @@ class LicenseServerController extends Controller
                     'download_url' => route('api.license.download-update', [
                         'license_key' => $licenseKey,
                         'version' => $latestUpdate->version,
-                    ]).'?product_slug='.(is_string($productSlug) ? $productSlug : ''),
+                    ]) . '?product_slug=' . (is_string($productSlug) ? $productSlug : ''),
                 ],
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Latest version request failed', [
                 'error' => $e->getMessage(),
-                'license_key' => substr(is_string($request->input('license_key', '')) ? $request->input('license_key', '') : '', 0, 8).'...',
+                'license_key' => substr(is_string($request->input('license_key', '')) ? $request->input('license_key', '') : '', 0, 8) . '...',
                 'product_slug' => $request->input('product_slug', ''),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -711,7 +710,7 @@ class LicenseServerController extends Controller
     public function getProducts(Request $request): JsonResponse
     {
         // Rate limiting for product discovery
-        $key = 'license-products:'.$request->ip();
+        $key = 'license-products:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 50)) {
             return response()->json([
                 'success' => false,
@@ -769,7 +768,7 @@ class LicenseServerController extends Controller
             $product = Product::where('slug', $productSlug)->first();
             if (! $product) {
                 Log::warning('Product not found for license verification', [
-                    'license_key' => substr($licenseKey, 0, 8).'...',
+                    'license_key' => substr($licenseKey, 0, 8) . '...',
                     'product_slug' => $productSlug,
                 ]);
 
@@ -781,7 +780,7 @@ class LicenseServerController extends Controller
                 ->first();
             if (! $license) {
                 Log::warning('License not found in database', [
-                    'license_key' => substr($licenseKey, 0, 8).'...',
+                    'license_key' => substr($licenseKey, 0, 8) . '...',
                     'product_slug' => $productSlug,
                 ]);
 
@@ -790,7 +789,7 @@ class LicenseServerController extends Controller
             // Check if license is active
             if ($license->status !== 'active') {
                 Log::warning('License is not active', [
-                    'license_key' => substr($licenseKey, 0, 8).'...',
+                    'license_key' => substr($licenseKey, 0, 8) . '...',
                     'status' => $license->status,
                 ]);
 
@@ -799,7 +798,7 @@ class LicenseServerController extends Controller
             // Check if license has expired
             if ($license->license_expires_at && $license->license_expires_at->isPast()) {
                 Log::warning('License has expired', [
-                    'license_key' => substr($licenseKey, 0, 8).'...',
+                    'license_key' => substr($licenseKey, 0, 8) . '...',
                     'expires_at' => $license->license_expires_at->toISOString(),
                 ]);
 
@@ -816,7 +815,7 @@ class LicenseServerController extends Controller
                         $this->registerDomainForLicense($license, $domain);
                     } catch (\Exception $e) {
                         Log::warning('Domain limit exceeded', [
-                            'license_key' => substr($licenseKey, 0, 8).'...',
+                            'license_key' => substr($licenseKey, 0, 8) . '...',
                             'domain' => $domain,
                             'error' => $e->getMessage(),
                         ]);
@@ -827,7 +826,7 @@ class LicenseServerController extends Controller
                     // Verification mode: Verify domain authorization
                     if (! $this->verifyDomain($license, $domain)) {
                         Log::warning('Domain not authorized for this license', [
-                            'license_key' => substr($licenseKey, 0, 8).'...',
+                            'license_key' => substr($licenseKey, 0, 8) . '...',
                             'domain' => $domain,
                         ]);
 
@@ -841,7 +840,7 @@ class LicenseServerController extends Controller
         } catch (\Exception $e) {
             Log::error('License verification exception', [
                 'error' => $e->getMessage(),
-                'license_key' => substr($licenseKey, 0, 8).'...',
+                'license_key' => substr($licenseKey, 0, 8) . '...',
                 'domain' => $domain,
                 'product_slug' => $productSlug,
                 'trace' => $e->getTraceAsString(),
@@ -965,7 +964,7 @@ class LicenseServerController extends Controller
         if ($license->hasReachedDomainLimit() === true) {
             Log::warning('Domain limit exceeded for license', [
                 'license_id' => $license->id,
-                'purchase_code' => substr($license->purchase_code, 0, 8).'...',
+                'purchase_code' => substr($license->purchase_code, 0, 8) . '...',
                 'domain' => $domain,
                 'current_domains' => $license->active_domains_count,
                 'max_domains' => $license->max_domains ?? 1,
@@ -974,7 +973,7 @@ class LicenseServerController extends Controller
             ]);
             $maxDomains = $license->max_domains ?? 1;
             throw new \Exception("License has reached its maximum domain limit ({$maxDomains} domain"
-                .($maxDomains > 1 ? 's' : '')."). Cannot register new domain: {$domain}");
+                . ($maxDomains > 1 ? 's' : '') . "). Cannot register new domain: {$domain}");
         }
     }
 

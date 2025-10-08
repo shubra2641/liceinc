@@ -46,7 +46,9 @@ class AppLayout extends Component
                 throw new \Exception('Application layout view not found');
             }
             // Render the layout with security context
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'layouts.app';
             $view = view($viewName, []);
             // Add security headers and context

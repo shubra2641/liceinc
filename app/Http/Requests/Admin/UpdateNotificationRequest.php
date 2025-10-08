@@ -39,7 +39,7 @@ class UpdateNotificationRequest extends FormRequest
     {
         $route = $this->route();
         $routeName = $route?->getName() ?? '';
-        
+
         $isDismiss = $this->isMethod('POST') && str_contains($routeName, 'dismiss');
         // Dismiss notification validation
         if ($isDismiss) {
@@ -236,11 +236,11 @@ class UpdateNotificationRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-        
+
         if (!is_string($input)) {
             return null;
         }
-        
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

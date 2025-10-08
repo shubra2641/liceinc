@@ -25,10 +25,6 @@ if (! function_exists('is_active_route')) {
      * @throws InvalidArgumentException When route name is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     function is_active_route(string $routeName): bool
     {
@@ -53,10 +49,6 @@ if (! function_exists('is_active_route_pattern')) {
      * @throws InvalidArgumentException When pattern is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     function is_active_route_pattern(string $pattern): bool
     {
@@ -77,12 +69,10 @@ if (! function_exists('get_breadcrumbs')) {
      * @return array Array of breadcrumb items with name, url, and active status
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
-    /** @return array<int, array<string, mixed>> */
+    /**
+ * @return array<int, array<string, mixed>>
+*/
     function get_breadcrumbs(): array
     {
         try {
@@ -127,12 +117,10 @@ if (! function_exists('get_navigation_tree')) {
      * @return array Array of navigation items with name, route, icon, and children
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
-    /** @return array<int, array<string, mixed>> */
+    /**
+ * @return array<int, array<string, mixed>>
+*/
     function get_navigation_tree(): array
     {
         return [
@@ -204,12 +192,10 @@ if (function_exists('get_available_languages') === false) {
      * @return array Array of language information with code, name, flag, and native name
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
-    /** @return array<int, array<string, string>> */
+    /**
+ * @return array<int, array<string, string>>
+*/
     function get_available_languages(): array
     {
         try {
@@ -252,10 +238,6 @@ if (! function_exists('get_language_name')) {
      * @throws InvalidArgumentException When language code is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     function get_language_name(string $code): string
     {
@@ -377,10 +359,6 @@ if (! function_exists('get_language_flag')) {
      * @throws InvalidArgumentException When language code is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     function get_language_flag(string $code): string
     {
@@ -502,10 +480,6 @@ if (! function_exists('get_language_native_name')) {
      * @throws InvalidArgumentException When language code is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     function get_language_native_name(string $code): string
     {

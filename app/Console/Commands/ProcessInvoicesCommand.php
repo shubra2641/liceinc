@@ -51,10 +51,6 @@ class ProcessInvoicesCommand extends Command
      * @throws \Exception When job dispatching fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function handle(): int
     {
@@ -111,10 +107,6 @@ class ProcessInvoicesCommand extends Command
      * @throws \Exception When job dispatching fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function processRenewalInvoices(bool $dryRun = false): void
     {
@@ -149,10 +141,6 @@ class ProcessInvoicesCommand extends Command
      * @throws \Exception When job dispatching fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function processOverdueInvoices(bool $dryRun = false): void
     {

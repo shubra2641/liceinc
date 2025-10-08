@@ -42,7 +42,6 @@ use App\Helpers\SecureFileHelper;
  * - Proper logging for errors and warnings only
  * - Model scope integration for optimized queries
  *
- *
  * @example
  * // Get dashboard statistics
  * GET /admin/dashboard/stats
@@ -209,10 +208,6 @@ class DashboardController extends Controller
      *
      * @version 1.0.6
      *
-     *
-     *
-     *
-     *
      * @example
      * // Request:
      * GET /admin/dashboard/license-distribution
@@ -354,10 +349,6 @@ class DashboardController extends Controller
      *
      * @version 1.0.6
      *
-     *
-     *
-     *
-     *
      * @example
      * // Request:
      * GET /admin/dashboard/activity-timeline
@@ -409,10 +400,6 @@ class DashboardController extends Controller
      * @return JsonResponse JSON response with dashboard statistics
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Request:
@@ -466,10 +453,6 @@ class DashboardController extends Controller
      * @return float The API success rate as a percentage
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function calculateApiSuccessRate(): float
     {
@@ -489,10 +472,6 @@ class DashboardController extends Controller
      * @return int The number of API errors today
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function getApiErrorsToday(): int
     {
@@ -525,10 +504,6 @@ class DashboardController extends Controller
      * @return int The number of API errors this month
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function getApiErrorsThisMonth(): int
     {
@@ -682,10 +657,6 @@ class DashboardController extends Controller
      * @return JsonResponse JSON response with API performance data
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Request:

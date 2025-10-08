@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
  * This controller manages the sending of email verification notifications
  * to users who need to verify their email addresses. It prevents sending
  * notifications to already verified users.
+ *
  * @version 1.0.6
  */
 class EmailVerificationNotificationController extends Controller

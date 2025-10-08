@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Http\ViewComposers\LayoutComposer;
@@ -34,14 +36,9 @@ class AppServiceProvider extends ServiceProvider
      * Registers application services including third-party providers
      * with proper validation and error handling.
      *
-     *
      * @throws \InvalidArgumentException When service registration fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function register(): void
     {
@@ -70,14 +67,9 @@ class AppServiceProvider extends ServiceProvider
      * Bootstraps application services including view composers and
      * pagination settings with proper validation and error handling.
      *
-     *
      * @throws \InvalidArgumentException When service bootstrapping fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function boot(): void
     {
@@ -145,14 +137,9 @@ class AppServiceProvider extends ServiceProvider
      *
      * Registers view composers with proper validation and error handling.
      *
-     *
      * @throws \InvalidArgumentException When view composer registration fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function registerViewComposers(): void
     {
@@ -172,14 +159,9 @@ class AppServiceProvider extends ServiceProvider
      *
      * Sets up pagination defaults with proper validation and error handling.
      *
-     *
      * @throws \InvalidArgumentException When pagination configuration fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function configurePagination(): void
     {

@@ -32,6 +32,7 @@ use Illuminate\View\View;
  * - Proper logging for errors and warnings only
  * - Anti-spam protection with reCAPTCHA and human questions
  * - Email verification and notification system
+ *
  * @version 1.0.6
  */
 class RegisteredUserController extends Controller
@@ -200,8 +201,10 @@ class RegisteredUserController extends Controller
         }
         $decoded = json_decode(is_string($humanQuestionsJson) ? $humanQuestionsJson : '', true);
         $result = is_array($decoded) ? $decoded : [];
-        
-        /** @var array<string, mixed> $typedResult */
+
+        /**
+ * @var array<string, mixed> $typedResult
+*/
         $typedResult = $result;
         return $typedResult;
     }
@@ -226,7 +229,7 @@ class RegisteredUserController extends Controller
             $expected = ConfigHelper::getSetting('human_question_answer', '5');
             return strtolower(trim(is_string($expected) ? $expected : '')) === $given;
         }
-        
+
         $questionData = $humanQuestions[(string)$index] ?? null;
         $answer = is_array($questionData) ? ($questionData['answer'] ?? null) : null;
         $expected = strtolower(trim(is_string($answer) ? $answer : ''));

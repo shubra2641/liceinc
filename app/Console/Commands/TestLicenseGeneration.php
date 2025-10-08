@@ -183,7 +183,9 @@ class TestLicenseGeneration extends Command
         $this->info("Product: {$product->name}");
         $this->info("Slug: {$product->slug}");
 
-        /** @var \App\Models\ProgrammingLanguage|null $programmingLanguage */
+        /**
+ * @var \App\Models\ProgrammingLanguage|null $programmingLanguage
+*/
         $programmingLanguage = $product->programmingLanguage;
         $languageName = $programmingLanguage ? $programmingLanguage->name : 'Not set';
         $this->info("Programming Language: {$languageName}");

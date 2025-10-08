@@ -28,7 +28,6 @@ use Illuminate\Support\Facades\Log;
  * - Rate limiting and CSRF protection
  * - Proper logging for errors and warnings only
  *
- *
  * @example
  * // Verify serial for article access
  * POST /api/kb/article/{slug}/verify

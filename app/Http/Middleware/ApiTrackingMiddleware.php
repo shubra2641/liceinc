@@ -60,7 +60,9 @@ class ApiTrackingMiddleware
                 $this->trackApiCall($request, $response);
             }
         }
-        /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+        /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
         $typedResponse = $response;
         return $typedResponse;
     }
@@ -158,7 +160,9 @@ class ApiTrackingMiddleware
     {
         $responseData = json_decode($content, true) ?? [];
         $sanitizedData = is_array($responseData) ? $this->sanitizeRequestData($responseData) : [];
-        /** @var array<string, mixed> $typedResult */
+        /**
+ * @var array<string, mixed> $typedResult
+*/
         $typedResult = $sanitizedData;
         return $typedResult;
     }

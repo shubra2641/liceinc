@@ -114,6 +114,7 @@ class KbCategory extends Model
     }
     /**
      * Scope to get only active categories.
+     *
      * @param Builder<KbCategory> $query
      * @return Builder<KbCategory>
      */

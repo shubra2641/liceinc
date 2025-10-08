@@ -71,7 +71,7 @@ class ConfigHelper
             $errors = $validationResult['errors'] ?? [];
             if (is_array($errors)) {
                 throw new \InvalidArgumentException('Invalid configuration key: '
-                    .implode(', ', $errors));
+                    . implode(', ', $errors));
             } else {
                 throw new \InvalidArgumentException('Invalid configuration key');
             }
@@ -80,7 +80,7 @@ class ConfigHelper
         if (!is_string($sanitizedKey)) {
             throw new \InvalidArgumentException('Invalid sanitized key');
         }
-        $cacheKey = self::CACHE_PREFIX.md5($sanitizedKey);
+        $cacheKey = self::CACHE_PREFIX . md5($sanitizedKey);
         // Try advanced cache first with compression
         if ($useCache) {
             $cachedValue = self::getFromAdvancedCache($cacheKey);
@@ -134,14 +134,16 @@ class ConfigHelper
     /**
      * Advanced input validation and sanitization.
      */
-    /** @return array<string, mixed> */
+    /**
+ * @return array<string, mixed>
+*/
     private static function validateSettingKey(string $key): array
     {
         $errors = [];
         $sanitized = trim($key);
         // Length validation
         if (strlen($sanitized) > self::MAX_KEY_LENGTH) {
-            $errors[] = 'Key length exceeds maximum of '.self::MAX_KEY_LENGTH.' characters';
+            $errors[] = 'Key length exceeds maximum of ' . self::MAX_KEY_LENGTH . ' characters';
         }
         // Pattern validation
         if (! preg_match(self::ALLOWED_KEY_PATTERN, $sanitized)) {
@@ -194,7 +196,7 @@ class ConfigHelper
             if (is_string($value) && strlen($value) > 1024) {
                 $compressed = gzcompress($value);
                 if ($compressed !== false) {
-                    $value = base64_encode($compressed).'|COMPRESSED';
+                    $value = base64_encode($compressed) . '|COMPRESSED';
                 }
             }
             // Use regular cache if tagging is not supported
@@ -301,7 +303,7 @@ class ConfigHelper
             foreach ($fetchedSettings as $key => $value) {
                 $settings[$key] = $validateTypes ? self::castValue($value, null) : $value;
                 if ($useCache) {
-                    self::storeInAdvancedCache(self::CACHE_PREFIX.md5($key), $value);
+                    self::storeInAdvancedCache(self::CACHE_PREFIX . md5($key), $value);
                 }
             }
         }
@@ -320,7 +322,7 @@ class ConfigHelper
     private static function getBatchFromCache(array $keys): array
     {
         $results = [];
-        $cacheKeys = array_map(fn ($key) => self::CACHE_PREFIX.md5($key), $keys);
+        $cacheKeys = array_map(fn ($key) => self::CACHE_PREFIX . md5($key), $keys);
         try {
             $cacheValues = Cache::tags([self::CACHE_TAG])->many($cacheKeys);
             foreach ($keys as $index => $key) {
@@ -347,7 +349,9 @@ class ConfigHelper
      */
     private static function fetchMultipleSettingsOptimized(array $keys): array
     {
-        /** @var array<string, mixed> $settings */
+        /**
+ * @var array<string, mixed> $settings
+*/
         $settings = [];
         try {
             // Single optimized query for all settings
@@ -383,7 +387,9 @@ class ConfigHelper
             ]);
         }
 
-        /** @var array<string, mixed> $result */
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $settings;
         return $result;
     }
@@ -506,7 +512,7 @@ class ConfigHelper
      */
     public static function clearSettingCache(string $key): void
     {
-        $cacheKey = self::CACHE_PREFIX.md5($key);
+        $cacheKey = self::CACHE_PREFIX . md5($key);
         try {
             try {
                 Cache::tags([self::CACHE_TAG])->forget($cacheKey);
@@ -539,7 +545,9 @@ class ConfigHelper
     /**
      * Get license-related settings with advanced caching.
      */
-    /** @return array<string, mixed> */
+    /**
+ * @return array<string, mixed>
+*/
     public static function getLicenseSettings(): array
     {
         return self::getSettings([
@@ -609,7 +617,9 @@ class ConfigHelper
     /**
      * Get Envato-related settings with advanced caching.
      */
-    /** @return array<string, mixed> */
+    /**
+ * @return array<string, mixed>
+*/
     public static function getEnvatoSettings(): array
     {
         return self::getSettings([
@@ -717,7 +727,9 @@ class ConfigHelper
     /**
      * Get cache statistics for monitoring.
      */
-    /** @return array<string, mixed> */
+    /**
+ * @return array<string, mixed>
+*/
     public static function getCacheStats(): array
     {
         return [
@@ -732,7 +744,9 @@ class ConfigHelper
     /**
      * Warm up cache for frequently used settings.
      */
-    /** @param array<string> $keys */
+    /**
+ * @param array<string> $keys
+*/
     public static function warmUpCache(array $keys = []): void
     {
         if (empty($keys)) {

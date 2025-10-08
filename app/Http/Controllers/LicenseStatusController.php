@@ -36,7 +36,6 @@ use Throwable;
  * - Proper error responses for different scenarios
  * - Comprehensive logging for security monitoring
  *
- *
  * @example
  * // Check license status
  * POST /license-status/check
@@ -333,7 +332,9 @@ class LicenseStatusController extends Controller
         try {
             $envatoService = new EnvatoService();
             $result = $envatoService->verifyPurchase($purchaseCode);
-            /** @var array<string, mixed>|null $typedResult */
+            /**
+ * @var array<string, mixed>|null $typedResult
+*/
             $typedResult = $result;
             return $typedResult;
         } catch (Throwable $e) {

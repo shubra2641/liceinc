@@ -34,7 +34,6 @@ use Illuminate\Support\Facades\Storage;
  * - Domain verification and authorization
  * - Comprehensive error handling and logging
  *
- *
  * @example
  * // Check for updates
  * POST /api/product-updates/check

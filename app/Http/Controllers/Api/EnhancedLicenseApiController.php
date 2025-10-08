@@ -38,7 +38,6 @@ use Illuminate\Validation\ValidationException;
  * - Proper logging for errors and warnings only
  * - Model scope integration for optimized queries
  *
- *
  * @example
  * // Verify a license
  * POST /api/license/verify
@@ -143,7 +142,9 @@ class EnhancedLicenseApiController extends BaseController
         } catch (ValidationException $e) {
             DB::rollBack();
 
-            /** @var array<string, mixed> $errors */
+            /**
+ * @var array<string, mixed> $errors
+*/
             $errors = $e->errors();
             return $this->errorResponse(
                 'Validation failed',
@@ -237,7 +238,9 @@ class EnhancedLicenseApiController extends BaseController
         } catch (ValidationException $e) {
             DB::rollBack();
 
-            /** @var array<string, mixed> $errors */
+            /**
+ * @var array<string, mixed> $errors
+*/
             $errors = $e->errors();
             return $this->errorResponse(
                 'Validation failed',
@@ -338,7 +341,9 @@ class EnhancedLicenseApiController extends BaseController
         } catch (ValidationException $e) {
             DB::rollBack();
 
-            /** @var array<string, mixed> $errors */
+            /**
+ * @var array<string, mixed> $errors
+*/
             $errors = $e->errors();
             return $this->errorResponse(
                 'Validation failed',
@@ -409,7 +414,7 @@ class EnhancedLicenseApiController extends BaseController
     private function isAuthorized(Request $request): bool
     {
         $authHeader = $request->header('Authorization');
-        $expectedToken = 'Bearer '.$this->getApiToken();
+        $expectedToken = 'Bearer ' . $this->getApiToken();
 
         return $authHeader === $expectedToken;
     }
@@ -441,7 +446,7 @@ class EnhancedLicenseApiController extends BaseController
     {
         $appKey = config('app.key');
         $appKeyStr = is_string($appKey) ? $appKey : (is_scalar($appKey) ? (string)$appKey : '');
-        $expectedKey = hash('sha256', $product->id.$product->slug.$appKeyStr);
+        $expectedKey = hash('sha256', $product->id . $product->slug . $appKeyStr);
 
         return hash_equals($expectedKey, $verificationKey);
     }
@@ -527,7 +532,9 @@ class EnhancedLicenseApiController extends BaseController
             abort(Response::HTTP_NOT_FOUND, 'License not found');
         }
         // Create license from Envato data
-        /** @var array<string, mixed> $envatoDataTyped */
+        /**
+ * @var array<string, mixed> $envatoDataTyped
+*/
         $envatoDataTyped = $envatoData;
         $license = $this->createLicenseFromEnvato($product, $purchaseCode, $envatoDataTyped);
 
@@ -664,13 +671,12 @@ class EnhancedLicenseApiController extends BaseController
     private function generateLicenseKey(): string
     {
         do {
-            $key = strtoupper(substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
+            $key = strtoupper(substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
                          substr(md5(uniqid((string)mt_rand(), true)), 0, 8));
         } while (License::where('license_key', $key)->exists());
 
         return $key;
     }
-
 }

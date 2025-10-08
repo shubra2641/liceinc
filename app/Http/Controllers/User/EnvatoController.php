@@ -41,7 +41,6 @@ use Throwable;
  * - Proper error responses for different scenarios
  * - Comprehensive logging for security monitoring
  *
- *
  * @example
  * // Verify Envato purchase
  * POST /envato/verify
@@ -187,7 +186,9 @@ class EnvatoController extends Controller
     {
         try {
             return DB::transaction(function () use ($envato) {
-                /** @var \Laravel\Socialite\Two\User $envatoUser */
+                /**
+ * @var \Laravel\Socialite\Two\User $envatoUser
+*/
                 $envatoUser = Socialite::driver('envato')->user();
                 $username = $envatoUser->getNickname() ?: $envatoUser->getId();
                 if (! $username) {
@@ -207,8 +208,8 @@ class EnvatoController extends Controller
                     'envato_username' => $envatoUser->getNickname()
                         ?: data_get($userInfo, 'account.username', $username),
                     'envato_id' => $envatoUser->getId(),
-           'envato_token' => $envatoUser->token,
-           'envato_refresh_token' => $envatoUser->refreshToken,
+                'envato_token' => $envatoUser->token,
+                'envato_refresh_token' => $envatoUser->refreshToken,
                     'email_verified_at' => now(),
                 ];
                 // Check if we have a real email, if not, we need to handle this differently
@@ -274,7 +275,9 @@ class EnvatoController extends Controller
     {
         try {
             return DB::transaction(function () use ($request, $envato) {
-                /** @var \Laravel\Socialite\Two\User $envatoUser */
+                /**
+ * @var \Laravel\Socialite\Two\User $envatoUser
+*/
                 $envatoUser = Socialite::driver('envato')->user();
                 $userInfo = $envato->getOAuthUserInfo($envatoUser->token);
                 if ($userInfo === null) {
@@ -292,8 +295,8 @@ class EnvatoController extends Controller
                     $user->update([
                     'envato_username' => $envatoUser->getNickname() ?: data_get($userInfo, 'account.username'),
                     'envato_id' => $envatoUser->getId(),
-           'envato_token' => $envatoUser->token,
-           'envato_refresh_token' => $envatoUser->refreshToken,
+                    'envato_token' => $envatoUser->token,
+                    'envato_refresh_token' => $envatoUser->refreshToken,
                     ]);
                     Log::debug('Envato account linked successfully', [
                     'user_id' => auth()->id(),

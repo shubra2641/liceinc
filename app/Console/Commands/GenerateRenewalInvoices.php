@@ -82,7 +82,9 @@ class GenerateRenewalInvoices extends Command
             $generatedCount = 0;
             $emailSentCount = 0;
             $errorCount = 0;
-            /** @var License $license */
+            /**
+ * @var License $license
+*/
             foreach ($licenses as $license) {
                 try {
                     DB::beginTransaction();
@@ -197,7 +199,9 @@ class GenerateRenewalInvoices extends Command
                 return null;
             }
 
-            /** @var Product $product */
+            /**
+ * @var Product $product
+*/
             // Calculate renewal price based on product settings
             $renewalPrice = $product->renewal_price ?? $product->price ?? 0;
             if ($renewalPrice <= 0) {
@@ -355,7 +359,9 @@ class GenerateRenewalInvoices extends Command
                         'invoice_due_date' => $invoice->due_date->format('Y-m-d'),
                         'invoice_id' => $invoice->id,
                     ];
-                    /** @var \App\Models\User $user */
+                    /**
+ * @var \App\Models\User $user
+*/
                     $user = $license->user;
                     $this->emailService->sendRenewalReminder($user, $customerData);
                     $notificationsSent++;
@@ -372,7 +378,9 @@ class GenerateRenewalInvoices extends Command
             $totalNotifications++;
             try {
                 // Sanitize data to prevent XSS
-                /** @var \App\Models\User|null $user */
+                /**
+ * @var \App\Models\User|null $user
+*/
                 $user = $license->user;
                 $adminData = [
                     'license_key' => htmlspecialchars(

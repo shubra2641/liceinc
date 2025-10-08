@@ -32,7 +32,6 @@ use Illuminate\Support\Facades\Log;
  * - Rate limiting and CSRF protection
  * - Proper logging for errors and warnings only
  *
- *
  * @example
  * // Verify a license
  * POST /api/license/verify
@@ -80,7 +79,7 @@ class LicenseApiController extends Controller
             DB::beginTransaction();
             // Check authorization header
             $authHeader = $request->header('Authorization');
-            $expectedToken = 'Bearer '.$this->getApiToken();
+            $expectedToken = 'Bearer ' . $this->getApiToken();
             if ($authHeader !== $expectedToken) {
                 Log::warning('Unauthorized license verification attempt', [
                     'ip' => $request->ip(),
@@ -184,7 +183,9 @@ class LicenseApiController extends Controller
                 ) {
                     $envatoValid = true;
                     // Create license automatically from Envato
-                    /** @var array<string, mixed> $envatoDataTyped */
+                    /**
+ * @var array<string, mixed> $envatoDataTyped
+*/
                     $envatoDataTyped = $envatoData;
                     $license = $this->createLicenseFromEnvato($product, $purchaseCodeStr, $envatoDataTyped);
                     $databaseValid = true;
@@ -296,7 +297,7 @@ class LicenseApiController extends Controller
 
             return response()->json([
                 'valid' => false,
-                'message' => 'Verification failed: '.$e->getMessage(),
+                'message' => 'Verification failed: ' . $e->getMessage(),
                 'error_code' => 'INTERNAL_ERROR',
             ], 500);
         }
@@ -309,7 +310,7 @@ class LicenseApiController extends Controller
     {
         $appKey = config('app.key');
         $appKeyStr = is_string($appKey) ? $appKey : (is_scalar($appKey) ? (string)$appKey : '');
-        $expectedKey = hash('sha256', $product->id.$product->slug.$appKeyStr);
+        $expectedKey = hash('sha256', $product->id . $product->slug . $appKeyStr);
 
         return hash_equals($expectedKey, $verificationKey);
     }
@@ -452,7 +453,7 @@ class LicenseApiController extends Controller
         if ($license->hasReachedDomainLimit()) {
             \Log::warning('Domain limit exceeded for license', [
                 'license_id' => $license->id,
-                'purchase_code' => substr($license->purchase_code, 0, 8).'...',
+                'purchase_code' => substr($license->purchase_code, 0, 8) . '...',
                 'domain' => $domain,
                 'current_domains' => $license->active_domains_count,
                 'max_domains' => $license->max_domains ?? 1,
@@ -460,8 +461,8 @@ class LicenseApiController extends Controller
                 'ip' => request()->ip(),
             ]);
             $maxDomains = $license->max_domains ?? 1;
-            throw new \Exception("License has reached its maximum domain limit ({$maxDomains} domain".
-                ($maxDomains > 1 ? 's' : '')."). Cannot register new domain: {$domain}");
+            throw new \Exception("License has reached its maximum domain limit ({$maxDomains} domain" .
+                ($maxDomains > 1 ? 's' : '') . "). Cannot register new domain: {$domain}");
         }
     }
 
@@ -486,9 +487,9 @@ class LicenseApiController extends Controller
      */
     private function generateLicenseKey(): string
     {
-        return strtoupper(substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
+        return strtoupper(substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
                          substr(md5(uniqid((string)mt_rand(), true)), 0, 8));
     }
 
@@ -588,7 +589,7 @@ class LicenseApiController extends Controller
             DB::beginTransaction();
             // Check authorization header
             $authHeader = $request->header('Authorization');
-            $expectedToken = 'Bearer '.$this->getApiToken();
+            $expectedToken = 'Bearer ' . $this->getApiToken();
             if ($authHeader !== $expectedToken) {
                 Log::warning('Unauthorized license registration attempt', [
                     'ip' => $request->ip(),
@@ -675,7 +676,7 @@ class LicenseApiController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Registration failed: '.$e->getMessage(),
+                'message' => 'Registration failed: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -763,7 +764,7 @@ class LicenseApiController extends Controller
 
             return response()->json([
                 'valid' => false,
-                'message' => 'Status check failed: '.$e->getMessage(),
+                'message' => 'Status check failed: ' . $e->getMessage(),
             ], 500);
         }
     }

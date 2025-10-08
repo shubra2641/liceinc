@@ -138,7 +138,9 @@ class ProfileController extends Controller
                 ]);
                 return redirect()->route('login');
             }
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'user.profile.edit';
             return view($viewName, ['user' => $request->user()]);
         } catch (\Exception $e) {
@@ -214,7 +216,7 @@ class ProfileController extends Controller
                         'old_email' => $user->getOriginal('email'),
                         'new_email' => $user->email,
                     'ip' => request()->ip(),
-                ]);
+                    ]);
                 }
                 $user->save();
             }

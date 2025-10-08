@@ -34,7 +34,6 @@ use Throwable;
  * - Authorization and validation capabilities
  * - Job dispatching and request handling
  *
- *
  * @example
  * // Extend this controller for all application controllers
  * class UserController extends Controller
@@ -270,7 +269,9 @@ class Controller extends BaseController
     {
         try {
             $validated = $request->validate($rules, $messages);
-            /** @var array<string, mixed> $result */
+            /**
+ * @var array<string, mixed> $result
+*/
             $result = $validated;
             return $result;
         } catch (\Illuminate\Validation\ValidationException $e) {

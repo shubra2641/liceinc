@@ -24,7 +24,6 @@ use Illuminate\Support\Facades\Log;
  * - Proper queue handling and retry logic
  * - Job failure handling and reporting
  *
- *
  * @example
  * // Dispatch job manually
  * ProcessOverdueInvoices::dispatch();
@@ -58,7 +57,6 @@ class ProcessOverdueInvoices implements ShouldQueue
      *
      * Processes all overdue invoices by updating their status to 'overdue'
      * and logging the changes for audit purposes.
-     *
      *
      * @throws \Exception When invoice processing fails
      *

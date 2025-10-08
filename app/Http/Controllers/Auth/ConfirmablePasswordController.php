@@ -25,6 +25,7 @@ use App\Helpers\SecurityHelper;
  * - Comprehensive error handling with database transactions
  * - Proper logging for errors and warnings only
  * - Session-based password confirmation tracking
+ *
  * @version 1.0.6
  */
 class ConfirmablePasswordController extends Controller

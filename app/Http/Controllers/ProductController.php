@@ -235,12 +235,12 @@ class ProductController extends Controller
             $product->description_has_html = false;
             $product->requirements_has_html = false;
             $product->installation_guide_has_html = false;
-            
+
             // Check if fields are strings before processing
             $description = $product->description;
             $requirements = $product->requirements;
             $installationGuide = $product->installation_guide;
-            
+
             if (is_string($description)) {
                 $product->description_has_html = strip_tags($description) !== $description;
             }
@@ -370,12 +370,12 @@ class ProductController extends Controller
             $product->description_has_html = false;
             $product->requirements_has_html = false;
             $product->installation_guide_has_html = false;
-            
+
             // Check if fields are strings before processing
             $description = $product->description;
             $requirements = $product->requirements;
             $installationGuide = $product->installation_guide;
-            
+
             if (is_string($description)) {
                 $product->description_has_html = strip_tags($description) !== $description;
             }

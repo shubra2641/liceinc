@@ -96,7 +96,9 @@ class PaymentSetting extends Model
     {
         $setting = static::getByGateway($gateway);
         $credentials = $setting ? (is_array($setting->credentials) ? $setting->credentials : []) : [];
-        /** @var array<string, mixed> $typedCredentials */
+        /**
+ * @var array<string, mixed> $typedCredentials
+*/
         $typedCredentials = $credentials;
         return $typedCredentials;
     }

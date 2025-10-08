@@ -99,6 +99,7 @@ class LicenseLog extends Model
     }
     /**
      * Get API calls grouped by date for the last N days.
+     *
      * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
      */
     public static function getApiCallsByDate(int $days = 30): \Illuminate\Database\Eloquent\Collection
@@ -111,6 +112,7 @@ class LicenseLog extends Model
     }
     /**
      * Get API status distribution for the last N days.
+     *
      * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
      */
     public static function getApiStatusDistribution(int $days = 30): \Illuminate\Database\Eloquent\Collection
@@ -122,6 +124,7 @@ class LicenseLog extends Model
     }
     /**
      * Get top domains by API calls.
+     *
      * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
      */
     public static function getTopDomainsByCalls(int $limit = 10): \Illuminate\Database\Eloquent\Collection
@@ -135,6 +138,7 @@ class LicenseLog extends Model
     }
     /**
      * Get API calls by hour for today.
+     *
      * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
      */
     public static function getApiCallsByHour(): \Illuminate\Database\Eloquent\Collection

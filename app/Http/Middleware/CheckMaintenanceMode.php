@@ -24,7 +24,6 @@ use Illuminate\Support\Facades\Log;
  * - Security validation for all route patterns
  * - Graceful fallback when settings are unavailable
  *
- *
  * @example
  * // Register in Kernel.php
  * protected $middleware = [

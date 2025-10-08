@@ -24,7 +24,6 @@ use Illuminate\View\View;
  * - Input validation and sanitization
  * - Clean and maintainable code structure
  *
- *
  * @example
  * // Register in AppServiceProvider
  * View::composer('layouts.*', LayoutComposer::class);
@@ -106,7 +105,9 @@ class LayoutComposer
             },
         );
         $arrayResult = is_array($result) ? $result : [];
-        /** @var array<string, mixed> $typedResult */
+        /**
+ * @var array<string, mixed> $typedResult
+*/
         $typedResult = $arrayResult;
         return $typedResult;
     }

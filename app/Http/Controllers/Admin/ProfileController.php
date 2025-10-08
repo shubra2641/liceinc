@@ -102,7 +102,7 @@ class ProfileController extends Controller
 
                     return Redirect::route('verification.notice')
                         ->with('success', 'Please verify your email address. A verification link has been sent to your '
-                            .'email.');
+                            . 'email.');
                 }
                 $user->save();
             }
@@ -220,7 +220,7 @@ class ProfileController extends Controller
                 DB::commit();
 
                 return Redirect::route('admin.profile.edit')
-                    ->with('success', 'Successfully connected to Envato account: '.((is_array($data) && isset($data['username']) && is_string($data['username'])) ? $data['username'] : 'Unknown'));
+                    ->with('success', 'Successfully connected to Envato account: ' . ((is_array($data) && isset($data['username']) && is_string($data['username'])) ? $data['username'] : 'Unknown'));
             } else {
                 DB::rollBack();
 
@@ -236,7 +236,7 @@ class ProfileController extends Controller
             ]);
 
             return Redirect::route('admin.profile.edit')
-                ->with('error', 'Failed to connect to Envato: '.$e->getMessage());
+                ->with('error', 'Failed to connect to Envato: ' . $e->getMessage());
         }
     }
 

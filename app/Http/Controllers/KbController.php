@@ -100,7 +100,9 @@ class KbController extends Controller
             DB::beginTransaction();
             $categories = KbCategory::all();
             DB::commit();
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'kb.create';
             return view($viewName, ['categories' => $categories]);
         } catch (Exception $e) {
@@ -182,7 +184,9 @@ class KbController extends Controller
             DB::beginTransaction();
             $article->load('category');
             DB::commit();
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'kb.show';
             return view($viewName, ['article' => $article]);
         } catch (Exception $e) {
@@ -221,7 +225,9 @@ class KbController extends Controller
             DB::beginTransaction();
             $categories = KbCategory::all();
             DB::commit();
-            /** @var view-string $viewName */
+            /**
+ * @var view-string $viewName
+*/
             $viewName = 'kb.edit';
             return view($viewName, ['article' => $article, 'categories' => $categories]);
         } catch (Exception $e) {
@@ -413,8 +419,10 @@ class KbController extends Controller
             'meta_description' => 'nullable|string|max:160',
             'tags' => 'nullable|string',
         ]);
-        
-        /** @var array<string, mixed> $result */
+
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $validated;
         return $result;
     }
@@ -437,8 +445,10 @@ class KbController extends Controller
             'meta_description' => 'nullable|string|max:160',
             'tags' => 'nullable|string',
         ]);
-        
-        /** @var array<string, mixed> $result */
+
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $validated;
         return $result;
     }

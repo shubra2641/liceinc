@@ -204,7 +204,9 @@ class EnvatoController extends Controller
     {
         try {
             DB::beginTransaction();
-            /** @var \Laravel\Socialite\Two\User $envatoUser */
+            /**
+ * @var \Laravel\Socialite\Two\User $envatoUser
+*/
             $envatoUser = Socialite::driver('envato')->user();
             $username = $envatoUser->getNickname() ?: $envatoUser->getId();
             if (! $username) {
@@ -224,8 +226,8 @@ class EnvatoController extends Controller
                 'password' => Hash::make(Str::random(32)), // Stronger random password
                 'envato_username' => $envatoUser->getNickname() ?: data_get($userInfo, 'account.username', $username),
                 'envato_id' => $envatoUser->getId(),
-           'envato_token' => $envatoUser->token,
-           'envato_refresh_token' => $envatoUser->refreshToken,
+            'envato_token' => $envatoUser->token,
+            'envato_refresh_token' => $envatoUser->refreshToken,
                 'email_verified_at' => now(),
                 'last_login_at' => now(),
             ];
@@ -285,7 +287,9 @@ class EnvatoController extends Controller
                 return redirect('/login')->withErrors(['envato' => 'Please log in to link your Envato account.']);
             }
             DB::beginTransaction();
-            /** @var \Laravel\Socialite\Two\User $envatoUser */
+            /**
+ * @var \Laravel\Socialite\Two\User $envatoUser
+*/
             $envatoUser = Socialite::driver('envato')->user();
             $userInfo = $envato->getOAuthUserInfo($envatoUser->token);
             if ($userInfo === null) {
@@ -318,8 +322,8 @@ class EnvatoController extends Controller
                 $user->update([
                 'envato_username' => $envatoUser->getNickname() ?: data_get($userInfo, 'account.username'),
                 'envato_id' => $envatoUser->getId(),
-           'envato_token' => $envatoUser->token,
-           'envato_refresh_token' => $envatoUser->refreshToken,
+                'envato_token' => $envatoUser->token,
+                'envato_refresh_token' => $envatoUser->refreshToken,
                 'updated_at' => now(),
                 ]);
             }
@@ -500,8 +504,10 @@ class EnvatoController extends Controller
             'purchase_code.regex' => 'Purchase code must be a valid UUID format.',
             'product_slug.alpha_dash' => 'Product slug can only contain letters, numbers, dashes and underscores.',
         ]);
-        
-        /** @var array<string, mixed> $result */
+
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $validated;
         return $result;
     }
@@ -530,8 +536,10 @@ class EnvatoController extends Controller
             'purchase_code.regex' => 'Purchase code must be a valid UUID format.',
             'product_id.exists' => 'Selected product does not exist.',
         ]);
-        
-        /** @var array<string, mixed> $result */
+
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $validated;
         return $result;
     }

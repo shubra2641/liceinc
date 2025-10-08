@@ -21,7 +21,6 @@ use Illuminate\View\View;
  * - Security validation for guest access
  * - Clean and maintainable code structure
  *
- *
  * @example
  * // Use in Blade template
  * <x-guest-layout>

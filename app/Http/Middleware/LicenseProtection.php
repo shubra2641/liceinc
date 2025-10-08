@@ -56,28 +56,36 @@ class LicenseProtection
             // Skip license check for installation routes
             if ($this->isInstallationRoute($request)) {
                 $response = $next($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
             // Skip license check for API routes (they have their own protection)
             if ($this->isApiRoute($request)) {
                 $response = $next($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
             // Skip license check for public routes
             if ($this->isPublicRoute($request)) {
                 $response = $next($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
             // Check if system is installed
             if (! $this->isSystemInstalled()) {
                 $response = $next($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
@@ -89,7 +97,9 @@ class LicenseProtection
             // Check if license is expired
             if ($this->isLicenseExpired($licenseInfo)) {
                 $response = $this->handleLicenseError('License has expired', $request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
@@ -98,7 +108,9 @@ class LicenseProtection
                 $this->verifyLicensePeriodically($licenseInfo);
             }
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         } catch (\Exception $e) {
@@ -111,7 +123,9 @@ class LicenseProtection
             ]);
             // In case of error, allow the request to proceed
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         }
@@ -261,7 +275,8 @@ class LicenseProtection
                 /**
                  * @return array<string, mixed>
                  */
-                public function verifyLicense(string $purchaseCode, string $domain): array {
+                public function verifyLicense(string $purchaseCode, string $domain): array
+                {
                     // Mock implementation for development
                     return ['valid' => true, 'message' => 'License verified'];
                 }

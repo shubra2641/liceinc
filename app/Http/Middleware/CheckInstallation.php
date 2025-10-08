@@ -50,10 +50,6 @@ class CheckInstallation
      * @throws \InvalidArgumentException When request is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -64,7 +60,9 @@ class CheckInstallation
             // Skip installation check for certain routes
             if ($this->shouldSkipRoute($currentRoute)) {
                 $response = $next($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
@@ -73,19 +71,25 @@ class CheckInstallation
             // If system is not installed and not accessing install routes
             if (! $isInstalled && ! $isInstallRoute) {
                 $response = $this->handleNotInstalled($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
             // If system is installed and trying to access install routes
             if ($isInstalled && $isInstallRoute) {
                 $response = $this->handleAlreadyInstalled($request);
-                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
                 $typedResponse = $response;
                 return $typedResponse;
             }
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         } catch (Exception $e) {
@@ -96,7 +100,9 @@ class CheckInstallation
             ]);
             // Fail safe - allow request to continue
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         }

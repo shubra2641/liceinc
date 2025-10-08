@@ -40,7 +40,7 @@ class TicketRequest extends FormRequest
     {
         $route = $this->route();
         $routeName = $route?->getName() ?? '';
-        
+
         $isReply = $this->isMethod('POST') && str_contains($routeName, 'reply');
         $isStatusUpdate = $this->isMethod('PATCH') && str_contains($routeName, 'status');
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');

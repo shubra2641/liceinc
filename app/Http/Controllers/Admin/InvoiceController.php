@@ -33,7 +33,6 @@ use Illuminate\View\View;
  * - Proper logging for errors and warnings only
  * - Model scope integration for optimized queries
  *
- *
  * @example
  * // Create a new invoice
  * POST /admin/invoices
@@ -244,10 +243,6 @@ class InvoiceController extends Controller
      *
      * @version 1.0.6
      *
-     *
-     *
-     *
-     *
      * @example
      * // Access invoice details:
      * GET /admin/invoices/123
@@ -351,10 +346,6 @@ class InvoiceController extends Controller
      * @return View The invoice edit form view
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      *
      * @example
      * // Access the edit form:

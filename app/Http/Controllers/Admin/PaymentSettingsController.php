@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+
 // use PayPal\PayPalServerSDK\PayPalServerSDK;
 // use PayPal\PayPalServerSDK\Orders\OrdersCreateRequest;
 
@@ -160,11 +161,15 @@ class PaymentSettingsController extends Controller
             $gateway = $validated['gateway'];
             $credentials = $validated['credentials'];
             if ($gateway === 'paypal') {
-                /** @var array<string, mixed> $paypalCredentials */
+                /**
+ * @var array<string, mixed> $paypalCredentials
+*/
                 $paypalCredentials = is_array($credentials) ? $credentials : [];
                 $result = $this->testPayPalConnection($paypalCredentials);
             } elseif ($gateway === 'stripe') {
-                /** @var array<string, mixed> $stripeCredentials */
+                /**
+ * @var array<string, mixed> $stripeCredentials
+*/
                 $stripeCredentials = is_array($credentials) ? $credentials : [];
                 $result = $this->testStripeConnection($stripeCredentials);
             } else {
@@ -213,20 +218,25 @@ class PaymentSettingsController extends Controller
                 ];
             }
             $paypal = new class {
-                public function __construct() {
+                public function __construct()
+                {
                     // Mock PayPal SDK implementation
                 }
-                public function execute(mixed $request): object {
+                public function execute(mixed $request): object
+                {
                     return (object) ['statusCode' => 201];
                 }
             };
             // Try to create a simple order to test connection
             $request = new class {
-                public function prefer(string $preference): mixed {
+                public function prefer(string $preference): mixed
+                {
                     // Mock implementation
                     return $this;
                 }
-                /** @var array<string, mixed> */
+                /**
+ * @var array<string, mixed>
+*/
                 public array $body = [];
             };
             $preferResult = $request->prefer('return=representation');

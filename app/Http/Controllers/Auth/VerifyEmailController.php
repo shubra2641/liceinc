@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
  * This controller handles the verification of user email addresses
  * through the email verification process. It ensures that users
  * can only verify their email addresses through secure, signed URLs.
+ *
  * @version 1.0.6
  */
 class VerifyEmailController extends Controller

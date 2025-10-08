@@ -479,8 +479,10 @@ class TicketController extends Controller
             'invoice_id' => ['nullable', 'exists:invoices,id'],
             'category_id' => ['required', 'exists:ticket_categories,id'],
         ]);
-        
-        /** @var array<string, mixed> $result */
+
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $validated;
         return $result;
     }
@@ -501,8 +503,10 @@ class TicketController extends Controller
             'status' => ['sometimes', 'in:' . implode(', ', self::VALID_STATUSES)],
             'content' => ['sometimes', 'string'],
         ]);
-        
-        /** @var array<string, mixed> $result */
+
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $validated;
         return $result;
     }
@@ -518,8 +522,10 @@ class TicketController extends Controller
         $validated = $request->validate([
             'message' => ['required', 'string'],
         ]);
-        
-        /** @var array<string, mixed> $result */
+
+        /**
+ * @var array<string, mixed> $result
+*/
         $result = $validated;
         return $result;
     }

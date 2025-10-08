@@ -14,6 +14,7 @@ use Illuminate\View\View;
  * This controller manages the sending of password reset links to users
  * who have forgotten their passwords. It validates email addresses and
  * sends reset links via email.
+ *
  * @version 1.0.6
  */
 class PasswordResetLinkController extends Controller

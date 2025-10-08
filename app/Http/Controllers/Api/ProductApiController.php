@@ -29,7 +29,6 @@ use Illuminate\Support\Facades\Log;
  * - Proper logging for errors and warnings only
  * - Model scope integration for optimized queries
  *
- *
  * @example
  * // Lookup product by purchase code
  * POST /api/product/lookup
@@ -46,10 +45,6 @@ class ProductApiController extends Controller
      * @param  EnvatoService  $envatoService  The Envato service for API integration
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function __construct(EnvatoService $envatoService)
     {

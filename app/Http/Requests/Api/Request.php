@@ -38,7 +38,7 @@ class Request extends FormRequest
         // Base sanitization for all API requests
         $data = $this->all();
         $sanitizedData = [];
-        
+
         foreach ($data as $key => $value) {
             if (is_string($value)) {
                 $sanitizedData[$key] = $this->sanitizeInput($value);
@@ -46,7 +46,7 @@ class Request extends FormRequest
                 $sanitizedData[$key] = $value;
             }
         }
-        
+
         $this->merge($sanitizedData);
     }
 

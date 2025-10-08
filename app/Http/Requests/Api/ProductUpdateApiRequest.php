@@ -39,7 +39,7 @@ class ProductUpdateApiRequest extends FormRequest
     {
         $route = $this->route();
         $routeName = $route?->getName() ?? '';
-        
+
         $isCheck = $this->isMethod('POST') && str_contains($routeName, 'check');
         $isLatest = $this->isMethod('POST') && str_contains($routeName, 'latest');
         $isDownload = $this->isMethod('POST') && str_contains($routeName, 'download');
@@ -453,11 +453,11 @@ class ProductUpdateApiRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-        
+
         if (!is_string($input)) {
             return null;
         }
-        
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

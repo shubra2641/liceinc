@@ -27,7 +27,6 @@ use Throwable;
  * - Proper error responses for different security scenarios
  * - Comprehensive logging for security monitoring
  *
- *
  * @example
  * // Applied to routes that require XSS protection
  * Route::middleware(['xss.protection'])->group(function () {
@@ -130,12 +129,16 @@ class XssProtectionMiddleware
             if ($enabled) {
                 // Sanitize input data
                 $configArray = is_array($xssConfig) ? $xssConfig : [];
-                /** @var array<string, mixed> $typedConfig */
+                /**
+ * @var array<string, mixed> $typedConfig
+*/
                 $typedConfig = $configArray;
                 $this->sanitizeInput($request, $typedConfig);
             }
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         } catch (Throwable $e) {
@@ -150,7 +153,9 @@ class XssProtectionMiddleware
             ]);
             // Continue processing even if XSS protection fails to prevent service disruption
             $response = $next($request);
-            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            /**
+ * @var \Symfony\Component\HttpFoundation\Response $typedResponse
+*/
             $typedResponse = $response;
             return $typedResponse;
         }

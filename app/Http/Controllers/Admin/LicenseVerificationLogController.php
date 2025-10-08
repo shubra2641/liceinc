@@ -243,7 +243,7 @@ class LicenseVerificationLogController extends Controller
     public function cleanOldLogs(LicenseVerificationLogRequest $request): JsonResponse
     {
         // Rate limiting for cleanup functionality
-        $key = 'license-logs-cleanup:'.$request->ip();
+        $key = 'license-logs-cleanup:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 3)) {
             return response()->json([
                 'error' => 'Too many cleanup attempts. Please try again later.',
@@ -300,9 +300,9 @@ class LicenseVerificationLogController extends Controller
     public function export(LicenseVerificationLogRequest $request)
     {
         // Rate limiting for export functionality
-        $key = 'license-logs-export:'.$request->ip();
+        $key = 'license-logs-export:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
-            return new \Symfony\Component\HttpFoundation\StreamedResponse(function() {
+            return new \Symfony\Component\HttpFoundation\StreamedResponse(function () {
                 echo 'Too many export attempts. Please try again later.';
             }, 429);
         }
@@ -311,10 +311,10 @@ class LicenseVerificationLogController extends Controller
             DB::beginTransaction();
             $query = $this->applyFilters(LicenseVerificationLog::query(), $request);
             $logs = $query->orderBy('created_at', 'desc')->get();
-            $filename = 'license_verification_logs_'.date('Y-m-d_H-i-s').'.csv';
+            $filename = 'license_verification_logs_' . date('Y-m-d_H-i-s') . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             ];
             $callback = function () use ($logs) {
                 $file = SecureFileHelper::openOutput('w');
@@ -352,7 +352,7 @@ class LicenseVerificationLogController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return new \Symfony\Component\HttpFoundation\StreamedResponse(function() {
+            return new \Symfony\Component\HttpFoundation\StreamedResponse(function () {
                 echo 'Failed to export logs. Please try again.';
             }, 500);
         }
@@ -400,11 +400,11 @@ class LicenseVerificationLogController extends Controller
         }
         // Apply domain filter
         if (! empty($validated['domain'])) {
-            $query->where('domain', 'like', '%'.(is_string($validated['domain']) ? $validated['domain'] : '').'%');
+            $query->where('domain', 'like', '%' . (is_string($validated['domain']) ? $validated['domain'] : '') . '%');
         }
         // Apply IP address filter
         if (! empty($validated['ip'])) {
-            $query->where('ip_address', 'like', '%'.(is_string($validated['ip']) ? $validated['ip'] : '').'%');
+            $query->where('ip_address', 'like', '%' . (is_string($validated['ip']) ? $validated['ip'] : '') . '%');
         }
         // Apply date from filter
         if (! empty($validated['date_from'])) {

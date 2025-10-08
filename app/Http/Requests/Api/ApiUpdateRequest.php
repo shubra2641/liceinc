@@ -39,7 +39,7 @@ class ApiUpdateRequest extends FormRequest
     {
         $route = $this->route();
         $routeName = $route?->getName() ?? '';
-        
+
         $isCheck = $this->isMethod('POST') && str_contains($routeName, 'check');
         $isHistory = $this->isMethod('POST') && str_contains($routeName, 'history');
         $isLatest = $this->isMethod('POST') && str_contains($routeName, 'latest');
@@ -461,11 +461,11 @@ class ApiUpdateRequest extends FormRequest
         if ($input === null || $input === '') {
             return null;
         }
-        
+
         if (!is_string($input)) {
             return null;
         }
-        
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }
