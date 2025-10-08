@@ -61,17 +61,25 @@ class EnvatoService
                 'token' => $this->sanitizeString(
                     is_string($setting->envatoPersonalToken ?? null) ? $setting->envatoPersonalToken : (is_string(config('envato.token')) ? config('envato.token') : ''),
                 ),
-                'api_key' => $this->sanitizeString(is_string($setting->envato_api_key ?? null) ? $setting->envato_api_key : (is_string(config('envato.api_key')) ? config('envato.api_key') : '')),
-                'client_id' => $this->sanitizeString(is_string($setting->envato_client_id ?? null) ? $setting->envato_client_id : (is_string(config('envato.client_id')) ? config('envato.client_id') : '')),
+                'api_key' => $this->sanitizeString(is_string($setting->envatoApiKey ?? null) 
+                    ? $setting->envatoApiKey 
+                    : (is_string(config('envato.api_key')) ? config('envato.api_key') : '')),
+                'client_id' => $this->sanitizeString(is_string($setting->envatoClientId ?? null) 
+                    ? $setting->envatoClientId 
+                    : (is_string(config('envato.client_id')) ? config('envato.client_id') : '')),
                 'client_secret' => $this->sanitizeString(
-                    is_string($setting->envato_client_secret ?? null) ? $setting->envato_client_secret : (is_string(config('envato.client_secret')) ? config('envato.client_secret') : ''),
+                    is_string($setting->envatoClientSecret ?? null) 
+                        ? $setting->envatoClientSecret 
+                        : (is_string(config('envato.client_secret')) ? config('envato.client_secret') : ''),
                 ),
                 'redirect' => $this->sanitizeString(
-                    is_string($setting->envato_redirect_uri ?? null) ? $setting->envato_redirect_uri : (is_string(config('services.envato.redirect')) ? config('services.envato.redirect') : ''),
+                    is_string($setting->envatoRedirectUri ?? null) 
+                        ? $setting->envatoRedirectUri 
+                        : (is_string(config('services.envato.redirect')) ? config('services.envato.redirect') : ''),
                 ),
-                'oauth_enabled' => (bool)($setting->envato_oauth_enabled ?? false),
+                'oauth_enabled' => (bool)($setting->envatoOauthEnabled ?? false),
                 'username' => $this->sanitizeString((string) ($setting->envatoUsername ?? null)),
-                'auth_enabled' => (bool)($setting->envato_auth_enabled ?? false),
+                'auth_enabled' => (bool)($setting->envatoAuthEnabled ?? false),
             ];
         } catch (Exception $e) {
             Log::error('Failed to retrieve Envato settings: ' . $e->getMessage());
