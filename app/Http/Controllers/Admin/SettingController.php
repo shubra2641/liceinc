@@ -120,7 +120,8 @@ class SettingController extends Controller
                     'envatoUsername' => '',
                     'envato_client_id' => '',
                     'envato_client_secret' => '',
-                    'envato_redirect_uri' => (is_string(config('app.url')) ? config('app.url') : '') . '/auth/envato/callback',
+                    'envato_redirect_uri' => (is_string(config('app.url')) ? config('app.url') : '')
+                        . '/auth/envato/callback',
                     'envato_oauth_enabled' => false,
                     'auto_generate_license' => true,
                     'default_license_length' => 32,
@@ -161,7 +162,12 @@ class SettingController extends Controller
             }
             DB::commit();
 
-            return view('admin.settings.index', ['settings' => $settings, 'settingsArray' => $settingsArray, 'currentTimezone' => $currentTimezone, 'existingQuestions' => $existingQuestions]);
+            return view('admin.settings.index', [
+                'settings' => $settings,
+                'settingsArray' => $settingsArray,
+                'currentTimezone' => $currentTimezone,
+                'existingQuestions' => $existingQuestions
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Settings page failed to load', [

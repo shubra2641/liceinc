@@ -166,7 +166,10 @@ class LicenseVerificationLogController extends Controller
             $validated = $request->validated();
             $hours = $validated['hours'] ?? 24;
             $minAttempts = $validated['min_attempts'] ?? 3;
-            $activity = LicenseVerificationLogger::getSuspiciousActivity(is_numeric($hours) ? (int)$hours : 24, is_numeric($minAttempts) ? (int)$minAttempts : 3);
+            $activity = LicenseVerificationLogger::getSuspiciousActivity(
+                is_numeric($hours) ? (int)$hours : 24,
+                is_numeric($minAttempts) ? (int)$minAttempts : 3
+            );
 
             return response()->json($activity);
         } catch (\Exception $e) {

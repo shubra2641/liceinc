@@ -215,14 +215,23 @@ class ProfileController extends Controller
                 $data = $response->json();
                 // Update user with Envato info
                 if ($user) {
-                    $user->envatoUsername = (is_array($data) && isset($data['username']) && is_string($data['username'])) ? $data['username'] : null;
-                    $user->envatoId = (is_array($data) && isset($data['id']) && is_string($data['id'])) ? $data['id'] : null;
+                    $user->envatoUsername = (is_array($data) && isset($data['username'])
+                        && is_string($data['username']))
+                        ? $data['username']
+                        : null;
+                    $user->envatoId = (is_array($data) && isset($data['id']) && is_string($data['id']))
+                        ? $data['id']
+                        : null;
                     $user->save();
                 }
                 DB::commit();
 
+                $username = (is_array($data) && isset($data['username']) && is_string($data['username']))
+                    ? $data['username']
+                    : 'Unknown';
+
                 return Redirect::route('admin.profile.edit')
-                    ->with('success', 'Successfully connected to Envato account: ' . ((is_array($data) && isset($data['username']) && is_string($data['username'])) ? $data['username'] : 'Unknown'));
+                    ->with('success', 'Successfully connected to Envato account: ' . $username);
             } else {
                 DB::rollBack();
 
@@ -271,7 +280,7 @@ class ProfileController extends Controller
                 $user->envatoId = null;
                 $user->envatoToken = null;
                 $user->envatoRefreshToken = null;
-                $user->envatoToken_expiresAt = null;
+                $user->envatoTokenExpiresAt = null;
                 $user->save();
             }
             DB::commit();

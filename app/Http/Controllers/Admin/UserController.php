@@ -149,7 +149,8 @@ class UserController extends Controller
             }
             // Send welcome email if requested
             if ($validated['send_welcome_email'] ?? false) {
-                // You can implement welcome email here
+                // TODO: Implement welcome email functionality
+                // This will be implemented in future versions
             }
             DB::commit();
             return redirect()->route('admin.users.show', $user)
