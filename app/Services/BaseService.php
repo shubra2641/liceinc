@@ -77,6 +77,9 @@ abstract class BaseService
      *     'email' => $email
      * ]);
      */
+    /**
+     * @param array<string, mixed> $context
+     */
     protected function logError(string $message, array $context = []): void
     {
         Log::error($message, array_merge($context, [
@@ -100,6 +103,9 @@ abstract class BaseService
      *     'user_id' => $userId,
      *     'email' => $email
      * ]);
+     */
+    /**
+     * @param array<string, mixed> $context
      */
     protected function logInfo(string $message, array $context = []): void
     {
@@ -222,7 +228,7 @@ abstract class BaseService
      */
     protected function generateSecureToken(int $length = 32): string
     {
-        return bin2hex(random_bytes($length / 2));
+        return bin2hex(random_bytes(max(1, (int) ($length / 2))));
     }
 
     /**

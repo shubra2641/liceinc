@@ -347,7 +347,7 @@ class InvoiceService extends BaseService
                 'status' => 'paid',
                 'paid_at' => now(),
                 'due_date' => now()->addDays(30),
-                'billing_address' => $this->sanitizeInput($user->billing_address ?? null),
+                'billing_address' => $this->sanitizeInput(is_string($user->billing_address) ? $user->billing_address : ''),
                 'tax_rate' => 0,
                 'tax_amount' => 0,
                 'total_amount' => $this->sanitizeAmount($amount),
@@ -506,23 +506,4 @@ class InvoiceService extends BaseService
         return strtoupper(trim($currency));
     }
 
-    /**
-     * Sanitize input to prevent XSS attacks.
-     *
-     * @param  mixed  $input  The input to sanitize
-     *
-     * @return string|null The sanitized input
-     */
-    private function sanitizeInput(mixed $input): ?string
-    {
-        if ($input === null || $input === '') {
-            return null;
-        }
-
-        if (! is_string($input)) {
-            return null;
-        }
-
-        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-    }
 }
