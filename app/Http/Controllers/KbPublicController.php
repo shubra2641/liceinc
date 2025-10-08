@@ -130,8 +130,8 @@ class KbPublicController extends Controller
             if ($providedRawCode) {
                 $accessResult = $this->handleRawCodeAccess($category, $providedRawCode);
                 if ($accessResult['success']) {
-                    return $accessResult['redirect'] instanceof \Illuminate\Http\RedirectResponse 
-                        ? $accessResult['redirect'] 
+                    return $accessResult['redirect'] instanceof \Illuminate\Http\RedirectResponse
+                        ? $accessResult['redirect']
                         : redirect()->back();
                 } else {
                     $error = $accessResult['error'];
