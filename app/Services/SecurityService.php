@@ -4,8 +4,11 @@ namespace App\Services;
 
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * Security Service with enhanced security.
@@ -27,7 +30,7 @@ use Illuminate\Support\Facades\RateLimiter;
  * - Clean code structure with no duplicate patterns
  * - Proper type hints and return types
  */
-class SecurityService
+class SecurityService extends BaseService
 {
     /**
      * Validate and sanitize input data with enhanced security.

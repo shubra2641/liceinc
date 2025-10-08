@@ -42,7 +42,7 @@ use Throwable;
  * // Validate a license key
  * $validation = $licenseService->isLicenseValid($licenseKey, $domain);
  */
-class LicenseService
+class LicenseService extends BaseService
 {
     /**
      * Create license for a user and product with enhanced security.

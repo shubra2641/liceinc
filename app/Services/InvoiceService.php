@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -39,7 +40,7 @@ use Illuminate\Support\Str;
  * // Get invoice statistics
  * $stats = $invoiceService->getInvoiceStats();
  */
-class InvoiceService
+class InvoiceService extends BaseService
 {
     /**
      * Create initial invoice for a license with enhanced security.

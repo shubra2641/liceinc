@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Setting;
 use Exception;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -26,7 +27,7 @@ use Illuminate\Support\Facades\Log;
  * - Clean code structure with no duplicate patterns
  * - Proper type hints and return types
  */
-class EnvatoService
+class EnvatoService extends BaseService
 {
     /**
      * The base URL for Envato API.

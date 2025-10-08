@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Log;
  * // Check user access to product
  * $hasAccess = $service->userHasProductAccess($user, $productId);
  */
-class PurchaseCodeService
+class PurchaseCodeService extends BaseService
 {
     /**
      * The Envato service instance for API operations.

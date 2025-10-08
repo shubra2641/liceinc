@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Mail;
  * - Clean code structure with no duplicate patterns
  * - Proper type hints and return types
  */
-class EmailService
+class EmailService extends BaseService
 {
     /**
      * Send email using template name and data with enhanced security.
