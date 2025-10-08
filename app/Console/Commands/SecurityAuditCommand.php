@@ -18,13 +18,14 @@ use Illuminate\Support\Facades\Log;
         $highCount = count(array_filter($this->issues, fn($i) => $i['severity'] === 'high'));ty analysis
  * - Dependency security checking * - Environment security validation * - Automated issue fixing capabilities * - Detailed security reporting with JSON export * - Email notification system for critical issues * - Performance optimization with efficient queries * - Enhanced error handling and logging *
  *
- * @example * // Run basic security audit * php artisan security:audit *
- * // Generate detailed report * php artisan security:audit --report *
- * // Auto-fix issues * php artisan security:audit --fix *
- * // Send email report * php artisan security:audit --report --email=admin@example.com */
+ */
 class SecurityAuditCommand extends Command
 {
-    /**   * The name and signature of the console command. *   * @var string */
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
     protected $signature = 'security:audit
                             {--report : Generate detailed security report}
                             {--fix : Attempt to fix found issues automatically}

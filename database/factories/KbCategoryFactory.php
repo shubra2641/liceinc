@@ -7,13 +7,18 @@ use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\KbCategory> */
+ * Factory for creating KbCategory instances.
+ */
 class KbCategoryFactory extends Factory
 {
     /**   * The name of the factory's corresponding model. *   * @var class-string<KbCategory> */
     protected $model = KbCategory::class;
 
-    /**   * Define the model's default state. *   * @return array<string, mixed> */
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
