@@ -907,7 +907,10 @@ class UpdateController extends Controller
                                     'current_version' => $currentVersion,
                                     'target_version' => $nextVersion,
                                     'update_result' => $updateResult,
-                                    'files_installed' => (is_array($updateResult['data'] ?? null) && isset($updateResult['data']['files_installed'])) ? $updateResult['data']['files_installed'] : 0,
+                                    'files_installed' => (is_array($updateResult['data'] ?? null)
+                                        && isset($updateResult['data']['files_installed']))
+                                        ? $updateResult['data']['files_installed']
+                                        : 0,
                                 ],
                             ]);
                         } else {

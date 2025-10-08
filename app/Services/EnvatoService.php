@@ -61,20 +61,20 @@ class EnvatoService
                 'token' => $this->sanitizeString(
                     is_string($setting->envatoPersonalToken ?? null) ? $setting->envatoPersonalToken : (is_string(config('envato.token')) ? config('envato.token') : ''),
                 ),
-                'api_key' => $this->sanitizeString(is_string($setting->envatoApiKey ?? null) 
-                    ? $setting->envatoApiKey 
+                'api_key' => $this->sanitizeString(is_string($setting->envatoApiKey ?? null)
+                    ? $setting->envatoApiKey
                     : (is_string(config('envato.api_key')) ? config('envato.api_key') : '')),
-                'client_id' => $this->sanitizeString(is_string($setting->envatoClientId ?? null) 
-                    ? $setting->envatoClientId 
+                'client_id' => $this->sanitizeString(is_string($setting->envatoClientId ?? null)
+                    ? $setting->envatoClientId
                     : (is_string(config('envato.client_id')) ? config('envato.client_id') : '')),
                 'client_secret' => $this->sanitizeString(
-                    is_string($setting->envatoClientSecret ?? null) 
-                        ? $setting->envatoClientSecret 
+                    is_string($setting->envatoClientSecret ?? null)
+                        ? $setting->envatoClientSecret
                         : (is_string(config('envato.client_secret')) ? config('envato.client_secret') : ''),
                 ),
                 'redirect' => $this->sanitizeString(
-                    is_string($setting->envatoRedirectUri ?? null) 
-                        ? $setting->envatoRedirectUri 
+                    is_string($setting->envatoRedirectUri ?? null)
+                        ? $setting->envatoRedirectUri
                         : (is_string(config('services.envato.redirect')) ? config('services.envato.redirect') : ''),
                 ),
                 'oauth_enabled' => (bool)($setting->envatoOauthEnabled ?? false),
