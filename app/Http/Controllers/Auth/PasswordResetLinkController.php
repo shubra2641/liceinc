@@ -36,7 +36,7 @@ class PasswordResetLinkController extends Controller
      * Validates the email address and sends a password reset link
      * to the user if the email exists in the system.
      *
-     * @param  Request  $request  The password reset link request
+     * @param  PasswordResetRequest  $request  The password reset link request
      *
      * @return RedirectResponse Redirect back with success or error message
      *

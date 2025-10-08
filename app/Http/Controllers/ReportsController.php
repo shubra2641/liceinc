@@ -74,7 +74,8 @@ class ReportsController extends Controller
     public function index(): View
     {
         try {
-            return $this->transaction(function () {
+            /** @var View $result */
+            $result = $this->transaction(function () {
                 // Basic metrics
                 $totalLicenses = License::count();
                 $activeLicenses = License::where('status', 'active')->count();
@@ -117,9 +118,9 @@ class ReportsController extends Controller
                 $monthlyRevenueData = [];
                 foreach ($last3Months as $month) {
                     $found = $monthlyRevenueRaw->first(function ($item) use ($month) {
-                        return $item->year . '-' . str_pad((string)$item->month, 2, '0', STR_PAD_LEFT) === $month;
+                        return (is_string($item->year) ? $item->year : '') . '-' . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
                     });
-                    $monthlyRevenueData[] = $found ? (float)$found->revenue : 0;
+                    $monthlyRevenueData[] = $found ? (float)(is_numeric($found->revenue) ? $found->revenue : 0) : 0;
                 }
                 $monthlyRevenue = [
                     'labels' => $last3MonthsLabels,
@@ -140,9 +141,9 @@ class ReportsController extends Controller
                 $monthlyLicensesData = [];
                 foreach ($last3Months as $month) {
                     $found = $monthlyLicensesRaw->first(function ($item) use ($month) {
-                        return $item->year . '-' . str_pad((string)$item->month, 2, '0', STR_PAD_LEFT) === $month;
+                        return (is_string($item->year) ? $item->year : '') . '-' . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
                     });
-                    $monthlyLicensesData[] = $found ? (int)$found->count : 0;
+                    $monthlyLicensesData[] = $found ? (int)(is_numeric($found->count) ? $found->count : 0) : 0;
                 }
                 $monthlyLicenses = [
                     'labels' => $last3MonthsLabels,
@@ -166,7 +167,7 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $licenseTypeData = [
                     'labels' => $licenseTypeDataRaw->pluck('license_type')->map(function ($type) {
-                        return __('app.' . $type) ?: ucfirst($type);
+                        return __('app.' . (is_string($type) ? $type : '')) ?: ucfirst(is_string($type) ? $type : '');
                     })->toArray(),
                     'datasets' => [[
                         'data' => $licenseTypeDataRaw->pluck('count')->toArray(),
@@ -181,7 +182,7 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $licenseStatusData = [
                     'labels' => $licenseStatusDataRaw->pluck('status')->map(function ($status) {
-                        return __('app.' . $status) ?: ucfirst($status);
+                        return __('app.' . (is_string($status) ? $status : '')) ?: ucfirst(is_string($status) ? $status : '');
                     })->toArray(),
                     'datasets' => [[
                         'data' => $licenseStatusDataRaw->pluck('count')->toArray(),
@@ -208,7 +209,7 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $apiStatusData = [
                     'labels' => $apiStatusDataRaw->pluck('status')->map(function ($status) {
-                        return __('app.' . $status) ?: ucfirst($status);
+                        return __('app.' . (is_string($status) ? $status : '')) ?: ucfirst(is_string($status) ? $status : '');
                     })->toArray(),
                     'datasets' => [[
                         'label' => __('app.api_calls'),
@@ -235,7 +236,7 @@ class ReportsController extends Controller
                     ->get();
                 // Calculate total revenue (from products table via licenses relationship)
                 $totalRevenue = License::join('products', 'licenses.product_id', '=', 'products.id')
-                    ->sum('products.price') ?? 0;
+                    ->sum('products.price') ?: 0;
                 // --- Invoices: monthly amounts and status totals - Last 3 months ---
                 $invoiceMonthlyRaw = Invoice::select(
                     DB::raw('YEAR(created_at) as year'),
@@ -251,9 +252,9 @@ class ReportsController extends Controller
                 $invoiceMonthlyData = [];
                 foreach ($last3Months as $month) {
                     $found = $invoiceMonthlyRaw->first(function ($item) use ($month) {
-                        return $item->year . '-' . str_pad((string)$item->month, 2, '0', STR_PAD_LEFT) === $month;
+                        return (is_string($item->year) ? $item->year : '') . '-' . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
                     });
-                    $invoiceMonthlyData[] = $found ? (float)$found->total : 0;
+                    $invoiceMonthlyData[] = $found ? (float)(is_numeric($found->total) ? $found->total : 0) : 0;
                 }
                 $invoiceMonthlyAmounts = [
                     'labels' => $last3MonthsLabels,
@@ -297,9 +298,9 @@ class ReportsController extends Controller
                 $userRegistrationsData = [];
                 foreach ($last3Months as $month) {
                     $found = $userRegistrationsRaw->first(function ($item) use ($month) {
-                        return $item->year . '-' . str_pad((string)$item->month, 2, '0', STR_PAD_LEFT) === $month;
+                        return (is_string($item->year) ? $item->year : '') . '-' . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
                     });
-                    $userRegistrationsData[] = $found ? (int)$found->count : 0;
+                    $userRegistrationsData[] = $found ? (int)(is_numeric($found->count) ? $found->count : 0) : 0;
                 }
                 $userRegistrations = [
                     'labels' => $last3MonthsLabels,
@@ -369,36 +370,37 @@ class ReportsController extends Controller
                         'attempts' => $failedCall->attempts,
                         'blocked_until' => now()->addMinutes(15), // Default lockout time
                     ]);
-                    $totalRateLimitedAttempts += $failedCall->attempts;
+                    $totalRateLimitedAttempts += is_numeric($failedCall->attempts) ? (int)$failedCall->attempts : 0;
                 }
-                return view('admin.reports', compact(
-                    'totalLicenses',
-                    'activeLicenses',
-                    'expiredLicenses',
-                    'totalUsers',
-                    'totalProducts',
-                    'totalTickets',
-                    'openTickets',
-                    'totalRevenue',
-                    'monthlyLicenses',
-                    'monthlyRevenue',
-                    'activityTimeline',
-                    'systemOverviewData',
-                    'licenseStatusData',
-                    'licenseTypeData',
-                    'apiCallsData',
-                    'apiStatusData',
-                    'topProducts',
-                    'recentActivities',
-                    'totalDomains',
-                    'activeDomains',
-                    'userRegistrations',
-                    'rateLimitedIPs',
-                    'totalRateLimitedAttempts',
-                    'invoiceStatusTotals',
-                    'invoiceMonthlyAmounts',
-                ));
+                return view('admin.reports', [
+                    'totalLicenses' => $totalLicenses,
+                    'activeLicenses' => $activeLicenses,
+                    'expiredLicenses' => $expiredLicenses,
+                    'totalUsers' => $totalUsers,
+                    'totalProducts' => $totalProducts,
+                    'totalTickets' => $totalTickets,
+                    'openTickets' => $openTickets,
+                    'totalRevenue' => $totalRevenue,
+                    'monthlyLicenses' => $monthlyLicenses,
+                    'monthlyRevenue' => $monthlyRevenue,
+                    'activityTimeline' => $activityTimeline,
+                    'systemOverviewData' => $systemOverviewData,
+                    'licenseStatusData' => $licenseStatusData,
+                    'licenseTypeData' => $licenseTypeData,
+                    'apiCallsData' => $apiCallsData,
+                    'apiStatusData' => $apiStatusData,
+                    'topProducts' => $topProducts,
+                    'recentActivities' => $recentActivities,
+                    'totalDomains' => $totalDomains,
+                    'activeDomains' => $activeDomains,
+                    'userRegistrations' => $userRegistrations,
+                    'rateLimitedIPs' => $rateLimitedIPs,
+                    'totalRateLimitedAttempts' => $totalRateLimitedAttempts,
+                    'invoiceStatusTotals' => $invoiceStatusTotals,
+                    'invoiceMonthlyAmounts' => $invoiceMonthlyAmounts,
+                ]);
             });
+            return $result;
         } catch (Throwable $e) {
             Log::error('Failed to load reports dashboard', [
                 'error' => $e->getMessage(),
@@ -452,7 +454,8 @@ class ReportsController extends Controller
     public function getLicenseData(Request $request): JsonResponse
     {
         try {
-            return $this->transaction(function () use ($request) {
+            /** @var JsonResponse $result */
+            $result = $this->transaction(function () use ($request) {
                 $period = $this->sanitizeInput($request->get('period', 'month'));
                 switch ($period) {
                     case 'week':
@@ -483,6 +486,7 @@ class ReportsController extends Controller
                 ]);
                 return $this->successResponse($data, 'License data retrieved successfully');
             });
+            return $result;
         } catch (Throwable $e) {
             Log::error('Failed to retrieve license data', [
                 'error' => $e->getMessage(),
@@ -517,7 +521,8 @@ class ReportsController extends Controller
     public function getApiStatusData(Request $request): JsonResponse
     {
         try {
-            return $this->transaction(function () use ($request) {
+            /** @var JsonResponse $result */
+            $result = $this->transaction(function () use ($request) {
                 $period = $this->sanitizeInput($request->get('period', 'week'));
                 switch ($period) {
                     case 'day':
@@ -549,6 +554,7 @@ class ReportsController extends Controller
                 ]);
                 return $this->successResponse($data, 'API status data retrieved successfully');
             });
+            return $result;
         } catch (Throwable $e) {
             Log::error('Failed to retrieve API status data', [
                 'error' => $e->getMessage(),
@@ -580,20 +586,24 @@ class ReportsController extends Controller
      * // Export reports to CSV
      * $response = $reportsController->export($request);
      */
-    public function export(Request $request)
+    public function export(Request $request): \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
     {
         try {
-            return $this->transaction(function () use ($request) {
+            /** @var \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse $result */
+            $result = $this->transaction(function () use ($request) {
                 $format = $this->sanitizeInput($request->get('format', 'pdf'));
                 $dateFrom = $this->sanitizeInput($request->get('date_from'));
                 $dateTo = $this->sanitizeInput($request->get('date_to'));
                 // Get data for export
-                $data = $this->getExportData($dateFrom, $dateTo);
+                $data = $this->getExportData(
+                    is_string($dateFrom) ? $dateFrom : null,
+                    is_string($dateTo) ? $dateTo : null
+                );
                 Log::debug('Reports export initiated', [
                     'format' => $format,
                     'date_from' => $dateFrom,
                     'date_to' => $dateTo,
-                    'records_count' => $data['licenses']->count(),
+                    'records_count' => is_array($data['licenses']) ? count($data['licenses']) : 0,
                     'ip' => $request->ip(),
                 ]);
                 if ($format === 'csv') {
@@ -602,6 +612,7 @@ class ReportsController extends Controller
                     return $this->exportToPdf($data);
                 }
             });
+            return $result;
         } catch (Throwable $e) {
             Log::error('Failed to export reports', [
                 'error' => $e->getMessage(),
@@ -657,11 +668,11 @@ class ReportsController extends Controller
      *
      * @param  array<string, mixed>  $data  The data to export
      *
-     * @return \Illuminate\Http\Response The CSV file response
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse The CSV file response
      *
      * @throws \Exception When CSV export fails
      */
-    private function exportToCsv(array $data)
+    private function exportToCsv(array $data): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $filename = 'reports_' . now()->format('Y-m-d_H-i-s') . '.csv';
         $headers = [
@@ -670,21 +681,30 @@ class ReportsController extends Controller
         ];
         $callback = function () use ($data) {
             $file = fopen('php://output', 'w');
-            // CSV headers
-            fputcsv($file, ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price']);
+            if ($file !== false) {
+                // CSV headers
+                fputcsv($file, ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price']);
             // CSV data
-            foreach ($data['licenses'] as $license) {
-                fputcsv($file, [
-                    $license->license_key,
-                    $license->product ? $license->product->name : 'N/A',
-                    $license->user ? $license->user->name : 'N/A',
-                    $license->status,
-                    $license->created_at->format('Y-m-d H:i:s'),
-                    $license->license_expires_at ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
-                    $license->product ? $license->product->price : '0',
-                ]);
+            if (is_array($data['licenses'])) {
+                foreach ($data['licenses'] as $license) {
+                    if (is_object($license) && isset($license->license_key)) {
+                        $csvData = [
+                            is_string($license->license_key) ? $license->license_key : '',
+                            (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
+                            (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
+                            (isset($license->status) && is_string($license->status)) ? $license->status : '',
+                            (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
+                        ];
+                        /** @var array<int|string, bool|float|int|string|null> $typedCsvData */
+                        $typedCsvData = $csvData;
+                        fputcsv($file, $typedCsvData);
+                    }
+                }
             }
-            SecureFileHelper::closeFile($file);
+                SecureFileHelper::closeFile($file);
+            }
         };
         return response()->stream($callback, 200, $headers);
     }
@@ -693,11 +713,11 @@ class ReportsController extends Controller
      *
      * @param  array<string, mixed>  $data  The data to export
      *
-     * @return \Illuminate\Http\Response The PDF file response
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse The PDF file response
      *
      * @throws \Exception When PDF export fails
      */
-    private function exportToPdf(array $data)
+    private function exportToPdf(array $data): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         // For now, return CSV as PDF generation requires additional packages
         // You can install dompdf or similar package for proper PDF generation
@@ -708,21 +728,30 @@ class ReportsController extends Controller
         ];
         $callback = function () use ($data) {
             $file = fopen('php://output', 'w');
-            // For now, just output CSV content as PDF placeholder
-            // In production, use a proper PDF library like dompdf
-            fputcsv($file, ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price']);
-            foreach ($data['licenses'] as $license) {
-                fputcsv($file, [
-                    $license->license_key,
-                    $license->product ? $license->product->name : 'N/A',
-                    $license->user ? $license->user->name : 'N/A',
-                    $license->status,
-                    $license->created_at->format('Y-m-d H:i:s'),
-                    $license->license_expires_at ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
-                    $license->product ? $license->product->price : '0',
-                ]);
+            if ($file !== false) {
+                // For now, just output CSV content as PDF placeholder
+                // In production, use a proper PDF library like dompdf
+                fputcsv($file, ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price']);
+            if (is_array($data['licenses'])) {
+                foreach ($data['licenses'] as $license) {
+                    if (is_object($license) && isset($license->license_key)) {
+                        $csvData = [
+                            is_string($license->license_key) ? $license->license_key : '',
+                            (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
+                            (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
+                            (isset($license->status) && is_string($license->status)) ? $license->status : '',
+                            (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
+                        ];
+                        /** @var array<int|string, bool|float|int|string|null> $typedCsvData */
+                        $typedCsvData = $csvData;
+                        fputcsv($file, $typedCsvData);
+                    }
+                }
             }
-            SecureFileHelper::closeFile($file);
+                SecureFileHelper::closeFile($file);
+            }
         };
         return response()->stream($callback, 200, $headers);
     }

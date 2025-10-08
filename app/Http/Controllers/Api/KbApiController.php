@@ -76,7 +76,8 @@ class KbApiController extends Controller
             $validated = $request->validated();
             // Sanitize input to prevent XSS
             $articleSlug = $this->sanitizeInput($articleSlug);
-            $article = $this->findArticleBySlug($articleSlug);
+            $articleSlugStr = is_string($articleSlug) ? $articleSlug : '';
+            $article = $this->findArticleBySlug($articleSlugStr);
             if (! $article) {
                 DB::rollBack();
                 return $this->errorResponse('Article not found', 404);
@@ -88,7 +89,8 @@ class KbApiController extends Controller
                     'title' => $this->sanitizeOutput($article->title),
                 ]);
             }
-            $serialValidation = $this->validateSerial($article, $validated['serial']);
+            $serial = is_string($validated['serial']) ? $validated['serial'] : '';
+            $serialValidation = $this->validateSerial($article, $serial);
             if (! $serialValidation['valid']) {
                 DB::rollBack();
                 Log::warning('Invalid serial attempt for article', [
@@ -149,7 +151,8 @@ class KbApiController extends Controller
         try {
             // Sanitize input to prevent XSS
             $articleSlug = $this->sanitizeInput($articleSlug);
-            $article = $this->findArticleWithCategory($articleSlug);
+            $articleSlugStr = is_string($articleSlug) ? $articleSlug : '';
+            $article = $this->findArticleWithCategory($articleSlugStr);
             if (! $article) {
                 return $this->errorResponse('Article not found', 404);
             }
@@ -161,7 +164,8 @@ class KbApiController extends Controller
             ];
             if ($requiresSerial) {
                 $serialInfo = $this->getSerialInfo($article);
-                $responseData['serial_message'] = $this->sanitizeOutput($serialInfo['message']);
+                $message = is_string($serialInfo['message'] ?? null) ? $serialInfo['message'] : null;
+                $responseData['serial_message'] = $this->sanitizeOutput($message);
                 $responseData['serial_source'] = $serialInfo['source'];
             }
             return $this->successResponse($responseData, 'Article requirements retrieved');
@@ -208,7 +212,8 @@ class KbApiController extends Controller
         try {
             // Sanitize input to prevent XSS
             $categorySlug = $this->sanitizeInput($categorySlug);
-            $category = $this->findCategoryWithArticles($categorySlug);
+            $categorySlugStr = is_string($categorySlug) ? $categorySlug : '';
+            $category = $this->findCategoryWithArticles($categorySlugStr);
             if (! $category) {
                 return $this->errorResponse('Category not found', 404);
             }
@@ -265,7 +270,9 @@ class KbApiController extends Controller
     private function findCategoryWithArticles(string $slug): ?KbCategory
     {
         return KbCategory::active()->with(['articles' => function ($query) {
-            $query->published();
+            if (is_object($query) && method_exists($query, 'published')) {
+                $query->published();
+            }
         }])->where('slug', $slug)->first();
     }
     /**
@@ -278,7 +285,7 @@ class KbApiController extends Controller
     private function requiresSerialVerification(KbArticle $article): bool
     {
         return $article->requires_serial ||
-               ($article->category && $article->category->requires_serial);
+               $article->category->requires_serial;
     }
     /**
      * Validate serial code.
@@ -294,7 +301,7 @@ class KbApiController extends Controller
             return ['valid' => true, 'source' => 'article'];
         }
         if (
-            $article->category && $article->category->requires_serial &&
+            $article->category->requires_serial &&
             $article->category->serial === $serial
         ) {
             return ['valid' => true, 'source' => 'category'];
@@ -319,7 +326,7 @@ class KbApiController extends Controller
                 'source' => 'article',
             ];
         }
-        if ($article->category && $article->category->requires_serial) {
+        if ($article->category->requires_serial) {
             return [
                 'message' => $article->category->serial_message
                     ?: 'Please enter the serial code to access articles in this category.',
@@ -397,13 +404,15 @@ class KbApiController extends Controller
     }
     /**
      * Sanitize input to prevent XSS attacks.
-     *
-     * @param  string  $input  The input to sanitize
-     *
-     * @return string The sanitized input
      */
     protected function sanitizeInput(mixed $input): mixed
     {
+        if (is_array($input)) {
+            return array_map([$this, 'sanitizeInput'], $input);
+        }
+        if (is_object($input)) {
+            return $input;
+        }
         if (is_string($input)) {
             return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
         }

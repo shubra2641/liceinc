@@ -57,7 +57,7 @@ class LicenseDomain extends Model
         'last_used_at' => 'datetime',
     ];
     /**
-     * @return BelongsTo<License, LicenseDomain>
+     * @return BelongsTo<License, $this>
      */
     public function license(): BelongsTo
     {

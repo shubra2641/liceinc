@@ -68,7 +68,7 @@ class WebhookLog extends Model
      * Get the webhook that owns the log.
      */
     /**
-     * @return BelongsTo<Webhook, WebhookLog>
+     * @return BelongsTo<Webhook, $this>
      */
     public function webhook(): BelongsTo
     {

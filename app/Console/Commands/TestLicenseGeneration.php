@@ -289,7 +289,7 @@ class TestLicenseGeneration extends Command
     private function validateTokenInclusion(string $content, Setting $setting): void
     {
         // Check API token inclusion
-        if (strpos($content, $setting->license_api_token) !== false) {
+        if ($setting->license_api_token && strpos($content, $setting->license_api_token) !== false) {
             $this->info("\n✅ API Token found in generated file!");
         } else {
             $this->error("\n❌ API Token NOT found in generated file!");

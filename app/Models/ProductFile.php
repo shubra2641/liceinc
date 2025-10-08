@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Storage;
  * @property string|null $description
  * @property int $download_count
  * @property bool $is_active
+ * @property array<array-key, mixed>|null $update_info
+ * @property bool $is_update
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read mixed $file_extension
@@ -85,7 +87,7 @@ class ProductFile extends Model
      * Get the product that owns the file.
      */
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Product, ProductFile>
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Product, $this>
      */
     public function product(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
@@ -121,21 +123,25 @@ class ProductFile extends Model
     /**
      * Get decrypted file content.
      */
-    public function getDecryptedContent(): string
+    public function getDecryptedContent(): ?string
     {
         if (! $this->fileExists()) {
             return null;
         }
         try {
             $encryptedContent = Storage::disk('private')->get($this->file_path);
+            if ($encryptedContent === null) {
+                return null;
+            }
             $decryptionKey = Crypt::decryptString($this->encryption_key);
-            return openssl_decrypt(
+            $result = openssl_decrypt(
                 $encryptedContent,
                 'AES-256-CBC',
                 $decryptionKey,
                 0,
                 substr(hash('sha256', $decryptionKey), 0, 16),
             );
+            return $result !== false ? $result : null;
         } catch (\Exception $e) {
             \Log::error('Failed to decrypt file: ' . $e->getMessage());
             return null;

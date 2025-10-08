@@ -60,7 +60,7 @@ class ProductController extends Controller
         $itemId = $request->input('item_id');
         try {
             $envatoService = app(\App\Services\EnvatoService::class);
-            $itemData = $envatoService->getItemInfo($itemId);
+            $itemData = $envatoService->getItemInfo(is_numeric($itemId) ? (int)$itemId : 0);
             if (! $itemData) {
                 return response()->json([
                     'success' => false,
@@ -86,7 +86,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => trans('app.Error fetching product data: ').$e->getMessage(),
+                'message' => trans('app.Error fetching product data: ') . $e->getMessage(),
             ], 500);
         }
     }
@@ -105,7 +105,8 @@ class ProductController extends Controller
                     'message' => trans('app.Envato username not configured'),
                 ], 400);
             }
-            $userItems = $envatoService->getUserItems($settings['username']);
+            $username = $settings['username'];
+            $userItems = $envatoService->getUserItems(is_string($username) ? $username : '');
             if (! $userItems || ! isset($userItems['matches'])) {
                 return response()->json([
                     'success' => false,
@@ -140,7 +141,7 @@ class ProductController extends Controller
     /**
      * Calculate support days from Envato item data.
      */
-    /** @param array<string, mixed> $itemData */
+    /** @param array<mixed, mixed> $itemData */
     private function calculateSupportDays(array $itemData): int
     {
         // Envato typically provides 6 months support for most items
@@ -149,7 +150,7 @@ class ProductController extends Controller
             foreach ($itemData['attributes'] as $attribute) {
                 if (is_array($attribute) && isset($attribute['name']) && $attribute['name'] === 'support') {
                     // Parse support duration (e.g., "6 months", "1 year")
-                    $value = strtolower($attribute['value'] ?? '');
+                    $value = strtolower(is_string($attribute['value'] ?? null) ? $attribute['value'] : '');
                     if (strpos($value, 'month') !== false) {
                         preg_match('/(\d+)/', $value, $matches);
 
@@ -186,7 +187,7 @@ class ProductController extends Controller
         $search = request('q', request('search'));
         if (! empty($search)) {
             $productsQuery->where(function ($query) use ($search) {
-                $searchStr = is_string($search) ? $search : (string)$search;
+                $searchStr = is_string($search) ? $search : '';
                 $query->where('name', 'like', "%{$searchStr}%")
                     ->orWhere('description', 'like', "%{$searchStr}%");
             });
@@ -198,9 +199,10 @@ class ProductController extends Controller
             $productsQuery->where('programming_language', request('language'));
         }
         // Apply price filter
-        if (request('price_filter') === 'free') {
+        $priceFilter = request('price_filter');
+        if ($priceFilter === 'free') {
             $productsQuery->where('price', 0);
-        } elseif (request('price_filter') === 'paid') {
+        } elseif ($priceFilter === 'paid') {
             $productsQuery->where('price', '>', 0);
         }
         // Apply sorting
@@ -224,7 +226,7 @@ class ProductController extends Controller
         // Provide all products collection for grouped/category displays in the admin index
         $allProducts = Product::with(['category', 'programmingLanguage'])->get();
 
-        return view('admin.products.index', compact('products', 'categories', 'programmingLanguages', 'allProducts'));
+        return view('admin.products.index', ['products' => $products, 'categories' => $categories, 'programmingLanguages' => $programmingLanguages, 'allProducts' => $allProducts]);
     }
 
     /**
@@ -240,18 +242,18 @@ class ProductController extends Controller
             ->orderBy('title')
             ->get(['id', 'title', 'slug', 'kb_category_id']);
 
-        return view('admin.products.create', compact(
-            'categories',
-            'programmingLanguages',
-            'kbCategories',
-            'kbArticles',
-        ));
+        return view('admin.products.create', [
+            'categories' => $categories,
+            'programmingLanguages' => $programmingLanguages,
+            'kbCategories' => $kbCategories,
+            'kbArticles' => $kbArticles,
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  StoreProductRequest  $request
+     * @param  ProductRequest  $request
      *
      * @throws \Exception When database operations fail
      */
@@ -264,7 +266,7 @@ class ProductController extends Controller
             if (isset($validated['requires_domain'])) {
                 $validated['requires_domain'] = (bool)$validated['requires_domain'];
             }
-            $validated['slug'] = $validated['slug'] ?? Str::slug($validated['name']);
+            $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
             // Handle main image upload
             if ($request->hasFile('image')) {
                 $validated['image'] = $request->file('image')->store('products', 'public');
@@ -318,13 +320,13 @@ class ProductController extends Controller
         // Load the product with its relationships
         $product->load(['category', 'programmingLanguage', 'updates']);
 
-        return view('admin.products.show', compact('product'));
+        return view('admin.products.show', ['product' => $product]);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  UpdateProductRequest  $request
+     * @param  ProductRequest  $request
      *
      * @throws \Exception When database operations fail
      */
@@ -340,7 +342,7 @@ class ProductController extends Controller
             // Handle main image upload
             if ($request->hasFile('image')) {
                 // Delete old image
-                if ($product->image === true) {
+                if ($product->image) {
                     Storage::disk('public')->delete($product->image);
                 }
                 $validated['image'] = $request->file('image')->store('products', 'public');
@@ -439,7 +441,7 @@ class ProductController extends Controller
         // Load product files
         $product->load('files');
 
-        return view('admin.products.edit', compact('product', 'categories', 'programmingLanguages'));
+        return view('admin.products.edit', ['product' => $product, 'categories' => $categories, 'programmingLanguages' => $programmingLanguages]);
     }
 
     /**
@@ -470,8 +472,8 @@ class ProductController extends Controller
             return $filePath;
         } catch (\Exception $e) {
             // Fallback to old method if new service fails
-            $apiDomain = rtrim(env('APP_URL', config('app.url')), '/');
-            $verificationEndpoint = config('license.verification_endpoint', '/api/license/verify');
+            $apiDomain = rtrim(is_string(config('app.url')) ? config('app.url') : '', '/');
+            $verificationEndpoint = is_string(config('license.verification_endpoint', '/api/license/verify')) ? config('license.verification_endpoint', '/api/license/verify') : '/api/license/verify';
             $apiUrl = $apiDomain.'/'.ltrim($verificationEndpoint, '/');
             $integrationCode = $this->getIntegrationCodeTemplate($product, $apiUrl);
             // Save to storage/app/public/integration/
@@ -534,7 +536,7 @@ class ProductController extends Controller
     /**
      * Get file extensions for programming language.
      */
-    /** @return array<string, mixed> */
+    /** @return array<string> */
     private function getFileExtensionsForLanguage(string $languageSlug): array
     {
         $extensions = [
@@ -629,7 +631,7 @@ class ProductController extends Controller
             ->latest()
             ->paginate(50);
 
-        return view('admin.products.logs', compact('product', 'logs'));
+        return view('admin.products.logs', ['product' => $product, 'logs' => $logs]);
     }
 
     /**

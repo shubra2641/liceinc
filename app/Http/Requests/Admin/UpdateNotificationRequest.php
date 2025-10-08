@@ -98,7 +98,7 @@ class UpdateNotificationRequest extends FormRequest
             ],
             'target_users.*' => [
                 'integer',
-                'exists:users, id',
+                'exists:users,id',
             ],
             'send_email' => [
                 'boolean',
@@ -198,11 +198,11 @@ class UpdateNotificationRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'dismiss_type' => $this->dismiss_type ? $this->sanitizeInput($this->dismiss_type) : null,
-            'dismiss_reason' => $this->dismiss_reason ? $this->sanitizeInput($this->dismiss_reason) : null,
-            'notification_type' => $this->notification_type ? $this->sanitizeInput($this->notification_type) : null,
-            'message' => $this->message ? $this->sanitizeInput($this->message) : null,
-            'priority' => $this->priority ? $this->sanitizeInput($this->priority) : null,
+            'dismiss_type' => $this->input('dismiss_type') ? $this->sanitizeInput($this->input('dismiss_type')) : null,
+            'dismiss_reason' => $this->input('dismiss_reason') ? $this->sanitizeInput($this->input('dismiss_reason')) : null,
+            'notification_type' => $this->input('notification_type') ? $this->sanitizeInput($this->input('notification_type')) : null,
+            'message' => $this->input('message') ? $this->sanitizeInput($this->input('message')) : null,
+            'priority' => $this->input('priority') ? $this->sanitizeInput($this->input('priority')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -227,15 +227,20 @@ class UpdateNotificationRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

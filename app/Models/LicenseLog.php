@@ -65,7 +65,7 @@ class LicenseLog extends Model
         'response_data' => 'array',
     ];
     /**
-     * @return BelongsTo<License, LicenseLog>
+     * @return BelongsTo<License, $this>
      */
     public function license(): BelongsTo
     {
@@ -76,16 +76,26 @@ class LicenseLog extends Model
      */
     public function getActionAttribute(): ?string
     {
-        $data = $this->request_data ?? [];
-        return is_array($data) ? ($data['action'] ?? null) : null;
+        $data = $this->request_data;
+        if ($data === null) {
+            return null;
+        }
+        // Data is already type-hinted as array
+        $action = $data['action'] ?? null;
+        return is_string($action) ? $action : null;
     }
     /**
      * Virtual attribute to access the message from response_data.
      */
     public function getMessageAttribute(): ?string
     {
-        $data = $this->response_data ?? [];
-        return is_array($data) ? ($data['message'] ?? null) : null;
+        $data = $this->response_data;
+        if ($data === null) {
+            return null;
+        }
+        // Data is already type-hinted as array
+        $message = $data['message'] ?? null;
+        return is_string($message) ? $message : null;
     }
     /**
      * Get API calls grouped by date for the last N days.

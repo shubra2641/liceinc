@@ -75,8 +75,9 @@ class ProductLookupRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $purchaseCode = $this->input('purchase_code');
         $this->merge([
-            'purchase_code' => $this->purchase_code ? trim($this->purchase_code) : null,
+            'purchase_code' => $purchaseCode && is_string($purchaseCode) ? trim($purchaseCode) : null,
         ]);
     }
 }

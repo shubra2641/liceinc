@@ -153,12 +153,12 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
                 'line_ending' => [
                     'nullable',
                     'string',
-                    Rule::in(['lf', 'crlf', 'cr']),
+                    \Illuminate\Validation\Rule::in(['lf', 'crlf', 'cr']),
                 ],
                 'encoding' => [
                     'nullable',
                     'string',
-                    Rule::in(['utf-8', 'utf-16', 'ascii', 'latin1']),
+                    \Illuminate\Validation\Rule::in(['utf-8', 'utf-16', 'ascii', 'latin1']),
                 ],
             ];
         }
@@ -230,15 +230,15 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'template_type' => $this->sanitizeInput($this->template_type),
-            'template_description' => $this->template_description
-                ? $this->sanitizeInput($this->template_description)
+            'template_type' => $this->sanitizeInput($this->input('template_type')),
+            'template_description' => $this->input('template_description')
+                ? $this->sanitizeInput($this->input('template_description'))
                 : null,
-            'template_name' => $this->template_name ? $this->sanitizeInput($this->template_name) : null,
-            'version' => $this->version === true ? $this->sanitizeInput($this->version) : null,
-            'compatibility' => $this->compatibility ? $this->sanitizeInput($this->compatibility) : null,
-            'author' => $this->author ? $this->sanitizeInput($this->author) : null,
-            'license' => $this->license ? $this->sanitizeInput($this->license) : null,
+            'template_name' => $this->input('template_name') ? $this->sanitizeInput($this->input('template_name')) : null,
+            'version' => $this->input('version') === true ? $this->sanitizeInput((string)$this->input('version')) : null,
+            'compatibility' => $this->input('compatibility') ? $this->sanitizeInput($this->input('compatibility')) : null,
+            'author' => $this->input('author') ? $this->sanitizeInput($this->input('author')) : null,
+            'license' => $this->input('license') ? $this->sanitizeInput($this->input('license')) : null,
         ]);
         // Sanitize tags array
         if ($this->tags && is_array($this->tags)) {
@@ -267,15 +267,20 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

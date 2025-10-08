@@ -67,7 +67,10 @@ class EnsureUser
                         ->with('success', 'Please verify your email address before accessing your account.');
                 }
             }
-            return $next($request);
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         } catch (\Exception $e) {
             Log::error('EnsureUser middleware failed', [
                 'error' => $e->getMessage(),
@@ -152,21 +155,4 @@ class EnsureUser
      *
      * @return string Sanitized email address
      */
-    private function sanitizeEmail(string $email): string
-    {
-        // Basic email sanitization for logging purposes
-        $parts = explode('@', $email);
-        if (count($parts) === 2) {
-            $username = $parts[0];
-            $domain = $parts[1];
-            // Mask part of username for privacy
-            if (strlen($username) > 2) {
-                $maskedUsername = substr($username, 0, 2) . str_repeat('*', strlen($username) - 2);
-            } else {
-                $maskedUsername = str_repeat('*', strlen($username));
-            }
-            return $maskedUsername . '@' . $domain;
-        }
-        return '***@***';
-    }
 }

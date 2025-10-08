@@ -68,10 +68,18 @@ class ConfigHelper
                 'ip' => request()->ip(),
                 'user_agent' => request()->userAgent(),
             ]);
-            throw new \InvalidArgumentException('Invalid configuration key: '
-                .implode(', ', $validationResult['errors']));
+            $errors = $validationResult['errors'] ?? [];
+            if (is_array($errors)) {
+                throw new \InvalidArgumentException('Invalid configuration key: '
+                    .implode(', ', $errors));
+            } else {
+                throw new \InvalidArgumentException('Invalid configuration key');
+            }
         }
-        $sanitizedKey = $validationResult['sanitized'];
+        $sanitizedKey = $validationResult['sanitized'] ?? '';
+        if (!is_string($sanitizedKey)) {
+            throw new \InvalidArgumentException('Invalid sanitized key');
+        }
         $cacheKey = self::CACHE_PREFIX.md5($sanitizedKey);
         // Try advanced cache first with compression
         if ($useCache) {
@@ -273,10 +281,11 @@ class ConfigHelper
             return [];
         }
         $settings = [];
-        $uncachedKeys = [];
+        $uncachedKeys = $useCache ? [] : $validatedKeys;
         // Advanced cache checking with batch operations
         if ($useCache) {
-            $cacheResults = self::getBatchFromCache($validatedKeys);
+            $validatedKeysArray = array_filter($validatedKeys, 'is_string');
+            $cacheResults = self::getBatchFromCache($validatedKeysArray);
             foreach ($cacheResults as $key => $value) {
                 if ($value !== null) {
                     $settings[$key] = $validateTypes ? self::castValue($value, null) : $value;
@@ -284,12 +293,11 @@ class ConfigHelper
                     $uncachedKeys[] = $key;
                 }
             }
-        } else {
-            $uncachedKeys = $validatedKeys;
         }
         // Batch fetch from database
-        if (! empty($uncachedKeys)) {
-            $fetchedSettings = self::fetchMultipleSettingsOptimized($uncachedKeys);
+        if (count($uncachedKeys) > 0) {
+            $uncachedKeysArray = array_filter($uncachedKeys, 'is_string');
+            $fetchedSettings = self::fetchMultipleSettingsOptimized($uncachedKeysArray);
             foreach ($fetchedSettings as $key => $value) {
                 $settings[$key] = $validateTypes ? self::castValue($value, null) : $value;
                 if ($useCache) {
@@ -339,6 +347,7 @@ class ConfigHelper
      */
     private static function fetchMultipleSettingsOptimized(array $keys): array
     {
+        /** @var array<string, mixed> $settings */
         $settings = [];
         try {
             // Single optimized query for all settings
@@ -374,7 +383,9 @@ class ConfigHelper
             ]);
         }
 
-        return $settings;
+        /** @var array<string, mixed> $result */
+        $result = $settings;
+        return $result;
     }
 
     /**
@@ -388,14 +399,14 @@ class ConfigHelper
         // Handle compressed values with error checking
         if (is_string($value) && strpos($value, '|COMPRESSED') !== false) {
             try {
-                $compressed = base64_decode(str_replace('|COMPRESSED', '', $value));
-                if ($compressed === false) {
+                $compressed = @base64_decode(str_replace('|COMPRESSED', '', $value));
+                if ($compressed === '') {
                     Log::warning('Failed to decode compressed config value');
 
                     return $default;
                 }
                 $decompressed = gzuncompress($compressed);
-                if ($decompressed === false) {
+                if ($decompressed === false || $decompressed === '') {
                     Log::warning('Failed to decompress config value');
 
                     return $default;
@@ -414,15 +425,22 @@ class ConfigHelper
                 case 'boolean':
                     return filter_var($value, FILTER_VALIDATE_BOOLEAN);
                 case 'integer':
-                    return is_numeric($value) ? (int)(string)$value : (int)$default;
+                    if (is_numeric($value)) {
+                        return (int)(string)$value;
+                    }
+                    return is_int($default) ? $default : 0;
                 case 'double':
                 case 'float':
-                    return is_numeric($value) ? (float)(string)$value : (float)$default;
+                    if (is_numeric($value)) {
+                        return (float)(string)$value;
+                    }
+                    return is_float($default) ? $default : 0.0;
                 case 'array':
                     if (is_array($value)) {
                         return $value;
                     }
-                    $decoded = json_decode($value, true);
+                    $valueString = is_string($value) ? $value : '';
+                    $decoded = json_decode($valueString, true);
                     if (json_last_error() !== JSON_ERROR_NONE) {
                         Log::warning('Invalid JSON in config value', ['error' => json_last_error_msg()]);
 
@@ -618,21 +636,31 @@ class ConfigHelper
         $value = self::getSetting($key, $default, null, true, true);
         switch ($type) {
             case 'string':
-                return (string)$value;
+                if (is_string($value)) {
+                    return $value;
+                }
+                return is_string($default) ? $default : '';
             case 'int':
             case 'integer':
-                return is_numeric($value) ? (int)(string)$value : (int)$default;
+                if (is_numeric($value)) {
+                    return (int)(string)$value;
+                }
+                return is_int($default) ? $default : 0;
             case 'bool':
             case 'boolean':
                 return filter_var($value, FILTER_VALIDATE_BOOLEAN);
             case 'float':
             case 'double':
-                return is_numeric($value) ? (float)(string)$value : (float)$default;
+                if (is_numeric($value)) {
+                    return (float)(string)$value;
+                }
+                return is_float($default) ? $default : 0.0;
             case 'array':
                 if (is_array($value)) {
                     return $value;
                 }
-                $decoded = json_decode($value, true);
+                $valueString = is_string($value) ? $value : '';
+                $decoded = json_decode($valueString, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     Log::warning('Invalid JSON in typed setting', ['key' => $key, 'error' => json_last_error_msg()]);
 

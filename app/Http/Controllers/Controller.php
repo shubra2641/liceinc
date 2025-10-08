@@ -206,7 +206,7 @@ class Controller extends BaseController
      */
     protected function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data . config('app.key')), 0, 8) . '...';
+        return substr(hash('sha256', $data . (is_string(config('app.key')) ? config('app.key') : '')), 0, 8) . '...';
     }
     /**
      * Log security event with comprehensive context.
@@ -269,7 +269,10 @@ class Controller extends BaseController
     protected function validateRequest(Request $request, array $rules, array $messages = []): array
     {
         try {
-            return $request->validate($rules, $messages);
+            $validated = $request->validate($rules, $messages);
+            /** @var array<string, mixed> $result */
+            $result = $validated;
+            return $result;
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::warning('Request validation failed', [
                 'url' => $request->fullUrl(),

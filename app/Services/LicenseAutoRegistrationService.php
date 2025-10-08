@@ -35,16 +35,8 @@ class LicenseAutoRegistrationService
      */
     public function __construct(PurchaseCodeService $purchaseCodeService, InvoiceService $invoiceService)
     {
-        try {
-            $this->purchaseCodeService = $purchaseCodeService;
-            $this->invoiceService = $invoiceService;
-        } catch (\Exception $e) {
-            Log::error('Failed to initialize LicenseAutoRegistrationService', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            throw $e;
-        }
+        $this->purchaseCodeService = $purchaseCodeService;
+        $this->invoiceService = $invoiceService;
     }
     /**
      * Automatically register a license for the authenticated user with enhanced security and error handling.
@@ -288,7 +280,7 @@ class LicenseAutoRegistrationService
         if ($productId) {
             return $productId;
         }
-        return $verificationResult['product_id'] ?? null;
+        return is_numeric($verificationResult['product_id'] ?? null) ? (int)$verificationResult['product_id'] : null;
     }
     /**
      * Find product by ID with enhanced error handling.

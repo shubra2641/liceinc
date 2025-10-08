@@ -79,14 +79,18 @@ class TicketController extends Controller
                 ->latest()
                 ->paginate(self::PAGINATION_LIMIT);
             DB::commit();
-            return view('tickets.index', compact('tickets'));
+            /** @var view-string $viewName */
+            $viewName = 'tickets.index';
+            return view($viewName, ['tickets' => $tickets]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load user tickets: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return view('tickets.index', ['tickets' => collect()])
+            /** @var view-string $viewName */
+            $viewName = 'tickets.index';
+            return view($viewName, ['tickets' => collect()])
                 ->with('error', 'Failed to load tickets. Please try again.');
         }
     }
@@ -107,10 +111,12 @@ class TicketController extends Controller
      * // Returns view with:
      * // - Ticket creation form
      */
-    public function create(): View
+    public function create(): View|RedirectResponse
     {
         try {
-            return view('tickets.create');
+            /** @var view-string $viewName */
+            $viewName = 'tickets.create';
+            return view($viewName);
         } catch (Exception $e) {
             Log::error('Failed to load ticket creation form: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
@@ -145,9 +151,7 @@ class TicketController extends Controller
     public function store(Request $request, LicenseAutoRegistrationService $licenseService): RedirectResponse
     {
         try {
-            if (! $request) {
-                throw new \InvalidArgumentException('Request cannot be null');
-            }
+            // Request is already validated by type hint
             $validated = $this->validateTicketData($request);
             DB::beginTransaction();
             // Auto-register license if purchase code is provided
@@ -158,7 +162,7 @@ class TicketController extends Controller
                 'priority' => $validated['priority'],
                 'status' => 'open',
                 'content' => $validated['content'],
-                'license_id' => $license?->id,
+                'license_id' => $license instanceof \App\Models\License ? $license->id : null,
             ]);
             DB::commit();
             return redirect()->route('tickets.show', $ticket)->with('success', 'Ticket created successfully');
@@ -197,9 +201,7 @@ class TicketController extends Controller
     public function show(Ticket $ticket): View
     {
         try {
-            if (! $ticket) {
-                throw new \InvalidArgumentException('Ticket cannot be null');
-            }
+            // Ticket is already validated by type hint
             if (! $this->canViewTicket($ticket)) {
                 Log::warning('Unauthorized ticket access attempt', [
                     'user_id' => Auth::id(),
@@ -212,7 +214,9 @@ class TicketController extends Controller
             DB::beginTransaction();
             $ticket->load(['user', 'replies.user']);
             DB::commit();
-            return view('tickets.show', compact('ticket'));
+            /** @var view-string $viewName */
+            $viewName = 'tickets.show';
+            return view($viewName, ['ticket' => $ticket]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load ticket details: ' . $e->getMessage(), [
@@ -259,9 +263,7 @@ class TicketController extends Controller
     public function update(Request $request, Ticket $ticket): RedirectResponse
     {
         try {
-            if (! $request || ! $ticket) {
-                throw new \InvalidArgumentException('Request and ticket cannot be null');
-            }
+            // Request and ticket are validated by type hints
             if (! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket modification attempt', [
                     'user_id' => Auth::id(),
@@ -305,9 +307,7 @@ class TicketController extends Controller
     public function destroy(Ticket $ticket): RedirectResponse
     {
         try {
-            if (! $ticket) {
-                throw new \InvalidArgumentException('Ticket cannot be null');
-            }
+            // Ticket is validated by type hint
             if (! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket deletion attempt', [
                     'user_id' => Auth::id(),
@@ -355,9 +355,7 @@ class TicketController extends Controller
     public function reply(Request $request, Ticket $ticket): RedirectResponse
     {
         try {
-            if (! $request || ! $ticket) {
-                throw new \InvalidArgumentException('Request and ticket cannot be null');
-            }
+            // Request and ticket are validated by type hints
             if (! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket reply attempt', [
                     'user_id' => Auth::id(),
@@ -409,13 +407,17 @@ class TicketController extends Controller
      */
     private function validateTicketData(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'subject' => ['required', 'string', 'max:255'],
             'priority' => ['required', 'in:' . implode(', ', self::VALID_PRIORITIES)],
             'content' => ['required', 'string'],
             'purchase_code' => ['nullable', 'string'],
             'product_slug' => ['nullable', 'string'],
         ]);
+        
+        /** @var array<string, mixed> $result */
+        $result = $validated;
+        return $result;
     }
     /**
      * Validate ticket update data.
@@ -428,12 +430,16 @@ class TicketController extends Controller
      */
     private function validateTicketUpdateData(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'subject' => ['sometimes', 'string', 'max:255'],
             'priority' => ['sometimes', 'in:' . implode(', ', self::VALID_PRIORITIES)],
             'status' => ['sometimes', 'in:' . implode(', ', self::VALID_STATUSES)],
             'content' => ['sometimes', 'string'],
         ]);
+        
+        /** @var array<string, mixed> $result */
+        $result = $validated;
+        return $result;
     }
     /**
      * Validate reply data.
@@ -444,11 +450,15 @@ class TicketController extends Controller
      */
     private function validateReplyData(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'message' => ['required', 'string'],
             'close_ticket' => ['sometimes', 'boolean'],
             'action' => ['sometimes', 'in:reply, reply_and_close'],
         ]);
+        
+        /** @var array<string, mixed> $result */
+        $result = $validated;
+        return $result;
     }
     /**
      * Handle license registration for ticket.
@@ -468,7 +478,10 @@ class TicketController extends Controller
             $product = Product::where('slug', $validated['product_slug'])->first();
             $productId = $product?->id;
         }
-        $registrationResult = $licenseService->autoRegisterLicense($validated['purchase_code'], $productId);
+        $registrationResult = $licenseService->autoRegisterLicense(
+            is_string($validated['purchase_code']) ? $validated['purchase_code'] : '',
+            $productId
+        );
         if ($registrationResult['success']) {
             return $registrationResult['license'];
         }

@@ -13,7 +13,7 @@ class PaymentSettingFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\Illuminate\Database\Eloquent\Model> */
+     * @var class-string<PaymentSetting> */
     protected $model = PaymentSetting::class;
 
     /**
@@ -91,8 +91,10 @@ class PaymentSettingFactory extends Factory
     public function production(): static
     {
         return $this->state(function (array $attributes) {
-            $settings = json_decode($attributes['settings'], true);
-            $settings['mode'] = 'live';
+            $settings = json_decode((string)$attributes['settings'], true);
+            if (is_array($settings)) {
+                $settings['mode'] = 'live';
+            }
 
             return [
                 'settings' => json_encode($settings),

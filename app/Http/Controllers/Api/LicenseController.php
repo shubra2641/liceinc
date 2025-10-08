@@ -104,14 +104,15 @@ class LicenseController extends Controller
             $productSlug = $validated['product_slug'];
             $domain = $validated['domain'];
             // Enhanced rate limiting with multiple keys
-            $rateLimitKey = 'license-verify:'.$request->ip().':'.substr($purchaseCode, 0, 8);
+            $purchaseCodeStr = is_string($purchaseCode) ? $purchaseCode : '';
+            $rateLimitKey = 'license-verify:'.$request->ip().':'.substr($purchaseCodeStr, 0, 8);
             $globalRateLimitKey = 'license-verify-global:'.$request->ip();
             if (
                 RateLimiter::tooManyAttempts($rateLimitKey, 10) ||
                 RateLimiter::tooManyAttempts($globalRateLimitKey, 50)
             ) {
                 Log::warning('Rate limit exceeded for license verification', [
-                    'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                    'purchase_code' => substr($purchaseCodeStr, 0, 4).'...',
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                     'rate_limit_key_attempts' => RateLimiter::attempts($rateLimitKey),
@@ -122,7 +123,8 @@ class LicenseController extends Controller
                     'reason' => 'rate_limited',
                     'message' => 'Too many verification attempts. Please try again later.',
                 ];
-                $this->logLicenseVerification(null, $domain, $request, $response, 'rate_limited');
+                $domainStr = is_string($domain) ? $domain : '';
+                $this->logLicenseVerification(null, $domainStr, $request, $response, 'rate_limited');
                 DB::commit();
 
                 return response()->json($response, 429);
@@ -131,26 +133,28 @@ class LicenseController extends Controller
             RateLimiter::hit($rateLimitKey, 300); // 5 minutes
             RateLimiter::hit($globalRateLimitKey, 300); // 5 minutes
             // First, try to find license in local database
-            $localLicense = $this->checkLocalLicense($purchaseCode, $productSlug, $domain);
+            $productSlugStr = is_string($productSlug) ? $productSlug : '';
+            $domainStr = is_string($domain) ? $domain : '';
+            $localLicense = $this->checkLocalLicense($purchaseCodeStr, $productSlugStr, $domainStr);
             if ($localLicense) {
                 $response = [
                     'valid' => true,
                     'source' => 'local',
                     'license_type' => 'system_generated',
-                    'purchase_code' => $localLicense->purchase_code,
-                    'product' => $localLicense->product->only(['id', 'name', 'slug', 'envato_item_id']),
-                    'domain_allowed' => $localLicense->domain_allowed,
-                    'status' => $localLicense->status,
-                    'support_expires_at' => $localLicense->support_expires_at?->toDateString(),
-                    'license_expires_at' => $localLicense->license_expires_at?->toDateString(),
+                    'purchase_code' => $localLicense->purchase_code ?? null,
+                    'product' => property_exists($localLicense, 'product') && $localLicense->product && is_object($localLicense->product) && method_exists($localLicense->product, 'only') ? $localLicense->product->only(['id', 'name', 'slug', 'envato_item_id']) : null,
+                    'domain_allowed' => $localLicense->domain_allowed ?? null,
+                    'status' => $localLicense->status ?? null,
+                    'support_expires_at' => property_exists($localLicense, 'support_expires_at') && is_object($localLicense->support_expires_at) && method_exists($localLicense->support_expires_at, 'toDateString') ? $localLicense->support_expires_at->toDateString() : null,
+                    'license_expires_at' => property_exists($localLicense, 'license_expires_at') && is_object($localLicense->license_expires_at) && method_exists($localLicense->license_expires_at, 'toDateString') ? $localLicense->license_expires_at->toDateString() : null,
                 ];
-                $this->logLicenseVerification($localLicense->license, $domain, $request, $response, 'success');
+                $this->logLicenseVerification($localLicense instanceof \App\Models\License ? $localLicense : null, $domainStr, $request, $response, 'success');
                 DB::commit();
 
                 return response()->json($response);
             }
             // If not found locally, check Envato
-            $envatoResult = $this->checkEnvatoLicense($purchaseCode, $productSlug, $domain);
+            $envatoResult = $this->checkEnvatoLicense($purchaseCodeStr, $productSlugStr, $domainStr);
             if ($envatoResult['valid']) {
                 $response = [
                     'valid' => true,
@@ -163,7 +167,7 @@ class LicenseController extends Controller
                     'support_expires_at' => $envatoResult['support_expires_at'],
                     'license_expires_at' => $envatoResult['license_expires_at'],
                 ];
-                $this->logLicenseVerification(null, $domain, $request, $response, 'success');
+                $this->logLicenseVerification(null, $domainStr, $request, $response, 'success');
                 DB::commit();
 
                 return response()->json($response);
@@ -174,7 +178,7 @@ class LicenseController extends Controller
                 'reason' => 'license_not_found',
                 'message' => 'License not found in local database or Envato Market',
             ];
-            $this->logLicenseVerification(null, $domain, $request, $response, 'failed');
+            $this->logLicenseVerification(null, $domainStr, $request, $response, 'failed');
             DB::commit();
 
             return response()->json($response, 404);
@@ -285,7 +289,7 @@ class LicenseController extends Controller
             // Check if the purchase belongs to the correct product
             $envatoItemIdValue = data_get($envatoData, 'item.id');
             $envatoItemId = is_string($envatoItemIdValue) ? $envatoItemIdValue : (is_scalar($envatoItemIdValue) ? (string)$envatoItemIdValue : '');
-            if (! empty($product->envato_item_id) && $product->envato_item_id !== $envatoItemId) {
+            if ((string)$product->envato_item_id !== $envatoItemId) {
                 Log::warning('Envato item ID mismatch', [
                     'expected_item_id' => $product->envato_item_id,
                     'actual_item_id' => $envatoItemId,
@@ -454,8 +458,8 @@ class LicenseController extends Controller
      */
     private function generateIntegrationCode(Product $product): string
     {
-        $apiDomain = rtrim(env('APP_URL', config('app.url')), '/');
-        $verificationEndpoint = config('license.verification_endpoint', '/api/license/verify');
+        $apiDomain = rtrim(is_string(config('app.url')) ? config('app.url') : '', '/');
+        $verificationEndpoint = is_string(config('license.verification_endpoint')) ? config('license.verification_endpoint') : '/api/license/verify';
         $apiUrl = $apiDomain.'/'.ltrim($verificationEndpoint, '/');
 
         return "<?php

@@ -39,7 +39,7 @@ class AuthenticatedSessionController extends Controller
     public function create(): View
     {
         $fromInstall = $this->sanitizeInput(request()->get('from_install', false));
-        return view('auth.login', compact('fromInstall'));
+        return view('auth.login', ['fromInstall' => $fromInstall]);
     }
     /**
      * Handle an incoming authentication request with enhanced security.
@@ -154,7 +154,7 @@ class AuthenticatedSessionController extends Controller
         $email = $this->sanitizeInput($email);
         $testDomains = ['@example.com', '@test.com', '@localhost', '@demo.com'];
         foreach ($testDomains as $domain) {
-            if (str_contains($email, $domain)) {
+            if (str_contains(is_string($email) ? $email : '', $domain)) {
                 return true;
             }
         }

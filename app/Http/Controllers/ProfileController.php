@@ -59,7 +59,7 @@ class ProfileController extends Controller
      * // Access: GET /profile
      * // Returns: View with user profile data
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         try {
             // Rate limiting
@@ -116,7 +116,7 @@ class ProfileController extends Controller
      * // Access: GET /profile/edit
      * // Returns: View with profile editing form
      */
-    public function edit(Request $request): View
+    public function edit(Request $request): View|RedirectResponse
     {
         try {
             // Rate limiting
@@ -138,9 +138,9 @@ class ProfileController extends Controller
                 ]);
                 return redirect()->route('login');
             }
-            return view('user.profile.edit', [
-                'user' => $request->user(),
-            ]);
+            /** @var view-string $viewName */
+            $viewName = 'user.profile.edit';
+            return view($viewName, ['user' => $request->user()]);
         } catch (\Exception $e) {
             Log::error('Failed to load profile edit form', [
                 'error' => $e->getMessage(),

@@ -53,9 +53,7 @@ class EnsureEmailIsVerified
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            if (! $request) {
-                throw new \InvalidArgumentException('Request cannot be null');
-            }
+            // Request is validated by type hint
             $user = $request->user();
             // Check if user is authenticated
             if (! $user) {
@@ -63,9 +61,15 @@ class EnsureEmailIsVerified
             }
             // Check if user's email is verified
             if (! $this->isEmailVerified($user)) {
-                return $this->handleUnverifiedEmail($request);
+                $response = $this->handleUnverifiedEmail($request);
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                $typedResponse = $response;
+                return $typedResponse;
             }
-            return $next($request);
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         } catch (Exception $e) {
             Log::error('Email verification middleware failed: ' . $e->getMessage(), [
                 'request_url' => $request->fullUrl(),
@@ -90,7 +94,7 @@ class EnsureEmailIsVerified
     private function isEmailVerified($user): bool
     {
         try {
-            if (! $user || ! method_exists($user, 'hasVerifiedEmail')) {
+            if (! $user) {
                 return false;
             }
             return $user->hasVerifiedEmail();

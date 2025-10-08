@@ -69,7 +69,7 @@ class TicketController extends Controller
             $tickets = Ticket::with(['user', 'category', 'invoice.product'])->latest()->paginate(10);
             DB::commit();
 
-            return view('admin.tickets.index', compact('tickets'));
+            return view('admin.tickets.index', ['tickets' => $tickets]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Tickets listing failed', [
@@ -79,7 +79,7 @@ class TicketController extends Controller
 
             // Return empty results on error
             return view('admin.tickets.index', [
-                'tickets' => collect()->paginate(10),
+                'tickets' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
             ]);
         }
     }
@@ -108,7 +108,7 @@ class TicketController extends Controller
         $categories = TicketCategory::active()->ordered()->get();
         $products = Product::all();
 
-        return view('admin.tickets.create', compact('users', 'categories', 'products'));
+        return view('admin.tickets.create', ['users' => $users, 'categories' => $categories, 'products' => $products]);
     }
 
     /**
@@ -117,7 +117,7 @@ class TicketController extends Controller
      * Creates a new ticket with comprehensive validation including
      * optional invoice creation and proper error handling.
      *
-     * @param  TicketStoreRequest  $request  The validated request containing ticket data
+     * @param  TicketRequest  $request  The validated request containing ticket data
      *
      * @return RedirectResponse Redirect to tickets index or back with error
      *
@@ -162,7 +162,7 @@ class TicketController extends Controller
                 if ($invoiceProductId === 'custom' || empty($invoiceProductId)) {
                     $amount = $validated['invoice_amount'] ?? 0;
                     $duration = $validated['invoice_duration_days'] ?? 0;
-                    $dueDate = now()->addDays($duration)->toDateString();
+                    $dueDate = now()->addDays(is_numeric($duration) ? (int)$duration : 0)->toDateString();
                     $metadata = [];
                     if ($billingType !== 'one_time') {
                         if ($billingType === 'custom_recurring') {
@@ -194,7 +194,7 @@ class TicketController extends Controller
                     $amount = $request->input('invoice_amount') ?: $product->price;
                     $duration = $request->input('invoice_duration_days') ?: $product->duration_days ?: null;
                     $dueDate = $request->input('invoice_due_date')
-                        ?: ($duration ? now()->addDays($duration)->toDateString() : null);
+                        ?: ($duration ? now()->addDays(is_numeric($duration) ? (int)$duration : 0)->toDateString() : null);
                     $metadata = [];
                     if ($billingType !== 'one_time') {
                         $map = [
@@ -226,11 +226,9 @@ class TicketController extends Controller
                     'notes' => $request->input('invoice_notes') ?? null,
                     'currency' => config('app.currency', 'USD'),
                     'type' => ($billingType && $billingType !== 'one_time') ? 'recurring' : 'one_time',
-                    'metadata' => $metadata ?? null,
+                    'metadata' => $metadata,
                 ]);
-                if ($invoice) {
-                    $ticketData['invoice_id'] = $invoice->id;
-                }
+                $ticketData['invoice_id'] = $invoice->id;
             }
             Ticket::create($ticketData);
             DB::commit();
@@ -274,7 +272,7 @@ class TicketController extends Controller
     {
         $ticket->load(['user.licenses.product', 'replies.user', 'category', 'invoice.product']);
 
-        return view('admin.tickets.show', compact('ticket'));
+        return view('admin.tickets.show', ['ticket' => $ticket]);
     }
 
     /**
@@ -301,7 +299,7 @@ class TicketController extends Controller
     {
         $categories = TicketCategory::active()->ordered()->get();
 
-        return view('admin.tickets.edit', compact('ticket', 'categories'));
+        return view('admin.tickets.edit', ['ticket' => $ticket, 'categories' => $categories]);
     }
 
     /**
@@ -310,7 +308,7 @@ class TicketController extends Controller
      * Updates an existing ticket with comprehensive validation and
      * proper error handling.
      *
-     * @param  TicketUpdateRequest  $request  The validated request containing ticket data
+     * @param  TicketRequest  $request  The validated request containing ticket data
      * @param  Ticket  $ticket  The ticket to update
      *
      * @return RedirectResponse Redirect back with success or error message
@@ -401,7 +399,7 @@ class TicketController extends Controller
      * Creates a new ticket reply with comprehensive validation and
      * email notification to the user.
      *
-     * @param  TicketReplyRequest  $request  The validated request containing reply data
+     * @param  TicketRequest  $request  The validated request containing reply data
      * @param  Ticket  $ticket  The ticket to reply to
      *
      * @return RedirectResponse Redirect back with success or error message
@@ -470,7 +468,7 @@ class TicketController extends Controller
      * Updates the status of a ticket with comprehensive validation and
      * email notification to the user.
      *
-     * @param  TicketStatusUpdateRequest  $request  The validated request containing status data
+     * @param  TicketRequest  $request  The validated request containing status data
      * @param  Ticket  $ticket  The ticket to update
      *
      * @return RedirectResponse Redirect back with success or error message
@@ -493,7 +491,7 @@ class TicketController extends Controller
             DB::beginTransaction();
             $validated = $request->validated();
             $oldStatus = $ticket->status;
-            $ticket->status = $validated['status'];
+            $ticket->status = is_string($validated['status'] ?? null) ? $validated['status'] : 'open';
             $saved = $ticket->save();
             if (! $saved) {
                 DB::rollBack();
@@ -519,7 +517,8 @@ class TicketController extends Controller
             }
             DB::commit();
 
-            return back()->with('success', 'Ticket status updated to '.ucfirst($ticket->status));
+            $status = $ticket->status ?? 'open';
+            return back()->with('success', 'Ticket status updated to '.ucfirst($status));
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to update ticket status', [

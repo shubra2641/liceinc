@@ -63,7 +63,8 @@ class LicenseServerService
     {
         // Always use my-logos.com for central API
         $this->baseUrl = 'https://my-logos.com/api';
-        $this->timeout = config('license_server.timeout', 30);
+        $timeoutConfig = config('license_server.timeout', 30);
+        $this->timeout = is_numeric($timeoutConfig) ? (int)$timeoutConfig : 30;
     }
     /**
      * Get license server domain with enhanced validation.
@@ -83,10 +84,12 @@ class LicenseServerService
             // If domain is not set, extract from APP_URL
             if (! $domain || $domain === 'my-logos.com') {
                 $appUrl = config('app.url');
-                $parsedDomain = parse_url($appUrl, PHP_URL_HOST);
+                $appUrlString = is_string($appUrl) ? $appUrl : '';
+                $parsedDomain = parse_url($appUrlString, PHP_URL_HOST);
                 return $parsedDomain ?: 'localhost';
             }
-            return $this->sanitizeDomain($domain);
+            $domainString = is_string($domain) ? $domain : '';
+            return $this->sanitizeDomain($domainString);
         } catch (\Exception $e) {
             Log::error('Failed to get license server domain', [
                 'error' => $e->getMessage(),
@@ -118,12 +121,15 @@ class LicenseServerService
      * @param  string  $productSlug  The product slug identifier
      * @param  string|null  $domain  The domain to check for (optional)
      *
-     * @return array<string, mixed> Array containing update information or error details
+     * @return array<mixed, mixed> Array containing update information or error details
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
      *
      * @example
      * $updates = $licenseServer->checkUpdates('ABC123', '1.0.0', 'my-product', 'example.com');
+     */
+    /**
+     * @return array<mixed, mixed>
      */
     public function checkUpdates(
         string $licenseKey,
@@ -137,7 +143,7 @@ class LicenseServerService
             // Check cache first
             $cached = Cache::get($cacheKey);
             if ($cached) {
-                return $cached;
+                return is_array($cached) ? $cached : [];
             }
             $response = Http::timeout($this->timeout)
                 ->post("{$this->getBaseUrl()}/license/check-updates", [
@@ -149,10 +155,10 @@ class LicenseServerService
             if ($response->successful()) {
                 $data = $response->json();
                 // Validate response data
-                if ($this->validateUpdateResponse($data)) {
+                if (is_array($data) && $this->validateUpdateResponse($data)) {
                     // Cache successful response
                     Cache::put($cacheKey, $data, self::CACHE_DURATION_UPDATES);
-                    return $data;
+                    return $this->convertToTypedArray($data);
                 } else {
                     return $this->createErrorResponse(
                         'Invalid response format from license server',
@@ -182,12 +188,15 @@ class LicenseServerService
      * @param  string  $productSlug  The product slug identifier
      * @param  string|null  $domain  The domain to check for (optional)
      *
-     * @return array<string, mixed> Array containing version history or error details
+     * @return array<mixed, mixed> Array containing version history or error details
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
      *
      * @example
      * $history = $licenseServer->getVersionHistory('ABC123', 'my-product', 'example.com');
+     */
+    /**
+     * @return array<mixed, mixed>
      */
     public function getVersionHistory(string $licenseKey, string $productSlug, ?string $domain = null): array
     {
@@ -197,7 +206,7 @@ class LicenseServerService
             // Check cache first
             $cached = Cache::get($cacheKey);
             if ($cached) {
-                return $cached;
+                return is_array($cached) ? $cached : [];
             }
             $response = Http::timeout($this->timeout)
                 ->post("{$this->getBaseUrl()}/license/version-history", [
@@ -208,11 +217,14 @@ class LicenseServerService
             if ($response->successful()) {
                 $data = $response->json();
                 // Cache successful response
-                Cache::put($cacheKey, $data, self::CACHE_DURATION_HISTORY);
-                return $data;
+                if (is_array($data)) {
+                    Cache::put($cacheKey, $data, self::CACHE_DURATION_HISTORY);
+                    return $this->convertToTypedArray($data);
+                }
             } else {
                 return $this->createErrorResponse('Failed to get version history', 'SERVER_ERROR');
             }
+            return $this->createErrorResponse('Failed to get version history', 'SERVER_ERROR');
         } catch (\Exception $e) {
             Log::error('License server version history exception', [
                 'error' => $e->getMessage(),
@@ -232,12 +244,15 @@ class LicenseServerService
      * @param  string  $productSlug  The product slug identifier
      * @param  string  $currentVersion  The current version
      *
-     * @return array<string, mixed> Array containing update information or error details
+     * @return array<mixed, mixed> Array containing update information or error details
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
      *
      * @example
      * $updateInfo = $licenseServer->getUpdateInfo('my-product', '1.0.0');
+     */
+    /**
+     * @return array<mixed, mixed>
      */
     public function getUpdateInfo(string $productSlug, string $currentVersion): array
     {
@@ -247,7 +262,7 @@ class LicenseServerService
             // Check cache first
             $cached = Cache::get($cacheKey);
             if ($cached) {
-                return $cached;
+                return is_array($cached) ? $cached : [];
             }
             $url = $this->getBaseUrl() . '/license/update-info';
             $ch = curl_init();
@@ -281,7 +296,7 @@ class LicenseServerService
                 return $this->createErrorResponse('Network error: ' . $curlError, 'NETWORK_ERROR');
             }
             if ($httpCode === 200) {
-                $data = json_decode($responseBody, true);
+                $data = json_decode(is_string($responseBody) ? $responseBody : '', true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     Log::error('Invalid JSON response from update-info API', [
                         'response' => $responseBody,
@@ -289,11 +304,14 @@ class LicenseServerService
                     return $this->createErrorResponse('Invalid response from license server', 'INVALID_JSON');
                 }
                 // Cache successful response
-                Cache::put($cacheKey, $data, self::CACHE_DURATION_HISTORY);
-                return $data;
+                if (is_array($data)) {
+                    Cache::put($cacheKey, $data, self::CACHE_DURATION_HISTORY);
+                    return $this->convertToTypedArray($data);
+                }
             } else {
                 return $this->createErrorResponse('Failed to get update info', 'SERVER_ERROR');
             }
+            return $this->createErrorResponse('Failed to get update info', 'SERVER_ERROR');
         } catch (\Exception $e) {
             Log::error('License server update info exception', [
                 'error' => $e->getMessage(),
@@ -316,12 +334,15 @@ class LicenseServerService
      * @param  string  $productSlug  The product slug identifier
      * @param  string|null  $domain  The domain to check for (optional)
      *
-     * @return array<string, mixed> Array containing latest version information or error details
+     * @return array<mixed, mixed> Array containing latest version information or error details
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
      *
      * @example
      * $latest = $licenseServer->getLatestVersion('ABC123', 'my-product', 'example.com');
+     */
+    /**
+     * @return array<mixed, mixed>
      */
     public function getLatestVersion(string $licenseKey, string $productSlug, ?string $domain = null): array
     {
@@ -331,7 +352,7 @@ class LicenseServerService
             // Check cache first
             $cached = Cache::get($cacheKey);
             if ($cached) {
-                return $cached;
+                return is_array($cached) ? $cached : [];
             }
             $response = Http::timeout($this->timeout)
                 ->post("{$this->getBaseUrl()}/license/latest-version", [
@@ -342,11 +363,14 @@ class LicenseServerService
             if ($response->successful()) {
                 $data = $response->json();
                 // Cache successful response
-                Cache::put($cacheKey, $data, self::CACHE_DURATION_UPDATES);
-                return $data;
+                if (is_array($data)) {
+                    Cache::put($cacheKey, $data, self::CACHE_DURATION_UPDATES);
+                    return $this->convertToTypedArray($data);
+                }
             } else {
                 return $this->createErrorResponse('Failed to get latest version', 'SERVER_ERROR');
             }
+            return $this->createErrorResponse('Failed to get latest version', 'SERVER_ERROR');
         } catch (\Exception $e) {
             Log::error('License server latest version exception', [
                 'error' => $e->getMessage(),
@@ -368,7 +392,7 @@ class LicenseServerService
      * @param  string  $productSlug  The product slug identifier
      * @param  string|null  $domain  The domain to check for (optional)
      *
-     * @return array<string, mixed> Array containing download information or error details
+     * @return array<mixed, mixed> Array containing download information or error details
      *
      * @throws \InvalidArgumentException When invalid parameters are provided
      *
@@ -444,10 +468,13 @@ class LicenseServerService
      * Retrieves a list of available products from the license server with
      * comprehensive error handling and caching.
      *
-     * @return array<string, mixed> Array containing products information or error details
+     * @return array<mixed, mixed> Array containing products information or error details
      *
      * @example
      * $products = $licenseServer->getProducts();
+     */
+    /**
+     * @return array<mixed, mixed>
      */
     public function getProducts(): array
     {
@@ -456,7 +483,7 @@ class LicenseServerService
             // Check cache first
             $cached = Cache::get($cacheKey);
             if ($cached) {
-                return $cached;
+                return is_array($cached) ? $cached : [];
             }
             $url = $this->getBaseUrl() . '/license/products';
             // Use cURL directly for better control
@@ -486,7 +513,7 @@ class LicenseServerService
                 return $this->createErrorResponse('Network error: ' . $curlError, 'NETWORK_ERROR');
             }
             if ($httpCode === 200) {
-                $data = json_decode($responseBody, true);
+                $data = json_decode(is_string($responseBody) ? $responseBody : '', true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     Log::error('Invalid JSON response from products API', [
                         'response' => $responseBody,
@@ -494,11 +521,14 @@ class LicenseServerService
                     return $this->createErrorResponse('Invalid response from license server', 'INVALID_JSON');
                 }
                 // Cache successful response
-                Cache::put($cacheKey, $data, self::CACHE_DURATION_PRODUCTS);
-                return $data;
+                if (is_array($data)) {
+                    Cache::put($cacheKey, $data, self::CACHE_DURATION_PRODUCTS);
+                    return $this->convertToTypedArray($data);
+                }
             } else {
                 return $this->createErrorResponse('Failed to get products', 'SERVER_ERROR');
             }
+            return $this->createErrorResponse('Failed to get products', 'SERVER_ERROR');
         } catch (\Exception $e) {
             Log::error('License server products exception', [
                 'error' => $e->getMessage(),
@@ -684,7 +714,7 @@ class LicenseServerService
      * @return bool True if valid, false otherwise
      */
     /**
-     * @param array<string, mixed> $data
+     * @param array<mixed, mixed> $data
      */
     private function validateUpdateResponse(array $data): bool
     {
@@ -696,7 +726,7 @@ class LicenseServerService
      * @param  string  $message  The error message
      * @param  string  $errorCode  The error code
      *
-     * @return array<string, mixed> The error response array
+     * @return array<mixed, mixed> The error response array
      */
     private function createErrorResponse(string $message, string $errorCode): array
     {
@@ -705,6 +735,18 @@ class LicenseServerService
             'message' => $message,
             'error_code' => $errorCode,
         ];
+    }
+
+    /**
+     * Convert mixed array to typed array.
+     * @return array<mixed, mixed>
+     */
+    private function convertToTypedArray(mixed $data): array
+    {
+        if (!is_array($data)) {
+            return [];
+        }
+        return (array)$data;
     }
     /**
      * Sanitize input to prevent XSS attacks.
@@ -735,9 +777,10 @@ class LicenseServerService
      *
      * @return string The sanitized filename
      */
-    private function sanitizeFilename(string $filename): string
+    private function sanitizeFilename(string $filename): ?string
     {
-        return preg_replace('/[^a-zA-Z0-9._-]/', '', $filename);
+        $result = preg_replace('/[^a-zA-Z0-9._-]/', '', $filename);
+        return $result !== null ? $result : null;
     }
     /**
      * Hash data for cache keys.
@@ -748,7 +791,9 @@ class LicenseServerService
      */
     private function hashForCache(string $data): string
     {
-        return hash('sha256', $data . config('app.key'));
+        $appKey = config('app.key');
+        $keyString = is_string($appKey) ? $appKey : '';
+        return hash('sha256', $data . $keyString);
     }
     /**
      * Hash data for logging.
@@ -759,6 +804,8 @@ class LicenseServerService
      */
     private function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data . config('app.key')), 0, 8) . '...';
+        $appKey = config('app.key');
+        $keyString = is_string($appKey) ? $appKey : '';
+        return substr(hash('sha256', $data . $keyString), 0, 8) . '...';
     }
 }

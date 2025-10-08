@@ -55,7 +55,7 @@ class ProfileController extends Controller
         $settings = \App\Models\Setting::first();
         $hasApiConfig = $settings && $settings->envato_personal_token;
 
-        return view('admin.profile.edit', compact('user', 'hasApiConfig'));
+        return view('admin.profile.edit', ['user' => $user, 'hasApiConfig' => $hasApiConfig]);
     }
 
     /**
@@ -64,7 +64,7 @@ class ProfileController extends Controller
      * Updates user profile data with comprehensive validation and proper
      * email verification handling when email is changed.
      *
-     * @param  ProfileUpdateRequest  $request  The validated request containing profile data
+     * @param  ProfileAdvancedRequest  $request  The validated request containing profile data
      *
      * @return RedirectResponse Redirect to profile edit with success/error message
      *
@@ -128,7 +128,7 @@ class ProfileController extends Controller
      * Updates user password with comprehensive validation including
      * current password verification and strong password requirements.
      *
-     * @param  UpdatePasswordRequest  $request  The validated request containing password data
+     * @param  ProfileAdvancedRequest  $request  The validated request containing password data
      *
      * @return RedirectResponse Redirect to profile edit with success/error message
      *
@@ -153,7 +153,7 @@ class ProfileController extends Controller
             $user = $request->user();
             $validated = $request->validated();
             if ($user) {
-                $user->password = Hash::make($validated['password']);
+                $user->password = Hash::make(is_string($validated['password'] ?? null) ? $validated['password'] : '');
                 $user->save();
             }
             DB::commit();
@@ -213,14 +213,14 @@ class ProfileController extends Controller
                 $data = $response->json();
                 // Update user with Envato info
                 if ($user) {
-                    $user->envato_username = (is_array($data) && isset($data['username'])) ? $data['username'] : null;
-                    $user->envato_id = (is_array($data) && isset($data['id'])) ? $data['id'] : null;
+                    $user->envato_username = (is_array($data) && isset($data['username']) && is_string($data['username'])) ? $data['username'] : null;
+                    $user->envato_id = (is_array($data) && isset($data['id']) && is_string($data['id'])) ? $data['id'] : null;
                     $user->save();
                 }
                 DB::commit();
 
                 return Redirect::route('admin.profile.edit')
-                    ->with('success', 'Successfully connected to Envato account: '.((is_array($data) && isset($data['username'])) ? $data['username'] : 'Unknown'));
+                    ->with('success', 'Successfully connected to Envato account: '.((is_array($data) && isset($data['username']) && is_string($data['username'])) ? $data['username'] : 'Unknown'));
             } else {
                 DB::rollBack();
 

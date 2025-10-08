@@ -33,7 +33,10 @@ class PasswordController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $validated = $this->validatePasswordUpdate($request);
-        $this->updateUserPassword($request->user(), $validated['password']);
+        $user = $request->user();
+        if ($user) {
+            $this->updateUserPassword($user, is_string($validated['password']) ? $validated['password'] : '');
+        }
         return back()->with('success', 'password-updated');
     }
     /**
@@ -50,10 +53,14 @@ class PasswordController extends Controller
      */
     private function validatePasswordUpdate(Request $request): array
     {
-        return $request->validateWithBag('updatePassword', [
+        $validated = $request->validateWithBag('updatePassword', [
             'current_password' => ['required', 'current_password'],
             'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
+        
+        /** @var array<string, mixed> $result */
+        $result = $validated;
+        return $result;
     }
     /**
      * Update the user's password.

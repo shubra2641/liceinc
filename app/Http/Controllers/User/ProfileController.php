@@ -167,7 +167,7 @@ class ProfileController extends Controller
             $intendedUrl = session('url.intended');
             if ($intendedUrl) {
                 session()->forget('url.intended');
-                return redirect($intendedUrl)->with('success', 'profile-updated');
+                return redirect(is_string($intendedUrl) ? $intendedUrl : '')->with('success', 'profile-updated');
             }
             return Redirect::route('profile.edit')->with('success', 'profile-updated');
         } catch (\Exception $e) {

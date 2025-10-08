@@ -1,0 +1,28 @@
+<?php
+
+namespace Illuminate\Database\Eloquent;
+
+/**
+ * @template TModel of \Illuminate\Database\Eloquent\Model
+ */
+class Builder
+{
+    /**
+     * @return TModel
+     */
+    public function firstOrFail();
+    
+    /**
+     * @return TModel|null
+     */
+    public function first();
+}
+
+/**
+ * @template TModel of \Illuminate\Database\Eloquent\Model
+ * @extends \Illuminate\Support\Collection<int, TModel>
+ */
+class Collection extends \Illuminate\Support\Collection
+{
+}
+

@@ -48,7 +48,12 @@ class SecureFileHelper
     public static function isDirectory(string $path): bool
     {
         try {
-            return is_dir($path);
+            if (!Storage::disk('local')->exists($path)) {
+                return false;
+            }
+            // Use is_dir() as fallback since getMetadata() is not available
+            $fullPath = Storage::disk('local')->path($path);
+            return is_dir($fullPath);
         } catch (\Exception $e) {
             Log::error('Failed to check directory: ' . $e->getMessage());
             return false;
@@ -127,6 +132,9 @@ class SecureFileHelper
      */
     public static function closeFile(mixed $handle): bool
     {
+        if (!is_resource($handle)) {
+            return false;
+        }
         return fclose($handle);
     }
 

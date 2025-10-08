@@ -99,7 +99,7 @@ class ProductCategory extends Model
         'allow_subcategories' => 'boolean',
     ];
     /**
-     * @return HasMany<Product, ProductCategory>
+     * @return HasMany<Product, $this>
      */
     public function products(): HasMany
     {
@@ -109,7 +109,7 @@ class ProductCategory extends Model
      * Get the parent category.
      */
     /**
-     * @return BelongsTo<ProductCategory, ProductCategory>
+     * @return BelongsTo<ProductCategory, $this>
      */
     public function parent(): BelongsTo
     {
@@ -119,7 +119,7 @@ class ProductCategory extends Model
      * Get the child categories.
      */
     /**
-     * @return HasMany<ProductCategory, ProductCategory>
+     * @return HasMany<ProductCategory, $this>
      */
     public function children(): HasMany
     {
@@ -172,14 +172,16 @@ class ProductCategory extends Model
     protected static function boot()
     {
         parent::boot();
-        static::creating(function ($category) {
+        static::creating(function (ProductCategory $category) {
             if (empty($category->slug)) {
-                $category->slug = Str::slug($category->name);
+                $categoryName = $category->name ?? '';
+                $category->slug = Str::slug($categoryName);
             }
         });
-        static::updating(function ($category) {
+        static::updating(function (ProductCategory $category) {
             if ($category->isDirty('name')) {
-                $category->slug = Str::slug($category->name);
+                $categoryName = $category->name ?? '';
+                $category->slug = Str::slug($categoryName);
             }
         });
     }

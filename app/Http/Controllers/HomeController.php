@@ -56,7 +56,7 @@ class HomeController extends Controller
             // Get system statistics with enhanced security
             $stats = $this->getSystemStatistics();
             DB::commit();
-            return view('welcome', compact('products', 'stats'));
+            return view('welcome', ['products' => $products, 'stats' => $stats]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to display home page', [

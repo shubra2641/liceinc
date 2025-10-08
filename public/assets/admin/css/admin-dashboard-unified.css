@@ -392,7 +392,7 @@ body {
 }
 
 /* Topbar */
-.admin-topbar {
+.admin-topbar1 {
   position: sticky !important;
   top: 0 !important;
   right: 0 !important;
@@ -404,8 +404,7 @@ body {
   height: var(--topbar-height) !important;
   margin: 0 !important;
   padding: 0 var(--spacing-lg) !important;
-  border-bottom: 1px solid #e5e7eb !important;
-  background: white !important;
+  border-bottom: 1px solid !important;
   visibility: visible !important;
   opacity: 1 !important;
   box-shadow: var(--shadow-sm) !important;

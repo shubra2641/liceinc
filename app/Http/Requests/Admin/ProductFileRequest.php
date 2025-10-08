@@ -44,7 +44,7 @@ class ProductFileRequest extends FormRequest
             'product_id' => [
                 'required',
                 'integer',
-                'exists:products, id',
+                'exists:products,id',
             ],
             'name' => [
                 'required',
@@ -213,16 +213,16 @@ class ProductFileRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'name' => $this->sanitizeInput($this->name),
-            'description' => $this->description ? $this->sanitizeInput($this->description) : null,
-            'release_notes' => $this->release_notes
-                ? $this->sanitizeInput($this->release_notes)
+            'name' => $this->sanitizeInput($this->input('name')),
+            'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
+            'release_notes' => $this->input('release_notes')
+                ? $this->sanitizeInput($this->input('release_notes'))
                 : null,
-            'changelog' => $this->changelog ? $this->sanitizeInput($this->changelog) : null,
-            'compatibility' => $this->compatibility ? $this->sanitizeInput($this->compatibility) : null,
-            'requirements' => $this->requirements ? $this->sanitizeInput($this->requirements) : null,
-            'installation_instructions' => $this->installation_instructions
-                ? $this->sanitizeInput($this->installation_instructions)
+            'changelog' => $this->input('changelog') ? $this->sanitizeInput($this->input('changelog')) : null,
+            'compatibility' => $this->input('compatibility') ? $this->sanitizeInput($this->input('compatibility')) : null,
+            'requirements' => $this->input('requirements') ? $this->sanitizeInput($this->input('requirements')) : null,
+            'installation_instructions' => $this->input('installation_instructions')
+                ? $this->sanitizeInput($this->input('installation_instructions'))
                 : null,
         ]);
         // Handle checkbox values
@@ -241,15 +241,20 @@ class ProductFileRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

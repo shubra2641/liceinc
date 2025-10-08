@@ -38,13 +38,14 @@ class ProductUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $updateId = $this->route('product_update') ? $this->route('product_update')->id : null;
+        $update = $this->route('product_update');
+        $updateId = $update && is_object($update) && property_exists($update, 'id') ? $update->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
             'product_id' => [
                 'required',
                 'integer',
-                'exists:products, id',
+                'exists:products,id',
             ],
             'version' => [
                 'required',
@@ -53,10 +54,10 @@ class ProductUpdateRequest extends FormRequest
                 'regex:/^[0-9]+\.[0-9]+\.[0-9]+$/',
                 $isUpdate
                     ? Rule::unique('product_updates', 'version')
-                        ->where('product_id', $this->product_id)
+                        ->where('product_id', $this->getProductId())
                         ->ignore($updateId)
                     : Rule::unique('product_updates', 'version')
-                        ->where('product_id', $this->product_id),
+                        ->where('product_id', $this->getProductId()),
             ],
             'title' => [
                 'required',
@@ -173,10 +174,10 @@ class ProductUpdateRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'title' => $this->sanitizeInput($this->title),
-            'description' => $this->description ? $this->sanitizeInput($this->description) : null,
-            'changelog' => $this->changelog ? $this->sanitizeInput($this->changelog) : null,
-            'release_notes' => $this->release_notes ? $this->sanitizeInput($this->release_notes) : null,
+            'title' => $this->sanitizeInput($this->input('title')),
+            'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
+            'changelog' => $this->input('changelog') ? $this->sanitizeInput($this->input('changelog')) : null,
+            'release_notes' => $this->input('release_notes') ? $this->sanitizeInput($this->input('release_notes')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -192,15 +193,31 @@ class ProductUpdateRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+    }
+    
+    /**
+     * Get the product ID safely.
+     *
+     * @return int|null
+     */
+    private function getProductId(): ?int
+    {
+        $productId = $this->input('product_id');
+        return is_numeric($productId) ? (int) $productId : null;
     }
 }

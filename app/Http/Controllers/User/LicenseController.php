@@ -41,7 +41,7 @@ class LicenseController extends Controller
      * // Access via GET /user/licenses
      * // Returns paginated list of user's licenses and invoices
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         try {
             // Validate request and user authentication
@@ -60,7 +60,7 @@ class LicenseController extends Controller
             // Get user invoices with product and license information
             $invoices = $this->getUserInvoices($user);
             DB::commit();
-            return view('user.licenses.index', compact('licenses', 'invoices'));
+            return view('user.licenses.index', ['licenses' => $licenses, 'invoices' => $invoices]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to display user licenses', [
@@ -103,7 +103,7 @@ class LicenseController extends Controller
             // Get license with related data
             $license = $this->getUserLicense($user, $id);
             DB::commit();
-            return view('user.licenses.show', compact('license'));
+            return view('user.licenses.show', ['license' => $license]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to display license details', [
@@ -144,13 +144,16 @@ class LicenseController extends Controller
     private function getUserLicenses($user)
     {
         try {
-            return $user->licenses()
-                ->with('product')
-                ->latest()
-                ->paginate(10);
+            if ($user instanceof \App\Models\User) {
+                return $user->licenses()
+                    ->with('product')
+                    ->latest()
+                    ->paginate(10);
+            }
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         } catch (\Exception $e) {
             Log::error('Failed to retrieve user licenses', [
-                'user_id' => $user->id ?? 'unknown',
+                'user_id' => ($user instanceof \App\Models\User && isset($user->id)) ? $user->id : 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -169,13 +172,16 @@ class LicenseController extends Controller
     private function getUserInvoices($user)
     {
         try {
-            return $user->invoices()
-                ->with(['product', 'license'])
-                ->latest()
-                ->paginate(10);
+            if ($user instanceof \App\Models\User) {
+                return $user->invoices()
+                    ->with(['product', 'license'])
+                    ->latest()
+                    ->paginate(10);
+            }
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         } catch (\Exception $e) {
             Log::error('Failed to retrieve user invoices', [
-                'user_id' => $user->id ?? 'unknown',
+                'user_id' => ($user instanceof \App\Models\User && isset($user->id)) ? $user->id : 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -195,13 +201,15 @@ class LicenseController extends Controller
     private function getUserLicense($user, int $id): License
     {
         try {
-            $license = $user->licenses()
-                ->with(['product', 'domains'])
-                ->findOrFail($id);
-            return $license;
+            if ($user instanceof \App\Models\User) {
+                return $user->licenses()
+                    ->with(['product', 'domains'])
+                    ->findOrFail($id);
+            }
+            throw new \Exception('User not found');
         } catch (\Exception $e) {
             Log::error('Failed to retrieve user license', [
-                'user_id' => $user->id ?? 'unknown',
+                'user_id' => ($user instanceof \App\Models\User && isset($user->id)) ? $user->id : 'unknown',
                 'license_id' => $id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

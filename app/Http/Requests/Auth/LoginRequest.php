@@ -107,13 +107,13 @@ class LoginRequest extends FormRequest
     /**
      * Sanitize email input with validation.
      *
-     * @param  string|null  $email  The email to sanitize
+     * @param  mixed  $email  The email to sanitize
      *
      * @return string|null The sanitized email
      */
-    private function sanitizeEmail(?string $email): ?string
+    private function sanitizeEmail(mixed $email): ?string
     {
-        if ($email === null) {
+        if ($email === null || !is_string($email)) {
             return null;
         }
         // Trim and convert to lowercase for consistency

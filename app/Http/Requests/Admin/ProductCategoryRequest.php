@@ -39,7 +39,8 @@ class ProductCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        $categoryId = $this->route('product_category') ? $this->route('product_category')->id : null;
+        $category = $this->route('product_category');
+        $categoryId = $category && is_object($category) && property_exists($category, 'id') ? $category->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
             'name' => [
@@ -63,7 +64,7 @@ class ProductCategoryRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:1000',
-                'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
+                'regex:/^[\p{L}\p{N}\p{P}\p{Z}]+$/u',
             ],
             'image' => [
                 'nullable',
@@ -83,26 +84,26 @@ class ProductCategoryRequest extends FormRequest
             ],
             'parent_id' => [
                 'nullable',
-                'exists:product_categories, id',
-                'not_in:' . ($categoryId ?? ''),
+                'exists:product_categories,id',
+                'not_in:' . (is_string($categoryId) ? $categoryId : ''),
             ],
             'meta_title' => [
                 'nullable',
                 'string',
                 'max:255',
-                'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
+                'regex:/^[\p{L}\p{N}\p{P}\p{Z}]+$/u',
             ],
             'meta_keywords' => [
                 'nullable',
                 'string',
                 'max:500',
-                'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
+                'regex:/^[\p{L}\p{N}\p{P}\p{Z}]+$/u',
             ],
             'meta_description' => [
                 'nullable',
                 'string',
                 'max:500',
-                'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
+                'regex:/^[\p{L}\p{N}\p{P}\p{Z}]+$/u',
             ],
             'color' => [
                 'nullable',
@@ -195,17 +196,18 @@ class ProductCategoryRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'name' => $this->sanitizeInput($this->name),
-            'description' => $this->description ? $this->sanitizeInput($this->description) : null,
-            'meta_title' => $this->meta_title ? $this->sanitizeInput($this->meta_title) : null,
-            'meta_keywords' => $this->meta_keywords ? $this->sanitizeInput($this->meta_keywords) : null,
-            'meta_description' => $this->meta_description ? $this->sanitizeInput($this->meta_description) : null,
-            'icon' => $this->icon ? $this->sanitizeInput($this->icon) : null,
+            'name' => $this->sanitizeInput($this->input('name')),
+            'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
+            'meta_title' => $this->input('meta_title') ? $this->sanitizeInput($this->input('meta_title')) : null,
+            'meta_keywords' => $this->input('meta_keywords') ? $this->sanitizeInput($this->input('meta_keywords')) : null,
+            'meta_description' => $this->input('meta_description') ? $this->sanitizeInput($this->input('meta_description')) : null,
+            'icon' => $this->input('icon') ? $this->sanitizeInput($this->input('icon')) : null,
         ]);
         // Auto-generate slug if not provided
-        if (! $this->slug && $this->name) {
+        $name = $this->input('name');
+        if (! $this->input('slug') && $name && is_string($name)) {
             $this->merge([
-                'slug' => Str::slug($this->name),
+                'slug' => Str::slug($name),
             ]);
         }
         // Handle checkbox values
@@ -219,15 +221,20 @@ class ProductCategoryRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

@@ -13,7 +13,7 @@ class WebhookLogFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<WebhookLog>
      */
     protected $model = WebhookLog::class;
 

@@ -121,7 +121,7 @@ class DashboardController extends Controller
             // Read maintenance mode from cached settings. If true -> site is in maintenance (Offline)
             $isMaintenance = Setting::get('maintenance_mode', false);
             DB::commit();
-            return view('admin.dashboard', compact('stats', 'latestTickets', 'latestLicenses', 'isMaintenance'));
+            return view('admin.dashboard', ['stats' => $stats, 'latestTickets' => $latestTickets, 'latestLicenses' => $latestLicenses, 'isMaintenance' => $isMaintenance]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Dashboard data loading failed', [
@@ -150,7 +150,7 @@ class DashboardController extends Controller
                 'api_errors_this_month' => 0,
             ];
             $isMaintenance = Setting::get('maintenance_mode', false);
-            return view('admin.dashboard', compact('stats', 'isMaintenance'));
+            return view('admin.dashboard', ['stats' => $stats, 'isMaintenance' => $isMaintenance]);
         }
     }
     /**
@@ -278,8 +278,9 @@ class DashboardController extends Controller
                 'year.min' => 'Year must be at least 2020.',
                 'year.max' => 'Year cannot exceed 2030.',
             ]);
-            $period = $this->sanitizeInput($validated['period'] ?? 'monthly');
-            $year = $validated['year'] ?? (int)date('Y');
+            $validatedArray = is_array($validated) ? $validated : [];
+            $period = $this->sanitizeInput($validatedArray['period'] ?? 'monthly');
+            $year = isset($validatedArray['year']) && is_numeric($validatedArray['year']) ? (int)$validatedArray['year'] : (int)date('Y');
             if ($period === 'monthly') {
                 $data = [];
                 $labels = [];
@@ -311,8 +312,8 @@ class DashboardController extends Controller
                 $data = [];
                 $labels = [];
                 for ($y = $currentYear - 4; $y <= $currentYear; $y++) {
-                    $startDate = Carbon::create($y, 1, 1)?->startOfYear();
-                    $endDate = Carbon::create($y, 12, 31)?->endOfYear();
+                    $startDate = Carbon::create((int)$y, 1, 1)?->startOfYear();
+                    $endDate = Carbon::create((int)$y, 12, 31)?->endOfYear();
                     $yearlyRevenue = License::join('products', 'licenses.product_id', '=', 'products.id')
                         ->whereBetween('licenses.created_at', [$startDate, $endDate])
                         ->sum('products.price');
@@ -590,8 +591,9 @@ class DashboardController extends Controller
                 'days.min' => 'Days must be at least 1.',
                 'days.max' => 'Days cannot exceed 30.',
             ]);
-            $period = $this->sanitizeInput($validated['period'] ?? 'daily');
-            $days = $validated['days'] ?? 7;
+            $validatedArray = is_array($validated) ? $validated : [];
+            $period = $this->sanitizeInput($validatedArray['period'] ?? 'daily');
+            $days = isset($validatedArray['days']) && is_numeric($validatedArray['days']) ? (int)$validatedArray['days'] : 7;
             $data = [];
             $labels = [];
             $successData = [];

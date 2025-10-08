@@ -50,7 +50,7 @@ class UpdatePackageService
             // Validate input parameters
             $this->validatePackagePath($packagePath);
             DB::beginTransaction();
-            $tempDir = storage_path('app/temp/update_' . time());
+            $tempDir = storage_path('app/temp/update_' . (string) time());
             // Create temp directory with security validation
             if (! SecureFileHelper::isDirectory($tempDir)) {
                 if (! mkdir($tempDir, 0755, true)) {
@@ -300,7 +300,7 @@ class UpdatePackageService
     private function extractPackage(string $packagePath): ?string
     {
         try {
-            $tempDir = storage_path('app/temp/update_' . time());
+            $tempDir = storage_path('app/temp/update_' . (string) time());
             if (! SecureFileHelper::isDirectory($tempDir)) {
                 if (! mkdir($tempDir, 0755, true)) {
                     throw new \Exception('Failed to create temporary directory');
@@ -402,7 +402,10 @@ class UpdatePackageService
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception('Invalid JSON in configuration file: ' . json_last_error_msg());
             }
-            return $config ?: null;
+            $arrayResult = is_array($config) ? $config : [];
+            /** @var array<string, mixed> $typedResult */
+            $typedResult = $arrayResult;
+            return $typedResult;
         } catch (\Exception $e) {
             Log::error('Failed to read update configuration', [
                 'extract_path' => $extractPath,
@@ -439,8 +442,10 @@ class UpdatePackageService
                 \RecursiveIteratorIterator::LEAVES_ONLY,
             );
             foreach ($files as $file) {
-                if (! $file->isDir()) {
-                    $relativePath = substr($file->getRealPath(), strlen($filesDir) + 1);
+                if (is_object($file) && method_exists($file, 'isDir') && !$file->isDir()) {
+                    $filePath = method_exists($file, 'getRealPath') ? $file->getRealPath() : '';
+                    $filePathString = is_string($filePath) ? $filePath : '';
+                    $relativePath = substr($filePathString, strlen($filesDir) + 1);
                     $targetPath = base_path($relativePath);
                     // Create backup of existing file
                     if (SecureFileHelper::fileExists($targetPath)) {
@@ -458,16 +463,18 @@ class UpdatePackageService
                     }
                     // Create directory if it doesn't exist
                     $targetDir = SecureFileHelper::getDirectoryName($targetPath);
-                    if (! Storage::disk('local')->exists($targetDir)) {
+                    if (!Storage::disk('local')->exists($targetDir)) {
                         Storage::disk('local')->makeDirectory($targetDir);
                     }
                     // Copy file
-                    if (! copy($file->getRealPath(), $targetPath)) {
+                    $sourcePath = method_exists($file, 'getRealPath') ? $file->getRealPath() : '';
+                    $sourcePathString = is_string($sourcePath) ? $sourcePath : '';
+                    if (!copy($sourcePathString, $targetPath)) {
                         throw new \Exception("Failed to copy file: {$relativePath}");
                     }
                 }
             }
-            return $processedFiles;
+            return ['processed_files' => $processedFiles];
         } catch (\Exception $e) {
             Log::error('Failed to process file updates', [
                 'extract_path' => $extractPath,
@@ -556,11 +563,11 @@ class UpdatePackageService
         try {
             $versionFile = $extractPath . '/version.json';
             if (Storage::disk('local')->exists($versionFile)) {
-                if (! is_readable($versionFile)) {
+                if (! is_readable(storage_path('app/' . $versionFile))) {
                     throw new \Exception('Version file is not readable');
                 }
                 $versionContent = Storage::disk('local')->get($versionFile);
-                if ($versionContent === false) {
+                if (!$versionContent) {
                     throw new \Exception('Failed to read version file');
                 }
                 $versionData = json_decode($versionContent, true);
@@ -575,7 +582,8 @@ class UpdatePackageService
                 }
                 $versionResult['success'] = true;
                 $versionResult['message'] = 'Version information updated';
-                $versionResult['version'] = $versionData['current_version'] ?? null;
+                $currentVersion = is_array($versionData) && isset($versionData['current_version']) ? $versionData['current_version'] : null;
+                $versionResult['version'] = $currentVersion;
             } else {
                 $versionResult['message'] = 'No version file found';
             }
@@ -655,7 +663,8 @@ class UpdatePackageService
      * @throws \Exception When file installation fails
      */
     /**
-     * @param array<string, mixed> $steps
+     * @param array<string, mixed> &$steps
+     * @param int &$filesInstalled
      */
     private function installFiles(string $sourceDir, string $targetDir, array &$steps, int &$filesInstalled): void
     {
@@ -668,15 +677,17 @@ class UpdatePackageService
                 \RecursiveIteratorIterator::SELF_FIRST,
             );
             foreach ($iterator as $item) {
-                $sourcePath = str_replace('\\', '/', $item->getPathname());
+                $itemPath = is_object($item) && method_exists($item, 'getPathname') ? $item->getPathname() : '';
+                $itemPathString = is_string($itemPath) ? $itemPath : '';
+                $sourcePath = str_replace('\\', '/', $itemPathString);
                 $relativePath = substr($sourcePath, strlen($sourceDir) + 1);
                 $targetPath = $targetDir . '/' . $relativePath;
-                if ($item->isDir()) {
-                    if (! SecureFileHelper::isDirectory($targetPath)) {
-                        if (! mkdir($targetPath, 0755, true)) {
+                if (is_object($item) && method_exists($item, 'isDir') && $item->isDir()) {
+                    if (!SecureFileHelper::isDirectory($targetPath)) {
+                        if (!mkdir($targetPath, 0755, true)) {
                             throw new \Exception("Failed to create directory: {$relativePath}");
                         }
-                        $steps[] = "Created directory: {$relativePath}";
+                        $steps["Created directory: {$relativePath}"] = true;
                     }
                 } else {
                     // Create backup of existing file
@@ -695,7 +706,7 @@ class UpdatePackageService
                         throw new \Exception("Failed to copy file: {$relativePath}");
                     }
                     $filesInstalled++;
-                    $steps[] = "Installed file: {$relativePath}";
+                    $steps["Installed file: {$relativePath}"] = true;
                 }
             }
         } catch (\Exception $e) {
@@ -721,7 +732,8 @@ class UpdatePackageService
             if (! SecureFileHelper::isDirectory($dir)) {
                 return;
             }
-            $files = array_diff(scandir($dir), ['.', '..']);
+            $scandirResult = scandir($dir);
+            $files = is_array($scandirResult) ? array_diff($scandirResult, ['.', '..']) : [];
             foreach ($files as $file) {
                 $path = $dir . '/' . $file;
                 if (SecureFileHelper::isDirectory($path)) {

@@ -3,19 +3,11 @@
 /**
  * Navigation Helper Functions with enhanced security.
  *
- * This     /**
-     * Generate breadcrumbs for the current route with enhanced security.
-     *
-     * Creates a breadcrumb navigation structur    /**
-     * Get available languages from the lang directory with enhanced security.
-     *
-     * Scans the language directory and returns available languages with proper
-     * error handling and security measures.
-     *
-     * @return array Array of language information with code, name, flag, and native name
-     *
-     * @version 1.0.6
-     */
+ * This helper provides navigation utilities with proper security measures
+ * and input validation for route checking and breadcrumb generation.
+ *
+ * @version 1.0.6
+ */
 
 use App\Helpers\SecureFileHelper;
 

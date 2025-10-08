@@ -64,7 +64,7 @@ class ProgrammingLanguageController extends Controller
      * Retrieves license template content for a specific programming language
      * with proper file validation and error handling.
      *
-     * @param  Request  $request  The HTTP request containing type parameter
+     * @param  \Illuminate\Http\Request  $request  The HTTP request containing type parameter
      * @param  string  $language  The programming language slug
      *
      * @return JsonResponse JSON response with file content or error
@@ -73,7 +73,7 @@ class ProgrammingLanguageController extends Controller
      *
      * @version 1.0.6
      */
-    public function getLicenseFileContent(Request $request, string $language): JsonResponse
+    public function getLicenseFileContent(\Illuminate\Http\Request $request, string $language): JsonResponse
     {
         try {
             $type = $request->get('type', 'default');
@@ -85,7 +85,7 @@ class ProgrammingLanguageController extends Controller
                 if (! empty($files)) {
                     $file = $files[0];
                     if (file_exists($file)) {
-                        $content = Storage::disk('local')->get($file);
+                        $content = \Illuminate\Support\Facades\Storage::disk('local')->get($file);
                     } else {
                         return response()->json([
                             'success' => false,
@@ -154,7 +154,7 @@ class ProgrammingLanguageController extends Controller
      * Creates a new programming language with comprehensive validation,
      * automatic slug generation, and proper error handling.
      *
-     * @param  ProgrammingLanguageStoreRequest  $request  The validated request containing language data
+     * @param  ProgrammingLanguageRequest  $request  The validated request containing language data
      *
      * @return RedirectResponse Redirect to languages list with success message
      *
@@ -167,7 +167,7 @@ class ProgrammingLanguageController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug'] ?? Str::slug($validated['name']);
+            $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
             ProgrammingLanguage::create($validated);
             DB::commit();
 
@@ -204,7 +204,7 @@ class ProgrammingLanguageController extends Controller
     {
         $availableTemplates = ProgrammingLanguage::getAvailableTemplateFiles();
 
-        return view('admin.programming-languages.show', compact('programming_language', 'availableTemplates'));
+        return view('admin.programming-languages.show', ['programming_language' => $programming_language, 'availableTemplates' => $availableTemplates]);
     }
 
     /**
@@ -221,7 +221,7 @@ class ProgrammingLanguageController extends Controller
      */
     public function edit(ProgrammingLanguage $programming_language): View
     {
-        return view('admin.programming-languages.edit', compact('programming_language'));
+        return view('admin.programming-languages.edit', ['programming_language' => $programming_language]);
     }
 
     /**
@@ -230,7 +230,7 @@ class ProgrammingLanguageController extends Controller
      * Updates an existing programming language with comprehensive validation,
      * automatic slug generation, and proper error handling.
      *
-     * @param  ProgrammingLanguageUpdateRequest  $request  The validated request containing updated language data
+     * @param  ProgrammingLanguageRequest  $request  The validated request containing updated language data
      * @param  ProgrammingLanguage  $programming_language  The programming language to update
      *
      * @return RedirectResponse Redirect to languages list with success message
@@ -246,7 +246,7 @@ class ProgrammingLanguageController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug'] ?? Str::slug($validated['name']);
+            $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
             $programming_language->update($validated);
             DB::commit();
 
@@ -372,7 +372,7 @@ class ProgrammingLanguageController extends Controller
             'exists' => $templateExists,
             'path' => $templatePath,
             'size' => $templateExists ? filesize($templatePath) : 0,
-            'last_modified' => $templateExists ? date('Y-m-d H:i:s', filemtime($templatePath)) : null,
+            'last_modified' => $templateExists ? date('Y-m-d H:i:s', (int)filemtime($templatePath)) : null,
         ];
 
         return response()->json($templateInfo);
@@ -401,7 +401,7 @@ class ProgrammingLanguageController extends Controller
                         'name' => $filename,
                         'path' => $file,
                         'size' => filesize($file),
-                        'last_modified' => date('Y-m-d H:i:s', filemtime($file)),
+                        'last_modified' => date('Y-m-d H:i:s', (int)filemtime($file)),
                     ];
                 }
             }
@@ -427,7 +427,7 @@ class ProgrammingLanguageController extends Controller
             $validationResults = [];
             foreach ($availableTemplates as $templateName => $templateInfo) {
                 $templatePath = (is_array($templateInfo) && isset($templateInfo['file_path'])) ? $templateInfo['file_path'] : '';
-                $content = file_get_contents($templatePath);
+                $content = file_get_contents(is_string($templatePath) ? $templatePath : '');
                 $result = [
                     'template' => $templateName,
                     'file_path' => $templatePath,
@@ -444,23 +444,23 @@ class ProgrammingLanguageController extends Controller
                     '{PRODUCT_VERSION}',
                 ];
                 foreach ($requiredPlaceholders as $placeholder) {
-                    if (strpos($content, $placeholder) === false) {
+                    if ($content !== false && strpos($content, $placeholder) === false) {
                         $result['warnings'][] = "Missing placeholder: {$placeholder}";
                     }
                 }
                 // Basic syntax validation for PHP templates
-                if (pathinfo($templatePath, PATHINFO_EXTENSION) === 'php') {
-                    $syntaxCheck = $this->validatePHPSyntax($content);
+                if (pathinfo(is_string($templatePath) ? $templatePath : '', PATHINFO_EXTENSION) === 'php') {
+                    $syntaxCheck = $content !== false ? $this->validatePHPSyntax($content) : false;
                     if (! $syntaxCheck) {
                         $result['is_valid'] = false;
                         $result['errors'][] = 'PHP syntax error detected';
                     }
                 }
                 // Check file permissions
-                if (! is_readable($templatePath)) {
+                if (! is_readable(is_string($templatePath) ? $templatePath : '')) {
                     $result['warnings'][] = 'File is not readable';
                 }
-                if (! is_writable($templatePath)) {
+                if (! is_writable(is_string($templatePath) ? $templatePath : '')) {
                     $result['warnings'][] = 'File is not writable';
                 }
                 $validationResults[] = $result;
@@ -492,8 +492,9 @@ class ProgrammingLanguageController extends Controller
 
     /**
      * Validate PHP syntax.
+     * @return array<string, mixed>
      */
-    private function validatePHPSyntax(string $code): bool
+    private function validatePHPSyntax(string $code): array
     {
         // Create a temporary file for syntax checking
         $tempFile = tempnam(sys_get_temp_dir(), 'php_syntax_check');
@@ -523,7 +524,7 @@ class ProgrammingLanguageController extends Controller
      * Uploads a template file for a specific programming language
      * with proper file validation and security measures.
      *
-     * @param  ProgrammingLanguageTemplateRequest  $request  The validated request containing template file
+     * @param  ProgrammingLanguageAdvancedRequest  $request  The validated request containing template file
      * @param  ProgrammingLanguage  $programming_language  The programming language to upload template for
      *
      * @return JsonResponse JSON response with upload result
@@ -533,7 +534,7 @@ class ProgrammingLanguageController extends Controller
      * @version 1.0.6
      */
     public function uploadTemplate(
-        ProgrammingLanguageTemplateRequest $request,
+        ProgrammingLanguageAdvancedRequest $request,
         ProgrammingLanguage $programming_language,
     ): JsonResponse {
         try {
@@ -565,7 +566,7 @@ class ProgrammingLanguageController extends Controller
      * Creates a template file from provided content for a specific
      * programming language with proper validation and security measures.
      *
-     * @param  ProgrammingLanguageContentRequest  $request  The validated request containing template content
+     * @param  ProgrammingLanguageAdvancedRequest  $request  The validated request containing template content
      * @param  ProgrammingLanguage  $programming_language  The programming language to create template for
      *
      * @return JsonResponse JSON response with creation result
@@ -586,7 +587,7 @@ class ProgrammingLanguageController extends Controller
             }
             $filename = $programming_language->slug.'.php';
             $filePath = $templateDir.'/'.$filename;
-            SecureFileHelper::putContents($filePath, $request->template_content);
+            SecureFileHelper::putContents($filePath, is_string($request->template_content ?? null) ? $request->template_content : '');
 
             return response()->json([
                 'success' => true,
@@ -607,11 +608,11 @@ class ProgrammingLanguageController extends Controller
      * Generates a CSV file containing all programming languages with their
      * configuration details for administrative purposes.
      *
-     * @return \Illuminate\Http\Response The CSV download response
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse The CSV download response
      *
      * @version 1.0.6
      */
-    public function export(): \Illuminate\Http\Response
+    public function export(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $languages = ProgrammingLanguage::orderBy('sort_order')->orderBy('name')->get();
         $filename = 'programming_languages_'.date('Y-m-d_H-i-s').'.csv';
@@ -621,8 +622,9 @@ class ProgrammingLanguageController extends Controller
         ];
         $callback = function () use ($languages) {
             $file = fopen('php://output', 'w');
-            // CSV Headers
-            fputcsv($file, [
+            if ($file !== false) {
+                // CSV Headers
+                fputcsv($file, [
                 'ID',
                 'Name',
                 'Slug',
@@ -649,7 +651,8 @@ class ProgrammingLanguageController extends Controller
                     $language->updated_at?->format('Y-m-d H:i:s'),
                 ]);
             }
-            fclose($file);
+                fclose($file);
+            }
         };
 
         return response()->stream($callback, 200, $headers);
@@ -678,7 +681,7 @@ class ProgrammingLanguageController extends Controller
                 'content' => $content,
                 'file_path' => $templatePath,
                 'file_size' => SecureFileHelper::getFileSize($templatePath),
-                'last_modified' => date('Y-m-d H:i:s', filemtime($templatePath)),
+                'last_modified' => date('Y-m-d H:i:s', (int)filemtime($templatePath)),
             ]);
         }
 

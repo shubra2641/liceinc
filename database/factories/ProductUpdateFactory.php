@@ -14,7 +14,7 @@ class ProductUpdateFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\Illuminate\Database\Eloquent\Model> */
+     * @var class-string<ProductUpdate> */
     protected $model = ProductUpdate::class;
 
     /**

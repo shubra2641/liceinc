@@ -155,7 +155,7 @@ class DashboardController extends Controller
             Log::error('Failed to get available products', [
                 'error' => $e->getMessage(),
             ]);
-            return collect();
+            return Product::whereRaw('1 = 0')->get();
         }
     }
     /**

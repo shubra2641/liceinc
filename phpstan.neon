@@ -1,0 +1,66 @@
+parameters:
+    # المستوى - من 0 إلى 9 (9 هو الأقصى والأكثر صرامة)
+    level: 8
+    
+    # مسارات التحليل
+    paths:
+        - app
+        - config
+        - database/factories
+        - database/seeders
+        - routes
+    
+    # استبعاد المسارات
+    excludePaths:
+        - bootstrap/cache/*
+        - storage/*
+        - vendor/*
+        - node_modules/*
+        - public/*
+        - tests/*
+        - database/migrations/*
+        - stubs/*
+    
+    # Stub files for third-party libraries
+    # stubFiles:
+    #     - stubs/Eloquent.stub
+    
+    # تجاهل الأخطاء المعروفة
+    ignoreErrors:
+        # Laravel Dynamic Properties
+        - '#Access to an undefined property Illuminate\\Database\\Eloquent\\Model::\$#'
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Builder::#'
+        - '#Call to an undefined method Illuminate\\Database\\Query\\Builder::#'
+        - '#Call to an undefined method Illuminate\\Support\\Collection::#'
+        - '#Call to an undefined method Illuminate\\Http\\Request::#'
+        - '#Call to an undefined method Illuminate\\Support\\Facades\\#'
+        
+        # Blade Directives
+        - '#Undefined variable: \$[a-zA-Z_]+#'
+        
+        # Magic Methods
+        - '#Method [a-zA-Z\\]+::__[a-zA-Z]+\(\) invoked with#'
+    
+    # إعدادات Laravel المتقدمة
+    checkModelProperties: true
+    checkOctaneCompatibility: true
+    checkUnusedViews: false
+    
+    # إعدادات عامة
+    reportUnmatchedIgnoredErrors: false
+    checkTooWideReturnTypesInProtectedAndPublicMethods: true
+    checkUninitializedProperties: true
+    checkDynamicProperties: false
+    
+    # الفئات العامة
+    universalObjectCratesClasses:
+        - Illuminate\Database\Eloquent\Model
+        - Illuminate\Database\Eloquent\Collection
+        - Illuminate\Support\Collection
+        - Illuminate\Http\Request
+    
+    # إعدادات الأداء
+    parallel:
+        jobSize: 20
+        maximumNumberOfProcesses: 32
+        minimumNumberOfJobsPerProcess: 2

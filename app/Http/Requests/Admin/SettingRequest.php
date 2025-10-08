@@ -674,26 +674,26 @@ class SettingRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'site_name' => $this->sanitizeInput($this->site_name),
-            'site_description' => $this->site_description ? $this->sanitizeInput($this->site_description) : null,
-            'site_keywords' => $this->site_keywords ? $this->sanitizeInput($this->site_keywords) : null,
-            'maintenance_message' => $this->maintenance_message ? $this->sanitizeInput($this->maintenance_message) : null,
-            'seo_og_title' => $this->seo_og_title ? $this->sanitizeInput($this->seo_og_title) : null,
-            'seo_og_description' => $this->seo_og_description ? $this->sanitizeInput($this->seo_og_description) : null,
-            'seo_og_type' => $this->seo_og_type ? $this->sanitizeInput($this->seo_og_type) : null,
-            'seo_og_site_name' => $this->seo_og_site_name ? $this->sanitizeInput($this->seo_og_site_name) : null,
-            'seo_twitter_card' => $this->seo_twitter_card ? $this->sanitizeInput($this->seo_twitter_card) : null,
-            'seo_twitter_site' => $this->seo_twitter_site ? $this->sanitizeInput($this->seo_twitter_site) : null,
-            'seo_twitter_creator' => $this->seo_twitter_creator ? $this->sanitizeInput($this->seo_twitter_creator) : null,
-            'analytics_google_analytics' => $this->analytics_google_analytics ? $this->sanitizeInput($this->analytics_google_analytics) : null,
-            'analytics_google_tag_manager' => $this->analytics_google_tag_manager ? $this->sanitizeInput($this->analytics_google_tag_manager) : null,
-            'analytics_facebook_pixel' => $this->analytics_facebook_pixel ? $this->sanitizeInput($this->analytics_facebook_pixel) : null,
-            'contact_phone' => $this->contact_phone ? $this->sanitizeInput($this->contact_phone) : null,
-            'contact_address' => $this->contact_address ? $this->sanitizeInput($this->contact_address) : null,
-            'contact_city' => $this->contact_city ? $this->sanitizeInput($this->contact_city) : null,
-            'contact_state' => $this->contact_state ? $this->sanitizeInput($this->contact_state) : null,
-            'contact_country' => $this->contact_country ? $this->sanitizeInput($this->contact_country) : null,
-            'contact_postal_code' => $this->contact_postal_code ? $this->sanitizeInput($this->contact_postal_code) : null,
+            'site_name' => $this->sanitizeInput($this->input('site_name')),
+            'site_description' => $this->input('site_description') ? $this->sanitizeInput($this->input('site_description')) : null,
+            'site_keywords' => $this->input('site_keywords') ? $this->sanitizeInput($this->input('site_keywords')) : null,
+            'maintenance_message' => $this->input('maintenance_message') ? $this->sanitizeInput($this->input('maintenance_message')) : null,
+            'seo_og_title' => $this->input('seo_og_title') ? $this->sanitizeInput($this->input('seo_og_title')) : null,
+            'seo_og_description' => $this->input('seo_og_description') ? $this->sanitizeInput($this->input('seo_og_description')) : null,
+            'seo_og_type' => $this->input('seo_og_type') ? $this->sanitizeInput($this->input('seo_og_type')) : null,
+            'seo_og_site_name' => $this->input('seo_og_site_name') ? $this->sanitizeInput($this->input('seo_og_site_name')) : null,
+            'seo_twitter_card' => $this->input('seo_twitter_card') ? $this->sanitizeInput($this->input('seo_twitter_card')) : null,
+            'seo_twitter_site' => $this->input('seo_twitter_site') ? $this->sanitizeInput($this->input('seo_twitter_site')) : null,
+            'seo_twitter_creator' => $this->input('seo_twitter_creator') ? $this->sanitizeInput($this->input('seo_twitter_creator')) : null,
+            'analytics_google_analytics' => $this->input('analytics_google_analytics') ? $this->sanitizeInput($this->input('analytics_google_analytics')) : null,
+            'analytics_google_tag_manager' => $this->input('analytics_google_tag_manager') ? $this->sanitizeInput($this->input('analytics_google_tag_manager')) : null,
+            'analytics_facebook_pixel' => $this->input('analytics_facebook_pixel') ? $this->sanitizeInput($this->input('analytics_facebook_pixel')) : null,
+            'contact_phone' => $this->input('contact_phone') ? $this->sanitizeInput($this->input('contact_phone')) : null,
+            'contact_address' => $this->input('contact_address') ? $this->sanitizeInput($this->input('contact_address')) : null,
+            'contact_city' => $this->input('contact_city') ? $this->sanitizeInput($this->input('contact_city')) : null,
+            'contact_state' => $this->input('contact_state') ? $this->sanitizeInput($this->input('contact_state')) : null,
+            'contact_country' => $this->input('contact_country') ? $this->sanitizeInput($this->input('contact_country')) : null,
+            'contact_postal_code' => $this->input('contact_postal_code') ? $this->sanitizeInput($this->input('contact_postal_code')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -713,15 +713,20 @@ class SettingRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

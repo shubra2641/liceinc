@@ -79,13 +79,14 @@ class NewPasswordController extends Controller
      */
     private function resetPassword(Request $request): string
     {
-        return Password::reset(
+        $result = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
-                $this->updateUserPassword($user, $request->password);
+                $this->updateUserPassword($user, is_string($request->password) ? $request->password : '');
                 event(new PasswordReset($user));
             },
         );
+        return is_string($result) ? $result : '';
     }
     /**
      * Update user's password and remember token.

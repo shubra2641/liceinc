@@ -126,13 +126,18 @@ class XssProtectionMiddleware
         try {
             // Get XSS protection configuration
             $xssConfig = config('security.xss_protection', []);
-            $enabled = $xssConfig['enabled'] ?? true;
+            $enabled = (is_array($xssConfig) && isset($xssConfig['enabled'])) ? $xssConfig['enabled'] : true;
             if ($enabled) {
                 // Sanitize input data
-                $this->sanitizeInput($request, $xssConfig);
+                $configArray = is_array($xssConfig) ? $xssConfig : [];
+                /** @var array<string, mixed> $typedConfig */
+                $typedConfig = $configArray;
+                $this->sanitizeInput($request, $typedConfig);
             }
             $response = $next($request);
-            return $response;
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         } catch (Throwable $e) {
             Log::error('XSS Protection middleware processing error', [
                 'error' => $e->getMessage(),
@@ -144,7 +149,10 @@ class XssProtectionMiddleware
                 'trace' => $e->getTraceAsString(),
             ]);
             // Continue processing even if XSS protection fails to prevent service disruption
-            return $next($request);
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         }
     }
     /**
@@ -167,10 +175,11 @@ class XssProtectionMiddleware
             $input = $request->all();
             $sanitized = $this->recursiveSanitize($input, $config);
             // Check for malicious content before replacing
-            if ($this->containsMaliciousContent(json_encode($sanitized))) {
+            $jsonData = json_encode($sanitized);
+            if ($jsonData !== false && $this->containsMaliciousContent($jsonData)) {
                 $this->logSuspiciousActivity($request, $sanitized);
             }
-            $request->replace($sanitized);
+            $request->replace(is_array($sanitized) ? $sanitized : []);
         } catch (Throwable $e) {
             Log::error('XSS input sanitization error', [
                 'error' => $e->getMessage(),
@@ -241,7 +250,7 @@ class XssProtectionMiddleware
             // Strip tags if configured
             if ($config['strip_tags'] ?? true) {
                 $allowedTags = $config['allowed_tags'] ?? '';
-                $data = strip_tags($data, $allowedTags);
+                $data = strip_tags($data, is_string($allowedTags) ? $allowedTags : '');
             }
             // Convert special characters to HTML entities
             if ($config['escape_output'] ?? true) {
@@ -276,7 +285,7 @@ class XssProtectionMiddleware
     {
         try {
             foreach (self::DANGEROUS_PATTERNS as $pattern) {
-                $data = preg_replace($pattern, '', $data);
+                $data = preg_replace($pattern, '', $data) ?? $data;
             }
             return $data;
         } catch (Throwable $e) {
@@ -377,33 +386,12 @@ class XssProtectionMiddleware
                 return substr($data, 0, 200); // First 200 characters
             }
             if (is_array($data)) {
-                return json_encode(array_slice($data, 0, 5)); // First 5 elements
+                $jsonResult = json_encode(array_slice($data, 0, 5)); // First 5 elements
+                return $jsonResult !== false ? $jsonResult : 'Data sample unavailable';
             }
-            return (string)$data;
+            return '';
         } catch (Throwable $e) {
             return 'Data sample unavailable';
         }
-    }
-    /**
-     * Sanitize input to prevent XSS attacks.
-     *
-     * @param  string  $input  The input to sanitize
-     *
-     * @return string The sanitized input
-     */
-    private function sanitizeInputString(string $input): string
-    {
-        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-    }
-    /**
-     * Hash data for logging.
-     *
-     * @param  string  $data  The data to hash
-     *
-     * @return string The hashed data
-     */
-    private function hashForLogging(string $data): string
-    {
-        return substr(hash('sha256', $data . config('app.key')), 0, 8) . '...';
     }
 }

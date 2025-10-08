@@ -86,19 +86,19 @@ class InvoiceController extends Controller
             $query = Invoice::with(['user', 'product', 'license']);
             // Filter by status with validation
             if ($request->filled('status')) {
-                $status = trim($request->status);
+                $status = trim(is_string($request->status) ? $request->status : '');
                 if (in_array($status, ['pending', 'paid', 'overdue', 'cancelled'])) {
                     $query->where('status', $status);
                 }
             }
             if ($request->filled('date_from')) {
-                $dateFrom = trim($request->date_from);
+                $dateFrom = trim(is_string($request->date_from) ? $request->date_from : '');
                 if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateFrom) === 1) {
                     $query->whereDate('created_at', '>=', $dateFrom);
                 }
             }
             if ($request->filled('date_to')) {
-                $dateTo = trim($request->date_to);
+                $dateTo = trim(is_string($request->date_to) ? $request->date_to : '');
                 if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateTo)) {
                     $query->whereDate('created_at', '<=', $dateTo);
                 }
@@ -106,7 +106,7 @@ class InvoiceController extends Controller
             $invoices = $query->latest()->paginate(10);
             $stats = $this->invoiceService->getInvoiceStats();
             DB::commit();
-            return view('admin.invoices.index', compact('invoices', 'stats'));
+            return view('admin.invoices.index', ['invoices' => $invoices, 'stats' => $stats]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Invoice listing failed', [
@@ -115,7 +115,7 @@ class InvoiceController extends Controller
             ]);
             // Return empty results on error
             return view('admin.invoices.index', [
-                'invoices' => collect()->paginate(10),
+                'invoices' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
                 'stats' => [],
             ]);
         }
@@ -141,7 +141,7 @@ class InvoiceController extends Controller
     public function create(): View
     {
         $users = User::select('id', 'name', 'email')->get();
-        return view('admin.invoices.create', compact('users'));
+        return view('admin.invoices.create', ['users' => $users]);
     }
     /**
      * Store a newly created invoice in storage with enhanced security.
@@ -150,7 +150,7 @@ class InvoiceController extends Controller
      * for custom invoices with metadata. Handles both license-based and
      * custom invoice creation with proper data validation.
      *
-     * @param  StoreInvoiceRequest  $request  The validated request containing invoice data
+     * @param  InvoiceRequest  $request  The validated request containing invoice data
      *
      * @return RedirectResponse Redirect to invoice details with success message
      *
@@ -262,7 +262,7 @@ class InvoiceController extends Controller
     public function show(Invoice $invoice): View
     {
         $invoice->load(['user', 'product', 'license']);
-        return view('admin.invoices.show', compact('invoice'));
+        return view('admin.invoices.show', ['invoice' => $invoice]);
     }
     /**
      * Mark invoice as paid with enhanced security.
@@ -325,7 +325,7 @@ class InvoiceController extends Controller
     {
         try {
             DB::beginTransaction();
-            $this->invoiceService->cancelInvoice($invoice);
+            $invoice->update(['status' => 'cancelled']);
             DB::commit();
             return redirect()->back()->with('success', 'Invoice cancelled successfully');
         } catch (\Exception $e) {
@@ -370,7 +370,7 @@ class InvoiceController extends Controller
     {
         $users = User::select('id', 'name', 'email')->get();
         $invoice->load(['user', 'license.product']);
-        return view('admin.invoices.edit', compact('invoice', 'users'));
+        return view('admin.invoices.edit', ['invoice' => $invoice, 'users' => $users]);
     }
     /**
      * Update the specified invoice in storage.
@@ -379,7 +379,7 @@ class InvoiceController extends Controller
      * support for custom invoices with metadata. Handles both license-based
      * and custom invoice updates with proper data validation.
      *
-     * @param  UpdateInvoiceRequest  $request  The validated request containing updated invoice data
+     * @param  InvoiceRequest  $request  The validated request containing updated invoice data
      * @param  Invoice  $invoice  The invoice to update
      *
      * @return RedirectResponse Redirect to invoice details with success message

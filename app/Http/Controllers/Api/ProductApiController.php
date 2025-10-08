@@ -118,10 +118,10 @@ class ProductApiController extends Controller
                 ]);
             }
             // If not found in database, try Envato API
-            $sale = $this->envatoService->verifyPurchase($purchaseCode);
+            $sale = $this->envatoService->verifyPurchase(is_string($purchaseCode) ? $purchaseCode : '');
             if ($sale) {
-                $productSlug = $this->sanitizeOutput(data_get($sale, 'item.slug'));
-                $productName = $this->sanitizeOutput(data_get($sale, 'item.name'));
+                $productSlug = $this->sanitizeOutput(is_string(data_get($sale, 'item.slug')) ? data_get($sale, 'item.slug') : null);
+                $productName = $this->sanitizeOutput(is_string(data_get($sale, 'item.name')) ? data_get($sale, 'item.name') : null);
                 DB::commit();
                 return response()->json([
                     'success' => true,
@@ -132,7 +132,7 @@ class ProductApiController extends Controller
                 ]);
             }
             Log::warning('Invalid purchase code lookup attempt', [
-                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
+                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4) . '...',
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);

@@ -5,6 +5,11 @@
  * Unified JavaScript for all admin pages
  */
 
+// Debug logger utility (toggle via: localStorage.setItem('app_debug','1'))
+const __debugEnabled = (() => { try { return localStorage.getItem('app_debug') === '1'; } catch (e) { return false; } })();
+// eslint-disable-next-line no-unused-vars -- Used conditionally across file
+const debugLog = (...args) => { if (__debugEnabled) { try { console.log('[DEBUG]', ...args); } catch (e) { /* ignore */ } } };
+
 // Global notification function
 function showNotification(message, type = 'info') {
   const notification = document.createElement('div');
@@ -333,14 +338,14 @@ class AdminDashboard {
     // Initialize settings functions
     const settingsPage = document.querySelector('.admin-settings-page');
     const testApiBtn = document.getElementById('test-api-btn');
-    console.log('Settings page check:', settingsPage);
-    console.log('Test API button check:', testApiBtn);
+    debugLog('Settings page check:', settingsPage);
+    debugLog('Test API button check:', testApiBtn);
 
     if (settingsPage || testApiBtn) {
       console.log('Settings page detected, initializing settings functions');
       this.initSettingsFunctions();
     } else {
-      console.log('Settings page not detected');
+  debugLog('Settings page not detected');
     }
 
     // Settings functions are initialized conditionally above
@@ -718,11 +723,8 @@ class AdminDashboard {
     // Initialize DataTables if available
     if (typeof $.fn.DataTable !== 'undefined') {
       $('.admin-table').DataTable({
-        responsive: true,
         pageLength: 25,
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json',
-        },
+        language: { url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Arabic.json' },
       });
     }
   }
@@ -5575,8 +5577,7 @@ function initializeApiTesting() {
       );
       formData.append('action', 'test-envato-api');
 
-      // Make AJAX request
-      // eslint-disable-next-line promise/catch-or-return
+  // Make AJAX request
       fetch('/admin/settings/test-api', {
         method: 'POST',
         body: formData,
@@ -5976,7 +5977,7 @@ function checkUpdateNotification() {
     .catch(error => {
       // Only log error if it's not a 404 or similar expected error
       if (!error.message.includes('404') && !error.message.includes('429')) {
-        console.error('Error checking update notification:', error);
+  debugLog('Update notification request failed:', error);
       }
     });
 }

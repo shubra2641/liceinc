@@ -90,10 +90,14 @@ class GenerateTestLicenseRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         // Sanitize input to prevent XSS
+        $domain = $this->input('domain');
+        $email = $this->input('email');
+        $name = $this->input('name');
+        
         $this->merge([
-            'domain' => $this->domain ? strtolower(trim($this->domain)) : null,
-            'email' => $this->email ? strtolower(trim($this->email)) : null,
-            'name' => $this->name ? trim($this->name) : null,
+            'domain' => $domain && is_string($domain) ? strtolower(trim($domain)) : null,
+            'email' => $email && is_string($email) ? strtolower(trim($email)) : null,
+            'name' => $name && is_string($name) ? trim($name) : null,
         ]);
     }
 }

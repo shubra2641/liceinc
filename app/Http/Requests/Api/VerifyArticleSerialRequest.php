@@ -76,7 +76,7 @@ class VerifyArticleSerialRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'serial' => $this->serial ? trim($this->serial) : null,
+            'serial' => $this->serial && is_string($this->serial) ? trim($this->serial) : null,
         ]);
     }
 }

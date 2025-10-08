@@ -49,7 +49,7 @@ class InstallController extends Controller
      * Returns the installation steps array with proper localization
      * and route information for the installation wizard.
      *
-     * @return array<string, mixed> The installation steps configuration
+     * @return array<int, array<string, string>> The installation steps configuration
      */
     private function getInstallationSteps()
     {
@@ -99,7 +99,7 @@ class InstallController extends Controller
      *
      * @param  int  $currentStep  The current step number
      *
-     * @return array<string, mixed> The installation steps with status information
+     * @return array<int, array<string, mixed>> The installation steps with status information
      */
     private function getInstallationStepsWithStatus($currentStep = 1)
     {
@@ -144,7 +144,7 @@ class InstallController extends Controller
             if ($request->has('lang')) {
                 $locale = $this->sanitizeInput($request->get('lang'));
                 if (in_array($locale, ['en', 'ar'])) {
-                    app()->setLocale($locale);
+                    app()->setLocale(is_string($locale) ? $locale : 'en');
                     session(['locale' => $locale]);
                 }
             }
@@ -239,7 +239,7 @@ class InstallController extends Controller
                     return ['valid' => true, 'message' => 'License verified'];
                 }
             };
-            $result = $licenseVerifier->verifyLicense($purchaseCode, $domain);
+            $result = $licenseVerifier->verifyLicense(is_string($purchaseCode) ? $purchaseCode : '', is_string($domain) ? $domain : '');
             if ($result['valid']) {
                 // Store license information in session with validation
                 session(['install.license' => [
@@ -260,7 +260,7 @@ class InstallController extends Controller
             } else {
                 // Handle license verification failure
                 $humanMessage = $result['message'] ?? 'License verification failed.';
-                $errorCode = $result['error_code'] ?? $this->extractCodeFromMessage($humanMessage);
+                $errorCode = $result['error_code'] ?? $this->extractCodeFromMessage(is_string($humanMessage) ? $humanMessage : '');
                 if ($request->ajax()) {
                     return response()->json([
                         'success' => false,
@@ -274,8 +274,8 @@ class InstallController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('License verification failed', [
-                'purchase_code_length' => strlen($request->purchase_code ?? ''),
-                'domain' => $request->getHost() ?? 'unknown',
+                'purchase_code_length' => strlen(is_string($request->purchase_code) ? $request->purchase_code : ''),
+                'domain' => $request->getHost(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -315,20 +315,20 @@ class InstallController extends Controller
                 'too many' => 'RATE_LIMIT',
                 'unauthorized' => 'UNAUTHORIZED',
             ];
-            $lower = strtolower($message);
+            $lower = strtolower(is_string($message) ? $message : '');
             foreach ($map as $frag => $code) {
                 if (str_contains($lower, $frag)) {
                     return $code;
                 }
             }
             // If message already resembles a code
-            if (preg_match('/[A-Z0-9_]{6, }/', $message, $m)) {
+            if (preg_match('/[A-Z0-9_]{6, }/', is_string($message) ? $message : '', $m)) {
                 return $m[0];
             }
             return 'LICENSE_VERIFICATION_FAILED';
         } catch (\Exception $e) {
             Log::error('Error extracting code from message', [
-                'message' => $message ?? 'unknown',
+                'message' => $message,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -347,11 +347,11 @@ class InstallController extends Controller
                 ->with('error', 'Please verify your license first.');
         }
         $requirements = $this->checkRequirements();
-        $allPassed = collect($requirements)->every(fn ($req) => $req['passed']);
+        $allPassed = collect($requirements)->every(fn ($req) => is_array($req) && isset($req['passed']) ? $req['passed'] : false);
         $steps = $this->getInstallationStepsWithStatus(3);
         return view(
             'install.requirements',
-            compact('requirements', 'allPassed', 'steps') + ['step' => 3, 'progressWidth' => 60],
+            ['requirements' => $requirements, 'allPassed' => $allPassed, 'steps' => $steps, 'step' => 3, 'progressWidth' => 60],
         );
     }
     /**
@@ -554,7 +554,11 @@ class InstallController extends Controller
             }
             // Starting installation steps...
             // Step 1: Update .env file
-            $this->updateEnvFile($databaseConfig, $settingsConfig);
+            /** @var array<string, mixed> $databaseConfigTyped */
+            $databaseConfigTyped = is_array($databaseConfig) ? $databaseConfig : [];
+            /** @var array<string, mixed> $settingsConfigTyped */
+            $settingsConfigTyped = is_array($settingsConfig) ? $settingsConfig : [];
+            $this->updateEnvFile($databaseConfigTyped, $settingsConfigTyped);
             // Step 2: Run migrations
             Artisan::call('migrate:fresh', ['--force' => true]);
             // Step 3: Create roles and permissions first
@@ -562,11 +566,15 @@ class InstallController extends Controller
             // Step 4: Run database seeders
             $this->runDatabaseSeeders();
             // Step 5: Create admin user
-            $this->createAdminUser($adminConfig);
+            /** @var array<string, mixed> $adminConfigTyped */
+            $adminConfigTyped = is_array($adminConfig) ? $adminConfig : [];
+            $this->createAdminUser($adminConfigTyped);
             // Step 6: Create default settings
-            $this->createDefaultSettings($settingsConfig);
+            $this->createDefaultSettings($settingsConfigTyped);
             // Step 7: Store license information
-            $this->storeLicenseInformation($licenseConfig);
+            /** @var array<string, mixed> $licenseConfigTyped */
+            $licenseConfigTyped = is_array($licenseConfig) ? $licenseConfig : [];
+            $this->storeLicenseInformation($licenseConfigTyped);
             // Step 8: Update session and cache drivers to database
             $this->updateSessionDrivers();
             // Step 9: Create storage link
@@ -735,10 +743,16 @@ class InstallController extends Controller
     private function testDatabaseConnection($config)
     {
         try {
+            $dbHost = is_array($config) ? ($config['db_host'] ?? null) : null;
+            $dbPort = is_array($config) ? ($config['db_port'] ?? null) : null;
+            $dbName = is_array($config) ? ($config['db_name'] ?? null) : null;
+            $dbUsername = is_array($config) ? ($config['db_username'] ?? null) : null;
+            $dbPassword = is_array($config) ? ($config['db_password'] ?? null) : null;
+            
             $connection = new \PDO(
-                "mysql:host={$config['db_host']};port={$config['db_port']};dbname={$config['db_name']}",
-                $config['db_username'],
-                $config['db_password'],
+                "mysql:host=".(is_string($dbHost) ? $dbHost : '').";port=".(is_string($dbPort) ? $dbPort : '').";dbname=".(is_string($dbName) ? $dbName : ''),
+                is_string($dbUsername) ? $dbUsername : null,
+                is_string($dbPassword) ? $dbPassword : null,
             );
             $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             return ['success' => true, 'message' => 'Database connection successful'];
@@ -757,73 +771,84 @@ class InstallController extends Controller
         $envPath = base_path('.env');
         $envContent = File::get($envPath);
         // Update database configuration
-        $envContent = preg_replace('/DB_HOST=.*/', "DB_HOST={$databaseConfig['db_host']}", $envContent);
-        $envContent = preg_replace('/DB_PORT=.*/', "DB_PORT={$databaseConfig['db_port']}", $envContent);
-        $envContent = preg_replace('/DB_DATABASE=.*/', "DB_DATABASE={$databaseConfig['db_name']}", $envContent);
-        $envContent = preg_replace('/DB_USERNAME=.*/', "DB_USERNAME={$databaseConfig['db_username']}", $envContent);
-        $envContent = preg_replace('/DB_PASSWORD=.*/', "DB_PASSWORD={$databaseConfig['db_password']}", $envContent);
+        $envContent = preg_replace('/DB_HOST=.*/', "DB_HOST=".(is_string($databaseConfig['db_host'] ?? null) ? $databaseConfig['db_host'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace('/DB_PORT=.*/', "DB_PORT=".(is_string($databaseConfig['db_port'] ?? null) ? $databaseConfig['db_port'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace('/DB_DATABASE=.*/', "DB_DATABASE=".(is_string($databaseConfig['db_name'] ?? null) ? $databaseConfig['db_name'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace('/DB_USERNAME=.*/', "DB_USERNAME=".(is_string($databaseConfig['db_username'] ?? null) ? $databaseConfig['db_username'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace('/DB_PASSWORD=.*/', "DB_PASSWORD=".(is_string($databaseConfig['db_password'] ?? null) ? $databaseConfig['db_password'] : ''), $envContent) ?? $envContent;
         // Update application configuration
-        $envContent = preg_replace('/APP_NAME=.*/', "APP_NAME=\"{$settingsConfig['site_name']}\"", $envContent);
+        $envContent = preg_replace('/APP_NAME=.*/', "APP_NAME=\"".(is_string($settingsConfig['site_name'] ?? null) ? $settingsConfig['site_name'] : '')."\"", $envContent) ?? $envContent;
         // Update APP_URL to current domain (this ensures emails use the correct domain)
         $currentUrl = request()->getSchemeAndHttpHost();
-        $envContent = preg_replace('/APP_URL=.*/', "APP_URL={$currentUrl}", $envContent);
-        $envContent = preg_replace('/APP_TIMEZONE=.*/', "APP_TIMEZONE={$settingsConfig['timezone']}", $envContent);
+        $envContent = preg_replace('/APP_URL=.*/', "APP_URL={$currentUrl}", $envContent) ?? $envContent;
+        $envContent = preg_replace('/APP_TIMEZONE=.*/', "APP_TIMEZONE=".(is_string($settingsConfig['timezone'] ?? null) ? $settingsConfig['timezone'] : ''), $envContent) ?? $envContent;
         // Add APP_TIMEZONE if it doesn't exist
-        if (! str_contains($envContent, 'APP_TIMEZONE=')) {
-            $envContent .= "\nAPP_TIMEZONE={$settingsConfig['timezone']}";
+        if ($envContent && ! str_contains($envContent, 'APP_TIMEZONE=')) {
+            $envContent .= "\nAPP_TIMEZONE=".(is_string($settingsConfig['timezone'] ?? null) ? $settingsConfig['timezone'] : '');
         }
-        $envContent = preg_replace('/APP_LOCALE=.*/', "APP_LOCALE={$settingsConfig['locale']}", $envContent);
+        $envContent = preg_replace('/APP_LOCALE=.*/', "APP_LOCALE=".(is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : ''), $envContent) ?? $envContent;
         // Add APP_LOCALE if it doesn't exist
-        if (! str_contains($envContent, 'APP_LOCALE=')) {
-            $envContent .= "\nAPP_LOCALE={$settingsConfig['locale']}";
+        if ($envContent && ! str_contains($envContent, 'APP_LOCALE=')) {
+            $envContent .= "\nAPP_LOCALE=".(is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : '');
         }
         // Update APP_FALLBACK_LOCALE
+        $locale = $settingsConfig['locale'] ?? null;
+        $localeStr = is_string($locale) ? $locale : '';
         $envContent = preg_replace(
             '/APP_FALLBACK_LOCALE=.*/',
-            "APP_FALLBACK_LOCALE={$settingsConfig['locale']}",
+            "APP_FALLBACK_LOCALE=".$localeStr,
             $envContent,
-        );
+        ) ?? $envContent;
         // Add APP_FALLBACK_LOCALE if it doesn't exist
-        if (! str_contains($envContent, 'APP_FALLBACK_LOCALE = ')) {
-            $envContent .= "\nAPP_FALLBACK_LOCALE={$settingsConfig['locale']}";
+        if ($envContent && ! str_contains($envContent, 'APP_FALLBACK_LOCALE = ')) {
+            $envContent .= "\nAPP_FALLBACK_LOCALE={$localeStr}";
         }
         // Update APP_FAKER_LOCALE
-        $fakerLocale = $settingsConfig['locale'] === 'ar' ? 'ar_SA' : 'en_US';
-        $envContent = preg_replace('/APP_FAKER_LOCALE=.*/', "APP_FAKER_LOCALE={$fakerLocale}", $envContent);
+        $fakerLocale = $localeStr === 'ar' ? 'ar_SA' : 'en_US';
+        $envContent = preg_replace('/APP_FAKER_LOCALE=.*/', "APP_FAKER_LOCALE={$fakerLocale}", $envContent) ?? $envContent;
         // Add APP_FAKER_LOCALE if it doesn't exist
-        if (! str_contains($envContent, 'APP_FAKER_LOCALE = ')) {
+        if ($envContent && ! str_contains($envContent, 'APP_FAKER_LOCALE = ')) {
             $envContent .= "\nAPP_FAKER_LOCALE={$fakerLocale}";
         }
         // Update email configuration if enabled
         if (isset($settingsConfig['enable_email']) && $settingsConfig['enable_email']) {
-            $envContent = preg_replace('/MAIL_MAILER=.*/', "MAIL_MAILER={$settingsConfig['mail_mailer']}", $envContent);
-            $envContent = preg_replace('/MAIL_HOST=.*/', "MAIL_HOST={$settingsConfig['mail_host']}", $envContent);
-            $envContent = preg_replace('/MAIL_PORT=.*/', "MAIL_PORT={$settingsConfig['mail_port']}", $envContent);
+            $mailMailer = $settingsConfig['mail_mailer'] ?? null;
+            $mailHost = $settingsConfig['mail_host'] ?? null;
+            $mailPort = $settingsConfig['mail_port'] ?? null;
+            $mailUsername = $settingsConfig['mail_username'] ?? null;
+            $mailPassword = $settingsConfig['mail_password'] ?? null;
+            $mailEncryption = $settingsConfig['mail_encryption'] ?? null;
+            $mailFromAddress = $settingsConfig['mail_from_address'] ?? null;
+            $mailFromName = $settingsConfig['mail_from_name'] ?? null;
+            
+            $envContent = preg_replace('/MAIL_MAILER=.*/', "MAIL_MAILER=".(is_string($mailMailer) ? $mailMailer : ''), $envContent) ?? $envContent;
+            $envContent = preg_replace('/MAIL_HOST=.*/', "MAIL_HOST=".(is_string($mailHost) ? $mailHost : ''), $envContent) ?? $envContent;
+            $envContent = preg_replace('/MAIL_PORT=.*/', "MAIL_PORT=".(is_string($mailPort) ? $mailPort : ''), $envContent) ?? $envContent;
             $envContent = preg_replace(
                 '/MAIL_USERNAME=.*/',
-                "MAIL_USERNAME={$settingsConfig['mail_username']}",
+                "MAIL_USERNAME=".(is_string($mailUsername) ? $mailUsername : ''),
                 $envContent,
-            );
+            ) ?? $envContent;
             $envContent = preg_replace(
                 '/MAIL_PASSWORD=.*/',
-                "MAIL_PASSWORD={$settingsConfig['mail_password']}",
+                "MAIL_PASSWORD=".(is_string($mailPassword) ? $mailPassword : ''),
                 $envContent,
-            );
+            ) ?? $envContent;
             $envContent = preg_replace(
                 '/MAIL_ENCRYPTION=.*/',
-                "MAIL_ENCRYPTION={$settingsConfig['mail_encryption']}",
+                "MAIL_ENCRYPTION=".(is_string($mailEncryption) ? $mailEncryption : ''),
                 $envContent,
-            );
+            ) ?? $envContent;
             $envContent = preg_replace(
                 '/MAIL_FROM_ADDRESS=.*/',
-                "MAIL_FROM_ADDRESS={$settingsConfig['mail_from_address']}",
+                "MAIL_FROM_ADDRESS=".(is_string($mailFromAddress) ? $mailFromAddress : ''),
                 $envContent,
-            );
+            ) ?? $envContent;
             $envContent = preg_replace(
                 '/MAIL_FROM_NAME=.*/',
-                "MAIL_FROM_NAME=\"{$settingsConfig['mail_from_name']}\"",
+                "MAIL_FROM_NAME=\"".(is_string($mailFromName) ? $mailFromName : '')."\"",
                 $envContent,
-            );
+            ) ?? $envContent;
         }
         // Keep session and cache drivers as file during installation
         // They will be updated to database after migrations are complete
@@ -831,7 +856,7 @@ class InstallController extends Controller
         // $envContent = preg_replace('/CACHE_STORE=.*/', "CACHE_STORE=database", $envContent);
         // $envContent = preg_replace('/QUEUE_CONNECTION=.*/', "QUEUE_CONNECTION=database", $envContent);
         // Set debug to false for production
-        $envContent = preg_replace('/APP_DEBUG=.*/', 'APP_DEBUG=false', $envContent);
+        $envContent = preg_replace('/APP_DEBUG=.*/', 'APP_DEBUG=false', $envContent) ?? $envContent;
         File::put($envPath, $envContent);
     }
     /**
@@ -842,9 +867,9 @@ class InstallController extends Controller
         $envPath = base_path('.env');
         $envContent = File::get($envPath);
         // Update session and cache drivers to database after migrations are complete
-        $envContent = preg_replace('/SESSION_DRIVER=.*/', 'SESSION_DRIVER=database', $envContent);
-        $envContent = preg_replace('/CACHE_STORE=.*/', 'CACHE_STORE=database', $envContent);
-        $envContent = preg_replace('/QUEUE_CONNECTION=.*/', 'QUEUE_CONNECTION=database', $envContent);
+        $envContent = preg_replace('/SESSION_DRIVER=.*/', 'SESSION_DRIVER=database', $envContent) ?? $envContent;
+        $envContent = preg_replace('/CACHE_STORE=.*/', 'CACHE_STORE=database', $envContent) ?? $envContent;
+        $envContent = preg_replace('/QUEUE_CONNECTION=.*/', 'QUEUE_CONNECTION=database', $envContent) ?? $envContent;
         File::put($envPath, $envContent);
     }
     /**
@@ -884,7 +909,7 @@ class InstallController extends Controller
             $user = User::create([
                 'name' => $adminConfig['name'],
                 'email' => $adminConfig['email'],
-                'password' => Hash::make($adminConfig['password']),
+                'password' => Hash::make(is_string($adminConfig['password'] ?? null) ? $adminConfig['password'] : ''),
                 'email_verified_at' => now(),
                 'status' => 'active',
                 'email_verified' => true,
@@ -955,30 +980,25 @@ class InstallController extends Controller
      */
     private function runDatabaseSeeders(): void
     {
-        try {
-            // Run only the required seeders
-            $seeders = [
-                'Database\\Seeders\\TicketCategorySeeder',
-                'Database\\Seeders\\ProgrammingLanguageSeeder',
-                'Database\\Seeders\\EmailTemplateSeeder',
-            ];
-            foreach ($seeders as $seeder) {
-                try {
-                    Artisan::call('db:seed', [
-                        '--class' => $seeder,
-                        '--force' => true,
-                    ]);
-                    // Seeder executed successfully
-                } catch (\Exception $seederError) {
-                    // Failed to run seeder
-                    // Continue with other seeders even if one fails
-                }
+        // Run only the required seeders
+        $seeders = [
+            'Database\\Seeders\\TicketCategorySeeder',
+            'Database\\Seeders\\ProgrammingLanguageSeeder',
+            'Database\\Seeders\\EmailTemplateSeeder',
+        ];
+        foreach ($seeders as $seeder) {
+            try {
+                Artisan::call('db:seed', [
+                    '--class' => $seeder,
+                    '--force' => true,
+                ]);
+                // Seeder executed successfully
+            } catch (\Exception $seederError) {
+                // Failed to run seeder
+                // Continue with other seeders even if one fails
             }
-            // Required database seeders execution completed
-        } catch (\Exception $e) {
-            // Failed to run database seeders
-            throw $e;
         }
+        // Required database seeders execution completed
     }
     /**
      * Store license information in database.
@@ -1020,13 +1040,15 @@ class InstallController extends Controller
      *
      * Sanitizes input data to prevent XSS attacks and other security issues
      * by removing or encoding potentially dangerous characters.
-     *
-     * @param  string  $input  The input string to sanitize
-     *
-     * @return string The sanitized input
      */
     protected function sanitizeInput(mixed $input): mixed
     {
+        if (is_array($input)) {
+            return array_map([$this, 'sanitizeInput'], $input);
+        }
+        if (is_object($input)) {
+            return $input;
+        }
         if (! is_string($input)) {
             return $input;
         }
@@ -1037,7 +1059,7 @@ class InstallController extends Controller
         // Remove potentially dangerous characters
         $input = preg_replace('/[<>"\']/', '', $input);
         // Limit length to prevent buffer overflow attacks
-        $input = substr($input, 0, 1000);
+        $input = substr($input ?? '', 0, 1000);
         return $input;
     }
 }

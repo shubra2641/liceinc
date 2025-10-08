@@ -119,7 +119,7 @@ class UpdateNotificationController extends Controller
      * Dismisses update notifications with optional time-based dismissal
      * and proper validation and security measures.
      *
-     * @param  UpdateNotificationDismissRequest  $request  The validated request containing dismissal data
+     * @param  UpdateNotificationRequest  $request  The validated request containing dismissal data
      *
      * @return JsonResponse JSON response with dismissal result
      *
@@ -137,8 +137,8 @@ class UpdateNotificationController extends Controller
             $dismissUntil = $request->validated()['dismiss_until'] ?? null;
             if ($dismissUntil) {
                 // Dismiss until specific date
-                Cache::put('update_notification_dismissed', true, now()->parse($dismissUntil));
-                Cache::put('update_notification_dismissed_until', $dismissUntil, now()->parse($dismissUntil));
+                Cache::put('update_notification_dismissed', true, now()->parse(is_string($dismissUntil) ? $dismissUntil : ''));
+                Cache::put('update_notification_dismissed_until', $dismissUntil, now()->parse(is_string($dismissUntil) ? $dismissUntil : ''));
             } else {
                 // Dismiss for 24 hours
                 Cache::put('update_notification_dismissed', true, now()->addHours(24));

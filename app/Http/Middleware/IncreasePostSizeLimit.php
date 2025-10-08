@@ -56,22 +56,26 @@ class IncreasePostSizeLimit
     {
         try {
             // Validate request
-            if (! $request) {
-                throw new \InvalidArgumentException('Invalid request provided to middleware');
-            }
+            // Request is validated by type hint
             // Apply PHP configuration adjustments with validation
             $this->adjustPhpConfiguration();
-            return $next($request);
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         } catch (\Exception $e) {
             Log::error('Error in IncreasePostSizeLimit middleware', [
-                'url' => $request->url() ?? 'unknown',
-                'method' => $request->method() ?? 'unknown',
-                'user_agent' => $request->userAgent() ?? 'unknown',
+                'url' => $request->url(),
+                'method' => $request->method(),
+                'user_agent' => $request->userAgent(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
             // In case of error, continue to next middleware to prevent request blocking
-            return $next($request);
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         }
     }
     /**
@@ -129,7 +133,7 @@ class IncreasePostSizeLimit
             if (empty($setting)) {
                 throw new \InvalidArgumentException('Configuration setting name cannot be empty');
             }
-            if ($value === null || $value === '') {
+            if ($value === '') {
                 throw new \InvalidArgumentException('Configuration value cannot be empty');
             }
             // Validate setting name to prevent injection
@@ -137,7 +141,7 @@ class IncreasePostSizeLimit
                 throw new \InvalidArgumentException('Invalid configuration setting name');
             }
             // Set the configuration value using secure helper
-            $result = SecureFileHelper::setIniSetting($setting, $value);
+            $result = SecureFileHelper::setIniSetting($setting, (string)$value);
             if ($result === false) {
                 // Don't log warning if the setting is already at the desired value
                 $currentValue = ini_get($setting);
@@ -161,8 +165,8 @@ class IncreasePostSizeLimit
             }
         } catch (\Exception $e) {
             Log::error('Error setting PHP configuration', [
-                'setting' => $setting ?? 'unknown',
-                'value' => $value ?? 'unknown',
+                'setting' => $setting,
+                'value' => $value,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

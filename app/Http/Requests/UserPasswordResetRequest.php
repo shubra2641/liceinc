@@ -30,7 +30,7 @@ class UserPasswordResetRequest extends FormRequest
             'user_id' => [
                 'required',
                 'integer',
-                'exists:users, id',
+                'exists:users,id',
             ],
             'confirm_reset' => [
                 'required',
@@ -61,9 +61,12 @@ class UserPasswordResetRequest extends FormRequest
     {
         // Ensure user_id is properly cast to integer
         if ($this->has('user_id')) {
-            $this->merge([
-                'user_id' => (int)$this->user_id,
-            ]);
+            $userId = $this->input('user_id');
+            if (is_numeric($userId)) {
+                $this->merge([
+                    'user_id' => (int)$userId,
+                ]);
+            }
         }
     }
 }

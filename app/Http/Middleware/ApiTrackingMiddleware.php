@@ -56,9 +56,13 @@ class ApiTrackingMiddleware
         $response = $next($request);
         // Only track API license verification requests
         if ($request->is('api/license/verify') && $request->isMethod('post')) {
-            $this->trackApiCall($request, $response);
+            if ($response instanceof \Symfony\Component\HttpFoundation\Response) {
+                $this->trackApiCall($request, $response);
+            }
         }
-        return $response;
+        /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+        $typedResponse = $response;
+        return $typedResponse;
     }
     /**
      * Track API call details with enhanced security.
@@ -86,11 +90,12 @@ class ApiTrackingMiddleware
             DB::beginTransaction();
             // Sanitize request data to prevent XSS
             $requestData = $this->sanitizeRequestData($request->all());
-            $responseData = $this->sanitizeResponseData($response->getContent());
+            $responseContent = $response->getContent();
+            $responseData = $this->sanitizeResponseData($responseContent !== false ? $responseContent : '');
             // Extract and sanitize license information
-            $licenseKey = $this->sanitizeInput($requestData['license_key'] ?? null);
-            $domain = $this->sanitizeInput($requestData['domain'] ?? null);
-            $serial = $this->sanitizeInput($requestData['serial'] ?? null);
+            $licenseKey = $this->sanitizeInput(is_string($requestData['license_key'] ?? null) ? $requestData['license_key'] : null);
+            $domain = $this->sanitizeInput(is_string($requestData['domain'] ?? null) ? $requestData['domain'] : null);
+            $serial = $this->sanitizeInput(is_string($requestData['serial'] ?? null) ? $requestData['serial'] : null);
             // Find license by key with security validation
             $license = null;
             if ($licenseKey && $this->isValidLicenseKey($licenseKey)) {
@@ -124,9 +129,9 @@ class ApiTrackingMiddleware
     /**
      * Sanitize request data to prevent XSS attacks.
      *
-     * @param  array<string, mixed>  $data  The request data to sanitize
+     * @param  array<mixed, mixed>  $data  The request data to sanitize
      *
-     * @return array<string, mixed> The sanitized request data
+     * @return array<mixed, mixed> The sanitized request data
      */
     private function sanitizeRequestData(array $data): array
     {
@@ -152,7 +157,10 @@ class ApiTrackingMiddleware
     private function sanitizeResponseData(string $content): array
     {
         $responseData = json_decode($content, true) ?? [];
-        return $this->sanitizeRequestData($responseData);
+        $sanitizedData = is_array($responseData) ? $this->sanitizeRequestData($responseData) : [];
+        /** @var array<string, mixed> $typedResult */
+        $typedResult = $sanitizedData;
+        return $typedResult;
     }
     /**
      * Sanitize input to prevent XSS attacks.

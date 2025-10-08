@@ -63,7 +63,7 @@ class DynamicEmail extends Mailable
     {
         try {
             // Validate template
-            if (! $template || ! $template->is_active) {
+            if (!$template->is_active) {
                 throw new \InvalidArgumentException('Invalid or inactive email template provided');
             }
             // Sanitize input data
@@ -164,7 +164,7 @@ class DynamicEmail extends Mailable
      * Recursively sanitizes array data to prevent XSS attacks
      * and ensure data integrity.
      *
-     * @param  array<string, mixed>  $data  The data to sanitize
+     * @param  array<mixed, mixed>  $data  The data to sanitize
      *
      * @return array<string, mixed> The sanitized data
      */
@@ -201,6 +201,6 @@ class DynamicEmail extends Mailable
         $content = strip_tags($content, $allowedTags);
         // Remove dangerous attributes
         $content = preg_replace('/(<[^>]+)\s+(on\w+|javascript:|data:|vbscript:)[^>]*>/i', '$1>', $content);
-        return trim($content);
+        return trim($content ?? '');
     }
 }

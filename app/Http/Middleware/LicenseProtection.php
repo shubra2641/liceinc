@@ -55,19 +55,31 @@ class LicenseProtection
         try {
             // Skip license check for installation routes
             if ($this->isInstallationRoute($request)) {
-                return $next($request);
+                $response = $next($request);
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                $typedResponse = $response;
+                return $typedResponse;
             }
             // Skip license check for API routes (they have their own protection)
             if ($this->isApiRoute($request)) {
-                return $next($request);
+                $response = $next($request);
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                $typedResponse = $response;
+                return $typedResponse;
             }
             // Skip license check for public routes
             if ($this->isPublicRoute($request)) {
-                return $next($request);
+                $response = $next($request);
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                $typedResponse = $response;
+                return $typedResponse;
             }
             // Check if system is installed
             if (! $this->isSystemInstalled()) {
-                return $next($request);
+                $response = $next($request);
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                $typedResponse = $response;
+                return $typedResponse;
             }
             // Get license information from database
             $licenseInfo = $this->getLicenseInfo();
@@ -76,13 +88,19 @@ class LicenseProtection
             }
             // Check if license is expired
             if ($this->isLicenseExpired($licenseInfo)) {
-                return $this->handleLicenseError('License has expired', $request);
+                $response = $this->handleLicenseError('License has expired', $request);
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                $typedResponse = $response;
+                return $typedResponse;
             }
             // Verify license periodically (every 24 hours)
             if ($this->shouldVerifyLicense($licenseInfo)) {
                 $this->verifyLicensePeriodically($licenseInfo);
             }
-            return $next($request);
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         } catch (\Exception $e) {
             Log::error('License protection middleware failed', [
                 'error' => $e->getMessage(),
@@ -92,7 +110,10 @@ class LicenseProtection
                 'url' => $request->fullUrl(),
             ]);
             // In case of error, allow the request to proceed
-            return $next($request);
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         }
     }
     /**
@@ -189,7 +210,7 @@ class LicenseProtection
             return false; // No expiration date means license doesn't expire
         }
         try {
-            $expiration = Carbon::parse($expirationDate);
+            $expiration = Carbon::parse(is_string($expirationDate) ? $expirationDate : '');
             return Carbon::now()->isAfter($expiration);
         } catch (\Exception $e) {
             Log::warning('Invalid license expiration date format', [
@@ -213,7 +234,7 @@ class LicenseProtection
             return true;
         }
         try {
-            $lastVerificationTime = Carbon::parse($lastVerification);
+            $lastVerificationTime = Carbon::parse(is_string($lastVerification) ? $lastVerification : '');
             $now = Carbon::now();
             // Verify every 24 hours
             return $now->diffInHours($lastVerificationTime) >= 24;
@@ -246,8 +267,8 @@ class LicenseProtection
                 }
             };
             $result = $licenseVerifier->verifyLicense(
-                $this->sanitizeInput($licenseInfo['license_purchase_code']),
-                $this->sanitizeInput($licenseInfo['license_domain']),
+                $this->sanitizeInput(is_string($licenseInfo['license_purchase_code'] ?? null) ? $licenseInfo['license_purchase_code'] : null) ?? '',
+                $this->sanitizeInput(is_string($licenseInfo['license_domain'] ?? null) ? $licenseInfo['license_domain'] : null) ?? '',
             );
             // Update last verification time
             Setting::updateOrCreate(
@@ -257,7 +278,7 @@ class LicenseProtection
             // If license is invalid, log it but don't block the request immediately
             if (! $result['valid']) {
                 Log::warning('License verification failed during periodic check', [
-                    'purchase_code' => $this->maskPurchaseCode($licenseInfo['license_purchase_code']),
+                    'purchase_code' => $this->maskPurchaseCode(is_string($licenseInfo['license_purchase_code']) ? $licenseInfo['license_purchase_code'] : ''),
                     'domain' => $licenseInfo['license_domain'],
                     'message' => $result['message'] ?? 'Unknown error',
                 ]);

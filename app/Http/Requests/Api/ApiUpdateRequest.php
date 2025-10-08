@@ -406,13 +406,13 @@ class ApiUpdateRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'license_key' => $this->sanitizeInput($this->license_key),
-            'current_version' => $this->current_version ? $this->sanitizeInput($this->current_version) : null,
-            'domain' => $this->sanitizeInput($this->domain),
-            'product_slug' => $this->sanitizeInput($this->product_slug),
-            'version' => $this->version ? $this->sanitizeInput($this->version) : null,
-            'filter_version' => $this->filter_version ? $this->sanitizeInput($this->filter_version) : null,
-            'sort_order' => $this->sort_order ? $this->sanitizeInput($this->sort_order) : null,
+            'license_key' => $this->sanitizeInput($this->input('license_key')),
+            'current_version' => $this->input('current_version') ? $this->sanitizeInput($this->input('current_version')) : null,
+            'domain' => $this->sanitizeInput($this->input('domain')),
+            'product_slug' => $this->sanitizeInput($this->input('product_slug')),
+            'version' => $this->input('version') ? $this->sanitizeInput($this->input('version')) : null,
+            'filter_version' => $this->input('filter_version') ? $this->sanitizeInput($this->input('filter_version')) : null,
+            'sort_order' => $this->input('sort_order') ? $this->sanitizeInput($this->input('sort_order')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -452,15 +452,20 @@ class ApiUpdateRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

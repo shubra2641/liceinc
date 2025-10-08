@@ -79,7 +79,7 @@ class LicenseVerificationLogger
             // Hash the purchase code for security
             $purchaseCodeHash = hash('sha256', $purchaseCode);
             // Determine status with validation
-            $status = $this->determineStatus($isValid, $errorDetails);
+            $status = self::determineStatus($isValid, $errorDetails);
             // Create log entry
             $log = LicenseVerificationLog::create([
                 'purchase_code_hash' => $purchaseCodeHash,
@@ -204,7 +204,7 @@ class LicenseVerificationLogger
         try {
             $hours = self::validateHours($hours);
             $minAttempts = self::validateMinAttempts($minAttempts);
-            return LicenseVerificationLog::recent($hours)
+            $result = LicenseVerificationLog::recent($hours)
                 ->failed()
                 ->selectRaw('ip_address, COUNT(*) as attempt_count, MAX(created_at) as last_attempt')
                 ->groupBy('ip_address')
@@ -212,6 +212,9 @@ class LicenseVerificationLogger
                 ->orderBy('attempt_count', 'desc')
                 ->get()
                 ->toArray();
+            /** @var array<string, mixed> $typedResult */
+            $typedResult = $result;
+            return $typedResult;
         } catch (Exception $e) {
             Log::error('Failed to get suspicious activity: ' . $e->getMessage());
             return [];
@@ -276,7 +279,7 @@ class LicenseVerificationLogger
             $cutoffDate = now()->subDays($days);
             $deletedCount = LicenseVerificationLog::where('created_at', '<', $cutoffDate)->delete();
             // Cleanup completed successfully - no logging needed for successful operations
-            return $deletedCount;
+            return is_numeric($deletedCount) ? (int)$deletedCount : 0;
         } catch (Exception $e) {
             Log::error('Failed to clean old logs: ' . $e->getMessage());
             return 0;

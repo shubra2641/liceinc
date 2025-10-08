@@ -104,38 +104,48 @@ class LicenseVerifyRequest extends FormRequest
     {
         // Sanitize inputs to prevent XSS
         $this->merge([
-            'purchase_code' => $this->sanitizeInput($this->purchase_code),
-            'product_slug' => $this->sanitizeInput($this->product_slug),
-            'domain' => $this->sanitizeDomain($this->domain),
-            'verification_key' => $this->verification_key ? $this->sanitizeInput($this->verification_key) : null,
+            'purchase_code' => $this->sanitizeInput($this->input('purchase_code')),
+            'product_slug' => $this->sanitizeInput($this->input('product_slug')),
+            'domain' => $this->sanitizeDomain($this->input('domain')),
+            'verification_key' => $this->input('verification_key') ? $this->sanitizeInput($this->input('verification_key')) : null,
         ]);
     }
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
     /**
      * Sanitize domain input with special handling for URLs.
      *
-     * @param  string|null  $domain  The domain to sanitize
+     * @param  mixed  $domain  The domain to sanitize
      *
      * @return string|null The sanitized domain
      */
-    private function sanitizeDomain(?string $domain): ?string
+    private function sanitizeDomain(mixed $domain): ?string
     {
-        if ($domain === null) {
+        if ($domain === null || $domain === '') {
             return null;
         }
+        
+        if (!is_string($domain)) {
+            return null;
+        }
+        
         // Extract host from URL if it's a full URL
         $host = parse_url($domain, PHP_URL_HOST);
         if ($host) {

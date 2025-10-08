@@ -7,15 +7,8 @@ use Illuminate\Foundation\Http\FormRequest;
 /**
  * Confirm Password Request with enhanced security.
  *
- * This request class handles validation for password confirmation
+ * This request class handles validation for password confirmation operations
  * with comprehensive security measures and input sanitization.
- *
- * Features:
- * - Enhanced security measures (XSS protection, input validation)
- * - Custom validation messages for better user experience
- * - Proper type hints and return types
- * - Security validation rules (XSS protection, SQL injection prevention)
- * - Input sanitization and validation
  */
 class ConfirmPasswordRequest extends FormRequest
 {
@@ -24,7 +17,7 @@ class ConfirmPasswordRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check();
+        return true;
     }
 
     /**
@@ -38,14 +31,13 @@ class ConfirmPasswordRequest extends FormRequest
             'password' => [
                 'required',
                 'string',
-                'min:8',
-                'max:255',
+                'current_password',
             ],
         ];
     }
 
     /**
-     * Get custom messages for validator errors.
+     * Get custom validation messages.
      *
      * @return array<string, string>
      */
@@ -53,21 +45,33 @@ class ConfirmPasswordRequest extends FormRequest
     {
         return [
             'password.required' => 'Password is required.',
-            'password.string' => 'Password must be a string.',
-            'password.min' => 'Password must be at least 8 characters.',
-            'password.max' => 'Password must not exceed 255 characters.',
+            'password.current_password' => 'The provided password is incorrect.',
         ];
     }
 
     /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
+     * Prepare the data for validation.
      */
-    public function attributes(): array
+    protected function prepareForValidation(): void
     {
-        return [
-            'password' => 'password',
-        ];
+        $this->merge([
+            'password' => $this->sanitizeInput($this->password),
+        ]);
+    }
+
+    /**
+     * Sanitize input to prevent XSS attacks.
+     */
+    private function sanitizeInput(mixed $input): ?string
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
+        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

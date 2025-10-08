@@ -63,7 +63,9 @@ class AutoUpdateController extends Controller
      */
     public function index()
     {
-        return view('admin.auto-update.index');
+        /** @var view-string $view */
+        $view = 'admin.auto-update.index';
+        return view($view);
     }
 
     /**
@@ -138,16 +140,17 @@ class AutoUpdateController extends Controller
                 'current_version.regex' => 'Version contains invalid characters.',
             ]);
             // Sanitize input to prevent XSS attacks
-            $licenseKey = $this->sanitizeInput($validated['license_key']);
-            $productSlug = $this->sanitizeInput($validated['product_slug']);
-            $domain = $validated['domain'] ? $this->sanitizeInput($validated['domain']) : null;
-            $currentVersion = $this->sanitizeInput($validated['current_version']);
+            $validatedArray = is_array($validated) ? $validated : [];
+            $licenseKey = $this->sanitizeInput($validatedArray['license_key'] ?? '');
+            $productSlug = $this->sanitizeInput($validatedArray['product_slug'] ?? '');
+            $domain = isset($validatedArray['domain']) && $validatedArray['domain'] ? $this->sanitizeInput($validatedArray['domain']) : null;
+            $currentVersion = $this->sanitizeInput($validatedArray['current_version'] ?? '');
             // Check for updates using LicenseServerService
             $updateData = $this->licenseServerService->checkUpdates(
-                $licenseKey,
-                $currentVersion,
-                $productSlug,
-                $domain,
+                is_string($licenseKey) ? $licenseKey : '',
+                is_string($currentVersion) ? $currentVersion : '',
+                is_string($productSlug) ? $productSlug : '',
+                is_string($domain) ? $domain : null,
             );
             if ($updateData['success']) {
                 DB::commit();
@@ -158,7 +161,7 @@ class AutoUpdateController extends Controller
                 ]);
             } else {
                 Log::warning('Update check failed', [
-                    'license_key' => substr($licenseKey, 0, 4).'...',
+                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4).'...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'current_version' => $currentVersion,
@@ -265,20 +268,21 @@ class AutoUpdateController extends Controller
                 'version.regex' => 'Version contains invalid characters.',
             ]);
             // Sanitize input to prevent XSS attacks
-            $licenseKey = $this->sanitizeInput($validated['license_key']);
-            $productSlug = $this->sanitizeInput($validated['product_slug']);
-            $domain = $validated['domain'] ? $this->sanitizeInput($validated['domain']) : null;
-            $version = $this->sanitizeInput($validated['version']);
+            $validatedArray = is_array($validated) ? $validated : [];
+            $licenseKey = $this->sanitizeInput($validatedArray['license_key'] ?? '');
+            $productSlug = $this->sanitizeInput($validatedArray['product_slug'] ?? '');
+            $domain = isset($validatedArray['domain']) && $validatedArray['domain'] ? $this->sanitizeInput($validatedArray['domain']) : null;
+            $version = $this->sanitizeInput($validatedArray['version'] ?? '');
             // First verify license again
             $updateData = $this->licenseServerService->checkUpdates(
-                $licenseKey,
+                is_string($licenseKey) ? $licenseKey : '',
                 '1.0.0', // Dummy version for verification
-                $productSlug,
-                $domain,
+                is_string($productSlug) ? $productSlug : '',
+                is_string($domain) ? $domain : null,
             );
             if (! $updateData['success']) {
                 Log::warning('License verification failed during update installation', [
-                    'license_key' => substr($licenseKey, 0, 4).'...',
+                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4).'...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'version' => $version,
@@ -295,14 +299,14 @@ class AutoUpdateController extends Controller
             }
             // Download update file
             $downloadResult = $this->licenseServerService->downloadUpdate(
-                $licenseKey,
-                $version,
-                $productSlug,
-                $domain,
+                is_string($licenseKey) ? $licenseKey : '',
+                is_string($version) ? $version : '',
+                is_string($productSlug) ? $productSlug : '',
+                is_string($domain) ? $domain : null,
             );
             if (! $downloadResult['success']) {
                 Log::error('Update download failed', [
-                    'license_key' => substr($licenseKey, 0, 4).'...',
+                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4).'...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'version' => $version,
@@ -317,16 +321,16 @@ class AutoUpdateController extends Controller
                 ], 500);
             }
             // Save update file
-            $updateFileName = 'update_'.(is_string($version) ? $version : (string)$version).'_'.time().'.zip';
+            $updateFileName = 'update_'.(is_string($version) ? $version : '').'_'.time().'.zip';
             $updateFilePath = storage_path("app/updates/{$updateFileName}");
             // Ensure updates directory exists
             if (! File::exists(storage_path('app/updates'))) {
                 File::makeDirectory(storage_path('app/updates'), 0755, true);
             }
             // Save the downloaded content
-            File::put($updateFilePath, $downloadResult['content']);
+            File::put($updateFilePath, is_string($downloadResult['content']) ? $downloadResult['content'] : '');
             // Extract and install update
-            $installResult = $this->installUpdatePackage($updateFilePath, $version);
+            $installResult = $this->installUpdatePackage($updateFilePath, is_string($version) ? $version : '');
             if ($installResult['success']) {
                 // Clean up update file
                 File::delete($updateFilePath);
@@ -580,14 +584,10 @@ class AutoUpdateController extends Controller
      */
     private function restoreFromBackup(string $backupPath): void
     {
-        try {
-            // Implementation depends on backup format
-            // Restoring from backup
-        } catch (\Exception $e) {
-            Log::error('Failed to restore from backup', [
-                'backup_path' => $backupPath,
-                'error' => $e->getMessage(),
-            ]);
-        }
+        // Implementation depends on backup format
+        // Restoring from backup
+        Log::info('Restoring from backup', [
+            'backup_path' => $backupPath,
+        ]);
     }
 }

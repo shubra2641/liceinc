@@ -40,7 +40,7 @@ class LicenseVerificationLogController extends Controller
      * by status, source, domain, IP address, and date range. Includes statistics
      * and suspicious activity monitoring.
      *
-     * @param  LicenseVerificationLogFilterRequest  $request  The HTTP request containing optional filter parameters
+     * @param  LicenseVerificationLogRequest  $request  The HTTP request containing optional filter parameters
      *
      * @return View The license verification logs index view with filtered data
      *
@@ -71,13 +71,13 @@ class LicenseVerificationLogController extends Controller
             $domains = LicenseVerificationLog::distinct()->pluck('domain')->filter();
             DB::commit();
 
-            return view('admin.license-verification-logs.index', compact(
-                'logs',
-                'stats',
-                'suspiciousActivity',
-                'sources',
-                'domains',
-            ));
+            return view('admin.license-verification-logs.index', [
+                'logs' => $logs,
+                'stats' => $stats,
+                'suspiciousActivity' => $suspiciousActivity,
+                'sources' => $sources,
+                'domains' => $domains,
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('License verification logs listing failed', [
@@ -87,7 +87,7 @@ class LicenseVerificationLogController extends Controller
 
             // Return empty results on error
             return view('admin.license-verification-logs.index', [
-                'logs' => collect()->paginate(20),
+                'logs' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20),
                 'stats' => [],
                 'suspiciousActivity' => [],
                 'sources' => collect(),
@@ -102,7 +102,7 @@ class LicenseVerificationLogController extends Controller
      * Retrieves statistics for license verification attempts over a specified
      * number of days with proper validation and error handling.
      *
-     * @param  LicenseVerificationLogStatsRequest  $request  The HTTP request containing days parameter
+     * @param  LicenseVerificationLogRequest  $request  The HTTP request containing days parameter
      *
      * @return JsonResponse JSON response with statistics data
      *
@@ -121,7 +121,7 @@ class LicenseVerificationLogController extends Controller
     {
         try {
             $days = $request->validated()['days'] ?? 30;
-            $stats = LicenseVerificationLogger::getStats($days);
+            $stats = LicenseVerificationLogger::getStats(is_numeric($days) ? (int)$days : 30);
 
             return response()->json($stats);
         } catch (\Exception $e) {
@@ -142,7 +142,7 @@ class LicenseVerificationLogController extends Controller
      * Retrieves suspicious license verification activity based on time period
      * and minimum attempt thresholds with proper validation.
      *
-     * @param  LicenseVerificationLogSuspiciousActivityRequest  $request
+     * @param  LicenseVerificationLogRequest  $request
      *         The HTTP request containing hours and min_attempts parameters
      *
      * @return JsonResponse JSON response with suspicious activity data
@@ -164,7 +164,7 @@ class LicenseVerificationLogController extends Controller
             $validated = $request->validated();
             $hours = $validated['hours'] ?? 24;
             $minAttempts = $validated['min_attempts'] ?? 3;
-            $activity = LicenseVerificationLogger::getSuspiciousActivity($hours, $minAttempts);
+            $activity = LicenseVerificationLogger::getSuspiciousActivity(is_numeric($hours) ? (int)$hours : 24, is_numeric($minAttempts) ? (int)$minAttempts : 3);
 
             return response()->json($activity);
         } catch (\Exception $e) {
@@ -203,7 +203,7 @@ class LicenseVerificationLogController extends Controller
     public function show(LicenseVerificationLog $log): View
     {
         try {
-            return view('admin.license-verification-logs.show', compact('log'));
+            return view('admin.license-verification-logs.show', ['log' => $log]);
         } catch (\Exception $e) {
             Log::error('License verification log view failed to load', [
                 'error' => $e->getMessage(),
@@ -225,7 +225,7 @@ class LicenseVerificationLogController extends Controller
      * Removes license verification logs older than the specified number of days
      * with proper validation and error handling.
      *
-     * @param  LicenseVerificationLogCleanupRequest  $request  The HTTP request containing days parameter
+     * @param  LicenseVerificationLogRequest  $request  The HTTP request containing days parameter
      *
      * @return JsonResponse JSON response with cleanup results
      *
@@ -254,7 +254,7 @@ class LicenseVerificationLogController extends Controller
             DB::beginTransaction();
             $validated = $request->validated();
             $daysToKeep = $validated['days'] ?? 90;
-            $cleanedCount = LicenseVerificationLogger::cleanOldLogs($daysToKeep);
+            $cleanedCount = LicenseVerificationLogger::cleanOldLogs(is_numeric($daysToKeep) ? (int)$daysToKeep : 90);
             DB::commit();
 
             return response()->json([
@@ -282,7 +282,7 @@ class LicenseVerificationLogController extends Controller
      * Exports filtered license verification logs to CSV format with proper
      * validation and error handling.
      *
-     * @param  LicenseVerificationLogFilterRequest  $request  The HTTP request containing filter parameters
+     * @param  LicenseVerificationLogRequest  $request  The HTTP request containing filter parameters
      *
      * @return \Symfony\Component\HttpFoundation\StreamedResponse CSV file download
      *
@@ -297,14 +297,14 @@ class LicenseVerificationLogController extends Controller
      * // - All relevant fields
      * // - Proper formatting
      */
-    public function export(LicenseVerificationLogFilterRequest $request)
+    public function export(LicenseVerificationLogRequest $request)
     {
         // Rate limiting for export functionality
         $key = 'license-logs-export:'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
-            return response()->json([
-                'error' => 'Too many export attempts. Please try again later.',
-            ], 429);
+            return new \Symfony\Component\HttpFoundation\StreamedResponse(function() {
+                echo 'Too many export attempts. Please try again later.';
+            }, 429);
         }
         RateLimiter::hit($key, 300); // 5 minutes
         try {
@@ -318,6 +318,9 @@ class LicenseVerificationLogController extends Controller
             ];
             $callback = function () use ($logs) {
                 $file = SecureFileHelper::openOutput('w');
+                if (!is_resource($file)) {
+                    return;
+                }
                 // CSV Headers
                 fputcsv($file, [
                     'ID', 'Purchase Code Hash', 'Domain', 'IP Address', 'Status',
@@ -349,9 +352,9 @@ class LicenseVerificationLogController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
-                'error' => 'Failed to export logs. Please try again.',
-            ], 500);
+            return new \Symfony\Component\HttpFoundation\StreamedResponse(function() {
+                echo 'Failed to export logs. Please try again.';
+            }, 500);
         }
     }
 
@@ -362,7 +365,7 @@ class LicenseVerificationLogController extends Controller
      * and ensures consistent security validation across all methods.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query  The query builder instance
-     * @param  LicenseVerificationLogFilterRequest  $request  The HTTP request containing filter parameters
+     * @param  LicenseVerificationLogRequest  $request  The HTTP request containing filter parameters
      *
      * @return \Illuminate\Database\Eloquent\Builder The filtered query builder
      *
@@ -397,19 +400,19 @@ class LicenseVerificationLogController extends Controller
         }
         // Apply domain filter
         if (! empty($validated['domain'])) {
-            $query->where('domain', 'like', '%'.(is_string($validated['domain']) ? $validated['domain'] : (string)$validated['domain']).'%');
+            $query->where('domain', 'like', '%'.(is_string($validated['domain']) ? $validated['domain'] : '').'%');
         }
         // Apply IP address filter
         if (! empty($validated['ip'])) {
-            $query->where('ip_address', 'like', '%'.(is_string($validated['ip']) ? $validated['ip'] : (string)$validated['ip']).'%');
+            $query->where('ip_address', 'like', '%'.(is_string($validated['ip']) ? $validated['ip'] : '').'%');
         }
         // Apply date from filter
         if (! empty($validated['date_from'])) {
-            $query->whereDate('created_at', '>=', $validated['date_from']);
+            $query->whereDate('created_at', '>=', is_string($validated['date_from']) ? $validated['date_from'] : null);
         }
         // Apply date to filter
         if (! empty($validated['date_to'])) {
-            $query->whereDate('created_at', '<=', $validated['date_to']);
+            $query->whereDate('created_at', '<=', is_string($validated['date_to']) ? $validated['date_to'] : null);
         }
 
         return $query;

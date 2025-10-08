@@ -57,7 +57,10 @@ class EnsureAdmin
         try {
             // Skip authentication for static assets
             if ($this->isStaticAsset($request)) {
-                return $next($request);
+                $response = $next($request);
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                $typedResponse = $response;
+                return $typedResponse;
             }
             // Check if user is authenticated
             if (! $request->user()) {
@@ -72,7 +75,10 @@ class EnsureAdmin
             }
             // Additional security: Check if user is active and email verified
             $this->validateUserEmailVerification($request, $user);
-            return $next($request);
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         } catch (Throwable $e) {
             Log::error('EnsureAdmin middleware processing error', [
                 'error' => $e->getMessage(),
@@ -213,18 +219,7 @@ class EnsureAdmin
      */
     private function logTestEmailAccess(Request $request, $user): void
     {
-        try {
-            // Test email access - no logging needed for successful access
-        } catch (Throwable $e) {
-            Log::error('Failed to log test email access', [
-                'error' => $e->getMessage(),
-                'user_id' => $user->id ?? 'unknown',
-                'url' => $request->fullUrl(),
-                'method' => $request->method(),
-                'ip' => $request->ip(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-        }
+        // Test email access - no logging needed for successful access
     }
     /**
      * Sanitize input to prevent XSS attacks.
@@ -233,10 +228,6 @@ class EnsureAdmin
      *
      * @return string The sanitized input
      */
-    private function sanitizeInput(string $input): string
-    {
-        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-    }
     /**
      * Check if the request is for a static asset.
      *
@@ -300,6 +291,6 @@ class EnsureAdmin
      */
     private function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data . config('app.key')), 0, 8) . '...';
+        return substr(hash('sha256', $data . (is_string(config('app.key')) ? config('app.key') : '')), 0, 8) . '...';
     }
 }

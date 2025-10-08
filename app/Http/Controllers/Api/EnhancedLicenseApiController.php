@@ -106,32 +106,34 @@ class EnhancedLicenseApiController extends BaseController
             // Additional authorization check for verification
             if (! $this->isAuthorized($request)) {
                 $this->logSecurityEvent('Unauthorized API access', $request, [
-                    'purchase_code' => $this->securityService->hashForLogging($validated['purchase_code']),
+                    'purchase_code' => $this->securityService->hashForLogging(is_string($validated['purchase_code']) ? $validated['purchase_code'] : ''),
                 ]);
 
-                return $this->errorResponse('Unauthorized', Response::HTTP_UNAUTHORIZED);
+                return $this->errorResponse('Unauthorized', null, Response::HTTP_UNAUTHORIZED);
             }
             // Find product
-            $product = $this->findProduct($validated['product_slug']);
+            $productSlug = is_string($validated['product_slug']) ? $validated['product_slug'] : '';
+            $product = $this->findProduct($productSlug);
             if (! $product) {
                 Log::warning('Product not found during enhanced license verification', [
-                    'product_slug' => $validated['product_slug'],
+                    'product_slug' => $productSlug,
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
 
-                return $this->errorResponse('Product not found', Response::HTTP_NOT_FOUND);
+                return $this->errorResponse('Product not found', null, Response::HTTP_NOT_FOUND);
             }
             // Verify verification key if provided
+            $verificationKey = is_string($validated['verification_key'] ?? null) ? $validated['verification_key'] : '';
             if (
                 isset($validated['verification_key']) &&
-                ! $this->verifyVerificationKey($product, $validated['verification_key'])
+                ! $this->verifyVerificationKey($product, $verificationKey)
             ) {
                 $this->logSecurityEvent('Invalid verification key', $request, [
                     'product_slug' => $validated['product_slug'],
                 ]);
 
-                return $this->errorResponse('Invalid verification key', Response::HTTP_FORBIDDEN);
+                return $this->errorResponse('Invalid verification key', null, Response::HTTP_FORBIDDEN);
             }
             // Process license verification
             $result = $this->processLicenseVerification($product, $validated, $request);
@@ -141,10 +143,12 @@ class EnhancedLicenseApiController extends BaseController
         } catch (ValidationException $e) {
             DB::rollBack();
 
+            /** @var array<string, mixed> $errors */
+            $errors = $e->errors();
             return $this->errorResponse(
                 'Validation failed',
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                $e->errors(),
+                $errors,
+                Response::HTTP_UNPROCESSABLE_ENTITY
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -199,15 +203,16 @@ class EnhancedLicenseApiController extends BaseController
             // Get validated data from Request class
             $validated = $request->validated();
             // Find product
-            $product = $this->findProduct($validated['product_slug']);
+            $productSlug = is_string($validated['product_slug']) ? $validated['product_slug'] : '';
+            $product = $this->findProduct($productSlug);
             if (! $product) {
                 Log::warning('Product not found during enhanced license registration', [
-                    'product_slug' => $validated['product_slug'],
+                    'product_slug' => $productSlug,
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
 
-                return $this->errorResponse('Product not found', Response::HTTP_NOT_FOUND);
+                return $this->errorResponse('Product not found', null, Response::HTTP_NOT_FOUND);
             }
             // Check if license already exists
             $existingLicense = License::where('purchase_code', $validated['purchase_code'])
@@ -232,10 +237,12 @@ class EnhancedLicenseApiController extends BaseController
         } catch (ValidationException $e) {
             DB::rollBack();
 
+            /** @var array<string, mixed> $errors */
+            $errors = $e->errors();
             return $this->errorResponse(
                 'Validation failed',
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                $e->errors(),
+                $errors,
+                Response::HTTP_UNPROCESSABLE_ENTITY
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -290,15 +297,16 @@ class EnhancedLicenseApiController extends BaseController
             // Get validated data from Request class
             $validated = $request->validated();
             // Find product
-            $product = $this->findProduct($validated['product_slug']);
+            $productSlug = is_string($validated['product_slug']) ? $validated['product_slug'] : '';
+            $product = $this->findProduct($productSlug);
             if (! $product) {
                 Log::warning('Product not found during enhanced license status check', [
-                    'product_slug' => $validated['product_slug'],
+                    'product_slug' => $productSlug,
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
 
-                return $this->errorResponse('Product not found', Response::HTTP_NOT_FOUND);
+                return $this->errorResponse('Product not found', null, Response::HTTP_NOT_FOUND);
             }
             // Find license
             $license = License::where('license_key', $validated['license_key'])
@@ -312,7 +320,7 @@ class EnhancedLicenseApiController extends BaseController
                     'user_agent' => $request->userAgent(),
                 ]);
 
-                return $this->errorResponse('License not found', Response::HTTP_NOT_FOUND);
+                return $this->errorResponse('License not found', null, Response::HTTP_NOT_FOUND);
             }
             // Check license status
             $isActive = $this->isLicenseActive($license);
@@ -330,10 +338,12 @@ class EnhancedLicenseApiController extends BaseController
         } catch (ValidationException $e) {
             DB::rollBack();
 
+            /** @var array<string, mixed> $errors */
+            $errors = $e->errors();
             return $this->errorResponse(
                 'Validation failed',
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                $e->errors(),
+                $errors,
+                Response::HTTP_UNPROCESSABLE_ENTITY
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -356,7 +366,8 @@ class EnhancedLicenseApiController extends BaseController
             abort(Response::HTTP_FORBIDDEN, 'Suspicious activity detected');
         }
         // Check IP blacklist
-        if ($this->securityService->isIpBlacklisted($request->ip())) {
+        $clientIp = $request->ip();
+        if ($clientIp && $this->securityService->isIpBlacklisted($clientIp)) {
             $this->logSecurityEvent('Blacklisted IP access attempt', $request);
             abort(Response::HTTP_FORBIDDEN, 'Access denied');
         }
@@ -382,11 +393,11 @@ class EnhancedLicenseApiController extends BaseController
                 ]);
             }
 
-            return $this->errorResponse($message, Response::HTTP_TOO_MANY_REQUESTS);
+            return $this->errorResponse($message, null, Response::HTTP_TOO_MANY_REQUESTS);
         }
         // Check authorization
         if (! $this->isAuthorized($request)) {
-            return $this->errorResponse('Unauthorized', Response::HTTP_UNAUTHORIZED);
+            return $this->errorResponse('Unauthorized', null, Response::HTTP_UNAUTHORIZED);
         }
 
         return null;
@@ -400,7 +411,7 @@ class EnhancedLicenseApiController extends BaseController
         $authHeader = $request->header('Authorization');
         $expectedToken = 'Bearer '.$this->getApiToken();
 
-        return $expectedToken !== '' && $authHeader === $expectedToken;
+        return $authHeader === $expectedToken;
     }
 
     /**
@@ -408,7 +419,8 @@ class EnhancedLicenseApiController extends BaseController
      */
     private function getApiToken(): string
     {
-        return \App\Helpers\ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
+        $token = \App\Helpers\ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
+        return is_string($token) ? $token : '';
     }
 
     /**
@@ -416,9 +428,10 @@ class EnhancedLicenseApiController extends BaseController
      */
     private function findProduct(string $slug): ?Product
     {
-        return Cache::remember("product_slug_{$slug}", 3600, function () use ($slug) {
+        $result = Cache::remember("product_slug_{$slug}", 3600, function () use ($slug) {
             return Product::where('slug', $slug)->first();
         });
+        return $result instanceof Product ? $result : null;
     }
 
     /**
@@ -442,8 +455,8 @@ class EnhancedLicenseApiController extends BaseController
      */
     private function processLicenseVerification(Product $product, array $validated, Request $request): array
     {
-        $purchaseCode = $validated['purchase_code'];
-        $domain = $validated['domain'] ?? null;
+        $purchaseCode = is_string($validated['purchase_code']) ? $validated['purchase_code'] : '';
+        $domain = is_string($validated['domain'] ?? null) ? $validated['domain'] : null;
         // Check database first
         $license = License::where('purchase_code', $purchaseCode)
             ->where('product_id', $product->id)
@@ -514,7 +527,9 @@ class EnhancedLicenseApiController extends BaseController
             abort(Response::HTTP_NOT_FOUND, 'License not found');
         }
         // Create license from Envato data
-        $license = $this->createLicenseFromEnvato($product, $purchaseCode, $envatoData);
+        /** @var array<string, mixed> $envatoDataTyped */
+        $envatoDataTyped = $envatoData;
+        $license = $this->createLicenseFromEnvato($product, $purchaseCode, $envatoDataTyped);
 
         return [
             'license_id' => $license->id,
@@ -547,8 +562,8 @@ class EnhancedLicenseApiController extends BaseController
     private function verifyDomain(License $license, string $domain): bool
     {
         // Clean domain
-        $domain = preg_replace('/^https?:\/\//', '', $domain);
-        $domain = preg_replace('/^www\./', '', $domain);
+        $domain = preg_replace('/^https?:\/\//', '', $domain) ?? $domain;
+        $domain = preg_replace('/^www\./', '', $domain) ?? $domain;
         $authorizedDomains = $license->domains()->where('status', 'active')->get();
         if ($authorizedDomains->isEmpty()) {
             $this->registerDomainForLicense($license, $domain);
@@ -556,17 +571,17 @@ class EnhancedLicenseApiController extends BaseController
             return true;
         }
         foreach ($authorizedDomains as $authorizedDomain) {
-            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain);
-            $authDomain = preg_replace('/^www\./', '', $authDomain);
+            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain ?? '');
+            $authDomain = preg_replace('/^www\./', '', $authDomain ?? '');
             if ($authDomain === $domain) {
                 $authorizedDomain->update(['last_used_at' => now()]);
 
                 return true;
             }
             // Check wildcard domains
-            if (str_starts_with($authDomain, '*.')) {
+            if ($authDomain && str_starts_with($authDomain, '*.')) {
                 $pattern = str_replace('*.', '', $authDomain);
-                if (str_ends_with($domain, $pattern)) {
+                if ($domain && str_ends_with($domain, $pattern)) {
                     $authorizedDomain->update(['last_used_at' => now()]);
 
                     return true;
@@ -582,8 +597,8 @@ class EnhancedLicenseApiController extends BaseController
      */
     private function registerDomainForLicense(License $license, string $domain): void
     {
-        $cleanDomain = preg_replace('/^https?:\/\//', '', $domain);
-        $cleanDomain = preg_replace('/^www\./', '', $cleanDomain);
+        $cleanDomain = preg_replace('/^https?:\/\//', '', $domain) ?? $domain;
+        $cleanDomain = preg_replace('/^www\./', '', $cleanDomain) ?? $cleanDomain;
         $existingDomain = $license->domains()
             ->where('domain', $cleanDomain)
             ->first();
@@ -649,30 +664,13 @@ class EnhancedLicenseApiController extends BaseController
     private function generateLicenseKey(): string
     {
         do {
-            $key = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid(mt_rand(), true)), 0, 8));
+            $key = strtoupper(substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8));
         } while (License::where('license_key', $key)->exists());
 
         return $key;
     }
 
-    /**
-     * Log successful verification.
-     *
-     * @param array<string, mixed> $result
-     */
-    private function logSuccessfulVerification(Request $request, array $result): void
-    {
-        // No logging needed for successful operations per Envato compliance rules
-    }
-
-    /**
-     * Log license registration.
-     */
-    private function logLicenseRegistration(Request $request, License $license): void
-    {
-        // No logging needed for successful operations per Envato compliance rules
-    }
 }

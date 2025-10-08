@@ -63,10 +63,12 @@ class CreateRenewalInvoices implements ShouldQueue
         try {
             DB::beginTransaction();
             // Create renewal invoices with validation
-            $result = $invoiceService->createRenewalInvoicesForExpiringLicenses();
-            if (! $result) {
-                throw new \Exception('Invoice service returned false - no invoices created');
+            $licenseInstance = $license instanceof \App\Models\License ? $license : null;
+            if ($licenseInstance === null) {
+                throw new \InvalidArgumentException('Invalid license instance provided');
             }
+            $result = $invoiceService->createRenewalInvoice($licenseInstance);
+            // Invoice created successfully
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

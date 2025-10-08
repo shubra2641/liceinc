@@ -154,7 +154,7 @@ class EmailTemplate extends Model
     protected function replaceVariables(string $content, array $data): string
     {
         foreach ($data as $key => $value) {
-            $content = str_replace("{{$key}}", $value, $content);
+            $content = str_replace("{{$key}}", is_string($value) ? $value : '', $content);
         }
         return $content;
     }

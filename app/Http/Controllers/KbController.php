@@ -67,7 +67,7 @@ class KbController extends Controller
                 ->limit(self::RECENT_ARTICLES_LIMIT)
                 ->get();
             DB::commit();
-            return view('kb.index', compact('categories', 'recentArticles'));
+            return view('kb.index', ['categories' => $categories, 'recentArticles' => $recentArticles]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load knowledge base index: ' . $e->getMessage(), [
@@ -94,13 +94,15 @@ class KbController extends Controller
      * // Returns view with:
      * // - All available categories
      */
-    public function create(): View
+    public function create(): View|\Illuminate\Http\RedirectResponse
     {
         try {
             DB::beginTransaction();
             $categories = KbCategory::all();
             DB::commit();
-            return view('kb.create', compact('categories'));
+            /** @var view-string $viewName */
+            $viewName = 'kb.create';
+            return view($viewName, ['categories' => $categories]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load article creation form: ' . $e->getMessage(), [
@@ -135,9 +137,7 @@ class KbController extends Controller
     public function store(Request $request): RedirectResponse
     {
         try {
-            if (! $request) {
-                throw new \InvalidArgumentException('Request cannot be null');
-            }
+            // Request is validated by type hint
             $validated = $this->validateArticleData($request);
             $validated['user_id'] = auth()->id();
             DB::beginTransaction();
@@ -178,13 +178,13 @@ class KbController extends Controller
     public function show(KbArticle $article): View
     {
         try {
-            if (! $article) {
-                throw new \InvalidArgumentException('Article cannot be null');
-            }
+            // Article is validated by type hint
             DB::beginTransaction();
             $article->load('category');
             DB::commit();
-            return view('kb.show', compact('article'));
+            /** @var view-string $viewName */
+            $viewName = 'kb.show';
+            return view($viewName, ['article' => $article]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load knowledge base article: ' . $e->getMessage(), [
@@ -214,16 +214,16 @@ class KbController extends Controller
      * // - Article data
      * // - All available categories
      */
-    public function edit(KbArticle $article): View
+    public function edit(KbArticle $article): View|\Illuminate\Http\RedirectResponse
     {
         try {
-            if (! $article) {
-                throw new \InvalidArgumentException('Article cannot be null');
-            }
+            // Article is validated by type hint
             DB::beginTransaction();
             $categories = KbCategory::all();
             DB::commit();
-            return view('kb.edit', compact('article', 'categories'));
+            /** @var view-string $viewName */
+            $viewName = 'kb.edit';
+            return view($viewName, ['article' => $article, 'categories' => $categories]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load article editing form: ' . $e->getMessage(), [
@@ -258,9 +258,7 @@ class KbController extends Controller
     public function update(Request $request, KbArticle $article): RedirectResponse
     {
         try {
-            if (! $request || ! $article) {
-                throw new \InvalidArgumentException('Request and article cannot be null');
-            }
+            // Request and article are validated by type hints
             $validated = $this->validateArticleUpdateData($request, $article);
             DB::beginTransaction();
             $article->update($validated);
@@ -296,9 +294,7 @@ class KbController extends Controller
     public function destroy(KbArticle $article): RedirectResponse
     {
         try {
-            if (! $article) {
-                throw new \InvalidArgumentException('Article cannot be null');
-            }
+            // Article is validated by type hint
             DB::beginTransaction();
             $article->delete();
             DB::commit();
@@ -336,10 +332,8 @@ class KbController extends Controller
     public function search(Request $request): View
     {
         try {
-            if (! $request) {
-                throw new \InvalidArgumentException('Request cannot be null');
-            }
-            $query = $this->validateSearchQuery($request->get('q'));
+            // Request is validated by type hint
+            $query = $this->validateSearchQuery(is_string($request->get('q')) ? $request->get('q') : null);
             DB::beginTransaction();
             $articles = KbArticle::where('status', 'published')
                 ->where(function ($q) use ($query) {
@@ -350,7 +344,7 @@ class KbController extends Controller
                 ->with('category')
                 ->paginate(self::PAGINATION_LIMIT);
             DB::commit();
-            return view('kb.search', compact('articles', 'query'));
+            return view('kb.search', ['articles' => $articles, 'query' => $query]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to search knowledge base articles: ' . $e->getMessage(), [
@@ -384,15 +378,13 @@ class KbController extends Controller
     public function category(KbCategory $category): View
     {
         try {
-            if (! $category) {
-                throw new \InvalidArgumentException('Category cannot be null');
-            }
+            // Category is validated by type hint
             DB::beginTransaction();
             $articles = $category->articles()
                 ->where('status', 'published')
                 ->paginate(self::PAGINATION_LIMIT);
             DB::commit();
-            return view('kb.category', compact('category', 'articles'));
+            return view('kb.category', ['category' => $category, 'articles' => $articles]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load category articles: ' . $e->getMessage(), [
@@ -412,7 +404,7 @@ class KbController extends Controller
      */
     private function validateArticleData(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:kb_articles, slug',
             'content' => 'required|string',
@@ -421,6 +413,10 @@ class KbController extends Controller
             'meta_description' => 'nullable|string|max:160',
             'tags' => 'nullable|string',
         ]);
+        
+        /** @var array<string, mixed> $result */
+        $result = $validated;
+        return $result;
     }
     /**
      * Validate article update data.
@@ -432,7 +428,7 @@ class KbController extends Controller
      */
     private function validateArticleUpdateData(Request $request, KbArticle $article): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:kb_articles, slug, ' . $article->id,
             'content' => 'required|string',
@@ -441,6 +437,10 @@ class KbController extends Controller
             'meta_description' => 'nullable|string|max:160',
             'tags' => 'nullable|string',
         ]);
+        
+        /** @var array<string, mixed> $result */
+        $result = $validated;
+        return $result;
     }
     /**
      * Validate search query.

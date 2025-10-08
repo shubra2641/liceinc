@@ -2,6 +2,7 @@
  * Admin Dashboard Charts and Statistics
  * Interactive charts and data visualization for the admin dashboard
  */
+/* global window document fetch URL setInterval setTimeout console Chart MutationObserver Blob bootstrap alert AdminCharts module */
 
 // Assume Chart.js and Bootstrap are loaded globally
 
@@ -9,14 +10,14 @@ if (typeof window.AdminCharts === 'undefined') {
   class AdminCharts {
     constructor() {
       this.charts = {};
+      // Track charts currently loading to avoid race conditions causing duplicate instantiation
+      this._loadingCharts = {};
       // Get base URL from meta tag or use current origin
-      // NOTE: use the full meta content (preserve possible subdirectory) instead of .origin
       const meta = document.querySelector('meta[name="base-url"]');
       let baseUrl = window.location.origin;
       if (meta && meta.content) {
         try {
-          // Keep the full URL as provided by the server (trim trailing slash)
-          baseUrl = meta.content.replace(/\/+$|\s+$/g, '');
+          baseUrl = meta.content.replace(/\/+$/g, '');
         } catch (e) {
           baseUrl = window.location.origin;
         }
@@ -24,79 +25,28 @@ if (typeof window.AdminCharts === 'undefined') {
       this.baseUrl = baseUrl;
 
       this.buildUrl = (path = '') => {
-        // Remove leading slashes and build full URL
         const cleanPath = (path || '').toString().replace(/^\/+/, '');
         const fullPath = cleanPath ? `/${cleanPath}` : '';
-        const finalUrl = `${this.baseUrl}${fullPath}`;
-        // URL building for API calls
-        return finalUrl;
+        return `${this.baseUrl}${fullPath}`;
       };
 
-      // Validate URL to prevent SSRF attacks
-      this.isValidUrl = url => {
-        try {
-          // eslint-disable-next-line no-new
-          new URL(url); // Validate URL format
-          const allowedOrigins = [
-            window.location.origin,
-            `${window.location.protocol}//${window.location.host}`,
-          ];
-          return allowedOrigins.some(origin => url.startsWith(origin));
-        } catch (e) {
-          return false;
-        }
-      };
-
-      // Unified fetch with proper URL building and authentication
       this.apiFetch = async(path, options = {}) => {
         const primaryUrl = this.buildUrl(path);
-
-        // Validate URL to prevent SSRF attacks
         if (!this.isValidUrl(primaryUrl)) {
           throw new Error('Invalid URL: SSRF protection activated');
         }
-
-        // Get CSRF token from meta tag
-        const csrfToken = document
-          .querySelector('meta[name="csrf-token"]')
-          ?.getAttribute('content');
-
-        // Prepare headers with authentication
-        const headers = {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-        };
-
-        // Add CSRF token if available
-        if (csrfToken) {
-          headers['X-CSRF-TOKEN'] = csrfToken;
-        }
-
-        // Merge with any additional headers
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const headers = { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
+        if (csrfToken) headers['X-CSRF-TOKEN'] = csrfToken;
         Object.assign(headers, options.headers || {});
-
-        const opts = Object.assign(
-          {
-            credentials: 'same-origin',
-            headers,
-            method: options.method || 'GET',
-          },
-          options,
-        );
-
+        const opts = Object.assign({ credentials: 'same-origin', headers, method: options.method || 'GET' }, options);
         const tryParseJson = async resp => {
           const ct = resp.headers.get('content-type') || '';
           if (!resp.ok) {
-            // Handle authentication errors gracefully
             if (resp.status === 401) {
-              throw new Error(
-                'Authentication required. Please refresh the page and log in again.',
-              );
+              throw new Error('Authentication required. Please refresh the page and log in again.');
             } else if (resp.status === 403) {
-              throw new Error(
-                'Access denied. You do not have permission to access this data.',
-              );
+              throw new Error('Access denied. You do not have permission to access this data.');
             } else if (resp.status === 404) {
               throw new Error('Data endpoint not found.');
             } else if (resp.status >= 500) {
@@ -109,21 +59,15 @@ if (typeof window.AdminCharts === 'undefined') {
           }
           return resp.json();
         };
-
         try {
-          // Validate URL to prevent SSRF attacks
           if (!this.isValidUrl(primaryUrl)) {
             throw new Error('Invalid URL: SSRF protection activated');
           }
           const resp = await fetch(primaryUrl, opts);
           return await tryParseJson(resp);
         } catch (e) {
-          // Log the error for debugging (only in development)
-          if (
-            window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1'
-          ) {
-            // AdminCharts: Failed to fetch data from primary URL, using fallback
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Debug fetch failure
           }
           throw e;
         }
@@ -132,194 +76,76 @@ if (typeof window.AdminCharts === 'undefined') {
       this.init();
     }
 
-    /**
-     * Validate URL to prevent SSRF attacks
-     */
-    isValidUrl(url) {
-      try {
-        // eslint-disable-next-line no-new
-        new URL(url); // Validate URL format
-        const allowedOrigins = [
-          window.location.origin,
-          `${window.location.protocol}//${window.location.host}`,
-        ];
-        return allowedOrigins.some(origin => url.startsWith(origin));
-      } catch (e) {
-        return false;
-      }
-    }
-
-    init() {
-      this.setupCharts();
-      this.setupRealTimeUpdates();
-      this.setupChartInteractions();
-    }
-
-    setupCharts() {
-      // System Overview Chart
-      this.createSystemOverviewChart();
-
-      // License Distribution Chart
-      this.createLicenseDistributionChart();
-
-      // Revenue Chart
-      this.createRevenueChart();
-
-      // Activity Timeline Chart
-      this.createActivityTimelineChart();
-
-      // Invoices Monthly Chart
-      this.createInvoicesMonthlyChart();
-
-      // Dashboard-specific charts
-      this.createApiRequestsChart();
-      this.createApiPerformanceChart();
-    }
-
     createSystemOverviewChart() {
       const ctx = document.getElementById('systemOverviewChart');
-      if (!ctx) {
-        return;
-      }
+      if (!ctx) return;
+      if (this._loadingCharts.systemOverview) return; // already in progress
+      this._loadingCharts.systemOverview = true;
 
-      // Check if chart already exists and destroy it
-      if (Chart.getChart(ctx)) {
-        Chart.getChart(ctx).destroy();
-      }
+      const debugLog = (typeof window !== 'undefined' && window.debugLog) ? window.debugLog : function() {};
+
+      const buildConfig = (labels, datasetValues) => ({
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [
+            {
+              data: datasetValues,
+              backgroundColor: [
+                'rgba(59, 130, 246, 0.8)',
+                'rgba(239, 68, 68, 0.8)',
+                'rgba(245, 158, 11, 0.8)',
+                'rgba(16, 185, 129, 0.8)',
+              ],
+              borderColor: [
+                'rgb(59, 130, 246)',
+                'rgb(239, 68, 68)',
+                'rgb(245, 158, 11)',
+                'rgb(16, 185, 129)',
+              ],
+              borderWidth: 2,
+              hoverOffset: 8,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { usePointStyle: true, padding: 20, font: { size: 12, weight: '500' } },
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              cornerRadius: 8,
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed || 0;
+                  return `${label}: ${value.toLocaleString()}`;
+                },
+              },
+            },
+          },
+          animation: { duration: 1200, easing: 'easeInOutQuart' },
+          cutout: '60%',
+        },
+      });
 
       this.apiFetch('/admin/dashboard/system-overview')
         .then(apiData => {
-          const data = {
-            labels: apiData.labels,
-            datasets: [
-              {
-                data: apiData.data,
-                backgroundColor: [
-                  'rgba(59, 130, 246, 0.8)',
-                  'rgba(239, 68, 68, 0.8)',
-                  'rgba(245, 158, 11, 0.8)',
-                  'rgba(16, 185, 129, 0.8)',
-                ],
-                borderColor: [
-                  'rgb(59, 130, 246)',
-                  'rgb(239, 68, 68)',
-                  'rgb(245, 158, 11)',
-                  'rgb(16, 185, 129)',
-                ],
-                borderWidth: 2,
-                hoverOffset: 8,
-              },
-            ],
-          };
-
-          const config = {
-            type: 'doughnut',
-            data,
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'bottom',
-                  labels: {
-                    padding: 20,
-                    usePointStyle: true,
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-                tooltip: {
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                  titleColor: '#fff',
-                  bodyColor: '#fff',
-                  cornerRadius: 8,
-                  displayColors: true,
-                  callbacks: {
-                    label: function(context) {
-                      const label = context.label || '';
-                      const value = context.parsed || 0;
-                      const total = context.dataset.data.reduce(
-                        (a, b) => a + b,
-                        0,
-                      );
-                      const percentage = Math.round((value / total) * 100);
-                      return `${label}: ${value} (${percentage}%)`;
-                    },
-                  },
-                },
-              },
-              animation: {
-                animateScale: true,
-                animateRotate: true,
-                duration: 2000,
-                easing: 'easeInOutQuart',
-              },
-            },
-          };
-
-          this.charts.systemOverview = new Chart(ctx, config);
+          this.createOrReplaceChart('systemOverview', ctx, buildConfig(apiData.labels, apiData.data));
           return true;
         })
-        .catch(error => {
-          console.warn('System overview API failed:', error);
-          // Use fallback data if API fails
-          const fallbackData = {
-            labels: [
-              'Active Licenses',
-              'Expired Licenses',
-              'Pending Requests',
-              'Total Products',
-            ],
-            data: [0, 0, 0, 0],
-          };
-
-          // Check if chart already exists and destroy it
-          if (Chart.getChart(ctx)) {
-            Chart.getChart(ctx).destroy();
-          }
-
-          const data = {
-            labels: fallbackData.labels,
-            datasets: [
-              {
-                data: fallbackData.data,
-                backgroundColor: [
-                  'rgba(59, 130, 246, 0.8)',
-                  'rgba(239, 68, 68, 0.8)',
-                  'rgba(245, 158, 11, 0.8)',
-                  'rgba(16, 185, 129, 0.8)',
-                ],
-                borderColor: [
-                  'rgb(59, 130, 246)',
-                  'rgb(239, 68, 68)',
-                  'rgb(245, 158, 11)',
-                  'rgb(16, 185, 129)',
-                ],
-                borderWidth: 2,
-                hoverOffset: 8,
-              },
-            ],
-          };
-
-          const config = {
-            type: 'doughnut',
-            data,
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'bottom',
-                },
-              },
-            },
-          };
-
-          this.charts.systemOverview = new Chart(ctx, config);
+        .catch(err => {
+          if (typeof debugLog === 'function') debugLog('System overview API failed:', err);
+          this.createOrReplaceChart('systemOverview', ctx, buildConfig(['Active', 'Expired', 'Suspended', 'Pending'], [0,0,0,0]));
           return true;
-        });
+        })
+        .finally(() => { this._loadingCharts.systemOverview = false; });
     }
 
     createLicenseDistributionChart() {
@@ -328,10 +154,7 @@ if (typeof window.AdminCharts === 'undefined') {
         return;
       }
 
-      // Check if chart already exists and destroy it
-      if (Chart.getChart(ctx)) {
-        Chart.getChart(ctx).destroy();
-      }
+      const existing = Chart.getChart(ctx);
 
       this.apiFetch('/admin/dashboard/license-distribution')
         .then(apiData => {
@@ -757,200 +580,75 @@ if (typeof window.AdminCharts === 'undefined') {
       if (!ctx) {
         return;
       }
+      if (this._loadingCharts.activityTimeline) return;
+      this._loadingCharts.activityTimeline = true;
+      const debugLog = (typeof window !== 'undefined' && window.debugLog) ? window.debugLog : function() {};
 
-      // Check if chart already exists and destroy it
-      if (Chart.getChart(ctx)) {
-        Chart.getChart(ctx).destroy();
-      }
+      const buildConfig = (labels, datasetValues) => ({
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Active Users',
+              data: datasetValues,
+              borderColor: 'rgb(16, 185, 129)',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: 'rgb(16, 185, 129)',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              pointRadius: 6,
+              pointHoverRadius: 8,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(0, 0, 0, 0.1)' },
+              ticks: { font: { size: 12, weight: '500' } },
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 12, weight: '500' } },
+            },
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { usePointStyle: true, padding: 20, font: { size: 12, weight: '500' } },
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              cornerRadius: 8,
+              mode: 'index',
+              intersect: false,
+            },
+          },
+          interaction: { intersect: false, mode: 'index' },
+          animation: { duration: 1200, easing: 'easeInOutQuart' },
+        },
+      });
 
-      // Fetch real data from API
       this.apiFetch('/admin/dashboard/activity-timeline')
         .then(apiData => {
-          const data = {
-            labels: apiData.labels,
-            datasets: [
-              {
-                label: 'Active Users',
-                data: apiData.data,
-                borderColor: 'rgb(16, 185, 129)',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: 'rgb(16, 185, 129)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 6,
-                pointHoverRadius: 8,
-              },
-            ],
-          };
-
-          const config = {
-            type: 'line',
-            data,
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  grid: {
-                    color: 'rgba(0, 0, 0, 0.1)',
-                  },
-                  ticks: {
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-                x: {
-                  grid: {
-                    display: false,
-                  },
-                  ticks: {
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-              },
-              plugins: {
-                legend: {
-                  position: 'top',
-                  labels: {
-                    usePointStyle: true,
-                    padding: 20,
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-                tooltip: {
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                  titleColor: '#fff',
-                  bodyColor: '#fff',
-                  cornerRadius: 8,
-                  mode: 'index',
-                  intersect: false,
-                },
-              },
-              interaction: {
-                intersect: false,
-                mode: 'index',
-              },
-              animation: {
-                duration: 2000,
-                easing: 'easeInOutQuart',
-              },
-            },
-          };
-
-          this.charts.activityTimeline = new Chart(ctx, config);
+          this.createOrReplaceChart('activityTimeline', ctx, buildConfig(apiData.labels, apiData.data));
           return true;
         })
-        .catch(error => {
-          console.warn('Activity timeline API failed:', error);
-          // Use fallback data if API fails
-          const fallbackData = {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            data: [0, 0, 0, 0, 0, 0, 0],
-          };
-
-          // Check if chart already exists and destroy it
-          if (Chart.getChart(ctx)) {
-            Chart.getChart(ctx).destroy();
-          }
-
-          const data = {
-            labels: fallbackData.labels,
-            datasets: [
-              {
-                label: 'Daily Activity',
-                data: fallbackData.data,
-                borderColor: 'rgb(16, 185, 129)',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: 'rgb(16, 185, 129)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 6,
-                pointHoverRadius: 8,
-              },
-            ],
-          };
-
-          const config = {
-            type: 'line',
-            data,
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  grid: {
-                    color: 'rgba(0, 0, 0, 0.1)',
-                  },
-                  ticks: {
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-                x: {
-                  grid: {
-                    display: false,
-                  },
-                  ticks: {
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-              },
-              plugins: {
-                legend: {
-                  position: 'top',
-                  labels: {
-                    usePointStyle: true,
-                    padding: 20,
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-                tooltip: {
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                  titleColor: '#fff',
-                  bodyColor: '#fff',
-                  cornerRadius: 8,
-                  mode: 'index',
-                  intersect: false,
-                },
-              },
-              interaction: {
-                intersect: false,
-                mode: 'index',
-              },
-              animation: {
-                duration: 1000,
-                easing: 'easeInOutQuart',
-              },
-            },
-          };
-
-          this.charts.activityTimeline = new Chart(ctx, config);
+        .catch(err => {
+          if (typeof debugLog === 'function') debugLog('Activity timeline API failed:', err);
+          this.createOrReplaceChart('activityTimeline', ctx, buildConfig(['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], [0,0,0,0,0,0,0]));
           return true;
-        });
+        })
+        .finally(() => { this._loadingCharts.activityTimeline = false; });
     }
 
     setupRealTimeUpdates() {
@@ -1565,15 +1263,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Export for module usage
-// eslint-disable-next-line no-undef
-if (typeof module !== 'undefined' && module.exports) {
-  // eslint-disable-next-line no-undef
-  module.exports = AdminCharts;
+// Export for CommonJS environments if available (Node/testing)
+try {
+  if (typeof module !== 'undefined' && module && module.exports) {
+  module.exports = AdminCharts; // Optional CommonJS export for testing environments
+  }
+} catch (e) {
+  // Silently ignore if module export not permitted in environment
 }
 
-// Make AdminCharts globally available
-window.AdminCharts = AdminCharts;
+// Safely attach to window for browser usage
+if (typeof window !== 'undefined') {
+  window.AdminCharts = AdminCharts;
+}
 
 /**
  * Initialize Reports Page Charts

@@ -47,7 +47,7 @@ class ConfirmablePasswordController extends Controller
      * Validates the user's password and stores the confirmation timestamp
      * in the session for subsequent sensitive operations.
      *
-     * @param  Request  $request  The password confirmation request
+     * @param  ConfirmPasswordRequest  $request  The password confirmation request
      *
      * @return RedirectResponse Redirect to intended destination or dashboard
      *

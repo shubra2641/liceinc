@@ -116,9 +116,7 @@ class LicenseService
     protected function calculateLicenseExpiry(Product $product): ?Carbon
     {
         try {
-            if (! $product) {
-                throw new \InvalidArgumentException('Product cannot be null');
-            }
+            // Product is already validated by type hint
             // If product has lifetime license or renewal_period is lifetime, return null (no expiry)
             if ($product->license_type === 'lifetime' || $product->renewal_period === 'lifetime') {
                 return null;
@@ -129,7 +127,8 @@ class LicenseService
             if ($days === null) {
                 $days = \App\Helpers\ConfigHelper::getSetting('license_default_duration', 365);
             }
-            return now()->addDays($days);
+            $daysInt = is_numeric($days) ? (int)$days : 365;
+            return now()->addDays($daysInt);
         } catch (Throwable $e) {
             Log::error('Failed to calculate license expiry', [
                 'error' => $e->getMessage(),
@@ -159,14 +158,13 @@ class LicenseService
     protected function calculateSupportExpiry(Product $product): Carbon
     {
         try {
-            if (! $product) {
-                throw new \InvalidArgumentException('Product cannot be null');
-            }
+            // Product is already validated by type hint
             // Use product's support_days or default from settings
             $supportDuration = $product->support_days
                 ?? \App\Helpers\ConfigHelper::getSetting('license_support_duration', 365);
             // Calculate support expiry based on duration in days
-            return now()->addDays($supportDuration);
+            $supportDurationInt = is_numeric($supportDuration) ? (int)$supportDuration : 365;
+            return now()->addDays($supportDurationInt);
         } catch (Throwable $e) {
             Log::error('Failed to calculate support expiry', [
                 'error' => $e->getMessage(),
@@ -192,27 +190,18 @@ class LicenseService
      */
     protected function getRenewalPeriodInDays(?string $renewalPeriod): ?int
     {
-        try {
-            if ($renewalPeriod === null) {
-                return null;
-            }
-            return match ($renewalPeriod) {
-                'monthly' => 30,
-                'quarterly' => 90,
-                'semi-annual' => 180,
-                'annual' => 365,
-                'three-years' => 1095, // 3 years
-                'lifetime' => null, // No expiry
-                default => null,
-            };
-        } catch (Throwable $e) {
-            Log::error('Failed to convert renewal period to days', [
-                'error' => $e->getMessage(),
-                'renewal_period' => $renewalPeriod,
-                'trace' => $e->getTraceAsString(),
-            ]);
+        if ($renewalPeriod === null) {
             return null;
         }
+        return match ($renewalPeriod) {
+            'monthly' => 30,
+            'quarterly' => 90,
+            'semi-annual' => 180,
+            'annual' => 365,
+            'three-years' => 1095, // 3 years
+            'lifetime' => null, // No expiry
+            default => null,
+        };
     }
     /**
      * Check if user can purchase product with enhanced validation.
@@ -306,10 +295,9 @@ class LicenseService
     public function getUserActiveLicenses(User $user): Collection
     {
         try {
-            if (! $user) {
-                throw new \InvalidArgumentException('User cannot be null');
-            }
-            return $user->licenses()
+            // User is already validated by type hint
+            /** @var Collection<int, License> $licenses */
+            $licenses = $user->licenses()
                 ->with('product')
                 ->where('status', 'active')
                 ->where(function ($q) {
@@ -317,6 +305,7 @@ class LicenseService
                         ->orWhere('license_expires_at', '>', now());
                 })
                 ->get();
+            return $licenses;
         } catch (Throwable $e) {
             Log::error('Failed to get user active licenses', [
                 'error' => $e->getMessage(),
@@ -382,8 +371,8 @@ class LicenseService
                 ];
             }
             // Check domain if provided
-            if ($domain && $license->license_domains) {
-                $allowedDomains = json_decode($license->license_domains, true);
+            if ($domain && $license->domains()->exists()) {
+                $allowedDomains = $license->domains()->pluck('domain')->toArray();
                 if (! in_array($this->sanitizeDomain($domain), $allowedDomains)) {
                     Log::warning('License validation failed: Domain not authorized', [
                         'license_id' => $license->id,
@@ -458,13 +447,15 @@ class LicenseService
                     ];
                 }
                 // Get current domains
-                $currentDomains = $license->license_domains ? json_decode($license->license_domains, true) : [];
+                $currentDomains = $license->domains()->pluck('domain')->toArray();
                 $sanitizedDomain = $this->sanitizeDomain($domain);
                 // Add new domain if not already present
-                if (! in_array($sanitizedDomain, $currentDomains)) {
+                if (!in_array($sanitizedDomain, $currentDomains)) {
                     $currentDomains[] = $sanitizedDomain;
-                    $license->update([
-                        'license_domains' => json_encode($currentDomains),
+                    // Create new domain record
+                    $license->domains()->create([
+                        'domain' => $sanitizedDomain,
+                        'status' => 'active',
                     ]);
                     Log::debug('License activated for domain', [
                         'license_id' => $license->id,
@@ -502,13 +493,8 @@ class LicenseService
      */
     private function validateCreateLicenseParameters(User $user, Product $product, ?string $paymentGateway): void
     {
-        if (! $user) {
-            throw new \InvalidArgumentException('User cannot be null');
-        }
-        if (! $product) {
-            throw new \InvalidArgumentException('Product cannot be null');
-        }
-        if ($paymentGateway && empty(trim($paymentGateway))) {
+        // User and Product are already validated by type hints
+        if ($paymentGateway !== null && empty(trim($paymentGateway))) {
             throw new \InvalidArgumentException('Payment gateway cannot be empty');
         }
     }
@@ -520,12 +506,8 @@ class LicenseService
      */
     private function validateCanPurchaseParameters(User $user, Product $product): void
     {
-        if (! $user) {
-            throw new \InvalidArgumentException('User cannot be null');
-        }
-        if (! $product) {
-            throw new \InvalidArgumentException('Product cannot be null');
-        }
+        // User and Product are already validated by type hints
+        // Additional validation can be added here if needed
     }
     /**
      * Validate license key parameter.
@@ -591,6 +573,8 @@ class LicenseService
      */
     private function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data . config('app.key')), 0, 8) . '...';
+        $appKey = config('app.key');
+        $keyString = is_string($appKey) ? $appKey : '';
+        return substr(hash('sha256', $data . $keyString), 0, 8) . '...';
     }
 }

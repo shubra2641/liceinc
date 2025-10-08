@@ -111,17 +111,19 @@ class AppServiceProvider extends ServiceProvider
      */
     private function configureAppUrl(): void
     {
-        if (! app()->runningInConsole() && request()) {
+        if (!app()->runningInConsole()) {
             $currentHost = request()->getHost();
             $currentScheme = request()->getScheme();
             $appUrl = config('app.url');
 
             // Check if current URL differs from configured APP_URL
-            $parsedAppUrl = parse_url($appUrl);
+            $parsedAppUrl = parse_url(is_string($appUrl) ? $appUrl : '');
+            $parsedHost = $parsedAppUrl['host'] ?? 'localhost';
+            $parsedScheme = $parsedAppUrl['scheme'] ?? 'http';
 
             if (
-                $currentHost !== ($parsedAppUrl['host'] ?? 'localhost') ||
-                $currentScheme !== ($parsedAppUrl['scheme'] ?? 'http')
+                $currentHost !== $parsedHost ||
+                $currentScheme !== $parsedScheme
             ) {
                 // Build proper base URL without /public
                 $path = trim(dirname(request()->getScriptName()), '/');
@@ -155,14 +157,10 @@ class AppServiceProvider extends ServiceProvider
     private function registerViewComposers(): void
     {
         $viewPaths = ['layouts.*', 'welcome'];
-        // Validate view paths
-        foreach ($viewPaths as $path) {
-            if (! is_string($path) || $path === '') {
-                throw new \InvalidArgumentException('Invalid view path provided: ' . $path);
-            }
-        }
+        // Validate view paths (hardcoded values are always valid)
+        // $viewPaths = ['layouts.*', 'welcome']; - these are always valid
         // Validate LayoutComposer class
-        if (! class_exists(LayoutComposer::class)) {
+        if (!class_exists(LayoutComposer::class)) {
             throw new \InvalidArgumentException(
                 'LayoutComposer class not found. Please ensure the view composer is properly implemented.',
             );
@@ -187,13 +185,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $defaultView = 'pagination::bootstrap-5';
         $defaultSimpleView = 'pagination::simple-bootstrap-5';
-        // Validate pagination view names
-        if (! is_string($defaultView) || $defaultView === '') {
-            throw new \InvalidArgumentException('Invalid default pagination view provided');
-        }
-        if (! is_string($defaultSimpleView) || $defaultSimpleView === '') {
-            throw new \InvalidArgumentException('Invalid default simple pagination view provided');
-        }
+        // Validate pagination view names (always valid for hardcoded values)
         Paginator::defaultView($defaultView);
         Paginator::defaultSimpleView($defaultSimpleView);
     }
@@ -207,11 +199,20 @@ class AppServiceProvider extends ServiceProvider
     {
         // Configure auth rate limiter
         RateLimiter::for('auth', function ($request) {
-            return Limit::perMinute(10)->by($request->ip());
+            if (is_object($request) && method_exists($request, 'ip')) {
+                return Limit::perMinute(10)->by($request->ip());
+            }
+            return Limit::perMinute(10)->by('127.0.0.1');
         });
         // Configure API rate limiter
         RateLimiter::for('api', function ($request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            if (is_object($request) && method_exists($request, 'user') && method_exists($request, 'ip')) {
+                $user = $request->user();
+                $userId = is_object($user) && property_exists($user, 'id') ? $user->id : null;
+                $ip = $request->ip();
+                return Limit::perMinute(60)->by($userId ?: $ip);
+            }
+            return Limit::perMinute(60)->by('127.0.0.1');
         });
     }
 }

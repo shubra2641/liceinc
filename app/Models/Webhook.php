@@ -66,7 +66,10 @@ class Webhook extends Model
      * Get the webhook logs for the webhook.
      */
     /**
-     * @return HasMany<WebhookLog, Webhook>
+     * @return HasMany
+     */
+    /**
+     * @return HasMany<WebhookLog, $this>
      */
     public function logs(): HasMany
     {

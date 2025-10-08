@@ -165,10 +165,6 @@ class Authenticate extends Middleware
      *
      * @return string The sanitized input
      */
-    private function sanitizeInput(string $input): string
-    {
-        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-    }
     /**
      * Hash data for logging.
      *
@@ -176,8 +172,4 @@ class Authenticate extends Middleware
      *
      * @return string The hashed data
      */
-    private function hashForLogging(string $data): string
-    {
-        return substr(hash('sha256', $data . config('app.key')), 0, 8) . '...';
-    }
 }

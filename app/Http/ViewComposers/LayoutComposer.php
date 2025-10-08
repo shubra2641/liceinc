@@ -83,7 +83,7 @@ class LayoutComposer
      */
     private function getLayoutData(): array
     {
-        return Cache::remember(
+        $result = Cache::remember(
             self::CACHE_PREFIX . 'layout_data',
             self::CACHE_DURATION,
             function () {
@@ -105,6 +105,10 @@ class LayoutComposer
                 ];
             },
         );
+        $arrayResult = is_array($result) ? $result : [];
+        /** @var array<string, mixed> $typedResult */
+        $typedResult = $arrayResult;
+        return $typedResult;
     }
     /**
      * Get site name with validation and fallback.
@@ -114,7 +118,7 @@ class LayoutComposer
     private function getSiteName(): string
     {
         $siteName = Setting::get('site_name', config('app.name', 'Laravel'));
-        return $this->sanitizeOutput($siteName);
+        return $this->sanitizeOutput(is_string($siteName) ? $siteName : '');
     }
     /**
      * Get site logo with validation.
@@ -124,7 +128,7 @@ class LayoutComposer
     private function getSiteLogo(): ?string
     {
         $siteLogo = Setting::get('site_logo', null);
-        return $siteLogo ? $this->sanitizeOutput($siteLogo) : null;
+        return $siteLogo ? $this->sanitizeOutput(is_string($siteLogo) ? $siteLogo : '') : null;
     }
     /**
      * Get site SEO title with validation.
@@ -134,7 +138,7 @@ class LayoutComposer
     private function getSiteSeoTitle(): ?string
     {
         $seoTitle = Setting::get('seo_site_title', null);
-        return $seoTitle ? $this->sanitizeOutput($seoTitle) : null;
+        return $seoTitle ? $this->sanitizeOutput(is_string($seoTitle) ? $seoTitle : '') : null;
     }
     /**
      * Get site SEO description with validation.
@@ -144,7 +148,7 @@ class LayoutComposer
     private function getSiteSeoDescription(): ?string
     {
         $seoDescription = Setting::get('seo_site_description', null);
-        return $seoDescription ? $this->sanitizeOutput($seoDescription) : null;
+        return $seoDescription ? $this->sanitizeOutput(is_string($seoDescription) ? $seoDescription : '') : null;
     }
     /**
      * Get Open Graph image with validation.
@@ -154,7 +158,7 @@ class LayoutComposer
     private function getOgImage(): ?string
     {
         $ogImage = Setting::get('seo_og_image', null);
-        return $ogImage ? $this->sanitizeOutput($ogImage) : null;
+        return $ogImage ? $this->sanitizeOutput(is_string($ogImage) ? $ogImage : '') : null;
     }
     /**
      * Get Knowledge Base SEO title with validation.
@@ -164,7 +168,7 @@ class LayoutComposer
     private function getKbSeoTitle(): ?string
     {
         $kbSeoTitle = Setting::get('seo_kb_title', null);
-        return $kbSeoTitle ? $this->sanitizeOutput($kbSeoTitle) : null;
+        return $kbSeoTitle ? $this->sanitizeOutput(is_string($kbSeoTitle) ? $kbSeoTitle : '') : null;
     }
     /**
      * Get Knowledge Base SEO description with validation.
@@ -174,7 +178,7 @@ class LayoutComposer
     private function getKbSeoDescription(): ?string
     {
         $kbSeoDescription = Setting::get('seo_kb_description', null);
-        return $kbSeoDescription ? $this->sanitizeOutput($kbSeoDescription) : null;
+        return $kbSeoDescription ? $this->sanitizeOutput(is_string($kbSeoDescription) ? $kbSeoDescription : '') : null;
     }
     /**
      * Get Tickets SEO title with validation.
@@ -184,7 +188,7 @@ class LayoutComposer
     private function getTicketsSeoTitle(): ?string
     {
         $ticketsSeoTitle = Setting::get('seo_tickets_title', null);
-        return $ticketsSeoTitle ? $this->sanitizeOutput($ticketsSeoTitle) : null;
+        return $ticketsSeoTitle ? $this->sanitizeOutput(is_string($ticketsSeoTitle) ? $ticketsSeoTitle : '') : null;
     }
     /**
      * Get Tickets SEO description with validation.
@@ -194,12 +198,12 @@ class LayoutComposer
     private function getTicketsSeoDescription(): ?string
     {
         $ticketsSeoDescription = Setting::get('seo_tickets_description', null);
-        return $ticketsSeoDescription ? $this->sanitizeOutput($ticketsSeoDescription) : null;
+        return $ticketsSeoDescription ? $this->sanitizeOutput(is_string($ticketsSeoDescription) ? $ticketsSeoDescription : '') : null;
     }
     /**
      * Get available languages with metadata.
      *
-     * @return array<string, mixed> The available languages
+     * @return array<int, array<string, string>> The available languages
      */
     private function getAvailableLanguages(): array
     {

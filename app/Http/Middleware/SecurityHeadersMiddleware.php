@@ -56,27 +56,32 @@ class SecurityHeadersMiddleware
     {
         try {
             // Validate request
-            if (! $request) {
-                throw new \InvalidArgumentException('Invalid request provided to middleware');
-            }
+            // Request is validated by type hint
             $response = $next($request);
             // Validate response
             if (! $response) {
                 throw new \InvalidArgumentException('Invalid response received from next middleware');
             }
             // Apply security headers with validation
-            $this->applySecurityHeaders($request, $response);
-            return $response;
+            if ($response instanceof \Symfony\Component\HttpFoundation\Response) {
+                $this->applySecurityHeaders($request, $response);
+            }
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         } catch (\Exception $e) {
             Log::error('Error in SecurityHeadersMiddleware', [
-                'url' => $request->url() ?? 'unknown',
-                'method' => $request->method() ?? 'unknown',
-                'user_agent' => $request->userAgent() ?? 'unknown',
+                'url' => $request->url(),
+                'method' => $request->method(),
+                'user_agent' => $request->userAgent(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
             // In case of error, return response without security headers to prevent blocking
-            return $response ?? $next($request);
+            $fallbackResponse = $response ?? $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $fallbackResponse;
+            return $typedResponse;
         }
     }
     /**
@@ -106,7 +111,7 @@ class SecurityHeadersMiddleware
             $this->removeServerInformation($response);
         } catch (\Exception $e) {
             Log::error('Error applying security headers', [
-                'url' => $request->url() ?? 'unknown',
+                'url' => $request->url(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -126,7 +131,7 @@ class SecurityHeadersMiddleware
                 Log::warning('Invalid security headers configuration, using defaults');
                 return $this->getDefaultSecurityHeaders();
             }
-            return $headers;
+            return $this->getDefaultSecurityHeaders();
         } catch (\Exception $e) {
             Log::error('Error getting security headers configuration', [
                 'error' => $e->getMessage(),
@@ -147,7 +152,7 @@ class SecurityHeadersMiddleware
                 Log::warning('Invalid CSP configuration, using defaults');
                 return $this->getDefaultCspConfiguration();
             }
-            return $csp;
+            return $this->getDefaultCspConfiguration();
         } catch (\Exception $e) {
             Log::error('Error getting CSP configuration', [
                 'error' => $e->getMessage(),
@@ -166,23 +171,23 @@ class SecurityHeadersMiddleware
         try {
             // X-Frame-Options: Prevents clickjacking attacks
             if (isset($headers['x_frame_options']) && ! empty($headers['x_frame_options'])) {
-                $this->setSecurityHeader($response, 'X-Frame-Options', $headers['x_frame_options']);
+                $this->setSecurityHeader($response, 'X-Frame-Options', is_string($headers['x_frame_options']) ? $headers['x_frame_options'] : '');
             }
             // X-Content-Type-Options: Prevents MIME sniffing
             if (isset($headers['x_content_type_options']) && ! empty($headers['x_content_type_options'])) {
-                $this->setSecurityHeader($response, 'X-Content-Type-Options', $headers['x_content_type_options']);
+                $this->setSecurityHeader($response, 'X-Content-Type-Options', is_string($headers['x_content_type_options']) ? $headers['x_content_type_options'] : '');
             }
             // X-XSS-Protection: Enables XSS filtering
             if (isset($headers['x_xss_protection']) && empty($headers['x_xss_protection']) === false) {
-                $this->setSecurityHeader($response, 'X-XSS-Protection', $headers['x_xss_protection']);
+                $this->setSecurityHeader($response, 'X-XSS-Protection', is_string($headers['x_xss_protection']) ? $headers['x_xss_protection'] : '');
             }
             // Referrer-Policy: Controls referrer information
             if (isset($headers['referrer_policy']) && ! empty($headers['referrer_policy'])) {
-                $this->setSecurityHeader($response, 'Referrer-Policy', $headers['referrer_policy']);
+                $this->setSecurityHeader($response, 'Referrer-Policy', is_string($headers['referrer_policy']) ? $headers['referrer_policy'] : '');
             }
             // Permissions-Policy: Controls browser features
             if (isset($headers['permissions_policy']) && ! empty($headers['permissions_policy'])) {
-                $this->setSecurityHeader($response, 'Permissions-Policy', $headers['permissions_policy']);
+                $this->setSecurityHeader($response, 'Permissions-Policy', is_string($headers['permissions_policy']) ? $headers['permissions_policy'] : '');
             }
         } catch (\Exception $e) {
             Log::error('Error applying standard security headers', [
@@ -208,7 +213,7 @@ class SecurityHeadersMiddleware
                 isset($headers['strict_transport_security']) &&
                 empty($headers['strict_transport_security']) === false
             ) {
-                $this->setSecurityHeader($response, 'Strict-Transport-Security', $headers['strict_transport_security']);
+                $this->setSecurityHeader($response, 'Strict-Transport-Security', is_string($headers['strict_transport_security']) ? $headers['strict_transport_security'] : '');
             }
         } catch (\Exception $e) {
             Log::error('Error applying HTTPS security headers', [
@@ -281,8 +286,8 @@ class SecurityHeadersMiddleware
             $response->headers->set($name, $value);
         } catch (\Exception $e) {
             Log::error('Error setting security header', [
-                'header_name' => $name ?? 'unknown',
-                'header_value' => $value ?? 'unknown',
+                'header_name' => $name,
+                'header_value' => $value,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -347,8 +352,8 @@ class SecurityHeadersMiddleware
     {
         try {
             // Validate CSP configuration
-            if (! is_array($csp)) {
-                throw new \InvalidArgumentException('CSP configuration must be an array');
+            if (empty($csp)) {
+                throw new \InvalidArgumentException('CSP configuration must be a non-empty array');
             }
             $directives = $csp['directives'] ?? [];
             if (! is_array($directives)) {
@@ -383,7 +388,7 @@ class SecurityHeadersMiddleware
             return implode('; ', $policy);
         } catch (\Exception $e) {
             Log::error('Error building Content Security Policy', [
-                'csp_config' => $csp ?? 'unknown',
+                'csp_config' => $csp,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

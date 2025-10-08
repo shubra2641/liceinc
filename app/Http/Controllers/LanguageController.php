@@ -75,7 +75,7 @@ class LanguageController extends Controller
     /**
      * Get available languages with metadata for views.
      *
-     * @return array<string, mixed> The available languages with metadata
+     * @return array<int, array<string, string>> The available languages with metadata
      */
     public static function getAvailableLanguagesWithMetadata(): array
     {

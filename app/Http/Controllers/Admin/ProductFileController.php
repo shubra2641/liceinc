@@ -75,7 +75,7 @@ class ProductFileController extends Controller
         try {
             $files = $this->productFileService->getProductFiles($product, false);
 
-            return view('admin.products.files.index', compact('product', 'files'));
+            return view('admin.products.files.index', ['product' => $product, 'files' => $files]);
         } catch (\Exception $e) {
             Log::error('Product files listing failed', [
                 'product_id' => $product->id,
@@ -97,7 +97,7 @@ class ProductFileController extends Controller
      * Uploads a new file for a product with comprehensive validation,
      * rate limiting, and security measures.
      *
-     * @param  ProductFileStoreRequest  $request  The validated request containing file data
+     * @param  ProductFileRequest  $request  The validated request containing file data
      * @param  Product  $product  The product to attach the file to
      *
      * @return JsonResponse JSON response with upload results
@@ -134,7 +134,7 @@ class ProductFileController extends Controller
             $file = $this->productFileService->uploadFile(
                 $product,
                 $request->file('file'),
-                $validated['description'],
+                is_string($validated['description'] ?? null) ? $validated['description'] : null,
             );
             DB::commit();
 
@@ -196,15 +196,16 @@ class ProductFileController extends Controller
         }
         RateLimiter::hit($key, 300); // 5 minutes
         try {
-            $fileData = $this->productFileService->downloadFile($file, auth()->id());
+            $userId = auth()->id();
+            $fileData = $this->productFileService->downloadFile($file, $userId ? (int)$userId : null);
             if (! $fileData) {
                 abort(404, 'File not found or access denied');
             }
 
-            return response($fileData['content'])
-                ->header('Content-Type', $fileData['mime_type'])
-                ->header('Content-Disposition', 'attachment; filename="'.(is_string($fileData['filename']) ? $fileData['filename'] : (string)$fileData['filename']).'"')
-                ->header('Content-Length', $fileData['size'])
+            return response(is_string($fileData['content'] ?? null) ? $fileData['content'] : '')
+                ->header('Content-Type', is_string($fileData['mime_type'] ?? null) ? $fileData['mime_type'] : 'application/octet-stream')
+                ->header('Content-Disposition', 'attachment; filename="'.(is_string($fileData['filename'] ?? null) ? $fileData['filename'] : 'file').'"')
+                ->header('Content-Length', is_numeric($fileData['size'] ?? null) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
                 ->header('Expires', '0');
@@ -224,7 +225,7 @@ class ProductFileController extends Controller
      * Updates a product file's status (activate/deactivate) and description
      * with comprehensive validation and security measures.
      *
-     * @param  ProductFileUpdateRequest  $request  The validated request containing update data
+     * @param  ProductFileRequest  $request  The validated request containing update data
      * @param  ProductFile  $file  The file to update
      *
      * @return JsonResponse JSON response with update results
@@ -376,7 +377,7 @@ class ProductFileController extends Controller
                 'active_files' => $files->where('is_active', true)->count(),
                 'total_downloads' => $files->sum('download_count'),
                 'total_size' => $files->sum('file_size'),
-                'formatted_total_size' => $this->formatBytes($files->sum('file_size')),
+                'formatted_total_size' => $this->formatBytes(is_numeric($files->sum('file_size')) ? (int)$files->sum('file_size') : 0),
             ];
 
             return response()->json([

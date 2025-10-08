@@ -76,7 +76,7 @@ class ProductCategoryController extends Controller
                 ->orderBy('name')
                 ->paginate(15);
             DB::commit();
-            return view('admin.product-categories.index', compact('categories'));
+            return view('admin.product-categories.index', ['categories' => $categories]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Product categories listing failed', [
@@ -85,7 +85,7 @@ class ProductCategoryController extends Controller
             ]);
             // Return empty categories on error
             return view('admin.product-categories.index', [
-                'categories' => collect()->paginate(15),
+                'categories' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15),
             ]);
         }
     }
@@ -115,7 +115,7 @@ class ProductCategoryController extends Controller
      * Creates a new product category with comprehensive validation,
      * image upload security, and proper error handling using Request classes.
      *
-     * @param  ProductCategoryStoreRequest  $request  The validated request containing category data
+     * @param  ProductCategoryRequest  $request  The validated request containing category data
      *
      * @return RedirectResponse Redirect to categories list with success message
      *
@@ -218,13 +218,15 @@ class ProductCategoryController extends Controller
      * // - Associated products
      * // - Category statistics
      */
-    public function show(ProductCategory $product_category): View
+    public function show(ProductCategory $product_category): View|RedirectResponse
     {
         try {
             DB::beginTransaction();
             $product_category->load('products');
             DB::commit();
-            return view('admin.product-categories.show', compact('product_category'));
+            /** @var view-string $viewName */
+            $viewName = 'admin.product-categories.show';
+            return view($viewName, ['product_category' => $product_category]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Product category view failed', [
@@ -256,7 +258,9 @@ class ProductCategoryController extends Controller
      */
     public function edit(ProductCategory $product_category): View
     {
-        return view('admin.product-categories.edit', compact('product_category'));
+        /** @var view-string $viewName */
+        $viewName = 'admin.product-categories.edit';
+        return view($viewName, ['product_category' => $product_category]);
     }
     /**
      * Update the specified product category with enhanced security.

@@ -44,12 +44,12 @@ class InvoiceRequest extends FormRequest
             'user_id' => [
                 'required',
                 'integer',
-                'exists:users, id',
+                'exists:users,id',
             ],
             'product_id' => [
                 'nullable',
                 'integer',
-                'exists:products, id',
+                'exists:products,id',
             ],
             'invoice_number' => [
                 'required',
@@ -222,10 +222,10 @@ class InvoiceRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'invoice_number' => $this->sanitizeInput($this->invoice_number),
-            'payment_reference' => $this->payment_reference ? $this->sanitizeInput($this->payment_reference) : null,
-            'description' => $this->description ? $this->sanitizeInput($this->description) : null,
-            'notes' => $this->notes ? $this->sanitizeInput($this->notes) : null,
+            'invoice_number' => $this->sanitizeInput($this->input('invoice_number')),
+            'payment_reference' => $this->input('payment_reference') ? $this->sanitizeInput($this->input('payment_reference')) : null,
+            'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
+            'notes' => $this->input('notes') ? $this->sanitizeInput($this->input('notes')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -241,15 +241,20 @@ class InvoiceRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

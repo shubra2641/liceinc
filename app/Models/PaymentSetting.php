@@ -75,9 +75,16 @@ class PaymentSetting extends Model
      */
     public static function getEnabledGateways(): array
     {
-        return static::where('is_enabled', true)
+        $gateways = static::where('is_enabled', true)
             ->pluck('gateway')
             ->toArray();
+        $result = [];
+        foreach ($gateways as $gateway) {
+            if (is_string($gateway)) {
+                $result[] = $gateway;
+            }
+        }
+        return $result;
     }
     /**
      * Get credentials for a specific gateway.
@@ -88,6 +95,9 @@ class PaymentSetting extends Model
     public static function getCredentials(string $gateway): array
     {
         $setting = static::getByGateway($gateway);
-        return $setting ? $setting->credentials : [];
+        $credentials = $setting ? (is_array($setting->credentials) ? $setting->credentials : []) : [];
+        /** @var array<string, mixed> $typedCredentials */
+        $typedCredentials = $credentials;
+        return $typedCredentials;
     }
 }

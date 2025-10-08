@@ -39,7 +39,8 @@ class ProgrammingLanguageRequest extends FormRequest
      */
     public function rules(): array
     {
-        $languageId = $this->route('programming_language') ? $this->route('programming_language')->id : null;
+        $language = $this->route('programming_language');
+        $languageId = $language && is_object($language) && property_exists($language, 'id') ? $language->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
             'name' => [
@@ -193,9 +194,9 @@ class ProgrammingLanguageRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'name' => $this->sanitizeInput($this->name),
-            'description' => $this->description ? $this->sanitizeInput($this->description) : null,
-            'icon' => $this->icon ? $this->sanitizeInput($this->icon) : null,
+            'name' => $this->sanitizeInput($this->input('name')),
+            'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
+            'icon' => $this->input('icon') ? $this->sanitizeInput($this->input('icon')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -213,15 +214,20 @@ class ProgrammingLanguageRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

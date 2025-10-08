@@ -47,7 +47,7 @@ class LicenseGeneratorService
     {
         try {
             $token = \App\Helpers\ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
-            if (empty($token)) {
+            if (empty($token) || !is_string($token)) {
                 throw new \Exception('License API token not configured');
             }
             return $token;
@@ -73,7 +73,7 @@ class LicenseGeneratorService
     {
         try {
             $token = \App\Helpers\ConfigHelper::getSetting('envato_personal_token', '', 'ENVATO_PERSONAL_TOKEN');
-            if (empty($token)) {
+            if (empty($token) || !is_string($token)) {
                 throw new \Exception('Envato personal token not configured');
             }
             return $token;
@@ -105,8 +105,8 @@ class LicenseGeneratorService
     public function generateLicenseFile(Product $product): string
     {
         try {
-            // Validate product
-            if (! $product || ! $product->id) {
+            // Product is validated by type hint, just check id
+            if (! $product->id) {
                 throw new \InvalidArgumentException('Invalid product provided');
             }
             // Refresh the product to get the latest data including programming language
@@ -157,7 +157,7 @@ class LicenseGeneratorService
     {
         try {
             // Validate product ID to prevent directory traversal
-            if (! $product->id || ! is_numeric($product->id)) {
+            if (! $product->id) {
                 throw new \InvalidArgumentException('Invalid product ID for file cleanup');
             }
             $productDir = "licenses/{$product->id}";
@@ -172,7 +172,7 @@ class LicenseGeneratorService
             $files = Storage::disk('public')->files($productDir);
             foreach ($files as $file) {
                 // Additional security check for file path
-                if (strpos($file, $productDir) === 0) {
+                if (is_string($file) && strpos($file, $productDir) === 0) {
                     Storage::disk('public')->delete($file);
                 }
             }
@@ -219,8 +219,8 @@ class LicenseGeneratorService
     private function getLicenseTemplate(ProgrammingLanguage $language): string
     {
         try {
-            // Validate language
-            if (! $language || ! $language->slug) {
+            // Language is validated by type hint, just check slug
+            if (! $language->slug) {
                 throw new \InvalidArgumentException('Invalid programming language provided');
             }
             // Sanitize language slug to prevent directory traversal
@@ -269,12 +269,12 @@ class LicenseGeneratorService
             if (empty($template)) {
                 throw new \InvalidArgumentException('Template content cannot be empty');
             }
-            if (! $product || ! $product->id) {
+            if (! $product->id) {
                 throw new \InvalidArgumentException('Invalid product for template compilation');
             }
             // Build the license API URL from environment/app url and the configured verification endpoint
-            $apiDomain = rtrim(env('APP_URL', config('app.url')), '/');
-            $verificationEndpoint = config('license.verification_endpoint', '/api/license/verify');
+            $apiDomain = rtrim(is_string(config('app.url')) ? config('app.url') : '', '/');
+            $verificationEndpoint = is_string(config('license.verification_endpoint', '/api/license/verify')) ? config('license.verification_endpoint', '/api/license/verify') : '/api/license/verify';
             $licenseApiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
             // Validate and sanitize data
             $data = [
@@ -296,14 +296,16 @@ class LicenseGeneratorService
                 if (! preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $key)) {
                     continue;
                 }
-                $template = str_replace("{{{$key}}}", $value, $template);
-                $template = str_replace("{{$key}}", $value, $template);
+                $template = str_replace("{{{$key}}}", is_string($value) ? $value : '', $template);
+                $template = str_replace("{{$key}}", is_string($value) ? $value : '', $template);
             }
             return $template;
         } catch (\Exception $e) {
+            $productId = $product->id ?? 'unknown';
+            $productSlug = $product->slug ?? 'unknown';
             Log::error('Error compiling license template', [
-                'product_id' => $product->id ?? 'unknown',
-                'product_slug' => $product->slug ?? 'unknown',
+                'product_id' => $productId,
+                'product_slug' => $productSlug,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -325,14 +327,14 @@ class LicenseGeneratorService
     private function generateVerificationKey(Product $product): string
     {
         try {
-            if (! $product || ! $product->id || ! $product->slug) {
+            if (! $product->id || ! $product->slug) {
                 throw new \InvalidArgumentException('Invalid product data for key generation');
             }
             $appKey = config('app.key');
-            if (empty($appKey)) {
+            if (empty($appKey) || !is_string($appKey)) {
                 throw new \Exception('Application key not configured');
             }
-            $keyData = $product->id . $product->slug . $appKey;
+            $keyData = (string)$product->id . $product->slug . $appKey;
             return hash('sha256', $keyData);
         } catch (\Exception $e) {
             Log::error('Error generating verification key', [
@@ -383,10 +385,10 @@ class LicenseGeneratorService
     private function generateFileName(Product $product, ProgrammingLanguage $language): string
     {
         try {
-            if (! $product || ! $product->slug) {
+            if (! $product->slug) {
                 throw new \InvalidArgumentException('Invalid product for filename generation');
             }
-            if (! $language || ! $language->slug) {
+            if (! $language->slug) {
                 throw new \InvalidArgumentException('Invalid language for filename generation');
             }
             $extension = $this->getFileExtensionForLanguage($language->slug);
@@ -398,9 +400,11 @@ class LicenseGeneratorService
             }
             return "license-{$sanitizedSlug}-{$timestamp}.{$extension}";
         } catch (\Exception $e) {
+            $productSlug = $product->slug ?? 'unknown';
+            $languageSlug = $language->slug ?? 'unknown';
             Log::error('Error generating filename', [
-                'product_slug' => $product->slug ?? 'unknown',
-                'language_slug' => $language->slug ?? 'unknown',
+                'product_slug' => $productSlug,
+                'language_slug' => $languageSlug,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -477,13 +481,10 @@ class LicenseGeneratorService
             if (empty($fileName)) {
                 throw new \InvalidArgumentException('Filename cannot be empty');
             }
-            if (! $product || ! $product->id) {
+            if (! $product->id) {
                 throw new \InvalidArgumentException('Invalid product for file saving');
             }
-            // Validate and sanitize path components
-            if (! is_numeric($product->id)) {
-                throw new \InvalidArgumentException('Invalid product ID for file path');
-            }
+            // Product ID is already validated by type hint
             $sanitizedFileName = $this->sanitizeInput($fileName);
             $path = "licenses/{$product->id}/{$sanitizedFileName}";
             // Additional security check for path
@@ -493,9 +494,11 @@ class LicenseGeneratorService
             Storage::disk('public')->put($path, $content);
             return $path;
         } catch (\Exception $e) {
+            $productId = $product->id ?? 'unknown';
+            $fileNameValue = $fileName;
             Log::error('Error saving license file', [
-                'product_id' => $product->id ?? 'unknown',
-                'filename' => $fileName ?? 'unknown',
+                'product_id' => $productId,
+                'filename' => $fileNameValue,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -597,7 +600,8 @@ class LicenseVerifier {
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        if ($httpCode === 200) {
+        $httpCodeInt = is_numeric($httpCode) ? (int)$httpCode : 0;
+        if ($httpCodeInt === 200) {
             $data = json_decode($response, true);
             return [
                 'valid' => true,
@@ -605,7 +609,7 @@ class LicenseVerifier {
                 'source' => 'envato'
             ];
         }
-        return ['valid' => false, 'error' => 'Envato API returned HTTP ' . $httpCode];
+        return ['valid' => false, 'error' => 'Envato API returned HTTP ' . $httpCodeInt];
     }
     /**
      * Verify with our license system
@@ -695,24 +699,24 @@ class LicenseVerifier {
      * Uses the new dual verification system
      * Note: This is a comment, not command execution
      */
-    async verifyLicense(purchaseCode, domain = null) {
+    public function verifyLicense($purchaseCode, $domain = null) {
         try {
             // Send request to our license server for dual verification
-            const result = await this.verifyWithOurSystem(purchaseCode, domain);
-            if (result.valid) {
-                const verificationMethod = result.data.verification_method || 'unknown';
-                const message = 'License verified successfully';
-                return this.createLicenseResponse(true, message, {
-                    verification_method: verificationMethod,
-                    envato_valid: result.data.envato_valid || false,
-                    database_valid: result.data.database_valid || false,
-                    license_data: result.data
-                });
+            $result = $this->verifyWithOurSystem($purchaseCode, $domain);
+            if ($result['valid']) {
+                $verificationMethod = $result['data']['verification_method'] ?? 'unknown';
+                $message = 'License verified successfully';
+                return $this->createLicenseResponse(true, $message, [
+                    'verification_method' => $verificationMethod,
+                    'envato_valid' => $result['data']['envato_valid'] ?? false,
+                    'database_valid' => $result['data']['database_valid'] ?? false,
+                    'license_data' => $result['data']
+                ]);
             }
             // Verification failed
-            return this.createLicenseResponse(false, result.message || 'License verification failed');
-        } catch (error) {
-            return this.createLicenseResponse(false, 'Verification failed: ' + error.message);
+            return $this->createLicenseResponse(false, $result['message'] ?? 'License verification failed');
+        } catch (\Exception $error) {
+            return $this->createLicenseResponse(false, 'Verification failed: ' . $error->getMessage());
         }
     }
     /**

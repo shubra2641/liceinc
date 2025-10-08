@@ -7,15 +7,13 @@ use Illuminate\Foundation\Http\FormRequest;
 /**
  * Password Reset Request with enhanced security.
  *
- * This request class handles validation for password reset link requests
- * with comprehensive security measures and input validation.
+ * This request class handles validation for password reset operations
+ * with comprehensive security measures and input sanitization.
  */
 class PasswordResetRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -25,22 +23,22 @@ class PasswordResetRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
         return [
             'email' => [
                 'required',
-                'email:rfc,dns',
+                'string',
+                'email',
                 'max:255',
-                'exists:users,email'
             ],
         ];
     }
 
     /**
-     * Get custom messages for validator errors.
+     * Get custom validation messages.
      *
      * @return array<string, string>
      */
@@ -50,19 +48,32 @@ class PasswordResetRequest extends FormRequest
             'email.required' => 'Email address is required.',
             'email.email' => 'Please provide a valid email address.',
             'email.max' => 'Email address cannot exceed 255 characters.',
-            'email.exists' => 'No account found with this email address.',
         ];
     }
 
     /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
+     * Prepare the data for validation.
      */
-    public function attributes(): array
+    protected function prepareForValidation(): void
     {
-        return [
-            'email' => 'email address',
-        ];
+        $this->merge([
+            'email' => $this->sanitizeInput($this->email),
+        ]);
+    }
+
+    /**
+     * Sanitize input to prevent XSS attacks.
+     */
+    private function sanitizeInput(mixed $input): ?string
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
+        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

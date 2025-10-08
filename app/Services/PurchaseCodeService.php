@@ -83,7 +83,7 @@ class PurchaseCodeService
             return $cleaned;
         } catch (\Exception $e) {
             Log::error('Error cleaning purchase code', [
-                'purchase_code_length' => strlen($purchaseCode ?? ''),
+                'purchase_code_length' => strlen($purchaseCode),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -115,10 +115,10 @@ class PurchaseCodeService
             }
             $cleaned = $this->cleanPurchaseCode($purchaseCode);
             // Basic format validation - should be alphanumeric and reasonable length
-            return preg_match('/^[A-Z0-9]{8, 50}$/', $cleaned);
+            return (bool) preg_match('/^[A-Z0-9]{8, 50}$/', $cleaned);
         } catch (\Exception $e) {
             Log::error('Error validating purchase code format', [
-                'purchase_code_length' => strlen($purchaseCode ?? ''),
+                'purchase_code_length' => strlen($purchaseCode),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -182,7 +182,7 @@ class PurchaseCodeService
             ];
         } catch (\Exception $e) {
             Log::error('Error verifying purchase code', [
-                'purchase_code_length' => strlen($purchaseCode ?? ''),
+                'purchase_code_length' => strlen($purchaseCode),
                 'product_id' => $productId ?? 'null',
                 'user_id' => $user->id ?? 'null',
                 'error' => $e->getMessage(),
@@ -248,7 +248,7 @@ class PurchaseCodeService
                 });
             // If product ID is specified, ensure the license belongs to that product
             if ($productId) {
-                if (! is_numeric($productId) || $productId <= 0) {
+                if ((int)$productId <= 0) {
                     throw new \InvalidArgumentException('Invalid product ID for database verification');
                 }
                 $query->where('product_id', $productId);
@@ -269,7 +269,7 @@ class PurchaseCodeService
             ];
         } catch (\Exception $e) {
             Log::error('Error verifying against database', [
-                'purchase_code_length' => strlen($purchaseCode ?? ''),
+                'purchase_code_length' => strlen($purchaseCode),
                 'product_id' => $productId ?? 'null',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -368,7 +368,7 @@ class PurchaseCodeService
             ];
         } catch (\Exception $e) {
             Log::error('Error verifying raw code', [
-                'raw_code_length' => strlen($rawCode ?? ''),
+                'raw_code_length' => strlen($rawCode),
                 'product_id' => $productId ?? 'null',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -383,18 +383,19 @@ class PurchaseCodeService
     {
         try {
             $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
-            if (! $envatoData || ! isset($envatoData['item']['id'])) {
+            if (!$envatoData || !isset($envatoData['item']) || !is_array($envatoData['item']) || !isset($envatoData['item']['id'])) {
                 return [
                     'success' => false,
                     'error' => 'Invalid Envato purchase code',
                     'source' => 'envato',
                 ];
             }
-            $envatoItemId = (string)$envatoData['item']['id'];
+            $itemId = $envatoData['item']['id'];
+            $envatoItemId = is_string($itemId) ? $itemId : '';
             // If product ID is specified, verify it matches the Envato item
             if ($productId) {
                 $product = Product::find($productId);
-                if (! $product || ! $product->envato_item_id || $product->envato_item_id != $envatoItemId) {
+                if (!$product || !$product->envato_item_id || $product->envato_item_id != $envatoItemId) {
                     return [
                         'success' => false,
                         'error' => 'Purchase code does not belong to this product',
@@ -425,7 +426,7 @@ class PurchaseCodeService
      * Create license record from Envato data.
      */
     /**
-     * @param array<string, mixed> $envatoData
+     * @param array<mixed> $envatoData
      */
     protected function createLicenseFromEnvato(
         User $user,
@@ -448,10 +449,10 @@ class PurchaseCodeService
             'license_type' => 'regular',
             'status' => 'active',
             'purchase_date' => data_get($envatoData, 'sold_at')
-                ? date('Y-m-d H:i:s', strtotime(data_get($envatoData, 'sold_at')))
+                ? date('Y-m-d H:i:s', strtotime(is_string(data_get($envatoData, 'sold_at')) ? data_get($envatoData, 'sold_at') : '') ?: time())
                 : now(),
             'support_expires_at' => data_get($envatoData, 'supported_until')
-                ? date('Y-m-d H:i:s', strtotime(data_get($envatoData, 'supported_until')))
+                ? date('Y-m-d H:i:s', strtotime(is_string(data_get($envatoData, 'supported_until')) ? data_get($envatoData, 'supported_until') : '') ?: time())
                 : null,
             'license_expires_at' => null, // Lifetime license
         ];
@@ -485,7 +486,7 @@ class PurchaseCodeService
     /**
      * Check if user has access to KB content via product license.
      */
-    public function userHasKbAccess(User $user, KbArticle $kbItem): bool
+    public function userHasKbAccess(User $user, \App\Models\KbArticle $kbItem): bool
     {
         // If KB item is not linked to any product, allow access
         if (! $kbItem->product_id) {
@@ -524,7 +525,7 @@ class PurchaseCodeService
     /**
      * Check if user has access to KB category via product license.
      */
-    public function userHasCategoryAccess(User $user, KbCategory $category): bool
+    public function userHasCategoryAccess(User $user, \App\Models\KbCategory $category): bool
     {
         // If category is not linked to any product, allow access
         if (! $category->product_id) {
@@ -536,14 +537,14 @@ class PurchaseCodeService
     /**
      * Check if user has access to KB article considering both direct product and category product.
      */
-    public function userHasArticleAccess(User $user, KbArticle $article): bool
+    public function userHasArticleAccess(User $user, \App\Models\KbArticle $article): bool
     {
         // If article has direct product link, check that first
-        if ($article->product_id) {
+        if (isset($article->product_id) && $article->product_id && $article->product_id > 0) {
             return $this->userHasProductAccess($user, $article->product_id);
         }
         // If article doesn't have direct product but category does, check category access
-        if ($article->category && $article->category->product_id) {
+        if ($article->category->product_id) {
             return $this->userHasCategoryAccess($user, $article->category);
         }
         // No product restrictions

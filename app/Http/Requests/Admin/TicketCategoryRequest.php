@@ -38,7 +38,8 @@ class TicketCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        $categoryId = $this->route('ticket_category') ? $this->route('ticket_category')->id : null;
+        $category = $this->route('ticket_category');
+        $categoryId = $category && is_object($category) && property_exists($category, 'id') ? $category->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
             'name' => [
@@ -81,7 +82,7 @@ class TicketCategoryRequest extends FormRequest
             'auto_assign_user_id' => [
                 'nullable',
                 'integer',
-                'exists:users, id',
+                'exists:users,id',
             ],
             'response_time_hours' => [
                 'nullable',
@@ -106,7 +107,7 @@ class TicketCategoryRequest extends FormRequest
             'approval_user_id' => [
                 'nullable',
                 'integer',
-                'exists:users, id',
+                'exists:users,id',
             ],
             'template_subject' => [
                 'nullable',
@@ -182,11 +183,11 @@ class TicketCategoryRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'name' => $this->sanitizeInput($this->name),
-            'description' => $this->description ? $this->sanitizeInput($this->description) : null,
-            'icon' => $this->icon ? $this->sanitizeInput($this->icon) : null,
-            'template_subject' => $this->template_subject ? $this->sanitizeInput($this->template_subject) : null,
-            'template_content' => $this->template_content ? $this->sanitizeInput($this->template_content) : null,
+            'name' => $this->sanitizeInput($this->input('name')),
+            'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
+            'icon' => $this->input('icon') ? $this->sanitizeInput($this->input('icon')) : null,
+            'template_subject' => $this->input('template_subject') ? $this->sanitizeInput($this->input('template_subject')) : null,
+            'template_content' => $this->input('template_content') ? $this->sanitizeInput($this->input('template_content')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -204,15 +205,20 @@ class TicketCategoryRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

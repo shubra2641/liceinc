@@ -38,7 +38,8 @@ class EmailTemplateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $templateId = $this->route('email_template') ? $this->route('email_template')->id : null;
+        $template = $this->route('email_template');
+        $templateId = $template && is_object($template) && property_exists($template, 'id') ? $template->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         $route = $this->route();
         $isTest = $this->isMethod('POST') && $route && str_contains($route->getName() ?? '', 'test');
@@ -193,9 +194,9 @@ class EmailTemplateRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'name' => $this->sanitizeInput($this->name),
-            'subject' => $this->sanitizeInput($this->subject),
-            'description' => $this->description ? $this->sanitizeInput($this->description) : null,
+            'name' => $this->sanitizeInput($this->input('name')),
+            'subject' => $this->sanitizeInput($this->input('subject')),
+            'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -219,15 +220,20 @@ class EmailTemplateRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

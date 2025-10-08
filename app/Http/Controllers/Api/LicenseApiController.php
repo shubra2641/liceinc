@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LicenseRegisterRequest;
 use App\Http\Requests\Api\LicenseStatusRequest;
 use App\Http\Requests\Api\LicenseVerifyRequest;
+use App\Http\Requests\Api\Request as ApiRequest;
 use App\Models\License;
 use App\Models\Product;
 use App\Services\EnvatoService;
@@ -55,7 +56,8 @@ class LicenseApiController extends Controller
      */
     private function getApiToken(): string
     {
-        return \App\Helpers\ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
+        $token = \App\Helpers\ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
+        return is_string($token) ? $token : '';
     }
 
     /**
@@ -79,7 +81,7 @@ class LicenseApiController extends Controller
             // Check authorization header
             $authHeader = $request->header('Authorization');
             $expectedToken = 'Bearer '.$this->getApiToken();
-            if (! $expectedToken || $authHeader !== $expectedToken) {
+            if ($authHeader !== $expectedToken) {
                 Log::warning('Unauthorized license verification attempt', [
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
@@ -114,7 +116,8 @@ class LicenseApiController extends Controller
                 ], 404);
             }
             // Verify verification key if provided
-            if ($verificationKey && ! $this->verifyVerificationKey($product, $verificationKey)) {
+            $verificationKeyStr = is_string($verificationKey) ? $verificationKey : '';
+            if ($verificationKey && ! $this->verifyVerificationKey($product, $verificationKeyStr)) {
                 Log::warning('Invalid verification key during license verification', [
                     'product_slug' => $productSlug,
                     'ip' => $request->ip(),
@@ -172,14 +175,18 @@ class LicenseApiController extends Controller
                 }
             } else {
                 // Step 3: If not in database, try Envato API
-                $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
+                $purchaseCodeStr = is_string($purchaseCode) ? $purchaseCode : '';
+                $envatoData = $this->envatoService->verifyPurchase($purchaseCodeStr);
                 if (
-                    $envatoData && is_array($envatoData) && isset($envatoData['item']) && is_array($envatoData['item']) && isset($envatoData['item']['id'])
+                    $envatoData && isset($envatoData['item'])
+                    && is_array($envatoData['item']) && isset($envatoData['item']['id'])
                     && $envatoData['item']['id'] == $product->envato_item_id
                 ) {
                     $envatoValid = true;
                     // Create license automatically from Envato
-                    $license = $this->createLicenseFromEnvato($product, $purchaseCode, $envatoData);
+                    /** @var array<string, mixed> $envatoDataTyped */
+                    $envatoDataTyped = $envatoData;
+                    $license = $this->createLicenseFromEnvato($product, $purchaseCodeStr, $envatoDataTyped);
                     $databaseValid = true;
                     $verificationMethod = 'envato_auto_created';
                 } else {
@@ -201,7 +208,8 @@ class LicenseApiController extends Controller
                 if ($autoRegisterDomains || $isTestMode) {
                     // Auto register mode: Register domain automatically
                     try {
-                        $this->registerDomainForLicense($license, $domain);
+                        $domainStr = is_string($domain) ? $domain : '';
+                        $this->registerDomainForLicense($license, $domainStr);
                         $this->logApiVerificationAttempt($request, true, 'Domain registered automatically', 'api', [
                             'domain' => $domain,
                             'license_id' => $license->id,
@@ -225,7 +233,8 @@ class LicenseApiController extends Controller
                     }
                 } else {
                     // Verification mode: Verify domain authorization
-                    if (! $this->verifyDomain($license, $domain)) {
+                    $domainStr = is_string($domain) ? $domain : '';
+                    if (! $this->verifyDomain($license, $domainStr)) {
                         $this->logApiVerificationAttempt(
                             $request,
                             false,
@@ -255,7 +264,8 @@ class LicenseApiController extends Controller
                 'database_valid' => $databaseValid,
             ]);
             // Step 7: Log verification in database
-            $this->logVerification($license, $domain, $verificationMethod);
+            $domainForLog = is_string($domain) ? $domain : null;
+            $this->logVerification($license, $domainForLog, $verificationMethod);
             DB::commit();
 
             return response()->json([
@@ -350,8 +360,8 @@ class LicenseApiController extends Controller
     private function verifyDomain(License $license, string $domain): bool
     {
         // Remove protocol and www
-        $domain = preg_replace('/^https?:\/\//', '', $domain);
-        $domain = preg_replace('/^www\./', '', $domain);
+        $domain = preg_replace('/^https?:\/\//', '', $domain) ?? $domain;
+        $domain = preg_replace('/^www\./', '', $domain) ?? $domain;
         $authorizedDomains = $license->domains()->where('status', 'active')->get();
         // If no domains are configured, check if we can register the current domain
         if ($authorizedDomains->isEmpty()) {
@@ -373,8 +383,8 @@ class LicenseApiController extends Controller
             }
         }
         foreach ($authorizedDomains as $authorizedDomain) {
-            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain);
-            $authDomain = preg_replace('/^www\./', '', $authDomain);
+            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain ?? '') ?? $authorizedDomain->domain ?? '';
+            $authDomain = preg_replace('/^www\./', '', $authDomain) ?? $authDomain;
             if ($authDomain === $domain) {
                 // Update last used timestamp
                 $authorizedDomain->update(['last_used_at' => now()]);
@@ -384,9 +394,9 @@ class LicenseApiController extends Controller
                 return true;
             }
             // Check wildcard domains
-            if (str_starts_with($authDomain, '*.')) {
+            if ($authDomain && str_starts_with($authDomain, '*.')) {
                 $pattern = str_replace('*.', '', $authDomain);
-                if (str_ends_with($domain, $pattern)) {
+                if ($domain && str_ends_with($domain, $pattern)) {
                     // Update last used timestamp
                     $authorizedDomain->update(['last_used_at' => now()]);
                     // Log verification for wildcard domain match
@@ -407,8 +417,8 @@ class LicenseApiController extends Controller
     private function registerDomainForLicense(License $license, string $domain): void
     {
         // Clean domain (remove protocol and www)
-        $cleanDomain = preg_replace('/^https?:\/\//', '', $domain);
-        $cleanDomain = preg_replace('/^www\./', '', $cleanDomain);
+        $cleanDomain = preg_replace('/^https?:\/\//', '', $domain) ?? $domain;
+        $cleanDomain = preg_replace('/^www\./', '', $cleanDomain) ?? $cleanDomain;
         // Check if domain already exists for this license
         $existingDomain = $license->domains()
             ->where('domain', $cleanDomain)
@@ -476,16 +486,16 @@ class LicenseApiController extends Controller
      */
     private function generateLicenseKey(): string
     {
-        return strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid(mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid(mt_rand(), true)), 0, 8));
+        return strtoupper(substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8));
     }
 
     /**
      * Log API verification attempt.
      *
-     * @param  Request  $request  The HTTP request
+     * @param  ApiRequest  $request  The HTTP request
      * @param  bool  $success  Whether the verification was successful
      * @param  string  $message  The log message
      * @param  string  $source  The verification source
@@ -495,7 +505,7 @@ class LicenseApiController extends Controller
      * @param array<string, mixed> $additionalData
      */
     private function logApiVerificationAttempt(
-        Request $request,
+        LicenseVerifyRequest $request,
         bool $success,
         string $message,
         string $source,
@@ -579,7 +589,7 @@ class LicenseApiController extends Controller
             // Check authorization header
             $authHeader = $request->header('Authorization');
             $expectedToken = 'Bearer '.$this->getApiToken();
-            if (! $expectedToken || $authHeader !== $expectedToken) {
+            if ($authHeader !== $expectedToken) {
                 Log::warning('Unauthorized license registration attempt', [
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
@@ -638,13 +648,15 @@ class LicenseApiController extends Controller
             ]);
             // Add domain if provided
             if ($domain) {
+                $domainStr = is_string($domain) ? $domain : '';
                 $license->domains()->create([
-                    'domain' => $domain,
+                    'domain' => $domainStr,
                     'status' => 'active',
                 ]);
             }
             // Log the license registration
-            $this->logVerification($license, $domain, 'license_registration');
+            $domainForLog = is_string($domain) ? $domain : null;
+            $this->logVerification($license, $domainForLog, 'license_registration');
             DB::commit();
 
             return response()->json([

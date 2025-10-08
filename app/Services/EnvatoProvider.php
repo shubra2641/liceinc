@@ -76,7 +76,7 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
      *
      * @param  string  $token  The OAuth access token for API authentication
      *
-     * @return array<string, mixed> The raw user data from Envato API
+     * @return array<mixed, mixed> The raw user data from Envato API
      *
      * @throws \Exception When API request fails or returns invalid data
      *
@@ -84,11 +84,14 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
      * $userData = $this->getUserByToken($accessToken);
      * $account = $userData['account'] ?? [];
      */
+    /**
+     * @return array<mixed, mixed>
+     */
     protected function getUserByToken($token): array
     {
         try {
             // Validate token format
-            if (empty($token) || ! is_string($token)) {
+            if (empty($token)) {
                 throw new \InvalidArgumentException('Invalid access token provided');
             }
             // Sanitize token to prevent injection attacks
@@ -100,21 +103,22 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
                 ],
                 'timeout' => 30,
             ]);
-            if (! $response->successful()) {
-                throw new \Exception('Failed to retrieve user data from Envato API: HTTP ' . $response->status());
+            $statusCode = $response->getStatusCode();
+            if ($statusCode >= 400) {
+                throw new \Exception('Failed to retrieve user data from Envato API: HTTP ' . (int)$statusCode);
             }
             $data = json_decode($response->getBody(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception('Invalid JSON response from Envato API: ' . json_last_error_msg());
             }
-            if (! is_array($data)) {
+            if (!is_array($data)) {
                 throw new \Exception('Invalid response format from Envato API');
             }
             return $data;
         } catch (\Exception $e) {
             Log::error('Error retrieving user data from Envato API', [
                 'error' => $e->getMessage(),
-                'token_length' => strlen($token ?? ''),
+                'token_length' => strlen($token),
                 'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
@@ -143,26 +147,35 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
     protected function mapUserToObject(array $user): User
     {
         try {
-            if (! is_array($user)) {
-                throw new \InvalidArgumentException('Invalid user data format');
-            }
+            // User parameter is already type-hinted as array
             $account = $user['account'] ?? [];
+            if (!is_array($account)) {
+                $account = [];
+            }
             // Generate a unique ID if not provided
-            $id = $account['id'] ?? uniqid('envato_', true);
+            $accountId = $account['id'] ?? null;
+            $id = is_string($accountId) ? $accountId : uniqid('envato_', true);
             $id = $this->sanitizeInput($id);
             // Generate username from firstname and surname if not provided
-            $username = $account['username']
-                ?? strtolower(($account['firstname'] ?? 'user') . ($account['surname'] ?? ''));
+            $accountUsername = $account['username'] ?? null;
+            $accountFirstname = $account['firstname'] ?? null;
+            $accountSurname = $account['surname'] ?? null;
+            $username = is_string($accountUsername) ? $accountUsername : 
+                       strtolower((is_string($accountFirstname) ? $accountFirstname : 'user') . 
+                                 (is_string($accountSurname) ? $accountSurname : ''));
             $username = $this->sanitizeInput($username);
             // For OAuth, we might not get email from this endpoint
             // We'll need to get it from somewhere else or generate one
-            $email = $account['email'] ?? ($username . '@envato.temp');
+            $accountEmail = $account['email'] ?? null;
+            $email = is_string($accountEmail) ? $accountEmail : ($username . '@envato.temp');
             $email = $this->sanitizeInput($email);
             // Validate email format
             if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $email = $username . '@envato.temp';
             }
-            $name = trim(($account['firstname'] ?? '') . ' ' . ($account['surname'] ?? ''));
+            $firstname = $account['firstname'] ?? '';
+            $surname = $account['surname'] ?? '';
+            $name = trim((is_string($firstname) ? $firstname : '') . ' ' . (is_string($surname) ? $surname : ''));
             $name = $this->sanitizeInput($name);
             // Sanitize avatar URL if provided
             $avatar = $account['image'] ?? null;
@@ -179,7 +192,7 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
         } catch (\Exception $e) {
             Log::error('Error mapping Envato user data', [
                 'error' => $e->getMessage(),
-                'user_data_keys' => array_keys($user ?? []),
+                'user_data_keys' => array_keys($user),
                 'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
@@ -194,7 +207,7 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
      *
      * @param  string  $code  The authorization code from OAuth callback
      *
-     * @return array<string, mixed> The token request fields with proper validation
+     * @return array<mixed, mixed> The token request fields with proper validation
      *
      * @throws \InvalidArgumentException When authorization code is invalid
      */
@@ -202,7 +215,7 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
     {
         try {
             // Validate authorization code
-            if (empty($code) || ! is_string($code)) {
+            if (empty($code)) {
                 throw new \InvalidArgumentException('Invalid authorization code provided');
             }
             // Sanitize authorization code
@@ -213,7 +226,7 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
         } catch (\Exception $e) {
             Log::error('Error preparing token request fields', [
                 'error' => $e->getMessage(),
-                'code_length' => strlen($code ?? ''),
+                'code_length' => strlen($code),
                 'trace' => $e->getTraceAsString(),
             ]);
             throw $e;

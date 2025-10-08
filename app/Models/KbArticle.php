@@ -82,14 +82,14 @@ class KbArticle extends Model
         'is_featured' => 'boolean',
     ];
     /**
-     * @return BelongsTo<KbCategory, KbArticle>
+     * @return BelongsTo<KbCategory, $this>
      */
     public function category(): BelongsTo
     {
         return $this->belongsTo(KbCategory::class, 'kb_category_id');
     }
     /**
-     * @return BelongsTo<Product, KbArticle>
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {

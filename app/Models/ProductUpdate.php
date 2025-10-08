@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
  * @property string|null $file_name
  * @property int|null $file_size
  * @property string|null $file_hash
+ * @property string|null $update_file_path
  * @property bool $is_major
  * @property bool $is_required
  * @property bool $is_active
@@ -114,7 +115,7 @@ class ProductUpdate extends Model
      * Get the product that owns the update.
      */
     /**
-     * @return BelongsTo<Product, ProductUpdate>
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {
@@ -171,21 +172,23 @@ class ProductUpdate extends Model
         $requirements = $this->requirements;
         // Check PHP version
         if (isset($requirements['php_version'])) {
-            if (version_compare(PHP_VERSION, $requirements['php_version'], '<')) {
+            $phpVersion = $requirements['php_version'];
+            if (is_string($phpVersion) && version_compare(PHP_VERSION, $phpVersion, '<')) {
                 return false;
             }
         }
         // Check Laravel version
         if (isset($requirements['laravel_version'])) {
             $laravelVersion = app()->version();
-            if (version_compare($laravelVersion, $requirements['laravel_version'], '<')) {
+            $requiredVersion = is_string($requirements['laravel_version']) ? $requirements['laravel_version'] : '';
+            if (version_compare($laravelVersion, $requiredVersion, '<')) {
                 return false;
             }
         }
         // Check extensions
-        if (isset($requirements['extensions'])) {
+        if (isset($requirements['extensions']) && is_array($requirements['extensions'])) {
             foreach ($requirements['extensions'] as $extension) {
-                if (! extension_loaded($extension)) {
+                if (! extension_loaded(is_string($extension) ? $extension : '')) {
                     return false;
                 }
             }
@@ -197,10 +200,12 @@ class ProductUpdate extends Model
      */
     public function getChangelogTextAttribute(): string
     {
-        if (! $this->changelog || ! is_array($this->changelog)) {
+        $changelog = $this->changelog;
+        if (empty($changelog)) {
             return '';
         }
-        return implode("\n", $this->changelog);
+        // Changelog is already validated
+        return implode("\n", $changelog);
     }
     /**
      * Get formatted file size.

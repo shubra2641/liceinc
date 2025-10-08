@@ -52,7 +52,7 @@ class TicketCategoryController extends Controller
     {
         try {
             $categories = TicketCategory::orderBy('sort_order')->paginate(15);
-            return view('admin.ticket-categories.index', compact('categories'));
+            return view('admin.ticket-categories.index', ['categories' => $categories]);
         } catch (\Exception $e) {
             Log::error('Ticket categories listing failed', [
                 'error' => $e->getMessage(),
@@ -60,7 +60,7 @@ class TicketCategoryController extends Controller
             ]);
             // Return view with empty categories collection
             return view('admin.ticket-categories.index', [
-                'categories' => collect()->paginate(15),
+                'categories' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15),
             ]);
         }
     }
@@ -91,7 +91,7 @@ class TicketCategoryController extends Controller
      * Creates a new ticket category with comprehensive validation,
      * rate limiting, and security measures.
      *
-     * @param  TicketCategoryStoreRequest  $request  The validated request containing category data
+     * @param  TicketCategoryRequest  $request  The validated request containing category data
      *
      * @return RedirectResponse Redirect to categories index with success message
      *
@@ -123,7 +123,7 @@ class TicketCategoryController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug'] ?? Str::slug($validated['name']);
+            $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
             TicketCategory::create($validated);
             DB::commit();
             return redirect()->route('admin.ticket-categories.index')
@@ -164,14 +164,18 @@ class TicketCategoryController extends Controller
     public function show(TicketCategory $ticket_category): View
     {
         try {
-            return view('admin.ticket-categories.show', compact('ticket_category'));
+            /** @var view-string $viewName */
+            $viewName = 'admin.ticket-categories.show';
+            return view($viewName, ['ticket_category' => $ticket_category]);
         } catch (\Exception $e) {
             Log::error('Ticket category view failed to load', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'category_id' => $ticket_category->id,
             ]);
-            return view('admin.ticket-categories.show', [
+            /** @var view-string $viewName */
+            $viewName = 'admin.ticket-categories.show';
+            return view($viewName, [
                 'ticket_category' => $ticket_category,
                 'error' => 'Unable to load the category details. Please try again later.',
             ]);
@@ -241,7 +245,7 @@ class TicketCategoryController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug'] ?? Str::slug($validated['name']);
+            $validated['slug'] = $validated['slug'] ?? Str::slug(is_string($validated['name'] ?? null) ? $validated['name'] : '');
             $ticket_category->update($validated);
             DB::commit();
             return redirect()->route('admin.ticket-categories.index')

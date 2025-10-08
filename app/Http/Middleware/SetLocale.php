@@ -51,7 +51,10 @@ class SetLocale
             $validatedLocale = $this->validateAndSanitizeLocale($locale);
             // Set application locale
             $this->setApplicationLocale($validatedLocale);
-            return $next($request);
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         } catch (\Exception $e) {
             Log::error('SetLocale middleware failed', [
                 'error' => $e->getMessage(),
@@ -61,8 +64,11 @@ class SetLocale
                 'config_locale' => config('app.locale'),
             ]);
             // Fallback to default locale and continue
-            app()->setLocale(config('app.locale'));
-            return $next($request);
+            app()->setLocale(is_string(config('app.locale')) ? config('app.locale') : 'en');
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         }
     }
     /**
@@ -139,7 +145,7 @@ class SetLocale
                 ]);
             }
             // Fallback to default locale instead of throwing exception
-            return config('app.locale', 'en');
+            return is_string(config('app.locale', 'en')) ? config('app.locale', 'en') : 'en';
         }
         return $sanitizedLocale;
     }
@@ -166,7 +172,7 @@ class SetLocale
     /**
      * Get supported locales with enhanced security and validation.
      *
-     * @return array<string> Array of supported locale codes
+     * @return array<mixed> Array of supported locale codes
      */
     private function getSupportedLocales(): array
     {
@@ -177,7 +183,7 @@ class SetLocale
             // return the keys; otherwise return the flat array as-is
             $keys = array_keys($configLocales);
             $isAssociative = array_filter($keys, 'is_string') === $keys;
-            return $isAssociative ? $keys : array_values($configLocales);
+            return $isAssociative ? array_map(function($key) { return $key; }, $keys) : array_map(function($value) { return $value; }, array_values($configLocales));
         }
         // Default supported locales
         return [

@@ -57,7 +57,7 @@ class UserController extends Controller
                 ->withCount(['licenses', 'tickets'])
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
-            return view('admin.users.index', compact('users'));
+            return view('admin.users.index', ['users' => $users]);
         } catch (\Exception $e) {
             Log::error('Failed to load users listing', [
                 'error' => $e->getMessage(),
@@ -97,7 +97,7 @@ class UserController extends Controller
      * Creates a new user with comprehensive validation, role assignment,
      * and optional welcome email functionality.
      *
-     * @param  StoreUserRequest  $request  The validated request containing user data
+     * @param  UserRequest  $request  The validated request containing user data
      *
      * @return RedirectResponse Redirect to user view or back with error
      *
@@ -127,7 +127,7 @@ class UserController extends Controller
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
+                'password' => Hash::make(is_string($validated['password'] ?? null) ? $validated['password'] : ''),
                 'email_verified_at' => now(),
                 'firstname' => $validated['firstname'],
                 'lastname' => $validated['lastname'],
@@ -193,7 +193,7 @@ class UserController extends Controller
                 ->forUser($user)
                 ->latest()
                 ->get();
-            return view('admin.users.show', compact('user', 'licenses'));
+            return view('admin.users.show', ['user' => $user, 'licenses' => $licenses]);
         } catch (\Exception $e) {
             Log::error('Failed to load user details', [
                 'error' => $e->getMessage(),
@@ -229,7 +229,7 @@ class UserController extends Controller
      */
     public function edit(User $user): View
     {
-        return view('admin.users.edit', compact('user'));
+        return view('admin.users.edit', ['user' => $user]);
     }
     /**
      * Update the specified user.
@@ -237,7 +237,7 @@ class UserController extends Controller
      * Updates user information including profile data, password (if provided),
      * and role assignment with comprehensive validation.
      *
-     * @param  UpdateUserRequest  $request  The validated request containing update data
+     * @param  UserRequest  $request  The validated request containing update data
      * @param  User  $user  The user to update
      *
      * @return RedirectResponse Redirect to user view or back with error
@@ -281,7 +281,7 @@ class UserController extends Controller
             ]);
             if ($request->filled('password')) {
                 $user->update([
-                    'password' => Hash::make($validated['password']),
+                    'password' => Hash::make(is_string($validated['password'] ?? null) ? $validated['password'] : ''),
                 ]);
             }
             // Update role

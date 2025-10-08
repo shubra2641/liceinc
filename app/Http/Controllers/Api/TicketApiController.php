@@ -116,7 +116,7 @@ class TicketApiController extends Controller
             // Search with sanitized input
             if (isset($validated['search'])) {
                 $search = $this->sanitizeInput($validated['search']);
-                $searchStr = is_string($search) ? $search : (string)$search;
+                $searchStr = is_string($search) ? $search : '';
                 $query->where(function ($q) use ($searchStr) {
                     $q->where('subject', 'like', "%{$searchStr}%")
                         ->orWhere('content', 'like', "%{$searchStr}%")
@@ -128,7 +128,7 @@ class TicketApiController extends Controller
             }
             // Pagination with validated input
             $perPage = $validated['per_page'] ?? 15;
-            $tickets = $query->latest()->paginate($perPage);
+            $tickets = $query->latest()->paginate(is_numeric($perPage) ? (int)$perPage : 15);
             DB::commit();
 
             return response()->json([
@@ -234,10 +234,10 @@ class TicketApiController extends Controller
             }
             // If not found in database, try Envato API
             try {
-                $sale = $this->envatoService->verifyPurchase($purchaseCode);
+                $sale = $this->envatoService->verifyPurchase(is_string($purchaseCode) ? $purchaseCode : '');
                 if ($sale && isset($sale['item'])) {
-                    $productSlug = $this->sanitizeOutput(data_get($sale, 'item.slug'));
-                    $productName = $this->sanitizeOutput(data_get($sale, 'item.name'));
+                    $productSlug = $this->sanitizeOutput(is_string(data_get($sale, 'item.slug')) ? data_get($sale, 'item.slug') : null);
+                    $productName = $this->sanitizeOutput(is_string(data_get($sale, 'item.name')) ? data_get($sale, 'item.name') : null);
                     DB::commit();
 
                     return response()->json([
@@ -253,12 +253,12 @@ class TicketApiController extends Controller
                 }
             } catch (\Throwable $envatoError) {
                 Log::warning('Envato API error during purchase code verification', [
-                    'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                    'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4).'...',
                     'error' => $envatoError->getMessage(),
                 ]);
             }
             Log::warning('Purchase code not found in ticket verification', [
-                'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4).'...',
             ]);
             DB::commit();
 
@@ -271,7 +271,7 @@ class TicketApiController extends Controller
             Log::error('Purchase code verification failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4).'...',
             ]);
 
             return response()->json([

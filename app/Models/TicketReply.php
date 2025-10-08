@@ -49,14 +49,14 @@ class TicketReply extends Model
         'user_id' => 'integer',
     ];
     /**
-     * @return BelongsTo<Ticket, TicketReply>
+     * @return BelongsTo<Ticket, $this>
      */
     public function ticket(): BelongsTo
     {
         return $this->belongsTo(Ticket::class);
     }
     /**
-     * @return BelongsTo<User, TicketReply>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

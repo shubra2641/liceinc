@@ -67,7 +67,11 @@ abstract class BaseController extends Controller
             $this->logValidationError($request, $validator->errors());
             throw new ValidationException($validator);
         }
-        return $validator->validated();
+        $validated = $validator->validated();
+        
+        /** @var array<string, mixed> $result */
+        $result = $validated;
+        return $result;
     }
     /**
      * Create standardized JSON response with enhanced security.
@@ -213,7 +217,7 @@ abstract class BaseController extends Controller
      * $sanitized = $this->sanitizeLogData($request->all());
      */
     /**
-     * @param array<string, mixed> $data
+     * @param array<mixed, mixed> $data
      * @return array<string, mixed>
      */
     protected function sanitizeLogData(array $data): array
@@ -238,7 +242,9 @@ abstract class BaseController extends Controller
                 $data[$field] = '[REDACTED]';
             }
         }
-        return $data;
+        /** @var array<string, mixed> $result */
+        $result = $data;
+        return $result;
     }
     /**
      * Handle exceptions with proper logging and response.
@@ -278,7 +284,7 @@ abstract class BaseController extends Controller
             'ip' => $request->ip(),
             'user_id' => Auth::id(),
         ]);
-        return $this->errorResponse($message, $statusCode);
+        return $this->errorResponse($message, null, $statusCode);
     }
     /**
      * Check if user has permission with enhanced validation.
@@ -366,10 +372,6 @@ abstract class BaseController extends Controller
     }
     /**
      * Sanitize input to prevent XSS attacks.
-     *
-     * @param  string|null  $input  The input to sanitize
-     *
-     * @return string|null The sanitized input
      */
     protected function sanitizeInput(mixed $input): mixed
     {
@@ -378,6 +380,12 @@ abstract class BaseController extends Controller
         }
         if (is_string($input)) {
             return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+        }
+        if (is_array($input)) {
+            return array_map([$this, 'sanitizeInput'], $input);
+        }
+        if (is_object($input)) {
+            return $input;
         }
         return $input;
     }

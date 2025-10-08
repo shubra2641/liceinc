@@ -49,9 +49,9 @@ class SecurityService
      *
      */
     /**
-     * @param array<string, mixed> $data
-     * @param array<string, mixed> $rules
-     * @return array<string, mixed>
+     * @param array<mixed> $data
+     * @param array<mixed> $rules
+     * @return array<mixed>
      */
     public function validateAndSanitizeInput(array $data, array $rules = []): array
     {
@@ -66,7 +66,8 @@ class SecurityService
                 if (is_string($value)) {
                     // Limit string length
                     if (strlen($value) > $maxStringLength) {
-                        $value = substr($value, 0, $maxStringLength);
+                        $maxLength = is_numeric($maxStringLength) ? (int)$maxStringLength : 1000;
+                        $value = substr($value, 0, $maxLength);
                     }
                     // Sanitize HTML if enabled
                     if ($sanitizeHtml) {
@@ -74,10 +75,12 @@ class SecurityService
                     }
                     // Apply specific validation rules if provided
                     if (isset($rules[$key])) {
-                        $value = $this->applyValidationRule($value, $rules[$key]);
+                        $rule = is_string($rules[$key] ?? '') ? (string)($rules[$key] ?? '') : '';
+                        $value = $this->applyValidationRule($value, $rule);
                     }
                 } elseif (is_array($value)) {
-                    $value = $this->validateAndSanitizeInput($value, $rules[$key] ?? []);
+                    $subRules = is_array($rules[$key] ?? []) ? (array)($rules[$key] ?? []) : [];
+                    $value = $this->validateAndSanitizeInput($value, $subRules);
                 }
                 $sanitized[$key] = $value;
             }
@@ -116,7 +119,8 @@ class SecurityService
             // Get allowed tags from configuration
             $allowedTags = config('security.xss_protection.allowed_tags', '');
             // Strip dangerous tags
-            $content = strip_tags($content, $allowedTags);
+            $allowedTagsString = is_string($allowedTags) ? $allowedTags : '';
+            $content = strip_tags($content, $allowedTagsString);
             // Convert special characters to HTML entities
             $content = htmlspecialchars($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
             // Remove dangerous JavaScript patterns
@@ -166,16 +170,16 @@ class SecurityService
             ];
             foreach ($dangerousPatterns as $pattern) {
                 try {
-                    $content = preg_replace($pattern, '', $content);
+                    $content = preg_replace($pattern, '', (string)$content);
                 } catch (Exception $e) {
                     Log::error('Failed to apply dangerous pattern filter: ' . $e->getMessage());
                     continue;
                 }
             }
-            return $content;
+            return (string)$content;
         } catch (Exception $e) {
             Log::error('Failed to remove dangerous patterns: ' . $e->getMessage());
-            return $content;
+            return (string)$content;
         }
     }
     /**
@@ -214,7 +218,7 @@ class SecurityService
                 case 'float':
                     return filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
                 case 'string':
-                    return filter_var($value, FILTER_SANITIZE_STRING);
+                    return filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
                 default:
                     return $value;
             }
@@ -244,9 +248,6 @@ class SecurityService
     public function isSuspiciousRequest(Request $request): bool
     {
         try {
-            if (! $request) {
-                throw new \InvalidArgumentException('Request cannot be null');
-            }
             $suspiciousIndicators = [
                 $this->hasHighRequestRate($request),
                 $this->hasSuspiciousUserAgent($request),
@@ -276,7 +277,8 @@ class SecurityService
     {
         $key = 'rate_limit:' . $request->ip();
         $maxRequests = config('security.rate_limiting.api_requests_per_minute', 60);
-        return RateLimiter::tooManyAttempts($key, $maxRequests);
+        $maxRequestsInt = is_numeric($maxRequests) ? (int)$maxRequests : 60;
+        return RateLimiter::tooManyAttempts($key, $maxRequestsInt);
     }
     /**
      * Check if user agent is suspicious.
@@ -308,7 +310,7 @@ class SecurityService
         ];
         foreach ($suspiciousHeaders as $header => $suspiciousValues) {
             $headerValue = $request->header($header);
-            if ($headerValue && in_array($headerValue, $suspiciousValues)) {
+            if ($headerValue && in_array((string) $headerValue, $suspiciousValues)) {
                 return true;
             }
         }
@@ -320,7 +322,9 @@ class SecurityService
     private function isFromBlacklistedIP(Request $request): bool
     {
         $ip = $request->ip();
-        $blacklist = explode(', ', config('security.ip_control.blacklist', ''));
+        $blacklistConfig = config('security.ip_control.blacklist', '');
+        $blacklistString = is_string($blacklistConfig) ? $blacklistConfig : '';
+        $blacklist = explode(', ', $blacklistString);
         return in_array($ip, array_filter($blacklist));
     }
     /**
@@ -355,14 +359,14 @@ class SecurityService
             '/\|\s*netcat\s+/i',
             // Path traversal patterns
             '/\.\.\/\.\.\/\.\.\//i',
-            '/\.\.\\\.\.\\\..\\/i',
+            '/\.\.\\\.\.\\\..\\\/i',
             '/%2e%2e%2f/i',
             '/%2e%2e%5c/i',
         ];
-        $requestData = json_encode($request->all());
+        $requestData = json_encode($request->all()) ?: '';
         foreach ($attackPatterns as $pattern) {
             try {
-                if (preg_match($pattern, $requestData)) {
+                if (preg_match($pattern, (string)$requestData)) {
                     return true;
                 }
             } catch (Exception $e) {
@@ -411,7 +415,7 @@ class SecurityService
                 'url' => request()->fullUrl(),
                 'method' => request()->method(),
             ], $data);
-            Log::channel('single')->$level('Security event: ' . $event, $logData);
+            Log::channel('single')->{$level}('Security event: ' . $event, $logData);
         } catch (Exception $e) {
             Log::error('Failed to log security event: ' . $e->getMessage());
         }
@@ -443,7 +447,7 @@ class SecurityService
             if ($length % 2 !== 0) {
                 throw new \InvalidArgumentException('Token length must be even');
             }
-            return bin2hex(random_bytes($length / 2));
+            return bin2hex(random_bytes(max(1, (int)($length / 2))));
         } catch (Exception $e) {
             Log::error('Failed to generate secure token: ' . $e->getMessage());
             throw $e;
@@ -477,51 +481,64 @@ class SecurityService
     public function validateFileUpload($file): array
     {
         try {
-            if (! $file) {
-                throw new \InvalidArgumentException('File cannot be null');
+            if (!$file || !is_object($file)) {
+                throw new \InvalidArgumentException('File cannot be null or must be an object');
             }
             $result = [
                 'valid' => true,
                 'errors' => [],
             ];
             // Check file size
-            $maxSize = config('security.file_upload_security.max_upload_size', 10240) * 1024;
-            if ($file->getSize() > $maxSize) {
+            $maxSizeConfig = config('security.file_upload_security.max_upload_size', 10240);
+            $maxSize = is_numeric($maxSizeConfig) ? (int)((float)$maxSizeConfig * 1024) : 10240 * 1024;
+            $fileSize = method_exists($file, 'getSize') ? $file->getSize() : 0;
+            if ($fileSize > $maxSize) {
                 $result['valid'] = false;
                 $result['errors'][] = 'File size exceeds maximum allowed size';
             }
             // Check file extension
-            $allowedExtensions = config('security.file_upload_security.allowed_extensions', []);
-            $extension = strtolower($file->getClientOriginalExtension());
+            $allowedExtensionsConfig = config('security.file_upload_security.allowed_extensions', []);
+            $allowedExtensions = is_array($allowedExtensionsConfig) ? $allowedExtensionsConfig : [];
+            $extension = method_exists($file, 'getClientOriginalExtension') ? 
+                (is_string($file->getClientOriginalExtension()) ? strtolower($file->getClientOriginalExtension()) : '') : '';
             $isAllowed = false;
             foreach ($allowedExtensions as $category => $extensions) {
-                if (in_array($extension, $extensions)) {
+                $extensionsArray = is_array($extensions) ? $extensions : [];
+                if (in_array($extension, $extensionsArray)) {
                     $isAllowed = true;
                     break;
                 }
             }
-            if (! $isAllowed) {
+            if (!$isAllowed) {
                 $result['valid'] = false;
                 $result['errors'][] = 'File type not allowed';
             }
             // Check MIME type
-            $mimeType = $file->getMimeType();
-            if (! $this->isAllowedMimeType($mimeType)) {
+            $mimeType = method_exists($file, 'getMimeType') ? 
+                (is_string($file->getMimeType()) ? $file->getMimeType() : '') : '';
+            if (!$this->isAllowedMimeType($mimeType)) {
                 $result['valid'] = false;
                 $result['errors'][] = 'Invalid file MIME type';
             }
             // Scan file content for malicious patterns
             if (config('security.file_upload_security.validate_file_content', true)) {
-                $content = file_get_contents($file->getRealPath());
-                if ($this->containsMaliciousContent($content)) {
+            $filePath = method_exists($file, 'getRealPath') ? $file->getRealPath() : '';
+            $filePathString = is_string($filePath) ? $filePath : '';
+            $content = file_get_contents($filePathString);
+            if ($content === false) {
+                $result['valid'] = false;
+                $result['errors'][] = 'Unable to read file content';
+            } elseif ($this->containsMaliciousContent($content)) {
                     $result['valid'] = false;
                     $result['errors'][] = 'File contains potentially malicious content';
                 }
             }
-            if (! $result['valid']) {
+            if (!$result['valid']) {
+                $fileName = method_exists($file, 'getClientOriginalName') ? $file->getClientOriginalName() : '';
+                $fileSize = method_exists($file, 'getSize') ? $file->getSize() : 0;
                 $this->logSecurityEvent('file_upload_validation_failed', [
-                    'file_name' => $file->getClientOriginalName(),
-                    'file_size' => $file->getSize(),
+                    'file_name' => is_string($fileName) ? $fileName : '',
+                    'file_size' => is_numeric($fileSize) ? (int)$fileSize : 0,
                     'mime_type' => $mimeType,
                     'errors' => $result['errors'],
                 ]);
@@ -619,7 +636,7 @@ class SecurityService
             ];
             foreach ($maliciousPatterns as $pattern) {
                 try {
-                    if (preg_match($pattern, $content)) {
+                    if (preg_match($pattern, $content) === 1) {
                         return true;
                     }
                 } catch (Exception $e) {
@@ -665,7 +682,7 @@ class SecurityService
             if ($decayMinutes <= 0) {
                 throw new \InvalidArgumentException('Decay minutes must be greater than 0');
             }
-            return RateLimiter::tooManyAttempts($key, $maxAttempts);
+            return (bool) RateLimiter::tooManyAttempts($key, $maxAttempts);
         } catch (Exception $e) {
             Log::error('Failed to check rate limit: ' . $e->getMessage());
             return false;

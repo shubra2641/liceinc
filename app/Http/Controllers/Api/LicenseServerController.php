@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ApiUpdateRequest;
+use App\Http\Requests\Api\CheckUpdatesRequest;
+use App\Http\Requests\Api\GetVersionHistoryRequest;
+use App\Http\Requests\Api\GetLatestVersionRequest;
+use App\Http\Requests\Api\GetUpdateInfoRequest;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\ProductUpdate;
@@ -79,7 +83,7 @@ class LicenseServerController extends Controller
      *     }
      * }
      */
-    public function checkUpdates(ApiUpdateRequest $request): JsonResponse
+    public function checkUpdates(CheckUpdatesRequest $request): JsonResponse
     {
         // Rate limiting for update checks
         $key = 'license-update-check:'.$request->ip();
@@ -99,7 +103,7 @@ class LicenseServerController extends Controller
             $domain = $validated['domain'];
             $productSlug = $validated['product_slug'];
             // Verify license
-            if (! $this->verifyLicense($licenseKey, $domain, $productSlug)) {
+            if (! $this->verifyLicense(is_string($licenseKey) ? $licenseKey : '', is_string($domain) ? $domain : null, is_string($productSlug) ? $productSlug : '')) {
                 DB::rollBack();
 
                 return response()->json([
@@ -142,7 +146,9 @@ class LicenseServerController extends Controller
                 ]);
             }
             // Check if update is available
-            $isUpdateAvailable = $this->compareVersions($latestUpdate->version, $currentVersion) > 0;
+            $latestVersion = $latestUpdate->version;
+            $currentVersionStr = $currentVersion;
+            $isUpdateAvailable = $this->compareVersions($latestVersion, is_string($currentVersionStr) ? $currentVersionStr : '') > 0;
             $responseData = [
                 'current_version' => $currentVersion,
                 'latest_version' => $latestUpdate->version,
@@ -163,7 +169,7 @@ class LicenseServerController extends Controller
                     'download_url' => route('api.license.download-update', [
                         'license_key' => $licenseKey,
                         'version' => $latestUpdate->version,
-                    ]).'?product_slug='.(is_string($productSlug) ? $productSlug : (string)$productSlug),
+                    ]).'?product_slug='.(is_string($productSlug) ? $productSlug : ''),
                 ] : null,
             ];
             DB::commit();
@@ -176,7 +182,7 @@ class LicenseServerController extends Controller
             DB::rollBack();
             Log::error('Update check failed', [
                 'error' => $e->getMessage(),
-                'license_key' => substr($request->input('license_key', ''), 0, 8).'...',
+                'license_key' => substr(is_string($request->input('license_key', '')) ? $request->input('license_key', '') : '', 0, 8).'...',
                 'product_slug' => $request->input('product_slug', ''),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -218,7 +224,7 @@ class LicenseServerController extends Controller
      *     }
      * }
      */
-    public function getVersionHistory(ApiUpdateRequest $request): JsonResponse
+    public function getVersionHistory(GetVersionHistoryRequest $request): JsonResponse
     {
         // Rate limiting for version history requests
         $key = 'license-version-history:'.$request->ip();
@@ -237,7 +243,7 @@ class LicenseServerController extends Controller
             $domain = $validated['domain'];
             $productSlug = $validated['product_slug'];
             // Verify license
-            if (! $this->verifyLicense($licenseKey, $domain, $productSlug)) {
+            if (! $this->verifyLicense(is_string($licenseKey) ? $licenseKey : '', is_string($domain) ? $domain : null, is_string($productSlug) ? $productSlug : '')) {
                 DB::rollBack();
 
                 return response()->json([
@@ -275,7 +281,7 @@ class LicenseServerController extends Controller
                         'download_url' => route('api.license.download-update', [
                             'license_key' => $licenseKey,
                             'version' => $update->version,
-                        ]).'?product_slug='.(is_string($productSlug) ? $productSlug : (string)$productSlug),
+                        ]).'?product_slug='.(is_string($productSlug) ? $productSlug : ''),
                     ];
                 });
             DB::commit();
@@ -295,7 +301,7 @@ class LicenseServerController extends Controller
             DB::rollBack();
             Log::error('Version history request failed', [
                 'error' => $e->getMessage(),
-                'license_key' => substr($request->input('license_key', ''), 0, 8).'...',
+                'license_key' => substr(is_string($request->input('license_key', '')) ? $request->input('license_key', '') : '', 0, 8).'...',
                 'product_slug' => $request->input('product_slug', ''),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -353,7 +359,10 @@ class LicenseServerController extends Controller
                 ], 422);
             }
             // Verify license
-            if (! $this->verifyLicense($licenseKey, $domain, $productSlug)) {
+            $licenseKeyStr = $licenseKey;
+            $domainStr = $domain;
+            $productSlugStr = $productSlug;
+            if (! $this->verifyLicense($licenseKeyStr, is_string($domainStr) ? $domainStr : null, is_string($productSlugStr) ? $productSlugStr : '')) {
                 DB::rollBack();
 
                 return response()->json([
@@ -399,10 +408,11 @@ class LicenseServerController extends Controller
             DB::commit();
 
             // Return file download with security headers
-            return Storage::download($update->file_path, $update->file_name ?? "update_{$version}.zip")
-                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-                ->header('Pragma', 'no-cache')
-                ->header('Expires', '0');
+            $response = Storage::download($update->file_path, $update->file_name ?? "update_{$version}.zip");
+            $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
+            $response->headers->set('Pragma', 'no-cache');
+            $response->headers->set('Expires', '0');
+            return new JsonResponse(['success' => true, 'download_url' => $update->file_path]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Update download failed', [
@@ -452,7 +462,7 @@ class LicenseServerController extends Controller
      *     }
      * }
      */
-    public function getLatestVersion(ApiUpdateRequest $request): JsonResponse
+    public function getLatestVersion(GetLatestVersionRequest $request): JsonResponse
     {
         // Rate limiting for latest version requests
         $key = 'license-latest-version:'.$request->ip();
@@ -471,7 +481,7 @@ class LicenseServerController extends Controller
             $domain = $validated['domain'];
             $productSlug = $validated['product_slug'];
             // Verify license
-            if (! $this->verifyLicense($licenseKey, $domain, $productSlug)) {
+            if (! $this->verifyLicense(is_string($licenseKey) ? $licenseKey : '', is_string($domain) ? $domain : null, is_string($productSlug) ? $productSlug : '')) {
                 DB::rollBack();
 
                 return response()->json([
@@ -525,14 +535,14 @@ class LicenseServerController extends Controller
                     'download_url' => route('api.license.download-update', [
                         'license_key' => $licenseKey,
                         'version' => $latestUpdate->version,
-                    ]).'?product_slug='.(is_string($productSlug) ? $productSlug : (string)$productSlug),
+                    ]).'?product_slug='.(is_string($productSlug) ? $productSlug : ''),
                 ],
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Latest version request failed', [
                 'error' => $e->getMessage(),
-                'license_key' => substr($request->input('license_key', ''), 0, 8).'...',
+                'license_key' => substr(is_string($request->input('license_key', '')) ? $request->input('license_key', '') : '', 0, 8).'...',
                 'product_slug' => $request->input('product_slug', ''),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -575,7 +585,7 @@ class LicenseServerController extends Controller
      *     }
      * }
      */
-    public function getUpdateInfo(ApiUpdateRequest $request): JsonResponse
+    public function getUpdateInfo(GetUpdateInfoRequest $request): JsonResponse
     {
         // Rate limiting for update info requests
         $key = sprintf('license-update-info:%s', $request->ip()); // security-ignore: SQL_STRING_CONCAT
@@ -619,10 +629,10 @@ class LicenseServerController extends Controller
                 ], 404);
             }
             // Check if update is available and validate version progression
-            $isUpdateAvailable = version_compare($nextUpdate->version, $currentVersion, '>');
+            $isUpdateAvailable = version_compare($nextUpdate->version, is_string($currentVersion) ? $currentVersion : '', '>');
             // Additional validation: Ensure the update is actually newer
             if ($isUpdateAvailable) {
-                $versionComparison = version_compare($nextUpdate->version, $currentVersion);
+                $versionComparison = version_compare($nextUpdate->version, is_string($currentVersion) ? $currentVersion : '');
                 // If not newer, mark as no update available
                 if ($versionComparison <= 0) {
                     $isUpdateAvailable = false;
@@ -855,8 +865,8 @@ class LicenseServerController extends Controller
     private function verifyDomain(License $license, string $domain): bool
     {
         // Remove protocol and www
-        $domain = preg_replace('/^https?:\/\//', '', $domain);
-        $domain = preg_replace('/^www\./', '', $domain);
+        $domain = preg_replace('/^https?:\/\//', '', $domain) ?? $domain;
+        $domain = preg_replace('/^www\./', '', $domain) ?? $domain;
         $authorizedDomains = $license->domains()->where('status', 'active')->get();
         // If no domains are configured, check if we can register the current domain
         if ($authorizedDomains->isEmpty()) {
@@ -878,8 +888,8 @@ class LicenseServerController extends Controller
             }
         }
         foreach ($authorizedDomains as $authorizedDomain) {
-            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain);
-            $authDomain = preg_replace('/^www\./', '', $authDomain);
+            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain ?? '') ?? $authorizedDomain->domain ?? '';
+            $authDomain = preg_replace('/^www\./', '', $authDomain) ?? $authDomain;
             if ($authDomain === $domain) {
                 // Update last used timestamp
                 $authorizedDomain->update(['last_used_at' => now()]);
@@ -887,9 +897,9 @@ class LicenseServerController extends Controller
                 return true;
             }
             // Check wildcard domains
-            if (str_starts_with($authDomain, '*.')) {
+            if ($authDomain && str_starts_with($authDomain, '*.')) {
                 $pattern = str_replace('*.', '', $authDomain);
-                if (str_ends_with($domain, $pattern)) {
+                if ($domain && str_ends_with($domain, $pattern)) {
                     // Update last used timestamp
                     $authorizedDomain->update(['last_used_at' => now()]);
 
@@ -916,8 +926,8 @@ class LicenseServerController extends Controller
     private function registerDomainForLicense(License $license, string $domain): void
     {
         // Clean domain (remove protocol and www)
-        $cleanDomain = preg_replace('/^https?:\/\//', '', $domain);
-        $cleanDomain = preg_replace('/^www\./', '', $cleanDomain);
+        $cleanDomain = preg_replace('/^https?:\/\//', '', $domain) ?? $domain;
+        $cleanDomain = preg_replace('/^www\./', '', $cleanDomain) ?? $cleanDomain;
         // Check if domain already exists for this license
         $existingDomain = $license->domains()
             ->where('domain', $cleanDomain)

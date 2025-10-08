@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Helpers\ConfigHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ConfirmPasswordRequest;
 use App\Models\User;
 use App\Services\EmailService;
 use Illuminate\Auth\Events\Registered;
@@ -56,7 +57,7 @@ class RegisteredUserController extends Controller
     public function create(): View
     {
         $registrationSettings = $this->getRegistrationSettings();
-        return view('auth.register', compact('registrationSettings'));
+        return view('auth.register', ['registrationSettings' => $registrationSettings]);
     }
     /**
      * Handle an incoming registration request with enhanced security.
@@ -64,7 +65,7 @@ class RegisteredUserController extends Controller
      * Validates user input, performs anti-spam checks, creates the user,
      * sends welcome and notification emails, and logs the user in.
      *
-     * @param  Request  $request  The registration request
+     * @param  RegisterRequest  $request  The registration request
      *
      * @return RedirectResponse Redirect to dashboard on success or back with errors
      *
@@ -100,11 +101,11 @@ class RegisteredUserController extends Controller
     /**
      * Validate the basic registration request with enhanced security.
      *
-     * @param  Request  $request  The current request
+     * @param  RegisterRequest  $request  The current request
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    private function validateRegistrationRequest(Request $request): void
+    private function validateRegistrationRequest(RegisterRequest $request): void
     {
         $request->validate([
             'firstname' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
@@ -123,7 +124,7 @@ class RegisteredUserController extends Controller
     /**
      * Validate anti-spam protection mechanisms.
      *
-     * @param  Request  $request  The current request
+     * @param  RegisterRequest  $request  The current request
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -135,7 +136,7 @@ class RegisteredUserController extends Controller
     /**
      * Validate Google reCAPTCHA if enabled.
      *
-     * @param  Request  $request  The current request
+     * @param  RegisterRequest  $request  The current request
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -150,20 +151,20 @@ class RegisteredUserController extends Controller
         if (empty($token)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
-                ['g-recaptcha-response' => [__('Please complete the captcha')]],
+                response()->json(['errors' => ['g-recaptcha-response' => [__('Please complete the captcha')]]], 422)
             );
         }
-        if (! $this->verifyRecaptcha($token, $captchaSecret, $request->ip())) {
+        if (! $this->verifyRecaptcha(is_string($token) ? $token : '', is_string($captchaSecret) ? $captchaSecret : '', $request->ip())) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
-                ['g-recaptcha-response' => [__('Captcha verification failed')]],
+                response()->json(['errors' => ['g-recaptcha-response' => [__('Captcha verification failed')]]], 422)
             );
         }
     }
     /**
      * Validate human verification question if enabled.
      *
-     * @param  Request  $request  The current request
+     * @param  RegisterRequest  $request  The current request
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -174,12 +175,12 @@ class RegisteredUserController extends Controller
             return;
         }
         $humanQuestions = $this->getHumanQuestions();
-        $given = strtolower(trim((string)$request->validated('human_answer', '')));
+        $given = strtolower(trim(is_string($request->validated('human_answer', '')) ? $request->validated('human_answer', '') : ''));
         $index = $request->validated('human_question_index', null);
-        if (! $this->isValidHumanAnswer($given, $index, $humanQuestions)) {
+        if (! $this->isValidHumanAnswer($given, is_numeric($index) ? (int)$index : 0, $humanQuestions)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
-                ['human_answer' => [__('Incorrect answer to the anti-spam question')]],
+                response()->json(['errors' => ['human_answer' => [__('Incorrect answer to the anti-spam question')]]], 422)
             );
         }
     }
@@ -197,11 +198,12 @@ class RegisteredUserController extends Controller
         if (empty($humanQuestionsJson)) {
             return [];
         }
-        try {
-            return json_decode($humanQuestionsJson, true) ?: [];
-        } catch (\Exception $e) {
-            return [];
-        }
+        $decoded = json_decode(is_string($humanQuestionsJson) ? $humanQuestionsJson : '', true);
+        $result = is_array($decoded) ? $decoded : [];
+        
+        /** @var array<string, mixed> $typedResult */
+        $typedResult = $result;
+        return $typedResult;
     }
     /**
      * Check if the human answer is valid.
@@ -220,28 +222,31 @@ class RegisteredUserController extends Controller
         if ($given === '') {
             return false;
         }
-        if (! isset($humanQuestions[$index])) {
+        if (! isset($humanQuestions[(string)$index])) {
             $expected = ConfigHelper::getSetting('human_question_answer', '5');
-            return strtolower(trim((string)$expected)) === $given;
+            return strtolower(trim(is_string($expected) ? $expected : '')) === $given;
         }
-        $expected = strtolower(trim((string)($humanQuestions[$index]['answer'] ?? '')));
+        
+        $questionData = $humanQuestions[(string)$index] ?? null;
+        $answer = is_array($questionData) ? ($questionData['answer'] ?? null) : null;
+        $expected = strtolower(trim(is_string($answer) ? $answer : ''));
         return $expected === $given;
     }
     /**
      * Create a new user from the request data with enhanced security.
      *
-     * @param  Request  $request  The current request
+     * @param  RegisterRequest  $request  The current request
      *
      * @return User The created user
      */
-    private function createUser(Request $request): User
+    private function createUser(RegisterRequest $request): User
     {
         return User::create([
-            'name' => $this->sanitizeInput($request->firstname) . ' ' . $this->sanitizeInput($request->lastname),
+            'name' => (is_string($this->sanitizeInput($request->firstname)) ? $this->sanitizeInput($request->firstname) : '') . ' ' . (is_string($this->sanitizeInput($request->lastname)) ? $this->sanitizeInput($request->lastname) : ''),
             'firstname' => $this->sanitizeInput($request->firstname),
             'lastname' => $this->sanitizeInput($request->lastname),
             'email' => $this->sanitizeInput($request->email),
-            'password' => Hash::make($request->password),
+            'password' => Hash::make(is_string($request->password) ? $request->password : ''),
             'phonenumber' => $this->sanitizeInput($request->phonenumber),
             'country' => $this->sanitizeInput($request->country),
         ]);
@@ -306,7 +311,8 @@ class RegisteredUserController extends Controller
                 return false;
             }
             $body = $response->json();
-            return isset($body['success']) && $body['success'] === true;
+            $success = is_array($body) ? ($body['success'] ?? null) : null;
+            return is_array($body) && isset($body['success']) && $success === true;
         } catch (\Exception $e) {
             return false;
         }
@@ -327,19 +333,16 @@ class RegisteredUserController extends Controller
         $humanQuestionsJson = ConfigHelper::getSetting('human_questions', null);
         $humanQuestions = [];
         if (! empty($humanQuestionsJson)) {
-            try {
-                $humanQuestions = json_decode($humanQuestionsJson, true) ?: [];
-            } catch (\Exception $e) {
-                $humanQuestions = [];
-            }
+            $decoded = json_decode(is_string($humanQuestionsJson) ? $humanQuestionsJson : '', true);
+            $humanQuestions = is_array($decoded) ? $decoded : [];
         }
         // Choose a random question (server-side) and include its index in a hidden field
         $selectedQuestionIndex = null;
         $selectedQuestionText = null;
-        if (! empty($humanQuestions) && is_array($humanQuestions)) {
+        if (! empty($humanQuestions)) {
             $selectedQuestionIndex = array_rand($humanQuestions);
             $selectedQuestion = $humanQuestions[$selectedQuestionIndex] ?? null;
-            $selectedQuestionText = $selectedQuestion['question'] ?? null;
+            $selectedQuestionText = (is_array($selectedQuestion) && isset($selectedQuestion['question'])) ? $selectedQuestion['question'] : null;
         }
         return [
             'enableCaptcha' => $enableCaptcha,

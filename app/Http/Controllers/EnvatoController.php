@@ -69,28 +69,29 @@ class EnvatoController extends Controller
     public function verify(Request $request, EnvatoService $envato): RedirectResponse
     {
         try {
-            if (! $request) {
-                throw new \InvalidArgumentException('Request cannot be null');
-            }
+            // Request is validated by type hint
             // Enhanced validation with more specific rules
             $data = $this->validatePurchaseRequest($request);
             // Rate limiting check
-            if ($this->isRateLimited($request->ip(), 'verify_purchase_') === true) {
+            $clientIp = $request->ip();
+            if ($clientIp && $this->isRateLimited($clientIp, 'verify_purchase_') === true) {
                 Log::warning('Rate limit exceeded for purchase verification', [
                     'ip' => $request->ip(),
-                    'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
+                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
                 ]);
                 return back()->withErrors(['purchase_code' => 'Too many verification attempts. '
                     . 'Please try again later.']);
             }
-            $this->setRateLimit($request->ip(), 'verify_purchase_');
+            if ($clientIp) {
+                $this->setRateLimit($clientIp, 'verify_purchase_');
+            }
             DB::beginTransaction();
             // Verify purchase with Envato API
-            $sale = $envato->verifyPurchase($data['purchase_code']);
-            if (! $sale) {
+            $sale = $envato->verifyPurchase(is_string($data['purchase_code']) ? $data['purchase_code'] : '');
+            if ($sale === null) {
                 DB::rollBack();
                 Log::warning('Failed to verify purchase code', [
-                    'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
+                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
                     'ip' => $request->ip(),
                 ]);
                 return back()->withErrors(['purchase_code' => 'Could not verify purchase code. '
@@ -102,12 +103,12 @@ class EnvatoController extends Controller
             $buyerName = data_get($sale, 'buyer', 'Unknown Buyer');
             $buyerEmail = data_get($sale, 'buyer_email');
             $supportEnd = data_get($sale, 'supported_until');
-            $itemId = (string)data_get($sale, 'item.id');
+            $itemId = is_string(data_get($sale, 'item.id')) ? data_get($sale, 'item.id') : '';
             // Validate product ownership
-            if ($product->envato_item_id && $product->envato_item_id !== $itemId) {
+            if ((string)$product->envato_item_id !== $itemId) {
                 DB::rollBack();
                 Log::warning('Purchase code does not match product', [
-                    'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
+                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
                     'product_id' => $product->id,
                     'expected_item_id' => $product->envato_item_id,
                     'actual_item_id' => $itemId,
@@ -129,7 +130,7 @@ class EnvatoController extends Controller
                 [
                     'product_id' => $product->id,
                     'user_id' => $user->id,
-                    'support_expires_at' => $supportEnd ? Carbon::parse($supportEnd)->format('Y-m-d') : null,
+                    'support_expires_at' => $supportEnd ? Carbon::parse(is_string($supportEnd) ? $supportEnd : '')->format('Y-m-d') : null,
                     'status' => 'active',
                     'verified_at' => now(),
                 ],
@@ -172,7 +173,7 @@ class EnvatoController extends Controller
     public function redirectToEnvato(): RedirectResponse
     {
         try {
-            return Socialite::driver('envato')->redirect();
+            return redirect(Socialite::driver('envato')->redirect()->getTargetUrl());
         } catch (Exception $e) {
             Log::error('Failed to redirect to Envato OAuth', [
                 'error' => $e->getMessage(),
@@ -203,6 +204,7 @@ class EnvatoController extends Controller
     {
         try {
             DB::beginTransaction();
+            /** @var \Laravel\Socialite\Two\User $envatoUser */
             $envatoUser = Socialite::driver('envato')->user();
             $username = $envatoUser->getNickname() ?: $envatoUser->getId();
             if (! $username) {
@@ -222,8 +224,8 @@ class EnvatoController extends Controller
                 'password' => Hash::make(Str::random(32)), // Stronger random password
                 'envato_username' => $envatoUser->getNickname() ?: data_get($userInfo, 'account.username', $username),
                 'envato_id' => $envatoUser->getId(),
-                'envato_token' => $envatoUser->token,
-                'envato_refresh_token' => $envatoUser->refreshToken,
+           'envato_token' => $envatoUser->token,
+           'envato_refresh_token' => $envatoUser->refreshToken,
                 'email_verified_at' => now(),
                 'last_login_at' => now(),
             ];
@@ -277,17 +279,16 @@ class EnvatoController extends Controller
     public function linkEnvatoAccount(Request $request, EnvatoService $envato): RedirectResponse
     {
         try {
-            if (! $request) {
-                throw new \InvalidArgumentException('Request cannot be null');
-            }
+            // Request is validated by type hint
             // Ensure user is authenticated
-            if (! auth()->check()) {
+            if (auth()->guest()) {
                 return redirect('/login')->withErrors(['envato' => 'Please log in to link your Envato account.']);
             }
             DB::beginTransaction();
+            /** @var \Laravel\Socialite\Two\User $envatoUser */
             $envatoUser = Socialite::driver('envato')->user();
             $userInfo = $envato->getOAuthUserInfo($envatoUser->token);
-            if (! $userInfo) {
+            if ($userInfo === null) {
                 DB::rollBack();
                 Log::warning('Failed to retrieve user info during account linking', [
                     'user_id' => auth()->id(),
@@ -317,8 +318,8 @@ class EnvatoController extends Controller
                 $user->update([
                 'envato_username' => $envatoUser->getNickname() ?: data_get($userInfo, 'account.username'),
                 'envato_id' => $envatoUser->getId(),
-                'envato_token' => $envatoUser->token,
-                'envato_refresh_token' => $envatoUser->refreshToken,
+           'envato_token' => $envatoUser->token,
+           'envato_refresh_token' => $envatoUser->refreshToken,
                 'updated_at' => now(),
                 ]);
             }
@@ -360,11 +361,9 @@ class EnvatoController extends Controller
     public function verifyUserPurchase(Request $request, EnvatoService $envato): JsonResponse
     {
         try {
-            if (! $request) {
-                throw new \InvalidArgumentException('Request cannot be null');
-            }
+            // Request is validated by type hint
             // Ensure user is authenticated
-            if (! auth()->check()) {
+            if (auth()->guest()) {
                 return response()->json([
                     'valid' => false,
                     'message' => 'Authentication required',
@@ -386,12 +385,12 @@ class EnvatoController extends Controller
             }
             $this->setRateLimit($rateLimitKey, 'ajax_verify_');
             DB::beginTransaction();
-            $sale = $envato->verifyPurchase($data['purchase_code']);
-            if (! $sale) {
+            $sale = $envato->verifyPurchase(is_string($data['purchase_code']) ? $data['purchase_code'] : '');
+            if ($sale === null) {
                 DB::rollBack();
                 Log::warning('AJAX purchase verification failed', [
                     'user_id' => auth()->id(),
-                    'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
+                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
                     'product_id' => $data['product_id'],
                     'ip' => $request->ip(),
                 ]);
@@ -401,12 +400,12 @@ class EnvatoController extends Controller
                 ]);
             }
             $product = Product::findOrFail($data['product_id']);
-            $itemId = (string)data_get($sale, 'item.id');
+            $itemId = is_string(data_get($sale, 'item.id')) ? data_get($sale, 'item.id') : '';
             if ($product->envato_item_id && $product->envato_item_id !== $itemId) {
                 DB::rollBack();
                 Log::warning('AJAX purchase code does not match product', [
                     'user_id' => auth()->id(),
-                    'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
+                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
                     'product_id' => $product->id,
                     'expected_item_id' => $product->envato_item_id,
                     'actual_item_id' => $itemId,
@@ -437,7 +436,7 @@ class EnvatoController extends Controller
                 'license_type' => 'regular',
                 'status' => 'active',
                 'support_expires_at' => data_get($sale, 'supported_until') ?
-                    Carbon::parse(data_get($sale, 'supported_until'))->format('Y-m-d') : null,
+                    Carbon::parse(is_string(data_get($sale, 'supported_until')) ? data_get($sale, 'supported_until') : '')->format('Y-m-d') : null,
                 'verified_at' => now(),
             ]);
             DB::commit();
@@ -484,7 +483,7 @@ class EnvatoController extends Controller
      */
     private function validatePurchaseRequest(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'purchase_code' => [
                 'required',
                 'string',
@@ -501,6 +500,10 @@ class EnvatoController extends Controller
             'purchase_code.regex' => 'Purchase code must be a valid UUID format.',
             'product_slug.alpha_dash' => 'Product slug can only contain letters, numbers, dashes and underscores.',
         ]);
+        
+        /** @var array<string, mixed> $result */
+        $result = $validated;
+        return $result;
     }
     /**
      * Validate AJAX purchase request data.
@@ -511,7 +514,7 @@ class EnvatoController extends Controller
      */
     private function validateAjaxPurchaseRequest(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'purchase_code' => [
                 'required',
                 'string',
@@ -527,6 +530,10 @@ class EnvatoController extends Controller
             'purchase_code.regex' => 'Purchase code must be a valid UUID format.',
             'product_id.exists' => 'Selected product does not exist.',
         ]);
+        
+        /** @var array<string, mixed> $result */
+        $result = $validated;
+        return $result;
     }
     /**
      * Check if request is rate limited.

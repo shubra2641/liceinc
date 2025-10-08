@@ -41,7 +41,7 @@ class InvoiceController extends Controller
      * Shows paginated list of user invoices with optional status filtering,
      * proper authorization, and comprehensive error handling.
      *
-     * @param  Request  $request  The HTTP request containing filter parameters
+     * @param  InvoiceFilterRequest  $request  The HTTP request containing filter parameters
      *
      * @return View The invoice listing view
      *
@@ -62,9 +62,7 @@ class InvoiceController extends Controller
     public function index(InvoiceFilterRequest $request): View
     {
         try {
-            if (! $request) {
-                throw new \InvalidArgumentException('Request cannot be null');
-            }
+            // Request is already validated by type hint
             $userId = Auth::id();
             if (! $userId) {
                 throw new Exception('User not authenticated');
@@ -74,12 +72,12 @@ class InvoiceController extends Controller
                 ->with(['product', 'license']);
             // Filter by status with validation
             if ($request->filled('status')) {
-                $status = $this->validateStatus($request->validated('status'));
+                $status = $this->validateStatus(is_string($request->validated('status')) ? $request->validated('status') : '');
                 $query->where('status', $status);
             }
             $invoices = $query->latest()->paginate(self::PAGINATION_LIMIT);
             DB::commit();
-            return view('user.invoices.index', compact('invoices'));
+            return view('user.invoices.index', ['invoices' => $invoices]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load user invoices: ' . $e->getMessage(), [
@@ -116,9 +114,7 @@ class InvoiceController extends Controller
     public function show(Invoice $invoice): View
     {
         try {
-            if (! $invoice) {
-                throw new \InvalidArgumentException('Invoice cannot be null');
-            }
+            // Invoice is already validated by type hint
             $userId = Auth::id();
             if (! $userId) {
                 throw new Exception('User not authenticated');
@@ -145,14 +141,14 @@ class InvoiceController extends Controller
             DB::commit();
             return view(
                 'user.invoices.show',
-                compact(
-                    'invoice',
-                    'hasLicense',
-                    'hasProduct',
-                    'isCustomInvoice',
-                    'productForPayment',
-                    'enabledGateways',
-                ),
+                [
+                    'invoice' => $invoice,
+                    'hasLicense' => $hasLicense,
+                    'hasProduct' => $hasProduct,
+                    'isCustomInvoice' => $isCustomInvoice,
+                    'productForPayment' => $productForPayment,
+                    'enabledGateways' => $enabledGateways,
+                ],
             );
         } catch (Exception $e) {
             DB::rollBack();

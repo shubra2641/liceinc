@@ -47,12 +47,12 @@ class TicketIndexRequest extends FormRequest
             'category_id' => [
                 'sometimes',
                 'integer',
-                'exists:ticket_categories, id',
+                'exists:ticket_categories,id',
             ],
             'user_id' => [
                 'sometimes',
                 'integer',
-                'exists:users, id',
+                'exists:users,id',
             ],
             'search' => [
                 'sometimes',
@@ -108,10 +108,10 @@ class TicketIndexRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'status' => $this->status ? trim($this->status) : null,
-            'priority' => $this->priority ? trim($this->priority) : null,
-            'search' => $this->search ? trim($this->search) : null,
-            'per_page' => $this->per_page ? (int)$this->per_page : null,
+            'status' => $this->status && is_string($this->status) ? trim($this->status) : null,
+            'priority' => $this->priority && is_string($this->priority) ? trim($this->priority) : null,
+            'search' => $this->search && is_string($this->search) ? trim($this->search) : null,
+            'per_page' => $this->per_page && is_numeric($this->per_page) ? (int)$this->per_page : null,
         ]);
     }
 }

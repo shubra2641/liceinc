@@ -262,11 +262,11 @@ class AutoUpdateRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'license_key' => $this->sanitizeInput($this->license_key),
-            'product_slug' => $this->sanitizeInput($this->product_slug),
-            'domain' => $this->sanitizeInput($this->domain),
-            'version' => $this->sanitizeInput($this->version),
-            'current_version' => $this->sanitizeInput($this->current_version),
+            'license_key' => $this->sanitizeInput($this->input('license_key')),
+            'product_slug' => $this->sanitizeInput($this->input('product_slug')),
+            'domain' => $this->sanitizeInput($this->input('domain')),
+            'version' => $this->sanitizeInput($this->input('version')),
+            'current_version' => $this->sanitizeInput($this->input('current_version')),
         ]);
         // Handle checkbox values
         $this->merge([
@@ -313,15 +313,20 @@ class AutoUpdateRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

@@ -120,7 +120,7 @@ class EmailService
      */
     public function sendToUser(User $user, string $templateName, array $data = []): bool
     {
-        if (! $user || ! $user->email) {
+        if (!$user->email) {
             Log::error('Invalid user provided for email sending');
             return false;
         }
@@ -166,7 +166,7 @@ class EmailService
             'admin_name' => 'Administrator',
             'site_name' => config('app.name'),
         ];
-        return $this->sendEmail($templateName, $adminEmail, array_merge($data, $adminData), 'Administrator');
+        return $this->sendEmail($templateName, is_string($adminEmail) ? $adminEmail : 'admin@example.com', array_merge($data, $adminData), 'Administrator');
     }
     /**
      * Send bulk emails to multiple users with enhanced security.
@@ -210,17 +210,20 @@ class EmailService
                 if ($user instanceof User) {
                     $success = $this->sendToUser($user, $templateName, $data);
                 } else {
-                    $success = $this->sendEmail($templateName, $user, $data);
+                    $userString = is_string($user) ? $user : '';
+                    $success = $this->sendEmail($templateName, $userString, $data);
                 }
                 if ($success) {
                     $results['success']++;
                 } else {
                     $results['failed']++;
-                    $results['errors'][] = $user instanceof User ? $user->email : $user;
+                    $userEmail = $user instanceof User ? $user->email : $user;
+                    $results['errors'][] = is_string($userEmail) ? $userEmail : '';
                 }
             } catch (Exception $e) {
                 $results['failed']++;
-                $results['errors'][] = $user instanceof User ? $user->email : $user;
+                $userEmail = $user instanceof User ? $user->email : $user;
+                $results['errors'][] = is_string($userEmail) ? $userEmail : '';
                 Log::error('Failed to send bulk email to user: ' . $e->getMessage());
             }
         }
@@ -312,13 +315,13 @@ class EmailService
      */
     public function testTemplate(string $templateName, array $data = []): array
     {
-        $templateName = $this->validateTemplateName($templateName);
-        $data = $this->sanitizeData($data);
-        $template = EmailTemplate::getByName($templateName);
+        $validatedTemplateName = $this->validateTemplateName($templateName);
+        $sanitizedData = $this->sanitizeData($data);
+        $template = EmailTemplate::getByName($validatedTemplateName);
         if (! $template) {
-            throw new \InvalidArgumentException("Template not found: {$templateName}");
+            throw new \InvalidArgumentException("Template not found: {$validatedTemplateName}");
         }
-        return $template->render($data);
+        return $template->render($sanitizedData);
     }
     /**
      * Send user registration welcome email with enhanced security.
@@ -340,7 +343,7 @@ class EmailService
      */
     public function sendUserWelcome(User $user): bool
     {
-        if (! $user || ! $user->created_at) {
+        if (!$user->created_at) {
             Log::error('Invalid user provided for welcome email');
             return false;
         }
@@ -372,7 +375,7 @@ class EmailService
      */
     public function sendWelcome(User $user, array $data = []): bool
     {
-        if (! $user || ! $user->created_at) {
+        if (!$user->created_at) {
             Log::error('Invalid user provided for welcome email');
             return false;
         }
@@ -402,7 +405,7 @@ class EmailService
      */
     public function sendEmailVerification(User $user, string $verificationUrl): bool
     {
-        if (! $user || empty($verificationUrl)) {
+        if (empty($verificationUrl)) {
             Log::error('Invalid user or verification URL provided');
             return false;
         }
@@ -431,10 +434,7 @@ class EmailService
      */
     public function sendNewUserNotification(User $user): bool
     {
-        if (! $user) {
-            Log::error('Invalid user provided for new user notification');
-            return false;
-        }
+        // User parameter is non-nullable, so no need to check
         return $this->sendToAdmin('admin_new_user_registration', [
             'user_name' => $this->sanitizeString($user->name),
             'user_email' => $this->sanitizeString($user->email),
@@ -453,8 +453,8 @@ class EmailService
      * Sends a payment confirmation email to a user with comprehensive
      * validation and sanitization.
      *
-     * @param  mixed  $license  License instance
-     * @param  mixed  $invoice  Invoice instance
+     * @param  License  $license  License instance
+     * @param  Invoice  $invoice  Invoice instance
      *
      * @return bool Success status
      *
@@ -466,23 +466,23 @@ class EmailService
      *
      *
      */
-    public function sendPaymentConfirmation($license, $invoice): bool
+    public function sendPaymentConfirmation(License $license, Invoice $invoice): bool
     {
-        if (! $license || ! $invoice || ! $license->user) {
+        if (!$license->user) {
             Log::error('Invalid license or invoice provided for payment confirmation');
             return false;
         }
         return $this->sendToUser($license->user, 'payment_confirmation', [
             'customer_name' => $this->sanitizeString($license->user->name),
             'customer_email' => $this->sanitizeString($license->user->email),
-            'product_name' => $this->sanitizeString($license->product->name),
+            'product_name' => $this->sanitizeString($license->product->name ?? ''),
             'order_number' => $this->sanitizeString($invoice->invoice_number),
             'license_key' => $this->sanitizeString($license->license_key),
             'invoice_number' => $this->sanitizeString($invoice->invoice_number),
             'amount' => $invoice->amount,
             'currency' => $this->sanitizeString($invoice->currency),
-            'payment_method' => $this->sanitizeString(ucfirst($invoice->metadata['gateway'] ?? 'Unknown')),
-            'payment_date' => $invoice->paid_at->format('M d, Y \a\t g:i A'),
+            'payment_method' => $this->sanitizeString(ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown')),
+            'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
             'license_expires_at' => $license->license_expires_at ?
                 $license->license_expires_at->format('M d, Y') : 'Never',
         ]);
@@ -505,11 +505,16 @@ class EmailService
      */
     public function sendLicenseExpiring(User $user, array $licenseData): bool
     {
+        $licenseKey = $licenseData['license_key'] ?? '';
+        $productName = $licenseData['product_name'] ?? '';
+        $expiresAt = $licenseData['expires_at'] ?? '';
+        $daysRemaining = $licenseData['days_remaining'] ?? 0;
+        
         return $this->sendToUser($user, 'user_license_expiring', array_merge($licenseData, [
-            'license_key' => $licenseData['license_key'] ?? '',
-            'product_name' => $licenseData['product_name'] ?? '',
-            'expires_at' => $licenseData['expires_at'] ?? '',
-            'days_remaining' => $licenseData['days_remaining'] ?? 0,
+            'license_key' => is_string($licenseKey) ? $licenseKey : '',
+            'product_name' => is_string($productName) ? $productName : '',
+            'expires_at' => is_string($expiresAt) ? $expiresAt : '',
+            'days_remaining' => is_numeric($daysRemaining) ? (int)$daysRemaining : 0,
         ]));
     }
     /**
@@ -549,10 +554,14 @@ class EmailService
      */
     public function sendTicketCreated(User $user, array $ticketData): bool
     {
+        $ticketId = $ticketData['ticket_id'] ?? '';
+        $ticketSubject = $ticketData['ticket_subject'] ?? '';
+        $ticketStatus = $ticketData['ticket_status'] ?? 'open';
+        
         return $this->sendToUser($user, 'user_ticket_created', array_merge($ticketData, [
-            'ticket_id' => $ticketData['ticket_id'] ?? '',
-            'ticket_subject' => $ticketData['ticket_subject'] ?? '',
-            'ticket_status' => $ticketData['ticket_status'] ?? 'open',
+            'ticket_id' => is_string($ticketId) ? $ticketId : '',
+            'ticket_subject' => is_string($ticketSubject) ? $ticketSubject : '',
+            'ticket_status' => is_string($ticketStatus) ? $ticketStatus : 'open',
         ]));
     }
     /**
@@ -593,11 +602,16 @@ class EmailService
      */
     public function sendInvoiceApproachingDue(User $user, array $invoiceData): bool
     {
+        $invoiceNumber = $invoiceData['invoice_number'] ?? '';
+        $invoiceAmount = $invoiceData['invoice_amount'] ?? 0;
+        $dueDate = $invoiceData['due_date'] ?? '';
+        $daysRemaining = $invoiceData['days_remaining'] ?? 0;
+        
         return $this->sendToUser($user, 'user_invoice_approaching_due', array_merge($invoiceData, [
-            'invoice_number' => $invoiceData['invoice_number'] ?? '',
-            'invoice_amount' => $invoiceData['invoice_amount'] ?? 0,
-            'due_date' => $invoiceData['due_date'] ?? '',
-            'days_remaining' => $invoiceData['days_remaining'] ?? 0,
+            'invoice_number' => is_string($invoiceNumber) ? $invoiceNumber : '',
+            'invoice_amount' => is_numeric($invoiceAmount) ? (float)$invoiceAmount : 0.0,
+            'due_date' => is_string($dueDate) ? $dueDate : '',
+            'days_remaining' => is_numeric($daysRemaining) ? (int)$daysRemaining : 0,
         ]));
     }
     /**
@@ -637,11 +651,16 @@ class EmailService
      */
     public function sendAdminLicenseCreated(array $licenseData): bool
     {
+        $licenseKey = $licenseData['license_key'] ?? '';
+        $productName = $licenseData['product_name'] ?? '';
+        $customerName = $licenseData['customer_name'] ?? '';
+        $customerEmail = $licenseData['customer_email'] ?? '';
+        
         return $this->sendToAdmin('admin_license_created', array_merge($licenseData, [
-            'license_key' => $licenseData['license_key'] ?? '',
-            'product_name' => $licenseData['product_name'] ?? '',
-            'customer_name' => $licenseData['customer_name'] ?? '',
-            'customer_email' => $licenseData['customer_email'] ?? '',
+            'license_key' => is_string($licenseKey) ? $licenseKey : '',
+            'product_name' => is_string($productName) ? $productName : '',
+            'customer_name' => is_string($customerName) ? $customerName : '',
+            'customer_email' => is_string($customerEmail) ? $customerEmail : '',
         ]));
     }
     /**
@@ -685,12 +704,18 @@ class EmailService
      */
     public function sendAdminTicketCreated(array $ticketData): bool
     {
+        $ticketId = $ticketData['ticket_id'] ?? '';
+        $ticketSubject = $ticketData['ticket_subject'] ?? '';
+        $customerName = $ticketData['customer_name'] ?? '';
+        $customerEmail = $ticketData['customer_email'] ?? '';
+        $ticketPriority = $ticketData['ticket_priority'] ?? 'normal';
+        
         return $this->sendToAdmin('admin_ticket_created', array_merge($ticketData, [
-            'ticket_id' => $ticketData['ticket_id'] ?? '',
-            'ticket_subject' => $ticketData['ticket_subject'] ?? '',
-            'customer_name' => $ticketData['customer_name'] ?? '',
-            'customer_email' => $ticketData['customer_email'] ?? '',
-            'ticket_priority' => $ticketData['ticket_priority'] ?? 'normal',
+            'ticket_id' => is_string($ticketId) ? $ticketId : '',
+            'ticket_subject' => is_string($ticketSubject) ? $ticketSubject : '',
+            'customer_name' => is_string($customerName) ? $customerName : '',
+            'customer_email' => is_string($customerEmail) ? $customerEmail : '',
+            'ticket_priority' => is_string($ticketPriority) ? $ticketPriority : 'normal',
         ]));
     }
     /**
@@ -801,12 +826,12 @@ class EmailService
         return $this->sendToAdmin('admin_payment_failure', [
             'customer_name' => $order->user->name,
             'customer_email' => $order->user->email,
-            'product_name' => $order->product->name,
+            'product_name' => $order->product->name ?? '',
             'order_number' => $order->order_number,
             'amount' => $order->amount,
             'currency' => $order->currency,
-            'payment_method' => ucfirst($order->payment_gateway),
-            'failure_reason' => $order->gateway_response['error'] ?? 'Unknown error',
+            'payment_method' => ucfirst((string)($order->payment_gateway ?? 'Unknown')),
+            'failure_reason' => (is_array($order->gateway_response) && isset($order->gateway_response['error'])) ? $order->gateway_response['error'] : 'Unknown error',
             'failure_date' => now()->format('M d, Y \a\t g:i A'),
         ]);
     }
@@ -816,18 +841,22 @@ class EmailService
     public function sendLicenseCreated(License $license, ?User $user = null): bool
     {
         $targetUser = $user ?? $license->user;
+        if (!$targetUser) {
+            Log::error('No user found for license creation notification');
+            return false;
+        }
         return $this->sendToUser($targetUser, 'license_created', [
-            'customer_name' => $license->user->name,
-            'customer_email' => $license->user->email,
-            'product_name' => $license->product->name,
+            'customer_name' => $license->user->name ?? '',
+            'customer_email' => $license->user->email ?? '',
+            'product_name' => $license->product->name ?? '',
             'license_key' => $license->license_key,
-            'license_type' => ucfirst($license->license_type),
+            'license_type' => ucfirst((string)($license->license_type ?? 'Unknown')),
             'max_domains' => $license->max_domains,
             'license_expires_at' => $license->license_expires_at ?
                 $license->license_expires_at->format('M d, Y') : 'Never',
             'support_expires_at' => $license->support_expires_at ?
                 $license->support_expires_at->format('M d, Y') : 'Never',
-            'created_date' => $license->created_at->format('M d, Y \a\t g:i A'),
+            'created_date' => $license->created_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
         ]);
     }
     /**
@@ -836,17 +865,17 @@ class EmailService
     public function sendAdminPaymentNotification(License $license, Invoice $invoice): bool
     {
         return $this->sendToAdmin('admin_payment_license_created', [
-            'customer_name' => $license->user->name,
-            'customer_email' => $license->user->email,
-            'product_name' => $license->product->name,
+            'customer_name' => $license->user->name ?? '',
+            'customer_email' => $license->user->email ?? '',
+            'product_name' => $license->product->name ?? '',
             'license_key' => $license->license_key,
             'invoice_number' => $invoice->invoice_number,
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
-            'payment_method' => ucfirst($invoice->metadata['gateway'] ?? 'Unknown'),
+            'payment_method' => ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown'),
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
-            'payment_date' => $invoice->paid_at->format('M d, Y \a\t g:i A'),
-            'license_type' => ucfirst($license->license_type),
+            'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
+            'license_type' => ucfirst((string)($license->license_type ?? 'Unknown')),
             'max_domains' => $license->max_domains,
         ]);
     }
@@ -855,15 +884,16 @@ class EmailService
      */
     public function sendCustomInvoicePaymentConfirmation(Invoice $invoice): bool
     {
+        // User parameter is non-nullable, so no need to check
         return $this->sendToUser($invoice->user, 'custom_invoice_payment_confirmation', [
-            'customer_name' => $invoice->user->name,
+            'customer_name' => $invoice->user->name ?? '',
             'customer_email' => $invoice->user->email,
             'invoice_number' => $invoice->invoice_number,
             'service_description' => $invoice->notes ?? 'Custom Service',
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
-            'payment_method' => ucfirst($invoice->metadata['gateway'] ?? 'Unknown'),
-            'payment_date' => $invoice->paid_at->format('M d, Y \a\t g:i A'),
+            'payment_method' => ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown'),
+            'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
         ]);
     }
@@ -873,15 +903,15 @@ class EmailService
     public function sendAdminCustomInvoicePaymentNotification(Invoice $invoice): bool
     {
         return $this->sendToAdmin('admin_custom_invoice_payment', [
-            'customer_name' => $invoice->user->name,
+            'customer_name' => $invoice->user->name ?? '',
             'customer_email' => $invoice->user->email,
             'invoice_number' => $invoice->invoice_number,
             'service_description' => $invoice->notes ?? 'Custom Service',
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
-            'payment_method' => ucfirst($invoice->metadata['gateway'] ?? 'Unknown'),
+            'payment_method' => ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown'),
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
-            'payment_date' => $invoice->paid_at->format('M d, Y \a\t g:i A'),
+            'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
         ]);
     }
     /**
@@ -1026,6 +1056,8 @@ class EmailService
                 $sanitized[$key] = $value;
             }
         }
-        return $sanitized;
+        /** @var array<string, mixed> $typedResult */
+        $typedResult = $sanitized;
+        return $typedResult;
     }
 }

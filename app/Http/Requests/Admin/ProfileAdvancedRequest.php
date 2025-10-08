@@ -322,23 +322,23 @@ class ProfileAdvancedRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'name' => $this->sanitizeInput($this->name),
-            'firstname' => $this->firstname ? $this->sanitizeInput($this->firstname) : null,
-            'lastname' => $this->lastname ? $this->sanitizeInput($this->lastname) : null,
-            'companyname' => $this->companyname ? $this->sanitizeInput($this->companyname) : null,
-            'phonenumber' => $this->phonenumber ? $this->sanitizeInput($this->phonenumber) : null,
-            'address1' => $this->address1 ? $this->sanitizeInput($this->address1) : null,
-            'address2' => $this->address2 ? $this->sanitizeInput($this->address2) : null,
-            'city' => $this->city ? $this->sanitizeInput($this->city) : null,
-            'state' => $this->state ? $this->sanitizeInput($this->state) : null,
-            'postcode' => $this->postcode ? $this->sanitizeInput($this->postcode) : null,
-            'country' => $this->country ? $this->sanitizeInput($this->country) : null,
-            'timezone' => $this->timezone ? $this->sanitizeInput($this->timezone) : null,
-            'language' => $this->language ? $this->sanitizeInput($this->language) : null,
-            'date_format' => $this->date_format ? $this->sanitizeInput($this->date_format) : null,
-            'time_format' => $this->time_format ? $this->sanitizeInput($this->time_format) : null,
-            'currency' => $this->currency ? $this->sanitizeInput($this->currency) : null,
-            'bio' => $this->bio ? $this->sanitizeInput($this->bio) : null,
+            'name' => $this->sanitizeInput($this->input('name')),
+            'firstname' => $this->input('firstname') ? $this->sanitizeInput($this->input('firstname')) : null,
+            'lastname' => $this->input('lastname') ? $this->sanitizeInput($this->input('lastname')) : null,
+            'companyname' => $this->input('companyname') ? $this->sanitizeInput($this->input('companyname')) : null,
+            'phonenumber' => $this->input('phonenumber') ? $this->sanitizeInput($this->input('phonenumber')) : null,
+            'address1' => $this->input('address1') ? $this->sanitizeInput($this->input('address1')) : null,
+            'address2' => $this->input('address2') ? $this->sanitizeInput($this->input('address2')) : null,
+            'city' => $this->input('city') ? $this->sanitizeInput($this->input('city')) : null,
+            'state' => $this->input('state') ? $this->sanitizeInput($this->input('state')) : null,
+            'postcode' => $this->input('postcode') ? $this->sanitizeInput($this->input('postcode')) : null,
+            'country' => $this->input('country') ? $this->sanitizeInput($this->input('country')) : null,
+            'timezone' => $this->input('timezone') ? $this->sanitizeInput($this->input('timezone')) : null,
+            'language' => $this->input('language') ? $this->sanitizeInput($this->input('language')) : null,
+            'date_format' => $this->input('date_format') ? $this->sanitizeInput($this->input('date_format')) : null,
+            'time_format' => $this->input('time_format') ? $this->sanitizeInput($this->input('time_format')) : null,
+            'currency' => $this->input('currency') ? $this->sanitizeInput($this->input('currency')) : null,
+            'bio' => $this->input('bio') ? $this->sanitizeInput($this->input('bio')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -361,15 +361,20 @@ class ProfileAdvancedRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

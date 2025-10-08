@@ -70,12 +70,12 @@ class TicketRequest extends FormRequest
             'user_id' => [
                 'required',
                 'integer',
-                'exists:users, id',
+                'exists:users,id',
             ],
             'category_id' => [
                 'required',
                 'integer',
-                'exists:ticket_categories, id',
+                'exists:ticket_categories,id',
             ],
             'subject' => [
                 'required',
@@ -105,7 +105,7 @@ class TicketRequest extends FormRequest
                 'nullable',
                 'required_if:create_invoice,1',
                 'integer',
-                'exists:products, id',
+                'exists:products,id',
             ],
             'invoice_amount' => [
                 'nullable',
@@ -206,10 +206,10 @@ class TicketRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'subject' => $this->sanitizeInput($this->subject),
-            'content' => $this->sanitizeInput($this->content),
-            'notes' => $this->notes ? $this->sanitizeInput($this->notes) : null,
-            'message' => $this->message ? $this->sanitizeInput($this->message) : null,
+            'subject' => $this->sanitizeInput(is_string($this->subject) ? $this->subject : null),
+            'content' => $this->sanitizeInput(is_string($this->content) ? $this->content : null),
+            'notes' => $this->notes && is_string($this->notes) ? $this->sanitizeInput($this->notes) : null,
+            'message' => $this->message && is_string($this->message) ? $this->sanitizeInput($this->message) : null,
         ]);
         // Handle checkbox values
         $this->merge([

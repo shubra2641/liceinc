@@ -70,7 +70,10 @@ class ProductFileSecurityMiddleware
             if ($request->route('file')) {
                 $this->validateFileAccess($request);
             }
-            return $next($request);
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         } catch (Throwable $e) {
             Log::error('ProductFileSecurityMiddleware processing error', [
                 'error' => $e->getMessage(),
@@ -105,7 +108,7 @@ class ProductFileSecurityMiddleware
     {
         try {
             $key = self::RATE_LIMIT_KEY . ':' . $request->ip();
-            return RateLimiter::attempt(
+            $result = RateLimiter::attempt(
                 $key,
                 self::MAX_ATTEMPTS,
                 function () {
@@ -113,6 +116,7 @@ class ProductFileSecurityMiddleware
                 },
                 self::DECAY_MINUTES * 60,
             );
+            return is_bool($result) ? $result : false;
         } catch (Throwable $e) {
             Log::error('Rate limit check error', [
                 'error' => $e->getMessage(),
@@ -185,8 +189,8 @@ class ProductFileSecurityMiddleware
             // Check if user is authenticated for file access
             if (! auth()->check()) {
                 Log::warning('Unauthorized file access attempt', [
-                    'file_id' => $file->id ?? 'unknown',
-                    'product_id' => $file->product_id ?? 'unknown',
+                    'file_id' => (is_object($file) && isset($file->id)) ? $file->id : 'unknown',
+                    'product_id' => (is_object($file) && isset($file->product_id)) ? $file->product_id : 'unknown',
                     'url' => $request->fullUrl(),
                     'method' => $request->method(),
                     'ip' => $request->ip(),
@@ -199,8 +203,8 @@ class ProductFileSecurityMiddleware
         } catch (Throwable $e) {
             Log::error('Additional security checks error', [
                 'error' => $e->getMessage(),
-                'file_id' => $file->id ?? 'unknown',
-                'product_id' => $file->product_id ?? 'unknown',
+                'file_id' => (is_object($file) && isset($file->id)) ? $file->id : 'unknown',
+                'product_id' => (is_object($file) && isset($file->product_id)) ? $file->product_id : 'unknown',
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
                 'ip' => $request->ip(),
@@ -230,8 +234,8 @@ class ProductFileSecurityMiddleware
             // Log only if there are security concerns or for debugging
             if ($this->shouldLogFileAccess($request, $file)) {
                 Log::debug('File access security check', [
-                    'file_id' => $file->id ?? 'unknown',
-                    'product_id' => $file->product_id ?? 'unknown',
+                    'file_id' => (is_object($file) && isset($file->id)) ? $file->id : 'unknown',
+                    'product_id' => (is_object($file) && isset($file->product_id)) ? $file->product_id : 'unknown',
                     'user_id' => auth()->id(),
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
@@ -243,8 +247,8 @@ class ProductFileSecurityMiddleware
         } catch (Throwable $e) {
             Log::error('File access logging error', [
                 'error' => $e->getMessage(),
-                'file_id' => $file->id ?? 'unknown',
-                'product_id' => $file->product_id ?? 'unknown',
+                'file_id' => (is_object($file) && isset($file->id)) ? $file->id : 'unknown',
+                'product_id' => (is_object($file) && isset($file->product_id)) ? $file->product_id : 'unknown',
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
                 'ip' => $request->ip(),
@@ -289,7 +293,7 @@ class ProductFileSecurityMiddleware
         $userAgent = $request->userAgent();
         $suspiciousPatterns = ['bot', 'crawler', 'scanner', 'wget', 'curl'];
         foreach ($suspiciousPatterns as $pattern) {
-            if (stripos($userAgent, $pattern) !== false) {
+            if ($userAgent && stripos($userAgent, $pattern) !== false) {
                 return true;
             }
         }
@@ -332,10 +336,6 @@ class ProductFileSecurityMiddleware
      *
      * @return string The sanitized input
      */
-    private function sanitizeInput(string $input): string
-    {
-        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-    }
     /**
      * Hash data for logging.
      *
@@ -343,8 +343,5 @@ class ProductFileSecurityMiddleware
      *
      * @return string The hashed data
      */
-    private function hashForLogging(string $data): string
-    {
-        return substr(hash('sha256', $data . config('app.key')), 0, 8) . '...';
-    }
+
 }

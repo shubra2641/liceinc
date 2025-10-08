@@ -85,28 +85,28 @@ class KbCategory extends Model
         'sort_order' => 'integer',
     ];
     /**
-     * @return BelongsTo<KbCategory, KbCategory>
+     * @return BelongsTo<KbCategory, $this>
      */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(KbCategory::class, 'parent_id');
     }
     /**
-     * @return HasMany<KbCategory, KbCategory>
+     * @return HasMany<KbCategory, $this>
      */
     public function children(): HasMany
     {
         return $this->hasMany(KbCategory::class, 'parent_id');
     }
     /**
-     * @return HasMany<KbArticle, KbCategory>
+     * @return HasMany<KbArticle, $this>
      */
     public function articles(): HasMany
     {
         return $this->hasMany(KbArticle::class, 'kb_category_id');
     }
     /**
-     * @return BelongsTo<Product, KbCategory>
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {

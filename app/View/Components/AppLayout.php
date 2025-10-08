@@ -5,6 +5,7 @@ namespace App\View\Components;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\Component;
 use Illuminate\View\View;
+use Illuminate\Contracts\View\View as ViewContract;
 
 /**
  * Application Layout Component with Enhanced Security.
@@ -32,11 +33,12 @@ class AppLayout extends Component
      *
      * @throws \Exception When view rendering fails
      */
-    public function render(): View
+    public function render(): ViewContract
     {
         try {
             // Validate view exists and is accessible
-            if (! file_exists(resource_path('views/layouts/app.blade.php'))) {
+            $viewPath = resource_path('views/layouts/app.blade.php');
+            if (! file_exists($viewPath)) {
                 Log::error('Application layout view not found', [
                     'view' => 'layouts.app',
                     'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
@@ -44,7 +46,9 @@ class AppLayout extends Component
                 throw new \Exception('Application layout view not found');
             }
             // Render the layout with security context
-            $view = view('layouts.app');
+            /** @var view-string $viewName */
+            $viewName = 'layouts.app';
+            $view = view($viewName, []);
             // Add security headers and context
             $this->addSecurityContext($view);
             return $view;
@@ -61,16 +65,18 @@ class AppLayout extends Component
      *
      * @param  View  $view  The view instance to add security context to
      */
-    private function addSecurityContext(View $view): void
+    private function addSecurityContext(ViewContract $view): void
     {
         try {
             // Add security-related data to the view
+            $appVersion = config('app.version', '1.0.0');
+            $appEnv = config('app.env', 'production');
             $view->with([
                 'security_token' => csrf_token(),
-                'app_version' => config('app.version', '1.0.0'),
-                'environment' => config('app.env', 'production'),
-                'debug_mode' => config('app.debug', false),
-                'timestamp' => now()->timestamp,
+                'app_version' => is_string($appVersion) ? $appVersion : '1.0.0',
+                'environment' => is_string($appEnv) ? $appEnv : 'production',
+                'debug_mode' => (bool)config('app.debug', false),
+                'timestamp' => (int)now()->timestamp,
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to add security context to view', [

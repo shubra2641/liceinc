@@ -133,8 +133,13 @@ class Dropdown extends Component
     private function sanitizeContentClasses(string $contentClasses): string
     {
         // Remove potentially dangerous characters and keep only safe CSS class characters
-        $sanitized = preg_replace('/[^a-zA-Z0-9\s\-_:]/', '', $contentClasses);
+        $sanitized = preg_replace('/[^a-zA-Z0-9\s\-_:]/', '', (string)$contentClasses);
+        if ($sanitized === null) {
+            return '';
+        }
         // Trim and normalize whitespace
-        return trim(preg_replace('/\s+/', ' ', $sanitized));
+        $trimmed = trim($sanitized);
+        $result = preg_replace('/\s+/', ' ', $trimmed);
+        return $result !== null ? $result : '';
     }
 }

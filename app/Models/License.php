@@ -126,35 +126,35 @@ class License extends Model
         return $key;
     }
     /**
-     * @return BelongsTo<Product, License>
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
     /**
-     * @return BelongsTo<User, License>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
     /**
-     * @return HasMany<LicenseDomain, License>
+     * @return HasMany<LicenseDomain, $this>
      */
     public function domains(): HasMany
     {
         return $this->hasMany(LicenseDomain::class);
     }
     /**
-     * @return HasMany<LicenseLog, License>
+     * @return HasMany<LicenseLog, $this>
      */
     public function logs(): HasMany
     {
         return $this->hasMany(LicenseLog::class);
     }
     /**
-     * @return HasMany<Invoice, License>
+     * @return HasMany<Invoice, $this>
      */
     public function invoices(): HasMany
     {
@@ -222,7 +222,7 @@ class License extends Model
      */
     public function setExpiresAtAttribute(?\Carbon\Carbon $value): void
     {
-        $this->license_expires_at = $value;
+        $this->license_expires_at = $value ? \Illuminate\Support\Carbon::instance($value) : null;
     }
     /**
      * Get the number of active domains for this license.

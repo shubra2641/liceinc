@@ -13,7 +13,7 @@ class ProgrammingLanguageFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\Illuminate\Database\Eloquent\Model> */
+     * @var class-string<ProgrammingLanguage> */
     protected $model = ProgrammingLanguage::class;
 
     /**
@@ -32,9 +32,9 @@ class ProgrammingLanguageFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => strtolower($name),
+            'slug' => strtolower((string)$name),
             'description' => $this->faker->sentence(),
-            'icon' => 'fab fa-'.strtolower($name),
+            'icon' => 'fab fa-'.strtolower((string)$name),
             'color' => $this->faker->hexColor(),
             'is_active' => true,
             'sort_order' => $this->faker->numberBetween(1, 100),

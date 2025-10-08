@@ -74,7 +74,7 @@ class AdvancedWebhookService
      */
     public function sendWebhookEvent(string $eventType, array $payload, ?int $webhookId = null): void
     {
-        $webhooks = $webhookId === true
+        $webhooks = $webhookId !== null
             ? Webhook::where('id', $webhookId)->get()
             : Webhook::where('is_active', true)
                 ->whereJsonContains('events', $eventType)
@@ -112,7 +112,8 @@ class AdvancedWebhookService
             $this->updateWebhookStats($webhook, true);
         } catch (\Exception $e) {
             // Log failed attempt
-            $this->logWebhookAttempt($webhook, $eventType, $payload, null, false, $e->getMessage());
+            $errorMessage = $e->getMessage();
+            $this->logWebhookAttempt($webhook, $eventType, $payload, null, false, $errorMessage);
             // Update webhook statistics
             $this->updateWebhookStats($webhook, false);
             // Queue for retry if not exceeded max retries
@@ -173,6 +174,9 @@ class AdvancedWebhookService
     private function generateSignature(string $secret, array $data): string
     {
         $payload = json_encode($data);
+        if ($payload === false) {
+            $payload = '';
+        }
         return 'sha256=' . hash_hmac('sha256', $payload, $secret);
     }
     /**
@@ -198,7 +202,7 @@ class AdvancedWebhookService
             'Content-Type' => 'application/json',
             'User-Agent' => 'Sekuret-Webhook/1.0',
             'X-Webhook-Event' => $data['event'],
-            'X-Webhook-Timestamp' => (string)$data['timestamp'],
+            'X-Webhook-Timestamp' => is_numeric($data['timestamp'] ?? time()) ? (string)($data['timestamp'] ?? time()) : (string)time(),
             'X-Webhook-Nonce' => $data['nonce'],
         ];
         if (isset($data['signature'])) {
@@ -308,10 +312,11 @@ class AdvancedWebhookService
      */
     private function getAttemptNumber(Webhook $webhook, string $eventType): int
     {
-        return WebhookLog::where('webhook_id', $webhook->id)
+        $attemptCount = WebhookLog::where('webhook_id', $webhook->id)
             ->where('event_type', $eventType)
             ->where('created_at', '>=', now()->subHour())
-            ->count() + 1;
+            ->count();
+        return $attemptCount + 1;
     }
     /**
      * Mark webhook as failed after maximum retry attempts.
@@ -394,11 +399,15 @@ class AdvancedWebhookService
         ];
         try {
             $response = $this->sendHttpRequest($webhook, $testPayload);
+            $statusCode = $response->status();
+            $responseBody = $response->body();
+            $responseTime = $response->transferStats?->getHandlerStat('total_time') ?? 0;
+            
             return [
                 'success' => $response->successful(),
-                'status_code' => $response->status(),
-                'response_body' => $response->body(),
-                'response_time' => $response->transferStats?->getHandlerStat('total_time') ?? 0,
+                'status_code' => (int)$statusCode,
+                'response_body' => (string)$responseBody,
+                'response_time' => is_numeric($responseTime) ? (float)$responseTime : 0.0,
             ];
         } catch (\Exception $e) {
             return [
@@ -449,8 +458,8 @@ class AdvancedWebhookService
             'total_attempts' => $totalAttempts,
             'successful_attempts' => $successfulAttempts,
             'failed_attempts' => $failedAttempts,
-            'success_rate' => round($successRate, 2),
-            'average_response_time' => round($avgResponseTime, 3),
+            'success_rate' => round((float) $successRate, 2),
+            'average_response_time' => round((float) $avgResponseTime, 3),
             'events_breakdown' => $events,
             'last_successful' => $webhook->last_successful_at,
             'last_failed' => $webhook->last_failed_at,
@@ -474,7 +483,8 @@ class AdvancedWebhookService
     public function cleanupOldLogs(int $days = 90): int
     {
         $cutoffDate = now()->subDays($days);
-        return WebhookLog::where('created_at', '<', $cutoffDate)->delete();
+        $result = WebhookLog::where('created_at', '<', $cutoffDate)->delete();
+        return is_numeric($result) ? (int)$result : 0;
     }
     /**
      * Get webhook health status and performance indicators.
@@ -502,7 +512,9 @@ class AdvancedWebhookService
             ->get();
         $recentFailures = $recentLogs->where('success', false)->count();
         $totalRecent = $recentLogs->count();
-        $healthScore = $totalRecent > 0 ? (($totalRecent - $recentFailures) / $totalRecent) * 100 : 100;
+        $failuresCount = (int)$recentFailures;
+        $totalCount = (int)$totalRecent;
+        $healthScore = $totalCount > 0 ? (($totalCount - $failuresCount) / $totalCount) * 100 : 100;
         $status = match (true) {
             $healthScore >= 95 => 'excellent',
             $healthScore >= 80 => 'good',
@@ -542,7 +554,8 @@ class AdvancedWebhookService
      */
     public function bulkUpdateWebhooks(array $webhookIds, array $updates): int
     {
-        return Webhook::whereIn('id', $webhookIds)->update($updates);
+        $updateResult = Webhook::whereIn('id', $webhookIds)->update($updates);
+        return (int)$updateResult;
     }
     /**
      * Generate comprehensive webhook delivery report for monitoring.
@@ -568,7 +581,9 @@ class AdvancedWebhookService
     {
         $startDate = now()->subDays($days);
         $webhooks = Webhook::with(['logs' => function ($query) use ($startDate) {
-            $query->where('created_at', '>=', $startDate);
+            if (is_object($query) && method_exists($query, 'where')) {
+                $query->where('created_at', '>=', $startDate);
+            }
         }])->get();
         $report = [];
         foreach ($webhooks as $webhook) {
@@ -586,7 +601,7 @@ class AdvancedWebhookService
                 'health_status' => $this->getWebhookHealth($webhook)['status'],
             ];
         }
-        return $report;
+        return ['delivery_report' => $report];
     }
     /**
      * Get execution time for performance tracking and monitoring.

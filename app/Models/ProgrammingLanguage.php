@@ -67,7 +67,7 @@ class ProgrammingLanguage extends Model
         'is_active' => 'boolean',
     ];
     /**
-     * @return HasMany<Product, ProgrammingLanguage>
+     * @return HasMany<Product, $this>
      */
     public function products(): HasMany
     {
@@ -76,14 +76,16 @@ class ProgrammingLanguage extends Model
     protected static function boot()
     {
         parent::boot();
-        static::creating(function ($language) {
+        static::creating(function (ProgrammingLanguage $language) {
             if (empty($language->slug)) {
-                $language->slug = Str::slug($language->name);
+                $languageName = $language->name ?? '';
+                $language->slug = Str::slug($languageName);
             }
         });
-        static::updating(function ($language) {
+        static::updating(function (ProgrammingLanguage $language) {
             if ($language->isDirty('name')) {
-                $language->slug = Str::slug($language->name);
+                $languageName = $language->name ?? '';
+                $language->slug = Str::slug($languageName);
             }
         });
     }
@@ -228,7 +230,7 @@ class ProgrammingLanguage extends Model
             'file_path' => $templatePath,
             'file_size' => $this->hasTemplateFile() ? filesize($templatePath) : 0,
             'last_modified' => $this->hasTemplateFile()
-                ? date('Y-m-d H:i:s', filemtime($templatePath))
+                ? date('Y-m-d H:i:s', filemtime($templatePath) ?: time())
                 : null,
             'template_content' => $this->hasTemplateFile() ?
                 file_get_contents($templatePath) : $this->getLicenseTemplate(),
@@ -251,7 +253,7 @@ class ProgrammingLanguage extends Model
                 Storage::disk('local')->files($templateDir, true)
             );
             $files = array_filter($files, function ($file) {
-                return preg_match('/\.(php|blade\.php)$/', $file);
+                return is_string($file) && preg_match('/\.(php|blade\.php)$/', $file);
             });
             foreach ($files as $file) {
                 $filename = basename($file);

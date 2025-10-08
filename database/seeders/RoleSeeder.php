@@ -40,7 +40,7 @@ class RoleSeeder extends Seeder
         // This can be destructive if run on a production DB where 'is_admin'
         // values are incorrect. Require an explicit opt-in via environment
         // or run only in the local environment.
-        if (app()->environment('local') || env('SEED_SYNC_USERS', false)) {
+        if (app()->environment('local') || config('app.seed_sync_users', false)) {
             // Sync users with is_admin field
             $adminUsers = User::where('is_admin', 1)->get();
             foreach ($adminUsers as $user) {

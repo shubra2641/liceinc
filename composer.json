@@ -55,6 +55,19 @@
             "@php artisan key:generate --ansi",
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --graceful --ansi"
+        ],
+        "phpstan": [
+            "vendor/bin/phpstan analyse --memory-limit=2G"
+        ],
+        "phpstan:baseline": [
+            "vendor/bin/phpstan analyse --memory-limit=2G --generate-baseline"
+        ],
+        "phpstan:clear": [
+            "vendor/bin/phpstan clear-result-cache"
+        ],
+        "code-quality": [
+            "@phpstan",
+            "@php artisan pint"
         ]
     },
     "extra": {

@@ -118,7 +118,7 @@ class SettingController extends Controller
                     'envato_username' => '',
                     'envato_client_id' => '',
                     'envato_client_secret' => '',
-                    'envato_redirect_uri' => (is_string(config('app.url')) ? config('app.url') : (string)config('app.url')).'/auth/envato/callback',
+                    'envato_redirect_uri' => (is_string(config('app.url')) ? config('app.url') : '').'/auth/envato/callback',
                     'envato_oauth_enabled' => false,
                     'auto_generate_license' => true,
                     'default_license_length' => 32,
@@ -149,12 +149,9 @@ class SettingController extends Controller
             $currentTimezone = old('timezone', $settings->timezone ?? 'UTC');
             // Process human questions for view
             $existingQuestions = [];
-            if (! empty($settingsArray['human_questions'])) {
-                try {
-                    $existingQuestions = json_decode($settingsArray['human_questions'], true) ?: [];
-                } catch (\Exception $e) {
-                    $existingQuestions = [];
-                }
+            $humanQuestions = $settingsArray['human_questions'] ?? null;
+            if (! empty($humanQuestions) && is_string($humanQuestions)) {
+                $existingQuestions = json_decode($humanQuestions, true) ?: [];
             }
             // If old input exists (after validation error) prefer it
             if (old('human_questions') && is_array(old('human_questions'))) {
@@ -162,7 +159,7 @@ class SettingController extends Controller
             }
             DB::commit();
 
-            return view('admin.settings.index', compact('settings', 'settingsArray', 'currentTimezone', 'existingQuestions'));
+            return view('admin.settings.index', ['settings' => $settings, 'settingsArray' => $settingsArray, 'currentTimezone' => $currentTimezone, 'existingQuestions' => $existingQuestions]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Settings page failed to load', [
@@ -185,7 +182,7 @@ class SettingController extends Controller
      * Validates and updates all system settings including
      * general settings, license settings, and security options using Request classes.
      *
-     * @param  SettingUpdateRequest  $request  The validated request containing settings data
+     * @param  SettingRequest  $request  The validated request containing settings data
      *
      * @return RedirectResponse Redirect back with success/error message
      *
@@ -263,11 +260,11 @@ class SettingController extends Controller
             foreach ($validated as $key => $value) {
                 // Handle human_questions special case
                 if ($key === 'human_questions') {
-                    if (is_array($value)) {
+                    if (is_array($value) && !empty($value)) {
                         $decoded = $value;
                     } elseif (! empty($value)) {
                         try {
-                            $decoded = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+                            $decoded = json_decode(is_string($value) ? $value : '', true, 512, JSON_THROW_ON_ERROR);
                         } catch (\JsonException $e) {
                             DB::rollBack();
 
@@ -292,14 +289,14 @@ class SettingController extends Controller
                         if (! is_array($entry)) {
                             continue;
                         }
-                        $q = trim((string)((is_array($entry) && isset($entry['question'])) ? $entry['question'] : ''));
-                        $a = trim((string)($entry['answer'] ?? ''));
+                        $q = trim(is_string($entry['question'] ?? null) ? $entry['question'] : '');
+                        $a = trim(is_string($entry['answer'] ?? null) ? $entry['answer'] : '');
                         if ($q === '' || $a === '') {
                             continue;
                         }
                         $normalized[] = ['question' => $q, 'answer' => $a];
                     }
-                    $setting->human_questions = ! empty($normalized) ? json_encode($normalized) : null;
+                    $setting->human_questions = ! empty($normalized) ? $normalized : [];
                     continue;
                 }
                 $setting->$key = $value;
@@ -310,7 +307,7 @@ class SettingController extends Controller
             DB::commit();
             // Check if API token was auto-generated
             $message = 'Settings updated successfully.';
-            if (empty($request->input('license_api_token')) || strlen($request->input('license_api_token')) < 32) {
+            if (empty($request->input('license_api_token')) || strlen(is_string($request->input('license_api_token')) ? $request->input('license_api_token') : '') < 32) {
                 $message .= ' A new API token has been automatically generated for you.';
             }
 
@@ -342,7 +339,7 @@ class SettingController extends Controller
      * Validates the provided Envato API token by making
      * a test request to the Envato API with proper security measures.
      *
-     * @param  SettingTestApiRequest  $request  The validated request containing API token
+     * @param  SettingRequest  $request  The validated request containing API token
      *
      * @return JsonResponse JSON response with test results
      *
@@ -393,7 +390,7 @@ class SettingController extends Controller
             $token = $request->validated()['token'];
             $envatoService = app('App\Services\EnvatoService');
             // Test API by calling testToken method
-            $isValid = $envatoService->testToken($token);
+            $isValid = $envatoService->testToken(is_string($token) ? $token : '');
             if ($isValid) {
                 return response()->json([
                     'success' => true,
@@ -403,7 +400,7 @@ class SettingController extends Controller
                 Log::warning('Envato API test failed - invalid token', [
                     'user_id' => Auth::id(),
                     'ip' => $request->ip(),
-                    'token_prefix' => substr($token, 0, 8).'...',
+                    'token_prefix' => substr(is_string($token) ? $token : '', 0, 8).'...',
                 ]);
 
                 return response()->json([
@@ -420,7 +417,7 @@ class SettingController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed: '.implode(', ', $e->errors()['token'] ?? ['Invalid input']),
+                'message' => 'Validation failed: '.implode(', ', is_array($e->errors()['token'] ?? null) ? $e->errors()['token'] : ['Invalid input']),
             ], 422);
         } catch (\Exception $e) {
             Log::error('Envato API test failed with exception', [

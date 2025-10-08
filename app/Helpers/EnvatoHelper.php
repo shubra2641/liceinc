@@ -61,7 +61,7 @@ class EnvatoHelper
     public static function isEnvatoConfigured(): bool
     {
         try {
-            return Cache::remember(self::CACHE_KEY_CONFIGURED, self::CACHE_DURATION, function () {
+            $result = Cache::remember(self::CACHE_KEY_CONFIGURED, self::CACHE_DURATION, function () {
                 $setting = Setting::first();
                 if (! $setting) {
                     return false;
@@ -79,6 +79,7 @@ class EnvatoHelper
                 }
                 return true;
             });
+            return is_bool($result) ? $result : false;
         } catch (\Exception $e) {
             Log::error('Error checking Envato configuration', [
                 'error' => $e->getMessage(),
@@ -128,7 +129,7 @@ class EnvatoHelper
     public static function getEnvatoSettings(): ?array
     {
         try {
-            return Cache::remember(self::CACHE_KEY_SETTINGS, self::CACHE_DURATION, function () {
+            $result = Cache::remember(self::CACHE_KEY_SETTINGS, self::CACHE_DURATION, function () {
                 $setting = Setting::first();
                 if (! $setting) {
                     return null;
@@ -150,6 +151,16 @@ class EnvatoHelper
                     'client_secret' => self::sanitizeOutput($setting->envato_client_secret),
                 ];
             });
+            if (is_array($result)) {
+                $sanitizedResult = [];
+                foreach ($result as $key => $value) {
+                    if (is_string($key) && is_string($value)) {
+                        $sanitizedResult[$key] = $value;
+                    }
+                }
+                return $sanitizedResult;
+            }
+            return null;
         } catch (\Exception $e) {
             Log::error('Error retrieving Envato settings', [
                 'error' => $e->getMessage(),

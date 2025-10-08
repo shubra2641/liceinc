@@ -93,19 +93,10 @@ class NavLink extends Component
      */
     protected function getClasses(): string
     {
-        try {
-            if ($this->active) {
-                return 'nav-link-active';
-            }
-            return 'nav-link';
-        } catch (\Exception $e) {
-            Log::error('Failed to get CSS classes for NavLink', [
-                'active' => $this->active,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return 'nav-link'; // Fallback to default
+        if ($this->active) {
+            return 'nav-link-active';
         }
+        return 'nav-link';
     }
     /**
      * Get the view / contents that represent the component with enhanced security.

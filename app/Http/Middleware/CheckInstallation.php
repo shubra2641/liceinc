@@ -58,26 +58,36 @@ class CheckInstallation
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            if (! $request) {
-                throw new \InvalidArgumentException('Request cannot be null');
-            }
+            // Request is validated by type hint
             $installedFile = storage_path(self::INSTALLED_FILE_PATH);
             $currentRoute = $this->getCurrentRouteName($request);
             // Skip installation check for certain routes
             if ($this->shouldSkipRoute($currentRoute)) {
-                return $next($request);
+                $response = $next($request);
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                $typedResponse = $response;
+                return $typedResponse;
             }
             $isInstalled = $this->isSystemInstalled($installedFile);
             $isInstallRoute = $this->isInstallRoute($request, $currentRoute);
             // If system is not installed and not accessing install routes
             if (! $isInstalled && ! $isInstallRoute) {
-                return $this->handleNotInstalled($request);
+                $response = $this->handleNotInstalled($request);
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                $typedResponse = $response;
+                return $typedResponse;
             }
             // If system is installed and trying to access install routes
             if ($isInstalled && $isInstallRoute) {
-                return $this->handleAlreadyInstalled($request);
+                $response = $this->handleAlreadyInstalled($request);
+                /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+                $typedResponse = $response;
+                return $typedResponse;
             }
-            return $next($request);
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         } catch (Exception $e) {
             Log::error('Installation check middleware failed: ' . $e->getMessage(), [
                 'request_url' => $request->fullUrl(),
@@ -85,7 +95,10 @@ class CheckInstallation
                 'trace' => $e->getTraceAsString(),
             ]);
             // Fail safe - allow request to continue
-            return $next($request);
+            $response = $next($request);
+            /** @var \Symfony\Component\HttpFoundation\Response $typedResponse */
+            $typedResponse = $response;
+            return $typedResponse;
         }
     }
     /**
@@ -99,10 +112,10 @@ class CheckInstallation
     {
         try {
             $route = $request->route();
-            if ($route === false) {
+            if ($route === null) {
                 return '';
             }
-            $routeName = $route ? $route->getName() : null;
+            $routeName = $route->getName();
             return $routeName ?? '';
         } catch (Exception $e) {
             Log::error('Failed to get current route name: ' . $e->getMessage());

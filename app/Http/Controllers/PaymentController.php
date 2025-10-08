@@ -115,7 +115,7 @@ class PaymentController extends Controller
                 ]);
                 return redirect()->back()->with('error', trans('app.No payment gateways are currently available'));
             }
-            return view('payment.gateways', compact('product', 'enabledGateways'));
+            return view('payment.gateways', ['product' => $product, 'enabledGateways' => $enabledGateways]);
         } catch (\Exception $e) {
             Log::error('Failed to load payment gateways', [
                 'error' => $e->getMessage(),
@@ -150,7 +150,7 @@ class PaymentController extends Controller
      *     "invoice_id": 123
      * }
      */
-    public function processPayment(Request $request, Product $product): RedirectResponse
+    public function processPayment(Request $request, Product $product): \Illuminate\Http\RedirectResponse
     {
         try {
             // Rate limiting
@@ -168,19 +168,21 @@ class PaymentController extends Controller
                 'gateway' => 'required|in:paypal, stripe',
                 'invoice_id' => 'nullable|exists:invoices, id',
             ]);
+            $validatedArray = is_array($validated) ? $validated : [];
             if (! Auth::check()) {
                 Log::warning('Unauthenticated payment processing attempt', [
                     'product_id' => $product->id,
-                    'gateway' => $validated['gateway'],
+                    'gateway' => $validatedArray['gateway'] ?? 'unknown',
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
                 return redirect()->back()->with('error', trans('app.Please login to purchase this product'));
             }
             // Check if gateway is enabled
-            if (! PaymentSetting::isGatewayEnabled($validated['gateway'])) {
+            $gateway = is_string($validatedArray['gateway'] ?? null) ? $validatedArray['gateway'] : '';
+            if (! PaymentSetting::isGatewayEnabled($gateway)) {
                 Log::warning('Disabled gateway access attempt', [
-                    'gateway' => $validated['gateway'],
+                    'gateway' => $gateway,
                     'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                 ]);
@@ -189,15 +191,16 @@ class PaymentController extends Controller
             DB::beginTransaction();
             // Check if this is for an existing invoice
             $invoice = null;
-            if (isset($validated['invoice_id']) && $validated['invoice_id']) {
-                $invoice = Invoice::where('id', $validated['invoice_id'])
+            $invoiceId = $validatedArray['invoice_id'] ?? null;
+            if (isset($invoiceId) && $invoiceId) {
+                $invoice = Invoice::where('id', $invoiceId)
                     ->where('user_id', Auth::id())
                     ->where('status', 'pending')
                     ->first();
                 if (! $invoice) {
                     DB::rollBack();
                     Log::warning('Invalid invoice access attempt', [
-                        'invoice_id' => $validated['invoice_id'],
+                        'invoice_id' => $invoiceId,
                         'user_id' => Auth::id(),
                         'ip' => request()->ip(),
                     ]);
@@ -210,7 +213,7 @@ class PaymentController extends Controller
                 'product_id' => $product->id,
                 'amount' => $invoice ? $invoice->amount : $product->price,
                 'currency' => 'USD',
-                'payment_gateway' => $validated['gateway'],
+                'payment_gateway' => $gateway,
                 'payment_status' => 'pending',
                 'invoice_id' => $invoice ? $invoice->id : null,
             ];
@@ -220,14 +223,14 @@ class PaymentController extends Controller
                 session(['payment_invoice_id' => $invoice->id]);
             }
             // Process payment based on gateway
-            $paymentResult = $this->paymentService->processPayment($orderData, $validated['gateway']);
+            $paymentResult = $this->paymentService->processPayment($orderData, $gateway);
             // Store session_id for Stripe
-            if ($validated['gateway'] === 'stripe' && isset($paymentResult['session_id'])) {
+            if ($gateway === 'stripe' && isset($paymentResult['session_id'])) {
                 session(['stripe_session_id' => $paymentResult['session_id']]);
             }
             DB::commit();
             // Redirect to payment gateway
-            return redirect($paymentResult['redirect_url']);
+            return redirect()->to(is_string($paymentResult['redirect_url'] ?? null) ? $paymentResult['redirect_url'] : '/');
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             Log::warning('Payment processing validation failed', [
@@ -284,9 +287,12 @@ class PaymentController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes
             // Log PayPal payments only
             if ($gateway === 'paypal') {
+                $requestData = $request->all();
+                /** @var array<string, mixed> $sanitizedData */
+                $sanitizedData = $requestData;
                 Log::warning('PayPal Payment Success Callback', [
                     'gateway' => $gateway,
-                    'all_params' => $this->sanitizeLogData($request->all()),
+                    'all_params' => $this->sanitizeLogData($sanitizedData),
                     'user_id' => Auth::id(),
                     'session_data' => [
                         'payment_product_id' => session('payment_product_id'),
@@ -316,7 +322,7 @@ class PaymentController extends Controller
             }
             $user = Auth::user();
             // Verify payment with gateway
-            $verificationResult = $this->paymentService->verifyPayment($gateway, $transactionId);
+            $verificationResult = $this->paymentService->verifyPayment($gateway, is_string($transactionId) ? $transactionId : '');
             if ($verificationResult['success']) {
                 // Check if this is a custom invoice payment
                 $isCustom = session('payment_is_custom', false);
@@ -324,7 +330,7 @@ class PaymentController extends Controller
                 if ($isCustom && $invoiceId) {
                     // Handle custom invoice payment
                     $existingInvoice = Invoice::find($invoiceId);
-                    if (! $existingInvoice) {
+                    if (! $existingInvoice || $existingInvoice instanceof \Illuminate\Database\Eloquent\Collection) {
                         Log::error('Custom invoice not found', [
                             'invoice_id' => $invoiceId,
                             'user_id' => Auth::id(),
@@ -395,20 +401,22 @@ class PaymentController extends Controller
                         'gateway' => $gateway,
                         'transactionId' => $transactionId,
                     ]);
-                    $result = $this->paymentService->createLicenseAndInvoice($orderData, $gateway, $transactionId);
+                    $result = $this->paymentService->createLicenseAndInvoice($orderData, $gateway, is_string($transactionId) ? $transactionId : null);
                     Log::warning('License and invoice creation result', [
                         'success' => $result['success'] ?? false,
-                        'license_id' => $result['license']->id ?? 'N/A',
-                        'invoice_id' => $result['invoice']->id ?? 'N/A',
+                        'license_id' => (is_object($result['license'] ?? null) && isset($result['license']->id)) ? $result['license']->id : 'N/A',
+                        'invoice_id' => (is_object($result['invoice'] ?? null) && isset($result['invoice']->id)) ? $result['invoice']->id : 'N/A',
                     ]);
                     if ($result['success']) {
                         // Clear payment session
                         session()->forget(['payment_product_id', 'payment_invoice_id']);
                         // Send emails
                         try {
-                            $this->emailService->sendPaymentConfirmation($result['license'], $result['invoice']);
-                            $this->emailService->sendLicenseCreated($result['license']);
-                            $this->emailService->sendAdminPaymentNotification($result['license'], $result['invoice']);
+                            if ($result['license'] instanceof \App\Models\License && $result['invoice'] instanceof \App\Models\Invoice) {
+                                $this->emailService->sendPaymentConfirmation($result['license'], $result['invoice']);
+                                $this->emailService->sendLicenseCreated($result['license']);
+                                $this->emailService->sendAdminPaymentNotification($result['license'], $result['invoice']);
+                            }
                         } catch (\Exception $e) {
                             Log::error('Failed to send payment emails', [
                                 'error' => $e->getMessage(),
@@ -535,7 +543,7 @@ class PaymentController extends Controller
                 'ip' => request()->ip(),
             ]);
             return redirect()->route('payment.failure', $gateway)
-                ->with('error_message', trans('app.Payment failed: :error', ['error' => $error]));
+                ->with('error_message', trans('app.Payment failed: :error', ['error' => is_string($error) ? $error : 'Unknown error']));
         } catch (\Exception $e) {
             Log::error('Payment failure handling failed', [
                 'error' => $e->getMessage(),
@@ -582,7 +590,8 @@ class PaymentController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'Rate limit exceeded'], 429);
             }
             RateLimiter::hit($key, 60); // 1 minute
-            $result = $this->paymentService->handleWebhook($request, $gateway);
+            $serviceRequest = new \App\Services\Request($request->all());
+            $result = $this->paymentService->handleWebhook($serviceRequest, $gateway);
             if ($result['success']) {
                 return response()->json(['status' => 'success']);
             } else {
@@ -625,7 +634,7 @@ class PaymentController extends Controller
      *     "gateway": "stripe"
      * }
      */
-    public function processCustomPayment(Request $request, Invoice $invoice): RedirectResponse
+    public function processCustomPayment(Request $request, Invoice $invoice): \Illuminate\Http\RedirectResponse
     {
         try {
             // Rate limiting
@@ -643,7 +652,8 @@ class PaymentController extends Controller
             $validated = $request->validate([
                 'gateway' => 'required|in:stripe, paypal',
             ]);
-            $gateway = $validated['gateway'];
+            $validatedArray = is_array($validated) ? $validated : [];
+            $gateway = is_string($validatedArray['gateway'] ?? null) ? $validatedArray['gateway'] : '';
             // Check if gateway is enabled
             if (! PaymentSetting::isGatewayEnabled($gateway)) {
                 Log::warning('Disabled gateway access attempt for custom payment', [
@@ -694,7 +704,7 @@ class PaymentController extends Controller
                 'user_id' => Auth::id(),
             ]);
             if ($result['success']) {
-                return redirect($result['redirect_url']);
+                return redirect()->to(is_string($result['redirect_url'] ?? null) ? $result['redirect_url'] : '/');
             } else {
                 return redirect()->back()->with('error', $result['message']);
             }

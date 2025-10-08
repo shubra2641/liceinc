@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
@@ -139,7 +140,8 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends AuthenticatableBase implements
     AuthenticatableContract,
     AuthorizableContract,
-    CanResetPasswordContract
+    CanResetPasswordContract,
+    MustVerifyEmailContract
 {
     use Authorizable;
     use CanResetPassword;
@@ -153,7 +155,8 @@ class User extends AuthenticatableBase implements
      */
     protected static $factory = UserFactory::class;
     use HasRoles;
-    use MustVerifyEmail;
+    // Provides the email verification notification & helpers
+    use MustVerifyEmailTrait;
     use Notifiable;
 
     /**
@@ -183,7 +186,6 @@ class User extends AuthenticatableBase implements
         'startdate',
         'expdate',
         'lastlogin',
-        'status',
         'language',
         'allow_sso',
         'email_verified',
@@ -252,14 +254,14 @@ class User extends AuthenticatableBase implements
         'email_preferences' => 'array',
     ];
     /**
-     * @return HasMany<License, User>
+     * @return HasMany<License, $this>
      */
     public function licenses(): HasMany
     {
         return $this->hasMany(License::class);
     }
     /**
-     * @return HasMany<Ticket, User>
+     * @return HasMany<Ticket, $this>
      */
     public function tickets(): HasMany
     {
@@ -269,7 +271,7 @@ class User extends AuthenticatableBase implements
      * Invoices belonging to the user.
      */
     /**
-     * @return HasMany<Invoice, User>
+     * @return HasMany<Invoice, $this>
      */
     public function invoices(): HasMany
     {
@@ -283,7 +285,7 @@ class User extends AuthenticatableBase implements
      * License logs that belong to the user through licenses.
      */
     /**
-     * @return HasManyThrough<LicenseLog, License, User>
+     * @return HasManyThrough<LicenseLog, License, $this>
      */
     public function licenseLogs(): HasManyThrough
     {

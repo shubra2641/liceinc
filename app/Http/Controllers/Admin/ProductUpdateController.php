@@ -71,7 +71,7 @@ class ProductUpdateController extends Controller
             $products = Product::where('is_active', true)->get();
             DB::commit();
 
-            return view('admin.product-updates.index', compact('updates', 'products', 'productId', 'product'));
+            return view('admin.product-updates.index', ['updates' => $updates, 'products' => $products, 'productId' => $productId, 'product' => $product]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Product updates listing failed', [
@@ -81,7 +81,7 @@ class ProductUpdateController extends Controller
 
             // Return empty results on error
             return view('admin.product-updates.index', [
-                'updates' => collect()->paginate(20),
+                'updates' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20),
                 'products' => collect(),
                 'productId' => null,
                 'product' => null,
@@ -115,11 +115,11 @@ class ProductUpdateController extends Controller
         if ($productId) {
             $product = Product::findOrFail($productId);
 
-            return view('admin.product-updates.create', compact('product'));
+            return view('admin.product-updates.create', ['product' => $product]);
         }
         $products = Product::where('is_active', true)->get();
 
-        return view('admin.product-updates.create', compact('products'));
+        return view('admin.product-updates.create', ['products' => $products]);
     }
 
     /**
@@ -128,7 +128,7 @@ class ProductUpdateController extends Controller
      * Creates a new product update with comprehensive validation including
      * file upload handling, version checking, and proper error handling.
      *
-     * @param  ProductUpdateStoreRequest  $request  The validated request containing update data
+     * @param  ProductUpdateRequest  $request  The validated request containing update data
      *
      * @return RedirectResponse Redirect to updates index or back with error
      *
@@ -169,12 +169,15 @@ class ProductUpdateController extends Controller
             }
             // Handle file upload
             $file = $request->file('update_file');
-            $fileName = 'update_'.$product->slug.'_'.(is_string($validated['version']) ? $validated['version'] : (string)$validated['version']).'_'.time().'.zip';
+            $version = $validated['version'] ?? '';
+            $versionString = is_string($version) ? $version : '';
+            $productSlug = is_string($product->slug) ? $product->slug : '';
+            $fileName = 'update_'.$productSlug.'_'.$versionString.'_'.time().'.zip';
             $filePath = $file->storeAs('product-updates', $fileName);
             $fileHash = hash_file('sha256', $file->getRealPath());
             // Convert changelog text to array
             $changelogText = $validated['changelog'] ?? null;
-            $changelogArray = $changelogText ? array_filter(array_map('trim', explode("\n", $changelogText))) : [];
+            $changelogArray = $changelogText ? array_filter(array_map('trim', explode("\n", is_string($changelogText) ? $changelogText : ''))) : [];
             // Create update record
             $update = ProductUpdate::create([
                 'product_id' => $product->id,
@@ -235,7 +238,7 @@ class ProductUpdateController extends Controller
     {
         $product_update->load('product');
 
-        return view('admin.product-updates.show', compact('product_update'));
+        return view('admin.product-updates.show', ['product_update' => $product_update]);
     }
 
     /**
@@ -263,7 +266,7 @@ class ProductUpdateController extends Controller
     {
         $products = Product::where('is_active', true)->get();
 
-        return view('admin.product-updates.edit', compact('product_update', 'products'));
+        return view('admin.product-updates.edit', ['product_update' => $product_update, 'products' => $products]);
     }
 
     /**
@@ -272,7 +275,7 @@ class ProductUpdateController extends Controller
      * Updates an existing product update with comprehensive validation including
      * file upload handling, version checking, and proper error handling.
      *
-     * @param  ProductUpdateUpdateRequest  $request  The validated request containing update data
+     * @param  ProductUpdateRequest  $request  The validated request containing update data
      * @param  ProductUpdate  $product_update  The product update to update
      *
      * @return RedirectResponse Redirect to updates index or back with error
@@ -313,7 +316,7 @@ class ProductUpdateController extends Controller
             }
             // Convert changelog text to array
             $changelogText = $validated['changelog'] ?? null;
-            $changelogArray = $changelogText ? array_filter(array_map('trim', explode("\n", $changelogText))) : [];
+            $changelogArray = $changelogText ? array_filter(array_map('trim', explode("\n", is_string($changelogText) ? $changelogText : ''))) : [];
             $updateData = [
                 'product_id' => $validated['product_id'],
                 'version' => $validated['version'],
@@ -330,7 +333,7 @@ class ProductUpdateController extends Controller
             // Handle file upload if provided
             if ($request->hasFile('update_file')) {
                 $file = $request->file('update_file');
-                $fileName = 'update_'.$product_update->product->slug.'_'.(is_string($validated['version']) ? $validated['version'] : (string)$validated['version']).'_'.time().'.zip';
+                $fileName = 'update_'.$product_update->product->slug.'_'.(is_string($validated['version'] ?? null) ? $validated['version'] : '').'_'.time().'.zip';
                 $filePath = $file->storeAs('product-updates', $fileName);
                 $fileHash = hash_file('sha256', $file->getRealPath());
                 // Delete old file
@@ -565,7 +568,7 @@ class ProductUpdateController extends Controller
     public function download(ProductUpdate $product_update)
     {
         try {
-            if ($product_update->file_path === false || Storage::exists($product_update->file_path) === false) {
+            if ($product_update->file_path === null || Storage::exists($product_update->file_path) === false) {
                 return redirect()->back()
                     ->withErrors(['error' => 'Update file not found']);
             }

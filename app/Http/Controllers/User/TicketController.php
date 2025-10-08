@@ -96,7 +96,7 @@ class TicketController extends Controller
                 ->latest()
                 ->paginate(self::PAGINATION_LIMIT);
             DB::commit();
-            return view('user.tickets.index', compact('tickets'));
+            return view('user.tickets.index', ['tickets' => $tickets]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load user tickets: ' . $e->getMessage(), [
@@ -148,7 +148,7 @@ class TicketController extends Controller
             $user = auth()->user();
             $licenses = $user ? $user->licenses()->with('product')->get() : collect();
             DB::commit();
-            return view('user.tickets.create', compact('categories', 'licenses'));
+            return view('user.tickets.create', ['categories' => $categories, 'licenses' => $licenses]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load ticket creation form: ' . $e->getMessage(), [
@@ -184,13 +184,11 @@ class TicketController extends Controller
     public function store(Request $request): RedirectResponse
     {
         try {
-            if (! $request) {
-                throw new \InvalidArgumentException('Request cannot be null');
-            }
+            // Request is already validated by type hint
             $validated = $this->validateTicketData($request);
             DB::beginTransaction();
             $category = TicketCategory::find($validated['category_id']);
-            if (! $category) {
+            if (! $category || $category instanceof \Illuminate\Database\Eloquent\Collection) {
                 DB::rollBack();
                 return back()->withErrors(['category_id' => 'Invalid category selected'])->withInput();
             }
@@ -222,7 +220,7 @@ class TicketController extends Controller
             $ticketData = $this->prepareTicketData($validated, $category, $license);
             // If created from an invoice, attach invoice and link license/product
             if (empty($validated['invoice_id']) === false) {
-                $ticketData = $this->attachInvoiceData($ticketData, $validated['invoice_id']);
+                $ticketData = $this->attachInvoiceData($ticketData, is_numeric($validated['invoice_id']) ? (int)$validated['invoice_id'] : 0);
             }
             if (! empty($validated['purchase_code'])) {
                 $ticketData['purchase_code'] = $validated['purchase_code'];
@@ -274,9 +272,7 @@ class TicketController extends Controller
     public function show(Ticket $ticket): View
     {
         try {
-            if (! $ticket) {
-                throw new \InvalidArgumentException('Ticket cannot be null');
-            }
+            // Ticket is already validated by type hint
             // Allow viewing ticket if it has no user_id (for guests) or if user is logged in
             // and is ticket owner or admin
             if (! $this->canViewTicket($ticket)) {
@@ -291,7 +287,7 @@ class TicketController extends Controller
             DB::beginTransaction();
             $ticket->load(['user', 'replies.user']);
             DB::commit();
-            return view('user.tickets.show', compact('ticket'));
+            return view('user.tickets.show', ['ticket' => $ticket]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load ticket details: ' . $e->getMessage(), [
@@ -338,9 +334,7 @@ class TicketController extends Controller
     public function update(Request $request, Ticket $ticket): RedirectResponse
     {
         try {
-            if (! $request || ! $ticket) {
-                throw new \InvalidArgumentException('Request and ticket cannot be null');
-            }
+            // Request and ticket are already validated by type hints
             if (! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket modification attempt', [
                     'user_id' => Auth::id(),
@@ -384,9 +378,7 @@ class TicketController extends Controller
     public function destroy(Ticket $ticket): RedirectResponse
     {
         try {
-            if (! $ticket) {
-                throw new \InvalidArgumentException('Ticket cannot be null');
-            }
+            // Ticket is validated by type hint
             if (! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket deletion attempt', [
                     'user_id' => Auth::id(),
@@ -433,9 +425,7 @@ class TicketController extends Controller
     public function reply(Request $request, Ticket $ticket): RedirectResponse
     {
         try {
-            if (! $request || ! $ticket) {
-                throw new \InvalidArgumentException('Request and ticket cannot be null');
-            }
+            // Request and ticket are already validated by type hints
             if (! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket reply attempt', [
                     'user_id' => Auth::id(),
@@ -453,7 +443,7 @@ class TicketController extends Controller
                 'message' => $validated['message'],
             ]);
             // Send email notification to admin when user replies
-            $this->sendReplyNotification($ticket, $validated['message']);
+            $this->sendReplyNotification($ticket, is_string($validated['message']) ? $validated['message'] : '');
             DB::commit();
             return back()->with('success', 'Reply added');
         } catch (Exception $e) {
@@ -478,7 +468,7 @@ class TicketController extends Controller
      */
     private function validateTicketData(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'subject' => ['required', 'string', 'max:255'],
             'priority' => ['required', 'in:' . implode(', ', self::VALID_PRIORITIES)],
             'content' => ['required', 'string'],
@@ -489,6 +479,10 @@ class TicketController extends Controller
             'invoice_id' => ['nullable', 'exists:invoices,id'],
             'category_id' => ['required', 'exists:ticket_categories,id'],
         ]);
+        
+        /** @var array<string, mixed> $result */
+        $result = $validated;
+        return $result;
     }
     /**
      * Validate ticket update data.
@@ -501,12 +495,16 @@ class TicketController extends Controller
      */
     private function validateTicketUpdateData(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'subject' => ['sometimes', 'string', 'max:255'],
             'priority' => ['sometimes', 'in:' . implode(', ', self::VALID_PRIORITIES)],
             'status' => ['sometimes', 'in:' . implode(', ', self::VALID_STATUSES)],
             'content' => ['sometimes', 'string'],
         ]);
+        
+        /** @var array<string, mixed> $result */
+        $result = $validated;
+        return $result;
     }
     /**
      * Validate reply data.
@@ -517,9 +515,13 @@ class TicketController extends Controller
      */
     private function validateReplyData(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'message' => ['required', 'string'],
         ]);
+        
+        /** @var array<string, mixed> $result */
+        $result = $validated;
+        return $result;
     }
     /**
      * Validate and create license from purchase code.
@@ -537,7 +539,7 @@ class TicketController extends Controller
                 // Try to verify via Envato service if available
                 try {
                     $envatoService = app(EnvatoService::class);
-                    $sale = $envatoService->verifyPurchase($validated['purchase_code']);
+                    $sale = $envatoService->verifyPurchase(is_string($validated['purchase_code']) ? $validated['purchase_code'] : '');
                 } catch (\Throwable $e) {
                     Log::error('Envato verification failed: ' . $e->getMessage());
                     $sale = null;
@@ -559,7 +561,7 @@ class TicketController extends Controller
                             'license_type' => 'regular',
                             'status' => 'active',
                             'support_expires_at' => data_get($sale, 'supported_until')
-                                ? date('Y-m-d', strtotime(data_get($sale, 'supported_until')))
+                                ? date('Y-m-d', strtotime(is_string(data_get($sale, 'supported_until')) ? data_get($sale, 'supported_until') : '') ?: time())
                                 : null,
                         ]);
                     }

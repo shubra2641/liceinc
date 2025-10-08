@@ -70,12 +70,12 @@ class ProductRequest extends FormRequest
             'category_id' => [
                 'required',
                 'integer',
-                'exists:product_categories, id',
+                'exists:product_categories,id',
             ],
             'programming_language_id' => [
                 'nullable',
                 'integer',
-                'exists:programming_languages, id',
+                'exists:programming_languages,id',
             ],
             'price' => [
                 'required',
@@ -249,12 +249,12 @@ class ProductRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'name' => $this->sanitizeInput($this->name),
-            'description' => $this->sanitizeInput($this->description),
-            'short_description' => $this->short_description ? $this->sanitizeInput($this->short_description) : null,
-            'meta_title' => $this->meta_title ? $this->sanitizeInput($this->meta_title) : null,
-            'meta_description' => $this->meta_description ? $this->sanitizeInput($this->meta_description) : null,
-            'meta_keywords' => $this->meta_keywords ? $this->sanitizeInput($this->meta_keywords) : null,
+            'name' => $this->sanitizeInput($this->input('name')),
+            'description' => $this->sanitizeInput($this->input('description')),
+            'short_description' => $this->input('short_description') ? $this->sanitizeInput($this->input('short_description')) : null,
+            'meta_title' => $this->input('meta_title') ? $this->sanitizeInput($this->input('meta_title')) : null,
+            'meta_description' => $this->input('meta_description') ? $this->sanitizeInput($this->input('meta_description')) : null,
+            'meta_keywords' => $this->input('meta_keywords') ? $this->sanitizeInput($this->input('meta_keywords')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -275,15 +275,20 @@ class ProductRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

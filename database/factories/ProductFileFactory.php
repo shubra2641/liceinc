@@ -14,7 +14,7 @@ class ProductFileFactory extends Factory
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\Illuminate\Database\Eloquent\Model> */
+     * @var class-string<ProductFile> */
     protected $model = ProductFile::class;
 
     /**
@@ -24,7 +24,7 @@ class ProductFileFactory extends Factory
      */
     public function definition(): array
     {
-        $originalName = $this->faker->words(3, true).'.zip';
+        $originalName = (string)$this->faker->words(3, true).'.zip';
 
         return [
             'original_name' => $originalName,

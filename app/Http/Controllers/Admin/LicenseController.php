@@ -68,7 +68,7 @@ class LicenseController extends Controller
         $licenses = License::with(['user', 'product'])
             ->latest()
             ->paginate(10);
-        return view('admin.licenses.index', compact('licenses'));
+        return view('admin.licenses.index', ['licenses' => $licenses]);
     }
     /**
      * Show the form for creating a new license.
@@ -86,7 +86,7 @@ class LicenseController extends Controller
         $users = User::all();
         $products = Product::all();
         $selectedUserId = null;
-        return view('admin.licenses.create', compact('users', 'products', 'selectedUserId'));
+        return view('admin.licenses.create', ['users' => $users, 'products' => $products, 'selectedUserId' => $selectedUserId]);
     }
     /**
      * Store a newly created resource in storage with enhanced security.
@@ -95,7 +95,7 @@ class LicenseController extends Controller
      * generation, and email notifications. Includes product inheritance
      * and proper error handling.
      *
-     * @param  LicenseStoreRequest  $request  The HTTP request containing license data
+     * @param  LicenseRequest  $request  The HTTP request containing license data
      *
      * @return RedirectResponse Redirect to license details with success message
      *
@@ -140,13 +140,13 @@ class LicenseController extends Controller
             // Calculate license expiration date based on product duration
             if (empty($validated['license_expires_at'])) {
                 if ($product->duration_days) {
-                    $validated['license_expires_at'] = now()->addDays($product->duration_days);
+                    $validated['license_expires_at'] = now()->addDays(is_numeric($product->duration_days) ? (int)$product->duration_days : 0);
                 }
             }
             // Calculate support expiration date based on product support days
             if (empty($validated['support_expires_at'])) {
                 if ($product->support_days) {
-                    $validated['support_expires_at'] = now()->addDays($product->support_days);
+                    $validated['support_expires_at'] = now()->addDays(is_numeric($product->support_days) ? (int)$product->support_days : 0);
                 }
             }
             $license = License::create($validated);
@@ -154,20 +154,14 @@ class LicenseController extends Controller
             $invoiceService = app(InvoiceService::class);
             $invoice = $invoiceService->createInitialInvoice(
                 $license,
-                $validated['invoice_payment_status'],
-                $validated['invoice_due_date'] ?? null,
+                is_string($validated['invoice_payment_status'] ?? null) ? $validated['invoice_payment_status'] : 'pending',
+                ($validated['invoice_due_date'] ?? null) instanceof \DateTimeInterface ? $validated['invoice_due_date'] : null,
             );
             // Send email notifications
             try {
                 // Send notification to user
                 if ($license->user) {
-                    $this->emailService->sendLicenseCreated($license->user, [
-                        'license_key' => $license->license_key,
-                        'product_name' => $license->product->name ?? 'Unknown Product',
-                        'expires_at' => $license->license_expires_at
-                            ? $license->license_expires_at->format('Y-m-d')
-                            : 'Never',
-                    ]);
+                    $this->emailService->sendLicenseCreated($license, $license->user);
                 }
                 // Send notification to admin
                 $this->emailService->sendAdminLicenseCreated([
@@ -218,7 +212,7 @@ class LicenseController extends Controller
     public function show(License $license): View
     {
         $license->load(['user', 'product', 'domains', 'logs']);
-        return view('admin.licenses.show', compact('license'));
+        return view('admin.licenses.show', ['license' => $license]);
     }
     /**
      * Show the form for editing the specified license.
@@ -240,7 +234,7 @@ class LicenseController extends Controller
     {
         $users = User::all();
         $products = Product::all();
-        return view('admin.licenses.edit', compact('license', 'users', 'products'));
+        return view('admin.licenses.edit', ['license' => $license, 'users' => $users, 'products' => $products]);
     }
     /**
      * Update the specified resource in storage with enhanced security.
@@ -248,7 +242,7 @@ class LicenseController extends Controller
      * Updates an existing license with comprehensive validation and proper
      * error handling. Includes product inheritance and domain management.
      *
-     * @param  LicenseUpdateRequest  $request  The HTTP request containing updated license data
+     * @param  LicenseRequest  $request  The HTTP request containing updated license data
      * @param  License  $license  The license to update
      *
      * @return RedirectResponse Redirect to license details with success message
@@ -264,7 +258,7 @@ class LicenseController extends Controller
             if (array_key_exists('expires_at', $validated)) {
                 $validated['license_expires_at'] = ($validated['expires_at'] !== null
                 && $validated['expires_at'] !== '')
-                    ? \Carbon\Carbon::parse($validated['expires_at'])->format('Y-m-d H:i:s')
+                    ? \Carbon\Carbon::parse(is_string($validated['expires_at']) ? $validated['expires_at'] : '')->format('Y-m-d H:i:s')
                     : null;
                 unset($validated['expires_at']);
             }
@@ -298,7 +292,7 @@ class LicenseController extends Controller
                 }
             }
             // Set default values
-            $validated['max_domains'] = $validated['max_domains'] ?? 1;
+            $validated['max_domains'] = $validated['max_domains'];
             $license->update($validated);
             DB::commit();
             return redirect()->route('admin.licenses.show', $license)
@@ -385,7 +379,7 @@ class LicenseController extends Controller
      * Generates a CSV file containing all licenses with their associated
      * user and product information for administrative purposes.
      *
-     * @return \Illuminate\Http\Response The CSV download response
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse The CSV download response
      *
      * @version 1.0.6
      *
@@ -393,7 +387,7 @@ class LicenseController extends Controller
      *
      *
      */
-    public function export(): \Illuminate\Http\Response
+    public function export(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $licenses = License::with(['user', 'product'])->get();
         $filename = 'licenses_' . date('Y-m-d_H-i-s') . '.csv';
@@ -403,6 +397,9 @@ class LicenseController extends Controller
         ];
         $callback = function () use ($licenses) {
             $file = SecureFileHelper::openOutput('w');
+            if (!is_resource($file)) {
+                return;
+            }
             // CSV Headers
             fputcsv($file, [
                 'ID',
@@ -427,7 +424,7 @@ class LicenseController extends Controller
                     $license->created_at,
                 ]);
             }
-            fclose($file);
+            SecureFileHelper::closeFile($file);
         };
         return response()->stream($callback, 200, $headers);
     }

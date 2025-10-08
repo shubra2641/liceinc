@@ -278,7 +278,7 @@ class EnhancedSecurityService
     {
         $errors = [];
         try {
-            $maxSize = (int) config('security.file_upload_security.max_size_kb', 2048) * 1024;
+            $maxSize = (is_numeric(config('security.file_upload_security.max_size_kb', 2048)) ? (int)config('security.file_upload_security.max_size_kb', 2048) : 2048) * 1024;
             $allowedMimes = config('security.file_upload_security.allowed_mimes', []);
             // Check file size
             if ($file->getSize() > $maxSize) {
@@ -301,9 +301,10 @@ class EnhancedSecurityService
                 $errors[] = 'File content contains potentially malicious patterns';
             }
         } catch (\Exception $e) {
+            $fileName = $file->getClientOriginalName();
             Log::error('File upload validation failed', [
                 'error' => $e->getMessage(),
-                'filename' => $file->getClientOriginalName(),
+                'filename' => (string)$fileName,
             ]);
             $errors[] = 'File validation failed';
         }
@@ -360,6 +361,9 @@ class EnhancedSecurityService
     {
         try {
             $content = file_get_contents($file->getPathname());
+            if ($content === false) {
+                return false;
+            }
             $content = substr($content, 0, 1024); // Check first 1KB
             return $this->containsMaliciousContent($content);
         } catch (\Exception $e) {
@@ -385,7 +389,7 @@ class EnhancedSecurityService
             if ($length < 8 || $length > 256) {
                 throw new \InvalidArgumentException('Token length must be between 8 and 256 characters');
             }
-            return bin2hex(random_bytes($length / 2));
+            return bin2hex(random_bytes(max(1, (int)($length / 2))));
         } catch (\Exception $e) {
             Log::error('Secure token generation failed', [
                 'error' => $e->getMessage(),
@@ -409,7 +413,9 @@ class EnhancedSecurityService
     public function hashForLogging(string $data): string
     {
         try {
-            return hash('sha256', $data . config('app.key'));
+            $appKey = config('app.key');
+            $keyString = is_string($appKey) ? $appKey : '';
+            return hash('sha256', $data . $keyString);
         } catch (\Exception $e) {
             Log::error('Data hashing failed', [
                 'error' => $e->getMessage(),
@@ -456,6 +462,9 @@ class EnhancedSecurityService
         $suspicious = [];
         try {
             $input = json_encode($request->all());
+            if ($input === false) {
+                $input = '';
+            }
             // Check for SQL injection patterns
             foreach (self::SQL_INJECTION_PATTERNS as $pattern) {
                 if (preg_match($pattern, $input)) {
@@ -559,7 +568,7 @@ class EnhancedSecurityService
                 return false;
             }
             $whitelist = config('security.ip_control.whitelist', '');
-            if (empty($whitelist)) {
+            if (empty($whitelist) || ! is_string($whitelist)) {
                 return false;
             }
             $whitelistedIps = array_map('trim', explode(', ', $whitelist));
@@ -585,7 +594,8 @@ class EnhancedSecurityService
             if (empty($ip) || ! filter_var($ip, FILTER_VALIDATE_IP)) {
                 return false;
             }
-            $blacklist = config('security.ip_control.blacklist', '');
+            $blacklistConfig = config('security.ip_control.blacklist', '');
+            $blacklist = is_string($blacklistConfig) ? $blacklistConfig : '';
             if (empty($blacklist)) {
                 return false;
             }

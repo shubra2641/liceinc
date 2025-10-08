@@ -210,10 +210,9 @@ class InvoiceService
         try {
             $this->validateInvoice($invoice);
             DB::beginTransaction();
-            $invoice->update([
-                'status' => 'paid',
-                'paid_at' => now(),
-            ]);
+            $invoice->status = 'paid';
+            $invoice->paid_at = now();
+            $invoice->save();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -245,9 +244,8 @@ class InvoiceService
         try {
             $this->validateInvoice($invoice);
             DB::beginTransaction();
-            $invoice->update([
-                'status' => 'overdue',
-            ]);
+            $invoice->status = 'overdue';
+            $invoice->save();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -283,9 +281,9 @@ class InvoiceService
                 'pending_invoices' => Invoice::where('status', 'pending')->count(),
                 'overdue_invoices' => Invoice::where('status', 'overdue')->count(),
                 'cancelled_invoices' => Invoice::where('status', 'cancelled')->count(),
-                'total_revenue' => $this->sanitizeAmount(Invoice::where('status', 'paid')->sum('amount')),
-                'pending_revenue' => $this->sanitizeAmount(Invoice::where('status', 'pending')->sum('amount')),
-                'overdue_revenue' => $this->sanitizeAmount(Invoice::where('status', 'overdue')->sum('amount')),
+                'total_revenue' => $this->sanitizeAmount((float)Invoice::where('status', 'paid')->sum('amount')),
+                'pending_revenue' => $this->sanitizeAmount((float)Invoice::where('status', 'pending')->sum('amount')),
+                'overdue_revenue' => $this->sanitizeAmount((float)Invoice::where('status', 'overdue')->sum('amount')),
             ];
         } catch (\Exception $e) {
             Log::error('Failed to get invoice statistics', [
@@ -453,13 +451,16 @@ class InvoiceService
     /**
      * Sanitize amount for security.
      *
-     * @param  float  $amount  The amount to sanitize
+     * @param  mixed  $amount  The amount to sanitize
      *
      * @return float The sanitized amount
      */
-    private function sanitizeAmount(float $amount): float
+    private function sanitizeAmount(mixed $amount): float
     {
-        return max(0, round($amount, 2));
+        if (!is_numeric($amount)) {
+            return 0.0;
+        }
+        return max(0, round((float)$amount, 2));
     }
     /**
      * Sanitize status for security.
@@ -487,15 +488,20 @@ class InvoiceService
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

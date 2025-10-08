@@ -37,7 +37,7 @@ class VersionHelper
     public static function getCurrentVersion(): string
     {
         try {
-            return Cache::remember('app_version', 3600, function () {
+            $result = Cache::remember('app_version', 3600, function () {
                 DB::beginTransaction();
                 try {
                     $setting = Setting::where('key', 'site_name')->first() ?? Setting::first();
@@ -55,6 +55,7 @@ class VersionHelper
                     return '1.0.1';
                 }
             });
+            return is_string($result) ? $result : '1.0.1';
         } catch (\Exception $e) {
             Log::error('Failed to get current version from cache', [
                 'error' => $e->getMessage(),
@@ -107,7 +108,7 @@ class VersionHelper
             }
             $version = (is_array($versionData) && isset($versionData['current_version'])) ? $versionData['current_version'] : '1.0.1';
             // Validate version format
-            if (! self::isValidVersion($version)) {
+            if (! is_string($version) || ! self::isValidVersion($version)) {
                 Log::error('Invalid version format in version file', [
                     'file' => $versionFile,
                     'version' => $version,
@@ -251,7 +252,8 @@ class VersionHelper
             if (! $setting) {
                 $setting = new Setting();
                 $setting->key = 'site_name';
-                $setting->value = config('app.name', 'License Management System');
+                $appName = config('app.name', 'License Management System');
+                $setting->value = is_string($appName) ? $appName : 'License Management System';
                 $setting->type = 'string';
                 $setting->save();
             }
@@ -331,10 +333,23 @@ class VersionHelper
                     return [];
                 }
 
-                return (is_array($versionData) && isset($versionData['changelog']) && is_array($versionData['changelog']) && isset($versionData['changelog'][$version])) ? $versionData['changelog'][$version] : [];
+                $changelog = (is_array($versionData) && isset($versionData['changelog']) && is_array($versionData['changelog']) && isset($versionData['changelog'][$version])) ? $versionData['changelog'][$version] : [];
+                /** @var array<string, mixed> $result */
+                $result = is_array($changelog) ? $changelog : [];
+                return $result;
             }
 
-            return $versionData;
+            if (is_array($versionData)) {
+                /** @var array<string, mixed> $sanitizedData */
+                $sanitizedData = [];
+                foreach ($versionData as $key => $value) {
+                    if (is_string($key)) {
+                        $sanitizedData[$key] = $value;
+                    }
+                }
+                return $sanitizedData;
+            }
+            return [];
         } catch (\Exception $e) {
             Log::error('Failed to get version info', [
                 'error' => $e->getMessage(),
@@ -398,7 +413,10 @@ class VersionHelper
                 return [];
             }
 
-            return (is_array($versionData) && isset($versionData['update_instructions']) && is_array($versionData['update_instructions']) && isset($versionData['update_instructions'][$version])) ? $versionData['update_instructions'][$version] : [];
+            $instructions = (is_array($versionData) && isset($versionData['update_instructions']) && is_array($versionData['update_instructions']) && isset($versionData['update_instructions'][$version])) ? $versionData['update_instructions'][$version] : [];
+            /** @var array<string, mixed> $result */
+            $result = is_array($instructions) ? $instructions : [];
+            return $result;
         } catch (\Exception $e) {
             Log::error('Failed to get update instructions', [
                 'error' => $e->getMessage(),
@@ -554,7 +572,7 @@ class VersionHelper
                 $setting = Setting::where('key', 'current_version')->first();
                 $version = $setting ? $setting->value : '1.0.0';
                 // Validate version format
-                if (! self::isValidVersion($version)) {
+                if ($version && ! self::isValidVersion($version)) {
                     Log::error('Invalid version format in database', [
                         'version' => $version,
                     ]);
@@ -562,7 +580,7 @@ class VersionHelper
                 }
                 DB::commit();
 
-                return $version;
+                return $version ?? '1.0.0';
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e;
@@ -662,7 +680,7 @@ class VersionHelper
                     ->orderBy('created_at', 'desc')
                     ->get();
                 $history = $versions->map(function ($setting) {
-                    $version = str_replace('version_', '', $setting->key);
+                    $version = str_replace('version_', '', $setting->key ?? '');
                     // Validate version format
                     if (! self::isValidVersion($version)) {
                         Log::warning('Invalid version format in history', [
@@ -681,7 +699,9 @@ class VersionHelper
                 })->filter()->values()->toArray();
                 DB::commit();
 
-                return $history;
+                /** @var array<string, mixed> $result */
+                $result = $history;
+                return $result;
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e;

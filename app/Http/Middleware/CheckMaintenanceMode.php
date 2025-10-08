@@ -56,9 +56,7 @@ class CheckMaintenanceMode
     {
         try {
             // Validate request
-            if (! $request) {
-                throw new \InvalidArgumentException('Invalid request provided to middleware');
-            }
+            // Request is already validated by type hint
             // Check maintenance mode status with error handling
             $isMaintenance = $this->checkMaintenanceMode();
             if ($isMaintenance) {
@@ -72,9 +70,9 @@ class CheckMaintenanceMode
             return $next($request);
         } catch (\Exception $e) {
             Log::error('Error in CheckMaintenanceMode middleware', [
-                'url' => $request->url() ?? 'unknown',
-                'method' => $request->method() ?? 'unknown',
-                'user_agent' => $request->userAgent() ?? 'unknown',
+                'url' => $request->url() ?: 'unknown',
+                'method' => $request->method() ?: 'unknown',
+                'user_agent' => $request->userAgent() ?: 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -125,7 +123,7 @@ class CheckMaintenanceMode
             return $isAdminPath || $isHealth || $isAllowlisted;
         } catch (\Exception $e) {
             Log::error('Error validating access permissions', [
-                'url' => $request->url() ?? 'unknown',
+                'url' => $request->url() ?: 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -151,7 +149,7 @@ class CheckMaintenanceMode
             return $isAdminPath;
         } catch (\Exception $e) {
             Log::error('Error checking admin path', [
-                'url' => $request->url() ?? 'unknown',
+                'url' => $request->url() ?: 'unknown',
                 'error' => $e->getMessage(),
             ]);
             return false;
@@ -172,7 +170,7 @@ class CheckMaintenanceMode
                    $request->is('health/*');
         } catch (\Exception $e) {
             Log::error('Error checking health endpoint', [
-                'url' => $request->url() ?? 'unknown',
+                'url' => $request->url() ?: 'unknown',
                 'error' => $e->getMessage(),
             ]);
             return false;
@@ -204,7 +202,7 @@ class CheckMaintenanceMode
             return false;
         } catch (\Exception $e) {
             Log::error('Error checking allowlisted path', [
-                'url' => $request->url() ?? 'unknown',
+                'url' => $request->url() ?: 'unknown',
                 'error' => $e->getMessage(),
             ]);
             return false;

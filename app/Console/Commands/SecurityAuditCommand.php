@@ -283,6 +283,7 @@ class SecurityAuditCommand extends Command
             }
         }
         // Check for world-writable files
+        /** @var array<string, array<string, string|int|bool>> $writableFiles */
         $writableFiles = [];
         $this->checkWorldWritableFiles(base_path(), $writableFiles);
         if (! empty($writableFiles)) {
@@ -343,7 +344,8 @@ class SecurityAuditCommand extends Command
             );
         }
         // Check HTTPS enforcement
-        if (config('app.url') && ! str_starts_with(config('app.url'), 'https://')) {
+        $appUrl = config('app.url');
+        if ($appUrl && is_string($appUrl) && ! str_starts_with($appUrl, 'https://')) {
             $this->addIssue(
                 'medium',
                 'Configuration',
@@ -493,7 +495,7 @@ class SecurityAuditCommand extends Command
     {
         $this->info('Checking environment security...');
         // Check PHP version
-        if (version_compare(PHP_VERSION, '8.1.0', '<')) {
+        if (version_compare(PHP_VERSION, '8.2.0', '<')) {
             $this->addIssue(
                 'high',
                 'Environment',
@@ -534,7 +536,7 @@ class SecurityAuditCommand extends Command
             'severity' => $severity,
             'category' => $category,
             'description' => $description,
-            'timestamp' => now()->toISOString(),
+            'timestamp' => now()->toISOString() ?? now()->format('Y-m-d\TH:i:s.u\Z'),
         ];
         $color = match ($severity) {
             'critical' => 'error',
@@ -549,13 +551,24 @@ class SecurityAuditCommand extends Command
     /**
      * Check for world-writable files recursively.
      */
-    /** @param array<string, mixed> $writableFiles */
+    /**
+     * @param array<string, array<string, string|int|bool>> $writableFiles
+     */
     private function checkWorldWritableFiles(string $directory, array &$writableFiles): void
     {
         $files = File::allFiles($directory);
         foreach ($files as $file) {
             if (is_writable($file) && (fileperms($file) & 0002)) {
-                $writableFiles[] = $file->getRelativePathname();
+                $relativePath = $file->getRelativePathname();
+                if (!is_string($relativePath)) {
+                    continue;
+                }
+                $permissions = fileperms($file);
+                $writableFiles[$relativePath] = [
+                    'path' => $relativePath,
+                    'permissions' => $permissions !== false ? $permissions : 0,
+                    'is_writable' => true
+                ];
             }
         }
     }
@@ -578,7 +591,11 @@ class SecurityAuditCommand extends Command
             'issues' => $this->issues,
         ];
         $reportPath = storage_path('logs/security-audit-'.now()->format('Y-m-d-H-i-s').'.json');
-        File::put($reportPath, json_encode($report, JSON_PRETTY_PRINT));
+        $jsonContent = json_encode($report, JSON_PRETTY_PRINT);
+        if ($jsonContent === false) {
+            throw new \RuntimeException('Failed to encode security report to JSON');
+        }
+        File::put($reportPath, $jsonContent);
         $this->info("Security report saved to: {$reportPath}");
     }
 
@@ -613,7 +630,8 @@ class SecurityAuditCommand extends Command
             'Missing .htaccess file',
         ];
         foreach ($autoFixablePatterns as $pattern) {
-            if (str_contains($issue['description'], $pattern)) {
+            $description = $issue['description'] ?? '';
+            if (is_string($description) && str_contains($description, $pattern)) {
                 return true;
             }
         }
@@ -628,13 +646,14 @@ class SecurityAuditCommand extends Command
     private function autoFix(array $issue): bool
     {
         try {
-            if (str_contains($issue['description'], 'Log files are consuming')) {
+            $description = $issue['description'] ?? '';
+            if (is_string($description) && str_contains($description, 'Log files are consuming')) {
                 // Rotate log files
                 $this->call('log:clear');
 
                 return true;
             }
-            if (str_contains($issue['description'], 'Missing .htaccess file')) {
+            if (is_string($description) && str_contains($description, 'Missing .htaccess file')) {
                 // Create basic .htaccess file
                 $htaccessContent = "RewriteEngine On\nRewriteRule ^(.*)$ index.php [QSA, L]\n";
                 File::put(public_path('.htaccess'), $htaccessContent);

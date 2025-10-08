@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 /**
  * @property int $id
  * @property string $invoice_number
+ * @property string|null $order_number
+ * @property string|null $payment_gateway
  * @property int $user_id
  * @property int|null $license_id
  * @property int|null $product_id
@@ -88,21 +90,21 @@ class Invoice extends Model
     ];
     // العلاقات
     /**
-     * @return BelongsTo<User, Invoice>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
     /**
-     * @return BelongsTo<License, Invoice>
+     * @return BelongsTo<License, $this>
      */
     public function license(): BelongsTo
     {
         return $this->belongsTo(License::class);
     }
     /**
-     * @return BelongsTo<Product, Invoice>
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {
@@ -147,7 +149,7 @@ class Invoice extends Model
     {
         parent::boot();
         static::creating(function ($invoice) {
-            if (empty($invoice->invoice_number)) {
+            if (is_object($invoice) && property_exists($invoice, 'invoice_number') && empty($invoice->invoice_number)) {
                 $invoice->invoice_number = static::generateInvoiceNumber();
             }
         });
@@ -198,13 +200,13 @@ class Invoice extends Model
      */
     public function getRemainingAmountAttribute(): float
     {
-        return $this->status === 'paid' ? 0 : $this->amount;
+        return $this->status === 'paid' ? 0.0 : (float)$this->amount;
     }
     /**
      * الحصول على عدد الأيام المتبقية حتى تاريخ الاستحقاق
      */
     public function getDaysUntilDueAttribute(): int
     {
-        return now()->diffInDays($this->due_date, false);
+        return (int)now()->diffInDays($this->due_date, false);
     }
 }

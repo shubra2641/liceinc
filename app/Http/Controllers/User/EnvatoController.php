@@ -58,7 +58,7 @@ class EnvatoController extends Controller
      * This method verifies an Envato purchase code and creates or updates
      * the corresponding license with comprehensive validation and error handling.
      *
-     * @param  Request  $request  The current HTTP request instance
+     * @param  EnvatoVerificationRequest  $request  The current HTTP request instance
      * @param  EnvatoService  $envato  The Envato service instance
      *
      * @return RedirectResponse Redirect response with success or error message
@@ -79,12 +79,13 @@ class EnvatoController extends Controller
                     'product_slug' => ['required', 'string', 'min:1', 'max:255'],
                 ]);
                 // Sanitize input data
-                $purchaseCode = $this->sanitizeInput($data['purchase_code']);
-                $productSlug = $this->sanitizeInput($data['product_slug']);
-                $sale = $envato->verifyPurchase($purchaseCode);
+                $dataArray = is_array($data) ? $data : [];
+                $purchaseCode = $this->sanitizeInput($dataArray['purchase_code'] ?? '');
+                $productSlug = $this->sanitizeInput($dataArray['product_slug'] ?? '');
+                $sale = $envato->verifyPurchase(is_string($purchaseCode) ? $purchaseCode : '');
                 if (! $sale) {
                     Log::warning('Envato purchase verification failed', [
-                        'purchase_code' => $this->hashForLogging($purchaseCode),
+                        'purchase_code' => $this->hashForLogging(is_string($purchaseCode) ? $purchaseCode : ''),
                         'product_slug' => $productSlug,
                         'ip' => $request->ip(),
                         'user_agent' => $request->userAgent(),
@@ -95,10 +96,10 @@ class EnvatoController extends Controller
                 $buyerName = data_get($sale, 'buyer');
                 $buyerEmail = data_get($sale, 'buyer_email');
                 $supportEnd = data_get($sale, 'supported_until');
-                $itemId = (string)data_get($sale, 'item.id');
-                if ($product->envato_item_id && $product->envato_item_id !== $itemId) {
+                $itemId = is_string(data_get($sale, 'item.id')) ? data_get($sale, 'item.id') : '';
+                if ($product->envato_item_id && (string)$product->envato_item_id !== $itemId) {
                     Log::warning('Purchase code does not belong to product', [
-                        'purchase_code' => $this->hashForLogging($purchaseCode),
+                        'purchase_code' => $this->hashForLogging(is_string($purchaseCode) ? $purchaseCode : ''),
                         'product_slug' => $productSlug,
                         'product_envato_id' => $product->envato_item_id,
                         'sale_item_id' => $itemId,
@@ -116,7 +117,7 @@ class EnvatoController extends Controller
                     [
                         'product_id' => $product->id,
                         'user_id' => $user->id,
-                        'support_expires_at' => $supportEnd ? date('Y-m-d', strtotime($supportEnd)) : null,
+                        'support_expires_at' => $supportEnd ? date('Y-m-d', strtotime(is_string($supportEnd) ? $supportEnd : '') ?: time()) : null,
                         'status' => 'active',
                     ],
                 );
@@ -124,14 +125,14 @@ class EnvatoController extends Controller
                     'license_id' => $license->id,
                     'user_id' => $user->id,
                     'product_id' => $product->id,
-                    'purchase_code' => $this->hashForLogging($purchaseCode),
+                    'purchase_code' => $this->hashForLogging(is_string($purchaseCode) ? $purchaseCode : ''),
                 ]);
                 return back()->with('success', 'Purchase verified and license updated.');
             });
         } catch (Throwable $e) {
             Log::error('Envato purchase verification error', [
                 'error' => $e->getMessage(),
-                'purchase_code' => $this->hashForLogging($request->validated('purchase_code', '')),
+                'purchase_code' => $this->hashForLogging(is_string($request->validated('purchase_code', '')) ? $request->validated('purchase_code', '') : ''),
                 'product_slug' => $request->validated('product_slug', ''),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
@@ -157,7 +158,7 @@ class EnvatoController extends Controller
     public function redirectToEnvato(): RedirectResponse
     {
         try {
-            return Socialite::driver('envato')->redirect();
+            return redirect(Socialite::driver('envato')->redirect()->getTargetUrl());
         } catch (Throwable $e) {
             Log::error('Envato OAuth redirect error', [
                 'error' => $e->getMessage(),
@@ -186,6 +187,7 @@ class EnvatoController extends Controller
     {
         try {
             return DB::transaction(function () use ($envato) {
+                /** @var \Laravel\Socialite\Two\User $envatoUser */
                 $envatoUser = Socialite::driver('envato')->user();
                 $username = $envatoUser->getNickname() ?: $envatoUser->getId();
                 if (! $username) {
@@ -205,8 +207,8 @@ class EnvatoController extends Controller
                     'envato_username' => $envatoUser->getNickname()
                         ?: data_get($userInfo, 'account.username', $username),
                     'envato_id' => $envatoUser->getId(),
-                    'envato_token' => $envatoUser->token,
-                    'envato_refresh_token' => $envatoUser->refreshToken,
+           'envato_token' => $envatoUser->token,
+           'envato_refresh_token' => $envatoUser->refreshToken,
                     'email_verified_at' => now(),
                 ];
                 // Check if we have a real email, if not, we need to handle this differently
@@ -257,7 +259,7 @@ class EnvatoController extends Controller
      * This method links an existing user account with an Envato account
      * using OAuth with comprehensive validation and error handling.
      *
-     * @param  Request  $request  The current HTTP request instance
+     * @param  EnvatoVerificationRequest  $request  The current HTTP request instance
      * @param  EnvatoService  $envato  The Envato service instance
      *
      * @return RedirectResponse Redirect response with success or error message
@@ -272,9 +274,10 @@ class EnvatoController extends Controller
     {
         try {
             return DB::transaction(function () use ($request, $envato) {
+                /** @var \Laravel\Socialite\Two\User $envatoUser */
                 $envatoUser = Socialite::driver('envato')->user();
                 $userInfo = $envato->getOAuthUserInfo($envatoUser->token);
-                if (! $userInfo) {
+                if ($userInfo === null) {
                     Log::warning('Envato account linking failed: Could not retrieve user info', [
                         'envato_user_id' => $envatoUser->getId(),
                         'envato_username' => $envatoUser->getNickname(),
@@ -289,8 +292,8 @@ class EnvatoController extends Controller
                     $user->update([
                     'envato_username' => $envatoUser->getNickname() ?: data_get($userInfo, 'account.username'),
                     'envato_id' => $envatoUser->getId(),
-                    'envato_token' => $envatoUser->token,
-                    'envato_refresh_token' => $envatoUser->refreshToken,
+           'envato_token' => $envatoUser->token,
+           'envato_refresh_token' => $envatoUser->refreshToken,
                     ]);
                     Log::debug('Envato account linked successfully', [
                     'user_id' => auth()->id(),
@@ -317,7 +320,7 @@ class EnvatoController extends Controller
      * This method verifies a user's purchase using the license auto-registration
      * service with comprehensive validation and error handling.
      *
-     * @param  Request  $request  The current HTTP request instance
+     * @param  EnvatoVerificationRequest  $request  The current HTTP request instance
      * @param  LicenseAutoRegistrationService  $licenseService  The license service instance
      *
      * @return JsonResponse JSON response with verification results
@@ -339,12 +342,15 @@ class EnvatoController extends Controller
                 ]);
                 // Sanitize input data
                 $purchaseCode = $this->sanitizeInput($request->validated('purchase_code'));
-                $productId = (int)$request->validated('product_id');
+                $productId = is_numeric($request->validated('product_id')) ? (int)$request->validated('product_id') : 0;
                 // Use the license auto-registration service
-                $registrationResult = $licenseService->autoRegisterLicense($purchaseCode, $productId);
+                $registrationResult = $licenseService->autoRegisterLicense(
+                    is_string($purchaseCode) ? $purchaseCode : '',
+                    $productId
+                );
                 if (! $registrationResult['success']) {
                     Log::warning('User purchase verification failed', [
-                        'purchase_code' => $this->hashForLogging($purchaseCode),
+                        'purchase_code' => $this->hashForLogging(is_string($purchaseCode) ? $purchaseCode : ''),
                         'product_id' => $productId,
                         'user_id' => auth()->id(),
                         'error_message' => $registrationResult['message'],
@@ -358,8 +364,8 @@ class EnvatoController extends Controller
                 }
                 $license = $registrationResult['license'];
                 Log::debug('User purchase verified successfully', [
-                    'license_id' => $license->id,
-                    'purchase_code' => $this->hashForLogging($purchaseCode),
+                    'license_id' => is_object($license) && isset($license->id) ? $license->id : 'N/A',
+                    'purchase_code' => $this->hashForLogging(is_string($purchaseCode) ? $purchaseCode : ''),
                     'product_id' => $productId,
                     'user_id' => auth()->id(),
                 ]);
@@ -372,7 +378,7 @@ class EnvatoController extends Controller
         } catch (Throwable $e) {
             Log::error('User purchase verification error', [
                 'error' => $e->getMessage(),
-                'purchase_code' => $this->hashForLogging($request->validated('purchase_code', '')),
+                'purchase_code' => $this->hashForLogging(is_string($request->validated('purchase_code', '')) ? $request->validated('purchase_code', '') : ''),
                 'product_id' => $request->validated('product_id', ''),
                 'user_id' => auth()->id(),
                 'ip' => $request->ip(),
@@ -388,7 +394,7 @@ class EnvatoController extends Controller
     /**
      * Validate verify request parameters.
      *
-     * @param  Request  $request  The current HTTP request instance
+     * @param  EnvatoVerificationRequest  $request  The current HTTP request instance
      *
      * @throws \InvalidArgumentException When validation fails
      */
@@ -401,7 +407,7 @@ class EnvatoController extends Controller
     /**
      * Validate verify user purchase request parameters.
      *
-     * @param  Request  $request  The current HTTP request instance
+     * @param  EnvatoVerificationRequest  $request  The current HTTP request instance
      *
      * @throws \InvalidArgumentException When validation fails
      */

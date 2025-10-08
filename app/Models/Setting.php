@@ -505,7 +505,7 @@ class Setting extends Model
     /**
      * Set setting value by key.
      */
-    public static function set(string $key, mixed $value): static
+    public static function set(string $key, mixed $value): self
     {
         try {
             $setting = static::firstOrCreate([]);
@@ -524,12 +524,13 @@ class Setting extends Model
     /**
      * Get all settings as array.
      */
-    public static function allSettings(): static
+    public static function allSettings(): self
     {
         try {
-            return Cache::remember('all_settings', 3600, function () {
+            $result = Cache::remember('all_settings', 3600, function () {
                 return static::first() ?? new self();
             });
+            return $result instanceof self ? $result : new self();
         } catch (\Illuminate\Database\QueryException $e) {
             return new self();
         }

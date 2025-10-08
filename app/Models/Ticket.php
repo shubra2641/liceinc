@@ -73,35 +73,35 @@ class Ticket extends Model
         'category_id' => 'integer',
     ];
     /**
-     * @return BelongsTo<User, Ticket>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
     /**
-     * @return BelongsTo<License, Ticket>
+     * @return BelongsTo<License, $this>
      */
     public function license(): BelongsTo
     {
         return $this->belongsTo(License::class);
     }
     /**
-     * @return BelongsTo<Invoice, Ticket>
+     * @return BelongsTo<Invoice, $this>
      */
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
     /**
-     * @return BelongsTo<TicketCategory, Ticket>
+     * @return BelongsTo<TicketCategory, $this>
      */
     public function category(): BelongsTo
     {
         return $this->belongsTo(TicketCategory::class, 'category_id');
     }
     /**
-     * @return HasMany<TicketReply, Ticket>
+     * @return HasMany<TicketReply, $this>
      */
     public function replies(): HasMany
     {

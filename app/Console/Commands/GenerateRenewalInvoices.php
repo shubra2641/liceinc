@@ -262,10 +262,7 @@ class GenerateRenewalInvoices extends Command
         try {
             $currentExpiry = $license->license_expires_at ?? Carbon::now();
             $renewalPeriod = $product->renewal_period;
-            // Validate current expiry date
-            if (! $currentExpiry instanceof Carbon) {
-                throw new \InvalidArgumentException('Invalid current expiry date format');
-            }
+            // Current expiry is already a Carbon instance
             // Validate renewal period
             $validPeriods = [
                 'monthly',
@@ -354,11 +351,9 @@ class GenerateRenewalInvoices extends Command
                         'expires_at' => $license->license_expires_at
                             ? $license->license_expires_at->format('Y-m-d')
                             : 'Unknown',
-                        'invoice_amount' => $invoice->amount ?? 0,
-                        'invoice_due_date' => $invoice->due_date
-                            ? $invoice->due_date->format('Y-m-d')
-                            : 'Unknown',
-                        'invoice_id' => $invoice->id ?? 'Unknown',
+                        'invoice_amount' => $invoice->amount,
+                        'invoice_due_date' => $invoice->due_date->format('Y-m-d'),
+                        'invoice_id' => $invoice->id,
                     ];
                     /** @var \App\Models\User $user */
                     $user = $license->user;

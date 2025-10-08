@@ -88,7 +88,7 @@ class TicketCategory extends Model
      * Get the tickets for this category.
      */
     /**
-     * @return HasMany<Ticket, TicketCategory>
+     * @return HasMany<Ticket, $this>
      */
     public function tickets(): HasMany
     {
@@ -98,10 +98,10 @@ class TicketCategory extends Model
      * Scope to get only active categories.
      */
     /**
-     * @param Builder<TicketCategory> $query
-     * @return Builder<TicketCategory>
+     * @param \Illuminate\Database\Eloquent\Builder<TicketCategory> $query
+     * @return \Illuminate\Database\Eloquent\Builder<TicketCategory>
      */
-    public function scopeActive(Builder $query): Builder
+    public function scopeActive(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
         return $query->where('is_active', true);
     }
@@ -109,10 +109,10 @@ class TicketCategory extends Model
      * Scope to order by sort_order.
      */
     /**
-     * @param Builder<TicketCategory> $query
-     * @return Builder<TicketCategory>
+     * @param \Illuminate\Database\Eloquent\Builder<TicketCategory> $query
+     * @return \Illuminate\Database\Eloquent\Builder<TicketCategory>
      */
-    public function scopeOrdered(Builder $query): Builder
+    public function scopeOrdered(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
         return $query->orderBy('sort_order');
     }

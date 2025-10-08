@@ -214,9 +214,9 @@ class SystemUpdateRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'version' => $this->sanitizeInput($this->version),
-            'rollback_reason' => $this->rollback_reason ? $this->sanitizeInput($this->rollback_reason) : null,
-            'update_notes' => $this->update_notes ? $this->sanitizeInput($this->update_notes) : null,
+            'version' => $this->sanitizeInput($this->input('version')),
+            'rollback_reason' => $this->input('rollback_reason') ? $this->sanitizeInput($this->input('rollback_reason')) : null,
+            'update_notes' => $this->input('update_notes') ? $this->sanitizeInput($this->input('update_notes')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -255,15 +255,20 @@ class SystemUpdateRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

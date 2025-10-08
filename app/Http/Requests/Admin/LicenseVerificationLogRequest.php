@@ -327,16 +327,16 @@ class LicenseVerificationLogRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'status' => $this->status ? $this->sanitizeInput($this->status) : null,
-            'source' => $this->source ? $this->sanitizeInput($this->source) : null,
-            'domain' => $this->domain ? $this->sanitizeInput($this->domain) : null,
-            'license_key' => $this->license_key ? $this->sanitizeInput($this->license_key) : null,
-            'sort_by' => $this->sort_by ? $this->sanitizeInput($this->sort_by) : null,
-            'sort_order' => $this->sort_order ? $this->sanitizeInput($this->sort_order) : null,
-            'group_by' => $this->group_by ? $this->sanitizeInput($this->group_by) : null,
-            'threshold_type' => $this->threshold_type ? $this->sanitizeInput($this->threshold_type) : null,
-            'risk_level' => $this->risk_level ? $this->sanitizeInput($this->risk_level) : null,
-            'cleanup_type' => $this->cleanup_type ? $this->sanitizeInput($this->cleanup_type) : null,
+            'status' => $this->input('status') ? $this->sanitizeInput($this->input('status')) : null,
+            'source' => $this->input('source') ? $this->sanitizeInput($this->input('source')) : null,
+            'domain' => $this->input('domain') ? $this->sanitizeInput($this->input('domain')) : null,
+            'license_key' => $this->input('license_key') ? $this->sanitizeInput($this->input('license_key')) : null,
+            'sort_by' => $this->input('sort_by') ? $this->sanitizeInput($this->input('sort_by')) : null,
+            'sort_order' => $this->input('sort_order') ? $this->sanitizeInput($this->input('sort_order')) : null,
+            'group_by' => $this->input('group_by') ? $this->sanitizeInput($this->input('group_by')) : null,
+            'threshold_type' => $this->input('threshold_type') ? $this->sanitizeInput($this->input('threshold_type')) : null,
+            'risk_level' => $this->input('risk_level') ? $this->sanitizeInput($this->input('risk_level')) : null,
+            'cleanup_type' => $this->input('cleanup_type') ? $this->sanitizeInput($this->input('cleanup_type')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
@@ -384,15 +384,20 @@ class LicenseVerificationLogRequest extends FormRequest
     /**
      * Sanitize input to prevent XSS attacks.
      *
-     * @param  string|null  $input  The input to sanitize
+     * @param  mixed  $input  The input to sanitize
      *
      * @return string|null The sanitized input
      */
-    private function sanitizeInput(?string $input): ?string
+    private function sanitizeInput(mixed $input): ?string
     {
-        if ($input === null) {
+        if ($input === null || $input === '') {
             return null;
         }
+        
+        if (!is_string($input)) {
+            return null;
+        }
+        
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

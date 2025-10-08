@@ -71,7 +71,7 @@ class KbCategoryController extends Controller
                 ->with('parent')
                 ->latest()
                 ->paginate(15);
-            return view('admin.kb.categories.index', compact('categories'));
+            return view('admin.kb.categories.index', ['categories' => $categories]);
         } catch (Throwable $e) {
             Log::error('Failed to load knowledge base categories', [
                 'error' => $e->getMessage(),
@@ -100,7 +100,7 @@ class KbCategoryController extends Controller
         try {
             $parents = KbCategory::pluck('name', 'id');
             $products = Product::where('is_active', true)->get();
-            return view('admin.kb.categories.create', compact('parents', 'products'));
+            return view('admin.kb.categories.create', ['parents' => $parents, 'products' => $products]);
         } catch (Throwable $e) {
             Log::error('Failed to load category creation form', [
                 'error' => $e->getMessage(),
@@ -131,28 +131,28 @@ class KbCategoryController extends Controller
     public function store(Request $request): RedirectResponse
     {
         try {
-            return $this->transaction(function () use ($request) {
+            $result = $this->transaction(function () use ($request) {
                 $validated = $this->validateRequest($request, [
-                    'name' => ['required', 'string', 'max:255'],
-                    'slug' => ['nullable', 'string', 'max:255', 'unique:kb_categories, slug'],
-                    'description' => ['nullable', 'string'],
-                    'parent_id' => ['nullable', 'exists:kb_categories, id'],
-                    'product_id' => ['nullable', 'exists:products, id'],
-                    'serial' => ['nullable', 'string', 'max:255'],
-                    'requires_serial' => ['sometimes', 'boolean'],
-                    'serial_message' => ['nullable', 'string'],
-                    'meta_title' => ['nullable', 'string', 'max:255'],
-                    'meta_description' => ['nullable', 'string', 'max:500'],
-                    'meta_keywords' => ['nullable', 'string', 'max:255'],
-                    'icon' => ['nullable', 'string', 'max:255'],
-                    'is_featured' => ['sometimes', 'boolean'],
-                    'is_active' => ['sometimes', 'boolean'],
-                    'sort_order' => ['nullable', 'integer', 'min:0'],
+                    'name' => 'required|string|max:255',
+                    'slug' => 'nullable|string|max:255|unique:kb_categories,slug',
+                    'description' => 'nullable|string',
+                    'parent_id' => 'nullable|exists:kb_categories,id',
+                    'product_id' => 'nullable|exists:products,id',
+                    'serial' => 'nullable|string|max:255',
+                    'requires_serial' => 'sometimes|boolean',
+                    'serial_message' => 'nullable|string',
+                    'meta_title' => 'nullable|string|max:255',
+                    'meta_description' => 'nullable|string|max:500',
+                    'meta_keywords' => 'nullable|string|max:255',
+                    'icon' => 'nullable|string|max:255',
+                    'is_featured' => 'sometimes|boolean',
+                    'is_active' => 'sometimes|boolean',
+                    'sort_order' => 'nullable|integer|min:0',
                 ]);
                 // Sanitize input data
                 $validated = $this->sanitizeCategoryData($validated);
                 // Generate slug if not provided
-                $validated['slug'] = $validated['slug'] ?: Str::slug($validated['name']);
+                $validated['slug'] = $validated['slug'] ?: Str::slug(is_string($validated['name']) ? $validated['name'] : '');
                 $category = KbCategory::create($validated);
                 Log::debug('Knowledge base category created successfully', [
                     'category_id' => $category->id,
@@ -173,6 +173,7 @@ class KbCategoryController extends Controller
             ]);
             return back()->withErrors(['general' => 'Failed to create category. Please try again.']);
         }
+        return $result instanceof RedirectResponse ? $result : back();
     }
     /**
      * Display the specified knowledge base category with enhanced security.
@@ -190,13 +191,20 @@ class KbCategoryController extends Controller
      * // Show category details
      * $view = $kbCategoryController->show($kbCategory);
      */
-    public function show(KbCategory $kbCategory): View
+    public function show(KbCategory $kbCategory): View|\Illuminate\Http\RedirectResponse
     {
         try {
             $kbCategory->load(['articles' => function ($query) {
-                $query->where('is_active', true)->latest();
+                if (is_object($query) && method_exists($query, 'where')) {
+                    $query->where('is_active', true);
+                    if (method_exists($query, 'latest')) {
+                        $query->latest();
+                    }
+                }
             }, 'parent', 'product']);
-            return view('admin.kb.categories.show', compact('kbCategory'));
+            /** @var view-string $viewName */
+            $viewName = 'admin.kb.categories.show';
+            return view($viewName, ['kbCategory' => $kbCategory]);
         } catch (Throwable $e) {
             Log::error('Failed to load knowledge base category details', [
                 'error' => $e->getMessage(),
@@ -223,7 +231,7 @@ class KbCategoryController extends Controller
      * // Show edit form
      * $view = $kbCategoryController->edit($kbCategory);
      */
-    public function edit(KbCategory $kbCategory): View
+    public function edit(KbCategory $kbCategory): View|\Illuminate\Http\RedirectResponse
     {
         try {
             $parents = KbCategory::where('id', '!=', $kbCategory->id)->pluck('name', 'id');
@@ -263,23 +271,23 @@ class KbCategoryController extends Controller
     public function update(Request $request, KbCategory $kbCategory): RedirectResponse
     {
         try {
-            return $this->transaction(function () use ($request, $kbCategory) {
+            $result = $this->transaction(function () use ($request, $kbCategory) {
                 $validated = $this->validateRequest($request, [
-                    'name' => ['required', 'string', 'max:255'],
-                    'slug' => ['required', 'string', 'max:255', 'unique:kb_categories, slug, ' . $kbCategory->id],
-                    'description' => ['nullable', 'string'],
-                    'parent_id' => ['nullable', 'exists:kb_categories, id'],
-                    'product_id' => ['nullable', 'exists:products, id'],
-                    'serial' => ['nullable', 'string', 'max:255'],
-                    'requires_serial' => ['sometimes', 'boolean'],
-                    'serial_message' => ['nullable', 'string'],
-                    'meta_title' => ['nullable', 'string', 'max:255'],
-                    'meta_description' => ['nullable', 'string', 'max:500'],
-                    'meta_keywords' => ['nullable', 'string', 'max:255'],
-                    'icon' => ['nullable', 'string', 'max:255'],
-                    'is_featured' => ['sometimes', 'boolean'],
-                    'is_active' => ['sometimes', 'boolean'],
-                    'sort_order' => ['nullable', 'integer', 'min:0'],
+                    'name' => 'required|string|max:255',
+                    'slug' => 'required|string|max:255|unique:kb_categories,slug,' . $kbCategory->id,
+                    'description' => 'nullable|string',
+                    'parent_id' => 'nullable|exists:kb_categories,id',
+                    'product_id' => 'nullable|exists:products,id',
+                    'serial' => 'nullable|string|max:255',
+                    'requires_serial' => 'sometimes|boolean',
+                    'serial_message' => 'nullable|string',
+                    'meta_title' => 'nullable|string|max:255',
+                    'meta_description' => 'nullable|string|max:500',
+                    'meta_keywords' => 'nullable|string|max:255',
+                    'icon' => 'nullable|string|max:255',
+                    'is_featured' => 'sometimes|boolean',
+                    'is_active' => 'sometimes|boolean',
+                    'sort_order' => 'nullable|integer|min:0',
                 ]);
                 // Sanitize input data
                 $validated = $this->sanitizeCategoryData($validated);
@@ -300,6 +308,7 @@ class KbCategoryController extends Controller
             ]);
             return back()->withErrors(['general' => 'Failed to update category. Please try again.']);
         }
+        return $result instanceof RedirectResponse ? $result : back();
     }
     /**
      * Remove the specified knowledge base category with enhanced security and comprehensive handling.
@@ -320,7 +329,7 @@ class KbCategoryController extends Controller
     public function destroy(KbCategory $kbCategory): RedirectResponse
     {
         try {
-            return $this->transaction(function () use ($kbCategory) {
+            $result = $this->transaction(function () use ($kbCategory) {
                 // Support two deletion modes via request param 'delete_mode':
                 // - with_articles : delete category and all its articles
                 // - keep_articles : move articles to 'uncategorized' category (created if missing)
@@ -367,6 +376,7 @@ class KbCategoryController extends Controller
             ]);
             return back()->withErrors(['general' => 'Failed to delete category. Please try again.']);
         }
+        return $result instanceof RedirectResponse ? $result : back();
     }
     /**
      * Sanitize category data to prevent XSS attacks.

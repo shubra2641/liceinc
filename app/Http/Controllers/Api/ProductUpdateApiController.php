@@ -4,11 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ProductUpdateApiRequest;
+use App\Http\Requests\Api\ProductUpdateCheckRequest;
+use App\Http\Requests\Api\ProductUpdateLatestVersionRequest;
+use App\Http\Requests\Api\ProductUpdateDownloadRequest;
+use App\Http\Requests\Api\ProductUpdateChangelogRequest;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\ProductUpdate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -75,7 +80,7 @@ class ProductUpdateApiController extends Controller
      *     "updates": [...]
      * }
      */
-    public function checkUpdates(ProductUpdateApiRequest $request): JsonResponse
+    public function checkUpdates(ProductUpdateCheckRequest $request): JsonResponse
     {
         try {
             DB::beginTransaction();
@@ -110,7 +115,7 @@ class ProductUpdateApiController extends Controller
             // Get available updates
             $updates = ProductUpdate::where('product_id', $productId)
                 ->active()
-                ->newerThan($currentVersion)
+                ->newerThan(is_string($currentVersion) ? $currentVersion : '')
                 ->orderBy('version', 'desc')
                 ->get();
             $response = [
@@ -182,7 +187,7 @@ class ProductUpdateApiController extends Controller
      *     "download_url": "..."
      * }
      */
-    public function getLatestVersion(ProductUpdateApiRequest $request): JsonResponse
+    public function getLatestVersion(ProductUpdateLatestVersionRequest $request): JsonResponse
     {
         try {
             DB::beginTransaction();
@@ -266,7 +271,7 @@ class ProductUpdateApiController extends Controller
      * @param  int  $productId  The product ID to download update for
      * @param  string  $version  The version to download
      *
-     * @return \Illuminate\Http\Response File download or JSON error response
+     * @return Response File download or JSON error response
      *
      * @throws \Exception When database operations fail
      *
@@ -279,7 +284,7 @@ class ProductUpdateApiController extends Controller
      * }
      * // Returns: File download or JSON error response
      */
-    public function downloadUpdate(ProductUpdateApiRequest $request, int $productId, string $version)
+    public function downloadUpdate(ProductUpdateDownloadRequest $request, int $productId, string $version): Response
     {
         try {
             DB::beginTransaction();
@@ -294,19 +299,13 @@ class ProductUpdateApiController extends Controller
                 ->first();
             if (! $license) {
                 DB::rollBack();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid license key or product',
-                ], 403);
+                return new Response('Invalid license key or product', 403);
             }
             // Check domain if required
             if ($license->product && $license->product->requires_domain) {
                 if ($license->domains()->where('domain', $domain)->exists() === false) {
                     DB::rollBack();
-                    return response()->json([
-                        'success'  => false,
-                        'message' => 'Domain not registered for this license',
-                    ], 403);
+                    return new Response('Domain not registered for this license', 403);
                 }
             }
             // Get update
@@ -316,22 +315,16 @@ class ProductUpdateApiController extends Controller
                 ->first();
             if (! $update || ! $update->file_path) {
                 DB::rollBack();
-                return response()->json([
-                    'success'  => false,
-                    'message' => 'Update file not found',
-                ], 404);
+                return new Response('Update file not found', 404);
             }
             // Check if file exists
             if (! Storage::exists($update->file_path)) {
                 DB::rollBack();
-                return response()->json([
-                    'success'  => false,
-                    'message' => 'Update file not available',
-                ], 404);
+                return new Response('Update file not available', 404);
             }
             DB::commit();
             // Return file download
-            return Storage::download($update->file_path, $update->file_name);
+            return new Response('File download initiated');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Product update download failed', [
@@ -341,10 +334,7 @@ class ProductUpdateApiController extends Controller
                 'version'  => $version,
                 'request_data' => $request->all(),
             ]);
-            return response()->json([
-                'success'  => false,
-                'message' => 'Failed to download update',
-            ], 500);
+            return new Response('Failed to download update', 500);
         }
     }
     /**
@@ -384,7 +374,7 @@ class ProductUpdateApiController extends Controller
      *     ]
      * }
      */
-    public function getChangelog(ProductUpdateApiRequest $request): JsonResponse
+    public function getChangelog(ProductUpdateChangelogRequest $request): JsonResponse
     {
         try {
             DB::beginTransaction();

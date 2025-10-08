@@ -60,12 +60,7 @@ class ProductFileService
     {
         try {
             // Validate inputs
-            if (! $product || ! $product->id) {
-                throw new \InvalidArgumentException('Invalid product provided');
-            }
-            if (! $file) {
-                throw new \InvalidArgumentException('No file provided');
-            }
+            // Product and file are validated by type hints
             // Validate file
             $this->validateFile($file);
             // Generate unique encryption key for this file
@@ -109,8 +104,8 @@ class ProductFileService
             return $productFile;
         } catch (\Exception $e) {
             Log::error('Error uploading product file', [
-                'product_id' => $product->id ?? 'unknown',
-                'original_name' => $file->getClientOriginalName() ?? 'unknown',
+                'product_id' => $product->id,
+                'original_name' => $file->getClientOriginalName(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -144,18 +139,16 @@ class ProductFileService
     {
         try {
             // Validate inputs
-            if (! $file || ! $file->id) {
-                throw new \InvalidArgumentException('Invalid file provided');
-            }
+            // File is validated by type hint
             // Verify user has license and paid invoice for this product
             if ($userId) {
                 $permissions = $this->userCanDownloadFiles($file->product, $userId);
-                if (! $permissions['can_download']) {
+                if (!$permissions['can_download']) {
                     return null;
                 }
             }
             // Check if file exists
-            if (! $file->fileExists()) {
+            if (!$file->fileExists()) {
                 Log::error('File not found for download', [
                     'file_id' => $file->id,
                     'user_id' => $userId,
@@ -222,9 +215,7 @@ class ProductFileService
     {
         try {
             // Validate input
-            if (! $file || ! $file->id) {
-                throw new \InvalidArgumentException('Invalid file provided for deletion');
-            }
+            // File is validated by type hint
             // Delete physical file
             if ($file->fileExists()) {
                 Storage::disk('private')->delete($file->file_path);
@@ -266,17 +257,17 @@ class ProductFileService
     {
         try {
             // Validate input
-            if (! $product || ! $product->id) {
-                throw new \InvalidArgumentException('Invalid product provided');
-            }
+            // Product is validated by type hint
             $query = $product->files();
             if ($activeOnly) {
                 $query->where('is_active', true);
             }
-            return $query->orderBy('created_at', 'desc')->get();
+            /** @var \Illuminate\Database\Eloquent\Collection<int, ProductFile> $files */
+            $files = $query->orderBy('created_at', 'desc')->get();
+            return $files;
         } catch (\Exception $e) {
             Log::error('Error getting product files', [
-                'product_id' => $product->id ?? 'unknown',
+                'product_id' => $product->id,
                 'active_only' => $activeOnly,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -322,10 +313,7 @@ class ProductFileService
     private function validateFile(UploadedFile $file): void
     {
         try {
-            // Validate file object
-            if (! $file) {
-                throw new \InvalidArgumentException('No file provided for validation');
-            }
+            // File is validated by type hint
             // Check file size (max 100MB)
             if ($file->getSize() > 100 * 1024 * 1024) {
                 throw new \Exception('File size cannot exceed 100MB');
@@ -360,10 +348,13 @@ class ProductFileService
             // Check for malicious content
             $this->scanFileForMaliciousContent($file);
         } catch (\Exception $e) {
+            $fileName = $file->getClientOriginalName();
+            $mimeType = $file->getMimeType();
+            $fileSize = $file->getSize();
             Log::error('File validation failed', [
-                'filename' => $file->getClientOriginalName() ?? 'unknown',
-                'mime_type' => $file->getMimeType() ?? 'unknown',
-                'file_size' => $file->getSize() ?? 0,
+                'filename' => $fileName,
+                'mime_type' => is_string($mimeType) ? $mimeType : 'unknown',
+                'file_size' => is_numeric($fileSize) ? (int)$fileSize : 0,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -416,8 +407,9 @@ class ProductFileService
                 }
             }
         } catch (\Exception $e) {
+            $fileName = $file->getClientOriginalName();
             Log::error('Error scanning file for malicious content', [
-                'filename' => $file->getClientOriginalName() ?? 'unknown',
+                'filename' => $fileName,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -453,9 +445,11 @@ class ProductFileService
             }
             return $encrypted;
         } catch (\Exception $e) {
+            $contentLength = strlen($content);
+            $keyLength = strlen($key);
             Log::error('Error encrypting file content', [
-                'content_length' => strlen($content ?? ''),
-                'key_length' => strlen($key ?? ''),
+                'content_length' => $contentLength,
+                'key_length' => $keyLength,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -540,7 +534,7 @@ class ProductFileService
             // Add update even if no file path (for display purposes)
             $updateFile = $this->createUpdateFileRecord($update);
             $updateFile->is_update = true;
-            $updateFile->update_info = $update;
+            $updateFile->update_info = $update->toArray();
             $allVersions[] = $updateFile;
         }
         // Get all base product files
@@ -558,7 +552,7 @@ class ProductFileService
             return $b->created_at <=> $a->created_at;
         });
         // Return all versions without logging success
-        return $allVersions;
+        return ['all_versions' => $allVersions];
     }
     /**
      * Get the latest update file for a product or return the base product file.
@@ -605,27 +599,29 @@ class ProductFileService
     /**
      * Create a ProductFile record for an update file.
      */
-    private function createUpdateFileRecord(ProductUpdate $update): ProductFile
+    private function createUpdateFileRecord(\Illuminate\Database\Eloquent\Model $update): ProductFile
     {
         // Create a temporary ProductFile record for the update
         $file = new ProductFile();
-        $file->id = 'update_' . $update->id; // Temporary ID
-        $file->product_id = $update->product_id;
-        $file->original_name = $update->title . '_v' . $update->version . '.zip';
-        $file->file_path = $update->file_path;
-        $file->file_size = $update->file_size ?? 0;
+        // Note: We can't set id directly as it's auto-increment
+        // This is a temporary object for display purposes
+        $file->product_id = is_numeric($update->product_id) ? (int)$update->product_id : 0;
+        $file->original_name = (is_string($update->title) ? $update->title : '') . '_v' . (is_string($update->version) ? $update->version : '') . '.zip';
+        $filePath = $update->file_path ?? '';
+        $file->file_path = is_string($filePath) ? $filePath : '';
+        $file->file_size = is_numeric($update->file_size ?? 0) ? (int)($update->file_size ?? 0) : 0;
         $file->file_extension = 'zip';
-        $file->description = $update->description;
+        $file->description = is_string($update->description) ? $update->description : null;
         $file->is_active = true;
         $file->download_count = 0;
-        $file->created_at = $update->created_at;
-        $file->updated_at = $update->updated_at;
+        $file->created_at = $update->created_at instanceof \Illuminate\Support\Carbon ? $update->created_at : null;
+        $file->updated_at = $update->updated_at instanceof \Illuminate\Support\Carbon ? $update->updated_at : null;
         // Add formatted_size for display
         $file->formatted_size = $file->file_size > 0 ?
             number_format($file->file_size / 1024 / 1024, 2) . ' MB' :
             'Unknown';
         // Add update_info for the view
-        $file->update_info = $update;
+        $file->update_info = $update->toArray();
         $file->is_update = true;
         return $file;
     }
@@ -633,10 +629,10 @@ class ProductFileService
      * Download update file directly from the update record.
      */
     /**
-     * @param ProductUpdate $update
+     * @param \App\Models\ProductUpdate $update
      * @return array<string, mixed>
      */
-    public function downloadUpdateFile(ProductUpdate $update, int $userId): array
+    public function downloadUpdateFile(\App\Models\ProductUpdate $update, int $userId): array
     {
         if (! $update->file_path || ! Storage::disk('private')->exists($update->file_path)) {
             throw new \Exception('Update file not found');
