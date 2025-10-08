@@ -677,7 +677,8 @@ class UpdateController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'message' => 'Update package uploaded but processing failed: ' . (is_string($processResult['message'] ?? null) ? $processResult['message'] : 'Unknown error'),
+                    'message' => 'Update package uploaded but processing failed: '
+                        . (is_string($processResult['message'] ?? null) ? $processResult['message'] : 'Unknown error'),
                 ], 422);
             }
         } catch (\Exception $e) {
@@ -875,11 +876,17 @@ class UpdateController extends Controller
                 $domainStr,
             );
             if ($updateData['success']) {
-                $isUpdateAvailable = (is_array($updateData['data'] ?? null) && isset($updateData['data']['is_update_available'])) ? $updateData['data']['is_update_available'] : false;
+                $isUpdateAvailable = (is_array($updateData['data'] ?? null)
+                    && isset($updateData['data']['is_update_available']))
+                    ? $updateData['data']['is_update_available']
+                    : false;
                 // If update is available, proceed with auto update
                 if ($isUpdateAvailable) {
                     // API returns 'latest_version' not 'next_version'
-                    $nextVersion = (is_array($updateData['data'] ?? null) && isset($updateData['data']['latest_version'])) ? $updateData['data']['latest_version'] : null;
+                    $nextVersion = (is_array($updateData['data'] ?? null)
+                        && isset($updateData['data']['latest_version']))
+                        ? $updateData['data']['latest_version']
+                        : null;
                     if ($nextVersion) {
                         // Perform the auto update
                         $updateResult = $this->performAutoUpdate(
