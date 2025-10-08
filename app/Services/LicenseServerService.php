@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
@@ -23,7 +25,6 @@ use App\Helpers\SecureFileHelper;
  * - Enhanced security measures for API communication
  * - Input validation and sanitization
  * - Network error handling and retry logic
- *
  *
  * @example
  * // Check for updates
@@ -573,7 +574,6 @@ class LicenseServerService
      *
      * Clears all cached license server data.
      *
-     *
      * @example
      * $licenseServer->clearAllCache();
      */
@@ -739,6 +739,7 @@ class LicenseServerService
 
     /**
      * Convert mixed array to typed array.
+     *
      * @return array<mixed, mixed>
      */
     private function convertToTypedArray(mixed $data): array

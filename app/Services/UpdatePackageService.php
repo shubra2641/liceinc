@@ -403,7 +403,9 @@ class UpdatePackageService
                 throw new \Exception('Invalid JSON in configuration file: ' . json_last_error_msg());
             }
             $arrayResult = is_array($config) ? $config : [];
-            /** @var array<string, mixed> $typedResult */
+            /**
+ * @var array<string, mixed> $typedResult
+*/
             $typedResult = $arrayResult;
             return $typedResult;
         } catch (\Exception $e) {

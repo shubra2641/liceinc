@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Mail\DynamicEmail;
@@ -50,10 +52,6 @@ class EmailService
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @param array<string, mixed> $data
@@ -110,10 +108,6 @@ class EmailService
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @param array<string, mixed> $data
@@ -146,10 +140,6 @@ class EmailService
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @param array<string, mixed> $data
@@ -243,10 +233,6 @@ class EmailService
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function getTemplates(string $type, ?string $category = null): Collection
     {
@@ -271,10 +257,6 @@ class EmailService
      * @throws \InvalidArgumentException When template data is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @param array<string, mixed> $templateData
@@ -304,10 +286,6 @@ class EmailService
      * @throws \InvalidArgumentException When template not found
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @param array<string, mixed> $data
@@ -336,10 +314,6 @@ class EmailService
      * @throws \InvalidArgumentException When user is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function sendUserWelcome(User $user): bool
     {
@@ -365,10 +339,6 @@ class EmailService
      * @throws \InvalidArgumentException When user is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @param array<string, mixed> $data
@@ -398,10 +368,6 @@ class EmailService
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function sendEmailVerification(User $user, string $verificationUrl): bool
     {
@@ -427,10 +393,6 @@ class EmailService
      * @throws \InvalidArgumentException When user is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function sendNewUserNotification(User $user): bool
     {
@@ -461,10 +423,6 @@ class EmailService
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function sendPaymentConfirmation(License $license, Invoice $invoice): bool
     {
@@ -509,7 +467,7 @@ class EmailService
         $productName = $licenseData['product_name'] ?? '';
         $expiresAt = $licenseData['expires_at'] ?? '';
         $daysRemaining = $licenseData['days_remaining'] ?? 0;
-        
+
         return $this->sendToUser($user, 'user_license_expiring', array_merge($licenseData, [
             'license_key' => is_string($licenseKey) ? $licenseKey : '',
             'product_name' => is_string($productName) ? $productName : '',
@@ -557,7 +515,7 @@ class EmailService
         $ticketId = $ticketData['ticket_id'] ?? '';
         $ticketSubject = $ticketData['ticket_subject'] ?? '';
         $ticketStatus = $ticketData['ticket_status'] ?? 'open';
-        
+
         return $this->sendToUser($user, 'user_ticket_created', array_merge($ticketData, [
             'ticket_id' => is_string($ticketId) ? $ticketId : '',
             'ticket_subject' => is_string($ticketSubject) ? $ticketSubject : '',
@@ -606,7 +564,7 @@ class EmailService
         $invoiceAmount = $invoiceData['invoice_amount'] ?? 0;
         $dueDate = $invoiceData['due_date'] ?? '';
         $daysRemaining = $invoiceData['days_remaining'] ?? 0;
-        
+
         return $this->sendToUser($user, 'user_invoice_approaching_due', array_merge($invoiceData, [
             'invoice_number' => is_string($invoiceNumber) ? $invoiceNumber : '',
             'invoice_amount' => is_numeric($invoiceAmount) ? (float)$invoiceAmount : 0.0,
@@ -655,7 +613,7 @@ class EmailService
         $productName = $licenseData['product_name'] ?? '';
         $customerName = $licenseData['customer_name'] ?? '';
         $customerEmail = $licenseData['customer_email'] ?? '';
-        
+
         return $this->sendToAdmin('admin_license_created', array_merge($licenseData, [
             'license_key' => is_string($licenseKey) ? $licenseKey : '',
             'product_name' => is_string($productName) ? $productName : '',
@@ -709,7 +667,7 @@ class EmailService
         $customerName = $ticketData['customer_name'] ?? '';
         $customerEmail = $ticketData['customer_email'] ?? '';
         $ticketPriority = $ticketData['ticket_priority'] ?? 'normal';
-        
+
         return $this->sendToAdmin('admin_ticket_created', array_merge($ticketData, [
             'ticket_id' => is_string($ticketId) ? $ticketId : '',
             'ticket_subject' => is_string($ticketSubject) ? $ticketSubject : '',
@@ -927,10 +885,6 @@ class EmailService
      * @throws \InvalidArgumentException When template name is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function validateTemplateName(string $templateName): string
     {
@@ -956,10 +910,6 @@ class EmailService
      * @throws \InvalidArgumentException When email is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function validateEmail(string $email): string
     {
@@ -985,10 +935,6 @@ class EmailService
      * @throws \InvalidArgumentException When template type is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function validateTemplateType(string $type): string
     {
@@ -1012,10 +958,6 @@ class EmailService
      * @return string|null The sanitized string or null
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function sanitizeString(?string $input): ?string
     {
@@ -1035,10 +977,6 @@ class EmailService
      * @return array The sanitized data array
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @param array<mixed, mixed> $data
@@ -1056,7 +994,9 @@ class EmailService
                 $sanitized[$key] = $value;
             }
         }
-        /** @var array<string, mixed> $typedResult */
+        /**
+ * @var array<string, mixed> $typedResult
+*/
         $typedResult = $sanitized;
         return $typedResult;
     }

@@ -114,7 +114,7 @@ class PaymentService
             // Create API context
             $clientId = is_string($credentials['client_id'] ?? '') ? (string)($credentials['client_id'] ?? '') : '';
             $clientSecret = is_string($credentials['client_secret'] ?? '') ? (string)($credentials['client_secret'] ?? '') : '';
-            
+
             $apiContext = new ApiContext(
                 new OAuthTokenCredential($clientId, $clientSecret),
             );
@@ -331,7 +331,7 @@ class PaymentService
             // Create API context
             $clientId = is_string($credentials['client_id'] ?? '') ? (string)($credentials['client_id'] ?? '') : '';
             $clientSecret = is_string($credentials['client_secret'] ?? '') ? (string)($credentials['client_secret'] ?? '') : '';
-            
+
             $apiContext = new ApiContext(
                 new OAuthTokenCredential($clientId, $clientSecret),
             );
@@ -524,11 +524,11 @@ class PaymentService
                     $amount = is_numeric($orderData['amount'] ?? 0) ? (float)($orderData['amount'] ?? 0) : 0.0;
                     $userModel = $user instanceof \App\Models\User ? $user : $user->first();
                     $productModel = $product instanceof \App\Models\Product ? $product : ($product ? $product->first() : null);
-                    
+
                     if (!$userModel || !$productModel) {
                         throw new \Exception('User or Product not found');
                     }
-                    
+
                     $invoice = $invoiceService->createInvoice(
                         $userModel,
                         $license,
@@ -572,7 +572,7 @@ class PaymentService
         try {
             // Validate gateway
             $this->validateGateway($gateway);
-            
+
             // Process webhook based on gateway
             switch ($gateway) {
                 case 'stripe':
@@ -594,6 +594,7 @@ class PaymentService
 
     /**
      * Handle Stripe webhook
+     *
      * @return array<string, mixed>
      */
     private function handleStripeWebhook(ServiceRequest $request): array
@@ -604,6 +605,7 @@ class PaymentService
 
     /**
      * Handle PayPal webhook
+     *
      * @return array<string, mixed>
      */
     private function handlePayPalWebhook(ServiceRequest $request): array
@@ -789,7 +791,7 @@ class PaymentService
             // Use product's support_days or default from settings
             $productSupportDays = $product->support_days ?? null;
             $defaultSupportDuration = \App\Helpers\ConfigHelper::getSetting('license_support_duration', 365);
-            $supportDuration = is_numeric($productSupportDays) ? (int)$productSupportDays : 
+            $supportDuration = is_numeric($productSupportDays) ? (int)$productSupportDays :
                               (is_numeric($defaultSupportDuration) ? (int)$defaultSupportDuration : 365);
             // Calculate support expiry based on duration in days
             return now()->addDays($supportDuration);

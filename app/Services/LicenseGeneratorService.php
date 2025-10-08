@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Product;
@@ -23,7 +25,6 @@ use Illuminate\Support\Facades\Storage;
  * - Dual verification system (Envato + custom database)
  * - Automatic template creation for missing languages
  * - File extension mapping and validation
- *
  *
  * @example
  * // Generate license file for a product

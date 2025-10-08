@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\License;
@@ -21,7 +23,6 @@ use Illuminate\Support\Facades\Log;
  * - Product access validation and authorization
  * - Secure license creation from Envato data
  * - Advanced error handling and logging
- *
  *
  * @example
  * // Verify a purchase code

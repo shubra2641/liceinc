@@ -31,7 +31,6 @@ use Throwable;
  * - Enhanced security measures for license operations
  * - Input validation and sanitization
  *
- *
  * @example
  * // Create a license for a user and product
  * $license = $licenseService->createLicense($user, $product, 'stripe');
@@ -296,7 +295,9 @@ class LicenseService
     {
         try {
             // User is already validated by type hint
-            /** @var Collection<int, License> $licenses */
+            /**
+ * @var Collection<int, License> $licenses
+*/
             $licenses = $user->licenses()
                 ->with('product')
                 ->where('status', 'active')

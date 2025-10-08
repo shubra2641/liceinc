@@ -27,7 +27,6 @@ use Illuminate\Support\Facades\RateLimiter;
  * - Enhanced error handling and validation
  * - Performance optimization with efficient algorithms
  *
- *
  * @example
  * // Rate limiting
  * $security = new EnhancedSecurityService();

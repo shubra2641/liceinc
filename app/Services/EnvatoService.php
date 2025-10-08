@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Setting;
@@ -43,10 +45,6 @@ class EnvatoService
      * @throws Exception When settings retrieval fails
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @return array<string, mixed>
@@ -93,10 +91,6 @@ class EnvatoService
      * @throws \InvalidArgumentException When purchase code is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @return array<mixed, mixed>|null
@@ -155,10 +149,6 @@ class EnvatoService
      * @throws \InvalidArgumentException When username is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @return array<mixed, mixed>|null
@@ -214,10 +204,6 @@ class EnvatoService
      * @throws \InvalidArgumentException When access token is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @return array<mixed, mixed>|null
@@ -266,10 +252,6 @@ class EnvatoService
      * @throws \InvalidArgumentException When token is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function testToken(string $token): bool
     {
@@ -361,12 +343,7 @@ class EnvatoService
      * Clears all cached data from Envato API calls with comprehensive
      * error handling and logging.
      *
-     *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function clearCache(): void
     {
@@ -406,10 +383,6 @@ class EnvatoService
      * @throws \InvalidArgumentException When purchase code is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function validatePurchaseCode(string $purchaseCode): string
     {
@@ -435,10 +408,6 @@ class EnvatoService
      * @throws \InvalidArgumentException When username is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function validateUsername(string $username): string
     {
@@ -464,10 +433,6 @@ class EnvatoService
      * @throws \InvalidArgumentException When access token is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function validateAccessToken(string $accessToken): string
     {
@@ -493,10 +458,6 @@ class EnvatoService
      * @throws \InvalidArgumentException When item ID is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     // private function validateItemId(int $itemId): int
     // {
@@ -516,10 +477,6 @@ class EnvatoService
      * @return string|null The sanitized string or null
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function sanitizeString(?string $input): ?string
     {

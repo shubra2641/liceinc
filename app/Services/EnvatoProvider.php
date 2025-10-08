@@ -23,7 +23,6 @@ use Laravel\Socialite\Two\User;
  * - Proper token management and validation
  * - Fallback mechanisms for missing user data
  *
- *
  * @example
  * // Configure in config/services.php
  * 'envato' => [
@@ -112,7 +111,7 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
             if ($statusCode >= 400) {
                 throw new \Exception('Failed to retrieve user data from Envato API: HTTP ' . (int)$statusCode);
             }
-            $data = json_decode($response->getBody(), true);
+            $data = json_decode((string) $response->getBody(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception('Invalid JSON response from Envato API: ' . json_last_error_msg());
             }

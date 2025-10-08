@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Product;
@@ -25,7 +27,6 @@ use Illuminate\Support\Str;
  * - Support for product updates and versioning
  * - Automatic file cleanup and management
  * - Multi-format file support with type validation
- *
  *
  * @example
  * // Upload a file for a product
@@ -262,7 +263,9 @@ class ProductFileService
             if ($activeOnly) {
                 $query->where('is_active', true);
             }
-            /** @var \Illuminate\Database\Eloquent\Collection<int, ProductFile> $files */
+            /**
+ * @var \Illuminate\Database\Eloquent\Collection<int, ProductFile> $files
+*/
             $files = $query->orderBy('created_at', 'desc')->get();
             return $files;
         } catch (\Exception $e) {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use Exception;
@@ -43,10 +45,6 @@ class SecurityService
      * @throws \InvalidArgumentException When input data is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @param array<mixed> $data
@@ -103,10 +101,6 @@ class SecurityService
      * @throws \InvalidArgumentException When content is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function sanitizeHtml(string $content): string
     {
@@ -142,10 +136,6 @@ class SecurityService
      * @return string The cleaned content
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function removeDangerousPatterns(string $content): string
     {
@@ -196,10 +186,6 @@ class SecurityService
      * @throws \InvalidArgumentException When rule is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function applyValidationRule($value, string $rule)
     {
@@ -240,10 +226,6 @@ class SecurityService
      * @throws \InvalidArgumentException When request is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function isSuspiciousRequest(Request $request): bool
     {
@@ -389,10 +371,6 @@ class SecurityService
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @param array<string, mixed> $data
@@ -433,10 +411,6 @@ class SecurityService
      * @throws \InvalidArgumentException When length is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function generateSecureToken(int $length = 32): string
     {
@@ -466,10 +440,6 @@ class SecurityService
      * @throws \InvalidArgumentException When file is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @return array<string, mixed>
@@ -499,7 +469,7 @@ class SecurityService
             // Check file extension
             $allowedExtensionsConfig = config('security.file_upload_security.allowed_extensions', []);
             $allowedExtensions = is_array($allowedExtensionsConfig) ? $allowedExtensionsConfig : [];
-            $extension = method_exists($file, 'getClientOriginalExtension') ? 
+            $extension = method_exists($file, 'getClientOriginalExtension') ?
                 (is_string($file->getClientOriginalExtension()) ? strtolower($file->getClientOriginalExtension()) : '') : '';
             $isAllowed = false;
             foreach ($allowedExtensions as $category => $extensions) {
@@ -514,7 +484,7 @@ class SecurityService
                 $result['errors'][] = 'File type not allowed';
             }
             // Check MIME type
-            $mimeType = method_exists($file, 'getMimeType') ? 
+            $mimeType = method_exists($file, 'getMimeType') ?
                 (is_string($file->getMimeType()) ? $file->getMimeType() : '') : '';
             if (!$this->isAllowedMimeType($mimeType)) {
                 $result['valid'] = false;
@@ -522,13 +492,13 @@ class SecurityService
             }
             // Scan file content for malicious patterns
             if (config('security.file_upload_security.validate_file_content', true)) {
-            $filePath = method_exists($file, 'getRealPath') ? $file->getRealPath() : '';
-            $filePathString = is_string($filePath) ? $filePath : '';
-            $content = file_get_contents($filePathString);
-            if ($content === false) {
-                $result['valid'] = false;
-                $result['errors'][] = 'Unable to read file content';
-            } elseif ($this->containsMaliciousContent($content)) {
+                $filePath = method_exists($file, 'getRealPath') ? $file->getRealPath() : '';
+                $filePathString = is_string($filePath) ? $filePath : '';
+                $content = file_get_contents($filePathString);
+                if ($content === false) {
+                    $result['valid'] = false;
+                    $result['errors'][] = 'Unable to read file content';
+                } elseif ($this->containsMaliciousContent($content)) {
                     $result['valid'] = false;
                     $result['errors'][] = 'File contains potentially malicious content';
                 }
@@ -563,10 +533,6 @@ class SecurityService
      * @return bool True if MIME type is allowed, false otherwise
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function isAllowedMimeType(string $mimeType): bool
     {
@@ -606,10 +572,6 @@ class SecurityService
      * @return bool True if malicious content is found, false otherwise
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private function containsMaliciousContent(string $content): bool
     {
@@ -665,10 +627,6 @@ class SecurityService
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function rateLimitExceeded(string $key, int $maxAttempts, int $decayMinutes): bool
     {
@@ -699,10 +657,6 @@ class SecurityService
      * @throws \InvalidArgumentException When key is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public function clearRateLimit(string $key): void
     {

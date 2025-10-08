@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\LicenseVerificationLog;
@@ -48,10 +50,6 @@ class LicenseVerificationLogger
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @param array<string, mixed>|null $responseData
@@ -139,10 +137,6 @@ class LicenseVerificationLogger
      * @throws \InvalidArgumentException When days parameter is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @return array<string, mixed>
@@ -191,10 +185,6 @@ class LicenseVerificationLogger
      * @throws \InvalidArgumentException When parameters are invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @return array<string, mixed>
@@ -212,7 +202,9 @@ class LicenseVerificationLogger
                 ->orderBy('attempt_count', 'desc')
                 ->get()
                 ->toArray();
-            /** @var array<string, mixed> $typedResult */
+            /**
+ * @var array<string, mixed> $typedResult
+*/
             $typedResult = $result;
             return $typedResult;
         } catch (Exception $e) {
@@ -233,10 +225,6 @@ class LicenseVerificationLogger
      * @throws \InvalidArgumentException When limit is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     /**
      * @return Collection<int, LicenseVerificationLog>
@@ -267,10 +255,6 @@ class LicenseVerificationLogger
      * @throws \InvalidArgumentException When days parameter is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     public static function cleanOldLogs(int $days = 90): int
     {
@@ -298,10 +282,6 @@ class LicenseVerificationLogger
      * @throws \InvalidArgumentException When purchase code is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private static function validatePurchaseCode(string $purchaseCode): string
     {
@@ -327,10 +307,6 @@ class LicenseVerificationLogger
      * @throws \InvalidArgumentException When domain is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private static function validateDomain(string $domain): string
     {
@@ -356,10 +332,6 @@ class LicenseVerificationLogger
      * @throws \InvalidArgumentException When source is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private static function validateSource(string $source): string
     {
@@ -383,10 +355,6 @@ class LicenseVerificationLogger
      * @return string The validated IP address
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private static function getValidatedIpAddress(?Request $request): string
     {
@@ -407,10 +375,6 @@ class LicenseVerificationLogger
      * @return string The validated user agent
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private static function getValidatedUserAgent(?Request $request): string
     {
@@ -432,10 +396,6 @@ class LicenseVerificationLogger
      * @throws \InvalidArgumentException When days is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private static function validateDays(int $days): int
     {
@@ -456,10 +416,6 @@ class LicenseVerificationLogger
      * @throws \InvalidArgumentException When hours is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private static function validateHours(int $hours): int
     {
@@ -480,10 +436,6 @@ class LicenseVerificationLogger
      * @throws \InvalidArgumentException When minAttempts is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private static function validateMinAttempts(int $minAttempts): int
     {
@@ -504,10 +456,6 @@ class LicenseVerificationLogger
      * @throws \InvalidArgumentException When limit is invalid
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private static function validateLimit(int $limit): int
     {
@@ -553,10 +501,6 @@ class LicenseVerificationLogger
      * @return string|null The sanitized string or null
      *
      * @version 1.0.6
-     *
-     *
-     *
-     *
      */
     private static function sanitizeString(?string $input): ?string
     {

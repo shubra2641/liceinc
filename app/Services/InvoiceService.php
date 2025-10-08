@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Invoice;
@@ -27,7 +29,6 @@ use Illuminate\Support\Str;
  * - Input validation and sanitization
  * - Performance optimization with efficient queries
  * - Proper logging for errors and warnings only
- *
  *
  * @example
  * // Create initial invoice
@@ -497,11 +498,11 @@ class InvoiceService
         if ($input === null || $input === '') {
             return null;
         }
-        
+
         if (!is_string($input)) {
             return null;
         }
-        
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

@@ -28,7 +28,6 @@ use App\Helpers\SecureFileHelper;
  * - URL validation and security checks
  * - Asynchronous webhook processing
  *
- *
  * @example
  * // Send a webhook event
  * $webhookService = new AdvancedWebhookService();
@@ -402,7 +401,7 @@ class AdvancedWebhookService
             $statusCode = $response->status();
             $responseBody = $response->body();
             $responseTime = $response->transferStats?->getHandlerStat('total_time') ?? 0;
-            
+
             return [
                 'success' => $response->successful(),
                 'status_code' => (int)$statusCode,

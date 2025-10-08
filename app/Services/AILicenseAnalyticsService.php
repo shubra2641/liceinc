@@ -71,7 +71,9 @@ class AILicenseAnalyticsService
                 });
             });
             $arrayResult = is_array($result) ? $result : [];
-            /** @var array<string, mixed> $typedResult */
+            /**
+ * @var array<string, mixed> $typedResult
+*/
             $typedResult = $arrayResult;
             return $typedResult;
         } catch (\Exception $e) {
@@ -160,7 +162,9 @@ class AILicenseAnalyticsService
             ->pluck('count', 'date')
             ->toArray();
         // Apply AI smoothing and prediction
-        /** @var array<string, mixed> $typedLicenseTrends */
+        /**
+ * @var array<string, mixed> $typedLicenseTrends
+*/
         $typedLicenseTrends = $licenseTrends;
         $smoothedTrends = $this->applyAISmoothing($typedLicenseTrends);
         $predictions = $this->predictFutureTrends($smoothedTrends, 7); // Predict next 7 days
@@ -251,7 +255,9 @@ class AILicenseAnalyticsService
             ];
         }
         // Sort by AI score
-        /** @var array<int, array<string, mixed>> $performance */
+        /**
+ * @var array<int, array<string, mixed>> $performance
+*/
         usort($performance, function (array $a, array $b): int {
             $scoreA = is_numeric($a['ai_score'] ?? 0) ? (int)($a['ai_score'] ?? 0) : 0;
             $scoreB = is_numeric($b['ai_score'] ?? 0) ? (int)($b['ai_score'] ?? 0) : 0;
@@ -338,7 +344,9 @@ class AILicenseAnalyticsService
             ];
         }
         // Sort by renewal probability (lowest first - highest risk)
-        /** @var array<int, array<string, mixed>> $predictions */
+        /**
+ * @var array<int, array<string, mixed>> $predictions
+*/
         usort($predictions, function (array $a, array $b): int {
             $probA = is_numeric($a['renewal_probability'] ?? 0.0) ? (float)($a['renewal_probability'] ?? 0.0) : 0.0;
             $probB = is_numeric($b['renewal_probability'] ?? 0.0) ? (float)($b['renewal_probability'] ?? 0.0) : 0.0;
@@ -388,7 +396,9 @@ class AILicenseAnalyticsService
             ];
         }
         // Sort by churn score (highest first - highest risk)
-        /** @var array<int, array<string, mixed>> $churnPredictions */
+        /**
+ * @var array<int, array<string, mixed>> $churnPredictions
+*/
         usort($churnPredictions, function (array $a, array $b): int {
             $scoreA = is_numeric($a['churn_score'] ?? 0.0) ? (float)($a['churn_score'] ?? 0.0) : 0.0;
             $scoreB = is_numeric($b['churn_score'] ?? 0.0) ? (float)($b['churn_score'] ?? 0.0) : 0.0;
@@ -517,7 +527,7 @@ class AILicenseAnalyticsService
         $growthRate = is_numeric($stats['growth_rate'] ?? 0) ? (float)($stats['growth_rate'] ?? 0) : 0.0;
         $churnRate = is_numeric($stats['churn_rate'] ?? 0) ? (float)($stats['churn_rate'] ?? 0) : 0.0;
         $activeLicenses = is_numeric($stats['active_licenses'] ?? 0) ? (float)($stats['active_licenses'] ?? 0) : 0.0;
-        
+
         $factors = [
             'growth_rate' => min(1.0, max(0.0, $growthRate / 100)),
             'churn_rate' => max(0.0, 1.0 - ($churnRate / 100)),
@@ -658,7 +668,9 @@ class AILicenseAnalyticsService
                 });
             });
             $arrayResult = is_array($result) ? $result : [];
-            /** @var array<string, mixed> $typedResult */
+            /**
+ * @var array<string, mixed> $typedResult
+*/
             $typedResult = $arrayResult;
             return $typedResult;
         } catch (\Exception $e) {
@@ -973,6 +985,7 @@ class AILicenseAnalyticsService
 
     /**
      * Get revenue trends for the specified period.
+     *
      * @return array<string, mixed>
      */
     private function getRevenueTrends(Carbon $startDate): array
@@ -984,18 +997,19 @@ class AILicenseAnalyticsService
             ->groupBy('date')
             ->orderBy('date')
             ->get();
-        
+
         $revenueTrends = [];
         foreach ($revenueData as $row) {
             $dateKey = is_string($row->date) ? $row->date : '';
             $revenueTrends[$dateKey] = $row->revenue;
         }
-        
+
         return ['revenue_trends' => $revenueTrends];
     }
 
     /**
      * Predict product performance using AI algorithms.
+     *
      * @return array<string, mixed>
      */
     private function predictProductPerformance(int $days): array
@@ -1024,6 +1038,7 @@ class AILicenseAnalyticsService
 
     /**
      * Predict market demand using AI algorithms.
+     *
      * @return array<string, mixed>
      */
     private function predictMarketDemand(int $days): array
@@ -1038,6 +1053,7 @@ class AILicenseAnalyticsService
 
     /**
      * Perform customer segmentation analysis.
+     *
      * @return array<string, mixed>
      */
     private function performCustomerSegmentation(int $days): array
@@ -1052,6 +1068,7 @@ class AILicenseAnalyticsService
 
     /**
      * Analyze customer behavior patterns.
+     *
      * @return array<string, mixed>
      */
     private function analyzeCustomerBehavior(int $days): array
@@ -1066,6 +1083,7 @@ class AILicenseAnalyticsService
 
     /**
      * Analyze customer lifetime value.
+     *
      * @return array<string, mixed>
      */
     private function analyzeCustomerLifetimeValue(int $days): array
@@ -1079,6 +1097,7 @@ class AILicenseAnalyticsService
 
     /**
      * Predict customer satisfaction scores.
+     *
      * @return array<string, mixed>
      */
     private function predictCustomerSatisfaction(int $days): array
@@ -1093,6 +1112,7 @@ class AILicenseAnalyticsService
 
     /**
      * Generate customer recommendations.
+     *
      * @return array<string, mixed>
      */
     private function generateCustomerRecommendations(int $days): array
@@ -1166,6 +1186,7 @@ class AILicenseAnalyticsService
 
     /**
      * Generate product recommendations.
+     *
      * @return array<string, mixed>
      */
     private function generateProductRecommendations(int $productId): array
@@ -1180,6 +1201,7 @@ class AILicenseAnalyticsService
 
     /**
      * Get revenue by country.
+     *
      * @return array<string, mixed>
      */
     private function getRevenueByCountry(int $days): array
@@ -1194,6 +1216,7 @@ class AILicenseAnalyticsService
 
     /**
      * Calculate market penetration.
+     *
      * @return array<string, mixed>
      */
     private function calculateMarketPenetration(int $days): array
@@ -1207,6 +1230,7 @@ class AILicenseAnalyticsService
 
     /**
      * Identify growth opportunities.
+     *
      * @return array<string, mixed>
      */
     private function identifyGrowthOpportunities(int $days): array
@@ -1221,6 +1245,7 @@ class AILicenseAnalyticsService
 
     /**
      * Detect license creation anomalies.
+     *
      * @return array<string, mixed>
      */
     private function detectLicenseCreationAnomalies(int $days): array
@@ -1234,6 +1259,7 @@ class AILicenseAnalyticsService
 
     /**
      * Detect suspicious activity.
+     *
      * @return array<string, mixed>
      */
     private function detectSuspiciousActivity(int $days): array
@@ -1247,6 +1273,7 @@ class AILicenseAnalyticsService
 
     /**
      * Detect revenue anomalies.
+     *
      * @return array<string, mixed>
      */
     private function detectRevenueAnomalies(int $days): array
@@ -1260,6 +1287,7 @@ class AILicenseAnalyticsService
 
     /**
      * Calculate confidence score for predictions.
+     *
      * @param array<string, mixed> $data
      */
     private function calculateConfidenceScore(array $data): float
@@ -1269,6 +1297,7 @@ class AILicenseAnalyticsService
 
     /**
      * Get recommended action based on analysis.
+     *
      * @param array<string, mixed> $data
      */
     private function getRecommendedAction(array $data): string
@@ -1278,6 +1307,7 @@ class AILicenseAnalyticsService
 
     /**
      * Get historical revenue data.
+     *
      * @return array<string, mixed>
      */
     private function getHistoricalRevenue(int $days): array
@@ -1291,6 +1321,7 @@ class AILicenseAnalyticsService
 
     /**
      * Apply time series forecasting.
+     *
      * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
@@ -1305,6 +1336,7 @@ class AILicenseAnalyticsService
 
     /**
      * Calculate confidence interval.
+     *
      * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
@@ -1315,6 +1347,7 @@ class AILicenseAnalyticsService
 
     /**
      * Analyze revenue trend.
+     *
      * @param array<string, mixed> $data
      */
     private function analyzeRevenueTrend(array $data): string
@@ -1348,6 +1381,7 @@ class AILicenseAnalyticsService
 
     /**
      * Get churn prevention actions.
+     *
      * @return array<string, mixed>
      */
     private function getChurnPreventionActions(int $userId): array
@@ -1361,6 +1395,7 @@ class AILicenseAnalyticsService
 
     /**
      * Get customer history.
+     *
      * @return array<string, mixed>
      */
     private function getCustomerHistory(int $userId): array
@@ -1382,6 +1417,7 @@ class AILicenseAnalyticsService
 
     /**
      * Get payment history.
+     *
      * @return array<string, mixed>
      */
     private function getPaymentHistory(int $userId): array
