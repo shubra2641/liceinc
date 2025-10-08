@@ -244,8 +244,8 @@ class PurchaseCodeService
                         ->orWhere('licenseKey', $purchaseCode);
                 })
                 ->where(function ($q) {
-                    $q->whereNull('license_expiresAt')
-                        ->orWhere('license_expiresAt', '>', now());
+                    $q->whereNull('licenseExpiresAt')
+                        ->orWhere('licenseExpiresAt', '>', now());
                 });
             // If product ID is specified, ensure the license belongs to that product
             if ($productId) {
@@ -351,12 +351,12 @@ class PurchaseCodeService
                 ];
             }
             // Check if license is expired
-            if ($license->license_expiresAt && now()->greaterThan($license->license_expiresAt)) {
+            if ($license->licenseExpiresAt && now()->greaterThan($license->licenseExpiresAt)) {
                 return [
                     'success' => false,
                     'error' => 'license_expired',
                     'message' => trans('license_status.license_expired'),
-                    'expiresAt' => $license->license_expiresAt,
+                    'expiresAt' => $license->licenseExpiresAt,
                     'source' => 'database_raw',
                 ];
             }
@@ -455,7 +455,7 @@ class PurchaseCodeService
             'support_expiresAt' => data_get($envatoData, 'supported_until')
                 ? date('Y-m-d H:i:s', strtotime(is_string(data_get($envatoData, 'supported_until')) ? data_get($envatoData, 'supported_until') : '') ?: time())
                 : null,
-            'license_expiresAt' => null, // Lifetime license
+            'licenseExpiresAt' => null, // Lifetime license
         ];
         // Add product ID if specified
         if ($productId) {
@@ -479,8 +479,8 @@ class PurchaseCodeService
             ->where('productId', $productId)
             ->where('status', 'active')
             ->where(function ($q) {
-                $q->whereNull('license_expiresAt')
-                    ->orWhere('license_expiresAt', '>', now());
+                $q->whereNull('licenseExpiresAt')
+                    ->orWhere('licenseExpiresAt', '>', now());
             })
             ->exists();
     }
@@ -507,8 +507,8 @@ class PurchaseCodeService
         $userProductIds = $user->licenses()
             ->where('status', 'active')
             ->where(function ($q) {
-                $q->whereNull('license_expiresAt')
-                    ->orWhere('license_expiresAt', '>', now());
+                $q->whereNull('licenseExpiresAt')
+                    ->orWhere('licenseExpiresAt', '>', now());
             })
             ->pluck('productId')
             ->toArray();

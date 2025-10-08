@@ -128,8 +128,8 @@ class DashboardController extends Controller
             return License::forUser($user)
                 ->where('status', 'active')
                 ->where(function ($q) {
-                    $q->whereNull('license_expiresAt')
-                        ->orWhere('license_expiresAt', '>', now());
+                    $q->whereNull('licenseExpiresAt')
+                        ->orWhere('licenseExpiresAt', '>', now());
                 })->count();
         } catch (\Exception $e) {
             Log::error('Failed to get active licenses count', [

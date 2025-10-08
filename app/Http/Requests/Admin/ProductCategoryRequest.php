@@ -41,7 +41,7 @@ class ProductCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        $category = $this->route('product_category');
+        $category = $this->route('productCategory');
         $categoryId = $category && is_object($category) && property_exists($category, 'id') ? $category->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [

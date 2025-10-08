@@ -164,7 +164,7 @@ class KbArticleController extends Controller
      * // Request:
      * POST /admin/kb-articles
      * {
-     *     "kb_category_id": 1,
+     *     "kbCategory_id": 1,
      *     "title": "How to Install",
      *     "content": "Installation guide...",
      *     "image": [file]
@@ -196,9 +196,9 @@ class KbArticleController extends Controller
             }
             DB::beginTransaction();
             $validated = $request->validate([
-                'kb_category_id' => ['required', 'exists:kb_categories, id'],
+                'kbCategory_id' => ['required', 'exists:kb_categories, id'],
                 'title' => ['required', 'string', 'max:255'],
-                'slug' => ['nullable', 'string', 'max:255', 'unique:kb_articles, slug'],
+                'slug' => ['nullable', 'string', 'max:255', 'unique:kbArticles, slug'],
                 'excerpt' => ['nullable', 'string'],
                 'content' => ['required', 'string'],
                 'image' => ['nullable', 'image', 'max:2048'],
@@ -329,7 +329,7 @@ class KbArticleController extends Controller
      * // Request:
      * PUT /admin/kb-articles/{id}
      * {
-     *     "kb_category_id": 1,
+     *     "kbCategory_id": 1,
      *     "title": "Updated Title",
      *     "content": "Updated content...",
      *     "image": [file]
@@ -361,9 +361,9 @@ class KbArticleController extends Controller
             }
             DB::beginTransaction();
             $validated = $request->validate([
-                'kb_category_id' => ['required', 'exists:kb_categories, id'],
+                'kbCategory_id' => ['required', 'exists:kb_categories, id'],
                 'title' => ['required', 'string', 'max:255'],
-                'slug' => ['required', 'string', 'max:255', 'unique:kb_articles, slug, ' . $kbArticle->id],
+                'slug' => ['required', 'string', 'max:255', 'unique:kbArticles, slug, ' . $kbArticle->id],
                 'excerpt' => ['nullable', 'string'],
                 'content' => ['required', 'string'],
                 'image' => ['nullable', 'image', 'max:2048'],

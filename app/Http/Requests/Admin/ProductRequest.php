@@ -74,10 +74,10 @@ class ProductRequest extends FormRequest
                 'integer',
                 'exists:product_categories,id',
             ],
-            'programming_language_id' => [
+            'programmingLanguage_id' => [
                 'nullable',
                 'integer',
-                'exists:programming_languages,id',
+                'exists:programmingLanguages,id',
             ],
             'price' => [
                 'required',
@@ -188,7 +188,7 @@ class ProductRequest extends FormRequest
             'short_description.regex' => 'Short description contains invalid characters.',
             'category_id.required' => 'Product category is required.',
             'category_id.exists' => 'Selected category does not exist.',
-            'programming_language_id.exists' => 'Selected programming language does not exist.',
+            'programmingLanguage_id.exists' => 'Selected programming language does not exist.',
             'price.required' => 'Product price is required.',
             'price.min' => 'Price must be at least 0.',
             'price.max' => 'Price cannot exceed 999,999.99.',
@@ -222,7 +222,7 @@ class ProductRequest extends FormRequest
             'description' => 'product description',
             'short_description' => 'short description',
             'category_id' => 'product category',
-            'programming_language_id' => 'programming language',
+            'programmingLanguage_id' => 'programming language',
             'price' => 'product price',
             'currency' => 'currency',
             'image' => 'product image',

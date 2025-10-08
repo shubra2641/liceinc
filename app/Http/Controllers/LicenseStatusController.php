@@ -374,14 +374,14 @@ class LicenseStatusController extends Controller
                 ? $license->product->name
                 : 'Not specified',
             'createdAt' => $license->createdAt?->format('Y-m-d H:i:s'),
-            'expiresAt' => $license->license_expiresAt ? $license->license_expiresAt->format('Y-m-d H:i:s') : null,
-            'is_expired' => $license->license_expiresAt && $license->license_expiresAt->isPast(),
-            'days_remaining' => $license->license_expiresAt
-                ? max(0, now()->diffInDays($license->license_expiresAt, false))
+            'expiresAt' => $license->licenseExpiresAt ? $license->licenseExpiresAt->format('Y-m-d H:i:s') : null,
+            'is_expired' => $license->licenseExpiresAt && $license->licenseExpiresAt->isPast(),
+            'days_remaining' => $license->licenseExpiresAt
+                ? max(0, now()->diffInDays($license->licenseExpiresAt, false))
                 : null,
             'domains' => $license->domains->toArray(),
             'supported_until' => $license->supported_until,
-            'max_domains' => $license->max_domains ?? 1,
+            'maxDomains' => $license->maxDomains ?? 1,
             'used_domains' => $license->domains->count(),
             // Attach envato verification results when available
             'envato_data' => $envatoData,
@@ -422,7 +422,7 @@ class LicenseStatusController extends Controller
     {
         try {
             if ($license->status === 'active') {
-                if ($license->license_expiresAt && $license->license_expiresAt->isPast()) {
+                if ($license->licenseExpiresAt && $license->licenseExpiresAt->isPast()) {
                     return __('license_status.expired');
                 }
                 return __('license_status.active');

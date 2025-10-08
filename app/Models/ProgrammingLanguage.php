@@ -73,7 +73,7 @@ class ProgrammingLanguage extends Model
      */
     public function products(): HasMany
     {
-        return $this->hasMany(Product::class, 'programming_language');
+        return $this->hasMany(Product::class, 'programmingLanguage');
     }
     protected static function boot()
     {
@@ -108,7 +108,7 @@ class ProgrammingLanguage extends Model
 declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n" .
                 " * License: {LICENSE_CODE}\n * Valid Until: {VALID_UNTIL}\n */\n\n" .
                 "define('LICENSE_CODE', '{LICENSE_CODE}');\n" .
-                "define('LICENSE_DOMAIN', '{DOMAIN}');\n" .
+                "define('licenseDomain', '{DOMAIN}');\n" .
                 "define('LICENSE_VALID_UNTIL', '{VALID_UNTIL}');\n\n" .
                 "define('PRODUCT_NAME', '{PRODUCT_NAME}');\n" .
                 "define('PRODUCT_VERSION', '{PRODUCT_VERSION}');\n\n" .
@@ -135,7 +135,7 @@ declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAM
             'python' => "# License Verification\n# Product: {PRODUCT_NAME}\n# Domain: {DOMAIN}\n" .
                 "# License: {LICENSE_CODE}\n# Valid Until: {VALID_UNTIL}\n\n" .
                 "LICENSE_CODE = '{LICENSE_CODE}'\n" .
-                "LICENSE_DOMAIN = '{DOMAIN}'\n" .
+                "licenseDomain = '{DOMAIN}'\n" .
                 "LICENSE_VALID_UNTIL = '{VALID_UNTIL}'\n\n" .
                 "PRODUCT_NAME = '{PRODUCT_NAME}'\n" .
                 "PRODUCT_VERSION = '{PRODUCT_VERSION}'\n\n" .

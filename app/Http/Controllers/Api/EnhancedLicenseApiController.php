@@ -330,7 +330,7 @@ class EnhancedLicenseApiController extends BaseController
             $statusData = [
                 'licenseId' => $license->id,
                 'type' => $license->licenseType,
-                'expiresAt' => $license->license_expiresAt?->toISOString(),
+                'expiresAt' => $license->licenseExpiresAt?->toISOString(),
                 'support_expiresAt' => $license->support_expiresAt?->toISOString(),
                 'status' => $license->status,
                 'isActive' => $isActive,
@@ -500,7 +500,7 @@ class EnhancedLicenseApiController extends BaseController
         return [
             'licenseId' => $license->id,
             'licenseType' => $license->licenseType,
-            'expiresAt' => $license->license_expiresAt?->toISOString(),
+            'expiresAt' => $license->licenseExpiresAt?->toISOString(),
             'support_expiresAt' => $license->support_expiresAt?->toISOString(),
             'status' => $license->status,
             'verification_method' => 'database',
@@ -541,7 +541,7 @@ class EnhancedLicenseApiController extends BaseController
         return [
             'licenseId' => $license->id,
             'licenseType' => $license->licenseType,
-            'expiresAt' => $license->license_expiresAt?->toISOString(),
+            'expiresAt' => $license->licenseExpiresAt?->toISOString(),
             'support_expiresAt' => $license->support_expiresAt?->toISOString(),
             'status' => $license->status,
             'verification_method' => 'envato_auto_created',
@@ -556,7 +556,7 @@ class EnhancedLicenseApiController extends BaseController
         if ($license->status !== 'active') {
             return false;
         }
-        if ($license->license_expiresAt && $license->license_expiresAt->isPast()) {
+        if ($license->licenseExpiresAt && $license->licenseExpiresAt->isPast()) {
             return false;
         }
 
@@ -634,7 +634,7 @@ class EnhancedLicenseApiController extends BaseController
             'licenseKey' => $purchaseCode,
             'licenseType' => $product->licenseType ?? 'regular',
             'support_expiresAt' => now()->addDays($product->supportDays ?? 365),
-            'license_expiresAt' => $product->licenseType === 'extended' ? now()->addYear() : null,
+            'licenseExpiresAt' => $product->licenseType === 'extended' ? now()->addYear() : null,
             'status' => 'active',
         ]);
     }
@@ -652,7 +652,7 @@ class EnhancedLicenseApiController extends BaseController
             'licenseKey' => $this->generateLicenseKey(),
             'licenseType' => $product->licenseType ?? 'regular',
             'support_expiresAt' => now()->addDays($product->supportDays ?? 365),
-            'license_expiresAt' => $product->licenseType === 'extended' ? now()->addYear() : null,
+            'licenseExpiresAt' => $product->licenseType === 'extended' ? now()->addYear() : null,
             'status' => 'active',
         ]);
         if (isset($validated['domain'])) {

@@ -71,8 +71,8 @@ class LicenseService
                     'productId' => $product->id,
                     'licenseType' => $product->licenseType ?? 'single',
                     'status' => 'active',
-                    'max_domains' => $product->max_domains ?? 1,
-                    'license_expiresAt' => $this->calculateLicenseExpiry($product),
+                    'maxDomains' => $product->maxDomains ?? 1,
+                    'licenseExpiresAt' => $this->calculateLicenseExpiry($product),
                     'support_expiresAt' => $this->calculateSupportExpiry($product),
                     'notes' => $paymentGateway
                         ? "Purchased via {$this->sanitizeInput($paymentGateway)}"
@@ -227,8 +227,8 @@ class LicenseService
                 ->where('productId', $product->id)
                 ->where('status', 'active')
                 ->where(function ($q) {
-                    $q->whereNull('license_expiresAt')
-                        ->orWhere('license_expiresAt', '>', now());
+                    $q->whereNull('licenseExpiresAt')
+                        ->orWhere('licenseExpiresAt', '>', now());
                 })
                 ->first();
             if ($existingLicense) {
@@ -302,8 +302,8 @@ class LicenseService
                 ->with('product')
                 ->where('status', 'active')
                 ->where(function ($q) {
-                    $q->whereNull('license_expiresAt')
-                        ->orWhere('license_expiresAt', '>', now());
+                    $q->whereNull('licenseExpiresAt')
+                        ->orWhere('licenseExpiresAt', '>', now());
                 })
                 ->get();
             return $licenses;
@@ -360,10 +360,10 @@ class LicenseService
                     'message' => 'License is not active',
                 ];
             }
-            if ($license->license_expiresAt && $license->license_expiresAt->isPast()) {
+            if ($license->licenseExpiresAt && $license->licenseExpiresAt->isPast()) {
                 Log::warning('License validation failed: License has expired', [
                     'licenseId' => $license->id,
-                    'expiresAt' => $license->license_expiresAt->toISOString(),
+                    'expiresAt' => $license->licenseExpiresAt->toISOString(),
                     'domain' => $domain ? $this->hashForLogging($domain) : null,
                 ]);
                 return [

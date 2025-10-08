@@ -144,7 +144,7 @@ class LicenseController extends Controller
      *     "licenseType": "regular",
      *     "status": "active",
      *     "expiresAt": "2024-12-31",
-     *     "max_domains": 1,
+     *     "maxDomains": 1,
      *     "notes": "License notes"
      * }
      */
@@ -157,7 +157,7 @@ class LicenseController extends Controller
                 'licenseType' => 'required|in:regular, extended',
                 'status' => 'required|in:active, inactive, suspended, expired',
                 'expiresAt' => 'nullable|date|after:today',
-                'max_domains' => 'nullable|integer|min:1',
+                'maxDomains' => 'nullable|integer|min:1',
                 'notes' => 'nullable|string|max:1000',
             ]);
             // Keep backwards-compatible customer_id if passed (optional) - map to userId
@@ -178,7 +178,7 @@ class LicenseController extends Controller
             // Map UI field to DB column with proper parsing and allowing null to clear
             if (array_key_exists('expiresAt', $validatedArray)) {
                 $expiresAt = $validatedArray['expiresAt'];
-                $validatedArray['license_expiresAt'] = ($expiresAt !== null
+                $validatedArray['licenseExpiresAt'] = ($expiresAt !== null
                     && $expiresAt !== '')
                     ? Carbon::parse(is_string($expiresAt) ? $expiresAt : '')->format('Y-m-d H:i:s')
                     : null;
@@ -191,8 +191,8 @@ class LicenseController extends Controller
             // This ensures consistency between what users enter and what's stored
             $validatedArray['purchase_code'] = $validatedArray['licenseKey'];
             // Set default values
-            if (! isset($validatedArray['max_domains'])) {
-                $validatedArray['max_domains'] = 1;
+            if (! isset($validatedArray['maxDomains'])) {
+                $validatedArray['maxDomains'] = 1;
             }
             $validated = $validatedArray;
             // @phpstan-ignore-next-line
@@ -240,7 +240,7 @@ class LicenseController extends Controller
             'status' => ['required', Rule::in(['active', 'inactive', 'suspended', 'expired'])],
             'expiresAt' => ['nullable', 'date'],
             'notes' => ['nullable', 'string'],
-            'max_domains' => ['nullable', 'integer', 'min:1'],
+            'maxDomains' => ['nullable', 'integer', 'min:1'],
         ]);
         $validatedArray = is_array($validated) ? $validated : [];
         if ($request->filled('customer_id')) {
@@ -250,15 +250,15 @@ class LicenseController extends Controller
         // Map UI field to DB column with proper parsing and allowing null to clear
         if (array_key_exists('expiresAt', $validatedArray)) {
             $expiresAt = $validatedArray['expiresAt'];
-            $validatedArray['license_expiresAt'] = ($expiresAt !== null && $expiresAt !== '')
+            $validatedArray['licenseExpiresAt'] = ($expiresAt !== null && $expiresAt !== '')
                 ? Carbon::parse(is_string($expiresAt) ? $expiresAt : '')->format('Y-m-d H:i:s')
                 : null;
             unset($validatedArray['expiresAt']);
             $validated = $validatedArray;
         }
         // Set default values
-        if (! isset($validatedArray['max_domains'])) {
-            $validatedArray['max_domains'] = 1;
+        if (! isset($validatedArray['maxDomains'])) {
+            $validatedArray['maxDomains'] = 1;
             $validated = $validatedArray;
         }
         // @phpstan-ignore-next-line

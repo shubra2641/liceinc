@@ -245,7 +245,7 @@ class ProductUpdateController extends Controller
     {
         $productUpdate->load('product');
 
-        return view('admin.product-updates.show', ['product_update' => $productUpdate]);
+        return view('admin.product-updates.show', ['productUpdate' => $productUpdate]);
     }
 
     /**
@@ -273,7 +273,7 @@ class ProductUpdateController extends Controller
     {
         $products = Product::where('isActive', true)->get();
 
-        return view('admin.product-updates.edit', ['product_update' => $productUpdate, 'products' => $products]);
+        return view('admin.product-updates.edit', ['productUpdate' => $productUpdate, 'products' => $products]);
     }
 
     /**

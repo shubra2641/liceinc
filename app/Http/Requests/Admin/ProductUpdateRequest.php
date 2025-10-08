@@ -40,7 +40,7 @@ class ProductUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $update = $this->route('product_update');
+        $update = $this->route('productUpdate');
         $updateId = $update && is_object($update) && property_exists($update, 'id') ? $update->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
@@ -55,10 +55,10 @@ class ProductUpdateRequest extends FormRequest
                 'max:50',
                 'regex:/^[0-9]+\.[0-9]+\.[0-9]+$/',
                 $isUpdate
-                    ? Rule::unique('product_updates', 'version')
+                    ? Rule::unique('productUpdates', 'version')
                         ->where('productId', $this->getProductId())
                         ->ignore($updateId)
-                    : Rule::unique('product_updates', 'version')
+                    : Rule::unique('productUpdates', 'version')
                         ->where('productId', $this->getProductId()),
             ],
             'title' => [

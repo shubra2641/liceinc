@@ -1025,7 +1025,7 @@ class InstallController extends Controller
                 'type' => 'license',
             ]);
             Setting::create([
-                'key' => 'license_domain',
+                'key' => 'licenseDomain',
                 'value' => $licenseConfig['domain'],
                 'type' => 'license',
             ]);

@@ -441,8 +441,8 @@ class EmailService
             'currency' => $this->sanitizeString($invoice->currency),
             'payment_method' => $this->sanitizeString(ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown')),
             'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
-            'license_expiresAt' => $license->license_expiresAt ?
-                $license->license_expiresAt->format('M d, Y') : 'Never',
+            'licenseExpiresAt' => $license->licenseExpiresAt ?
+                $license->licenseExpiresAt->format('M d, Y') : 'Never',
         ]);
     }
     /**
@@ -545,7 +545,7 @@ class EmailService
      */
     public function sendTicketReply(User $user, array $ticketData): bool
     {
-        return $this->sendToUser($user, 'user_ticket_reply', array_merge($ticketData, [
+        return $this->sendToUser($user, 'user_ticketReply', array_merge($ticketData, [
             'ticket_id' => $ticketData['ticket_id'] ?? '',
             'ticket_subject' => $ticketData['ticket_subject'] ?? '',
             'reply_message' => $ticketData['reply_message'] ?? '',
@@ -719,7 +719,7 @@ class EmailService
      */
     public function sendAdminTicketReply(array $ticketData): bool
     {
-        return $this->sendToAdmin('admin_ticket_reply', array_merge($ticketData, [
+        return $this->sendToAdmin('admin_ticketReply', array_merge($ticketData, [
             'ticket_id' => $ticketData['ticket_id'] ?? '',
             'ticket_subject' => $ticketData['ticket_subject'] ?? '',
             'customer_name' => $ticketData['customer_name'] ?? '',
@@ -809,9 +809,9 @@ class EmailService
             'product_name' => $license->product->name ?? '',
             'licenseKey' => $license->licenseKey,
             'licenseType' => ucfirst((string)($license->licenseType ?? 'Unknown')),
-            'max_domains' => $license->max_domains,
-            'license_expiresAt' => $license->license_expiresAt ?
-                $license->license_expiresAt->format('M d, Y') : 'Never',
+            'maxDomains' => $license->maxDomains,
+            'licenseExpiresAt' => $license->licenseExpiresAt ?
+                $license->licenseExpiresAt->format('M d, Y') : 'Never',
             'support_expiresAt' => $license->support_expiresAt ?
                 $license->support_expiresAt->format('M d, Y') : 'Never',
             'created_date' => $license->createdAt?->format('M d, Y \a\t g:i A') ?? 'Unknown',
@@ -834,7 +834,7 @@ class EmailService
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
             'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
             'licenseType' => ucfirst((string)($license->licenseType ?? 'Unknown')),
-            'max_domains' => $license->max_domains,
+            'maxDomains' => $license->maxDomains,
         ]);
     }
     /**

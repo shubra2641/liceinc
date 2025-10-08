@@ -51,7 +51,7 @@ class ProductSearchRequest extends FormRequest
             'language' => [
                 'nullable',
                 'integer',
-                'exists:programming_languages,id',
+                'exists:programmingLanguages,id',
             ],
             'price_filter' => [
                 'nullable',

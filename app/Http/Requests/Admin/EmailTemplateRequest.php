@@ -40,7 +40,7 @@ class EmailTemplateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $template = $this->route('email_template');
+        $template = $this->route('emailTemplate');
         $templateId = $template && is_object($template) && property_exists($template, 'id') ? $template->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         $route = $this->route();
@@ -70,8 +70,8 @@ class EmailTemplateRequest extends FormRequest
                 'string',
                 'max:255',
                 $isUpdate ?
-                    Rule::unique('email_templates', 'name')->ignore($templateId) :
-                    'unique:email_templates, name',
+                    Rule::unique('emailTemplates', 'name')->ignore($templateId) :
+                    'unique:emailTemplates, name',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
             'subject' => [

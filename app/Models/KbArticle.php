@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
- * @property int $kb_category_id
+ * @property int $kbCategory_id
  * @property int|null $productId
  * @property string $title
  * @property string $slug
@@ -74,7 +74,7 @@ class KbArticle extends Model
     protected static $factory = KbArticleFactory::class;
 
     protected $fillable = [
-        'kb_category_id', 'title', 'slug', 'excerpt', 'content', 'views', 'is_published',
+        'kbCategory_id', 'title', 'slug', 'excerpt', 'content', 'views', 'is_published',
         'serial', 'requires_serial', 'serial_message', 'image', 'meta_title', 'meta_description', 'meta_keywords',
         'allow_comments', 'is_featured',
     ];
@@ -88,7 +88,7 @@ class KbArticle extends Model
      */
     public function category(): BelongsTo
     {
-        return $this->belongsTo(KbCategory::class, 'kb_category_id');
+        return $this->belongsTo(KbCategory::class, 'kbCategory_id');
     }
     /**
      * @return BelongsTo<Product, $this>

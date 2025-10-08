@@ -468,8 +468,8 @@ class ProductFileService
             ->where('userId', $userId)
             ->where('status', 'active')
             ->where(function ($q) {
-                $q->whereNull('license_expiresAt')
-                    ->orWhere('license_expiresAt', '>', now());
+                $q->whereNull('licenseExpiresAt')
+                    ->orWhere('licenseExpiresAt', '>', now());
             })
             ->exists();
     }

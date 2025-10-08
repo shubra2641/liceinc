@@ -170,7 +170,7 @@ class TicketCategoryController extends Controller
  * @var view-string $viewName
 */
             $viewName = 'admin.ticket-categories.show';
-            return view($viewName, ['ticket_category' => $ticketCategory]);
+            return view($viewName, ['ticketCategory' => $ticketCategory]);
         } catch (\Exception $e) {
             Log::error('Ticket category view failed to load', [
                 'error' => $e->getMessage(),
@@ -182,7 +182,7 @@ class TicketCategoryController extends Controller
 */
             $viewName = 'admin.ticket-categories.show';
             return view($viewName, [
-                'ticket_category' => $ticketCategory,
+                'ticketCategory' => $ticketCategory,
                 'error' => 'Unable to load the category details. Please try again later.',
             ]);
         }

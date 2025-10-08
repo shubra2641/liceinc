@@ -30,15 +30,15 @@ use Carbon\Carbon;
  * @property int|null $extended_supportDays
  * @property \Illuminate\Support\Carbon|null $extended_supported_until
  * @property array<array-key, mixed>|null $kb_categories Array of KB category IDs linked to this product
- * @property array<array-key, mixed>|null $kb_articles Array of KB article IDs linked to this product
+ * @property array<array-key, mixed>|null $kbArticles Array of KB article IDs linked to this product
  * @property bool $kb_access_required Whether KB access is required for this product
  * @property string|null $kb_access_message Custom message for KB access requirement
  * @property bool $isActive
  * @property \Illuminate\Support\Carbon|null $createdAt
  * @property \Illuminate\Support\Carbon|null $updatedAt
  * @property int|null $category_id
- * @property int|null $kb_category_id
- * @property int|null $programming_language
+ * @property int|null $kbCategory_id
+ * @property int|null $programmingLanguage
  * @property string|null $integration_filePath
  * @property float|null $renewalPrice
  * @property string|null $renewalPeriod
@@ -78,7 +78,7 @@ use Carbon\Carbon;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
  * @property-read int|null $invoices_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle> $kbArticles
- * @property-read int|null $kb_articles_count
+ * @property-read int|null $kbArticles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory> $kbCategories
  * @property-read int|null $kb_categories_count
  * @property-read \App\Models\ProductUpdate|null $latestUpdate
@@ -171,9 +171,9 @@ class Product extends Model
         'extended_supported_until',
         'isActive',
         'integration_filePath',
-        'programming_language',
+        'programmingLanguage',
         'category_id',
-        'kb_category_id',
+        'kbCategory_id',
         'requires_domain',
         'features',
         'requirements',
@@ -188,7 +188,7 @@ class Product extends Model
         'gallery_images',
         'version',
         'kb_categories',
-        'kb_articles',
+        'kbArticles',
         'kb_access_required',
         'kb_access_message',
         'stock',
@@ -210,8 +210,8 @@ class Product extends Model
         'stock_quantity' => 'integer',
         'stock' => 'integer',
         'category_id' => 'integer',
-        'programming_language' => 'integer',
-        'kb_category_id' => 'integer',
+        'programmingLanguage' => 'integer',
+        'kbCategory_id' => 'integer',
         'envato_item_id' => 'integer',
         'version' => 'string',
         'image' => 'string',
@@ -238,7 +238,7 @@ class Product extends Model
         'tags' => 'array',
         'gallery_images' => 'array',
         'kb_categories' => 'array',
-        'kb_articles' => 'array',
+        'kbArticles' => 'array',
         'auto_renewal' => 'boolean',
     ];
     /**
@@ -300,14 +300,14 @@ class Product extends Model
      */
     public function programmingLanguage(): BelongsTo
     {
-        return $this->belongsTo(ProgrammingLanguage::class, 'programming_language');
+        return $this->belongsTo(ProgrammingLanguage::class, 'programmingLanguage');
     }
     /**
      * @return BelongsTo<ProductCategory, $this>
      */
     public function category(): BelongsTo
     {
-        // Specify foreign key explicitly to avoid default 'product_category_id'
+        // Specify foreign key explicitly to avoid default 'productCategory_id'
         return $this->belongsTo(ProductCategory::class, 'category_id');
     }
     /**
@@ -318,7 +318,7 @@ class Product extends Model
      */
     public function kbCategories(): BelongsToMany
     {
-        return $this->belongsToMany(KbCategory::class, 'product_kb_categories', 'productId', 'kb_category_id');
+        return $this->belongsToMany(KbCategory::class, 'product_kb_categories', 'productId', 'kbCategory_id');
     }
     /**
      * Get KB articles linked to this product.
@@ -328,7 +328,7 @@ class Product extends Model
      */
     public function kbArticles(): BelongsToMany
     {
-        return $this->belongsToMany(KbArticle::class, 'product_kb_articles', 'productId', 'kb_article_id');
+        return $this->belongsToMany(KbArticle::class, 'product_kbArticles', 'productId', 'kbArticle_id');
     }
     /**
      * Get KB categories by IDs stored in JSON.
@@ -379,19 +379,19 @@ class Product extends Model
      */
     public function getKbArticlesCollection(): \Illuminate\Database\Eloquent\Collection
     {
-        if (! $this->kb_articles) {
+        if ($this->kbArticles->count() === 0) {
             return new \Illuminate\Database\Eloquent\Collection();
         }
-        return KbArticle::whereIn('id', $this->kb_articles)->get();
+        return KbArticle::whereIn('id', $this->kbArticles->pluck('id')->toArray())->get();
     }
     /**
      * Check if product has KB access requirements.
      */
     public function hasKbAccess(): bool
     {
-        return $this->kb_access_required &&
+        return (bool) $this->kb_access_required &&
                ((is_array($this->kb_categories) && count($this->kb_categories) > 0) ||
-                (is_array($this->kb_articles) && count($this->kb_articles) > 0));
+                ($this->kbArticles->count() > 0));
     }
     /**
      * Get all accessible KB content (categories + articles from selected categories).
@@ -413,12 +413,13 @@ class Product extends Model
             $categories = KbCategory::whereIn('id', $this->kb_categories)->get();
             $accessibleContent['categories'] = $categories;
             // Get all articles from selected categories
-            $articles = KbArticle::whereIn('kb_category_id', $this->kb_categories)->get();
+            $articles = KbArticle::whereIn('kbCategory_id', $this->kb_categories)->get();
             $accessibleContent['articles'] = $articles;
         }
         // Add specifically selected articles
-        if (is_array($this->kb_articles) && count($this->kb_articles) > 0) {
-            $specificArticles = KbArticle::whereIn('id', $this->kb_articles)->get();
+        if ($this->kbArticles->count() > 0) {
+            $kbArticlesIds = $this->kbArticles->pluck('id')->toArray();
+            $specificArticles = KbArticle::whereIn('id', $kbArticlesIds)->get();
             $accessibleContent['articles'] = $accessibleContent['articles']->merge($specificArticles)->unique('id');
         }
         return $accessibleContent;

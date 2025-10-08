@@ -31,7 +31,7 @@ class LicenseRequest extends FormRequest
             'status' => ['required', Rule::in(['active', 'inactive', 'suspended', 'expired'])],
             'expiresAt' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'max_domains' => ['nullable', 'integer', 'min:1'],
+            'maxDomains' => ['nullable', 'integer', 'min:1'],
             'customer_id' => ['nullable', 'integer', 'min:1'],
         ];
     }

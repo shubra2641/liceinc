@@ -395,7 +395,7 @@ class SecurityAuditCommand extends Command
         $this->info('Checking license system security...');
         // Check for licenses without proper validation
         $invalidLicenses = License::where('status', 'active')
-            ->where('license_expiresAt', '<', now())
+            ->where('licenseExpiresAt', '<', now())
             ->count();
         if ($invalidLicenses > 0) {
             $this->addIssue(

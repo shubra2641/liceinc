@@ -514,8 +514,8 @@ class PaymentService
                         'productId' => $product instanceof \App\Models\Product ? $product->id : null,
                         'licenseType' => $product instanceof \App\Models\Product ? $product->licenseType ?? 'single' : 'single',
                         'status' => 'active',
-                        'max_domains' => $product instanceof \App\Models\Product ? (is_numeric($product->max_domains ?? null) ? (int) $product->max_domains : 1) : 1,
-                        'license_expiresAt' => $product instanceof \App\Models\Product ? $this->calculateLicenseExpiry($product) : null,
+                        'maxDomains' => $product instanceof \App\Models\Product ? (is_numeric($product->maxDomains ?? null) ? (int) $product->maxDomains : 1) : 1,
+                        'licenseExpiresAt' => $product instanceof \App\Models\Product ? $this->calculateLicenseExpiry($product) : null,
                         'support_expiresAt' => $product instanceof \App\Models\Product ? $this->calculateSupportExpiry($product) : null,
                         'notes' => "Purchased via {$gateway}",
                     ]);

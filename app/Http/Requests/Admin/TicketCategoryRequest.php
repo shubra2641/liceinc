@@ -40,7 +40,7 @@ class TicketCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        $category = $this->route('ticket_category');
+        $category = $this->route('ticketCategory');
         $categoryId = $category && is_object($category) && property_exists($category, 'id') ? $category->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [

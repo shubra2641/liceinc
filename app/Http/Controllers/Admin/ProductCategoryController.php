@@ -230,7 +230,7 @@ class ProductCategoryController extends Controller
  * @var view-string $viewName
 */
             $viewName = 'admin.product-categories.show';
-            return view($viewName, ['product_category' => $productCategory]);
+            return view($viewName, ['productCategory' => $productCategory]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Product category view failed', [
@@ -266,7 +266,7 @@ class ProductCategoryController extends Controller
  * @var view-string $viewName
 */
         $viewName = 'admin.product-categories.edit';
-        return view($viewName, ['product_category' => $productCategory]);
+        return view($viewName, ['productCategory' => $productCategory]);
     }
     /**
      * Update the specified product category with enhanced security.

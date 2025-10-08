@@ -203,7 +203,7 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
         // Removed category filter to display all products regardless of category assignment
         // Apply language filter
         if (request('language')) {
-            $productsQuery->where('programming_language', request('language'));
+            $productsQuery->where('programmingLanguage', request('language'));
         }
         // Apply price filter
         $priceFilter = request('price_filter');
@@ -247,7 +247,7 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
         $kbArticles = KbArticle::where('is_published', true)
             ->with('category:id, name')
             ->orderBy('title')
-            ->get(['id', 'title', 'slug', 'kb_category_id']);
+            ->get(['id', 'title', 'slug', 'kbCategory_id']);
 
         return view('admin.products.create', [
             'categories' => $categories,
@@ -292,10 +292,10 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
             }
             $product = Product::create($validated);
             // Handle product files upload
-            if ($request->hasFile('product_files')) {
+            if ($request->hasFile('productFiles')) {
                 try {
                     $productFileService = app(\App\Services\ProductFileService::class);
-                    foreach ($request->file('product_files') as $file) {
+                    foreach ($request->file('productFiles') as $file) {
                         if ($file->isValid()) {
                             $productFileService->uploadFile($product, $file);
                         }
@@ -368,10 +368,10 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
             }
             $product->update($validated);
             // Handle product files upload
-            if ($request->hasFile('product_files')) {
+            if ($request->hasFile('productFiles')) {
                 try {
                     $productFileService = app(\App\Services\ProductFileService::class);
-                    foreach ($request->file('product_files') as $file) {
+                    foreach ($request->file('productFiles') as $file) {
                         if ($file->isValid()) {
                             $productFileService->uploadFile($product, $file);
                         }
@@ -383,7 +383,7 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
                 }
             }
             // Regenerate file if programming language or envato settings changed
-            if ($product->wasChanged(['programming_language', 'envato_item_id', 'name', 'slug'])) {
+            if ($product->wasChanged(['programmingLanguage', 'envato_item_id', 'name', 'slug'])) {
                 $this->generateIntegrationFile($product);
             }
             DB::commit();
@@ -612,7 +612,7 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
                 'status' => 'active',
                 'licenseType' => 'regular',
                 'support_expiresAt' => now()->addDays($product->supportDays),
-                'license_expiresAt' => now()->addYear(),
+                'licenseExpiresAt' => now()->addYear(),
             ]);
             // Add domain
             $license->domains()->create([
@@ -655,7 +655,7 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
             ->with('category:id, name')
             ->orderBy('title')
             ->get([
-                'id', 'title', 'slug', 'kb_category_id',
+                'id', 'title', 'slug', 'kbCategory_id',
             ]);
 
         return response()->json([
@@ -670,12 +670,12 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
      */
     public function getKbArticles(int $categoryId): JsonResponse
     {
-        $articles = KbArticle::where('kb_category_id', $categoryId)
+        $articles = KbArticle::where('kbCategory_id', $categoryId)
             ->where('is_published', true)
             ->with('category:id, name')
             ->orderBy('title')
             ->get([
-                'id', 'title', 'slug', 'kb_category_id',
+                'id', 'title', 'slug', 'kbCategory_id',
             ]);
 
         return response()->json([

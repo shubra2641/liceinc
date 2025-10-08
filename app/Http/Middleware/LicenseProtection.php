@@ -285,7 +285,7 @@ class LicenseProtection
             };
             $result = $licenseVerifier->verifyLicense(
                 $this->sanitizeInput(is_string($licenseInfo['license_purchase_code'] ?? null) ? $licenseInfo['license_purchase_code'] : null) ?? '',
-                $this->sanitizeInput(is_string($licenseInfo['license_domain'] ?? null) ? $licenseInfo['license_domain'] : null) ?? '',
+                $this->sanitizeInput(is_string($licenseInfo['licenseDomain'] ?? null) ? $licenseInfo['licenseDomain'] : null) ?? '',
             );
             // Update last verification time
             Setting::updateOrCreate(
@@ -296,7 +296,7 @@ class LicenseProtection
             if (! $result['valid']) {
                 Log::warning('License verification failed during periodic check', [
                     'purchase_code' => $this->maskPurchaseCode(is_string($licenseInfo['license_purchase_code']) ? $licenseInfo['license_purchase_code'] : ''),
-                    'domain' => $licenseInfo['license_domain'],
+                    'domain' => $licenseInfo['licenseDomain'],
                     'message' => $result['message'] ?? 'Unknown error',
                 ]);
             }

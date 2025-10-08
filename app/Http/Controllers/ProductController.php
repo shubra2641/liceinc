@@ -118,7 +118,7 @@ class ProductController extends Controller
             if ($request && $request->filled('language')) {
                 $languageId = $this->sanitizeInput($request->validated('language'));
                 if (is_numeric($languageId)) {
-                    $productsQuery->where('programming_language', (int)$languageId);
+                    $productsQuery->where('programmingLanguage', (int)$languageId);
                 }
             }
             // Price filtering
@@ -215,8 +215,8 @@ class ProductController extends Controller
                     ->where('productId', $product->id)
                     ->where('status', 'active')
                     ->where(function ($q) {
-                        $q->whereNull('license_expiresAt')
-                            ->orWhere('license_expiresAt', '>', now());
+                        $q->whereNull('licenseExpiresAt')
+                            ->orWhere('licenseExpiresAt', '>', now());
                     })
                     ->exists() : false;
                 // Check if user has purchased this product before (any license, even expired)
@@ -254,8 +254,8 @@ class ProductController extends Controller
             $licenseCount = License::where('productId', $product->id)
                 ->where('status', 'active')
                 ->where(function ($q) {
-                    $q->whereNull('license_expiresAt')
-                        ->orWhere('license_expiresAt', '>', now());
+                    $q->whereNull('licenseExpiresAt')
+                        ->orWhere('licenseExpiresAt', '>', now());
                 })
                 ->count();
             $relatedProducts = Product::where('category_id', $product->category_id)
@@ -350,8 +350,8 @@ class ProductController extends Controller
                     ->where('productId', $product->id)
                     ->where('status', 'active')
                     ->where(function ($q) {
-                        $q->whereNull('license_expiresAt')
-                            ->orWhere('license_expiresAt', '>', now());
+                        $q->whereNull('licenseExpiresAt')
+                            ->orWhere('licenseExpiresAt', '>', now());
                     })
                     ->exists() : false;
                 // Check if user has purchased this product before (any license, even expired)
@@ -389,8 +389,8 @@ class ProductController extends Controller
             $licenseCount = License::where('productId', $product->id)
                 ->where('status', 'active')
                 ->where(function ($q) {
-                    $q->whereNull('license_expiresAt')
-                        ->orWhere('license_expiresAt', '>', now());
+                    $q->whereNull('licenseExpiresAt')
+                        ->orWhere('licenseExpiresAt', '>', now());
                 })
                 ->count();
             $relatedProducts = Product::where('category_id', $product->category_id)

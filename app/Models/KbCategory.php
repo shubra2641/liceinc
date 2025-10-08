@@ -105,7 +105,7 @@ class KbCategory extends Model
      */
     public function articles(): HasMany
     {
-        return $this->hasMany(KbArticle::class, 'kb_category_id');
+        return $this->hasMany(KbArticle::class, 'kbCategory_id');
     }
     /**
      * @return BelongsTo<Product, $this>

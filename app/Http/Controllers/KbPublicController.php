@@ -348,8 +348,8 @@ class KbPublicController extends Controller
                     ->where('productId', $category->productId)
                     ->where('status', 'active')
                     ->where(function ($query) {
-                        $query->whereNull('license_expiresAt')
-                            ->orWhere('license_expiresAt', '>', now());
+                        $query->whereNull('licenseExpiresAt')
+                            ->orWhere('licenseExpiresAt', '>', now());
                     })
                     ->exists() : false;
                 return $hasLicense;
@@ -395,8 +395,8 @@ class KbPublicController extends Controller
                     ->where('productId', $article->productId)
                     ->where('status', 'active')
                     ->where(function ($query) {
-                        $query->whereNull('license_expiresAt')
-                            ->orWhere('license_expiresAt', '>', now());
+                        $query->whereNull('licenseExpiresAt')
+                            ->orWhere('licenseExpiresAt', '>', now());
                     })
                     ->exists() : false;
                 return $hasLicense;
@@ -408,8 +408,8 @@ class KbPublicController extends Controller
                     ->where('productId', $catProductId)
                     ->where('status', 'active')
                     ->where(function ($query) {
-                        $query->whereNull('license_expiresAt')
-                            ->orWhere('license_expiresAt', '>', now());
+                        $query->whereNull('licenseExpiresAt')
+                            ->orWhere('licenseExpiresAt', '>', now());
                     })
                     ->exists() : false;
                 return $hasLicense;
@@ -536,7 +536,7 @@ class KbPublicController extends Controller
     private function getCategoryArticles(KbCategory $category)
     {
         try {
-            return KbArticle::where('kb_category_id', $category->id)
+            return KbArticle::where('kbCategory_id', $category->id)
                 ->where('is_published', true)
                 ->whereHas('category', function ($query) {
                     $query->where('isActive', true);
@@ -743,7 +743,7 @@ class KbPublicController extends Controller
     private function getRelatedArticles(KbArticle $article)
     {
         try {
-            return KbArticle::where('kb_category_id', $article->kb_category_id)
+            return KbArticle::where('kbCategory_id', $article->kbCategory_id)
                 ->where('id', '!=', $article->id)
                 ->where('is_published', true)
                 ->whereHas('category', function ($query) {
@@ -787,7 +787,7 @@ class KbPublicController extends Controller
                 $articleProductId = $article->productId ?:
                     $article->category->productId;
                 if ($product && $product->id == $articleProductId) {
-                    $accessToken = 'kb_article_access_' . $article->id . '_' . time() . '_' .
+                    $accessToken = 'kbArticle_access_' . $article->id . '_' . time() . '_' .
                         substr(md5($license instanceof \App\Models\License ? $license->licenseKey : ''), 0, 8);
                     session([$accessToken => [
                         'licenseId' => $license instanceof \App\Models\License ? $license->id : null,

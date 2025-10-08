@@ -354,7 +354,7 @@ class KbCategoryController extends Controller
                         ],
                     );
                     $movedArticlesCount = $kbCategory->articles()->count();
-                    $kbCategory->articles()->update(['kb_category_id' => $uncat->id]);
+                    $kbCategory->articles()->update(['kbCategory_id' => $uncat->id]);
                     $kbCategory->delete();
                     Log::debug('Knowledge base category deleted, articles moved to uncategorized', [
                         'category_id' => $kbCategory->id,

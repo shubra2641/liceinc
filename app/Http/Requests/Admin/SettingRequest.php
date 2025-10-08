@@ -322,13 +322,13 @@ class SettingRequest extends FormRequest
             'license_auto_register_domains' => [
                 'boolean',
             ],
-            'license_max_domains' => [
+            'license_maxDomains' => [
                 'nullable',
                 'integer',
                 'min:1',
                 'max:100',
             ],
-            'license_domain_cooldown' => [
+            'licenseDomain_cooldown' => [
                 'nullable',
                 'integer',
                 'min:1',
@@ -372,7 +372,7 @@ class SettingRequest extends FormRequest
                 'min:1',
                 'max:1440', // 24 hours in minutes
             ],
-            'max_license_domains' => [
+            'max_licenseDomains' => [
                 'nullable',
                 'integer',
                 'min:1',
@@ -571,8 +571,8 @@ class SettingRequest extends FormRequest
             'license_api_url.url' => 'License API URL must be a valid URL.',
             'license_verification_interval.min' => 'Verification interval must be at least 1 minute.',
             'license_verification_interval.max' => 'Verification interval cannot exceed 1440 minutes (24 hours).',
-            'max_license_domains.min' => 'Maximum license domains must be at least 1.',
-            'max_license_domains.max' => 'Maximum license domains cannot exceed 100.',
+            'max_licenseDomains.min' => 'Maximum license domains must be at least 1.',
+            'max_licenseDomains.max' => 'Maximum license domains cannot exceed 100.',
             'license_expiry_warning_days.min' => 'Expiry warning days must be at least 1.',
             'license_expiry_warning_days.max' => 'Expiry warning days cannot exceed 365.',
             'renewal_reminder_days.min' => 'Renewal reminder days must be at least 1.',
@@ -637,7 +637,7 @@ class SettingRequest extends FormRequest
             'license_verification_enabled' => 'license verification enabled',
             'license_auto_verification' => 'license auto verification',
             'license_verification_interval' => 'license verification interval',
-            'max_license_domains' => 'maximum license domains',
+            'max_licenseDomains' => 'maximum license domains',
             'license_expiry_warning_days' => 'license expiry warning days',
             'auto_renewal_enabled' => 'auto renewal enabled',
             'renewal_reminder_days' => 'renewal reminder days',

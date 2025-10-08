@@ -313,7 +313,7 @@ class LicenseVerificationLogController extends Controller
             DB::beginTransaction();
             $query = $this->applyFilters(LicenseVerificationLog::query(), $request);
             $logs = $query->orderBy('createdAt', 'desc')->get();
-            $filename = 'license_verification_logs_' . date('Y-m-d_H-i-s') . '.csv';
+            $filename = 'licenseVerificationLogs_' . date('Y-m-d_H-i-s') . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
                 'Content-Disposition' => 'attachment; filename="' . $filename . '"',

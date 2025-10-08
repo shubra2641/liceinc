@@ -206,7 +206,7 @@ class ProgrammingLanguageController extends Controller
     {
         $availableTemplates = ProgrammingLanguage::getAvailableTemplateFiles();
 
-        return view('admin.programming-languages.show', ['programming_language' => $programmingLanguage, 'availableTemplates' => $availableTemplates]);
+        return view('admin.programming-languages.show', ['programmingLanguage' => $programmingLanguage, 'availableTemplates' => $availableTemplates]);
     }
 
     /**
@@ -223,7 +223,7 @@ class ProgrammingLanguageController extends Controller
      */
     public function edit(ProgrammingLanguage $programmingLanguage): View
     {
-        return view('admin.programming-languages.edit', ['programming_language' => $programmingLanguage]);
+        return view('admin.programming-languages.edit', ['programmingLanguage' => $programmingLanguage]);
     }
 
     /**
@@ -259,7 +259,7 @@ class ProgrammingLanguageController extends Controller
             Log::error('Programming language update failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'programming_language_id' => $programmingLanguage->id,
+                'programmingLanguage_id' => $programmingLanguage->id,
                 'request_data' => $request->except(['license_template']),
             ]);
 
@@ -305,7 +305,7 @@ class ProgrammingLanguageController extends Controller
             Log::error('Programming language deletion failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'programming_language_id' => $programmingLanguage->id,
+                'programmingLanguage_id' => $programmingLanguage->id,
             ]);
 
             return redirect()
@@ -345,7 +345,7 @@ class ProgrammingLanguageController extends Controller
             Log::error('Programming language status toggle failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'programming_language_id' => $programmingLanguage->id,
+                'programmingLanguage_id' => $programmingLanguage->id,
             ]);
 
             return redirect()
@@ -618,7 +618,7 @@ class ProgrammingLanguageController extends Controller
     public function export(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $languages = ProgrammingLanguage::orderBy('sortOrder')->orderBy('name')->get();
-        $filename = 'programming_languages_' . date('Y-m-d_H-i-s') . '.csv';
+        $filename = 'programmingLanguages_' . date('Y-m-d_H-i-s') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',

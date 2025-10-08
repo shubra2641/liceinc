@@ -575,8 +575,8 @@ class ConfigHelper
             'license_allow_wildcards',
             'license_validate_ssl',
             'license_auto_approve_subdomains',
-            'license_max_domains',
-            'license_domain_cooldown',
+            'license_maxDomains',
+            'licenseDomain_cooldown',
             // License expiration settings
             'license_default_duration',
             'license_support_duration',

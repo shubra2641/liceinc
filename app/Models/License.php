@@ -19,10 +19,10 @@ use Illuminate\Support\Str;
  * @property string $purchase_code
  * @property string $licenseKey
  * @property string $status
- * @property int $max_domains
+ * @property int $maxDomains
  * @property string $licenseType
  * @property string|null $supported_until
- * @property \Illuminate\Support\Carbon|null $license_expiresAt
+ * @property \Illuminate\Support\Carbon|null $licenseExpiresAt
  * @property \Illuminate\Support\Carbon|null $support_expiresAt
  * @property string|null $purchase_date
  * @property string|null $notes
@@ -84,9 +84,9 @@ class License extends Model
         'licenseKey',
         'licenseType',
         'support_expiresAt',
-        'license_expiresAt',
+        'licenseExpiresAt',
         'status',
-        'max_domains',
+        'maxDomains',
         'notes',
     ];
     protected $hidden = [
@@ -95,8 +95,8 @@ class License extends Model
     ];
     protected $casts = [
         'support_expiresAt' => 'datetime',
-        'license_expiresAt' => 'datetime',
-        'max_domains' => 'integer',
+        'licenseExpiresAt' => 'datetime',
+        'maxDomains' => 'integer',
     ];
     protected static function booted(): void
     {
@@ -172,8 +172,8 @@ class License extends Model
     {
         return $query->where('status', 'active')
             ->where(function ($q) {
-                $q->whereNull('license_expiresAt')
-                    ->orWhere('license_expiresAt', '>', now());
+                $q->whereNull('licenseExpiresAt')
+                    ->orWhere('licenseExpiresAt', '>', now());
             });
     }
     /**
@@ -214,18 +214,18 @@ class License extends Model
         return $this->support_expiresAt && $this->support_expiresAt->isFuture();
     }
     /**
-     * Get expiresAt attribute (alias for license_expiresAt).
+     * Get expiresAt attribute (alias for licenseExpiresAt).
      */
     public function getExpiresAtAttribute(): ?\Carbon\Carbon
     {
-        return $this->license_expiresAt;
+        return $this->licenseExpiresAt;
     }
     /**
-     * Set expiresAt attribute (alias for license_expiresAt).
+     * Set expiresAt attribute (alias for licenseExpiresAt).
      */
     public function setExpiresAtAttribute(?\Carbon\Carbon $value): void
     {
-        $this->license_expiresAt = $value ? \Illuminate\Support\Carbon::instance($value) : null;
+        $this->licenseExpiresAt = $value ? \Illuminate\Support\Carbon::instance($value) : null;
     }
     /**
      * Get the number of active domains for this license.
@@ -239,7 +239,7 @@ class License extends Model
      */
     public function hasReachedDomainLimit(): bool
     {
-        $maxDomains = $this->max_domains ?? 1;
+        $maxDomains = $this->maxDomains ?? 1;
         return $this->active_domains_count >= $maxDomains;
     }
     /**
@@ -247,7 +247,7 @@ class License extends Model
      */
     public function getRemainingDomainsAttribute(): int
     {
-        $maxDomains = $this->max_domains ?? 1;
+        $maxDomains = $this->maxDomains ?? 1;
         return max(0, $maxDomains - $this->active_domains_count);
     }
 }

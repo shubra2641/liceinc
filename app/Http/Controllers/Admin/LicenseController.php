@@ -128,9 +128,9 @@ class LicenseController extends Controller
             // Set default values
             $validated['status'] = $validated['status'] ?? 'active';
             // Calculate license expiration date based on product duration
-            if (empty($validated['license_expiresAt'])) {
+            if (empty($validated['licenseExpiresAt'])) {
                 if ($product->durationDays) {
-                    $validated['license_expiresAt'] = now()->addDays(is_numeric($product->durationDays) ? (int)$product->durationDays : 0);
+                    $validated['licenseExpiresAt'] = now()->addDays(is_numeric($product->durationDays) ? (int)$product->durationDays : 0);
                 }
             }
             // Calculate support expiration date based on product support days
@@ -238,7 +238,7 @@ class LicenseController extends Controller
             $validated = $request->validated();
             // Map UI field to DB column with proper parsing and allowing null to clear
             if (array_key_exists('expiresAt', $validated)) {
-                $validated['license_expiresAt'] = ($validated['expiresAt'] !== null
+                $validated['licenseExpiresAt'] = ($validated['expiresAt'] !== null
                 && $validated['expiresAt'] !== '')
                     ? \Carbon\Carbon::parse(is_string($validated['expiresAt']) ? $validated['expiresAt'] : '')->format('Y-m-d H:i:s')
                     : null;
@@ -397,7 +397,7 @@ class LicenseController extends Controller
                     (string) ($license->user->name ?? 'N/A'),
                     (string) ($license->product->name ?? 'N/A'),
                     (string) $license->status,
-                    is_numeric($license->maxDomains) ? (string) $license->maxDomains : '0',
+                    (string) ($license->maxDomains ?? 0),
                     (string) $license->expiresAt,
                     (string) $license->createdAt,
                 ]);

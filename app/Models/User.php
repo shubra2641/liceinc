@@ -70,7 +70,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
  * @property-read int|null $invoices_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LicenseLog> $licenseLogs
- * @property-read int|null $license_logs_count
+ * @property-read int|null $licenseLogs_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\License> $licenses
  * @property-read int|null $licenses_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int,

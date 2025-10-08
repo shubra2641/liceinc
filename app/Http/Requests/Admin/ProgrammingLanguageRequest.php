@@ -41,7 +41,7 @@ class ProgrammingLanguageRequest extends FormRequest
      */
     public function rules(): array
     {
-        $language = $this->route('programming_language');
+        $language = $this->route('programmingLanguage');
         $languageId = $language && is_object($language) && property_exists($language, 'id') ? $language->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
@@ -51,8 +51,8 @@ class ProgrammingLanguageRequest extends FormRequest
                 'max:100',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
                 $isUpdate
-                    ? Rule::unique('programming_languages', 'name')->ignore($languageId)
-                    : 'unique:programming_languages, name',
+                    ? Rule::unique('programmingLanguages', 'name')->ignore($languageId)
+                    : 'unique:programmingLanguages, name',
             ],
             'extension' => [
                 'required',
@@ -60,8 +60,8 @@ class ProgrammingLanguageRequest extends FormRequest
                 'max:10',
                 'regex:/^[a-zA-Z0-9]+$/',
                 $isUpdate
-                    ? Rule::unique('programming_languages', 'extension')->ignore($languageId)
-                    : 'unique:programming_languages, extension',
+                    ? Rule::unique('programmingLanguages', 'extension')->ignore($languageId)
+                    : 'unique:programmingLanguages, extension',
             ],
             'mime_type' => [
                 'required',

@@ -148,7 +148,7 @@ class LicenseController extends Controller
                     'domain_allowed' => $localLicense->domain_allowed ?? null,
                     'status' => $localLicense->status ?? null,
                     'support_expiresAt' => property_exists($localLicense, 'support_expiresAt') && is_object($localLicense->support_expiresAt) && method_exists($localLicense->support_expiresAt, 'toDateString') ? $localLicense->support_expiresAt->toDateString() : null,
-                    'license_expiresAt' => property_exists($localLicense, 'license_expiresAt') && is_object($localLicense->license_expiresAt) && method_exists($localLicense->license_expiresAt, 'toDateString') ? $localLicense->license_expiresAt->toDateString() : null,
+                    'licenseExpiresAt' => property_exists($localLicense, 'licenseExpiresAt') && is_object($localLicense->licenseExpiresAt) && method_exists($localLicense->licenseExpiresAt, 'toDateString') ? $localLicense->licenseExpiresAt->toDateString() : null,
                 ];
                 $this->logLicenseVerification($localLicense instanceof \App\Models\License ? $localLicense : null, $domainStr, $request, $response, 'success');
                 DB::commit();
@@ -167,7 +167,7 @@ class LicenseController extends Controller
                     'domain_allowed' => $envatoResult['domain_allowed'],
                     'status' => 'active',
                     'support_expiresAt' => $envatoResult['support_expiresAt'],
-                    'license_expiresAt' => $envatoResult['license_expiresAt'],
+                    'licenseExpiresAt' => $envatoResult['licenseExpiresAt'],
                 ];
                 $this->logLicenseVerification(null, $domainStr, $request, $response, 'success');
                 DB::commit();
@@ -238,7 +238,7 @@ class LicenseController extends Controller
                 'product' => $license->product,
                 'status' => $license->status,
                 'support_expiresAt' => $license->support_expiresAt,
-                'license_expiresAt' => $license->license_expiresAt,
+                'licenseExpiresAt' => $license->licenseExpiresAt,
             ];
         } catch (\Exception $e) {
             Log::error('Error checking local license', [
@@ -307,7 +307,7 @@ class LicenseController extends Controller
                 'product' => $product->only(['id', 'name', 'slug', 'envato_item_id']),
                 'domain_allowed' => true, // Envato licenses don't restrict domains
                 'support_expiresAt' => $envatoData['supported_until'] ?? null,
-                'license_expiresAt' => null, // Envato licenses don't expire
+                'licenseExpiresAt' => null, // Envato licenses don't expire
             ];
         } catch (\Exception $e) {
             Log::error('Envato license verification failed', [
@@ -571,7 +571,7 @@ class LicenseManager
             'status' => \$result['status'] ?? 'unknown',
             'domain_allowed' => \$result['domain_allowed'] ?? false,
             'support_expiresAt' => \$result['support_expiresAt'] ?? null,
-            'license_expiresAt' => \$result['license_expiresAt'] ?? null,
+            'licenseExpiresAt' => \$result['licenseExpiresAt'] ?? null,
         ];
     }
 }

@@ -50,7 +50,7 @@ use Illuminate\Support\Facades\Cache;
  * @property bool $license_verification_enabled
  * @property bool $license_auto_verification
  * @property int|null $license_verification_interval
- * @property int|null $max_license_domains
+ * @property int|null $max_licenseDomains
  * @property int|null $license_expiry_warning_days
  * @property bool $auto_renewal_enabled
  * @property int|null $renewal_reminder_days
@@ -75,8 +75,8 @@ use Illuminate\Support\Facades\Cache;
  * @property bool $license_validate_ssl
  * @property bool $license_auto_approve_subdomains
  * @property bool $license_auto_register_domains
- * @property int $license_max_domains
- * @property int $license_domain_cooldown
+ * @property int $license_maxDomains
+ * @property int $licenseDomain_cooldown
  * @property int $license_default_duration
  * @property int $license_support_duration
  * @property int $license_renewal_reminder
@@ -332,8 +332,8 @@ class Setting extends Model
         'license_validate_ssl',
         'license_auto_approve_subdomains',
         'license_auto_register_domains',
-        'license_max_domains',
-        'license_domain_cooldown',
+        'license_maxDomains',
+        'licenseDomain_cooldown',
         'license_default_duration',
         'license_support_duration',
         'license_renewal_reminder',
@@ -397,7 +397,7 @@ class Setting extends Model
         'license_verification_enabled',
         'license_auto_verification',
         'license_verification_interval',
-        'max_license_domains',
+        'max_licenseDomains',
         'license_expiry_warning_days',
         'auto_renewal_enabled',
         'renewal_reminder_days',
@@ -450,8 +450,8 @@ class Setting extends Model
         'license_validate_ssl' => 'boolean',
         'license_auto_approve_subdomains' => 'boolean',
         'license_auto_register_domains' => 'boolean',
-        'license_max_domains' => 'integer',
-        'license_domain_cooldown' => 'integer',
+        'license_maxDomains' => 'integer',
+        'licenseDomain_cooldown' => 'integer',
         // License expiration settings
         'license_default_duration' => 'integer',
         'license_support_duration' => 'integer',

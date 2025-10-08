@@ -241,7 +241,7 @@ class EmailTemplateController extends Controller
      */
     public function show(EmailTemplate $emailTemplate): View
     {
-        return view('admin.email-templates.show', ['email_template' => $emailTemplate]);
+        return view('admin.email-templates.show', ['emailTemplate' => $emailTemplate]);
     }
 
     /**
@@ -272,7 +272,7 @@ class EmailTemplateController extends Controller
         $types = ['user', 'admin'];
         $categories = ['registration', 'license', 'product', 'ticket', 'invoice'];
 
-        return view('admin.email-templates.edit', ['email_template' => $emailTemplate, 'types' => $types, 'categories' => $categories]);
+        return view('admin.email-templates.edit', ['emailTemplate' => $emailTemplate, 'types' => $types, 'categories' => $categories]);
     }
 
     /**
@@ -474,7 +474,7 @@ class EmailTemplateController extends Controller
             }
 
             return view('admin.email-templates.test', [
-                'email_template' => $emailTemplate,
+                'emailTemplate' => $emailTemplate,
                 'testData' => $testData,
                 'rendered' => $rendered,
             ]);
@@ -487,7 +487,7 @@ class EmailTemplateController extends Controller
 
             // Return error view
             return view('admin.email-templates.test', [
-                'email_template' => $emailTemplate,
+                'emailTemplate' => $emailTemplate,
                 'testData' => [],
                 'rendered' => [
                     'subject' => 'Error',

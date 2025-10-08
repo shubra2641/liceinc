@@ -798,10 +798,10 @@ class LicenseServerController extends Controller
                 return false;
             }
             // Check if license has expired
-            if ($license->license_expiresAt && $license->license_expiresAt->isPast()) {
+            if ($license->licenseExpiresAt && $license->licenseExpiresAt->isPast()) {
                 Log::warning('License has expired', [
                     'licenseKey' => substr($licenseKey, 0, 8) . '...',
-                    'expiresAt' => $license->license_expiresAt->toISOString(),
+                    'expiresAt' => $license->licenseExpiresAt->toISOString(),
                 ]);
 
                 return false;
@@ -969,11 +969,11 @@ class LicenseServerController extends Controller
                 'purchase_code' => substr($license->purchase_code, 0, 8) . '...',
                 'domain' => $domain,
                 'current_domains' => $license->active_domains_count,
-                'max_domains' => $license->max_domains ?? 1,
+                'maxDomains' => $license->maxDomains ?? 1,
                 'licenseType' => $license->licenseType,
                 'ip' => request()->ip(),
             ]);
-            $maxDomains = $license->max_domains ?? 1;
+            $maxDomains = $license->maxDomains ?? 1;
             throw new \Exception("License has reached its maximum domain limit ({$maxDomains} domain"
                 . ($maxDomains > 1 ? 's' : '') . "). Cannot register new domain: {$domain}");
         }

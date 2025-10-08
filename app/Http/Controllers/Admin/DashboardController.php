@@ -88,7 +88,7 @@ class DashboardController extends Controller
                 'customers' => User::count(),
                 'licenses_active' => License::where('status', 'active')->count(),
                 'tickets_open' => Ticket::whereIn('status', ['open', 'pending'])->count(),
-                'kb_articles' => KbArticle::count(),
+                'kbArticles' => KbArticle::count(),
             ];
             // Invoice monetary statistics
             $invoiceTotalCount = Invoice::count();
@@ -135,7 +135,7 @@ class DashboardController extends Controller
                 'customers' => 0,
                 'licenses_active' => 0,
                 'tickets_open' => 0,
-                'kb_articles' => 0,
+                'kbArticles' => 0,
                 'invoices_count' => 0,
                 'invoices_total_amount' => 0,
                 'invoices_paid_amount' => 0,
@@ -415,7 +415,7 @@ class DashboardController extends Controller
      *     "licenses_expired": 30,
      *     "tickets_open": 8,
      *     "tickets_closed": 45,
-     *     "kb_articles": 25
+     *     "kbArticles": 25
      * }
      */
     public function getStats(): JsonResponse
@@ -428,7 +428,7 @@ class DashboardController extends Controller
                 'licenses_expired' => License::where('status', 'expired')->count(),
                 'tickets_open' => Ticket::whereIn('status', ['open', 'pending'])->count(),
                 'tickets_closed' => Ticket::where('status', 'closed')->count(),
-                'kb_articles' => KbArticle::count(),
+                'kbArticles' => KbArticle::count(),
             ];
             return response()->json($stats);
         } catch (\Exception $e) {
@@ -442,7 +442,7 @@ class DashboardController extends Controller
                 'licenses_expired' => 0,
                 'tickets_open' => 0,
                 'tickets_closed' => 0,
-                'kb_articles' => 0,
+                'kbArticles' => 0,
             ]);
         }
     }

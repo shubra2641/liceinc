@@ -328,7 +328,7 @@ class AILicenseAnalyticsService
      */
     private function predictLicenseExpirations(): array
     {
-        $expiringSoon = License::where('license_expiresAt', '<=', now()->addDays(30))
+        $expiringSoon = License::where('licenseExpiresAt', '<=', now()->addDays(30))
             ->where('status', 'active')
             ->get();
         $predictions = [];
@@ -336,8 +336,8 @@ class AILicenseAnalyticsService
             $renewalProbability = $this->calculateRenewalProbability($license);
             $predictions[] = [
                 'licenseId' => $license->id,
-                'expiresAt' => $license->license_expiresAt,
-                'days_until_expiry' => now()->diffInDays($license->license_expiresAt),
+                'expiresAt' => $license->licenseExpiresAt,
+                'days_until_expiry' => now()->diffInDays($license->licenseExpiresAt),
                 'renewal_probability' => $renewalProbability,
                 'confidence_score' => $this->calculateConfidenceScore(['license' => $license]),
                 'recommended_action' => $this->getRecommendedAction(['probability' => $renewalProbability]),

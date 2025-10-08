@@ -162,8 +162,8 @@ class GenerateRenewalInvoices extends Command
         try {
             return License::with(['user', 'product', 'invoices'])
                 ->where('status', 'active')
-                ->where('license_expiresAt', '<=', $expiryDate)
-                ->where('license_expiresAt', '>', Carbon::now())
+                ->where('licenseExpiresAt', '<=', $expiryDate)
+                ->where('licenseExpiresAt', '>', Carbon::now())
                 ->get()
                 ->filter(function ($license) {
                     // Check if there's already a pending renewal invoice
@@ -266,7 +266,7 @@ class GenerateRenewalInvoices extends Command
     protected function calculateNewExpiryDate(License $license, Product $product): Carbon
     {
         try {
-            $currentExpiry = $license->license_expiresAt ?? Carbon::now();
+            $currentExpiry = $license->licenseExpiresAt ?? Carbon::now();
             $renewalPeriod = $product->renewalPeriod;
             // Current expiry is already a Carbon instance
             // Validate renewal period
@@ -354,8 +354,8 @@ class GenerateRenewalInvoices extends Command
                             ENT_QUOTES,
                             'UTF-8',
                         ),
-                        'expiresAt' => $license->license_expiresAt
-                            ? $license->license_expiresAt->format('Y-m-d')
+                        'expiresAt' => $license->licenseExpiresAt
+                            ? $license->licenseExpiresAt->format('Y-m-d')
                             : 'Unknown',
                         'invoice_amount' => $invoice->amount,
                         'invoice_due_date' => $invoice->due_date->format('Y-m-d'),
@@ -405,8 +405,8 @@ class GenerateRenewalInvoices extends Command
                         ENT_QUOTES,
                         'UTF-8',
                     ),
-                    'expiresAt' => $license->license_expiresAt
-                        ? $license->license_expiresAt->format('Y-m-d')
+                    'expiresAt' => $license->licenseExpiresAt
+                        ? $license->licenseExpiresAt->format('Y-m-d')
                         : 'Unknown',
                     'invoice_amount' => $invoice->amount ?? 0,
                     'invoice_id' => $invoice->id ?? 'Unknown',

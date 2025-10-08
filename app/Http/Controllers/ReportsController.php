@@ -98,11 +98,11 @@ class ReportsController extends Controller
                     ->get();
                 // Monthly revenue data for charts (from licenses) - Last 3 months
                 $monthlyRevenueRaw = License::select(
-                    DB::raw('YEAR(licenses.createdAt) as year'),
-                    DB::raw('MONTH(licenses.createdAt) as month'),
+                    DB::raw('YEAR(licenses.created_at) as year'),
+                    DB::raw('MONTH(licenses.created_at) as month'),
                     DB::raw('SUM(products.price) as revenue'),
                 )
-                    ->join('products', 'licenses.productId', '=', 'products.id')
+                    ->join('products', 'licenses.product_id', '=', 'products.id')
                     ->where('licenses.created_at', '>=', now()->subMonths(3))
                     ->groupBy('year', 'month')
                     ->orderBy('year')
@@ -661,7 +661,7 @@ class ReportsController extends Controller
             'summary' => [
                 'total_licenses' => $licenses->count(),
                 'active_licenses' => $licenses->where('status', 'active')->count(),
-                'expired_licenses' => $licenses->where('license_expiresAt', '<', now())->count(),
+                'expired_licenses' => $licenses->where('licenseExpiresAt', '<', now())->count(),
                 'total_revenue' => $licenses->sum(function ($license) {
                     return $license->product ? $license->product->price : 0;
                 }),
@@ -701,7 +701,7 @@ class ReportsController extends Controller
                             (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
                             (isset($license->status) && is_string($license->status)) ? $license->status : '',
                             (isset($license->createdAt) && is_object($license->createdAt) && method_exists($license->createdAt, 'format')) ? $license->createdAt->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->license_expiresAt) && is_object($license->license_expiresAt) && method_exists($license->license_expiresAt, 'format')) ? $license->license_expiresAt->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->licenseExpiresAt) && is_object($license->licenseExpiresAt) && method_exists($license->licenseExpiresAt, 'format')) ? $license->licenseExpiresAt->format('Y-m-d H:i:s') : 'N/A',
                             (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
                             ];
                             /**
@@ -750,7 +750,7 @@ class ReportsController extends Controller
                             (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
                             (isset($license->status) && is_string($license->status)) ? $license->status : '',
                             (isset($license->createdAt) && is_object($license->createdAt) && method_exists($license->createdAt, 'format')) ? $license->createdAt->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->license_expiresAt) && is_object($license->license_expiresAt) && method_exists($license->license_expiresAt, 'format')) ? $license->license_expiresAt->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->licenseExpiresAt) && is_object($license->licenseExpiresAt) && method_exists($license->licenseExpiresAt, 'format')) ? $license->licenseExpiresAt->format('Y-m-d H:i:s') : 'N/A',
                             (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
                             ];
                             /**
