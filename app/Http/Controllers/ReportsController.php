@@ -119,7 +119,9 @@ class ReportsController extends Controller
                 $monthlyRevenueData = [];
                 foreach ($last3Months as $month) {
                     $found = $monthlyRevenueRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '') . '-' . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
+                        return (is_string($item->year) ? $item->year : '') . '-'
+                            . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT)
+                            === $month;
                     });
                     $monthlyRevenueData[] = $found ? (float)(is_numeric($found->revenue) ? $found->revenue : 0) : 0;
                 }
@@ -142,7 +144,9 @@ class ReportsController extends Controller
                 $monthlyLicensesData = [];
                 foreach ($last3Months as $month) {
                     $found = $monthlyLicensesRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '') . '-' . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT) === $month;
+                        return (is_string($item->year) ? $item->year : '') . '-'
+                            . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT)
+                            === $month;
                     });
                     $monthlyLicensesData[] = $found ? (int)(is_numeric($found->count) ? $found->count : 0) : 0;
                 }

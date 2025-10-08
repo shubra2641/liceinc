@@ -97,7 +97,7 @@ class ProductFileService
                 'encrypted_name' => $encryptedName,
                 'filePath' => $filePath,
                 'fileType' => $file->getMimeType(),
-                'file_size' => $file->getSize(),
+                'fileSize' => $file->getSize(),
                 'encryption_key' => $encryptedKey,
                 'checksum' => $checksum,
                 'description' => $this->sanitizeInput($description),
@@ -182,7 +182,7 @@ class ProductFileService
                 'content' => $content,
                 'filename' => $file->originalName,
                 'mime_type' => $file->fileType,
-                'size' => $file->file_size,
+                'size' => $file->fileSize,
             ];
         } catch (\Exception $e) {
             Log::error('Error downloading product file', [
@@ -357,7 +357,7 @@ class ProductFileService
             Log::error('File validation failed', [
                 'filename' => $fileName,
                 'mime_type' => is_string($mimeType) ? $mimeType : 'unknown',
-                'file_size' => is_numeric($fileSize) ? (int)$fileSize : 0,
+                'fileSize' => is_numeric($fileSize) ? (int)$fileSize : 0,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -404,7 +404,7 @@ class ProductFileService
                     Log::error('Malicious content detected in file', [
                         'filename' => $file->getClientOriginalName(),
                         'pattern' => $pattern,
-                        'file_size' => $file->getSize(),
+                        'fileSize' => $file->getSize(),
                     ]);
                     throw new \Exception('File contains potentially malicious content');
                 }
@@ -536,8 +536,8 @@ class ProductFileService
         foreach ($updates as $update) {
             // Add update even if no file path (for display purposes)
             $updateFile = $this->createUpdateFileRecord($update);
-            $updateFile->is_update = true;
-            $updateFile->update_info = $update->toArray();
+            $updateFile->isUpdate = true;
+            $updateFile->updateInfo = $update->toArray();
             $allVersions[] = $updateFile;
         }
         // Get all base product files
@@ -546,8 +546,8 @@ class ProductFileService
             ->orderBy('createdAt', 'desc')
             ->get();
         foreach ($baseFiles as $file) {
-            $file->is_update = false;
-            $file->update_info = null;
+            $file->isUpdate = false;
+            $file->updateInfo = null;
             $allVersions[] = $file;
         }
         // Sort by creation date (newest first)
@@ -572,7 +572,7 @@ class ProductFileService
             ->where('isActive', true)
             ->orderBy('version', 'desc')
             ->first();
-        if ($latestUpdate && $latestUpdate->update_filePath) {
+        if ($latestUpdate && $latestUpdate->updateFilePath) {
             // Return the latest update file
             return $this->createUpdateFileRecord($latestUpdate);
         }
@@ -609,10 +609,11 @@ class ProductFileService
         // Note: We can't set id directly as it's auto-increment
         // This is a temporary object for display purposes
         $file->productId = is_numeric($update->productId) ? (int)$update->productId : 0;
-        $file->originalName = (is_string($update->title) ? $update->title : '') . '_v' . (is_string($update->version) ? $update->version : '') . '.zip';
+        $file->originalName = (is_string($update->title) ? $update->title : '')
+            . '_v' . (is_string($update->version) ? $update->version : '') . '.zip';
         $filePath = $update->filePath ?? '';
         $file->filePath = is_string($filePath) ? $filePath : '';
-        $file->file_size = is_numeric($update->file_size ?? 0) ? (int)($update->file_size ?? 0) : 0;
+        $file->fileSize = is_numeric($update->fileSize ?? 0) ? (int)($update->fileSize ?? 0) : 0;
         $file->fileExtension = 'zip';
         $file->description = is_string($update->description) ? $update->description : null;
         $file->isActive = true;
@@ -620,12 +621,12 @@ class ProductFileService
         $file->createdAt = $update->createdAt instanceof \Illuminate\Support\Carbon ? $update->createdAt : null;
         $file->updatedAt = $update->updatedAt instanceof \Illuminate\Support\Carbon ? $update->updatedAt : null;
         // Add formattedSize for display
-        $file->formattedSize = $file->file_size > 0 ?
-            number_format($file->file_size / 1024 / 1024, 2) . ' MB' :
+        $file->formattedSize = $file->fileSize > 0 ?
+            number_format($file->fileSize / 1024 / 1024, 2) . ' MB' :
             'Unknown';
-        // Add update_info for the view
-        $file->update_info = $update->toArray();
-        $file->is_update = true;
+        // Add updateInfo for the view
+        $file->updateInfo = $update->toArray();
+        $file->isUpdate = true;
         return $file;
     }
     /**
@@ -633,6 +634,7 @@ class ProductFileService
      */
     /**
      * @param \App\Models\ProductUpdate $update
+     *
      * @return array<string, mixed>
      */
     public function downloadUpdateFile(\App\Models\ProductUpdate $update, int $userId): array

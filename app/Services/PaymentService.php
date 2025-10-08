@@ -59,6 +59,7 @@ class PaymentService
      */
     /**
      * @param array<string, mixed> $orderData
+     *
      * @return array<string, mixed>
      */
     public function processPayment(array $orderData, string $gateway): array
@@ -99,6 +100,7 @@ class PaymentService
      */
     /**
      * @param array<string, mixed> $orderData
+     *
      * @return array<string, mixed>
      */
     protected function processPayPalPayment(array $orderData): array
@@ -120,7 +122,7 @@ class PaymentService
             );
             // Set mode (sandbox or live)
             $apiContext->setConfig([
-                'mode' => $settings->is_sandbox ? 'sandbox' : 'live',
+                'mode' => $settings->isSandbox ? 'sandbox' : 'live',
                 'log.LogEnabled' => true,
                 'log.FileName' => (string)storage_path('logs/paypal.log'),
                 'log.LogLevel' => 'INFO',
@@ -195,6 +197,7 @@ class PaymentService
      */
     /**
      * @param array<string, mixed> $orderData
+     *
      * @return array<string, mixed>
      */
     protected function processStripePayment(array $orderData): array
@@ -274,6 +277,7 @@ class PaymentService
      * }
      */
     /**
+     *
      * @return array<string, mixed>
      */
     public function verifyPayment(string $gateway, string $transactionId): array
@@ -316,6 +320,7 @@ class PaymentService
      * @throws \Exception When PayPal verification fails
      */
     /**
+     *
      * @return array<string, mixed>
      */
     protected function verifyPayPalPayment(string $paymentId): array
@@ -336,7 +341,7 @@ class PaymentService
                 new OAuthTokenCredential($clientId, $clientSecret),
             );
             $apiContext->setConfig([
-                'mode' => $settings->is_sandbox ? 'sandbox' : 'live',
+                'mode' => $settings->isSandbox ? 'sandbox' : 'live',
             ]);
             // Get payment details
             $payment = Payment::get($paymentId, $apiContext);
@@ -381,6 +386,7 @@ class PaymentService
      * @throws \Exception When Stripe verification fails
      */
     /**
+     *
      * @return array<string, mixed>
      */
     protected function verifyStripePayment(string $transactionId): array
@@ -447,6 +453,7 @@ class PaymentService
      */
     /**
      * @param array<string, mixed> $orderData
+     *
      * @return array<string, mixed>
      */
     public function createLicenseAndInvoice(array $orderData, string $gateway, ?string $transactionId = null): array
@@ -471,7 +478,7 @@ class PaymentService
             if ($existingInvoice instanceof \App\Models\Invoice) {
                 // Update existing invoice
                 $existingInvoice->status = 'paid';
-                $existingInvoice->paid_at = now();
+                $existingInvoice->paidAt = now();
                 $existingInvoice->notes = "Payment via {$gateway}";
                 $existingInvoice->metadata = array_merge($existingInvoice->metadata ?? [], [
                     'gateway' => $gateway,
@@ -494,9 +501,9 @@ class PaymentService
                         'amount' => $orderData['amount'],
                         'currency' => $orderData['currency'],
                         'status' => 'paid',
-                        'paid_at' => now(),
+                        'paidAt' => now(),
                         'due_date' => now()->addDays(30), // Add due date
-                        'billing_address' => $user->billing_address ?? null,
+                        'billingAddress' => $user->billingAddress ?? null,
                         'tax_rate' => 0,
                         'tax_amount' => 0,
                         'total_amount' => $orderData['amount'],
@@ -565,6 +572,7 @@ class PaymentService
      *
      * @param Request $request The webhook request
      * @param string $gateway The payment gateway name
+     *
      * @return array<string, mixed> Webhook processing result
      */
     public function handleWebhook(ServiceRequest $request, string $gateway): array
