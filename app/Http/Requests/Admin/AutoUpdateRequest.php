@@ -73,7 +73,7 @@ class AutoUpdateRequest extends FormRequest
                     'boolean',
                     'accepted',
                 ],
-                'backup_before_install' => [
+                'backupBeforeInstall' => [
                     'boolean',
                 ],
                 'force_install' => [
@@ -82,22 +82,22 @@ class AutoUpdateRequest extends FormRequest
                 'skip_license_check' => [
                     'boolean',
                 ],
-                'install_dependencies' => [
+                'installDependencies' => [
                     'boolean',
                 ],
-                'clear_caches' => [
+                'clearCaches' => [
                     'boolean',
                 ],
                 'restart_services' => [
                     'boolean',
                 ],
-                'notify_users' => [
+                'notifyUsers' => [
                     'boolean',
                 ],
-                'maintenance_mode' => [
+                'maintenanceMode' => [
                     'boolean',
                 ],
-                'rollback_on_error' => [
+                'rollbackOnError' => [
                     'boolean',
                 ],
                 'test_mode' => [
@@ -140,31 +140,31 @@ class AutoUpdateRequest extends FormRequest
             'check_prerelease' => [
                 'boolean',
             ],
-            'include_changelog' => [
+            'includeChangelog' => [
                 'boolean',
             ],
-            'include_dependencies' => [
+            'includeDependencies' => [
                 'boolean',
             ],
-            'include_security_updates' => [
+            'includeSecurityUpdates' => [
                 'boolean',
             ],
-            'include_feature_updates' => [
+            'includeFeatureUpdates' => [
                 'boolean',
             ],
-            'include_bug_fixes' => [
+            'includeBugFixes' => [
                 'boolean',
             ],
             'auto_install' => [
                 'boolean',
             ],
-            'notify_on_available' => [
+            'notifyOnAvailable' => [
                 'boolean',
             ],
             'schedule_check' => [
                 'boolean',
             ],
-            'check_interval' => [
+            'checkInterval' => [
                 'nullable',
                 'integer',
                 'min:1',
@@ -194,29 +194,29 @@ class AutoUpdateRequest extends FormRequest
                 . '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
             'confirm.required' => 'Confirmation is required for this operation.',
             'confirm.accepted' => 'You must confirm this operation to proceed.',
-            'backup_before_install.boolean' => 'Backup before install must be true or false.',
+            'backupBeforeInstall.boolean' => 'Backup before install must be true or false.',
             'force_install.boolean' => 'Force install must be true or false.',
             'skip_license_check.boolean' => 'Skip license check must be true or false.',
-            'install_dependencies.boolean' => 'Install dependencies must be true or false.',
-            'clear_caches.boolean' => 'Clear caches must be true or false.',
+            'installDependencies.boolean' => 'Install dependencies must be true or false.',
+            'clearCaches.boolean' => 'Clear caches must be true or false.',
             'restart_services.boolean' => 'Restart services must be true or false.',
-            'notify_users.boolean' => 'Notify users must be true or false.',
-            'maintenance_mode.boolean' => 'Maintenance mode must be true or false.',
-            'rollback_on_error.boolean' => 'Rollback on error must be true or false.',
+            'notifyUsers.boolean' => 'Notify users must be true or false.',
+            'maintenanceMode.boolean' => 'Maintenance mode must be true or false.',
+            'rollbackOnError.boolean' => 'Rollback on error must be true or false.',
             'test_mode.boolean' => 'Test mode must be true or false.',
             'dry_run.boolean' => 'Dry run must be true or false.',
             'check_beta.boolean' => 'Check beta must be true or false.',
             'check_prerelease.boolean' => 'Check prerelease must be true or false.',
-            'include_changelog.boolean' => 'Include changelog must be true or false.',
-            'include_dependencies.boolean' => 'Include dependencies must be true or false.',
-            'include_security_updates.boolean' => 'Include security updates must be true or false.',
-            'include_feature_updates.boolean' => 'Include feature updates must be true or false.',
-            'include_bug_fixes.boolean' => 'Include bug fixes must be true or false.',
+            'includeChangelog.boolean' => 'Include changelog must be true or false.',
+            'includeDependencies.boolean' => 'Include dependencies must be true or false.',
+            'includeSecurityUpdates.boolean' => 'Include security updates must be true or false.',
+            'includeFeatureUpdates.boolean' => 'Include feature updates must be true or false.',
+            'includeBugFixes.boolean' => 'Include bug fixes must be true or false.',
             'auto_install.boolean' => 'Auto install must be true or false.',
-            'notify_on_available.boolean' => 'Notify on available must be true or false.',
+            'notifyOnAvailable.boolean' => 'Notify on available must be true or false.',
             'schedule_check.boolean' => 'Schedule check must be true or false.',
-            'check_interval.min' => 'Check interval must be at least 1 hour.',
-            'check_interval.max' => 'Check interval cannot exceed 168 hours (1 week).',
+            'checkInterval.min' => 'Check interval must be at least 1 hour.',
+            'checkInterval.max' => 'Check interval cannot exceed 168 hours (1 week).',
         ];
     }
     /**
@@ -233,28 +233,28 @@ class AutoUpdateRequest extends FormRequest
             'version' => 'target version',
             'current_version' => 'current version',
             'confirm' => 'confirmation',
-            'backup_before_install' => 'backup before install',
+            'backupBeforeInstall' => 'backup before install',
             'force_install' => 'force install',
             'skip_license_check' => 'skip license check',
-            'install_dependencies' => 'install dependencies',
-            'clear_caches' => 'clear caches',
+            'installDependencies' => 'install dependencies',
+            'clearCaches' => 'clear caches',
             'restart_services' => 'restart services',
-            'notify_users' => 'notify users',
-            'maintenance_mode' => 'maintenance mode',
-            'rollback_on_error' => 'rollback on error',
+            'notifyUsers' => 'notify users',
+            'maintenanceMode' => 'maintenance mode',
+            'rollbackOnError' => 'rollback on error',
             'test_mode' => 'test mode',
             'dry_run' => 'dry run',
             'check_beta' => 'check beta versions',
             'check_prerelease' => 'check prerelease versions',
-            'include_changelog' => 'include changelog',
-            'include_dependencies' => 'include dependencies',
-            'include_security_updates' => 'include security updates',
-            'include_feature_updates' => 'include feature updates',
-            'include_bug_fixes' => 'include bug fixes',
+            'includeChangelog' => 'include changelog',
+            'includeDependencies' => 'include dependencies',
+            'includeSecurityUpdates' => 'include security updates',
+            'includeFeatureUpdates' => 'include feature updates',
+            'includeBugFixes' => 'include bug fixes',
             'auto_install' => 'auto install',
-            'notify_on_available' => 'notify on available',
+            'notifyOnAvailable' => 'notify on available',
             'schedule_check' => 'schedule check',
-            'check_interval' => 'check interval',
+            'checkInterval' => 'check interval',
         ];
     }
     /**
@@ -273,43 +273,43 @@ class AutoUpdateRequest extends FormRequest
         // Handle checkbox values
         $this->merge([
             'confirm' => $this->has('confirm'),
-            'backup_before_install' => $this->has('backup_before_install'),
+            'backupBeforeInstall' => $this->has('backupBeforeInstall'),
             'force_install' => $this->has('force_install'),
             'skip_license_check' => $this->has('skip_license_check'),
-            'install_dependencies' => $this->has('install_dependencies'),
-            'clear_caches' => $this->has('clear_caches'),
+            'installDependencies' => $this->has('installDependencies'),
+            'clearCaches' => $this->has('clearCaches'),
             'restart_services' => $this->has('restart_services'),
-            'notify_users' => $this->has('notify_users'),
-            'maintenance_mode' => $this->has('maintenance_mode'),
-            'rollback_on_error' => $this->has('rollback_on_error'),
+            'notifyUsers' => $this->has('notifyUsers'),
+            'maintenanceMode' => $this->has('maintenanceMode'),
+            'rollbackOnError' => $this->has('rollbackOnError'),
             'test_mode' => $this->has('test_mode'),
             'dry_run' => $this->has('dry_run'),
             'check_beta' => $this->has('check_beta'),
             'check_prerelease' => $this->has('check_prerelease'),
-            'include_changelog' => $this->has('include_changelog'),
-            'include_dependencies' => $this->has('include_dependencies'),
-            'include_security_updates' => $this->has('include_security_updates'),
-            'include_feature_updates' => $this->has('include_feature_updates'),
-            'include_bug_fixes' => $this->has('include_bug_fixes'),
+            'includeChangelog' => $this->has('includeChangelog'),
+            'includeDependencies' => $this->has('includeDependencies'),
+            'includeSecurityUpdates' => $this->has('includeSecurityUpdates'),
+            'includeFeatureUpdates' => $this->has('includeFeatureUpdates'),
+            'includeBugFixes' => $this->has('includeBugFixes'),
             'auto_install' => $this->has('auto_install'),
-            'notify_on_available' => $this->has('notify_on_available'),
+            'notifyOnAvailable' => $this->has('notifyOnAvailable'),
             'schedule_check' => $this->has('schedule_check'),
         ]);
         // Set default values
         $this->merge([
-            'backup_before_install' => $this->backup_before_install ?? true,
-            'install_dependencies' => $this->install_dependencies ?? true,
-            'clear_caches' => $this->clear_caches ?? true,
-            'notify_users' => $this->notify_users ?? true,
-            'maintenance_mode' => $this->maintenance_mode ?? true,
-            'rollback_on_error' => $this->rollback_on_error ?? true,
-            'include_changelog' => $this->include_changelog ?? true,
-            'include_dependencies' => $this->include_dependencies ?? true,
-            'include_security_updates' => $this->include_security_updates ?? true,
-            'include_feature_updates' => $this->include_feature_updates ?? true,
-            'include_bug_fixes' => $this->include_bug_fixes ?? true,
-            'notify_on_available' => $this->notify_on_available ?? true,
-            'check_interval' => $this->check_interval ?? 24,
+            'backupBeforeInstall' => $this->backupBeforeInstall ?? true,
+            'installDependencies' => $this->installDependencies ?? true,
+            'clearCaches' => $this->clearCaches ?? true,
+            'notifyUsers' => $this->notifyUsers ?? true,
+            'maintenanceMode' => $this->maintenanceMode ?? true,
+            'rollbackOnError' => $this->rollbackOnError ?? true,
+            'includeChangelog' => $this->includeChangelog ?? true,
+            'includeDependencies' => $this->includeDependencies ?? true,
+            'includeSecurityUpdates' => $this->includeSecurityUpdates ?? true,
+            'includeFeatureUpdates' => $this->includeFeatureUpdates ?? true,
+            'includeBugFixes' => $this->includeBugFixes ?? true,
+            'notifyOnAvailable' => $this->notifyOnAvailable ?? true,
+            'checkInterval' => $this->checkInterval ?? 24,
         ]);
     }
     /**

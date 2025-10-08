@@ -156,7 +156,12 @@ class EmailService
             'admin_name' => 'Administrator',
             'site_name' => config('app.name'),
         ];
-        return $this->sendEmail($templateName, is_string($adminEmail) ? $adminEmail : 'admin@example.com', array_merge($data, $adminData), 'Administrator');
+        return $this->sendEmail(
+            $templateName,
+            is_string($adminEmail) ? $adminEmail : 'admin@example.com',
+            array_merge($data, $adminData),
+            'Administrator'
+        );
     }
     /**
      * Send bulk emails to multiple users with enhanced security.
@@ -181,6 +186,7 @@ class EmailService
     /**
      * @param array<string, mixed> $users
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     public function sendBulkEmail(array $users, string $templateName, array $data = []): array
@@ -289,6 +295,7 @@ class EmailService
      */
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     public function testTemplate(string $templateName, array $data = []): array
@@ -434,11 +441,11 @@ class EmailService
             'customer_name' => $this->sanitizeString($license->user->name),
             'customer_email' => $this->sanitizeString($license->user->email),
             'product_name' => $this->sanitizeString($license->product->name ?? ''),
-            'order_number' => $this->sanitizeString(is_string($invoice->invoiceNumber)
-                ? $invoice->invoiceNumber
-                : ''),
+            'order_number' => $this->sanitizeString(
+                is_string($invoice->invoiceNumber) ? $invoice->invoiceNumber : ''
+            ),
             'licenseKey' => $this->sanitizeString($license->licenseKey),
-            'invoice_number' => $this->sanitizeString(is_string($invoice->invoiceNumber)
+            'invoiceNumber' => $this->sanitizeString(is_string($invoice->invoiceNumber)
                 ? $invoice->invoiceNumber
                 : ''),
             'amount' => $invoice->amount,
@@ -566,13 +573,13 @@ class EmailService
      */
     public function sendInvoiceApproachingDue(User $user, array $invoiceData): bool
     {
-        $invoiceNumber = $invoiceData['invoice_number'] ?? '';
+        $invoiceNumber = $invoiceData['invoiceNumber'] ?? '';
         $invoiceAmount = $invoiceData['invoice_amount'] ?? 0;
         $dueDate = $invoiceData['due_date'] ?? '';
         $daysRemaining = $invoiceData['days_remaining'] ?? 0;
 
         return $this->sendToUser($user, 'user_invoice_approaching_due', array_merge($invoiceData, [
-            'invoice_number' => is_string($invoiceNumber) ? $invoiceNumber : '',
+            'invoiceNumber' => is_string($invoiceNumber) ? $invoiceNumber : '',
             'invoice_amount' => is_numeric($invoiceAmount) ? (float)$invoiceAmount : 0.0,
             'due_date' => is_string($dueDate) ? $dueDate : '',
             'days_remaining' => is_numeric($daysRemaining) ? (int)$daysRemaining : 0,
@@ -587,7 +594,7 @@ class EmailService
     public function sendInvoicePaid(User $user, array $invoiceData): bool
     {
         return $this->sendToUser($user, 'user_invoice_paid', array_merge($invoiceData, [
-            'invoice_number' => $invoiceData['invoice_number'] ?? '',
+            'invoiceNumber' => $invoiceData['invoiceNumber'] ?? '',
             'invoice_amount' => $invoiceData['invoice_amount'] ?? 0,
             'payment_date' => $invoiceData['payment_date'] ?? '',
             'payment_method' => $invoiceData['payment_method'] ?? '',
@@ -602,7 +609,7 @@ class EmailService
     public function sendInvoiceCancelled(User $user, array $invoiceData): bool
     {
         return $this->sendToUser($user, 'user_invoice_cancelled', array_merge($invoiceData, [
-            'invoice_number' => $invoiceData['invoice_number'] ?? '',
+            'invoiceNumber' => $invoiceData['invoiceNumber'] ?? '',
             'invoice_amount' => $invoiceData['invoice_amount'] ?? 0,
             'cancellation_reason' => $invoiceData['cancellation_reason'] ?? '',
         ]));
@@ -758,7 +765,7 @@ class EmailService
     public function sendAdminInvoiceApproachingDue(array $invoiceData): bool
     {
         return $this->sendToAdmin('admin_invoice_approaching_due', array_merge($invoiceData, [
-            'invoice_number' => $invoiceData['invoice_number'] ?? '',
+            'invoiceNumber' => $invoiceData['invoiceNumber'] ?? '',
             'invoice_amount' => $invoiceData['invoice_amount'] ?? 0,
             'customer_name' => $invoiceData['customer_name'] ?? '',
             'customer_email' => $invoiceData['customer_email'] ?? '',
@@ -775,7 +782,7 @@ class EmailService
     public function sendAdminInvoiceCancelled(array $invoiceData): bool
     {
         return $this->sendToAdmin('admin_invoice_cancelled', array_merge($invoiceData, [
-            'invoice_number' => $invoiceData['invoice_number'] ?? '',
+            'invoiceNumber' => $invoiceData['invoiceNumber'] ?? '',
             'invoice_amount' => $invoiceData['invoice_amount'] ?? 0,
             'customer_name' => $invoiceData['customer_name'] ?? '',
             'customer_email' => $invoiceData['customer_email'] ?? '',
@@ -839,7 +846,7 @@ class EmailService
             'customer_email' => $license->user->email ?? '',
             'product_name' => $license->product->name ?? '',
             'licenseKey' => $license->licenseKey,
-            'invoice_number' => $invoice->invoice_number,
+            'invoiceNumber' => $invoice->invoiceNumber,
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
             'payment_method' => ucfirst(is_string($invoice->metadata['gateway'] ?? null) ? $invoice->metadata['gateway'] : 'Unknown'),
@@ -860,7 +867,7 @@ class EmailService
         return $this->sendToUser($invoice->user, 'custom_invoice_payment_confirmation', [
             'customer_name' => $invoice->user->name ?? '',
             'customer_email' => $invoice->user->email,
-            'invoice_number' => $invoice->invoice_number,
+            'invoiceNumber' => $invoice->invoiceNumber,
             'service_description' => $invoice->notes ?? 'Custom Service',
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
@@ -879,7 +886,7 @@ class EmailService
         return $this->sendToAdmin('admin_custom_invoice_payment', [
             'customer_name' => $invoice->user->name ?? '',
             'customer_email' => $invoice->user->email,
-            'invoice_number' => $invoice->invoice_number,
+            'invoiceNumber' => $invoice->invoiceNumber,
             'service_description' => $invoice->notes ?? 'Custom Service',
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
@@ -998,6 +1005,7 @@ class EmailService
      */
     /**
      * @param array<mixed, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function sanitizeData(array $data): array
