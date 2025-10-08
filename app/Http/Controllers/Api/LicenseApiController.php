@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Log;
  * // Verify a license
  * POST /api/license/verify
  * {
- *     "purchase_code": "ABC123-DEF456-GHI789",
+ *     "purchaseCode": "ABC123-DEF456-GHI789",
  *     "product_slug": "my-product",
  *     "domain": "example.com"
  * }
@@ -97,7 +97,7 @@ class LicenseApiController extends Controller
             }
             $validated = $request->validated();
             // Get validated and sanitized data from Request class
-            $purchaseCode = $validated['purchase_code'];
+            $purchaseCode = $validated['purchaseCode'];
             $productSlug = $validated['product_slug'];
             $domain = $validated['domain'] ?? null;
             $verificationKey = $validated['verification_key'] ?? null;
@@ -132,7 +132,7 @@ class LicenseApiController extends Controller
                 ], 403);
             }
             // Step 1: Check if license exists in our database
-            $license = License::where('purchase_code', $purchaseCode)
+            $license = License::where('purchaseCode', $purchaseCode)
                 ->where('productId', $product->id)
                 ->first();
             $databaseValid = false;
@@ -181,7 +181,7 @@ class LicenseApiController extends Controller
                 if (
                     $envatoData && isset($envatoData['item'])
                     && is_array($envatoData['item']) && isset($envatoData['item']['id'])
-                    && $envatoData['item']['id'] == $product->envato_item_id
+                    && $envatoData['item']['id'] == $product->envatoItemId
                 ) {
                     $envatoValid = true;
                     // Create license automatically from Envato
@@ -228,8 +228,8 @@ class LicenseApiController extends Controller
                             'error_code' => 'DOMAIN_LIMIT_EXCEEDED',
                             'data' => [
                                 'maxDomains' => $license->maxDomains ?? 1,
-                                'current_domains' => $license->active_domains_count,
-                                'remaining_domains' => $license->remaining_domains,
+                                'current_domains' => $license->activeDomainsCount,
+                                'remainingDomains' => $license->remainingDomains,
                                 'licenseType' => $license->licenseType,
                             ],
                         ], 403);
@@ -251,8 +251,8 @@ class LicenseApiController extends Controller
                             'error_code' => 'DOMAIN_NOT_AUTHORIZED',
                             'data' => [
                                 'maxDomains' => $license->maxDomains ?? 1,
-                                'current_domains' => $license->active_domains_count,
-                                'remaining_domains' => $license->remaining_domains,
+                                'current_domains' => $license->activeDomainsCount,
+                                'remainingDomains' => $license->remainingDomains,
                                 'licenseType' => $license->licenseType,
                             ],
                         ], 403);
@@ -278,10 +278,12 @@ class LicenseApiController extends Controller
                     'licenseId' => $license->id,
                     'licenseType' => $license->licenseType,
                     'maxDomains' => $license->maxDomains ?? 1,
-                    'current_domains' => $license->active_domains_count,
-                    'remaining_domains' => $license->remaining_domains,
+                    'current_domains' => $license->activeDomainsCount,
+                    'remainingDomains' => $license->remainingDomains,
                     'expiresAt' => $license->licenseExpiresAt?->toISOString(),
-                    'support_expiresAt' => ($license->support_expiresAt instanceof \Carbon\Carbon) ? $license->support_expiresAt->toISOString() : null,
+                    'supportExpiresAt' => ($license->supportExpiresAt instanceof \Carbon\Carbon)
+                        ? $license->supportExpiresAt->toISOString()
+                        : null,
                     'status' => $license->status,
                     'verification_method' => $verificationMethod,
                     'envato_valid' => $envatoValid,
@@ -329,11 +331,11 @@ class LicenseApiController extends Controller
         $maxDomains = $this->getMaxDomainsForLicenseType($product->licenseType ?? 'single');
         $license = License::create([
             'productId' => $product->id,
-            'purchase_code' => $purchaseCode,
-            'licenseKey' => $purchaseCode, // Use same value as purchase_code
+            'purchaseCode' => $purchaseCode,
+            'licenseKey' => $purchaseCode, // Use same value as purchaseCode
             'licenseType' => $product->licenseType ?? 'single',
             'maxDomains' => $maxDomains,
-            'support_expiresAt' => now()->addDays($product->supportDays ?? 365),
+            'supportExpiresAt' => now()->addDays($product->supportDays ?? 365),
             'licenseExpiresAt' => $product->licenseType === 'extended' ? now()->addYear() : null,
             'status' => 'active',
         ]);
@@ -386,7 +388,7 @@ class LicenseApiController extends Controller
             }
         }
         foreach ($authorizedDomains as $authorizedDomain) {
-            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain ?? '') 
+            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain ?? '')
                 ?? $authorizedDomain->domain ?? '';
             $authDomain = preg_replace('/^www\./', '', $authDomain) ?? $authDomain;
             if ($authDomain === $domain) {
@@ -456,9 +458,11 @@ class LicenseApiController extends Controller
         if ($license->hasReachedDomainLimit()) {
             \Log::warning('Domain limit exceeded for license', [
                 'licenseId' => $license->id,
-                'purchase_code' => is_string($license->purchase_code) ? substr($license->purchase_code, 0, 8) . '...' : 'unknown',
+                'purchaseCode' => !empty($license->purchaseCode)
+                    ? substr($license->purchaseCode, 0, 8) . '...'
+                    : 'unknown',
                 'domain' => $domain,
-                'current_domains' => $license->active_domains_count,
+                'current_domains' => $license->activeDomainsCount,
                 'maxDomains' => $license->maxDomains ?? 1,
                 'licenseType' => $license->licenseType,
                 'ip' => request()->ip(),
@@ -525,11 +529,10 @@ class LicenseApiController extends Controller
         if (! empty($additionalData)) {
             $logData = array_merge($logData, $additionalData);
         }
-        if ($success) {
-            // No logging for successful operations per Envato compliance rules
-        } else {
+        if (!$success) {
             Log::warning('License verification attempt failed', $logData);
         }
+        // Note: Successful operations are not logged per Envato compliance rules
     }
 
     /**
@@ -556,7 +559,7 @@ class LicenseApiController extends Controller
         $license->logs()->create([
             'domain' => $domain ?? 'unknown',
             'ipAddress' => request()->ip(),
-            'serial' => $license->purchase_code,
+            'serial' => $license->purchaseCode,
             'status' => 'success',
             'user_agent' => request()->userAgent(),
             'request_data' => [
@@ -607,7 +610,7 @@ class LicenseApiController extends Controller
             }
             $validated = $request->validated();
             // Get validated and sanitized data from Request class
-            $purchaseCode = $validated['purchase_code'];
+            $purchaseCode = $validated['purchaseCode'];
             $productSlug = $validated['product_slug'];
             $domain = $validated['domain'] ?? null;
             $envatoData = $validated['envato_data'] ?? [];
@@ -626,7 +629,7 @@ class LicenseApiController extends Controller
                 ], 404);
             }
             // Check if license already exists
-            $existingLicense = License::where('purchase_code', $purchaseCode)
+            $existingLicense = License::where('purchaseCode', $purchaseCode)
                 ->where('productId', $product->id)
                 ->first();
             if ($existingLicense) {
@@ -642,11 +645,11 @@ class LicenseApiController extends Controller
             // Create new license
             $license = License::create([
                 'productId' => $product->id,
-                'purchase_code' => $purchaseCode,
+                'purchaseCode' => $purchaseCode,
                 'licenseKey' => $this->generateLicenseKey(),
                 'licenseType' => $product->licenseType ?? 'single',
                 'maxDomains' => $maxDomains,
-                'support_expiresAt' => now()->addDays($product->supportDays ?? 365),
+                'supportExpiresAt' => now()->addDays($product->supportDays ?? 365),
                 'licenseExpiresAt' => $product->licenseType === 'extended' ? now()->addYear() : null,
                 'status' => 'active',
             ]);
@@ -748,7 +751,9 @@ class LicenseApiController extends Controller
                     'id' => $license->id,
                     'type' => $license->licenseType,
                     'expiresAt' => $license->licenseExpiresAt?->toISOString(),
-                    'support_expiresAt' => ($license->support_expiresAt instanceof \Carbon\Carbon) ? $license->support_expiresAt->toISOString() : null,
+                    'supportExpiresAt' => ($license->supportExpiresAt instanceof \Carbon\Carbon)
+                        ? $license->supportExpiresAt->toISOString()
+                        : null,
                     'status' => $license->status,
                 ],
                 'product' => [

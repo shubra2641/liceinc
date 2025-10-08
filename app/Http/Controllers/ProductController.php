@@ -111,7 +111,7 @@ class ProductController extends Controller
             if ($request && $request->filled('category')) {
                 $categoryId = $this->sanitizeInput($request->validated('category'));
                 if (is_numeric($categoryId)) {
-                    $productsQuery->where('category_id', (int)$categoryId);
+                    $productsQuery->where('categoryId', (int)$categoryId);
                 }
             }
             // Programming language filtering
@@ -224,31 +224,34 @@ class ProductController extends Controller
                     ->where('productId', $product->id)
                     ->exists();
                 // Check download permissions if product is downloadable
-                if ($product->is_downloadable) {
+                if ($product->isDownloadable) {
                     $productFileService = app(ProductFileService::class);
-                    $permissions = $productFileService->userCanDownloadFiles($product, Auth::id() ? (int)Auth::id() : 0);
+                    $permissions = $productFileService->userCanDownloadFiles(
+                        $product,
+                        Auth::id() ? (int)Auth::id() : 0
+                    );
                     $userCanDownload = $permissions['can_download'];
                     $downloadMessage = $permissions['message'];
                 }
             }
             // Process content for HTML/text detection
-            $product->description_has_html = false;
-            $product->requirements_has_html = false;
-            $product->installation_guide_has_html = false;
+            $product->descriptionHasHtml = false;
+            $product->requirementsHasHtml = false;
+            $product->installationGuideHasHtml = false;
 
             // Check if fields are strings before processing
             $description = $product->description;
             $requirements = $product->requirements;
-            $installationGuide = $product->installation_guide;
+            $installationGuide = $product->installationGuide;
 
             if (is_string($description)) {
-                $product->description_has_html = strip_tags($description) !== $description;
+                $product->descriptionHasHtml = strip_tags($description) !== $description;
             }
             if (is_string($requirements)) {
-                $product->requirements_has_html = strip_tags($requirements) !== $requirements;
+                $product->requirementsHasHtml = strip_tags($requirements) !== $requirements;
             }
             if (is_string($installationGuide)) {
-                $product->installation_guide_has_html = strip_tags($installationGuide) !== $installationGuide;
+                $product->installationGuideHasHtml = strip_tags($installationGuide) !== $installationGuide;
             }
             // Get license count for this product
             $licenseCount = License::where('productId', $product->id)
@@ -258,7 +261,7 @@ class ProductController extends Controller
                         ->orWhere('licenseExpiresAt', '>', now());
                 })
                 ->count();
-            $relatedProducts = Product::where('category_id', $product->category_id)
+            $relatedProducts = Product::where('categoryId', $product->categoryId)
                 ->where('id', '!=', $product->id)
                 ->where('isActive', true)
                 ->with(['category', 'programmingLanguage'])
@@ -359,31 +362,34 @@ class ProductController extends Controller
                     ->where('productId', $product->id)
                     ->exists();
                 // Check download permissions if product is downloadable
-                if ($product->is_downloadable) {
+                if ($product->isDownloadable) {
                     $productFileService = app(ProductFileService::class);
-                    $permissions = $productFileService->userCanDownloadFiles($product, Auth::id() ? (int)Auth::id() : 0);
+                    $permissions = $productFileService->userCanDownloadFiles(
+                        $product,
+                        Auth::id() ? (int)Auth::id() : 0
+                    );
                     $userCanDownload = $permissions['can_download'];
                     $downloadMessage = $permissions['message'];
                 }
             }
             // Process content for HTML/text detection
-            $product->description_has_html = false;
-            $product->requirements_has_html = false;
-            $product->installation_guide_has_html = false;
+            $product->descriptionHasHtml = false;
+            $product->requirementsHasHtml = false;
+            $product->installationGuideHasHtml = false;
 
             // Check if fields are strings before processing
             $description = $product->description;
             $requirements = $product->requirements;
-            $installationGuide = $product->installation_guide;
+            $installationGuide = $product->installationGuide;
 
             if (is_string($description)) {
-                $product->description_has_html = strip_tags($description) !== $description;
+                $product->descriptionHasHtml = strip_tags($description) !== $description;
             }
             if (is_string($requirements)) {
-                $product->requirements_has_html = strip_tags($requirements) !== $requirements;
+                $product->requirementsHasHtml = strip_tags($requirements) !== $requirements;
             }
             if (is_string($installationGuide)) {
-                $product->installation_guide_has_html = strip_tags($installationGuide) !== $installationGuide;
+                $product->installationGuideHasHtml = strip_tags($installationGuide) !== $installationGuide;
             }
             // Get license count for this product
             $licenseCount = License::where('productId', $product->id)
@@ -393,7 +399,7 @@ class ProductController extends Controller
                         ->orWhere('licenseExpiresAt', '>', now());
                 })
                 ->count();
-            $relatedProducts = Product::where('category_id', $product->category_id)
+            $relatedProducts = Product::where('categoryId', $product->categoryId)
                 ->where('id', '!=', $product->id)
                 ->where('isActive', true)
                 ->with(['category', 'programmingLanguage'])
