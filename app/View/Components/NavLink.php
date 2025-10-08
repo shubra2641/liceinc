@@ -8,36 +8,16 @@ use Illuminate\View\Component;
 use Illuminate\View\View;
 
 /**
- * Navigation Link Component with Enhanced Security.
- *
- * This view component provides navigation link functionality with enhanced security
- * measures and comprehensive error handling for the license management system.
- *
- * Features:
- * - Secure navigation link rendering with error handling
- * - Enhanced security measures and input validation
- * - Comprehensive error handling and logging
- * - Proper type hints and return types
- * - XSS protection and input sanitization
- * - Active state management with validation
- */
+ * Navigation Link Component with Enhanced Security. *
+ * This view component provides navigation link functionality with enhanced security * measures and comprehensive error handling for the license management system. *
+ * Features: * - Secure navigation link rendering with error handling * - Enhanced security measures and input validation * - Comprehensive error handling and logging * - Proper type hints and return types * - XSS protection and input sanitization * - Active state management with validation */
 class NavLink extends Component
 {
-    /**
-     * The active state of the navigation link.
-     */
+    /**   * The active state of the navigation link. */
     public bool $active;
-    /**
-     * The CSS classes for the navigation link.
-     */
+    /**   * The CSS classes for the navigation link. */
     public string $classes;
-    /**
-     * Create a new component instance with enhanced security.
-     *
-     * @param  bool  $active  Whether the navigation link is active
-     *
-     * @throws \InvalidArgumentException When invalid active state is provided
-     */
+    /**   * Create a new component instance with enhanced security. *   * @param bool $active Whether the navigation link is active *   * @throws \InvalidArgumentException When invalid active state is provided */
     public function __construct(bool $active = false)
     {
         try {
@@ -53,15 +33,7 @@ class NavLink extends Component
             throw $e;
         }
     }
-    /**
-     * Validate the active state with enhanced security.
-     *
-     * @param  mixed  $active  The active state to validate
-     *
-     * @return bool The validated active state
-     *
-     * @throws \InvalidArgumentException When invalid active state is provided
-     */
+    /**   * Validate the active state with enhanced security. *   * @param mixed $active The active state to validate *   * @return bool The validated active state *   * @throws \InvalidArgumentException When invalid active state is provided */
     private function validateActiveState($active): bool
     {
         // Convert to boolean and validate
@@ -86,11 +58,7 @@ class NavLink extends Component
         ]);
         throw new \InvalidArgumentException('Invalid active state: ' . var_export($active, true));
     }
-    /**
-     * Get the CSS classes for the link with enhanced security.
-     *
-     * @return string The CSS classes for the navigation link
-     */
+    /**   * Get the CSS classes for the link with enhanced security. *   * @return string The CSS classes for the navigation link */
     protected function getClasses(): string
     {
         if ($this->active) {
@@ -98,13 +66,7 @@ class NavLink extends Component
         }
         return 'nav-link';
     }
-    /**
-     * Get the view / contents that represent the component with enhanced security.
-     *
-     * @return View The rendered view instance
-     *
-     * @throws \Exception When view rendering fails
-     */
+    /**   * Get the view / contents that represent the component with enhanced security. *   * @return View The rendered view instance *   * @throws \Exception When view rendering fails */
     public function render(): View
     {
         try {

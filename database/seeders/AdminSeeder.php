@@ -12,9 +12,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+    /**   * Run the database seeds. */
     public function run(): void
     {
         // Create default admin user if one doesn't already exist

@@ -10,39 +10,12 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Admin Update Notification Controller with enhanced security.
- *
- * This controller handles update notification management in the admin panel
- * including checking for updates, sending notifications, and managing dismissal.
- *
- * Features:
- * - Update notification checking and sending
- * - Notification status management
- * - Notification dismissal with time limits
- * - Cache-based notification storage
- * - Comprehensive error handling
- * - Enhanced security measures (XSS protection, input validation)
- * - Proper logging for errors and warnings only
- * - Version status integration
- */
+ * Admin Update Notification Controller with enhanced security. *
+ * This controller handles update notification management in the admin panel * including checking for updates, sending notifications, and managing dismissal. *
+ * Features: * - Update notification checking and sending * - Notification status management * - Notification dismissal with time limits * - Cache-based notification storage * - Comprehensive error handling * - Enhanced security measures (XSS protection, input validation) * - Proper logging for errors and warnings only * - Version status integration */
 class UpdateNotificationController extends Controller
 {
-    /**
-     * Check for updates and send notifications with enhanced security.
-     *
-     * Checks for available system updates and sends notifications to admin
-     * with proper error handling and security measures.
-     *
-     * @return JsonResponse JSON response with update status and notification result
-     *
-     * @throws \Exception When update checking fails
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Check for updates and send notifications with enhanced security. *   * Checks for available system updates and sends notifications to admin * with proper error handling and security measures. *   * @return JsonResponse JSON response with update status and notification result *   * @throws \Exception When update checking fails *   * @version 1.0.6 *   *   *   *   */
     public function checkAndNotify(): JsonResponse
     {
         try {
@@ -72,22 +45,7 @@ class UpdateNotificationController extends Controller
             ], 500);
         }
     }
-    /**
-     * Get update notification status with comprehensive information.
-     *
-     * Retrieves the current notification status including version information,
-     * last notification details, and dismissal status.
-     *
-     * @return JsonResponse JSON response with notification status data
-     *
-     * @throws \Exception When status retrieval fails
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Get update notification status with comprehensive information. *   * Retrieves the current notification status including version information, * last notification details, and dismissal status. *   * @return JsonResponse JSON response with notification status data *   * @throws \Exception When status retrieval fails *   * @version 1.0.6 *   *   *   *   */
     public function getNotificationStatus(): JsonResponse
     {
         try {
@@ -113,24 +71,7 @@ class UpdateNotificationController extends Controller
             ], 500);
         }
     }
-    /**
-     * Dismiss update notification with enhanced security.
-     *
-     * Dismisses update notifications with optional time-based dismissal
-     * and proper validation and security measures.
-     *
-     * @param  UpdateNotificationRequest  $request  The validated request containing dismissal data
-     *
-     * @return JsonResponse JSON response with dismissal result
-     *
-     * @throws \Exception When dismissal operation fails
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Dismiss update notification with enhanced security. *   * Dismisses update notifications with optional time-based dismissal * and proper validation and security measures. *   * @param UpdateNotificationRequest $request The validated request containing dismissal data *   * @return JsonResponse JSON response with dismissal result *   * @throws \Exception When dismissal operation fails *   * @version 1.0.6 *   *   *   *   */
     public function dismissNotification(UpdateNotificationRequest $request): JsonResponse
     {
         try {
@@ -158,25 +99,8 @@ class UpdateNotificationController extends Controller
             ], 500);
         }
     }
-    /**
-     * Send update notification with enhanced security.
-     *
-     * Sends update notification to admin with proper cache management
-     * and security measures.
-     *
-     * @param  array  $versionStatus  The version status information
-     *
-     * @throws \Exception When notification sending fails
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
-    /**
-     * @param array<string, mixed> $versionStatus
-     */
+    /**   * Send update notification with enhanced security. *   * Sends update notification to admin with proper cache management * and security measures. *   * @param array $versionStatus The version status information *   * @throws \Exception When notification sending fails *   * @version 1.0.6 *   *   *   *   */
+    /**   * @param array<string, mixed> $versionStatus */
     private function sendUpdateNotification(array $versionStatus): void
     {
         // Store notification in cache

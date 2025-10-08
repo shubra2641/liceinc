@@ -15,70 +15,20 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 /**
- * Admin Invoice Controller with enhanced security.
+ * Admin Invoice Controller with enhanced security. *
+ * This controller handles invoice management functionality including creation, * editing, payment processing, and cancellation of invoices. It provides * comprehensive invoice management with proper validation and security measures. *
+ * Features: * - Invoice listing with filtering and pagination * - Invoice creation and editing with validation * - Payment processing and status management * - Invoice cancellation and deletion * - Custom invoice support with metadata * - Comprehensive error handling with database transactions * - Support for multiple invoice types and currencies * - Enhanced security measures (XSS protection, input validation) * - Proper logging for errors and warnings only * - Model scope integration for optimized queries *
  *
- * This controller handles invoice management functionality including creation,
- * editing, payment processing, and cancellation of invoices. It provides
- * comprehensive invoice management with proper validation and security measures.
- *
- * Features:
- * - Invoice listing with filtering and pagination
- * - Invoice creation and editing with validation
- * - Payment processing and status management
- * - Invoice cancellation and deletion
- * - Custom invoice support with metadata
- * - Comprehensive error handling with database transactions
- * - Support for multiple invoice types and currencies
- * - Enhanced security measures (XSS protection, input validation)
- * - Proper logging for errors and warnings only
- * - Model scope integration for optimized queries
- *
- *
- * @example
- * // Create a new invoice
- * POST /admin/invoices
- * {
- *     "user_id": 1,
- *     "license_id": 5,
- *     "type": "initial",
- *     "amount": 99.99,
- *     "currency": "USD",
- *     "status": "pending"
- * }
- */
+ * @example * // Create a new invoice * POST /admin/invoices * { * "user_id": 1, * "license_id": 5, * "type": "initial", * "amount": 99.99, * "currency": "USD", * "status": "pending" * } */
 class InvoiceController extends Controller
 {
     protected InvoiceService $invoiceService;
-    /**
-     * Create a new controller instance.
-     *
-     * @param  InvoiceService  $invoiceService  The invoice service for business logic
-     */
+    /**   * Create a new controller instance. *   * @param InvoiceService $invoiceService The invoice service for business logic */
     public function __construct(InvoiceService $invoiceService)
     {
         $this->invoiceService = $invoiceService;
     }
-    /**
-     * Display a listing of invoices with filtering and pagination and enhanced security.
-     *
-     * Shows a paginated list of invoices with optional filtering by status
-     * and date range. Includes invoice statistics for dashboard display.
-     *
-     * @param  Request  $request  The HTTP request containing optional filter parameters
-     *
-     * @return View The invoices index view with filtered data and statistics
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request with filters:
-     * GET /admin/invoices?status=paid&date_from=2024-01-01&date_to=2024-01-31
-     *
-     * // Returns view with:
-     * // - Paginated invoices list
-     * // - Filter options
-     * // - Invoice statistics
-     */
+    /**   * Display a listing of invoices with filtering and pagination and enhanced security. *   * Shows a paginated list of invoices with optional filtering by status * and date range. Includes invoice statistics for dashboard display. *   * @param Request $request The HTTP request containing optional filter parameters *   * @return View The invoices index view with filtered data and statistics *   * @throws \Exception When database operations fail *   * @example * // Request with filters: * GET /admin/invoices?status=paid&date_from=2024-01-01&date_to=2024-01-31 *   * // Returns view with: * // - Paginated invoices list * // - Filter options * // - Invoice statistics */
     public function index(Request $request): View
     {
         try {
@@ -120,67 +70,13 @@ class InvoiceController extends Controller
             ]);
         }
     }
-    /**
-     * Show the form for creating a new invoice.
-     *
-     * Displays the invoice creation form with user selection and
-     * license/product options for invoice generation.
-     *
-     * @return View The invoice creation form view
-     *
-     * @example
-     * // Access the create form:
-     * GET /admin/invoices/create
-     *
-     * // Returns view with:
-     * // - User selection dropdown
-     * // - Invoice type options
-     * // - Amount and currency fields
-     * // - Custom invoice options
-     */
+    /**   * Show the form for creating a new invoice. *   * Displays the invoice creation form with user selection and * license/product options for invoice generation. *   * @return View The invoice creation form view *   * @example * // Access the create form: * GET /admin/invoices/create *   * // Returns view with: * // - User selection dropdown * // - Invoice type options * // - Amount and currency fields * // - Custom invoice options */
     public function create(): View
     {
         $users = User::select('id', 'name', 'email')->get();
         return view('admin.invoices.create', ['users' => $users]);
     }
-    /**
-     * Store a newly created invoice in storage with enhanced security.
-     *
-     * Creates a new invoice with comprehensive validation including support
-     * for custom invoices with metadata. Handles both license-based and
-     * custom invoice creation with proper data validation.
-     *
-     * @param  InvoiceRequest  $request  The validated request containing invoice data
-     *
-     * @return RedirectResponse Redirect to invoice details with success message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request for license-based invoice:
-     * POST /admin/invoices
-     * {
-     *     "user_id": 1,
-     *     "license_id": 5,
-     *     "type": "initial",
-     *     "amount": 99.99,
-     *     "currency": "USD",
-     *     "status": "pending"
-     * }
-     *
-     * // Request for custom invoice:
-     * POST /admin/invoices
-     * {
-     *     "user_id": 1,
-     *     "license_id": "custom",
-     *     "type": "custom",
-     *     "amount": 149.99,
-     *     "currency": "USD",
-     *     "status": "pending",
-     *     "custom_invoice_type": "annual",
-     *     "custom_product_name": "Premium Support"
-     * }
-     */
+    /**   * Store a newly created invoice in storage with enhanced security. *   * Creates a new invoice with comprehensive validation including support * for custom invoices with metadata. Handles both license-based and * custom invoice creation with proper data validation. *   * @param InvoiceRequest $request The validated request containing invoice data *   * @return RedirectResponse Redirect to invoice details with success message *   * @throws \Exception When database operations fail *   * @example * // Request for license-based invoice: * POST /admin/invoices * { * "user_id": 1, * "license_id": 5, * "type": "initial", * "amount": 99.99, * "currency": "USD", * "status": "pending" * } *   * // Request for custom invoice: * POST /admin/invoices * { * "user_id": 1, * "license_id": "custom", * "type": "custom", * "amount": 149.99, * "currency": "USD", * "status": "pending", * "custom_invoice_type": "annual", * "custom_product_name": "Premium Support" * } */
     public function store(InvoiceRequest $request): RedirectResponse
     {
         try {
@@ -232,57 +128,13 @@ class InvoiceController extends Controller
                 ->with('error', 'Failed to create invoice. Please try again.');
         }
     }
-    /**
-     * Display the specified invoice.
-     *
-     * Shows detailed information about a specific invoice including
-     * user details, product/license information, and payment status.
-     *
-     * @param  Invoice  $invoice  The invoice to display
-     *
-     * @return View The invoice details view
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     *
-     * @example
-     * // Access invoice details:
-     * GET /admin/invoices/123
-     *
-     * // Returns view with:
-     * // - Invoice details and status
-     * // - User information
-     * // - Product/license details
-     * // - Payment information
-     * // - Action buttons (mark paid, cancel, etc.)
-     */
+    /**   * Display the specified invoice. *   * Shows detailed information about a specific invoice including * user details, product/license information, and payment status. *   * @param Invoice $invoice The invoice to display *   * @return View The invoice details view *   * @version 1.0.6 *   *   *   *   *   * @example * // Access invoice details: * GET /admin/invoices/123 *   * // Returns view with: * // - Invoice details and status * // - User information * // - Product/license details * // - Payment information * // - Action buttons (mark paid, cancel, etc.) */
     public function show(Invoice $invoice): View
     {
         $invoice->load(['user', 'product', 'license']);
         return view('admin.invoices.show', ['invoice' => $invoice]);
     }
-    /**
-     * Mark invoice as paid with enhanced security.
-     *
-     * Updates the invoice status to paid and records the payment timestamp
-     * using the invoice service for proper business logic handling.
-     *
-     * @param  Invoice  $invoice  The invoice to mark as paid
-     *
-     * @return RedirectResponse Redirect back with success message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Mark invoice as paid:
-     * POST /admin/invoices/123/mark-paid
-     *
-     * // Response: Redirect back with success message
-     * // "Invoice marked as paid successfully"
-     */
+    /**   * Mark invoice as paid with enhanced security. *   * Updates the invoice status to paid and records the payment timestamp * using the invoice service for proper business logic handling. *   * @param Invoice $invoice The invoice to mark as paid *   * @return RedirectResponse Redirect back with success message *   * @throws \Exception When database operations fail *   * @example * // Mark invoice as paid: * POST /admin/invoices/123/mark-paid *   * // Response: Redirect back with success message * // "Invoice marked as paid successfully" */
     public function markAsPaid(Invoice $invoice): RedirectResponse
     {
         try {
@@ -302,25 +154,7 @@ class InvoiceController extends Controller
                 ->with('error', 'Failed to mark invoice as paid. Please try again.');
         }
     }
-    /**
-     * Cancel invoice with enhanced security.
-     *
-     * Cancels the invoice and updates its status using the invoice service
-     * for proper business logic handling and status management.
-     *
-     * @param  Invoice  $invoice  The invoice to cancel
-     *
-     * @return RedirectResponse Redirect back with success message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Cancel invoice:
-     * POST /admin/invoices/123/cancel
-     *
-     * // Response: Redirect back with success message
-     * // "Invoice cancelled successfully"
-     */
+    /**   * Cancel invoice with enhanced security. *   * Cancels the invoice and updates its status using the invoice service * for proper business logic handling and status management. *   * @param Invoice $invoice The invoice to cancel *   * @return RedirectResponse Redirect back with success message *   * @throws \Exception When database operations fail *   * @example * // Cancel invoice: * POST /admin/invoices/123/cancel *   * // Response: Redirect back with success message * // "Invoice cancelled successfully" */
     public function cancel(Invoice $invoice): RedirectResponse
     {
         try {
@@ -340,68 +174,14 @@ class InvoiceController extends Controller
                 ->with('error', 'Failed to cancel invoice. Please try again.');
         }
     }
-    /**
-     * Show the form for editing the specified invoice.
-     *
-     * Displays the invoice editing form with pre-populated data
-     * and user selection options for invoice modification.
-     *
-     * @param  Invoice  $invoice  The invoice to edit
-     *
-     * @return View The invoice edit form view
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     *
-     * @example
-     * // Access the edit form:
-     * GET /admin/invoices/123/edit
-     *
-     * // Returns view with:
-     * // - Pre-populated invoice data
-     * // - User selection dropdown
-     * // - Invoice type and status options
-     * // - Custom invoice fields if applicable
-     */
+    /**   * Show the form for editing the specified invoice. *   * Displays the invoice editing form with pre-populated data * and user selection options for invoice modification. *   * @param Invoice $invoice The invoice to edit *   * @return View The invoice edit form view *   * @version 1.0.6 *   *   *   *   *   * @example * // Access the edit form: * GET /admin/invoices/123/edit *   * // Returns view with: * // - Pre-populated invoice data * // - User selection dropdown * // - Invoice type and status options * // - Custom invoice fields if applicable */
     public function edit(Invoice $invoice): View
     {
         $users = User::select('id', 'name', 'email')->get();
         $invoice->load(['user', 'license.product']);
         return view('admin.invoices.edit', ['invoice' => $invoice, 'users' => $users]);
     }
-    /**
-     * Update the specified invoice in storage.
-     *
-     * Updates an existing invoice with comprehensive validation including
-     * support for custom invoices with metadata. Handles both license-based
-     * and custom invoice updates with proper data validation.
-     *
-     * @param  InvoiceRequest  $request  The validated request containing updated invoice data
-     * @param  Invoice  $invoice  The invoice to update
-     *
-     * @return RedirectResponse Redirect to invoice details with success message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Update invoice:
-     * PUT /admin/invoices/123
-     * {
-     *     "user_id": 1,
-     *     "license_id": 5,
-     *     "type": "renewal",
-     *     "amount": 79.99,
-     *     "currency": "USD",
-     *     "status": "paid",
-     *     "paid_at": "2024-01-15 10:30:00"
-     * }
-     *
-     * // Response: Redirect to invoice details with success message
-     * // "Invoice updated successfully"
-     */
+    /**   * Update the specified invoice in storage. *   * Updates an existing invoice with comprehensive validation including * support for custom invoices with metadata. Handles both license-based * and custom invoice updates with proper data validation. *   * @param InvoiceRequest $request The validated request containing updated invoice data * @param Invoice $invoice The invoice to update *   * @return RedirectResponse Redirect to invoice details with success message *   * @throws \Exception When database operations fail *   * @example * // Update invoice: * PUT /admin/invoices/123 * { * "user_id": 1, * "license_id": 5, * "type": "renewal", * "amount": 79.99, * "currency": "USD", * "status": "paid", * "paid_at": "2024-01-15 10:30:00" * } *   * // Response: Redirect to invoice details with success message * // "Invoice updated successfully" */
     public function update(InvoiceRequest $request, Invoice $invoice): RedirectResponse
     {
         try {
@@ -454,28 +234,7 @@ class InvoiceController extends Controller
                 ->with('error', 'Failed to update invoice. Please try again.');
         }
     }
-    /**
-     * Remove the specified invoice from storage with enhanced security.
-     *
-     * Deletes an invoice with proper validation to prevent deletion
-     * of paid invoices. Only allows deletion of pending or cancelled invoices.
-     *
-     * @param  Invoice  $invoice  The invoice to delete
-     *
-     * @return RedirectResponse Redirect to invoices list with success/error message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Delete invoice:
-     * DELETE /admin/invoices/123
-     *
-     * // Success response: Redirect to invoices list
-     * // "Invoice deleted successfully"
-     *
-     * // Error response (if paid): Redirect back with error
-     * // "Cannot delete a paid invoice"
-     */
+    /**   * Remove the specified invoice from storage with enhanced security. *   * Deletes an invoice with proper validation to prevent deletion * of paid invoices. Only allows deletion of pending or cancelled invoices. *   * @param Invoice $invoice The invoice to delete *   * @return RedirectResponse Redirect to invoices list with success/error message *   * @throws \Exception When database operations fail *   * @example * // Delete invoice: * DELETE /admin/invoices/123 *   * // Success response: Redirect to invoices list * // "Invoice deleted successfully" *   * // Error response (if paid): Redirect back with error * // "Cannot delete a paid invoice" */
     public function destroy(Invoice $invoice): RedirectResponse
     {
         try {

@@ -12,35 +12,17 @@ use Illuminate\Validation\ValidationException;
 use App\Helpers\SecurityHelper;
 
 /**
- * Login Request with enhanced security and validation.
- *
- * This request class handles authentication requests with comprehensive security
- * measures including rate limiting, input validation, and security logging.
- *
- * Features:
- * - Rate limiting protection against brute force attacks
- * - Input validation and sanitization
- * - Security event logging
- * - Custom validation messages
- * - Enhanced authentication with remember functionality
- * - IP-based throttling with email combination
- */
+ * Login Request with enhanced security and validation. *
+ * This request class handles authentication requests with comprehensive security * measures including rate limiting, input validation, and security logging. *
+ * Features: * - Rate limiting protection against brute force attacks * - Input validation and sanitization * - Security event logging * - Custom validation messages * - Enhanced authentication with remember functionality * - IP-based throttling with email combination */
 class LoginRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool Always returns true for login requests
-     */
+    /**   * Determine if the user is authorized to make this request. *   * @return bool Always returns true for login requests */
     public function authorize(): bool
     {
         return true;
     }
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
+    /**   * Get the validation rules that apply to the request. *   * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string> */
     public function rules(): array
     {
         return [
@@ -62,11 +44,7 @@ class LoginRequest extends FormRequest
             ],
         ];
     }
-    /**
-     * Get custom validation messages.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom validation messages. *   * @return array<string, string> */
     public function messages(): array
     {
         return [
@@ -79,11 +57,7 @@ class LoginRequest extends FormRequest
             'remember.boolean' => 'تذكرني يجب أن يكون صحيح أو خطأ.',
         ];
     }
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom attributes for validator errors. *   * @return array<string, string> */
     public function attributes(): array
     {
         return [
@@ -92,9 +66,7 @@ class LoginRequest extends FormRequest
             'remember' => 'remember me',
         ];
     }
-    /**
-     * Prepare the data for validation.
-     */
+    /**   * Prepare the data for validation. */
     protected function prepareForValidation(): void
     {
         // Sanitize email input to prevent XSS
@@ -104,13 +76,7 @@ class LoginRequest extends FormRequest
             ]);
         }
     }
-    /**
-     * Sanitize email input with validation.
-     *
-     * @param  mixed  $email  The email to sanitize
-     *
-     * @return string|null The sanitized email
-     */
+    /**   * Sanitize email input with validation. *   * @param mixed $email The email to sanitize *   * @return string|null The sanitized email */
     private function sanitizeEmail(mixed $email): ?string
     {
         if ($email === null || !is_string($email)) {
@@ -121,14 +87,7 @@ class LoginRequest extends FormRequest
         // Don't use htmlspecialchars for email as it can break the format
         return $email;
     }
-    /**
-     * Attempt to authenticate the request's credentials with enhanced security.
-     *
-     * Performs authentication with rate limiting, security logging, and
-     * comprehensive error handling for failed login attempts.
-     *
-     * @throws ValidationException When authentication fails
-     */
+    /**   * Attempt to authenticate the request's credentials with enhanced security. *   * Performs authentication with rate limiting, security logging, and * comprehensive error handling for failed login attempts. *   * @throws ValidationException When authentication fails */
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
@@ -150,14 +109,7 @@ class LoginRequest extends FormRequest
         }
         RateLimiter::clear($this->throttleKey());
     }
-    /**
-     * Ensure the login request is not rate limited with enhanced security logging.
-     *
-     * Checks rate limiting status and logs security events for monitoring
-     * and protection against brute force attacks.
-     *
-     * @throws ValidationException When rate limit is exceeded
-     */
+    /**   * Ensure the login request is not rate limited with enhanced security logging. *   * Checks rate limiting status and logs security events for monitoring * and protection against brute force attacks. *   * @throws ValidationException When rate limit is exceeded */
     public function ensureIsNotRateLimited(): void
     {
         if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
@@ -180,14 +132,7 @@ class LoginRequest extends FormRequest
             ]),
         ]);
     }
-    /**
-     * Get the rate limiting throttle key for the request with enhanced security.
-     *
-     * Creates a unique throttle key combining email and IP address for
-     * rate limiting protection against brute force attacks.
-     *
-     * @return string The unique throttle key for rate limiting
-     */
+    /**   * Get the rate limiting throttle key for the request with enhanced security. *   * Creates a unique throttle key combining email and IP address for * rate limiting protection against brute force attacks. *   * @return string The unique throttle key for rate limiting */
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->string('email')) . '|' . $this->ip());

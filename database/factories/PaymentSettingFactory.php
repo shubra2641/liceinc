@@ -6,21 +6,13 @@ use App\Models\PaymentSetting;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PaymentSetting>
- */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PaymentSetting> */
 class PaymentSettingFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var class-string<PaymentSetting> */
+    /**   * The name of the factory's corresponding model. *   * @var class-string<PaymentSetting> */
     protected $model = PaymentSetting::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Define the model's default state. *   * @return array<string, mixed> */
     public function definition(): array
     {
         $gateways = ['stripe', 'paypal', 'razorpay', 'bank_transfer'];
@@ -41,9 +33,7 @@ class PaymentSettingFactory extends Factory
         ];
     }
 
-    /**
-     * Create an inactive payment gateway.
-     */
+    /**   * Create an inactive payment gateway. */
     public function inactive(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -51,9 +41,7 @@ class PaymentSettingFactory extends Factory
         ]);
     }
 
-    /**
-     * Create a Stripe gateway.
-     */
+    /**   * Create a Stripe gateway. */
     public function stripe(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -61,16 +49,14 @@ class PaymentSettingFactory extends Factory
             'name' => 'Stripe',
             'description' => 'Pay with credit card via Stripe',
             'settings' => json_encode([
-                'publishable_key' => 'pk_test_'.$this->faker->uuid(),
-                'secret_key' => 'sk_test_'.$this->faker->uuid(),
+                'publishable_key' => 'pk_test_' . $this->faker->uuid(),
+                'secret_key' => 'sk_test_' . $this->faker->uuid(),
                 'mode' => 'sandbox',
             ]),
         ]);
     }
 
-    /**
-     * Create a PayPal gateway.
-     */
+    /**   * Create a PayPal gateway. */
     public function paypal(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -85,9 +71,7 @@ class PaymentSettingFactory extends Factory
         ]);
     }
 
-    /**
-     * Set production mode.
-     */
+    /**   * Set production mode. */
     public function production(): static
     {
         return $this->state(function (array $attributes) {

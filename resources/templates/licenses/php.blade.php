@@ -1,40 +1,35 @@
 <?php
-/**
- * License Verification System
- * Product: {{product}}
- * Generated: {{date}}
- */
 
-class LicenseVerifier {
+/**
+ * License Verification System * Product: {{product}} * Generated: {{date}} */
+
+class LicenseVerifier
+{
     private $apiUrl = '{{license_api_url}}';
     private $productSlug = '{{product_slug}}';
     private $verificationKey = '{{verification_key}}';
     private $apiToken = '{{api_token}}';
 
-    /**
-     * Verify license with purchase code
-     * This method sends a single request to our system which handles both Envato and database verification
-     */
-    public function verifyLicense($purchaseCode, $domain = null) {
+    /**   * Verify license with purchase code * This method sends a single request to our system which handles both Envato and database verification */
+    public function verifyLicense($purchaseCode, $domain = null)
+    {
         try {
             // Send single request to our system
             $result = $this->verifyWithOurSystem($purchaseCode, $domain);
-            
+
             if ($result['valid']) {
                 return $this->createLicenseResponse(true, $result['message'], $result['data']);
             } else {
                 return $this->createLicenseResponse(false, $result['message']);
             }
-
         } catch (Exception $e) {
             return $this->createLicenseResponse(false, 'Verification failed: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Verify with our license system
-     */
-    private function verifyWithOurSystem($purchaseCode, $domain = null) {
+    /**   * Verify with our license system */
+    private function verifyWithOurSystem($purchaseCode, $domain = null)
+    {
         $postData = [
             'purchase_code' => $purchaseCode,
             'product_slug' => $this->productSlug,
@@ -74,10 +69,9 @@ class LicenseVerifier {
         ];
     }
 
-    /**
-     * Create standardized response
-     */
-    private function createLicenseResponse($valid, $message, $data = null) {
+    /**   * Create standardized response */
+    private function createLicenseResponse($valid, $message, $data = null)
+    {
         return [
             'valid' => $valid,
             'message' => $message,
@@ -99,4 +93,3 @@ if ($result['valid']) {
     echo "License verification failed: " . $result['message'];
 }
 */
-?>

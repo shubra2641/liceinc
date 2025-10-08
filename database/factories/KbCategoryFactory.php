@@ -7,21 +7,13 @@ use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\KbCategory>
- */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\KbCategory> */
 class KbCategoryFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var class-string<KbCategory> */
+    /**   * The name of the factory's corresponding model. *   * @var class-string<KbCategory> */
     protected $model = KbCategory::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Define the model's default state. *   * @return array<string, mixed> */
     public function definition(): array
     {
         return [
@@ -39,9 +31,7 @@ class KbCategoryFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate that the category is not published.
-     */
+    /**   * Indicate that the category is not published. */
     public function unpublished(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -49,9 +39,7 @@ class KbCategoryFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the category requires serial.
-     */
+    /**   * Indicate that the category requires serial. */
     public function requiresSerial(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -60,9 +48,7 @@ class KbCategoryFactory extends Factory
         ]);
     }
 
-    /**
-     * Set a specific sort order.
-     */
+    /**   * Set a specific sort order. */
     public function sortOrder(int $order): static
     {
         return $this->state(fn (array $attributes) => [
@@ -70,9 +56,7 @@ class KbCategoryFactory extends Factory
         ]);
     }
 
-    /**
-     * Associate with a product.
-     */
+    /**   * Associate with a product. */
     public function forProduct(Product $product): static
     {
         return $this->state(fn (array $attributes) => [

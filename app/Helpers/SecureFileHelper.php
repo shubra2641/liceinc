@@ -6,16 +6,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Secure File Helper
- *
- * Provides secure alternatives to discouraged PHP functions
- * for file operations and system interactions.
- */
+ * Secure File Helper *
+ * Provides secure alternatives to discouraged PHP functions * for file operations and system interactions. */
 class SecureFileHelper
 {
-    /**
-     * Secure alternative to filesize()
-     */
+    /**   * Secure alternative to filesize() */
     public static function getFileSize(string $path): int
     {
         try {
@@ -29,9 +24,7 @@ class SecureFileHelper
         }
     }
 
-    /**
-     * Secure alternative to file_exists()
-     */
+    /**   * Secure alternative to file_exists() */
     public static function fileExists(string $path): bool
     {
         try {
@@ -42,9 +35,7 @@ class SecureFileHelper
         }
     }
 
-    /**
-     * Secure alternative to is_dir()
-     */
+    /**   * Secure alternative to is_dir() */
     public static function isDirectory(string $path): bool
     {
         try {
@@ -60,9 +51,7 @@ class SecureFileHelper
         }
     }
 
-    /**
-     * Secure alternative to is_writable()
-     */
+    /**   * Secure alternative to is_writable() */
     public static function isWritable(string $path): bool
     {
         try {
@@ -80,9 +69,7 @@ class SecureFileHelper
         }
     }
 
-    /**
-     * Secure alternative to mkdir()
-     */
+    /**   * Secure alternative to mkdir() */
     public static function createDirectory(string $path, int $permissions = 0755, bool $recursive = true): bool
     {
         try {
@@ -93,9 +80,7 @@ class SecureFileHelper
         }
     }
 
-    /**
-     * Secure alternative to unlink()
-     */
+    /**   * Secure alternative to unlink() */
     public static function deleteFile(string $path): bool
     {
         try {
@@ -106,9 +91,7 @@ class SecureFileHelper
         }
     }
 
-    /**
-     * Secure alternative to file_put_contents()
-     */
+    /**   * Secure alternative to file_put_contents() */
     public static function putContents(string $path, string $content): bool
     {
         try {
@@ -119,17 +102,13 @@ class SecureFileHelper
         }
     }
 
-    /**
-     * Secure alternative to fopen() for output
-     */
+    /**   * Secure alternative to fopen() for output */
     public static function openOutput(string $mode = 'w'): mixed
     {
         return fopen('php://output', $mode);
     }
 
-    /**
-     * Secure alternative to fclose()
-     */
+    /**   * Secure alternative to fclose() */
     public static function closeFile(mixed $handle): bool
     {
         if (!is_resource($handle)) {
@@ -138,33 +117,25 @@ class SecureFileHelper
         return fclose($handle);
     }
 
-    /**
-     * Secure alternative to dirname()
-     */
+    /**   * Secure alternative to dirname() */
     public static function getDirectoryName(string $path): string
     {
         return pathinfo($path, PATHINFO_DIRNAME);
     }
 
-    /**
-     * Secure alternative to chr()
-     */
+    /**   * Secure alternative to chr() */
     public static function getCharacter(int $ascii): string
     {
         return chr($ascii);
     }
 
-    /**
-     * Secure alternative to gettype()
-     */
+    /**   * Secure alternative to gettype() */
     public static function getType(mixed $variable): string
     {
         return gettype($variable);
     }
 
-    /**
-     * Secure alternative to parse_url()
-     */
+    /**   * Secure alternative to parse_url() */
     public static function parseUrl(string $url, int $component = -1): mixed
     {
         $parsed = parse_url($url, $component);
@@ -174,9 +145,7 @@ class SecureFileHelper
         return $parsed;
     }
 
-    /**
-     * Secure alternative to ini_set()
-     */
+    /**   * Secure alternative to ini_set() */
     public static function setIniSetting(string $setting, string $value): bool
     {
         try {

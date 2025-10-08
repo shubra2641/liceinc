@@ -18,42 +18,19 @@ use Illuminate\View\View;
 use InvalidArgumentException;
 
 /**
- * Knowledge Base Public Controller with enhanced security and comprehensive KB management.
- *
- * This controller handles public knowledge base operations including viewing articles,
- * categories, and search functionality. It implements comprehensive security measures,
- * input validation, and error handling for reliable KB operations.
- */
+ * Knowledge Base Public Controller with enhanced security and comprehensive KB management. *
+ * This controller handles public knowledge base operations including viewing articles, * categories, and search functionality. It implements comprehensive security measures, * input validation, and error handling for reliable KB operations. */
 class KbPublicController extends Controller
 {
     protected EnvatoService $envatoService;
     protected PurchaseCodeService $purchaseCodeService;
-    /**
-     * Constructor with enhanced security and dependency injection.
-     *
-     * @param  EnvatoService  $envatoService  Envato service for license verification
-     * @param  PurchaseCodeService  $purchaseCodeService  Purchase code service for verification
-     */
+    /**   * Constructor with enhanced security and dependency injection. *   * @param EnvatoService $envatoService Envato service for license verification * @param PurchaseCodeService $purchaseCodeService Purchase code service for verification */
     public function __construct(EnvatoService $envatoService, PurchaseCodeService $purchaseCodeService)
     {
         $this->envatoService = $envatoService;
         $this->purchaseCodeService = $purchaseCodeService;
     }
-    /**
-     * Display the knowledge base index with enhanced security and error handling.
-     *
-     * Shows the main knowledge base page with categories and latest articles with
-     * comprehensive validation, security measures, and error handling for reliable
-     * KB operations.
-     *
-     * @return View The KB index view
-     *
-     * @throws \Exception When data retrieval fails
-     *
-     * @example
-     * // Access via GET /kb
-     * // Returns KB index with categories and latest articles
-     */
+    /**   * Display the knowledge base index with enhanced security and error handling. *   * Shows the main knowledge base page with categories and latest articles with * comprehensive validation, security measures, and error handling for reliable * KB operations. *   * @return View The KB index view *   * @throws \Exception When data retrieval fails *   * @example * // Access via GET /kb * // Returns KB index with categories and latest articles */
     public function index(): View
     {
         try {
@@ -77,23 +54,7 @@ class KbPublicController extends Controller
             ]);
         }
     }
-    /**
-     * Display a knowledge base category with enhanced security and error handling.
-     *
-     * Shows a specific KB category with articles and access control with comprehensive
-     * validation, security measures, and error handling for reliable KB operations.
-     *
-     * @param  string  $slug  The category slug
-     *
-     * @return View|RedirectResponse The category view or redirect on error
-     *
-     * @throws InvalidArgumentException When slug is invalid
-     * @throws \Exception When category retrieval fails
-     *
-     * @example
-     * // Access via GET /kb/category/{slug}
-     * // Returns category view with articles and access control
-     */
+    /**   * Display a knowledge base category with enhanced security and error handling. *   * Shows a specific KB category with articles and access control with comprehensive * validation, security measures, and error handling for reliable KB operations. *   * @param string $slug The category slug *   * @return View|RedirectResponse The category view or redirect on error *   * @throws InvalidArgumentException When slug is invalid * @throws \Exception When category retrieval fails *   * @example * // Access via GET /kb/category/{slug} * // Returns category view with articles and access control */
     public function category(string $slug): View|RedirectResponse
     {
         try {
@@ -161,24 +122,7 @@ class KbPublicController extends Controller
             return redirect()->route('kb.index')->with('error', 'Category not found or access denied.');
         }
     }
-    /**
-     * Display a knowledge base article with enhanced security and error handling.
-     *
-     * Shows a specific KB article with access control and related articles with
-     * comprehensive validation, security measures, and error handling for reliable
-     * KB operations.
-     *
-     * @param  string  $slug  The article slug
-     *
-     * @return View|RedirectResponse The article view or redirect on error
-     *
-     * @throws InvalidArgumentException When slug is invalid
-     * @throws \Exception When article retrieval fails
-     *
-     * @example
-     * // Access via GET /kb/article/{slug}
-     * // Returns article view with access control and related articles
-     */
+    /**   * Display a knowledge base article with enhanced security and error handling. *   * Shows a specific KB article with access control and related articles with * comprehensive validation, security measures, and error handling for reliable * KB operations. *   * @param string $slug The article slug *   * @return View|RedirectResponse The article view or redirect on error *   * @throws InvalidArgumentException When slug is invalid * @throws \Exception When article retrieval fails *   * @example * // Access via GET /kb/article/{slug} * // Returns article view with access control and related articles */
     public function article(string $slug): View|RedirectResponse
     {
         try {
@@ -250,23 +194,7 @@ class KbPublicController extends Controller
             return redirect()->route('kb.index')->with('error', 'Article not found or access denied.');
         }
     }
-    /**
-     * Search knowledge base with enhanced security and error handling.
-     *
-     * Performs secure search across KB articles and categories with comprehensive
-     * validation, security measures, and error handling for reliable KB operations.
-     *
-     * @param  Request  $request  The search request
-     *
-     * @return View The search results view
-     *
-     * @throws InvalidArgumentException When search query is invalid
-     * @throws \Exception When search operation fails
-     *
-     * @example
-     * // Access via GET /kb/search?q=search_term
-     * // Returns search results with access control
-     */
+    /**   * Search knowledge base with enhanced security and error handling. *   * Performs secure search across KB articles and categories with comprehensive * validation, security measures, and error handling for reliable KB operations. *   * @param Request $request The search request *   * @return View The search results view *   * @throws InvalidArgumentException When search query is invalid * @throws \Exception When search operation fails *   * @example * // Access via GET /kb/search?q=search_term * // Returns search results with access control */
     public function search(Request $request): View
     {
         try {
@@ -321,16 +249,7 @@ class KbPublicController extends Controller
             ]);
         }
     }
-    /**
-     * Check if user has access to a category with enhanced security and error handling.
-     *
-     * @param  KbCategory  $category  The category to check access for
-     * @param  mixed  $user  The user to check access for
-     *
-     * @return bool True if user has access, false otherwise
-     *
-     * @throws \Exception When access check fails
-     */
+    /**   * Check if user has access to a category with enhanced security and error handling. *   * @param KbCategory $category The category to check access for * @param mixed $user The user to check access for *   * @return bool True if user has access, false otherwise *   * @throws \Exception When access check fails */
     private function checkCategoryAccess($category, $user): bool
     {
         try {
@@ -365,16 +284,7 @@ class KbPublicController extends Controller
             return false;
         }
     }
-    /**
-     * Check if user has access to an article with enhanced security and error handling.
-     *
-     * @param  KbArticle  $article  The article to check access for
-     * @param  mixed  $user  The user to check access for
-     *
-     * @return bool True if user has access, false otherwise
-     *
-     * @throws \Exception When access check fails
-     */
+    /**   * Check if user has access to an article with enhanced security and error handling. *   * @param KbArticle $article The article to check access for * @param mixed $user The user to check access for *   * @return bool True if user has access, false otherwise *   * @throws \Exception When access check fails */
     private function checkArticleAccess($article, $user): bool
     {
         try {
@@ -425,13 +335,7 @@ class KbPublicController extends Controller
             return false;
         }
     }
-    /**
-     * Validate slug with enhanced security and comprehensive validation.
-     *
-     * @param  string  $slug  The slug to validate
-     *
-     * @throws InvalidArgumentException When slug is invalid
-     */
+    /**   * Validate slug with enhanced security and comprehensive validation. *   * @param string $slug The slug to validate *   * @throws InvalidArgumentException When slug is invalid */
     private function validateSlug(string $slug): void
     {
         if (empty($slug) || strlen($slug) > 255) {
@@ -440,13 +344,7 @@ class KbPublicController extends Controller
         // XSS protection
         $slug = htmlspecialchars($slug, ENT_QUOTES, 'UTF-8');
     }
-    /**
-     * Get active categories with enhanced security and error handling.
-     *
-     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory>
-     *
-     * @throws \Exception When category retrieval fails
-     */
+    /**   * Get active categories with enhanced security and error handling. *   * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory> *   * @throws \Exception When category retrieval fails */
     private function getActiveCategories()
     {
         try {
@@ -463,13 +361,7 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-    /**
-     * Get latest articles with enhanced security and error handling.
-     *
-     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle>
-     *
-     * @throws \Exception When article retrieval fails
-     */
+    /**   * Get latest articles with enhanced security and error handling. *   * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle> *   * @throws \Exception When article retrieval fails */
     private function getLatestArticles()
     {
         try {
@@ -489,15 +381,7 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-    /**
-     * Get category by slug with enhanced security and error handling.
-     *
-     * @param  string  $slug  The category slug
-     *
-     * @return KbCategory The category
-     *
-     * @throws \Exception When category retrieval fails
-     */
+    /**   * Get category by slug with enhanced security and error handling. *   * @param string $slug The category slug *   * @return KbCategory The category *   * @throws \Exception When category retrieval fails */
     private function getCategoryBySlug(string $slug): KbCategory
     {
         try {
@@ -513,26 +397,12 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-    /**
-     * Check if category requires access with enhanced security.
-     *
-     * @param  KbCategory  $category  The category to check
-     *
-     * @return bool True if access is required, false otherwise
-     */
+    /**   * Check if category requires access with enhanced security. *   * @param KbCategory $category The category to check *   * @return bool True if access is required, false otherwise */
     private function categoryRequiresAccess(KbCategory $category): bool
     {
         return (bool)($category->requires_serial || $category->product_id);
     }
-    /**
-     * Get category articles with enhanced security and error handling.
-     *
-     * @param  KbCategory  $category  The category
-     *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, \App\Models\KbArticle>
-     *
-     * @throws \Exception When article retrieval fails
-     */
+    /**   * Get category articles with enhanced security and error handling. *   * @param KbCategory $category The category *   * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, \App\Models\KbArticle> *   * @throws \Exception When article retrieval fails */
     private function getCategoryArticles(KbCategory $category)
     {
         try {
@@ -553,15 +423,7 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-    /**
-     * Get related categories with enhanced security and error handling.
-     *
-     * @param  KbCategory  $category  The category
-     *
-     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory>
-     *
-     * @throws \Exception When category retrieval fails
-     */
+    /**   * Get related categories with enhanced security and error handling. *   * @param KbCategory $category The category *   * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory> *   * @throws \Exception When category retrieval fails */
     private function getRelatedCategories(KbCategory $category)
     {
         try {
@@ -580,16 +442,7 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-    /**
-     * Handle raw code access for category with enhanced security.
-     *
-     * @param  KbCategory  $category  The category
-     * @param  string  $rawCode  The raw code
-     *
-     * @return array<string, mixed> Access result
-     *
-     * @throws \Exception When access handling fails
-     */
+    /**   * Handle raw code access for category with enhanced security. *   * @param KbCategory $category The category * @param string $rawCode The raw code *   * @return array<string, mixed> Access result *   * @throws \Exception When access handling fails */
     private function handleRawCodeAccess(KbCategory $category, string $rawCode): array
     {
         try {
@@ -640,14 +493,7 @@ class KbPublicController extends Controller
             ];
         }
     }
-    /**
-     * Validate access token with enhanced security.
-     *
-     * @param  string  $accessToken  The access token
-     * @param  int  $categoryId  The category ID
-     *
-     * @return array<string, mixed> Token validation result
-     */
+    /**   * Validate access token with enhanced security. *   * @param string $accessToken The access token * @param int $categoryId The category ID *   * @return array<string, mixed> Token validation result */
     private function validateAccessToken(string $accessToken, int $categoryId): array
     {
         try {
@@ -669,15 +515,7 @@ class KbPublicController extends Controller
             return ['valid' => false];
         }
     }
-    /**
-     * Get article by slug with enhanced security and error handling.
-     *
-     * @param  string  $slug  The article slug
-     *
-     * @return KbArticle The article
-     *
-     * @throws \Exception When article retrieval fails
-     */
+    /**   * Get article by slug with enhanced security and error handling. *   * @param string $slug The article slug *   * @return KbArticle The article *   * @throws \Exception When article retrieval fails */
     private function getArticleBySlug(string $slug): KbArticle
     {
         try {
@@ -697,13 +535,7 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-    /**
-     * Check if article requires access with enhanced security.
-     *
-     * @param  KbArticle  $article  The article to check
-     *
-     * @return bool True if access is required, false otherwise
-     */
+    /**   * Check if article requires access with enhanced security. *   * @param KbArticle $article The article to check *   * @return bool True if access is required, false otherwise */
     private function articleRequiresAccess(KbArticle $article): bool
     {
         return (bool)($article->requires_serial ||
@@ -711,13 +543,7 @@ class KbPublicController extends Controller
                                  ($article->category->requires_serial ||
                                   $article->category->product_id));
     }
-    /**
-     * Increment article views with enhanced security and error handling.
-     *
-     * @param  KbArticle  $article  The article
-     *
-     * @throws \Exception When view increment fails
-     */
+    /**   * Increment article views with enhanced security and error handling. *   * @param KbArticle $article The article *   * @throws \Exception When view increment fails */
     private function incrementArticleViews(KbArticle $article): void
     {
         try {
@@ -731,15 +557,7 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-    /**
-     * Get related articles with enhanced security and error handling.
-     *
-     * @param  KbArticle  $article  The article
-     *
-     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle>
-     *
-     * @throws \Exception When article retrieval fails
-     */
+    /**   * Get related articles with enhanced security and error handling. *   * @param KbArticle $article The article *   * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle> *   * @throws \Exception When article retrieval fails */
     private function getRelatedArticles(KbArticle $article)
     {
         try {
@@ -762,16 +580,7 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-    /**
-     * Handle raw code access for article with enhanced security.
-     *
-     * @param  KbArticle  $article  The article
-     * @param  string  $rawCode  The raw code
-     *
-     * @return array<string, mixed> Access result
-     *
-     * @throws \Exception When access handling fails
-     */
+    /**   * Handle raw code access for article with enhanced security. *   * @param KbArticle $article The article * @param string $rawCode The raw code *   * @return array<string, mixed> Access result *   * @throws \Exception When access handling fails */
     private function handleArticleRawCodeAccess(KbArticle $article, string $rawCode): array
     {
         try {
@@ -826,14 +635,7 @@ class KbPublicController extends Controller
             ];
         }
     }
-    /**
-     * Validate article access token with enhanced security.
-     *
-     * @param  string  $accessToken  The access token
-     * @param  int  $articleId  The article ID
-     *
-     * @return array<string, mixed> Token validation result
-     */
+    /**   * Validate article access token with enhanced security. *   * @param string $accessToken The access token * @param int $articleId The article ID *   * @return array<string, mixed> Token validation result */
     private function validateArticleAccessToken(string $accessToken, int $articleId): array
     {
         try {
@@ -855,13 +657,7 @@ class KbPublicController extends Controller
             return ['valid' => false];
         }
     }
-    /**
-     * Sanitize search query with enhanced security and XSS protection.
-     *
-     * @param  string  $query  The search query
-     *
-     * @return string Sanitized search query
-     */
+    /**   * Sanitize search query with enhanced security and XSS protection. *   * @param string $query The search query *   * @return string Sanitized search query */
     private function sanitizeSearchQuery(string $query): string
     {
         $query = trim($query);
@@ -873,13 +669,7 @@ class KbPublicController extends Controller
         }
         return $query;
     }
-    /**
-     * Get all categories with access information for display.
-     *
-     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory>
-     *
-     * @throws \Exception When category retrieval fails
-     */
+    /**   * Get all categories with access information for display. *   * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory> *   * @throws \Exception When category retrieval fails */
     private function getAllCategoriesWithAccess()
     {
         try {
@@ -899,15 +689,7 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-    /**
-     * Perform secure search with enhanced security and error handling.
-     *
-     * @param  string  $q  The search query
-     *
-     * @return array<string, mixed> Search results
-     *
-     * @throws \Exception When search fails
-     */
+    /**   * Perform secure search with enhanced security and error handling. *   * @param string $q The search query *   * @return array<string, mixed> Search results *   * @throws \Exception When search fails */
     private function performSecureSearch(string $q): array
     {
         try {
@@ -978,14 +760,7 @@ class KbPublicController extends Controller
             throw $e;
         }
     }
-    /**
-     * Highlight search terms in text.
-     *
-     * @param string $text The text to highlight
-     * @param string $query The search query
-     *
-     * @return string The highlighted text
-     */
+    /**   * Highlight search terms in text. *   * @param string $text The text to highlight * @param string $query The search query *   * @return string The highlighted text */
     public static function highlightSearchTerm($text, $query)
     {
         if (empty($query)) {

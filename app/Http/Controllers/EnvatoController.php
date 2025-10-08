@@ -19,53 +19,14 @@ use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 /**
- * Envato Controller with enhanced security.
- *
- * This controller handles Envato marketplace integration including
- * purchase verification, OAuth authentication, account linking, and
- * license management with enhanced security measures.
- *
- * Features:
- * - Purchase code verification with Envato API
- * - OAuth authentication with Envato marketplace
- * - Account linking and user management
- * - License creation and management
- * - Enhanced security measures (XSS protection, input validation)
- * - Comprehensive error handling with database transactions
- * - Proper logging for errors and warnings only
- * - Rate limiting and security validation
- * - Model relationship integration for optimized queries
- */
+ * Envato Controller with enhanced security. *
+ * This controller handles Envato marketplace integration including * purchase verification, OAuth authentication, account linking, and * license management with enhanced security measures. *
+ * Features: * - Purchase code verification with Envato API * - OAuth authentication with Envato marketplace * - Account linking and user management * - License creation and management * - Enhanced security measures (XSS protection, input validation) * - Comprehensive error handling with database transactions * - Proper logging for errors and warnings only * - Rate limiting and security validation * - Model relationship integration for optimized queries */
 class EnvatoController extends Controller
 {
-    /**
-     * Rate limiting duration in minutes.
-     */
+    /**   * Rate limiting duration in minutes. */
     private const RATE_LIMIT_DURATION = 1;
-    /**
-     * Verify purchase code with Envato API and create/update license with enhanced security.
-     *
-     * This method validates a purchase code against Envato's API,
-     * verifies it belongs to the specified product, and creates
-     * or updates a license record for the buyer with comprehensive
-     * error handling and security measures.
-     *
-     * @param  Request  $request  Contains purchase_code and product_slug
-     * @param  EnvatoService  $envato  Service for Envato API interactions
-     *
-     * @return RedirectResponse The redirect response
-     *
-     * @throws \InvalidArgumentException When request is invalid
-     * @throws Exception When database operations fail
-     *
-     * @example
-     * // Verify purchase code:
-     * POST /envato/verify
-     * {
-     *     "purchase_code": "ABC123-DEF456-GHI789",
-     *     "product_slug": "my-product"
-     * }
-     */
+    /**   * Verify purchase code with Envato API and create/update license with enhanced security. *   * This method validates a purchase code against Envato's API, * verifies it belongs to the specified product, and creates * or updates a license record for the buyer with comprehensive * error handling and security measures. *   * @param Request $request Contains purchase_code and product_slug * @param EnvatoService $envato Service for Envato API interactions *   * @return RedirectResponse The redirect response *   * @throws \InvalidArgumentException When request is invalid * @throws Exception When database operations fail *   * @example * // Verify purchase code: * POST /envato/verify * { * "purchase_code": "ABC123-DEF456-GHI789", * "product_slug": "my-product" * } */
     public function verify(Request $request, EnvatoService $envato): RedirectResponse
     {
         try {
@@ -155,21 +116,7 @@ class EnvatoController extends Controller
                 . 'Please try again.']);
         }
     }
-    /**
-     * Redirect user to Envato OAuth authorization page with enhanced security.
-     *
-     * Initiates the OAuth flow with Envato for user authentication.
-     * This is the first step in the OAuth process with comprehensive
-     * error handling and security measures.
-     *
-     * @return RedirectResponse The redirect response
-     *
-     * @throws Exception When OAuth redirection fails
-     *
-     * @example
-     * // Redirect to Envato OAuth:
-     * GET /envato/redirect
-     */
+    /**   * Redirect user to Envato OAuth authorization page with enhanced security. *   * Initiates the OAuth flow with Envato for user authentication. * This is the first step in the OAuth process with comprehensive * error handling and security measures. *   * @return RedirectResponse The redirect response *   * @throws Exception When OAuth redirection fails *   * @example * // Redirect to Envato OAuth: * GET /envato/redirect */
     public function redirectToEnvato(): RedirectResponse
     {
         try {
@@ -183,23 +130,7 @@ class EnvatoController extends Controller
             return redirect('/login')->withErrors(['envato' => 'Unable to connect to Envato. Please try again.']);
         }
     }
-    /**
-     * Handle Envato OAuth callback and authenticate user with enhanced security.
-     *
-     * Processes the OAuth callback from Envato, retrieves user information,
-     * creates or updates user account, and logs them in with comprehensive
-     * error handling and security measures.
-     *
-     * @param  EnvatoService  $envato  Service for Envato API interactions
-     *
-     * @return RedirectResponse The redirect response
-     *
-     * @throws Exception When OAuth callback processing fails
-     *
-     * @example
-     * // Handle OAuth callback:
-     * GET /envato/callback
-     */
+    /**   * Handle Envato OAuth callback and authenticate user with enhanced security. *   * Processes the OAuth callback from Envato, retrieves user information, * creates or updates user account, and logs them in with comprehensive * error handling and security measures. *   * @param EnvatoService $envato Service for Envato API interactions *   * @return RedirectResponse The redirect response *   * @throws Exception When OAuth callback processing fails *   * @example * // Handle OAuth callback: * GET /envato/callback */
     public function handleEnvatoCallback(EnvatoService $envato): RedirectResponse
     {
         try {
@@ -224,8 +155,8 @@ class EnvatoController extends Controller
                 'password' => Hash::make(Str::random(32)), // Stronger random password
                 'envato_username' => $envatoUser->getNickname() ?: data_get($userInfo, 'account.username', $username),
                 'envato_id' => $envatoUser->getId(),
-           'envato_token' => $envatoUser->token,
-           'envato_refresh_token' => $envatoUser->refreshToken,
+            'envato_token' => $envatoUser->token,
+            'envato_refresh_token' => $envatoUser->refreshToken,
                 'email_verified_at' => now(),
                 'last_login_at' => now(),
             ];
@@ -258,24 +189,7 @@ class EnvatoController extends Controller
             return redirect('/login')->withErrors(['envato' => 'Authentication failed. Please try again.']);
         }
     }
-    /**
-     * Link existing user account with Envato OAuth with enhanced security.
-     *
-     * Allows authenticated users to link their existing account
-     * with their Envato profile for enhanced functionality with
-     * comprehensive error handling and security measures.
-     *
-     * @param  Request  $request  The HTTP request
-     * @param  EnvatoService  $envato  Service for Envato API interactions
-     *
-     * @return RedirectResponse The redirect response
-     *
-     * @throws Exception When account linking fails
-     *
-     * @example
-     * // Link Envato account:
-     * POST /envato/link
-     */
+    /**   * Link existing user account with Envato OAuth with enhanced security. *   * Allows authenticated users to link their existing account * with their Envato profile for enhanced functionality with * comprehensive error handling and security measures. *   * @param Request $request The HTTP request * @param EnvatoService $envato Service for Envato API interactions *   * @return RedirectResponse The redirect response *   * @throws Exception When account linking fails *   * @example * // Link Envato account: * POST /envato/link */
     public function linkEnvatoAccount(Request $request, EnvatoService $envato): RedirectResponse
     {
         try {
@@ -318,8 +232,8 @@ class EnvatoController extends Controller
                 $user->update([
                 'envato_username' => $envatoUser->getNickname() ?: data_get($userInfo, 'account.username'),
                 'envato_id' => $envatoUser->getId(),
-           'envato_token' => $envatoUser->token,
-           'envato_refresh_token' => $envatoUser->refreshToken,
+                'envato_token' => $envatoUser->token,
+                'envato_refresh_token' => $envatoUser->refreshToken,
                 'updated_at' => now(),
                 ]);
             }
@@ -336,28 +250,7 @@ class EnvatoController extends Controller
             return back()->withErrors(['envato' => 'Failed to link Envato account. Please try again.']);
         }
     }
-    /**
-     * Verify user's purchase code via AJAX request with enhanced security.
-     *
-     * This method provides an AJAX endpoint for users to verify their
-     * purchase codes and automatically add licenses to their account
-     * with comprehensive error handling and security measures.
-     *
-     * @param  Request  $request  Contains purchase_code and product_id
-     * @param  EnvatoService  $envato  Service for Envato API interactions
-     *
-     * @return JsonResponse The JSON response
-     *
-     * @throws Exception When AJAX verification fails
-     *
-     * @example
-     * // Verify purchase via AJAX:
-     * POST /envato/verify-user-purchase
-     * {
-     *     "purchase_code": "ABC123-DEF456-GHI789",
-     *     "product_id": 1
-     * }
-     */
+    /**   * Verify user's purchase code via AJAX request with enhanced security. *   * This method provides an AJAX endpoint for users to verify their * purchase codes and automatically add licenses to their account * with comprehensive error handling and security measures. *   * @param Request $request Contains purchase_code and product_id * @param EnvatoService $envato Service for Envato API interactions *   * @return JsonResponse The JSON response *   * @throws Exception When AJAX verification fails *   * @example * // Verify purchase via AJAX: * POST /envato/verify-user-purchase * { * "purchase_code": "ABC123-DEF456-GHI789", * "product_id": 1 * } */
     public function verifyUserPurchase(Request $request, EnvatoService $envato): JsonResponse
     {
         try {
@@ -471,16 +364,8 @@ class EnvatoController extends Controller
             ], 500);
         }
     }
-    /**
-     * Validate purchase request data.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return array The validated data
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Validate purchase request data. *   * @param Request $request The HTTP request *   * @return array The validated data */
+    /**   * @return array<string, mixed> */
     private function validatePurchaseRequest(Request $request): array
     {
         $validated = $request->validate([
@@ -500,18 +385,12 @@ class EnvatoController extends Controller
             'purchase_code.regex' => 'Purchase code must be a valid UUID format.',
             'product_slug.alpha_dash' => 'Product slug can only contain letters, numbers, dashes and underscores.',
         ]);
-        
+
         /** @var array<string, mixed> $result */
         $result = $validated;
         return $result;
     }
-    /**
-     * Validate AJAX purchase request data.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return array<string, mixed> The validated data
-     */
+    /**   * Validate AJAX purchase request data. *   * @param Request $request The HTTP request *   * @return array<string, mixed> The validated data */
     private function validateAjaxPurchaseRequest(Request $request): array
     {
         $validated = $request->validate([
@@ -530,40 +409,22 @@ class EnvatoController extends Controller
             'purchase_code.regex' => 'Purchase code must be a valid UUID format.',
             'product_id.exists' => 'Selected product does not exist.',
         ]);
-        
+
         /** @var array<string, mixed> $result */
         $result = $validated;
         return $result;
     }
-    /**
-     * Check if request is rate limited.
-     *
-     * @param  string  $key  The rate limit key
-     * @param  string  $prefix  The rate limit prefix
-     *
-     * @return bool True if rate limited
-     */
+    /**   * Check if request is rate limited. *   * @param string $key The rate limit key * @param string $prefix The rate limit prefix *   * @return bool True if rate limited */
     private function isRateLimited(string $key, string $prefix = ''): bool
     {
         return cache()->has($prefix . $key);
     }
-    /**
-     * Set rate limit for request.
-     *
-     * @param  string  $key  The rate limit key
-     * @param  string  $prefix  The rate limit prefix
-     */
+    /**   * Set rate limit for request. *   * @param string $key The rate limit key * @param string $prefix The rate limit prefix */
     private function setRateLimit(string $key, string $prefix = ''): void
     {
         cache()->put($prefix . $key, true, now()->addMinutes(self::RATE_LIMIT_DURATION));
     }
-    /**
-     * Mask purchase code for logging.
-     *
-     * @param  string  $purchaseCode  The purchase code
-     *
-     * @return string The masked purchase code
-     */
+    /**   * Mask purchase code for logging. *   * @param string $purchaseCode The purchase code *   * @return string The masked purchase code */
     private function maskPurchaseCode(string $purchaseCode): string
     {
         return substr($purchaseCode, 0, 8) . '...';

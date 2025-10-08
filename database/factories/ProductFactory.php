@@ -6,21 +6,13 @@ use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Product>
- */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Product> */
 class ProductFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var class-string<Product> */
+    /**   * The name of the factory's corresponding model. *   * @var class-string<Product> */
     protected $model = Product::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Define the model's default state. *   * @return array<string, mixed> */
     public function definition(): array
     {
         return [
@@ -39,9 +31,7 @@ class ProductFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate that the product is featured.
-     */
+    /**   * Indicate that the product is featured. */
     public function featured(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -49,9 +39,7 @@ class ProductFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the product is inactive.
-     */
+    /**   * Indicate that the product is inactive. */
     public function inactive(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -59,9 +47,7 @@ class ProductFactory extends Factory
         ]);
     }
 
-    /**
-     * Set a specific license type.
-     */
+    /**   * Set a specific license type. */
     public function licenseType(string $type): static
     {
         return $this->state(fn (array $attributes) => [

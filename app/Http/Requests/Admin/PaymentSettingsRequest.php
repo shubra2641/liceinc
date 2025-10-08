@@ -6,36 +6,18 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
- * Payment Settings Request with enhanced security.
- *
- * This unified request class handles validation for both updating and testing
- * payment settings with comprehensive security measures and input sanitization.
- *
- * Features:
- * - Unified validation for both update and test operations
- * - XSS protection and input sanitization
- * - Custom validation messages for better user experience
- * - Proper type hints and return types
- * - Security validation rules (XSS protection, SQL injection prevention)
- * - Payment gateway configuration validation
- * - API key and credential validation
- * - Test connection functionality
- */
+ * Payment Settings Request with enhanced security. *
+ * This unified request class handles validation for both updating and testing * payment settings with comprehensive security measures and input sanitization. *
+ * Features: * - Unified validation for both update and test operations * - XSS protection and input sanitization * - Custom validation messages for better user experience * - Proper type hints and return types * - Security validation rules (XSS protection, SQL injection prevention) * - Payment gateway configuration validation * - API key and credential validation * - Test connection functionality */
 class PaymentSettingsRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    /**   * Determine if the user is authorized to make this request. */
     public function authorize(): bool
     {
         $user = auth()->user();
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Get the validation rules that apply to the request. *   * @return array<string, mixed> */
     public function rules(): array
     {
         $route = $this->route();
@@ -123,11 +105,7 @@ class PaymentSettingsRequest extends FormRequest
             ],
         ];
     }
-    /**
-     * Get custom validation messages.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom validation messages. *   * @return array<string, string> */
     public function messages(): array
     {
         return [
@@ -144,11 +122,7 @@ class PaymentSettingsRequest extends FormRequest
             'webhook_url.url' => 'Webhook URL must be a valid URL.',
         ];
     }
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom attributes for validator errors. *   * @return array<string, string> */
     public function attributes(): array
     {
         return [
@@ -164,9 +138,7 @@ class PaymentSettingsRequest extends FormRequest
             'webhook_url' => 'webhook URL',
         ];
     }
-    /**
-     * Prepare the data for validation.
-     */
+    /**   * Prepare the data for validation. */
     protected function prepareForValidation(): void
     {
         // Handle checkbox values

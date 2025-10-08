@@ -1,9 +1,7 @@
 <?php
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Envato API Configuration
+    /* |-------------------------------------------------------------------------- | Envato API Configuration
     |--------------------------------------------------------------------------
     |
     | Configuration for Envato Market API integration including OAuth
@@ -13,11 +11,9 @@ return [
 
     'client_id' => env('ENVATO_CLIENT_ID'),
     'client_secret' => env('ENVATO_CLIENT_SECRET'),
-    'redirect_uri' => env('ENVATO_REDIRECT_URI', env('APP_URL').'/auth/envato/callback'),
+    'redirect_uri' => env('ENVATO_REDIRECT_URI', env('APP_URL') . '/auth/envato/callback'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Personal Token (for server-side API calls)
+    /* |-------------------------------------------------------------------------- | Personal Token (for server-side API calls)
     |--------------------------------------------------------------------------
     |
     | This token is used for verifying purchases and accessing author endpoints.
@@ -26,16 +22,12 @@ return [
     */
     'token' => env('ENVATO_PERSONAL_TOKEN'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | API Base URLs
+    /* |-------------------------------------------------------------------------- | API Base URLs
     |--------------------------------------------------------------------------
     */
     'api_base' => 'https://api.envato.com',
 
-    /*
-    |--------------------------------------------------------------------------
-    | OAuth Scopes
+    /* |-------------------------------------------------------------------------- | OAuth Scopes
     |--------------------------------------------------------------------------
     |
     | Scopes required for the OAuth flow. These determine what data
@@ -48,9 +40,7 @@ return [
         'purchase:verify',
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Cache Configuration
+    /* |-------------------------------------------------------------------------- | Cache Configuration
     |--------------------------------------------------------------------------
     |
     | Cache settings for API responses to reduce API calls and improve performance.

@@ -8,21 +8,13 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\LicenseLog>
- */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\LicenseLog> */
 class LicenseLogFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var class-string<LicenseLog> */
+    /**   * The name of the factory's corresponding model. *   * @var class-string<LicenseLog> */
     protected $model = LicenseLog::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Define the model's default state. *   * @return array<string, mixed> */
     public function definition(): array
     {
         return [
@@ -36,20 +28,16 @@ class LicenseLogFactory extends Factory
         ];
     }
 
-    /**
-     * Set a specific action.
-     */
+    /**   * Set a specific action. */
     public function action(string $action): static
     {
         return $this->state(fn (array $attributes) => [
             'action' => $action,
-            'description' => ucfirst($action).' action performed',
+            'description' => ucfirst($action) . ' action performed',
         ]);
     }
 
-    /**
-     * Associate with a license.
-     */
+    /**   * Associate with a license. */
     public function forLicense(License $license): static
     {
         return $this->state(fn (array $attributes) => [
@@ -57,9 +45,7 @@ class LicenseLogFactory extends Factory
         ]);
     }
 
-    /**
-     * Associate with a user.
-     */
+    /**   * Associate with a user. */
     public function forUser(User $user): static
     {
         return $this->state(fn (array $attributes) => [

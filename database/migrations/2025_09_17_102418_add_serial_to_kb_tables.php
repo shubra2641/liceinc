@@ -4,10 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
-    /**
-     * Run the migrations.
-     */
+return new class () extends Migration {
+    /**   * Run the migrations. */
     public function up(): void
     {
         // Add serial fields to kb_articles
@@ -25,9 +23,7 @@ return new class() extends Migration {
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    /**   * Reverse the migrations. */
     public function down(): void
     {
         // Remove serial fields from kb_articles

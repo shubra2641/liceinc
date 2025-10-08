@@ -15,32 +15,11 @@ use Illuminate\View\View;
 use InvalidArgumentException;
 
 /**
- * License Controller with enhanced security and comprehensive license management.
- *
- * This controller handles user license management operations including viewing
- * licenses, invoices, and license details. It implements comprehensive security
- * measures, input validation, and error handling for reliable license operations.
- */
+ * License Controller with enhanced security and comprehensive license management. *
+ * This controller handles user license management operations including viewing * licenses, invoices, and license details. It implements comprehensive security * measures, input validation, and error handling for reliable license operations. */
 class LicenseController extends Controller
 {
-    /**
-     * Display a listing of the user's licenses with enhanced security and error handling.
-     *
-     * Shows a paginated list of user licenses and invoices with comprehensive
-     * validation, security measures, and error handling for reliable license
-     * management operations.
-     *
-     * @param  Request  $request  The HTTP request object
-     *
-     * @return View The licenses index view
-     *
-     * @throws InvalidArgumentException When user data is invalid
-     * @throws \Exception When license retrieval fails
-     *
-     * @example
-     * // Access via GET /user/licenses
-     * // Returns paginated list of user's licenses and invoices
-     */
+    /**   * Display a listing of the user's licenses with enhanced security and error handling. *   * Shows a paginated list of user licenses and invoices with comprehensive * validation, security measures, and error handling for reliable license * management operations. *   * @param Request $request The HTTP request object *   * @return View The licenses index view *   * @throws InvalidArgumentException When user data is invalid * @throws \Exception When license retrieval fails *   * @example * // Access via GET /user/licenses * // Returns paginated list of user's licenses and invoices */
     public function index(Request $request): View|RedirectResponse
     {
         try {
@@ -71,25 +50,7 @@ class LicenseController extends Controller
             return redirect()->back()->with('error', 'Failed to load licenses. Please try again.');
         }
     }
-    /**
-     * Display the specified license with enhanced security and error handling.
-     *
-     * Shows detailed information about a specific license with comprehensive
-     * validation, security measures, and error handling for reliable license
-     * viewing operations.
-     *
-     * @param  Request  $request  The HTTP request object
-     * @param  int  $id  The license ID
-     *
-     * @return View|RedirectResponse The license show view or redirect on error
-     *
-     * @throws InvalidArgumentException When license ID is invalid
-     * @throws \Exception When license retrieval fails
-     *
-     * @example
-     * // Access via GET /user/licenses/{id}
-     * // Returns detailed view of the specified license
-     */
+    /**   * Display the specified license with enhanced security and error handling. *   * Shows detailed information about a specific license with comprehensive * validation, security measures, and error handling for reliable license * viewing operations. *   * @param Request $request The HTTP request object * @param int $id The license ID *   * @return View|RedirectResponse The license show view or redirect on error *   * @throws InvalidArgumentException When license ID is invalid * @throws \Exception When license retrieval fails *   * @example * // Access via GET /user/licenses/{id} * // Returns detailed view of the specified license */
     public function show(Request $request, int $id): View|RedirectResponse
     {
         try {
@@ -116,13 +77,7 @@ class LicenseController extends Controller
                 ->with('error', 'License not found or access denied.');
         }
     }
-    /**
-     * Validate license ID with enhanced security and comprehensive validation.
-     *
-     * @param  int  $id  The license ID to validate
-     *
-     * @throws InvalidArgumentException When license ID is invalid
-     */
+    /**   * Validate license ID with enhanced security and comprehensive validation. *   * @param int $id The license ID to validate *   * @throws InvalidArgumentException When license ID is invalid */
     private function validateLicenseId(int $id): void
     {
         if ($id <= 0) {
@@ -132,15 +87,7 @@ class LicenseController extends Controller
             throw new InvalidArgumentException('License ID is too large');
         }
     }
-    /**
-     * Get user licenses with enhanced security and error handling.
-     *
-     * @param  mixed  $user  The user object
-     *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, \App\Models\License>
-     *
-     * @throws \Exception When license retrieval fails
-     */
+    /**   * Get user licenses with enhanced security and error handling. *   * @param mixed $user The user object *   * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, \App\Models\License> *   * @throws \Exception When license retrieval fails */
     private function getUserLicenses($user)
     {
         try {
@@ -160,15 +107,7 @@ class LicenseController extends Controller
             throw $e;
         }
     }
-    /**
-     * Get user invoices with enhanced security and error handling.
-     *
-     * @param  mixed  $user  The user object
-     *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, \App\Models\Invoice>
-     *
-     * @throws \Exception When invoice retrieval fails
-     */
+    /**   * Get user invoices with enhanced security and error handling. *   * @param mixed $user The user object *   * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, \App\Models\Invoice> *   * @throws \Exception When invoice retrieval fails */
     private function getUserInvoices($user)
     {
         try {
@@ -188,16 +127,7 @@ class LicenseController extends Controller
             throw $e;
         }
     }
-    /**
-     * Get user license by ID with enhanced security and error handling.
-     *
-     * @param  mixed  $user  The user object
-     * @param  int  $id  The license ID
-     *
-     * @return License The license model
-     *
-     * @throws \Exception When license retrieval fails
-     */
+    /**   * Get user license by ID with enhanced security and error handling. *   * @param mixed $user The user object * @param int $id The license ID *   * @return License The license model *   * @throws \Exception When license retrieval fails */
     private function getUserLicense($user, int $id): License
     {
         try {

@@ -1,9 +1,7 @@
 <?php
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Defaults
+    /* |-------------------------------------------------------------------------- | Authentication Defaults
     |--------------------------------------------------------------------------
     |
     | This option defines the default authentication "guard" and password
@@ -17,9 +15,7 @@ return [
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Guards
+    /* |-------------------------------------------------------------------------- | Authentication Guards
     |--------------------------------------------------------------------------
     |
     | Next, you may define every authentication guard for your application.
@@ -41,9 +37,7 @@ return [
         ],
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | User Providers
+    /* |-------------------------------------------------------------------------- | User Providers
     |--------------------------------------------------------------------------
     |
     | All authentication guards have a user provider, which defines how the
@@ -70,9 +64,7 @@ return [
         // ],
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Resetting Passwords
+    /* |-------------------------------------------------------------------------- | Resetting Passwords
     |--------------------------------------------------------------------------
     |
     | These configuration options specify the behavior of Laravel's password
@@ -98,9 +90,7 @@ return [
         ],
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Password Confirmation Timeout
+    /* |-------------------------------------------------------------------------- | Password Confirmation Timeout
     |--------------------------------------------------------------------------
     |
     | Here you may define the number of seconds before a password confirmation

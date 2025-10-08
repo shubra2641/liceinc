@@ -1,11 +1,6 @@
 /**
- * License Verification System
- * Product: {{product}}
- * Language: Kotlin
- * Generated: {{date}}
- *
- * This is a generic template. Please customize according to Kotlin best practices.
- */
+ * License Verification System * Product: {{product}} * Language: Kotlin * Generated: {{date}} *
+ * This is a generic template. Please customize according to Kotlin best practices. */
 
 // License verification for Kotlin
 // API URL: {{license_api_url}}

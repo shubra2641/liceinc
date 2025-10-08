@@ -1,9 +1,7 @@
 <?php
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Application Name
+    /* |-------------------------------------------------------------------------- | Application Name
     |--------------------------------------------------------------------------
     |
     | This value is the name of your application, which will be used when the
@@ -14,9 +12,7 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Application Environment
+    /* |-------------------------------------------------------------------------- | Application Environment
     |--------------------------------------------------------------------------
     |
     | This value determines the "environment" your application is currently
@@ -27,9 +23,7 @@ return [
 
     'env' => env('APP_ENV', 'production'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Application Debug Mode
+    /* |-------------------------------------------------------------------------- | Application Debug Mode
     |--------------------------------------------------------------------------
     |
     | When your application is in debug mode, detailed error messages with
@@ -40,9 +34,7 @@ return [
 
     'debug' => (bool)env('APP_DEBUG', false),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Application URL
+    /* |-------------------------------------------------------------------------- | Application URL
     |--------------------------------------------------------------------------
     |
     | This URL is used by the console to properly generate URLs when using
@@ -53,9 +45,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Application Timezone
+    /* |-------------------------------------------------------------------------- | Application Timezone
     |--------------------------------------------------------------------------
     |
     | Here you may specify the default timezone for your application, which
@@ -66,9 +56,7 @@ return [
 
     'timezone' => 'UTC',
 
-    /*
-    |--------------------------------------------------------------------------
-    | Application Locale Configuration
+    /* |-------------------------------------------------------------------------- | Application Locale Configuration
     |--------------------------------------------------------------------------
     |
     | The application locale determines the default locale that will be used
@@ -83,9 +71,7 @@ return [
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Encryption Key
+    /* |-------------------------------------------------------------------------- | Encryption Key
     |--------------------------------------------------------------------------
     |
     | This key is utilized by Laravel's encryption services and should be set
@@ -104,9 +90,7 @@ return [
         ),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Maintenance Mode Driver
+    /* |-------------------------------------------------------------------------- | Maintenance Mode Driver
     |--------------------------------------------------------------------------
     |
     | These configuration options determine the driver used to determine and
@@ -122,9 +106,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Supported Locales
+    /* |-------------------------------------------------------------------------- | Supported Locales
     |--------------------------------------------------------------------------
     |
     | The supported locales for the application. These locales will be

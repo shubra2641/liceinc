@@ -13,47 +13,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 /**
- * User Dashboard Controller with enhanced security.
- *
- * This controller handles user dashboard functionality including license management,
- * product suggestions, invoice statistics, and comprehensive data visualization
- * with enhanced security measures and proper error handling.
- *
- * Features:
- * - User dashboard with license overview
- * - Product suggestions and recommendations
- * - Invoice statistics and analytics
- * - SEO data integration
- * - Enhanced security measures (XSS protection, input validation)
- * - Comprehensive error handling with database transactions
- * - Proper logging for errors and warnings only
- * - Model scope integration for optimized queries
- */
+ * User Dashboard Controller with enhanced security. *
+ * This controller handles user dashboard functionality including license management, * product suggestions, invoice statistics, and comprehensive data visualization * with enhanced security measures and proper error handling. *
+ * Features: * - User dashboard with license overview * - Product suggestions and recommendations * - Invoice statistics and analytics * - SEO data integration * - Enhanced security measures (XSS protection, input validation) * - Comprehensive error handling with database transactions * - Proper logging for errors and warnings only * - Model scope integration for optimized queries */
 class DashboardController extends Controller
 {
-    /**
-     * Display the user dashboard with enhanced security.
-     *
-     * Shows comprehensive user dashboard with license overview, product suggestions,
-     * invoice statistics, and SEO data with proper error handling and security measures.
-     *
-     * @param  Request  $request  The HTTP request containing user information
-     *
-     * @return View The user dashboard view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access the user dashboard:
-     * GET /user/dashboard
-     *
-     * // Returns view with:
-     * // - User licenses (paginated, latest 10)
-     * // - Active licenses count
-     * // - Available products (suggestions)
-     * // - Invoice statistics
-     * // - SEO data
-     */
+    /**   * Display the user dashboard with enhanced security. *   * Shows comprehensive user dashboard with license overview, product suggestions, * invoice statistics, and SEO data with proper error handling and security measures. *   * @param Request $request The HTTP request containing user information *   * @return View The user dashboard view *   * @throws \Exception When database operations fail *   * @example * // Access the user dashboard: * GET /user/dashboard *   * // Returns view with: * // - User licenses (paginated, latest 10) * // - Active licenses count * // - Available products (suggestions) * // - Invoice statistics * // - SEO data */
     public function index(Request $request): View
     {
         try {
@@ -111,15 +76,7 @@ class DashboardController extends Controller
             ]);
         }
     }
-    /**
-     * Get active licenses count for the user.
-     *
-     * @param  \App\Models\User  $user  The user instance
-     *
-     * @return int The count of active licenses
-     *
-     * @throws \Exception When database operations fail
-     */
+    /**   * Get active licenses count for the user. *   * @param  \App\Models\User  $user  The user instance *   * @return int The count of active licenses *   * @throws \Exception When database operations fail */
     private function getActiveLicensesCount($user): int
     {
         try {
@@ -137,13 +94,7 @@ class DashboardController extends Controller
             return 0;
         }
     }
-    /**
-     * Get available products for suggestions.
-     *
-     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> The available products
-     *
-     * @throws \Exception When database operations fail
-     */
+    /**   * Get available products for suggestions. *   * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> The available products *   * @throws \Exception When database operations fail */
     private function getAvailableProducts()
     {
         try {
@@ -158,15 +109,7 @@ class DashboardController extends Controller
             return Product::whereRaw('1 = 0')->get();
         }
     }
-    /**
-     * Get invoice statistics for the user.
-     *
-     * @param  \App\Models\User  $user  The user instance
-     *
-     * @return array<string, mixed> The invoice statistics
-     *
-     * @throws \Exception When database operations fail
-     */
+    /**   * Get invoice statistics for the user. *   * @param  \App\Models\User  $user  The user instance *   * @return array<string, mixed> The invoice statistics *   * @throws \Exception When database operations fail */
     private function getInvoiceStatistics($user): array
     {
         try {
@@ -193,13 +136,7 @@ class DashboardController extends Controller
             ];
         }
     }
-    /**
-     * Get SEO data from settings.
-     *
-     * @return array<string, mixed> The SEO data
-     *
-     * @throws \Exception When database operations fail
-     */
+    /**   * Get SEO data from settings. *   * @return array<string, mixed> The SEO data *   * @throws \Exception When database operations fail */
     private function getSeoData(): array
     {
         try {

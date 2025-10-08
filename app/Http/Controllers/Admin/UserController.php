@@ -15,41 +15,13 @@ use Illuminate\View\View;
 use Spatie\Permission\Models\Role;
 
 /**
- * User Controller with enhanced security.
- *
- * This controller handles user management functionality including
- * CRUD operations, role management, and user administration.
- *
- * Features:
- * - User creation and management with comprehensive validation
- * - Role assignment and management (admin/user)
- * - User profile updates and password management
- * - User deletion with safety checks
- * - License and ticket management integration
- * - Comprehensive error handling with database transactions
- * - Enhanced security measures (input validation, password security)
- * - Proper logging for errors and warnings only
- */
+ * User Controller with enhanced security. *
+ * This controller handles user management functionality including * CRUD operations, role management, and user administration. *
+ * Features: * - User creation and management with comprehensive validation * - Role assignment and management (admin/user) * - User profile updates and password management * - User deletion with safety checks * - License and ticket management integration * - Comprehensive error handling with database transactions * - Enhanced security measures (input validation, password security) * - Proper logging for errors and warnings only */
 class UserController extends Controller
 {
     // Middleware is applied at route level
-    /**
-     * Display a listing of users.
-     *
-     * Shows all users with their licenses and tickets count,
-     * ordered by creation date with pagination.
-     *
-     * @return View The users index view
-     *
-     * @example
-     * // Access the users listing:
-     * GET /admin/users
-     *
-     * // Returns view with:
-     * // - Paginated list of users
-     * // - License and ticket counts
-     * // - User management controls
-     */
+    /**   * Display a listing of users. *   * Shows all users with their licenses and tickets count, * ordered by creation date with pagination. *   * @return View The users index view *   * @example * // Access the users listing: * GET /admin/users *   * // Returns view with: * // - Paginated list of users * // - License and ticket counts * // - User management controls */
     public function index(): View
     {
         try {
@@ -70,55 +42,12 @@ class UserController extends Controller
             ]);
         }
     }
-    /**
-     * Show the form for creating a new user.
-     *
-     * Displays the user creation form with all necessary fields
-     * for creating a new user account.
-     *
-     * @return View The user creation form view
-     *
-     * @example
-     * // Access the user creation form:
-     * GET /admin/users/create
-     *
-     * // Returns view with:
-     * // - User creation form
-     * // - Role selection options
-     * // - Profile fields
-     */
+    /**   * Show the form for creating a new user. *   * Displays the user creation form with all necessary fields * for creating a new user account. *   * @return View The user creation form view *   * @example * // Access the user creation form: * GET /admin/users/create *   * // Returns view with: * // - User creation form * // - Role selection options * // - Profile fields */
     public function create(): View
     {
         return view('admin.users.create');
     }
-    /**
-     * Store a newly created user.
-     *
-     * Creates a new user with comprehensive validation, role assignment,
-     * and optional welcome email functionality.
-     *
-     * @param  UserRequest  $request  The validated request containing user data
-     *
-     * @return RedirectResponse Redirect to user view or back with error
-     *
-     * @throws \Exception When user creation fails
-     *
-     * @example
-     * // Create a new user:
-     * POST /admin/users
-     * {
-     *     "name": "John Doe",
-     *     "email": "john@example.com",
-     *     "password": "SecurePass123!",
-     *     "password_confirmation": "SecurePass123!",
-     *     "role": "user",
-     *     "firstname": "John",
-     *     "lastname": "Doe"
-     * }
-     *
-     * // Response: Redirect to user view with success message
-     * // "User created successfully"
-     */
+    /**   * Store a newly created user. *   * Creates a new user with comprehensive validation, role assignment, * and optional welcome email functionality. *   * @param UserRequest $request The validated request containing user data *   * @return RedirectResponse Redirect to user view or back with error *   * @throws \Exception When user creation fails *   * @example * // Create a new user: * POST /admin/users * { * "name": "John Doe", * "email": "john@example.com", * "password": "SecurePass123!", * "password_confirmation": "SecurePass123!", * "role": "user", * "firstname": "John", * "lastname": "Doe" * } *   * // Response: Redirect to user view with success message * // "User created successfully" */
     public function store(UserRequest $request): RedirectResponse
     {
         try {
@@ -163,26 +92,7 @@ class UserController extends Controller
                 ->with('error', 'Failed to create user. Please try again.');
         }
     }
-    /**
-     * Display the specified user.
-     *
-     * Shows detailed user information including licenses, tickets,
-     * and related data with proper loading and scoping.
-     *
-     * @param  User  $user  The user to display
-     *
-     * @return View The user detail view
-     *
-     * @example
-     * // View user details:
-     * GET /admin/users/{user}
-     *
-     * // Returns view with:
-     * // - User profile information
-     * // - User licenses with products
-     * // - User tickets
-     * // - User management actions
-     */
+    /**   * Display the specified user. *   * Shows detailed user information including licenses, tickets, * and related data with proper loading and scoping. *   * @param User $user The user to display *   * @return View The user detail view *   * @example * // View user details: * GET /admin/users/{user} *   * // Returns view with: * // - User profile information * // - User licenses with products * // - User tickets * // - User management actions */
     public function show(User $user): View
     {
         try {
@@ -208,56 +118,12 @@ class UserController extends Controller
             ]);
         }
     }
-    /**
-     * Show the form for editing the specified user.
-     *
-     * Displays the user editing form with current user data
-     * for updating user information.
-     *
-     * @param  User  $user  The user to edit
-     *
-     * @return View The user edit form view
-     *
-     * @example
-     * // Edit user:
-     * GET /admin/users/{user}/edit
-     *
-     * // Returns view with:
-     * // - User edit form
-     * // - Current user data
-     * // - Role selection options
-     */
+    /**   * Show the form for editing the specified user. *   * Displays the user editing form with current user data * for updating user information. *   * @param User $user The user to edit *   * @return View The user edit form view *   * @example * // Edit user: * GET /admin/users/{user}/edit *   * // Returns view with: * // - User edit form * // - Current user data * // - Role selection options */
     public function edit(User $user): View
     {
         return view('admin.users.edit', ['user' => $user]);
     }
-    /**
-     * Update the specified user.
-     *
-     * Updates user information including profile data, password (if provided),
-     * and role assignment with comprehensive validation.
-     *
-     * @param  UserRequest  $request  The validated request containing update data
-     * @param  User  $user  The user to update
-     *
-     * @return RedirectResponse Redirect to user view or back with error
-     *
-     * @throws \Exception When user update fails
-     *
-     * @example
-     * // Update user:
-     * PUT /admin/users/{user}
-     * {
-     *     "name": "John Doe Updated",
-     *     "email": "john.updated@example.com",
-     *     "role": "admin",
-     *     "firstname": "John",
-     *     "lastname": "Doe"
-     * }
-     *
-     * // Response: Redirect to user view with success message
-     * // "User updated successfully"
-     */
+    /**   * Update the specified user. *   * Updates user information including profile data, password (if provided), * and role assignment with comprehensive validation. *   * @param UserRequest $request The validated request containing update data * @param User $user The user to update *   * @return RedirectResponse Redirect to user view or back with error *   * @throws \Exception When user update fails *   * @example * // Update user: * PUT /admin/users/{user} * { * "name": "John Doe Updated", * "email": "john.updated@example.com", * "role": "admin", * "firstname": "John", * "lastname": "Doe" * } *   * // Response: Redirect to user view with success message * // "User updated successfully" */
     public function update(UserRequest $request, User $user): RedirectResponse
     {
         try {
@@ -301,29 +167,7 @@ class UserController extends Controller
                 ->with('error', 'Failed to update user. Please try again.');
         }
     }
-    /**
-     * Remove the specified user from storage.
-     *
-     * Deletes a user with safety checks to prevent self-deletion
-     * and proper error handling.
-     *
-     * @param  User  $user  The user to delete
-     *
-     * @return RedirectResponse Redirect to users index with message
-     *
-     * @throws \Exception When user deletion fails
-     *
-     * @example
-     * // Delete user:
-     * DELETE /admin/users/{user}
-     *
-     * // Response: Redirect to users index with success message
-     * // "User deleted successfully"
-     *
-     * // If trying to delete own account:
-     * // Response: Redirect with error message
-     * // "You cannot delete your own account."
-     */
+    /**   * Remove the specified user from storage. *   * Deletes a user with safety checks to prevent self-deletion * and proper error handling. *   * @param User $user The user to delete *   * @return RedirectResponse Redirect to users index with message *   * @throws \Exception When user deletion fails *   * @example * // Delete user: * DELETE /admin/users/{user} *   * // Response: Redirect to users index with success message * // "User deleted successfully" *   * // If trying to delete own account: * // Response: Redirect with error message * // "You cannot delete your own account." */
     public function destroy(User $user): RedirectResponse
     {
         try {
@@ -349,25 +193,7 @@ class UserController extends Controller
                 ->with('error', 'Failed to delete user. Please try again.');
         }
     }
-    /**
-     * Toggle user admin role.
-     *
-     * Switches user role between admin and regular user with
-     * proper role management and safety checks.
-     *
-     * @param  User  $user  The user to toggle role for
-     *
-     * @return RedirectResponse Redirect back with success message
-     *
-     * @throws \Exception When role toggle fails
-     *
-     * @example
-     * // Toggle user role:
-     * POST /admin/users/{user}/toggle-admin
-     *
-     * // Response: Redirect back with success message
-     * // "User promoted to administrator" or "User role changed to regular user"
-     */
+    /**   * Toggle user admin role. *   * Switches user role between admin and regular user with * proper role management and safety checks. *   * @param User $user The user to toggle role for *   * @return RedirectResponse Redirect back with success message *   * @throws \Exception When role toggle fails *   * @example * // Toggle user role: * POST /admin/users/{user}/toggle-admin *   * // Response: Redirect back with success message * // "User promoted to administrator" or "User role changed to regular user" */
     public function toggleAdmin(User $user): RedirectResponse
     {
         try {
@@ -395,25 +221,7 @@ class UserController extends Controller
                 ->with('error', 'Failed to change user role. Please try again.');
         }
     }
-    /**
-     * Send password reset email to user.
-     *
-     * Sends a password reset email to the specified user using
-     * Laravel's built-in password reset functionality.
-     *
-     * @param  User  $user  The user to send password reset to
-     *
-     * @return RedirectResponse Redirect back with success message
-     *
-     * @throws \Exception When password reset email fails
-     *
-     * @example
-     * // Send password reset:
-     * POST /admin/users/{user}/send-password-reset
-     *
-     * // Response: Redirect back with success message
-     * // "Password reset email sent to user@example.com"
-     */
+    /**   * Send password reset email to user. *   * Sends a password reset email to the specified user using * Laravel's built-in password reset functionality. *   * @param User $user The user to send password reset to *   * @return RedirectResponse Redirect back with success message *   * @throws \Exception When password reset email fails *   * @example * // Send password reset: * POST /admin/users/{user}/send-password-reset *   * // Response: Redirect back with success message * // "Password reset email sent to user@example.com" */
     public function sendPasswordReset(User $user): RedirectResponse
     {
         try {
@@ -433,37 +241,7 @@ class UserController extends Controller
                 ->with('error', 'Failed to send password reset email. Please try again.');
         }
     }
-    /**
-     * Get user licenses for API.
-     *
-     * Retrieves user licenses with product information for API consumption
-     * with proper error handling and data formatting.
-     *
-     * @param  int  $userId  The user ID to get licenses for
-     *
-     * @return JsonResponse JSON response with user licenses
-     *
-     * @throws \Exception When user or licenses not found
-     *
-     * @example
-     * // Get user licenses:
-     * GET /admin/users/{userId}/licenses
-     *
-     * // Response:
-     * {
-     *     "success": true,
-     *     "licenses": [
-     *         {
-     *             "id": 1,
-     *             "license_key": "abc123...",
-     *             "product_name": "Premium License",
-     *             "product_price": 99.99,
-     *             "status": "active",
-     *             "expires_at": "2024-12-31T23:59:59Z"
-     *         }
-     *     ]
-     * }
-     */
+    /**   * Get user licenses for API. *   * Retrieves user licenses with product information for API consumption * with proper error handling and data formatting. *   * @param int $userId The user ID to get licenses for *   * @return JsonResponse JSON response with user licenses *   * @throws \Exception When user or licenses not found *   * @example * // Get user licenses: * GET /admin/users/{userId}/licenses *   * // Response: * { * "success": true, * "licenses": [ * { * "id": 1, * "license_key": "abc123...", * "product_name": "Premium License", * "product_price": 99.99, * "status": "active", * "expires_at": "2024-12-31T23:59:59Z" * } * ] * } */
     public function getUserLicenses($userId): JsonResponse
     {
         try {

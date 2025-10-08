@@ -115,8 +115,7 @@
                 <div class="stats-card-label">{{ trans('app.Active Licenses') }}</div>
                 <div class="stats-card-trend positive">
                     <i class="stats-trend-icon positive"></i>
-                    <span>{{ number_format(($licenses->where('status', 'active')->count() / max($licenses->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span>
-                </div>
+                    <span>{{ number_format(($licenses->where('status', 'active')->count() / max($licenses->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span> </div>
             </div>
         </div>
     </div>
@@ -165,8 +164,7 @@
                 <div class="stats-card-label">{{ trans('app.Expired Licenses') }}</div>
                 <div class="stats-card-trend negative">
                     <i class="stats-trend-icon negative"></i>
-                    <span>{{ number_format(($licenses->filter(function($license) { return $license->license_expires_at && $license->license_expires_at->isPast(); })->count() / max($licenses->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span>
-                </div>
+                    <span>{{ number_format(($licenses->filter(function($license) { return $license->license_expires_at && $license->license_expires_at->isPast(); })->count() / max($licenses->count(), 1)) * 100, 1) }}% {{ trans('app.of_total') }}</span> </div>
             </div>
         </div>
     </div>

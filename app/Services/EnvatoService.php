@@ -9,48 +9,15 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Envato Service with enhanced security.
- *
- * A comprehensive service for interacting with Envato's API, providing
- * secure authentication, data retrieval, and comprehensive error handling.
- *
- * Features:
- * - Secure API communication with Envato
- * - Purchase code verification and validation
- * - User information retrieval and caching
- * - OAuth token management and validation
- * - Item information and user items retrieval
- * - Enhanced error handling and logging
- * - Input validation and sanitization
- * - Comprehensive security measures
- * - Clean code structure with no duplicate patterns
- * - Proper type hints and return types
- */
+ * Envato Service with enhanced security. *
+ * A comprehensive service for interacting with Envato's API, providing * secure authentication, data retrieval, and comprehensive error handling. *
+ * Features: * - Secure API communication with Envato * - Purchase code verification and validation * - User information retrieval and caching * - OAuth token management and validation * - Item information and user items retrieval * - Enhanced error handling and logging * - Input validation and sanitization * - Comprehensive security measures * - Clean code structure with no duplicate patterns * - Proper type hints and return types */
 class EnvatoService
 {
-    /**
-     * The base URL for Envato API.
-     */
+    /**   * The base URL for Envato API. */
     protected string $baseUrl = 'https://api.envato.com';
-    /**
-     * Get Envato settings from database with fallback to config and enhanced security.
-     *
-     * Retrieves Envato configuration settings from the database with fallback
-     * to configuration files, including comprehensive validation and sanitization.
-     *
-     * @return array The Envato settings array
-     *
-     * @throws Exception When settings retrieval fails
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Get Envato settings from database with fallback to config and enhanced security. *   * Retrieves Envato configuration settings from the database with fallback * to configuration files, including comprehensive validation and sanitization. *   * @return array The Envato settings array *   * @throws Exception When settings retrieval fails *   * @version 1.0.6 *   *   *   *   */
+    /**   * @return array<string, mixed> */
     public function getEnvatoSettings(): array
     {
         try {
@@ -80,27 +47,8 @@ class EnvatoService
             throw $e;
         }
     }
-    /**
-     * Verify purchase code with Envato API and enhanced security.
-     *
-     * Verifies a purchase code with Envato's API using secure authentication
-     * and comprehensive error handling with caching for performance.
-     *
-     * @param  string  $purchaseCode  The purchase code to verify
-     *
-     * @return array|null The purchase verification data or null if failed
-     *
-     * @throws \InvalidArgumentException When purchase code is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
-    /**
-     * @return array<mixed, mixed>|null
-     */
+    /**   * Verify purchase code with Envato API and enhanced security. *   * Verifies a purchase code with Envato's API using secure authentication * and comprehensive error handling with caching for performance. *   * @param string $purchaseCode The purchase code to verify *   * @return array|null The purchase verification data or null if failed *   * @throws \InvalidArgumentException When purchase code is invalid *   * @version 1.0.6 *   *   *   *   */
+    /**   * @return array<mixed, mixed>|null */
     public function verifyPurchase(string $purchaseCode): ?array
     {
         try {
@@ -142,27 +90,8 @@ class EnvatoService
             return null;
         }
     }
-    /**
-     * Get user information from Envato API with enhanced security.
-     *
-     * Retrieves user information from Envato's API using secure authentication
-     * and comprehensive error handling with caching for performance.
-     *
-     * @param  string  $username  The username to retrieve information for
-     *
-     * @return array|null The user information data or null if failed
-     *
-     * @throws \InvalidArgumentException When username is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
-    /**
-     * @return array<mixed, mixed>|null
-     */
+    /**   * Get user information from Envato API with enhanced security. *   * Retrieves user information from Envato's API using secure authentication * and comprehensive error handling with caching for performance. *   * @param string $username The username to retrieve information for *   * @return array|null The user information data or null if failed *   * @throws \InvalidArgumentException When username is invalid *   * @version 1.0.6 *   *   *   *   */
+    /**   * @return array<mixed, mixed>|null */
     public function getUserInfo(string $username): ?array
     {
         try {
@@ -201,27 +130,8 @@ class EnvatoService
             return null;
         }
     }
-    /**
-     * Get OAuth user information from Envato API with enhanced security.
-     *
-     * Retrieves OAuth user information from Envato's API using secure authentication
-     * and comprehensive error handling with caching for performance.
-     *
-     * @param  string  $accessToken  The OAuth access token
-     *
-     * @return array|null The OAuth user information data or null if failed
-     *
-     * @throws \InvalidArgumentException When access token is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
-    /**
-     * @return array<mixed, mixed>|null
-     */
+    /**   * Get OAuth user information from Envato API with enhanced security. *   * Retrieves OAuth user information from Envato's API using secure authentication * and comprehensive error handling with caching for performance. *   * @param string $accessToken The OAuth access token *   * @return array|null The OAuth user information data or null if failed *   * @throws \InvalidArgumentException When access token is invalid *   * @version 1.0.6 *   *   *   *   */
+    /**   * @return array<mixed, mixed>|null */
     public function getOAuthUserInfo(string $accessToken): ?array
     {
         try {
@@ -253,24 +163,7 @@ class EnvatoService
             return null;
         }
     }
-    /**
-     * Test token validity with Envato API and enhanced security.
-     *
-     * Tests the validity of an Envato token by making a secure API call
-     * with comprehensive error handling and timeout protection.
-     *
-     * @param  string  $token  The token to test
-     *
-     * @return bool True if token is valid, false otherwise
-     *
-     * @throws \InvalidArgumentException When token is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Test token validity with Envato API and enhanced security. *   * Tests the validity of an Envato token by making a secure API call * with comprehensive error handling and timeout protection. *   * @param string $token The token to test *   * @return bool True if token is valid, false otherwise *   * @throws \InvalidArgumentException When token is invalid *   * @version 1.0.6 *   *   *   *   */
     public function testToken(string $token): bool
     {
         try {
@@ -292,9 +185,7 @@ class EnvatoService
             return false;
         }
     }
-    /**
-     * @return array<mixed, mixed>|null
-     */
+    /**   * @return array<mixed, mixed>|null */
     public function getItemInfo(int $itemId): ?array
     {
         $settings = $this->getEnvatoSettings();
@@ -318,9 +209,7 @@ class EnvatoService
         });
         return is_array($result) ? $result : null;
     }
-    /**
-     * @return array<mixed, mixed>|null
-     */
+    /**   * @return array<mixed, mixed>|null */
     public function getUserItems(string $username): ?array
     {
         $settings = $this->getEnvatoSettings();
@@ -355,19 +244,7 @@ class EnvatoService
             ->get("{$this->baseUrl}/v1/market/private/user/account.json");
         return $response->successful();
     }
-    /**
-     * Clear Envato API cache with enhanced security.
-     *
-     * Clears all cached data from Envato API calls with comprehensive
-     * error handling and logging.
-     *
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Clear Envato API cache with enhanced security. *   * Clears all cached data from Envato API calls with comprehensive * error handling and logging. *   *   * @version 1.0.6 *   *   *   *   */
     public function clearCache(): void
     {
         try {
@@ -393,24 +270,7 @@ class EnvatoService
             Log::error('Failed to clear Envato cache: ' . $e->getMessage());
         }
     }
-    /**
-     * Validate and sanitize purchase code.
-     *
-     * Validates the purchase code and returns a sanitized version
-     * with proper security measures.
-     *
-     * @param  string  $purchaseCode  The purchase code to validate
-     *
-     * @return string The validated and sanitized purchase code
-     *
-     * @throws \InvalidArgumentException When purchase code is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Validate and sanitize purchase code. *   * Validates the purchase code and returns a sanitized version * with proper security measures. *   * @param string $purchaseCode The purchase code to validate *   * @return string The validated and sanitized purchase code *   * @throws \InvalidArgumentException When purchase code is invalid *   * @version 1.0.6 *   *   *   *   */
     private function validatePurchaseCode(string $purchaseCode): string
     {
         if (empty($purchaseCode)) {
@@ -422,24 +282,7 @@ class EnvatoService
         }
         return $sanitized;
     }
-    /**
-     * Validate and sanitize username.
-     *
-     * Validates the username and returns a sanitized version
-     * with proper security measures.
-     *
-     * @param  string  $username  The username to validate
-     *
-     * @return string The validated and sanitized username
-     *
-     * @throws \InvalidArgumentException When username is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Validate and sanitize username. *   * Validates the username and returns a sanitized version * with proper security measures. *   * @param string $username The username to validate *   * @return string The validated and sanitized username *   * @throws \InvalidArgumentException When username is invalid *   * @version 1.0.6 *   *   *   *   */
     private function validateUsername(string $username): string
     {
         if (empty($username)) {
@@ -451,24 +294,7 @@ class EnvatoService
         }
         return $sanitized;
     }
-    /**
-     * Validate and sanitize access token.
-     *
-     * Validates the access token and returns a sanitized version
-     * with proper security measures.
-     *
-     * @param  string  $accessToken  The access token to validate
-     *
-     * @return string The validated and sanitized access token
-     *
-     * @throws \InvalidArgumentException When access token is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Validate and sanitize access token. *   * Validates the access token and returns a sanitized version * with proper security measures. *   * @param string $accessToken The access token to validate *   * @return string The validated and sanitized access token *   * @throws \InvalidArgumentException When access token is invalid *   * @version 1.0.6 *   *   *   *   */
     private function validateAccessToken(string $accessToken): string
     {
         if (empty($accessToken)) {
@@ -480,24 +306,7 @@ class EnvatoService
         }
         return $sanitized;
     }
-    /**
-     * Validate and sanitize item ID.
-     *
-     * Validates the item ID and returns a sanitized version
-     * with proper security measures.
-     *
-     * @param  int  $itemId  The item ID to validate
-     *
-     * @return int The validated item ID
-     *
-     * @throws \InvalidArgumentException When item ID is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Validate and sanitize item ID. *   * Validates the item ID and returns a sanitized version * with proper security measures. *   * @param int $itemId The item ID to validate *   * @return int The validated item ID *   * @throws \InvalidArgumentException When item ID is invalid *   * @version 1.0.6 *   *   *   *   */
     // private function validateItemId(int $itemId): int
     // {
     //     if ($itemId <= 0) {
@@ -505,22 +314,7 @@ class EnvatoService
     //     }
     //     return $itemId;
     // }
-    /**
-     * Sanitize string input with XSS protection.
-     *
-     * Sanitizes string input to prevent XSS attacks and other
-     * security vulnerabilities.
-     *
-     * @param  string|null  $input  The input string to sanitize
-     *
-     * @return string|null The sanitized string or null
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Sanitize string input with XSS protection. *   * Sanitizes string input to prevent XSS attacks and other * security vulnerabilities. *   * @param  string|null  $input  The input string to sanitize *   * @return string|null The sanitized string or null *   * @version 1.0.6 *   *   *   *   */
     private function sanitizeString(?string $input): ?string
     {
         if ($input === null) {

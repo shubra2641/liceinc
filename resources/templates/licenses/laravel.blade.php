@@ -1,9 +1,7 @@
 <?php
+
 /**
- * License Verification System for Laravel
- * Product: {{product}}
- * Generated: {{date}}
- */
+ * License Verification System for Laravel * Product: {{product}} * Generated: {{date}} */
 
 namespace App\Services;
 
@@ -18,30 +16,24 @@ class LaravelLicenseVerifier
     protected $verificationKey = '{{verification_key}}';
     protected $apiToken = '{{api_token}}';
 
-    /**
-     * Verify license with purchase code
-     * This method sends a single request to our system which handles both Envato and database verification
-     */
+    /**   * Verify license with purchase code * This method sends a single request to our system which handles both Envato and database verification */
     public function verifyLicense(string $purchaseCode, ?string $domain = null): array
     {
         try {
             // Send single request to our system
             $result = $this->verifyWithOurSystem($purchaseCode, $domain);
-            
+
             if ($result['valid']) {
                 return $this->createLicenseResponse(true, $result['message'], $result['data']);
             } else {
                 return $this->createLicenseResponse(false, $result['message']);
             }
-
         } catch (\Exception $e) {
             return $this->createLicenseResponse(false, 'Verification failed: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Verify with our license system
-     */
+    /**   * Verify with our license system */
     protected function verifyWithOurSystem(string $purchaseCode, ?string $domain = null): array
     {
         try {
@@ -76,9 +68,7 @@ class LaravelLicenseVerifier
         }
     }
 
-    /**
-     * Create standardized response
-     */
+    /**   * Create standardized response */
     protected function createLicenseResponse(bool $valid, string $message, ?array $data = null): array
     {
         return [
@@ -90,27 +80,21 @@ class LaravelLicenseVerifier
         ];
     }
 
-    /**
-     * Cache license verification result
-     */
+    /**   * Cache license verification result */
     public function cacheLicenseResult(string $purchaseCode, array $result, int $minutes = 60): void
     {
         $cacheKey = 'license_result_' . md5($purchaseCode . $this->productSlug);
         Cache::put($cacheKey, $result, now()->addMinutes($minutes));
     }
 
-    /**
-     * Get cached license result
-     */
+    /**   * Get cached license result */
     public function getCachedLicenseResult(string $purchaseCode): ?array
     {
         $cacheKey = 'license_result_' . md5($purchaseCode . $this->productSlug);
         return Cache::get($cacheKey);
     }
 
-    /**
-     * Clear license cache
-     */
+    /**   * Clear license cache */
     public function clearLicenseCache(string $purchaseCode): void
     {
         $cacheKey = 'license_result_' . md5($purchaseCode . $this->productSlug);
@@ -135,4 +119,3 @@ if ($result['valid']) {
     return response()->json(['app.Status' => 'error', 'message' => $result['message']], 403);
 }
 */
-?>

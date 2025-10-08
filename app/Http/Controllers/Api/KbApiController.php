@@ -12,63 +12,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Knowledge Base API Controller.
+ * Knowledge Base API Controller. *
+ * This controller handles API endpoints for knowledge base articles and categories. * It provides serial verification for protected content and manages article access. *
+ * Features: * - Serial verification for protected articles and categories * - Article and category requirements checking * - View tracking for articles * - Comprehensive error handling with database transactions * - Clean API responses with proper status codes * - Support for both article-level and category-level serial protection * - Enhanced security measures (XSS protection, input validation) * - Rate limiting and CSRF protection * - Proper logging for errors and warnings only *
  *
- * This controller handles API endpoints for knowledge base articles and categories.
- * It provides serial verification for protected content and manages article access.
- *
- * Features:
- * - Serial verification for protected articles and categories
- * - Article and category requirements checking
- * - View tracking for articles
- * - Comprehensive error handling with database transactions
- * - Clean API responses with proper status codes
- * - Support for both article-level and category-level serial protection
- * - Enhanced security measures (XSS protection, input validation)
- * - Rate limiting and CSRF protection
- * - Proper logging for errors and warnings only
- *
- *
- * @example
- * // Verify serial for article access
- * POST /api/kb/article/{slug}/verify
- * {
- *     "serial": "ABC123-DEF456"
- * }
- */
+ * @example * // Verify serial for article access * POST /api/kb/article/{slug}/verify * { * "serial": "ABC123-DEF456" * } */
 class KbApiController extends Controller
 {
-    /**
-     * Verify serial for article access.
-     *
-     * Validates serial codes for accessing protected knowledge base articles.
-     * Supports both article-level and category-level serial protection.
-     *
-     * @param  VerifyArticleSerialRequest  $request  The validated request containing serial code
-     * @param  string  $articleSlug  The article slug to verify access for
-     *
-     * @return JsonResponse Response with article content or error message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Verify serial for article access:
-     * POST /api/kb/article/{slug}/verify
-     * {
-     *     "serial": "ABC123-DEF456"
-     * }
-     *
-     * // Response:
-     * {
-     *     "success": true,
-     *     "message": "Serial verified successfully",
-     *     "data": {
-     *         "content": "Article content...",
-     *         "title": "Article Title",
-     *         "serial_source": "article"
-     *     }
-     * }
-     */
+    /**   * Verify serial for article access. *   * Validates serial codes for accessing protected knowledge base articles. * Supports both article-level and category-level serial protection. *   * @param VerifyArticleSerialRequest $request The validated request containing serial code * @param string $articleSlug The article slug to verify access for *   * @return JsonResponse Response with article content or error message *   * @throws \Exception When database operations fail *   * @example * // Verify serial for article access: * POST /api/kb/article/{slug}/verify * { * "serial": "ABC123-DEF456" * } *   * // Response: * { * "success": true, * "message": "Serial verified successfully", * "data": { * "content": "Article content...", * "title": "Article Title", * "serial_source": "article" * } * } */
     public function verifyArticleSerial(VerifyArticleSerialRequest $request, string $articleSlug): JsonResponse
     {
         try {
@@ -117,35 +68,7 @@ class KbApiController extends Controller
             return $this->errorResponse('An error occurred while verifying serial', 500);
         }
     }
-    /**
-     * Get article serial requirements.
-     *
-     * Retrieves information about whether an article requires serial verification
-     * and provides appropriate messages for the user interface.
-     *
-     * @param  string  $articleSlug  The article slug to check requirements for
-     *
-     * @return JsonResponse Response with serial requirements information
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Get article requirements:
-     * GET /api/kb/article/{slug}/requirements
-     *
-     * // Response:
-     * {
-     *     "success": true,
-     *     "message": "Article requirements retrieved",
-     *     "data": {
-     *         "requires_serial": true,
-     *         "title": "Article Title",
-     *         "excerpt": "Article excerpt...",
-     *         "serial_message": "Please enter the serial code to access this article.",
-     *         "serial_source": "article"
-     *     }
-     * }
-     */
+    /**   * Get article serial requirements. *   * Retrieves information about whether an article requires serial verification * and provides appropriate messages for the user interface. *   * @param string $articleSlug The article slug to check requirements for *   * @return JsonResponse Response with serial requirements information *   * @throws \Exception When database operations fail *   * @example * // Get article requirements: * GET /api/kb/article/{slug}/requirements *   * // Response: * { * "success": true, * "message": "Article requirements retrieved", * "data": { * "requires_serial": true, * "title": "Article Title", * "excerpt": "Article excerpt...", * "serial_message": "Please enter the serial code to access this article.", * "serial_source": "article" * } * } */
     public function getArticleRequirements(string $articleSlug): JsonResponse
     {
         try {
@@ -178,35 +101,7 @@ class KbApiController extends Controller
             return $this->errorResponse('An error occurred while retrieving article requirements', 500);
         }
     }
-    /**
-     * Get category serial requirements.
-     *
-     * Retrieves information about whether a category requires serial verification
-     * and provides appropriate messages for the user interface.
-     *
-     * @param  string  $categorySlug  The category slug to check requirements for
-     *
-     * @return JsonResponse Response with category serial requirements information
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Get category requirements:
-     * GET /api/kb/category/{slug}/requirements
-     *
-     * // Response:
-     * {
-     *     "success": true,
-     *     "message": "Category requirements retrieved",
-     *     "data": {
-     *         "requires_serial": true,
-     *         "name": "Category Name",
-     *         "description": "Category description...",
-     *         "articles_count": 5,
-     *         "serial_message": "Please enter the serial code to access articles in this category."
-     *     }
-     * }
-     */
+    /**   * Get category serial requirements. *   * Retrieves information about whether a category requires serial verification * and provides appropriate messages for the user interface. *   * @param string $categorySlug The category slug to check requirements for *   * @return JsonResponse Response with category serial requirements information *   * @throws \Exception When database operations fail *   * @example * // Get category requirements: * GET /api/kb/category/{slug}/requirements *   * // Response: * { * "success": true, * "message": "Category requirements retrieved", * "data": { * "requires_serial": true, * "name": "Category Name", * "description": "Category description...", * "articles_count": 5, * "serial_message": "Please enter the serial code to access articles in this category." * } * } */
     public function getCategoryRequirements(string $categorySlug): JsonResponse
     {
         try {
@@ -238,35 +133,17 @@ class KbApiController extends Controller
             return $this->errorResponse('An error occurred while retrieving category requirements', 500);
         }
     }
-    /**
-     * Find article by slug with published scope.
-     *
-     * @param  string  $slug  The article slug
-     *
-     * @return KbArticle|null The article or null if not found
-     */
+    /**   * Find article by slug with published scope. *   * @param string $slug The article slug *   * @return KbArticle|null The article or null if not found */
     private function findArticleBySlug(string $slug): ?KbArticle
     {
         return KbArticle::published()->where('slug', $slug)->first();
     }
-    /**
-     * Find article with category relationship using published scope.
-     *
-     * @param  string  $slug  The article slug
-     *
-     * @return KbArticle|null The article with category or null if not found
-     */
+    /**   * Find article with category relationship using published scope. *   * @param string $slug The article slug *   * @return KbArticle|null The article with category or null if not found */
     private function findArticleWithCategory(string $slug): ?KbArticle
     {
         return KbArticle::published()->with('category')->where('slug', $slug)->first();
     }
-    /**
-     * Find category with articles relationship using active scope.
-     *
-     * @param  string  $slug  The category slug
-     *
-     * @return KbCategory|null The category with articles or null if not found
-     */
+    /**   * Find category with articles relationship using active scope. *   * @param string $slug The category slug *   * @return KbCategory|null The category with articles or null if not found */
     private function findCategoryWithArticles(string $slug): ?KbCategory
     {
         return KbCategory::active()->with(['articles' => function ($query) {
@@ -275,26 +152,13 @@ class KbApiController extends Controller
             }
         }])->where('slug', $slug)->first();
     }
-    /**
-     * Check if article requires serial verification.
-     *
-     * @param  KbArticle  $article  The article to check
-     *
-     * @return bool True if serial verification is required
-     */
+    /**   * Check if article requires serial verification. *   * @param KbArticle $article The article to check *   * @return bool True if serial verification is required */
     private function requiresSerialVerification(KbArticle $article): bool
     {
         return $article->requires_serial ||
                $article->category->requires_serial;
     }
-    /**
-     * Validate serial code.
-     *
-     * @param  KbArticle  $article  The article to validate against
-     * @param  string  $serial  The serial code to validate
-     *
-     * @return array<string, mixed> Validation result with 'valid' and 'source' keys
-     */
+    /**   * Validate serial code. *   * @param KbArticle $article The article to validate against * @param string $serial The serial code to validate *   * @return array<string, mixed> Validation result with 'valid' and 'source' keys */
     private function validateSerial(KbArticle $article, string $serial): array
     {
         if ($article->requires_serial && $article->serial === $serial) {
@@ -308,16 +172,8 @@ class KbApiController extends Controller
         }
         return ['valid' => false, 'source' => ''];
     }
-    /**
-     * Get serial information for article.
-     *
-     * @param  KbArticle  $article  The article to get serial info for
-     *
-     * @return array Serial information with 'message' and 'source' keys
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Get serial information for article. *   * @param KbArticle $article The article to get serial info for *   * @return array Serial information with 'message' and 'source' keys */
+    /**   * @return array<string, mixed> */
     private function getSerialInfo(KbArticle $article): array
     {
         if ($article->requires_serial) {
@@ -335,13 +191,7 @@ class KbApiController extends Controller
         }
         return ['message' => '', 'source' => ''];
     }
-    /**
-     * Increment article views with error handling.
-     *
-     * @param  KbArticle  $article  The article to increment views for
-     *
-     * @throws \Exception When view increment fails
-     */
+    /**   * Increment article views with error handling. *   * @param KbArticle $article The article to increment views for *   * @throws \Exception When view increment fails */
     private function incrementArticleViews(KbArticle $article): void
     {
         try {
@@ -354,17 +204,8 @@ class KbApiController extends Controller
             throw $e;
         }
     }
-    /**
-     * Create success response with proper headers.
-     *
-     * @param  string  $message  The success message
-     * @param  array  $data  The response data
-     *
-     * @return JsonResponse The success response
-     */
-    /**
-     * @param array<string, mixed>|null $data
-     */
+    /**   * Create success response with proper headers. *   * @param string $message The success message * @param array $data The response data *   * @return JsonResponse The success response */
+    /**   * @param array<string, mixed>|null $data */
     protected function successResponse(
         mixed $data = null,
         string $message = 'Success',
@@ -379,14 +220,7 @@ class KbApiController extends Controller
         $response[$dataKey] = $data;
         return response()->json($response, $statusCode);
     }
-    /**
-     * Create error response with proper headers.
-     *
-     * @param  string  $message  The error message
-     * @param  int  $statusCode  The HTTP status code
-     *
-     * @return JsonResponse The error response
-     */
+    /**   * Create error response with proper headers. *   * @param string $message The error message * @param int $statusCode The HTTP status code *   * @return JsonResponse The error response */
     protected function errorResponse(
         string $message = 'Error',
         mixed $errors = null,
@@ -402,9 +236,7 @@ class KbApiController extends Controller
         }
         return response()->json($response, $statusCode);
     }
-    /**
-     * Sanitize input to prevent XSS attacks.
-     */
+    /**   * Sanitize input to prevent XSS attacks. */
     protected function sanitizeInput(mixed $input): mixed
     {
         if (is_array($input)) {
@@ -418,13 +250,7 @@ class KbApiController extends Controller
         }
         return $input;
     }
-    /**
-     * Sanitize output to prevent XSS attacks.
-     *
-     * @param  string|null  $output  The output to sanitize
-     *
-     * @return string The sanitized output
-     */
+    /**   * Sanitize output to prevent XSS attacks. *   * @param  string|null  $output  The output to sanitize *   * @return string The sanitized output */
     private function sanitizeOutput(?string $output): string
     {
         if ($output === null) {

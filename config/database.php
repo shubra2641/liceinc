@@ -3,9 +3,7 @@
 use Illuminate\Support\Str;
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Default Database Connection Name
+    /* |-------------------------------------------------------------------------- | Default Database Connection Name
     |--------------------------------------------------------------------------
     |
     | Here you may specify which of the database connections below you wish
@@ -17,9 +15,7 @@ return [
 
     'default' => env('DB_CONNECTION', 'sqlite'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Database Connections
+    /* |-------------------------------------------------------------------------- | Database Connections
     |--------------------------------------------------------------------------
     |
     | Below are all of the database connections defined for your application.
@@ -123,9 +119,7 @@ return [
         ],
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Migration Repository Table
+    /* |-------------------------------------------------------------------------- | Migration Repository Table
     |--------------------------------------------------------------------------
     |
     | This table keeps track of all the migrations that have already run for
@@ -139,9 +133,7 @@ return [
         'update_date_on_publish' => true,
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Redis Databases
+    /* |-------------------------------------------------------------------------- | Redis Databases
     |--------------------------------------------------------------------------
     |
     | Redis is an open source, fast, and advanced key-value store that also
@@ -155,7 +147,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug((string)env('APP_NAME', 'laravel')).'-database-'),
+            'prefix' => env('REDIS_PREFIX', Str::slug((string)env('APP_NAME', 'laravel')) . '-database-'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 

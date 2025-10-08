@@ -16,47 +16,17 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
- * Knowledge Base Article Controller with enhanced security.
- *
- * This controller handles knowledge base article management in the admin panel,
- * including CRUD operations, image uploads, and SEO optimization.
- *
- * Features:
- * - Article listing with pagination and category filtering
- * - Article creation with image upload and SEO fields
- * - Article editing with validation and security measures
- * - Article deletion with proper authorization
- * - Enhanced security measures (XSS protection, input validation)
- * - Comprehensive error handling and logging
- * - Proper logging for errors and warnings only
- * - Rate limiting for destructive operations
- * - Authorization checks for admin access
- */
+ * Knowledge Base Article Controller with enhanced security. *
+ * This controller handles knowledge base article management in the admin panel, * including CRUD operations, image uploads, and SEO optimization. *
+ * Features: * - Article listing with pagination and category filtering * - Article creation with image upload and SEO fields * - Article editing with validation and security measures * - Article deletion with proper authorization * - Enhanced security measures (XSS protection, input validation) * - Comprehensive error handling and logging * - Proper logging for errors and warnings only * - Rate limiting for destructive operations * - Authorization checks for admin access */
 class KbArticleController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
+    /**   * Create a new controller instance. *   * @return void */
     public function __construct()
     {
         $this->middleware(['auth', 'user', 'verified']);
     }
-    /**
-     * Display a listing of knowledge base articles with enhanced security.
-     *
-     * Shows a paginated list of knowledge base articles with category filtering
-     * and proper authorization checks.
-     *
-     * @return View The articles listing view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access: GET /admin/kb-articles
-     * // Returns: View with paginated articles and categories
-     */
+    /**   * Display a listing of knowledge base articles with enhanced security. *   * Shows a paginated list of knowledge base articles with category filtering * and proper authorization checks. *   * @return View The articles listing view *   * @throws \Exception When database operations fail *   * @example * // Access: GET /admin/kb-articles * // Returns: View with paginated articles and categories */
     public function index(): View
     {
         try {
@@ -96,20 +66,7 @@ class KbArticleController extends Controller
             abort(500, 'Failed to load articles');
         }
     }
-    /**
-     * Show the form for creating a new knowledge base article.
-     *
-     * Displays the article creation form with available categories
-     * and proper authorization checks.
-     *
-     * @return View The article creation form view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access: GET /admin/kb-articles/create
-     * // Returns: View with article creation form
-     */
+    /**   * Show the form for creating a new knowledge base article. *   * Displays the article creation form with available categories * and proper authorization checks. *   * @return View The article creation form view *   * @throws \Exception When database operations fail *   * @example * // Access: GET /admin/kb-articles/create * // Returns: View with article creation form */
     public function create(): View
     {
         try {
@@ -148,28 +105,7 @@ class KbArticleController extends Controller
             abort(500, 'Failed to load creation form');
         }
     }
-    /**
-     * Store a newly created knowledge base article with enhanced security.
-     *
-     * Creates a new knowledge base article with comprehensive validation,
-     * image upload handling, and security measures.
-     *
-     * @param  Request  $request  The HTTP request containing article data
-     *
-     * @return RedirectResponse Redirect to articles index or back with error
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request:
-     * POST /admin/kb-articles
-     * {
-     *     "kb_category_id": 1,
-     *     "title": "How to Install",
-     *     "content": "Installation guide...",
-     *     "image": [file]
-     * }
-     */
+    /**   * Store a newly created knowledge base article with enhanced security. *   * Creates a new knowledge base article with comprehensive validation, * image upload handling, and security measures. *   * @param Request $request The HTTP request containing article data *   * @return RedirectResponse Redirect to articles index or back with error *   * @throws \Exception When database operations fail *   * @example * // Request: * POST /admin/kb-articles * { * "kb_category_id": 1, * "title": "How to Install", * "content": "Installation guide...", * "image": [file] * } */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -258,22 +194,7 @@ class KbArticleController extends Controller
             return back()->with('error', 'Failed to create article. Please try again.');
         }
     }
-    /**
-     * Show the form for editing the specified knowledge base article.
-     *
-     * Displays the article editing form with current article data
-     * and available categories.
-     *
-     * @param  KbArticle  $kbArticle  The article to edit
-     *
-     * @return View The article editing form view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access: GET /admin/kb-articles/{id}/edit
-     * // Returns: View with article editing form
-     */
+    /**   * Show the form for editing the specified knowledge base article. *   * Displays the article editing form with current article data * and available categories. *   * @param KbArticle $kbArticle The article to edit *   * @return View The article editing form view *   * @throws \Exception When database operations fail *   * @example * // Access: GET /admin/kb-articles/{id}/edit * // Returns: View with article editing form */
     public function edit(KbArticle $kbArticle): View
     {
         try {
@@ -312,29 +233,7 @@ class KbArticleController extends Controller
             abort(500, 'Failed to load editing form');
         }
     }
-    /**
-     * Update the specified knowledge base article with enhanced security.
-     *
-     * Updates an existing knowledge base article with comprehensive validation,
-     * image upload handling, and security measures.
-     *
-     * @param  Request  $request  The HTTP request containing updated article data
-     * @param  KbArticle  $kbArticle  The article to update
-     *
-     * @return RedirectResponse Redirect back with success or error message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request:
-     * PUT /admin/kb-articles/{id}
-     * {
-     *     "kb_category_id": 1,
-     *     "title": "Updated Title",
-     *     "content": "Updated content...",
-     *     "image": [file]
-     * }
-     */
+    /**   * Update the specified knowledge base article with enhanced security. *   * Updates an existing knowledge base article with comprehensive validation, * image upload handling, and security measures. *   * @param Request $request The HTTP request containing updated article data * @param KbArticle $kbArticle The article to update *   * @return RedirectResponse Redirect back with success or error message *   * @throws \Exception When database operations fail *   * @example * // Request: * PUT /admin/kb-articles/{id} * { * "kb_category_id": 1, * "title": "Updated Title", * "content": "Updated content...", * "image": [file] * } */
     public function update(Request $request, KbArticle $kbArticle): RedirectResponse
     {
         try {
@@ -421,23 +320,7 @@ class KbArticleController extends Controller
             return back()->with('error', 'Failed to update article. Please try again.');
         }
     }
-    /**
-     * Remove the specified knowledge base article with enhanced security.
-     *
-     * Deletes a knowledge base article with proper authorization checks
-     * and security measures.
-     *
-     * @param  KbArticle  $kbArticle  The article to delete
-     *
-     * @return RedirectResponse Redirect to articles index with success message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request:
-     * DELETE /admin/kb-articles/{id}
-     * // Returns: Redirect to articles index
-     */
+    /**   * Remove the specified knowledge base article with enhanced security. *   * Deletes a knowledge base article with proper authorization checks * and security measures. *   * @param KbArticle $kbArticle The article to delete *   * @return RedirectResponse Redirect to articles index with success message *   * @throws \Exception When database operations fail *   * @example * // Request: * DELETE /admin/kb-articles/{id} * // Returns: Redirect to articles index */
     public function destroy(KbArticle $kbArticle): RedirectResponse
     {
         try {

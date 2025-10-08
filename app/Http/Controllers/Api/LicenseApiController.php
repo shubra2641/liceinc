@@ -15,33 +15,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * License API Controller.
+ * License API Controller. *
+ * Provides comprehensive license management API endpoints with Envato integration, * domain verification, and advanced security features. *
+ * Features: * - License verification with database and Envato API fallback * - License registration and status checking * - Domain verification and auto-registration * - API token authentication with enhanced security * - Comprehensive error handling with database transactions * - Support for multiple license types and domain limits * - Automatic license creation from Envato purchases * - Enhanced security measures (XSS protection, input validation) * - Rate limiting and CSRF protection * - Proper logging for errors and warnings only *
  *
- * Provides comprehensive license management API endpoints with Envato integration,
- * domain verification, and advanced security features.
- *
- * Features:
- * - License verification with database and Envato API fallback
- * - License registration and status checking
- * - Domain verification and auto-registration
- * - API token authentication with enhanced security
- * - Comprehensive error handling with database transactions
- * - Support for multiple license types and domain limits
- * - Automatic license creation from Envato purchases
- * - Enhanced security measures (XSS protection, input validation)
- * - Rate limiting and CSRF protection
- * - Proper logging for errors and warnings only
- *
- *
- * @example
- * // Verify a license
- * POST /api/license/verify
- * {
- *     "purchase_code": "ABC123-DEF456-GHI789",
- *     "product_slug": "my-product",
- *     "domain": "example.com"
- * }
- */
+ * @example * // Verify a license * POST /api/license/verify * { * "purchase_code": "ABC123-DEF456-GHI789", * "product_slug": "my-product", * "domain": "example.com" * } */
 class LicenseApiController extends Controller
 {
     protected EnvatoService $envatoService;
@@ -51,36 +29,21 @@ class LicenseApiController extends Controller
         $this->envatoService = $envatoService;
     }
 
-    /**
-     * Get API token from database settings.
-     */
+    /**   * Get API token from database settings. */
     private function getApiToken(): string
     {
         $token = \App\Helpers\ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
         return is_string($token) ? $token : '';
     }
 
-    /**
-     * Verify license endpoint with enhanced security.
-     *
-     * This endpoint is used by the generated license files to verify licenses
-     * with comprehensive validation, security measures, and proper error handling.
-     *
-     * @param  LicenseVerifyRequest  $request  The validated request containing license verification data
-     *
-     * @return JsonResponse Response with license verification result
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @version 1.0.6
-     */
+    /**   * Verify license endpoint with enhanced security. *   * This endpoint is used by the generated license files to verify licenses * with comprehensive validation, security measures, and proper error handling. *   * @param LicenseVerifyRequest $request The validated request containing license verification data *   * @return JsonResponse Response with license verification result *   * @throws \Exception When database operations fail *   * @version 1.0.6 */
     public function verify(LicenseVerifyRequest $request): JsonResponse
     {
         try {
             DB::beginTransaction();
             // Check authorization header
             $authHeader = $request->header('Authorization');
-            $expectedToken = 'Bearer '.$this->getApiToken();
+            $expectedToken = 'Bearer ' . $this->getApiToken();
             if ($authHeader !== $expectedToken) {
                 Log::warning('Unauthorized license verification attempt', [
                     'ip' => $request->ip(),
@@ -296,30 +259,24 @@ class LicenseApiController extends Controller
 
             return response()->json([
                 'valid' => false,
-                'message' => 'Verification failed: '.$e->getMessage(),
+                'message' => 'Verification failed: ' . $e->getMessage(),
                 'error_code' => 'INTERNAL_ERROR',
             ], 500);
         }
     }
 
-    /**
-     * Verify verification key.
-     */
+    /**   * Verify verification key. */
     private function verifyVerificationKey(Product $product, string $verificationKey): bool
     {
         $appKey = config('app.key');
         $appKeyStr = is_string($appKey) ? $appKey : (is_scalar($appKey) ? (string)$appKey : '');
-        $expectedKey = hash('sha256', $product->id.$product->slug.$appKeyStr);
+        $expectedKey = hash('sha256', $product->id . $product->slug . $appKeyStr);
 
         return hash_equals($expectedKey, $verificationKey);
     }
 
-    /**
-     * Create license from Envato data.
-     */
-    /**
-     * @param array<string, mixed> $envatoData
-     */
+    /**   * Create license from Envato data. */
+    /**   * @param array<string, mixed> $envatoData */
     private function createLicenseFromEnvato(Product $product, string $purchaseCode, array $envatoData): License
     {
         // Determine max_domains based on license type
@@ -340,9 +297,7 @@ class LicenseApiController extends Controller
         return $license;
     }
 
-    /**
-     * Get maximum domains allowed for license type.
-     */
+    /**   * Get maximum domains allowed for license type. */
     private function getMaxDomainsForLicenseType(string $licenseType): int
     {
         return match ($licenseType) {
@@ -354,9 +309,7 @@ class LicenseApiController extends Controller
         };
     }
 
-    /**
-     * Verify domain authorization.
-     */
+    /**   * Verify domain authorization. */
     private function verifyDomain(License $license, string $domain): bool
     {
         // Remove protocol and www
@@ -411,9 +364,7 @@ class LicenseApiController extends Controller
         return false;
     }
 
-    /**
-     * Register domain for license automatically.
-     */
+    /**   * Register domain for license automatically. */
     private function registerDomainForLicense(License $license, string $domain): void
     {
         // Clean domain (remove protocol and www)
@@ -444,15 +395,13 @@ class LicenseApiController extends Controller
         }
     }
 
-    /**
-     * Check if license has reached its domain limit.
-     */
+    /**   * Check if license has reached its domain limit. */
     private function checkDomainLimit(License $license, string $domain): void
     {
         if ($license->hasReachedDomainLimit()) {
             \Log::warning('Domain limit exceeded for license', [
                 'license_id' => $license->id,
-                'purchase_code' => substr($license->purchase_code, 0, 8).'...',
+                'purchase_code' => substr($license->purchase_code, 0, 8) . '...',
                 'domain' => $domain,
                 'current_domains' => $license->active_domains_count,
                 'max_domains' => $license->max_domains ?? 1,
@@ -460,14 +409,12 @@ class LicenseApiController extends Controller
                 'ip' => request()->ip(),
             ]);
             $maxDomains = $license->max_domains ?? 1;
-            throw new \Exception("License has reached its maximum domain limit ({$maxDomains} domain".
-                ($maxDomains > 1 ? 's' : '')."). Cannot register new domain: {$domain}");
+            throw new \Exception("License has reached its maximum domain limit ({$maxDomains} domain" .
+                ($maxDomains > 1 ? 's' : '') . "). Cannot register new domain: {$domain}");
         }
     }
 
-    /**
-     * Check if license is active.
-     */
+    /**   * Check if license is active. */
     private function isLicenseActive(License $license): bool
     {
         if ($license->status !== 'active') {
@@ -481,29 +428,17 @@ class LicenseApiController extends Controller
         return true;
     }
 
-    /**
-     * Generate unique license key.
-     */
+    /**   * Generate unique license key. */
     private function generateLicenseKey(): string
     {
-        return strtoupper(substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
-                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
+        return strtoupper(substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
+                         substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
                          substr(md5(uniqid((string)mt_rand(), true)), 0, 8));
     }
 
-    /**
-     * Log API verification attempt.
-     *
-     * @param  ApiRequest  $request  The HTTP request
-     * @param  bool  $success  Whether the verification was successful
-     * @param  string  $message  The log message
-     * @param  string  $source  The verification source
-     * @param  array  $additionalData  Additional data to log
-     */
-    /**
-     * @param array<string, mixed> $additionalData
-     */
+    /**   * Log API verification attempt. *   * @param ApiRequest $request The HTTP request * @param bool $success Whether the verification was successful * @param string $message The log message * @param string $source The verification source * @param array $additionalData Additional data to log */
+    /**   * @param array<string, mixed> $additionalData */
     private function logApiVerificationAttempt(
         LicenseVerifyRequest $request,
         bool $success,
@@ -528,13 +463,7 @@ class LicenseApiController extends Controller
         }
     }
 
-    /**
-     * Sanitize output to prevent XSS attacks.
-     *
-     * @param  string|null  $output  The output to sanitize
-     *
-     * @return string The sanitized output
-     */
+    /**   * Sanitize output to prevent XSS attacks. *   * @param  string|null  $output  The output to sanitize *   * @return string The sanitized output */
     private function sanitizeOutput(?string $output): string
     {
         if ($output === null) {
@@ -544,9 +473,7 @@ class LicenseApiController extends Controller
         return htmlspecialchars($output, ENT_QUOTES, 'UTF-8');
     }
 
-    /**
-     * Log license verification.
-     */
+    /**   * Log license verification. */
     private function logVerification(License $license, ?string $domain, string $method): void
     {
         $license->logs()->create([
@@ -568,27 +495,14 @@ class LicenseApiController extends Controller
         ]);
     }
 
-    /**
-     * Register license endpoint with enhanced security.
-     *
-     * This endpoint is used to register licenses from Envato with comprehensive
-     * validation, security measures, and proper error handling.
-     *
-     * @param  LicenseRegisterRequest  $request  The validated request containing license registration data
-     *
-     * @return JsonResponse Response with license registration result
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @version 1.0.6
-     */
+    /**   * Register license endpoint with enhanced security. *   * This endpoint is used to register licenses from Envato with comprehensive * validation, security measures, and proper error handling. *   * @param LicenseRegisterRequest $request The validated request containing license registration data *   * @return JsonResponse Response with license registration result *   * @throws \Exception When database operations fail *   * @version 1.0.6 */
     public function register(LicenseRegisterRequest $request): JsonResponse
     {
         try {
             DB::beginTransaction();
             // Check authorization header
             $authHeader = $request->header('Authorization');
-            $expectedToken = 'Bearer '.$this->getApiToken();
+            $expectedToken = 'Bearer ' . $this->getApiToken();
             if ($authHeader !== $expectedToken) {
                 Log::warning('Unauthorized license registration attempt', [
                     'ip' => $request->ip(),
@@ -675,25 +589,12 @@ class LicenseApiController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Registration failed: '.$e->getMessage(),
+                'message' => 'Registration failed: ' . $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Get license status endpoint with enhanced security.
-     *
-     * Retrieves license status information with comprehensive validation,
-     * security measures, and proper error handling.
-     *
-     * @param  LicenseStatusRequest  $request  The validated request containing license status check data
-     *
-     * @return JsonResponse Response with license status information
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @version 1.0.6
-     */
+    /**   * Get license status endpoint with enhanced security. *   * Retrieves license status information with comprehensive validation, * security measures, and proper error handling. *   * @param LicenseStatusRequest $request The validated request containing license status check data *   * @return JsonResponse Response with license status information *   * @throws \Exception When database operations fail *   * @version 1.0.6 */
     public function status(LicenseStatusRequest $request): JsonResponse
     {
         try {
@@ -763,7 +664,7 @@ class LicenseApiController extends Controller
 
             return response()->json([
                 'valid' => false,
-                'message' => 'Status check failed: '.$e->getMessage(),
+                'message' => 'Status check failed: ' . $e->getMessage(),
             ], 500);
         }
     }

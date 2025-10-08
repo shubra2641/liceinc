@@ -7,36 +7,18 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /**
- * Product Category Request with enhanced security.
- *
- * This unified request class handles validation for both creating and updating
- * product categories with comprehensive security measures and input sanitization.
- *
- * Features:
- * - Unified validation for both store and update operations
- * - XSS protection and input sanitization
- * - File upload validation with security checks
- * - Custom validation messages for better user experience
- * - Proper type hints and return types
- * - Security validation rules (XSS protection, SQL injection prevention)
- * - Unique validation with ignore for current record on updates
- * - Auto-slug generation and checkbox handling
- */
+ * Product Category Request with enhanced security. *
+ * This unified request class handles validation for both creating and updating * product categories with comprehensive security measures and input sanitization. *
+ * Features: * - Unified validation for both store and update operations * - XSS protection and input sanitization * - File upload validation with security checks * - Custom validation messages for better user experience * - Proper type hints and return types * - Security validation rules (XSS protection, SQL injection prevention) * - Unique validation with ignore for current record on updates * - Auto-slug generation and checkbox handling */
 class ProductCategoryRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    /**   * Determine if the user is authorized to make this request. */
     public function authorize(): bool
     {
         $user = auth()->user();
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Get the validation rules that apply to the request. *   * @return array<string, mixed> */
     public function rules(): array
     {
         $category = $this->route('product_category');
@@ -134,11 +116,7 @@ class ProductCategoryRequest extends FormRequest
             ],
         ];
     }
-    /**
-     * Get custom validation messages.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom validation messages. *   * @return array<string, string> */
     public function messages(): array
     {
         return [
@@ -163,11 +141,7 @@ class ProductCategoryRequest extends FormRequest
             'parent_id.not_in' => 'A category cannot be its own parent.',
         ];
     }
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom attributes for validator errors. *   * @return array<string, string> */
     public function attributes(): array
     {
         return [
@@ -189,9 +163,7 @@ class ProductCategoryRequest extends FormRequest
             'allow_subcategories' => 'allow subcategories',
         ];
     }
-    /**
-     * Prepare the data for validation.
-     */
+    /**   * Prepare the data for validation. */
     protected function prepareForValidation(): void
     {
         // Sanitize input to prevent XSS
@@ -218,23 +190,17 @@ class ProductCategoryRequest extends FormRequest
             'allow_subcategories' => $this->has('allow_subcategories'),
         ]);
     }
-    /**
-     * Sanitize input to prevent XSS attacks.
-     *
-     * @param  mixed  $input  The input to sanitize
-     *
-     * @return string|null The sanitized input
-     */
+    /**   * Sanitize input to prevent XSS attacks. *   * @param mixed $input The input to sanitize *   * @return string|null The sanitized input */
     private function sanitizeInput(mixed $input): ?string
     {
         if ($input === null || $input === '') {
             return null;
         }
-        
+
         if (!is_string($input)) {
             return null;
         }
-        
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

@@ -11,46 +11,12 @@ use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * API Tracking Middleware with enhanced security.
- *
- * This middleware handles API request tracking for license verification endpoints,
- * providing comprehensive logging and monitoring capabilities with enhanced
- * security measures and proper error handling.
- *
- * Features:
- * - API request tracking for license verification endpoints
- * - Comprehensive logging with database transactions
- * - Enhanced security measures (XSS protection, input sanitization)
- * - Proper error handling with database transactions
- * - Rate limiting and security validation
- * - Request/response data sanitization
- * - IP address and user agent tracking
- * - License status monitoring and analytics
- */
+ * API Tracking Middleware with enhanced security. *
+ * This middleware handles API request tracking for license verification endpoints, * providing comprehensive logging and monitoring capabilities with enhanced * security measures and proper error handling. *
+ * Features: * - API request tracking for license verification endpoints * - Comprehensive logging with database transactions * - Enhanced security measures (XSS protection, input sanitization) * - Proper error handling with database transactions * - Rate limiting and security validation * - Request/response data sanitization * - IP address and user agent tracking * - License status monitoring and analytics */
 class ApiTrackingMiddleware
 {
-    /**
-     * Handle an incoming request with enhanced security.
-     *
-     * Processes incoming API requests and tracks license verification calls
-     * with comprehensive logging and security measures.
-     *
-     * @param  Request  $request  The incoming HTTP request
-     * @param  Closure  $next  The next middleware in the pipeline
-     *
-     * @return Response The HTTP response
-     *
-     * @throws \Exception When tracking operations fail
-     *
-     * @example
-     * // Middleware automatically tracks:
-     * // POST /api/license/verify
-     * // {
-     * //     "license_key": "ABC123-DEF456-GHI789",
-     * //     "domain": "example.com",
-     * //     "serial": "SERIAL123"
-     * // }
-     */
+    /**   * Handle an incoming request with enhanced security. *   * Processes incoming API requests and tracks license verification calls * with comprehensive logging and security measures. *   * @param Request $request The incoming HTTP request * @param Closure $next The next middleware in the pipeline *   * @return Response The HTTP response *   * @throws \Exception When tracking operations fail *   * @example * // Middleware automatically tracks: * // POST /api/license/verify * // { * //     "license_key": "ABC123-DEF456-GHI789", * //     "domain": "example.com", * //     "serial": "SERIAL123" * // } */
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
@@ -64,26 +30,7 @@ class ApiTrackingMiddleware
         $typedResponse = $response;
         return $typedResponse;
     }
-    /**
-     * Track API call details with enhanced security.
-     *
-     * Records comprehensive information about API license verification calls
-     * including request data, response data, and security metrics with
-     * proper sanitization and error handling.
-     *
-     * @param  Request  $request  The HTTP request object
-     * @param  Response  $response  The HTTP response object
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Tracks successful verification:
-     * // - License ID: 123
-     * // - Domain: example.com
-     * // - IP: 192.168.1.1
-     * // - Status: success
-     * // - Response: {"success": true, "license": {...}}
-     */
+    /**   * Track API call details with enhanced security. *   * Records comprehensive information about API license verification calls * including request data, response data, and security metrics with * proper sanitization and error handling. *   * @param Request $request The HTTP request object * @param Response $response The HTTP response object *   * @throws \Exception When database operations fail *   * @example * // Tracks successful verification: * // - License ID: 123 * // - Domain: example.com * // - IP: 192.168.1.1 * // - Status: success * // - Response: {"success": true, "license": {...}} */
     private function trackApiCall(Request $request, Response $response): void
     {
         try {
@@ -126,13 +73,7 @@ class ApiTrackingMiddleware
             ]);
         }
     }
-    /**
-     * Sanitize request data to prevent XSS attacks.
-     *
-     * @param  array<mixed, mixed>  $data  The request data to sanitize
-     *
-     * @return array<mixed, mixed> The sanitized request data
-     */
+    /**   * Sanitize request data to prevent XSS attacks. *   * @param  array<mixed, mixed>  $data  The request data to sanitize *   * @return array<mixed, mixed> The sanitized request data */
     private function sanitizeRequestData(array $data): array
     {
         $sanitized = [];
@@ -147,13 +88,7 @@ class ApiTrackingMiddleware
         }
         return $sanitized;
     }
-    /**
-     * Sanitize response data to prevent XSS attacks.
-     *
-     * @param  string  $content  The response content to sanitize
-     *
-     * @return array<string, mixed> The sanitized response data
-     */
+    /**   * Sanitize response data to prevent XSS attacks. *   * @param string $content The response content to sanitize *   * @return array<string, mixed> The sanitized response data */
     private function sanitizeResponseData(string $content): array
     {
         $responseData = json_decode($content, true) ?? [];
@@ -162,13 +97,7 @@ class ApiTrackingMiddleware
         $typedResult = $sanitizedData;
         return $typedResult;
     }
-    /**
-     * Sanitize input to prevent XSS attacks.
-     *
-     * @param  string|null  $input  The input to sanitize
-     *
-     * @return string|null The sanitized input
-     */
+    /**   * Sanitize input to prevent XSS attacks. *   * @param  string|null  $input  The input to sanitize *   * @return string|null The sanitized input */
     private function sanitizeInput(?string $input): ?string
     {
         if ($input === null) {
@@ -176,25 +105,12 @@ class ApiTrackingMiddleware
         }
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
-    /**
-     * Validate license key format.
-     *
-     * @param  string  $licenseKey  The license key to validate
-     *
-     * @return bool True if valid, false otherwise
-     */
+    /**   * Validate license key format. *   * @param string $licenseKey The license key to validate *   * @return bool True if valid, false otherwise */
     private function isValidLicenseKey(string $licenseKey): bool
     {
         return preg_match('/^[a-zA-Z0-9\-_]+$/', $licenseKey) === 1;
     }
-    /**
-     * Determine API call status based on response.
-     *
-     * @param  Response  $response  The HTTP response
-     * @param  array<string, mixed>  $responseData  The parsed response data
-     *
-     * @return string The determined status
-     */
+    /**   * Determine API call status based on response. *   * @param Response $response The HTTP response * @param  array<string, mixed>  $responseData  The parsed response data *   * @return string The determined status */
     private function determineStatus(Response $response, array $responseData): string
     {
         if ($response->getStatusCode() === 200 && isset($responseData['success']) && $responseData['success']) {

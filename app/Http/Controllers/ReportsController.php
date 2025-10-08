@@ -21,56 +21,15 @@ use Throwable;
 use App\Helpers\SecureFileHelper;
 
 /**
- * Reports Controller with enhanced security and comprehensive reporting functionality.
+ * Reports Controller with enhanced security and comprehensive reporting functionality. *
+ * This controller provides comprehensive reporting functionality including * dashboard metrics, data visualization, export capabilities, and enhanced security measures * with comprehensive error handling and logging. *
+ * Features: * - Enhanced dashboard metrics and analytics * - Comprehensive data visualization with charts * - Export functionality for PDF and CSV formats * - License and user analytics * - API usage statistics and monitoring * - Revenue and financial reporting * - Comprehensive error handling and logging * - Input validation and sanitization * - Enhanced security measures for report operations * - Database transaction support for data integrity * - Proper error responses for different scenarios * - Comprehensive logging for security monitoring *
  *
- * This controller provides comprehensive reporting functionality including
- * dashboard metrics, data visualization, export capabilities, and enhanced security measures
- * with comprehensive error handling and logging.
- *
- * Features:
- * - Enhanced dashboard metrics and analytics
- * - Comprehensive data visualization with charts
- * - Export functionality for PDF and CSV formats
- * - License and user analytics
- * - API usage statistics and monitoring
- * - Revenue and financial reporting
- * - Comprehensive error handling and logging
- * - Input validation and sanitization
- * - Enhanced security measures for report operations
- * - Database transaction support for data integrity
- * - Proper error responses for different scenarios
- * - Comprehensive logging for security monitoring
- *
- *
- * @example
- * // Get reports dashboard
- * GET /admin/reports
- *
- * // Export reports
- * POST /admin/reports/export
- * {
- *     "format": "csv",
- *     "date_from": "2024-01-01",
- *     "date_to": "2024-12-31"
- * }
- */
+ * @example * // Get reports dashboard * GET /admin/reports *
+ * // Export reports * POST /admin/reports/export * { * "format": "csv", * "date_from": "2024-01-01", * "date_to": "2024-12-31" * } */
 class ReportsController extends Controller
 {
-    /**
-     * Display the reports dashboard with enhanced security and comprehensive metrics.
-     *
-     * This method displays the comprehensive reports dashboard with various metrics,
-     * charts, and analytics including license statistics, revenue data, user analytics,
-     * and system overview with enhanced security measures.
-     *
-     * @return View The reports dashboard view
-     *
-     * @throws \Exception When dashboard data retrieval fails
-     *
-     * @example
-     * // Display reports dashboard
-     * $view = $reportsController->index();
-     */
+    /**   * Display the reports dashboard with enhanced security and comprehensive metrics. *   * This method displays the comprehensive reports dashboard with various metrics, * charts, and analytics including license statistics, revenue data, user analytics, * and system overview with enhanced security measures. *   * @return View The reports dashboard view *   * @throws \Exception When dashboard data retrieval fails *   * @example * // Display reports dashboard * $view = $reportsController->index(); */
     public function index(): View
     {
         try {
@@ -435,22 +394,7 @@ class ReportsController extends Controller
             ])->with('error', 'Failed to load reports data. Please try again.');
         }
     }
-    /**
-     * Get license data for AJAX requests with enhanced security and validation.
-     *
-     * This method retrieves license data for AJAX requests with comprehensive
-     * validation and enhanced security measures.
-     *
-     * @param  Request  $request  The current HTTP request instance
-     *
-     * @return JsonResponse JSON response with license data
-     *
-     * @throws \Exception When license data retrieval fails
-     *
-     * @example
-     * // Get license data
-     * $response = $reportsController->getLicenseData($request);
-     */
+    /**   * Get license data for AJAX requests with enhanced security and validation. *   * This method retrieves license data for AJAX requests with comprehensive * validation and enhanced security measures. *   * @param Request $request The current HTTP request instance *   * @return JsonResponse JSON response with license data *   * @throws \Exception When license data retrieval fails *   * @example * // Get license data * $response = $reportsController->getLicenseData($request); */
     public function getLicenseData(Request $request): JsonResponse
     {
         try {
@@ -502,22 +446,7 @@ class ReportsController extends Controller
             );
         }
     }
-    /**
-     * Get API status data with enhanced security and validation.
-     *
-     * This method retrieves API status data for AJAX requests with comprehensive
-     * validation and enhanced security measures.
-     *
-     * @param  Request  $request  The current HTTP request instance
-     *
-     * @return JsonResponse JSON response with API status data
-     *
-     * @throws \Exception When API status data retrieval fails
-     *
-     * @example
-     * // Get API status data
-     * $response = $reportsController->getApiStatusData($request);
-     */
+    /**   * Get API status data with enhanced security and validation. *   * This method retrieves API status data for AJAX requests with comprehensive * validation and enhanced security measures. *   * @param Request $request The current HTTP request instance *   * @return JsonResponse JSON response with API status data *   * @throws \Exception When API status data retrieval fails *   * @example * // Get API status data * $response = $reportsController->getApiStatusData($request); */
     public function getApiStatusData(Request $request): JsonResponse
     {
         try {
@@ -570,22 +499,7 @@ class ReportsController extends Controller
             );
         }
     }
-    /**
-     * Export reports data to PDF or CSV format with enhanced security and validation.
-     *
-     * This method exports reports data to PDF or CSV format with comprehensive
-     * validation and enhanced security measures.
-     *
-     * @param  Request  $request  The current HTTP request instance
-     *
-     * @return \Illuminate\Http\Response The export file response
-     *
-     * @throws \Exception When export operation fails
-     *
-     * @example
-     * // Export reports to CSV
-     * $response = $reportsController->export($request);
-     */
+    /**   * Export reports data to PDF or CSV format with enhanced security and validation. *   * This method exports reports data to PDF or CSV format with comprehensive * validation and enhanced security measures. *   * @param Request $request The current HTTP request instance *   * @return \Illuminate\Http\Response The export file response *   * @throws \Exception When export operation fails *   * @example * // Export reports to CSV * $response = $reportsController->export($request); */
     public function export(Request $request): \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
     {
         try {
@@ -629,16 +543,7 @@ class ReportsController extends Controller
             ], 500);
         }
     }
-    /**
-     * Get data for export with enhanced security and validation.
-     *
-     * @param  string|null  $dateFrom  The start date for export
-     * @param  string|null  $dateTo  The end date for export
-     *
-     * @return array<string, mixed> The export data array
-     *
-     * @throws \Exception When data retrieval fails
-     */
+    /**   * Get data for export with enhanced security and validation. *   * @param  string|null  $dateFrom  The start date for export * @param  string|null  $dateTo  The end date for export *   * @return array<string, mixed> The export data array *   * @throws \Exception When data retrieval fails */
     private function getExportData(?string $dateFrom = null, ?string $dateTo = null): array
     {
         $query = License::with(['user', 'product']);
@@ -663,15 +568,7 @@ class ReportsController extends Controller
             'date_to' => $dateTo,
         ];
     }
-    /**
-     * Export data to CSV format with enhanced security and validation.
-     *
-     * @param  array<string, mixed>  $data  The data to export
-     *
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse The CSV file response
-     *
-     * @throws \Exception When CSV export fails
-     */
+    /**   * Export data to CSV format with enhanced security and validation. *   * @param  array<string, mixed>  $data  The data to export *   * @return \Symfony\Component\HttpFoundation\StreamedResponse The CSV file response *   * @throws \Exception When CSV export fails */
     private function exportToCsv(array $data): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $filename = 'reports_' . now()->format('Y-m-d_H-i-s') . '.csv';
@@ -685,10 +582,10 @@ class ReportsController extends Controller
                 // CSV headers
                 fputcsv($file, ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price']);
             // CSV data
-            if (is_array($data['licenses'])) {
-                foreach ($data['licenses'] as $license) {
-                    if (is_object($license) && isset($license->license_key)) {
-                        $csvData = [
+                if (is_array($data['licenses'])) {
+                    foreach ($data['licenses'] as $license) {
+                        if (is_object($license) && isset($license->license_key)) {
+                            $csvData = [
                             is_string($license->license_key) ? $license->license_key : '',
                             (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
                             (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
@@ -696,27 +593,19 @@ class ReportsController extends Controller
                             (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
                             (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
                             (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
-                        ];
-                        /** @var array<int|string, bool|float|int|string|null> $typedCsvData */
-                        $typedCsvData = $csvData;
-                        fputcsv($file, $typedCsvData);
+                            ];
+                            /** @var array<int|string, bool|float|int|string|null> $typedCsvData */
+                            $typedCsvData = $csvData;
+                            fputcsv($file, $typedCsvData);
+                        }
                     }
                 }
-            }
                 SecureFileHelper::closeFile($file);
             }
         };
         return response()->stream($callback, 200, $headers);
     }
-    /**
-     * Export data to PDF format with enhanced security and validation.
-     *
-     * @param  array<string, mixed>  $data  The data to export
-     *
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse The PDF file response
-     *
-     * @throws \Exception When PDF export fails
-     */
+    /**   * Export data to PDF format with enhanced security and validation. *   * @param  array<string, mixed>  $data  The data to export *   * @return \Symfony\Component\HttpFoundation\StreamedResponse The PDF file response *   * @throws \Exception When PDF export fails */
     private function exportToPdf(array $data): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         // For now, return CSV as PDF generation requires additional packages
@@ -732,10 +621,10 @@ class ReportsController extends Controller
                 // For now, just output CSV content as PDF placeholder
                 // In production, use a proper PDF library like dompdf
                 fputcsv($file, ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price']);
-            if (is_array($data['licenses'])) {
-                foreach ($data['licenses'] as $license) {
-                    if (is_object($license) && isset($license->license_key)) {
-                        $csvData = [
+                if (is_array($data['licenses'])) {
+                    foreach ($data['licenses'] as $license) {
+                        if (is_object($license) && isset($license->license_key)) {
+                            $csvData = [
                             is_string($license->license_key) ? $license->license_key : '',
                             (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
                             (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
@@ -743,13 +632,13 @@ class ReportsController extends Controller
                             (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
                             (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
                             (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
-                        ];
-                        /** @var array<int|string, bool|float|int|string|null> $typedCsvData */
-                        $typedCsvData = $csvData;
-                        fputcsv($file, $typedCsvData);
+                            ];
+                            /** @var array<int|string, bool|float|int|string|null> $typedCsvData */
+                            $typedCsvData = $csvData;
+                            fputcsv($file, $typedCsvData);
+                        }
                     }
                 }
-            }
                 SecureFileHelper::closeFile($file);
             }
         };

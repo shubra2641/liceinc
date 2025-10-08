@@ -8,17 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Enterprise-Grade Configuration Management System.
- *
- * Advanced configuration helper with:
- * - Multi-layer caching strategies with compression
- * - Security validation and sanitization
- * - Performance optimization with query batching
- * - Audit logging and monitoring
- * - Graceful degradation and error handling
- * - Type safety and validation
- * - Advanced features not found in basic helpers
- */
+ * Enterprise-Grade Configuration Management System. *
+ * Advanced configuration helper with: * - Multi-layer caching strategies with compression * - Security validation and sanitization * - Performance optimization with query batching * - Audit logging and monitoring * - Graceful degradation and error handling * - Type safety and validation * - Advanced features not found in basic helpers */
 class ConfigHelper
 {
     // Cache configuration
@@ -38,20 +29,7 @@ class ConfigHelper
 
     private const QUERY_TIMEOUT = 5; // seconds
 
-    /**
-     * Get setting with advanced validation, caching, and security.
-     *
-     * @param  string  $key  The setting key (validated and sanitized)
-     * @param  mixed  $default  Default value if not found
-     * @param  string|null  $configKey  Optional config key for fallback
-     * @param  bool  $useCache  Whether to use advanced caching
-     * @param  bool  $validateType  Whether to validate and cast return type
-     *
-     * @return mixed
-     *
-     * @throws \InvalidArgumentException
-     * @throws \RuntimeException
-     */
+    /**   * Get setting with advanced validation, caching, and security. *   * @param string $key The setting key (validated and sanitized) * @param mixed $default Default value if not found * @param  string|null  $configKey  Optional config key for fallback * @param bool $useCache Whether to use advanced caching * @param bool $validateType Whether to validate and cast return type *   * @return mixed *   * @throws \InvalidArgumentException * @throws \RuntimeException */
     public static function getSetting(
         string $key,
         $default = null,
@@ -71,7 +49,7 @@ class ConfigHelper
             $errors = $validationResult['errors'] ?? [];
             if (is_array($errors)) {
                 throw new \InvalidArgumentException('Invalid configuration key: '
-                    .implode(', ', $errors));
+                    . implode(', ', $errors));
             } else {
                 throw new \InvalidArgumentException('Invalid configuration key');
             }
@@ -80,7 +58,7 @@ class ConfigHelper
         if (!is_string($sanitizedKey)) {
             throw new \InvalidArgumentException('Invalid sanitized key');
         }
-        $cacheKey = self::CACHE_PREFIX.md5($sanitizedKey);
+        $cacheKey = self::CACHE_PREFIX . md5($sanitizedKey);
         // Try advanced cache first with compression
         if ($useCache) {
             $cachedValue = self::getFromAdvancedCache($cacheKey);
@@ -131,9 +109,7 @@ class ConfigHelper
         }
     }
 
-    /**
-     * Advanced input validation and sanitization.
-     */
+    /**   * Advanced input validation and sanitization. */
     /** @return array<string, mixed> */
     private static function validateSettingKey(string $key): array
     {
@@ -141,7 +117,7 @@ class ConfigHelper
         $sanitized = trim($key);
         // Length validation
         if (strlen($sanitized) > self::MAX_KEY_LENGTH) {
-            $errors[] = 'Key length exceeds maximum of '.self::MAX_KEY_LENGTH.' characters';
+            $errors[] = 'Key length exceeds maximum of ' . self::MAX_KEY_LENGTH . ' characters';
         }
         // Pattern validation
         if (! preg_match(self::ALLOWED_KEY_PATTERN, $sanitized)) {
@@ -162,9 +138,7 @@ class ConfigHelper
         ];
     }
 
-    /**
-     * Advanced caching with compression and tagging.
-     */
+    /**   * Advanced caching with compression and tagging. */
     private static function getFromAdvancedCache(string $cacheKey): mixed
     {
         try {
@@ -184,9 +158,7 @@ class ConfigHelper
         }
     }
 
-    /**
-     * Store in advanced cache with compression.
-     */
+    /**   * Store in advanced cache with compression. */
     private static function storeInAdvancedCache(string $cacheKey, mixed $value): void
     {
         try {
@@ -194,7 +166,7 @@ class ConfigHelper
             if (is_string($value) && strlen($value) > 1024) {
                 $compressed = gzcompress($value);
                 if ($compressed !== false) {
-                    $value = base64_encode($compressed).'|COMPRESSED';
+                    $value = base64_encode($compressed) . '|COMPRESSED';
                 }
             }
             // Use regular cache if tagging is not supported
@@ -209,9 +181,7 @@ class ConfigHelper
         }
     }
 
-    /**
-     * Optimized database fetch with query optimization.
-     */
+    /**   * Optimized database fetch with query optimization. */
     private static function fetchSettingFromDatabase(string $key): mixed
     {
         try {
@@ -251,14 +221,8 @@ class ConfigHelper
         }
     }
 
-    /**
-     * Get multiple settings with batch optimization and advanced caching.
-     */
-    /**
-     * @param array<string> $keys
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Get multiple settings with batch optimization and advanced caching. */
+    /**   * @param array<string> $keys *   * @return array<string, mixed> */
     public static function getSettings(
         array $keys,
         bool $useCache = true,
@@ -301,7 +265,7 @@ class ConfigHelper
             foreach ($fetchedSettings as $key => $value) {
                 $settings[$key] = $validateTypes ? self::castValue($value, null) : $value;
                 if ($useCache) {
-                    self::storeInAdvancedCache(self::CACHE_PREFIX.md5($key), $value);
+                    self::storeInAdvancedCache(self::CACHE_PREFIX . md5($key), $value);
                 }
             }
         }
@@ -309,18 +273,12 @@ class ConfigHelper
         return $settings;
     }
 
-    /**
-     * Batch cache retrieval with optimization.
-     */
-    /**
-     * @param array<string> $keys
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Batch cache retrieval with optimization. */
+    /**   * @param array<string> $keys *   * @return array<string, mixed> */
     private static function getBatchFromCache(array $keys): array
     {
         $results = [];
-        $cacheKeys = array_map(fn ($key) => self::CACHE_PREFIX.md5($key), $keys);
+        $cacheKeys = array_map(fn ($key) => self::CACHE_PREFIX . md5($key), $keys);
         try {
             $cacheValues = Cache::tags([self::CACHE_TAG])->many($cacheKeys);
             foreach ($keys as $index => $key) {
@@ -337,14 +295,8 @@ class ConfigHelper
         return $results;
     }
 
-    /**
-     * Optimized multiple settings fetch with single query.
-     */
-    /**
-     * @param array<string> $keys
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Optimized multiple settings fetch with single query. */
+    /**   * @param array<string> $keys *   * @return array<string, mixed> */
     private static function fetchMultipleSettingsOptimized(array $keys): array
     {
         /** @var array<string, mixed> $settings */
@@ -388,9 +340,7 @@ class ConfigHelper
         return $result;
     }
 
-    /**
-     * Advanced type casting and validation.
-     */
+    /**   * Advanced type casting and validation. */
     private static function castValue(mixed $value, mixed $default): mixed
     {
         if ($value === null) {
@@ -454,9 +404,7 @@ class ConfigHelper
         return $value;
     }
 
-    /**
-     * Get config value with validation.
-     */
+    /**   * Get config value with validation. */
     private static function getConfigValue(string $configKey, mixed $default): mixed
     {
         $value = config($configKey, $default);
@@ -470,9 +418,7 @@ class ConfigHelper
         return $value;
     }
 
-    /**
-     * Graceful degradation handler.
-     */
+    /**   * Graceful degradation handler. */
     private static function handleGracefulDegradation(?string $configKey, mixed $default, bool $validateType): mixed
     {
         if ($configKey) {
@@ -484,29 +430,23 @@ class ConfigHelper
         return $validateType ? self::castValue($default, $default) : $default;
     }
 
-    /**
-     * Log cache hit for monitoring.
-     */
+    /**   * Log cache hit for monitoring. */
     private static function logCacheHit(string $key): void
     {
         Log::debug('Config cache hit', ['key' => $key]);
     }
 
-    /**
-     * Log setting access for audit trail.
-     */
+    /**   * Log setting access for audit trail. */
     private static function logSettingAccess(string $key, string $source): void
     {
         // Audit logging removed for successful operations per Envato compliance rules
         // Only log errors and warnings, not successful operations
     }
 
-    /**
-     * Clear cache for specific setting.
-     */
+    /**   * Clear cache for specific setting. */
     public static function clearSettingCache(string $key): void
     {
-        $cacheKey = self::CACHE_PREFIX.md5($key);
+        $cacheKey = self::CACHE_PREFIX . md5($key);
         try {
             try {
                 Cache::tags([self::CACHE_TAG])->forget($cacheKey);
@@ -519,9 +459,7 @@ class ConfigHelper
         }
     }
 
-    /**
-     * Clear all settings cache.
-     */
+    /**   * Clear all settings cache. */
     public static function clearAllCache(): void
     {
         try {
@@ -536,9 +474,7 @@ class ConfigHelper
         }
     }
 
-    /**
-     * Get license-related settings with advanced caching.
-     */
+    /**   * Get license-related settings with advanced caching. */
     /** @return array<string, mixed> */
     public static function getLicenseSettings(): array
     {
@@ -606,9 +542,7 @@ class ConfigHelper
         ]);
     }
 
-    /**
-     * Get Envato-related settings with advanced caching.
-     */
+    /**   * Get Envato-related settings with advanced caching. */
     /** @return array<string, mixed> */
     public static function getEnvatoSettings(): array
     {
@@ -623,14 +557,7 @@ class ConfigHelper
         ]);
     }
 
-    /**
-     * Get setting with type safety and validation.
-     *
-     * @param  string  $type  Expected type (string, int, bool, array, float)
-     * @param  mixed  $default
-     *
-     * @return mixed
-     */
+    /**   * Get setting with type safety and validation. *   * @param string $type Expected type (string, int, bool, array, float) * @param mixed $default *   * @return mixed */
     public static function getTypedSetting(string $key, string $type, $default = null)
     {
         $value = self::getSetting($key, $default, null, true, true);
@@ -673,9 +600,7 @@ class ConfigHelper
         }
     }
 
-    /**
-     * Check if setting exists and is not empty.
-     */
+    /**   * Check if setting exists and is not empty. */
     public static function hasSetting(string $key): bool
     {
         try {
@@ -687,17 +612,8 @@ class ConfigHelper
         }
     }
 
-    /**
-     * Get settings with fallback to environment variables.
-     *
-     * @param  array  $envMappings  Mapping of setting keys to env variable names
-     */
-    /**
-     * @param array<string> $keys
-     * @param array<string, string> $envMappings
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Get settings with fallback to environment variables. *   * @param array $envMappings Mapping of setting keys to env variable names */
+    /**   * @param array<string> $keys * @param array<string, string> $envMappings *   * @return array<string, mixed> */
     public static function getSettingsWithEnvFallback(array $keys, array $envMappings = []): array
     {
         $settings = self::getSettings($keys);
@@ -714,9 +630,7 @@ class ConfigHelper
         return $settings;
     }
 
-    /**
-     * Get cache statistics for monitoring.
-     */
+    /**   * Get cache statistics for monitoring. */
     /** @return array<string, mixed> */
     public static function getCacheStats(): array
     {
@@ -729,9 +643,7 @@ class ConfigHelper
         ];
     }
 
-    /**
-     * Warm up cache for frequently used settings.
-     */
+    /**   * Warm up cache for frequently used settings. */
     /** @param array<string> $keys */
     public static function warmUpCache(array $keys = []): void
     {

@@ -8,21 +8,13 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\License>
- */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\License> */
 class LicenseFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var class-string<License> */
+    /**   * The name of the factory's corresponding model. *   * @var class-string<License> */
     protected $model = License::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Define the model's default state. *   * @return array<string, mixed> */
     public function definition(): array
     {
         return [
@@ -36,9 +28,7 @@ class LicenseFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate that the license is expired.
-     */
+    /**   * Indicate that the license is expired. */
     public function expired(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -47,9 +37,7 @@ class LicenseFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the license is revoked.
-     */
+    /**   * Indicate that the license is revoked. */
     public function revoked(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -57,9 +45,7 @@ class LicenseFactory extends Factory
         ]);
     }
 
-    /**
-     * Set a specific license type.
-     */
+    /**   * Set a specific license type. */
     public function ofType(string $type): static
     {
         $maxDomains = match ($type) {
@@ -77,9 +63,7 @@ class LicenseFactory extends Factory
         ]);
     }
 
-    /**
-     * Associate with a user.
-     */
+    /**   * Associate with a user. */
     public function forUser(User $user): static
     {
         return $this->state(fn (array $attributes) => [
@@ -88,9 +72,7 @@ class LicenseFactory extends Factory
         ]);
     }
 
-    /**
-     * Associate with a product.
-     */
+    /**   * Associate with a product. */
     public function forProduct(Product $product): static
     {
         return $this->state(fn (array $attributes) => [

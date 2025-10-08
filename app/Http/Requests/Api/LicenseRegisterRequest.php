@@ -5,25 +5,16 @@ namespace App\Http\Requests\Api;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * License Register Request with comprehensive validation.
- *
- * This request class handles validation for license registration API endpoints
- * with enhanced security measures and proper input sanitization.
- */
+ * License Register Request with comprehensive validation. *
+ * This request class handles validation for license registration API endpoints * with enhanced security measures and proper input sanitization. */
 class LicenseRegisterRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    /**   * Determine if the user is authorized to make this request. */
     public function authorize(): bool
     {
         return true; // Authorization handled by middleware
     }
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
+    /**   * Get the validation rules that apply to the request. *   * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string> */
     public function rules(): array
     {
         return [
@@ -49,11 +40,7 @@ class LicenseRegisterRequest extends FormRequest
             'envato_data' => 'nullable|array',
         ];
     }
-    /**
-     * Get custom validation messages.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom validation messages. *   * @return array<string, string> */
     public function messages(): array
     {
         return [
@@ -64,11 +51,7 @@ class LicenseRegisterRequest extends FormRequest
             'domain.regex' => 'Domain contains invalid characters.',
         ];
     }
-    /**
-     * Get custom attribute names for validation errors.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom attribute names for validation errors. *   * @return array<string, string> */
     public function attributes(): array
     {
         return [
@@ -78,9 +61,7 @@ class LicenseRegisterRequest extends FormRequest
             'envato_data' => 'envato data',
         ];
     }
-    /**
-     * Prepare the data for validation.
-     */
+    /**   * Prepare the data for validation. */
     protected function prepareForValidation(): void
     {
         // Sanitize inputs to prevent XSS
@@ -100,23 +81,17 @@ class LicenseRegisterRequest extends FormRequest
             ]);
         }
     }
-    /**
-     * Sanitize input to prevent XSS attacks.
-     *
-     * @param  mixed  $input  The input to sanitize
-     *
-     * @return string|null The sanitized input
-     */
+    /**   * Sanitize input to prevent XSS attacks. *   * @param mixed $input The input to sanitize *   * @return string|null The sanitized input */
     private function sanitizeInput(mixed $input): ?string
     {
         if ($input === null || $input === '') {
             return null;
         }
-        
+
         if (!is_string($input)) {
             return null;
         }
-        
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

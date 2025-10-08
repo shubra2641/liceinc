@@ -7,21 +7,13 @@ use App\Models\ProductUpdate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductUpdate>
- */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductUpdate> */
 class ProductUpdateFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var class-string<ProductUpdate> */
+    /**   * The name of the factory's corresponding model. *   * @var class-string<ProductUpdate> */
     protected $model = ProductUpdate::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Define the model's default state. *   * @return array<string, mixed> */
     public function definition(): array
     {
         return [
@@ -52,9 +44,7 @@ class ProductUpdateFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate that the update is critical.
-     */
+    /**   * Indicate that the update is critical. */
     public function critical(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -63,9 +53,7 @@ class ProductUpdateFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the update is a security update.
-     */
+    /**   * Indicate that the update is a security update. */
     public function security(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -75,9 +63,7 @@ class ProductUpdateFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the update is published.
-     */
+    /**   * Indicate that the update is published. */
     public function published(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -86,9 +72,7 @@ class ProductUpdateFactory extends Factory
         ]);
     }
 
-    /**
-     * Set a specific version.
-     */
+    /**   * Set a specific version. */
     public function version(string $version): static
     {
         return $this->state(fn (array $attributes) => [
@@ -96,9 +80,7 @@ class ProductUpdateFactory extends Factory
         ]);
     }
 
-    /**
-     * Associate with a product.
-     */
+    /**   * Associate with a product. */
     public function forProduct(Product $product): static
     {
         return $this->state(fn (array $attributes) => [

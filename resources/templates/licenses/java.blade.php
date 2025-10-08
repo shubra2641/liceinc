@@ -1,8 +1,5 @@
 /**
- * License Verification System
- * Product: {{product}}
- * Generated: {{date}}
- */
+ * License Verification System * Product: {{product}} * Generated: {{date}} */
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,10 +24,7 @@ public class LicenseVerifier {
         this.objectMapper = new ObjectMapper();
     }
 
-    /**
-     * Verify license with purchase code
-     * This method sends a single request to our system which handles both Envato and database verification
-     */
+    /**   * Verify license with purchase code * This method sends a single request to our system which handles both Envato and database verification */
     public LicenseResponse verifyLicense(String purchaseCode, String domain) {
         try {
             // Send single request to our system
@@ -42,9 +36,7 @@ public class LicenseVerifier {
     }
 
 
-    /**
-     * Verify with our license system
-     */
+    /**   * Verify with our license system */
     private LicenseResponse verifyWithOurSystem(String purchaseCode, String domain) {
         try {
             URL url = new URL(API_URL);
@@ -92,9 +84,7 @@ public class LicenseVerifier {
         }
     }
 
-    /**
-     * Create standardized response
-     */
+    /**   * Create standardized response */
     private LicenseResponse createLicenseResponse(boolean valid, String message, JsonNode data) {
         return new LicenseResponse(valid, message, data, LocalDateTime.now(), PRODUCT_SLUG);
     }

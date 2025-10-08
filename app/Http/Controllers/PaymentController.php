@@ -20,34 +20,14 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
 /**
- * Payment Controller with enhanced security.
- *
- * This controller handles payment processing, gateway management, and transaction
- * handling with comprehensive security measures and proper error handling.
- *
- * Features:
- * - Payment gateway selection and processing
- * - Payment success and failure handling
- * - Webhook processing for payment gateways
- * - Custom invoice payment processing
- * - Enhanced security measures (XSS protection, input validation)
- * - Comprehensive error handling and logging
- * - Proper logging for errors and warnings only
- * - Rate limiting for payment operations
- * - Authorization checks for payment access
- */
+ * Payment Controller with enhanced security. *
+ * This controller handles payment processing, gateway management, and transaction * handling with comprehensive security measures and proper error handling. *
+ * Features: * - Payment gateway selection and processing * - Payment success and failure handling * - Webhook processing for payment gateways * - Custom invoice payment processing * - Enhanced security measures (XSS protection, input validation) * - Comprehensive error handling and logging * - Proper logging for errors and warnings only * - Rate limiting for payment operations * - Authorization checks for payment access */
 class PaymentController extends Controller
 {
     protected PaymentService $paymentService;
     protected EmailService $emailService;
-    /**
-     * Create a new controller instance.
-     *
-     * @param  PaymentService  $paymentService  The payment service instance
-     * @param  EmailService  $emailService  The email service instance
-     *
-     * @return void
-     */
+    /**   * Create a new controller instance. *   * @param PaymentService $paymentService The payment service instance * @param EmailService $emailService The email service instance *   * @return void */
     public function __construct(
         PaymentService $paymentService,
         EmailService $emailService,
@@ -55,22 +35,7 @@ class PaymentController extends Controller
         $this->paymentService = $paymentService;
         $this->emailService = $emailService;
     }
-    /**
-     * Show payment gateway selection page with enhanced security.
-     *
-     * Displays available payment gateways for product purchase with
-     * proper authentication and product validation.
-     *
-     * @param  Product  $product  The product to purchase
-     *
-     * @return View|RedirectResponse The payment gateways view or redirect
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access: GET /payment/gateways/{product}
-     * // Returns: View with available payment gateways
-     */
+    /**   * Show payment gateway selection page with enhanced security. *   * Displays available payment gateways for product purchase with * proper authentication and product validation. *   * @param Product $product The product to purchase *   * @return View|RedirectResponse The payment gateways view or redirect *   * @throws \Exception When database operations fail *   * @example * // Access: GET /payment/gateways/{product} * // Returns: View with available payment gateways */
     public function showPaymentGateways(Product $product): View|RedirectResponse
     {
         try {
@@ -129,27 +94,7 @@ class PaymentController extends Controller
             return redirect()->back()->with('error', 'Failed to load payment options. Please try again.');
         }
     }
-    /**
-     * Process payment with selected gateway with enhanced security.
-     *
-     * Processes payment through the selected gateway with comprehensive
-     * validation and security measures.
-     *
-     * @param  Request  $request  The HTTP request containing payment data
-     * @param  Product  $product  The product being purchased
-     *
-     * @return RedirectResponse Redirect to payment gateway or back with error
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request:
-     * POST /payment/process/{product}
-     * {
-     *     "gateway": "paypal",
-     *     "invoice_id": 123
-     * }
-     */
+    /**   * Process payment with selected gateway with enhanced security. *   * Processes payment through the selected gateway with comprehensive * validation and security measures. *   * @param Request $request The HTTP request containing payment data * @param Product $product The product being purchased *   * @return RedirectResponse Redirect to payment gateway or back with error *   * @throws \Exception When database operations fail *   * @example * // Request: * POST /payment/process/{product} * { * "gateway": "paypal", * "invoice_id": 123 * } */
     public function processPayment(Request $request, Product $product): \Illuminate\Http\RedirectResponse
     {
         try {
@@ -252,24 +197,7 @@ class PaymentController extends Controller
             return redirect()->back()->with('error', trans('app.Payment processing failed. Please try again.'));
         }
     }
-    /**
-     * Handle successful payment callback with enhanced security.
-     *
-     * Processes successful payment callbacks from payment gateways
-     * with comprehensive validation and security measures.
-     *
-     * @param  Request  $request  The HTTP request from payment gateway
-     * @param  string  $gateway  The payment gateway name
-     *
-     * @return RedirectResponse Redirect to success or failure page
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Callback from PayPal/Stripe:
-     * GET /payment/success/{gateway}
-     * // Returns: Redirect to success page with license data
-     */
+    /**   * Handle successful payment callback with enhanced security. *   * Processes successful payment callbacks from payment gateways * with comprehensive validation and security measures. *   * @param Request $request The HTTP request from payment gateway * @param string $gateway The payment gateway name *   * @return RedirectResponse Redirect to success or failure page *   * @throws \Exception When database operations fail *   * @example * // Callback from PayPal/Stripe: * GET /payment/success/{gateway} * // Returns: Redirect to success page with license data */
     public function handleSuccess(Request $request, string $gateway): RedirectResponse
     {
         try {
@@ -454,22 +382,7 @@ class PaymentController extends Controller
                 ->with('error_message', trans('app.Payment processing error. Please contact support.'));
         }
     }
-    /**
-     * Handle cancelled payment with enhanced security.
-     *
-     * Processes cancelled payment requests with proper session cleanup
-     * and user notification.
-     *
-     * @param  Request  $request  The HTTP request
-     * @param  string  $gateway  The payment gateway name
-     *
-     * @return RedirectResponse Redirect to cancel page
-     *
-     * @example
-     * // User cancels payment:
-     * GET /payment/cancel/{gateway}
-     * // Returns: Redirect to cancel page
-     */
+    /**   * Handle cancelled payment with enhanced security. *   * Processes cancelled payment requests with proper session cleanup * and user notification. *   * @param Request $request The HTTP request * @param string $gateway The payment gateway name *   * @return RedirectResponse Redirect to cancel page *   * @example * // User cancels payment: * GET /payment/cancel/{gateway} * // Returns: Redirect to cancel page */
     public function handleCancel(Request $request, string $gateway): RedirectResponse
     {
         try {
@@ -502,22 +415,7 @@ class PaymentController extends Controller
             return redirect()->route('user.dashboard')->with('error', 'Payment cancellation failed. Please try again.');
         }
     }
-    /**
-     * Handle payment failure with enhanced security.
-     *
-     * Processes failed payment requests with proper session cleanup
-     * and error logging.
-     *
-     * @param  Request  $request  The HTTP request
-     * @param  string  $gateway  The payment gateway name
-     *
-     * @return RedirectResponse Redirect to failure page
-     *
-     * @example
-     * // Payment fails:
-     * GET /payment/failure/{gateway}
-     * // Returns: Redirect to failure page
-     */
+    /**   * Handle payment failure with enhanced security. *   * Processes failed payment requests with proper session cleanup * and error logging. *   * @param Request $request The HTTP request * @param string $gateway The payment gateway name *   * @return RedirectResponse Redirect to failure page *   * @example * // Payment fails: * GET /payment/failure/{gateway} * // Returns: Redirect to failure page */
     public function handleFailure(Request $request, string $gateway): RedirectResponse
     {
         try {
@@ -560,22 +458,7 @@ class PaymentController extends Controller
             );
         }
     }
-    /**
-     * Handle webhook notifications from payment gateways with enhanced security.
-     *
-     * Processes webhook notifications from payment gateways with
-     * comprehensive validation and security measures.
-     *
-     * @param  Request  $request  The HTTP request from webhook
-     * @param  string  $gateway  The payment gateway name
-     *
-     * @return JsonResponse JSON response for webhook
-     *
-     * @example
-     * // Webhook from PayPal/Stripe:
-     * POST /payment/webhook/{gateway}
-     * // Returns: JSON response
-     */
+    /**   * Handle webhook notifications from payment gateways with enhanced security. *   * Processes webhook notifications from payment gateways with * comprehensive validation and security measures. *   * @param Request $request The HTTP request from webhook * @param string $gateway The payment gateway name *   * @return JsonResponse JSON response for webhook *   * @example * // Webhook from PayPal/Stripe: * POST /payment/webhook/{gateway} * // Returns: JSON response */
     public function handleWebhook(Request $request, string $gateway): JsonResponse
     {
         try {
@@ -614,26 +497,7 @@ class PaymentController extends Controller
             return response()->json(['status' => 'error'], 500);
         }
     }
-    /**
-     * Process custom invoice payment with enhanced security.
-     *
-     * Processes payments for custom invoices (additional services)
-     * with comprehensive validation and security measures.
-     *
-     * @param  Request  $request  The HTTP request containing payment data
-     * @param  Invoice  $invoice  The custom invoice to pay
-     *
-     * @return RedirectResponse Redirect to payment gateway or back with error
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request:
-     * POST /payment/custom/{invoice}
-     * {
-     *     "gateway": "stripe"
-     * }
-     */
+    /**   * Process custom invoice payment with enhanced security. *   * Processes payments for custom invoices (additional services) * with comprehensive validation and security measures. *   * @param Request $request The HTTP request containing payment data * @param Invoice $invoice The custom invoice to pay *   * @return RedirectResponse Redirect to payment gateway or back with error *   * @throws \Exception When database operations fail *   * @example * // Request: * POST /payment/custom/{invoice} * { * "gateway": "stripe" * } */
     public function processCustomPayment(Request $request, Invoice $invoice): \Illuminate\Http\RedirectResponse
     {
         try {
@@ -729,13 +593,7 @@ class PaymentController extends Controller
             return redirect()->back()->with('error', 'Payment processing failed');
         }
     }
-    /**
-     * Sanitize data for logging (remove sensitive information).
-     *
-     * @param  array<string, mixed>  $data  The data to sanitize
-     *
-     * @return array<string, mixed> The sanitized data
-     */
+    /**   * Sanitize data for logging (remove sensitive information). *   * @param  array<string, mixed>  $data  The data to sanitize *   * @return array<string, mixed> The sanitized data */
     private function sanitizeLogData(array $data): array
     {
         $sensitiveFields = [

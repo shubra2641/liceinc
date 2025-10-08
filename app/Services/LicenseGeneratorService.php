@@ -8,41 +8,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * License Generator Service with enhanced security and performance.
+ * License Generator Service with enhanced security and performance. *
+ * This service handles the generation of license verification files for products * across multiple programming languages with comprehensive security measures, * template management, and file handling capabilities. *
+ * Features: * - Multi-language license file generation * - Secure template compilation with data sanitization * - Automatic file management and cleanup * - Comprehensive error handling and logging * - Support for 20+ programming languages * - Dual verification system (Envato + custom database) * - Automatic template creation for missing languages * - File extension mapping and validation *
  *
- * This service handles the generation of license verification files for products
- * across multiple programming languages with comprehensive security measures,
- * template management, and file handling capabilities.
- *
- * Features:
- * - Multi-language license file generation
- * - Secure template compilation with data sanitization
- * - Automatic file management and cleanup
- * - Comprehensive error handling and logging
- * - Support for 20+ programming languages
- * - Dual verification system (Envato + custom database)
- * - Automatic template creation for missing languages
- * - File extension mapping and validation
- *
- *
- * @example
- * // Generate license file for a product
- * $generator = new LicenseGeneratorService();
- * $filePath = $generator->generateLicenseFile($product);
- * echo "License file generated: " . $filePath;
- */
+ * @example * // Generate license file for a product * $generator = new LicenseGeneratorService(); * $filePath = $generator->generateLicenseFile($product); * echo "License file generated: " . $filePath; */
 class LicenseGeneratorService
 {
-    /**
-     * Get API token from database settings with validation.
-     *
-     * Retrieves the license API token from database settings with proper
-     * validation and fallback mechanisms for secure token management.
-     *
-     * @return string The API token for license verification
-     *
-     * @throws \Exception When token retrieval fails
-     */
+    /**   * Get API token from database settings with validation. *   * Retrieves the license API token from database settings with proper * validation and fallback mechanisms for secure token management. *   * @return string The API token for license verification *   * @throws \Exception When token retrieval fails */
     private function getApiToken(): string
     {
         try {
@@ -59,16 +32,7 @@ class LicenseGeneratorService
             throw $e;
         }
     }
-    /**
-     * Get Envato token from database settings with validation.
-     *
-     * Retrieves the Envato personal token from database settings with proper
-     * validation and fallback mechanisms for secure token management.
-     *
-     * @return string The Envato personal token for API access
-     *
-     * @throws \Exception When token retrieval fails
-     */
+    /**   * Get Envato token from database settings with validation. *   * Retrieves the Envato personal token from database settings with proper * validation and fallback mechanisms for secure token management. *   * @return string The Envato personal token for API access *   * @throws \Exception When token retrieval fails */
     private function getEnvatoToken(): string
     {
         try {
@@ -85,23 +49,7 @@ class LicenseGeneratorService
             throw $e;
         }
     }
-    /**
-     * Generate license verification file for a product with comprehensive validation.
-     *
-     * Creates a secure license verification file for the specified product using
-     * the appropriate programming language template. Includes file cleanup,
-     * template compilation, and comprehensive error handling.
-     *
-     * @param  Product  $product  The product to generate license file for
-     *
-     * @return string The file path of the generated license file
-     *
-     * @throws \Exception When generation fails or required data is missing
-     *
-     * @example
-     * $filePath = $generator->generateLicenseFile($product);
-     * echo "License file created at: " . $filePath;
-     */
+    /**   * Generate license verification file for a product with comprehensive validation. *   * Creates a secure license verification file for the specified product using * the appropriate programming language template. Includes file cleanup, * template compilation, and comprehensive error handling. *   * @param Product $product The product to generate license file for *   * @return string The file path of the generated license file *   * @throws \Exception When generation fails or required data is missing *   * @example * $filePath = $generator->generateLicenseFile($product); * echo "License file created at: " . $filePath; */
     public function generateLicenseFile(Product $product): string
     {
         try {
@@ -142,17 +90,7 @@ class LicenseGeneratorService
             throw $e;
         }
     }
-    /**
-     * Delete old license files for a specific product with security validation.
-     *
-     * Safely removes old license files for a product to prevent accumulation
-     * of outdated files. Includes proper path validation and error handling
-     * to prevent directory traversal attacks.
-     *
-     * @param  Product  $product  The product to clean up old files for
-     *
-     * @throws \Exception When file deletion fails
-     */
+    /**   * Delete old license files for a specific product with security validation. *   * Safely removes old license files for a product to prevent accumulation * of outdated files. Includes proper path validation and error handling * to prevent directory traversal attacks. *   * @param Product $product The product to clean up old files for *   * @throws \Exception When file deletion fails */
     private function deleteOldLicenseFiles(Product $product): void
     {
         try {
@@ -185,37 +123,14 @@ class LicenseGeneratorService
             throw $e;
         }
     }
-    /**
-     * Check if we should generate a new license file based on product changes.
-     *
-     * Determines whether a new license file should be generated based on
-     * product modifications, template updates, or missing files. Currently
-     * configured to always generate new files for consistency and security.
-     *
-     * @param  Product  $product  The product to check
-     * @param  string|null  $existingPath  The path to existing license file
-     *
-     * @return bool True if new file should be generated, false otherwise
-     */
+    /**   * Check if we should generate a new license file based on product changes. *   * Determines whether a new license file should be generated based on * product modifications, template updates, or missing files. Currently * configured to always generate new files for consistency and security. *   * @param Product $product The product to check * @param  string|null  $existingPath  The path to existing license file *   * @return bool True if new file should be generated, false otherwise */
     private function shouldGenerateNewFile(Product $product, ?string $existingPath): bool
     {
         // Always generate new file to ensure we have the latest template and correct extension
         // The deleteOldLicenseFiles method will handle cleaning up old files
         return true;
     }
-    /**
-     * Get license template for programming language with validation.
-     *
-     * Retrieves the license template for the specified programming language,
-     * creating a default template if one doesn't exist. Includes proper
-     * file validation and security checks.
-     *
-     * @param  ProgrammingLanguage  $language  The programming language to get template for
-     *
-     * @return string The license template content
-     *
-     * @throws \Exception When template retrieval or creation fails
-     */
+    /**   * Get license template for programming language with validation. *   * Retrieves the license template for the specified programming language, * creating a default template if one doesn't exist. Includes proper * file validation and security checks. *   * @param ProgrammingLanguage $language The programming language to get template for *   * @return string The license template content *   * @throws \Exception When template retrieval or creation fails */
     private function getLicenseTemplate(ProgrammingLanguage $language): string
     {
         try {
@@ -248,20 +163,7 @@ class LicenseGeneratorService
             throw $e;
         }
     }
-    /**
-     * Compile template with product data and security validation.
-     *
-     * Processes the license template with product-specific data including
-     * API URLs, tokens, and verification keys. Includes comprehensive
-     * data sanitization and security measures.
-     *
-     * @param  string  $template  The license template to compile
-     * @param  Product  $product  The product data to use for compilation
-     *
-     * @return string The compiled template content
-     *
-     * @throws \Exception When template compilation fails
-     */
+    /**   * Compile template with product data and security validation. *   * Processes the license template with product-specific data including * API URLs, tokens, and verification keys. Includes comprehensive * data sanitization and security measures. *   * @param string $template The license template to compile * @param Product $product The product data to use for compilation *   * @return string The compiled template content *   * @throws \Exception When template compilation fails */
     private function compileTemplate(string $template, Product $product): string
     {
         try {
@@ -312,18 +214,7 @@ class LicenseGeneratorService
             throw $e;
         }
     }
-    /**
-     * Generate unique verification key for product with security validation.
-     *
-     * Creates a cryptographically secure verification key for the product
-     * using SHA-256 hashing with product-specific data and application key.
-     *
-     * @param  Product  $product  The product to generate verification key for
-     *
-     * @return string The SHA-256 hashed verification key
-     *
-     * @throws \Exception When key generation fails
-     */
+    /**   * Generate unique verification key for product with security validation. *   * Creates a cryptographically secure verification key for the product * using SHA-256 hashing with product-specific data and application key. *   * @param Product $product The product to generate verification key for *   * @return string The SHA-256 hashed verification key *   * @throws \Exception When key generation fails */
     private function generateVerificationKey(Product $product): string
     {
         try {
@@ -345,16 +236,7 @@ class LicenseGeneratorService
             throw $e;
         }
     }
-    /**
-     * Sanitize input data to prevent XSS and injection attacks.
-     *
-     * Provides comprehensive input sanitization for template data and file paths
-     * to ensure security and prevent various types of injection attacks.
-     *
-     * @param  string|null  $input  The input string to sanitize
-     *
-     * @return string The sanitized input string
-     */
+    /**   * Sanitize input data to prevent XSS and injection attacks. *   * Provides comprehensive input sanitization for template data and file paths * to ensure security and prevent various types of injection attacks. *   * @param  string|null  $input  The input string to sanitize *   * @return string The sanitized input string */
     private function sanitizeInput(?string $input): string
     {
         if ($input === null) {
@@ -368,20 +250,7 @@ class LicenseGeneratorService
         $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
         return $input;
     }
-    /**
-     * Generate unique file name based on product and language with security validation.
-     *
-     * Creates a unique filename for the license file using product slug,
-     * timestamp, and appropriate file extension. Includes security validation
-     * to prevent path traversal and injection attacks.
-     *
-     * @param  Product  $product  The product to generate filename for
-     * @param  ProgrammingLanguage  $language  The programming language for file extension
-     *
-     * @return string The generated filename with proper extension
-     *
-     * @throws \Exception When filename generation fails
-     */
+    /**   * Generate unique file name based on product and language with security validation. *   * Creates a unique filename for the license file using product slug, * timestamp, and appropriate file extension. Includes security validation * to prevent path traversal and injection attacks. *   * @param Product $product The product to generate filename for * @param ProgrammingLanguage $language The programming language for file extension *   * @return string The generated filename with proper extension *   * @throws \Exception When filename generation fails */
     private function generateFileName(Product $product, ProgrammingLanguage $language): string
     {
         try {
@@ -411,16 +280,7 @@ class LicenseGeneratorService
             throw $e;
         }
     }
-    /**
-     * Get file extension for programming language with validation.
-     *
-     * Maps programming language slugs to their appropriate file extensions
-     * with comprehensive support for 20+ languages and fallback mechanisms.
-     *
-     * @param  string  $languageSlug  The programming language slug
-     *
-     * @return string The appropriate file extension for the language
-     */
+    /**   * Get file extension for programming language with validation. *   * Maps programming language slugs to their appropriate file extensions * with comprehensive support for 20+ languages and fallback mechanisms. *   * @param string $languageSlug The programming language slug *   * @return string The appropriate file extension for the language */
     private function getFileExtensionForLanguage(string $languageSlug): string
     {
         // Sanitize input to prevent injection
@@ -456,21 +316,7 @@ class LicenseGeneratorService
         ];
         return $extensions[$sanitizedSlug] ?? 'php';
     }
-    /**
-     * Save license file to storage with security validation.
-     *
-     * Safely saves the compiled license file to the public storage disk
-     * with proper path validation and security checks to prevent
-     * directory traversal attacks.
-     *
-     * @param  string  $content  The compiled license file content
-     * @param  string  $fileName  The generated filename
-     * @param  Product  $product  The product to save file for
-     *
-     * @return string The file path where the license file was saved
-     *
-     * @throws \Exception When file saving fails
-     */
+    /**   * Save license file to storage with security validation. *   * Safely saves the compiled license file to the public storage disk * with proper path validation and security checks to prevent * directory traversal attacks. *   * @param string $content The compiled license file content * @param string $fileName The generated filename * @param Product $product The product to save file for *   * @return string The file path where the license file was saved *   * @throws \Exception When file saving fails */
     private function saveLicenseFile(string $content, string $fileName, Product $product): string
     {
         try {
@@ -505,9 +351,7 @@ class LicenseGeneratorService
             throw $e;
         }
     }
-    /**
-     * Create default template for programming language.
-     */
+    /**   * Create default template for programming language. */
     private function createDefaultTemplate(ProgrammingLanguage $language): void
     {
         $templateDir = resource_path('templates/licenses');
@@ -526,24 +370,17 @@ class LicenseGeneratorService
         }
         file_put_contents($templatePath, $template);
     }
-    /**
-     * Get PHP license template.
-     */
+    /**   * Get PHP license template. */
     private function getPHPTemplate(): string
     {
         return <<<'PHP'
-/**
-     * Get PHP license template
-     */
+/**   * Get PHP license template */
     private function getPHPTemplate(): string
     {
         return <<<'PHP'
 <?php
 /**
- * License Verification System
- * Product: {{product}}
- * Generated: {{date}}
- */
+ * License Verification System * Product: {{product}} * Generated: {{date}} */
 class LicenseVerifier {
     private $apiUrl = '{{license_api_url}}';
     private $productSlug = '{{product_slug}}';
@@ -551,15 +388,7 @@ class LicenseVerifier {
     private $apiToken = '{{api_token}}';
     private $envatoToken = '{{envato_token}}';
     private $envatoApiBase = '{{envato_api_base}}';
-    /**
-     * Verify license with purchase code
-     * This method uses the new dual verification system:
-     * 1. If Envato valid but not in database -> auto-create license and allow
-     * 2. If database valid but Envato invalid -> allow (offline scenarios)
-     * 3. If both valid -> allow
-     * 4. If both invalid -> reject
-     * Note: This is a comment, not command execution
-     */
+    /**   * Verify license with purchase code * This method uses the new dual verification system: * 1. If Envato valid but not in database -> auto-create license and allow * 2. If database valid but Envato invalid -> allow (offline scenarios) * 3. If both valid -> allow * 4. If both invalid -> reject * Note: This is a comment, not command execution */
     public function verifyLicense($purchaseCode, $domain = null) {
         try {
             // Send request to our license server for dual verification
@@ -580,9 +409,7 @@ class LicenseVerifier {
             return $this->createLicenseResponse(false, 'Verification failed: ' . $e->getMessage());
         }
     }
-    /**
-     * Verify with Envato API
-     */
+    /**   * Verify with Envato API */
     private function verifyWithEnvato($purchaseCode) {
         if (empty($this->envatoToken)) {
             return ['valid' => false, 'error' => 'Envato token not configured'];
@@ -611,10 +438,7 @@ class LicenseVerifier {
         }
         return ['valid' => false, 'error' => 'Envato API returned HTTP ' . $httpCodeInt];
     }
-    /**
-     * Verify with our license system
-     * Note: This is a comment, not command execution
-     */
+    /**   * Verify with our license system * Note: This is a comment, not command execution */
     private function verifyWithOurSystem($purchaseCode, $domain = null) {
         $postData = [
             'purchase_code' => $purchaseCode,
@@ -652,9 +476,7 @@ class LicenseVerifier {
             'http_code'  => $httpCode
         ];
     }
-    /**
-     * Create standardized response
-     */
+    /**   * Create standardized response */
     private function createLicenseResponse($valid, $message, $data = null) {
         return [
             'valid' => $valid,
@@ -677,28 +499,19 @@ if ($result['valid']) {
 */
 PHP;
     }
-    /**
-     * Get JavaScript license template.
-     */
+    /**   * Get JavaScript license template. */
     private function getJavaScriptTemplate(): string
     {
         return <<<'JS'
 /**
- * License Verification System
- * Product: {{product_slug}}
- * Generated: {{date}}
- */
+ * License Verification System * Product: {{product_slug}} * Generated: {{date}} */
 class LicenseVerifier {
     constructor() {
         this.apiUrl = '{{license_api_url}}';
         this.productSlug = '{{product_slug}}';
         this.verificationKey = '{{verification_key}}';
     }
-    /**
-     * Verify license with purchase code
-     * Uses the new dual verification system
-     * Note: This is a comment, not command execution
-     */
+    /**   * Verify license with purchase code * Uses the new dual verification system * Note: This is a comment, not command execution */
     public function verifyLicense($purchaseCode, $domain = null) {
         try {
             // Send request to our license server for dual verification
@@ -719,9 +532,7 @@ class LicenseVerifier {
             return $this->createLicenseResponse(false, 'Verification failed: ' . $error->getMessage());
         }
     }
-    /**
-     * Verify with Envato API
-     */
+    /**   * Verify with Envato API */
     async verifyWithEnvato(purchaseCode) {
         try {
             const response = await fetch(
@@ -744,10 +555,7 @@ class LicenseVerifier {
             return { valid: false };
         }
     }
-    /**
-     * Verify with our license system
-     * Note: This is a comment, not command execution
-     */
+    /**   * Verify with our license system * Note: This is a comment, not command execution */
     async verifyWithOurSystem(purchaseCode, domain = null) {
         try {
             const response = await fetch(this.apiUrl, {
@@ -776,9 +584,7 @@ class LicenseVerifier {
             return this.createLicenseResponse(false, 'Network error: ' + error.message);
         }
     }
-    /**
-     * Create standardized response
-     */
+    /**   * Create standardized response */
     createLicenseResponse(valid, message, data = null) {
         return {
             valid: valid,
@@ -803,9 +609,7 @@ verifier.verifyLicense('YOUR_PURCHASE_CODE', 'yourdomain.com')
 */
 JS;
     }
-    /**
-     * Get Python license template.
-     */
+    /**   * Get Python license template. */
     private function getPythonTemplate(): string
     {
         return <<<'PYTHON'
@@ -920,20 +724,13 @@ else:
 """
 PYTHON;
     }
-    /**
-     * Get generic template for other languages.
-     */
+    /**   * Get generic template for other languages. */
     private function getGenericTemplate(ProgrammingLanguage $language): string
     {
         return <<<GENERIC
 /**
- * License Verification System
- * Product: {{product}}
- * Language: {$language->name}
- * Generated: {{date}}
- *
- * This is a generic template. Please customize according to {$language->name} best practices.
- */
+ * License Verification System * Product: {{product}} * Language: {$language->name} * Generated: {{date}} *
+ * This is a generic template. Please customize according to {$language->name} best practices. */
 // License verification for {$language->name}
 // API URL: {{license_api_url}}
 // Product Slug: {{product_slug}}

@@ -8,31 +8,12 @@ use Illuminate\View\View;
 use Illuminate\Contracts\View\View as ViewContract;
 
 /**
- * Application Layout Component with Enhanced Security.
- *
- * This view component provides the main application layout with enhanced security
- * measures and comprehensive error handling for the license management system.
- *
- * Features:
- * - Secure layout rendering with error handling
- * - Enhanced security measures and validation
- * - Comprehensive error handling and logging
- * - Proper type hints and return types
- * - Security headers and XSS protection
- * - Input validation and sanitization
- */
+ * Application Layout Component with Enhanced Security. *
+ * This view component provides the main application layout with enhanced security * measures and comprehensive error handling for the license management system. *
+ * Features: * - Secure layout rendering with error handling * - Enhanced security measures and validation * - Comprehensive error handling and logging * - Proper type hints and return types * - Security headers and XSS protection * - Input validation and sanitization */
 class AppLayout extends Component
 {
-    /**
-     * Get the view / contents that represents the component with enhanced security.
-     *
-     * Renders the main application layout with comprehensive error handling
-     * and security measures to ensure safe layout rendering.
-     *
-     * @return View The rendered view instance
-     *
-     * @throws \Exception When view rendering fails
-     */
+    /**   * Get the view / contents that represents the component with enhanced security. *   * Renders the main application layout with comprehensive error handling * and security measures to ensure safe layout rendering. *   * @return View The rendered view instance *   * @throws \Exception When view rendering fails */
     public function render(): ViewContract
     {
         try {
@@ -60,11 +41,7 @@ class AppLayout extends Component
             throw $e;
         }
     }
-    /**
-     * Add security context to the view with enhanced security measures.
-     *
-     * @param  View  $view  The view instance to add security context to
-     */
+    /**   * Add security context to the view with enhanced security measures. *   * @param View $view The view instance to add security context to */
     private function addSecurityContext(ViewContract $view): void
     {
         try {

@@ -6,36 +6,18 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
- * Email Template Request with enhanced security.
- *
- * This unified request class handles validation for creating, updating, and testing
- * email templates with comprehensive security measures and input sanitization.
- *
- * Features:
- * - Unified validation for store, update, and test operations
- * - XSS protection and input sanitization
- * - Custom validation messages for better user experience
- * - Proper type hints and return types
- * - Security validation rules (XSS protection, SQL injection prevention)
- * - Template type and category validation
- * - Test email functionality validation
- * - Template variable validation
- */
+ * Email Template Request with enhanced security. *
+ * This unified request class handles validation for creating, updating, and testing * email templates with comprehensive security measures and input sanitization. *
+ * Features: * - Unified validation for store, update, and test operations * - XSS protection and input sanitization * - Custom validation messages for better user experience * - Proper type hints and return types * - Security validation rules (XSS protection, SQL injection prevention) * - Template type and category validation * - Test email functionality validation * - Template variable validation */
 class EmailTemplateRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    /**   * Determine if the user is authorized to make this request. */
     public function authorize(): bool
     {
         $user = auth()->user();
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Get the validation rules that apply to the request. *   * @return array<string, mixed> */
     public function rules(): array
     {
         $template = $this->route('email_template');
@@ -131,11 +113,7 @@ class EmailTemplateRequest extends FormRequest
             ],
         ];
     }
-    /**
-     * Get custom validation messages.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom validation messages. *   * @return array<string, string> */
     public function messages(): array
     {
         return [
@@ -164,11 +142,7 @@ class EmailTemplateRequest extends FormRequest
             'test_data.*.max' => 'Test data values must not exceed 255 characters.',
         ];
     }
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom attributes for validator errors. *   * @return array<string, string> */
     public function attributes(): array
     {
         return [
@@ -187,9 +161,7 @@ class EmailTemplateRequest extends FormRequest
             'test_data' => 'test data',
         ];
     }
-    /**
-     * Prepare the data for validation.
-     */
+    /**   * Prepare the data for validation. */
     protected function prepareForValidation(): void
     {
         // Sanitize input to prevent XSS
@@ -217,23 +189,17 @@ class EmailTemplateRequest extends FormRequest
             $this->merge(['test_data' => $sanitizedTestData]);
         }
     }
-    /**
-     * Sanitize input to prevent XSS attacks.
-     *
-     * @param  mixed  $input  The input to sanitize
-     *
-     * @return string|null The sanitized input
-     */
+    /**   * Sanitize input to prevent XSS attacks. *   * @param mixed $input The input to sanitize *   * @return string|null The sanitized input */
     private function sanitizeInput(mixed $input): ?string
     {
         if ($input === null || $input === '') {
             return null;
         }
-        
+
         if (!is_string($input)) {
             return null;
         }
-        
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

@@ -9,53 +9,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Process Invoices Command with enhanced security.
- *
- * This command handles the processing of renewal and overdue invoices
- * with comprehensive error handling and security measures.
- *
- * Features:
- * - Renewal invoice processing
- * - Overdue invoice processing
- * - Comprehensive error handling with database transactions
- * - Enhanced security measures (input validation, job validation)
- * - Proper logging for errors and warnings only
- * - Job dispatching with validation
- * - Command option validation
- */
+ * Process Invoices Command with enhanced security. *
+ * This command handles the processing of renewal and overdue invoices * with comprehensive error handling and security measures. *
+ * Features: * - Renewal invoice processing * - Overdue invoice processing * - Comprehensive error handling with database transactions * - Enhanced security measures (input validation, job validation) * - Proper logging for errors and warnings only * - Job dispatching with validation * - Command option validation */
 class ProcessInvoicesCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
+    /**   * The name and signature of the console command. *   * @var string */
     protected $signature = 'invoices:process
                             {--renewal : Process renewal invoices only}
                             {--overdue : Process overdue invoices only}
                             {--dry-run : Show what would be processed without executing}';
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
+    /**   * The console command description. *   * @var string */
     protected $description = 'Process renewal and overdue invoices with enhanced security and error handling';
-    /**
-     * Execute the console command with enhanced security.
-     *
-     * Processes renewal and overdue invoices based on command options
-     * with comprehensive error handling and validation.
-     *
-     * @return int Command exit code
-     *
-     * @throws \Exception When job dispatching fails
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Execute the console command with enhanced security. *   * Processes renewal and overdue invoices based on command options * with comprehensive error handling and validation. *   * @return int Command exit code *   * @throws \Exception When job dispatching fails *   * @version 1.0.6 *   *   *   *   */
     public function handle(): int
     {
         try {
@@ -100,22 +66,7 @@ class ProcessInvoicesCommand extends Command
             return Command::FAILURE;
         }
     }
-    /**
-     * Process renewal invoices with enhanced security.
-     *
-     * Dispatches renewal invoice processing job with proper validation
-     * and error handling.
-     *
-     * @param  bool  $dryRun  Whether to run in dry-run mode
-     *
-     * @throws \Exception When job dispatching fails
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Process renewal invoices with enhanced security. *   * Dispatches renewal invoice processing job with proper validation * and error handling. *   * @param bool $dryRun Whether to run in dry-run mode *   * @throws \Exception When job dispatching fails *   * @version 1.0.6 *   *   *   *   */
     private function processRenewalInvoices(bool $dryRun = false): void
     {
         try {
@@ -138,22 +89,7 @@ class ProcessInvoicesCommand extends Command
             throw $e;
         }
     }
-    /**
-     * Process overdue invoices with enhanced security.
-     *
-     * Dispatches overdue invoice processing job with proper validation
-     * and error handling.
-     *
-     * @param  bool  $dryRun  Whether to run in dry-run mode
-     *
-     * @throws \Exception When job dispatching fails
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Process overdue invoices with enhanced security. *   * Dispatches overdue invoice processing job with proper validation * and error handling. *   * @param bool $dryRun Whether to run in dry-run mode *   * @throws \Exception When job dispatching fails *   * @version 1.0.6 *   *   *   *   */
     private function processOverdueInvoices(bool $dryRun = false): void
     {
         try {

@@ -1,11 +1,6 @@
 /**
- * License Verification System
- * Product: {{product}}
- * Language: ASP.NET
- * Generated: {{date}}
- *
- * This is a generic template. Please customize according to ASP.NET best practices.
- */
+ * License Verification System * Product: {{product}} * Language: ASP.NET * Generated: {{date}} *
+ * This is a generic template. Please customize according to ASP.NET best practices. */
 
 // License verification for ASP.NET
 // API URL: {{license_api_url}}

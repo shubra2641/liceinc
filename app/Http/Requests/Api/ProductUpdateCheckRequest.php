@@ -5,26 +5,17 @@ namespace App\Http\Requests\Api;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * Product Update Check Request with enhanced security.
- *
- * This request class handles validation for product update checking operations
- * with comprehensive security measures and input sanitization.
- */
+ * Product Update Check Request with enhanced security. *
+ * This request class handles validation for product update checking operations * with comprehensive security measures and input sanitization. */
 class ProductUpdateCheckRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    /**   * Determine if the user is authorized to make this request. */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Get the validation rules that apply to the request. *   * @return array<string, mixed> */
     public function rules(): array
     {
         return [
@@ -54,11 +45,7 @@ class ProductUpdateCheckRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get custom validation messages.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom validation messages. *   * @return array<string, string> */
     public function messages(): array
     {
         return [
@@ -74,9 +61,7 @@ class ProductUpdateCheckRequest extends FormRequest
         ];
     }
 
-    /**
-     * Prepare the data for validation.
-     */
+    /**   * Prepare the data for validation. */
     protected function prepareForValidation(): void
     {
         $this->merge([
@@ -86,19 +71,17 @@ class ProductUpdateCheckRequest extends FormRequest
         ]);
     }
 
-    /**
-     * Sanitize input to prevent XSS attacks.
-     */
+    /**   * Sanitize input to prevent XSS attacks. */
     private function sanitizeInput(mixed $input): ?string
     {
         if ($input === null || $input === '') {
             return null;
         }
-        
+
         if (!is_string($input)) {
             return null;
         }
-        
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

@@ -4,10 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
-    /**
-     * Run the migrations.
-     */
+return new class () extends Migration {
+    /**   * Run the migrations. */
     public function up(): void
     {
         // Add anti-spam related columns to single-row settings table if they don't exist
@@ -36,9 +34,7 @@ return new class() extends Migration {
         }
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    /**   * Reverse the migrations. */
     public function down(): void
     {
         if (! Schema::hasTable('settings')) {

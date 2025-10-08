@@ -15,40 +15,14 @@ use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 /**
- * AI License Analytics Service with enhanced security and comprehensive analytics.
- *
- * This service provides AI-powered analytics and insights for license management,
- * including predictive analytics, customer behavior analysis, intelligent recommendations,
- * anomaly detection, and real-time monitoring. It implements comprehensive security
- * measures, input validation, and error handling for reliable analytics operations.
- */
+ * AI License Analytics Service with enhanced security and comprehensive analytics. *
+ * This service provides AI-powered analytics and insights for license management, * including predictive analytics, customer behavior analysis, intelligent recommendations, * anomaly detection, and real-time monitoring. It implements comprehensive security * measures, input validation, and error handling for reliable analytics operations. */
 class AILicenseAnalyticsService
 {
     private const CACHE_TTL = 3600; // 1 hour
     private const PREDICTION_MODEL_VERSION = '1.0';
-    /**
-     * Get comprehensive license analytics dashboard data with enhanced security and error handling.
-     *
-     * Retrieves comprehensive analytics data including overview statistics, trend analysis,
-     * predictive insights, customer behavior analysis, product performance metrics,
-     * geographic distribution, and anomaly detection. All data is cached for performance
-     * and includes comprehensive error handling and input validation.
-     *
-     * @param  int  $days  Number of days to analyze (1-365, default: 30)
-     *
-     * @return array Comprehensive analytics dashboard data
-     *
-     * @throws InvalidArgumentException When days parameter is invalid
-     * @throws \Exception When analytics data retrieval fails
-     *
-     * @example
-     * $analytics = $service->getDashboardAnalytics(30);
-     * $overview = $analytics['overview'];
-     * $trends = $analytics['trends'];
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Get comprehensive license analytics dashboard data with enhanced security and error handling. *   * Retrieves comprehensive analytics data including overview statistics, trend analysis, * predictive insights, customer behavior analysis, product performance metrics, * geographic distribution, and anomaly detection. All data is cached for performance * and includes comprehensive error handling and input validation. *   * @param int $days Number of days to analyze (1-365, default: 30) *   * @return array Comprehensive analytics dashboard data *   * @throws InvalidArgumentException When days parameter is invalid * @throws \Exception When analytics data retrieval fails *   * @example * $analytics = $service->getDashboardAnalytics(30); * $overview = $analytics['overview']; * $trends = $analytics['trends']; */
+    /**   * @return array<string, mixed> */
     public function getDashboardAnalytics(int $days = 30): array
     {
         try {
@@ -83,22 +57,8 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * Get overview statistics with AI-enhanced insights and comprehensive error handling.
-     *
-     * Retrieves comprehensive overview statistics including license counts, customer metrics,
-     * revenue data, growth rates, and AI-powered insights. All data is validated and
-     * includes proper error handling for database operations.
-     *
-     * @param  int  $days  Number of days to analyze
-     *
-     * @return array Overview statistics with AI insights
-     *
-     * @throws \Exception When statistics retrieval fails
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Get overview statistics with AI-enhanced insights and comprehensive error handling. *   * Retrieves comprehensive overview statistics including license counts, customer metrics, * revenue data, growth rates, and AI-powered insights. All data is validated and * includes proper error handling for database operations. *   * @param int $days Number of days to analyze *   * @return array Overview statistics with AI insights *   * @throws \Exception When statistics retrieval fails */
+    /**   * @return array<string, mixed> */
     private function getOverviewStats(int $days): array
     {
         try {
@@ -131,12 +91,8 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * Get trend analysis with predictive elements.
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Get trend analysis with predictive elements. */
+    /**   * @return array<string, mixed> */
     private function getTrendAnalysis(int $days): array
     {
         $startDate = now()->subDays($days);
@@ -176,12 +132,8 @@ class AILicenseAnalyticsService
             'seasonality' => $this->detectSeasonality($typedLicenseTrends),
         ];
     }
-    /**
-     * Get predictive insights using machine learning algorithms.
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Get predictive insights using machine learning algorithms. */
+    /**   * @return array<string, mixed> */
     private function getPredictiveInsights(int $days): array
     {
         $insights = [];
@@ -197,12 +149,8 @@ class AILicenseAnalyticsService
         $insights['market_demand'] = $this->predictMarketDemand($days);
         return $insights;
     }
-    /**
-     * Get customer insights with behavioral analysis.
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Get customer insights with behavioral analysis. */
+    /**   * @return array<string, mixed> */
     private function getCustomerInsights(int $days): array
     {
         $startDate = now()->subDays($days);
@@ -222,12 +170,8 @@ class AILicenseAnalyticsService
             'recommendations' => $this->generateCustomerRecommendations($days),
         ];
     }
-    /**
-     * Get product performance with AI analysis.
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Get product performance with AI analysis. */
+    /**   * @return array<string, mixed> */
     private function getProductPerformance(int $days): array
     {
         $startDate = now()->subDays($days);
@@ -259,12 +203,8 @@ class AILicenseAnalyticsService
         });
         return ['product_performance' => $performance];
     }
-    /**
-     * Get geographic distribution with heatmap data.
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Get geographic distribution with heatmap data. */
+    /**   * @return array<string, mixed> */
     private function getGeographicDistribution(int $days): array
     {
         $startDate = now()->subDays($days);
@@ -287,12 +227,8 @@ class AILicenseAnalyticsService
             'growth_opportunities' => $this->identifyGrowthOpportunities($days),
         ];
     }
-    /**
-     * Detect anomalies in license patterns.
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Detect anomalies in license patterns. */
+    /**   * @return array<string, mixed> */
     private function detectAnomalies(int $days): array
     {
         $startDate = now()->subDays($days);
@@ -314,12 +250,8 @@ class AILicenseAnalyticsService
         }
         return $anomalies;
     }
-    /**
-     * Predict license expirations with confidence scores.
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Predict license expirations with confidence scores. */
+    /**   * @return array<string, mixed> */
     private function predictLicenseExpirations(): array
     {
         $expiringSoon = License::where('license_expires_at', '<=', now()->addDays(30))
@@ -346,12 +278,8 @@ class AILicenseAnalyticsService
         });
         return ['predictions' => $predictions];
     }
-    /**
-     * Forecast revenue using time series analysis.
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Forecast revenue using time series analysis. */
+    /**   * @return array<string, mixed> */
     private function forecastRevenue(int $days): array
     {
         $startDate = now()->subDays($days);
@@ -365,12 +293,8 @@ class AILicenseAnalyticsService
             'trend' => $this->analyzeRevenueTrend($historicalRevenue),
         ];
     }
-    /**
-     * Predict customer churn using behavioral patterns.
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Predict customer churn using behavioral patterns. */
+    /**   * @return array<string, mixed> */
     private function predictCustomerChurn(): array
     {
         $customers = User::where('role', 'customer')->with(['licenses'])->get();
@@ -396,9 +320,7 @@ class AILicenseAnalyticsService
         });
         return ['churn_predictions' => array_slice($churnPredictions, 0, 20)]; // Top 20 at risk
     }
-    /**
-     * Calculate renewal probability based on customer behavior.
-     */
+    /**   * Calculate renewal probability based on customer behavior. */
     private function calculateRenewalProbability(License $license): float
     {
         $factors = [];
@@ -429,13 +351,8 @@ class AILicenseAnalyticsService
         }
         return min(1.0, max(0.0, $probability));
     }
-    /**
-     * Apply AI smoothing to trend data.
-     */
-    /**
-     * @param array<string, mixed> $data
-     * @return array<string, mixed>
-     */
+    /**   * Apply AI smoothing to trend data. */
+    /**   * @param array<string, mixed> $data * @return array<string, mixed> */
     private function applyAISmoothing(array $data): array
     {
         if (count($data) < 3) {
@@ -459,13 +376,8 @@ class AILicenseAnalyticsService
         }
         return $smoothed;
     }
-    /**
-     * Predict future trends using linear regression.
-     */
-    /**
-     * @param array<string, mixed> $data
-     * @return array<string, mixed>
-     */
+    /**   * Predict future trends using linear regression. */
+    /**   * @param array<string, mixed> $data * @return array<string, mixed> */
     private function predictFutureTrends(array $data, int $days): array
     {
         if (count($data) < 2) {
@@ -487,8 +399,7 @@ class AILicenseAnalyticsService
             $sumXY += (float)$x * $yFloat;
             $sumXX += (float)$x * (float)$x;
         }
-        $denominator = ($n * $sumXX - $sumX * $sumX);
-        if ($denominator == 0) {
+        $denominator = ($n * $sumXX - $sumX * $sumX); if ($denominator == 0) {
             $slope = 0;
             $intercept = $sumY / $n;
         } else {
@@ -506,18 +417,14 @@ class AILicenseAnalyticsService
         }
         return $predictions;
     }
-    /**
-     * Calculate health score for the business.
-     */
-    /**
-     * @param array<string, mixed> $stats
-     */
+    /**   * Calculate health score for the business. */
+    /**   * @param array<string, mixed> $stats */
     private function calculateHealthScore(array $stats): float
     {
         $growthRate = is_numeric($stats['growth_rate'] ?? 0) ? (float)($stats['growth_rate'] ?? 0) : 0.0;
         $churnRate = is_numeric($stats['churn_rate'] ?? 0) ? (float)($stats['churn_rate'] ?? 0) : 0.0;
         $activeLicenses = is_numeric($stats['active_licenses'] ?? 0) ? (float)($stats['active_licenses'] ?? 0) : 0.0;
-        
+
         $factors = [
             'growth_rate' => min(1.0, max(0.0, $growthRate / 100)),
             'churn_rate' => max(0.0, 1.0 - ($churnRate / 100)),
@@ -536,13 +443,8 @@ class AILicenseAnalyticsService
         }
         return round($score * 100, 1);
     }
-    /**
-     * Generate intelligent recommendations.
-     */
-    /**
-     * @param array<string, mixed> $stats
-     * @return array<string, mixed>
-     */
+    /**   * Generate intelligent recommendations. */
+    /**   * @param array<string, mixed> $stats * @return array<string, mixed> */
     private function generateRecommendations(array $stats): array
     {
         $recommendations = [];
@@ -575,25 +477,8 @@ class AILicenseAnalyticsService
         }
         return ['recommendations' => $recommendations];
     }
-    /**
-     * Log analytics event for tracking with enhanced security and error handling.
-     *
-     * Logs analytics events for system tracking and monitoring. Includes
-     * comprehensive error handling and input validation to ensure reliable
-     * event logging for analytics purposes.
-     *
-     * @param  string  $eventType  Type of event to log
-     * @param  array  $eventData  Additional event data
-     *
-     * @throws InvalidArgumentException When event type is invalid
-     * @throws \Exception When event logging fails
-     *
-     * @example
-     * $service->logAnalyticsEvent('dashboard_viewed', ['user_id' => 123]);
-     */
-    /**
-     * @param array<string, mixed> $eventData
-     */
+    /**   * Log analytics event for tracking with enhanced security and error handling. *   * Logs analytics events for system tracking and monitoring. Includes * comprehensive error handling and input validation to ensure reliable * event logging for analytics purposes. *   * @param string $eventType Type of event to log * @param array $eventData Additional event data *   * @throws InvalidArgumentException When event type is invalid * @throws \Exception When event logging fails *   * @example * $service->logAnalyticsEvent('dashboard_viewed', ['user_id' => 123]); */
+    /**   * @param array<string, mixed> $eventData */
     public function logAnalyticsEvent(string $eventType, array $eventData = []): void
     {
         try {
@@ -620,25 +505,8 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * Get real-time analytics updates with enhanced security and error handling.
-     *
-     * Retrieves real-time analytics data including current active licenses,
-     * daily license creation counts, revenue data, API call metrics, and
-     * system health information. All data is cached for performance and
-     * includes comprehensive error handling.
-     *
-     * @return array Real-time analytics data
-     *
-     * @throws \Exception When real-time data retrieval fails
-     *
-     * @example
-     * $realtimeData = $service->getRealTimeUpdates();
-     * $activeLicenses = $realtimeData['active_licenses_now'];
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Get real-time analytics updates with enhanced security and error handling. *   * Retrieves real-time analytics data including current active licenses, * daily license creation counts, revenue data, API call metrics, and * system health information. All data is cached for performance and * includes comprehensive error handling. *   * @return array Real-time analytics data *   * @throws \Exception When real-time data retrieval fails *   * @example * $realtimeData = $service->getRealTimeUpdates(); * $activeLicenses = $realtimeData['active_licenses_now']; */
+    /**   * @return array<string, mixed> */
     public function getRealTimeUpdates(): array
     {
         try {
@@ -669,29 +537,14 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * Validate days parameter for analytics queries.
-     *
-     * Ensures the days parameter is within acceptable range for analytics queries
-     * to prevent performance issues and invalid data retrieval.
-     *
-     * @param  int  $days  Number of days to validate
-     *
-     * @throws InvalidArgumentException When days parameter is invalid
-     */
+    /**   * Validate days parameter for analytics queries. *   * Ensures the days parameter is within acceptable range for analytics queries * to prevent performance issues and invalid data retrieval. *   * @param int $days Number of days to validate *   * @throws InvalidArgumentException When days parameter is invalid */
     private function validateDaysParameter(int $days): void
     {
         if ($days < 1 || $days > 365) {
             throw new InvalidArgumentException('Days parameter must be between 1 and 365');
         }
     }
-    /**
-     * Get total licenses count with error handling.
-     *
-     * @return int Total number of licenses
-     *
-     * @throws \Exception When database query fails
-     */
+    /**   * Get total licenses count with error handling. *   * @return int Total number of licenses *   * @throws \Exception When database query fails */
     private function getTotalLicenses(): int
     {
         try {
@@ -704,13 +557,7 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * Get active licenses count with error handling.
-     *
-     * @return int Number of active licenses
-     *
-     * @throws \Exception When database query fails
-     */
+    /**   * Get active licenses count with error handling. *   * @return int Number of active licenses *   * @throws \Exception When database query fails */
     private function getActiveLicenses(): int
     {
         try {
@@ -723,13 +570,7 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * Get expired licenses count with error handling.
-     *
-     * @return int Number of expired licenses
-     *
-     * @throws \Exception When database query fails
-     */
+    /**   * Get expired licenses count with error handling. *   * @return int Number of expired licenses *   * @throws \Exception When database query fails */
     private function getExpiredLicenses(): int
     {
         try {
@@ -742,13 +583,7 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * Get suspended licenses count with error handling.
-     *
-     * @return int Number of suspended licenses
-     *
-     * @throws \Exception When database query fails
-     */
+    /**   * Get suspended licenses count with error handling. *   * @return int Number of suspended licenses *   * @throws \Exception When database query fails */
     private function getSuspendedLicenses(): int
     {
         try {
@@ -761,13 +596,7 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * Get total customers count with error handling.
-     *
-     * @return int Number of customers
-     *
-     * @throws \Exception When database query fails
-     */
+    /**   * Get total customers count with error handling. *   * @return int Number of customers *   * @throws \Exception When database query fails */
     private function getTotalCustomers(): int
     {
         try {
@@ -780,13 +609,7 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * Get total products count with error handling.
-     *
-     * @return int Number of products
-     *
-     * @throws \Exception When database query fails
-     */
+    /**   * Get total products count with error handling. *   * @return int Number of products *   * @throws \Exception When database query fails */
     private function getTotalProducts(): int
     {
         try {
@@ -799,35 +622,20 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * Calculate revenue for the specified period with enhanced error handling.
-     *
-     * @param  Carbon  $startDate  Start date for revenue calculation
-     *
-     * @return float Calculated revenue amount
-     */
+    /**   * Calculate revenue for the specified period with enhanced error handling. *   * @param Carbon $startDate Start date for revenue calculation *   * @return float Calculated revenue amount */
     private function calculateRevenue(Carbon $startDate): float
     {
         // Implementation would calculate revenue from invoices/payments
         // This is a placeholder implementation
         return 0.0;
     }
-    /**
-     * Calculate growth rate with enhanced error handling and validation.
-     *
-     * @param  int  $days  Number of days to analyze
-     *
-     * @return float Growth rate percentage
-     *
-     * @throws \Exception When growth rate calculation fails
-     */
+    /**   * Calculate growth rate with enhanced error handling and validation. *   * @param int $days Number of days to analyze *   * @return float Growth rate percentage *   * @throws \Exception When growth rate calculation fails */
     private function calculateGrowthRate(int $days): float
     {
         try {
             $currentPeriod = License::where('created_at', '>=', now()->subDays($days))->count();
             $previousPeriod = License::whereBetween('created_at', [
-                now()->subDays($days * 2),
-                now()->subDays($days),
+                now()->subDays($days * 2), now()->subDays($days),
             ])->count();
             if ($previousPeriod === 0) {
                 return $currentPeriod > 0 ? 100.0 : 0.0;
@@ -842,15 +650,7 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * Calculate churn rate with enhanced error handling and validation.
-     *
-     * @param  int  $days  Number of days to analyze
-     *
-     * @return float Churn rate percentage
-     *
-     * @throws \Exception When churn rate calculation fails
-     */
+    /**   * Calculate churn rate with enhanced error handling and validation. *   * @param int $days Number of days to analyze *   * @return float Churn rate percentage *   * @throws \Exception When churn rate calculation fails */
     private function calculateChurnRate(int $days): float
     {
         try {
@@ -868,29 +668,15 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * Calculate customer lifetime value with enhanced error handling.
-     *
-     * @return float Customer lifetime value
-     */
+    /**   * Calculate customer lifetime value with enhanced error handling. *   * @return float Customer lifetime value */
     private function calculateCustomerLifetimeValue(): float
     {
         // Implementation would calculate CLV based on historical data
         // This is a placeholder implementation
         return 0.0;
     }
-    /**
-     * Assess risk level based on business metrics with enhanced error handling.
-     *
-     * @param  array  $stats  Business statistics
-     *
-     * @return string Risk level (low, medium, high)
-     *
-     * @throws \Exception When risk assessment fails
-     */
-    /**
-     * @param array<string, mixed> $stats
-     */
+    /**   * Assess risk level based on business metrics with enhanced error handling. *   * @param array $stats Business statistics *   * @return string Risk level (low, medium, high) *   * @throws \Exception When risk assessment fails */
+    /**   * @param array<string, mixed> $stats */
     private function assessRiskLevel(array $stats): string
     {
         try {
@@ -911,17 +697,12 @@ class AILicenseAnalyticsService
             throw $e;
         }
     }
-    /**
-     * @param array<string, mixed> $trends
-     */
+    /**   * @param array<string, mixed> $trends */
     private function analyzeTrendDirection(array $trends): string
     {
         return 'stable';
     }
-    /**
-     * @param array<string, mixed> $data
-     * @return array<string, mixed>
-     */
+    /**   * @param array<string, mixed> $data * @return array<string, mixed> */
     private function detectSeasonality(array $data): array
     {
         return [];
@@ -934,27 +715,13 @@ class AILicenseAnalyticsService
     {
         return 0;
     }
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * @return array<string, mixed> */
     private function getSystemHealthMetrics(): array
     {
         return [];
     }
-    /**
-     * Sanitize event data to prevent XSS and injection attacks.
-     *
-     * Applies security sanitization to event data to prevent
-     * XSS attacks and other security vulnerabilities.
-     *
-     * @param  array  $eventData  The event data to sanitize
-     *
-     * @return array The sanitized event data
-     */
-    /**
-     * @param array<mixed, mixed> $eventData
-     * @return array<string, mixed>
-     */
+    /**   * Sanitize event data to prevent XSS and injection attacks. *   * Applies security sanitization to event data to prevent * XSS attacks and other security vulnerabilities. *   * @param array $eventData The event data to sanitize *   * @return array The sanitized event data */
+    /**   * @param array<mixed, mixed> $eventData * @return array<string, mixed> */
     private function sanitizeEventData(array $eventData): array
     {
         $sanitized = [];
@@ -971,10 +738,7 @@ class AILicenseAnalyticsService
         return $sanitized;
     }
 
-    /**
-     * Get revenue trends for the specified period.
-     * @return array<string, mixed>
-     */
+    /**   * Get revenue trends for the specified period. * @return array<string, mixed> */
     private function getRevenueTrends(Carbon $startDate): array
     {
         $revenueData = DB::table('invoices')
@@ -984,20 +748,17 @@ class AILicenseAnalyticsService
             ->groupBy('date')
             ->orderBy('date')
             ->get();
-        
+
         $revenueTrends = [];
         foreach ($revenueData as $row) {
             $dateKey = is_string($row->date) ? $row->date : '';
             $revenueTrends[$dateKey] = $row->revenue;
         }
-        
+
         return ['revenue_trends' => $revenueTrends];
     }
 
-    /**
-     * Predict product performance using AI algorithms.
-     * @return array<string, mixed>
-     */
+    /**   * Predict product performance using AI algorithms. * @return array<string, mixed> */
     private function predictProductPerformance(int $days): array
     {
         $products = Product::withCount('licenses')
@@ -1014,18 +775,14 @@ class AILicenseAnalyticsService
                 'product_id' => $product->id,
                 'name' => $product->name,
                 'current_sales' => $product->licenses_count,
-                'predicted_sales' => (int)($product->licenses_count * 1.1),
-                'confidence' => 0.85,
+                'predicted_sales' => (int)($product->licenses_count * 1.1), 'confidence' => 0.85,
             ];
         }
 
         return ['product_performance' => $predictions];
     }
 
-    /**
-     * Predict market demand using AI algorithms.
-     * @return array<string, mixed>
-     */
+    /**   * Predict market demand using AI algorithms. * @return array<string, mixed> */
     private function predictMarketDemand(int $days): array
     {
         return ['market_demand' => [
@@ -1036,10 +793,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Perform customer segmentation analysis.
-     * @return array<string, mixed>
-     */
+    /**   * Perform customer segmentation analysis. * @return array<string, mixed> */
     private function performCustomerSegmentation(int $days): array
     {
         return ['customer_segments' => [
@@ -1050,10 +804,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Analyze customer behavior patterns.
-     * @return array<string, mixed>
-     */
+    /**   * Analyze customer behavior patterns. * @return array<string, mixed> */
     private function analyzeCustomerBehavior(int $days): array
     {
         return ['behavior_analysis' => [
@@ -1064,10 +815,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Analyze customer lifetime value.
-     * @return array<string, mixed>
-     */
+    /**   * Analyze customer lifetime value. * @return array<string, mixed> */
     private function analyzeCustomerLifetimeValue(int $days): array
     {
         return ['lifetime_value' => [
@@ -1077,10 +825,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Predict customer satisfaction scores.
-     * @return array<string, mixed>
-     */
+    /**   * Predict customer satisfaction scores. * @return array<string, mixed> */
     private function predictCustomerSatisfaction(int $days): array
     {
         return ['satisfaction_prediction' => [
@@ -1091,10 +836,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Generate customer recommendations.
-     * @return array<string, mixed>
-     */
+    /**   * Generate customer recommendations. * @return array<string, mixed> */
     private function generateCustomerRecommendations(int $days): array
     {
         return ['customer_recommendations' => [
@@ -1105,9 +847,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Calculate product revenue metrics.
-     */
+    /**   * Calculate product revenue metrics. */
     private function calculateProductRevenue(int $productId): float
     {
         return (float) DB::table('invoices')
@@ -1116,9 +856,7 @@ class AILicenseAnalyticsService
             ->sum('amount');
     }
 
-    /**
-     * Calculate product growth rate.
-     */
+    /**   * Calculate product growth rate. */
     private function calculateProductGrowthRate(int $productId): float
     {
         $current = DB::table('licenses')
@@ -1134,9 +872,7 @@ class AILicenseAnalyticsService
         return $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
     }
 
-    /**
-     * Calculate market share percentage.
-     */
+    /**   * Calculate market share percentage. */
     private function calculateMarketShare(int $productId): float
     {
         $productSales = DB::table('licenses')
@@ -1148,26 +884,19 @@ class AILicenseAnalyticsService
         return $totalSales > 0 ? ($productSales / $totalSales) * 100 : 0;
     }
 
-    /**
-     * Calculate product satisfaction score.
-     */
+    /**   * Calculate product satisfaction score. */
     private function calculateProductSatisfaction(int $productId): float
     {
         return 4.2; // Mock data
     }
 
-    /**
-     * Calculate AI-powered product score.
-     */
+    /**   * Calculate AI-powered product score. */
     private function calculateProductAIScore(int $productId): float
     {
         return 8.5; // Mock data
     }
 
-    /**
-     * Generate product recommendations.
-     * @return array<string, mixed>
-     */
+    /**   * Generate product recommendations. * @return array<string, mixed> */
     private function generateProductRecommendations(int $productId): array
     {
         return [
@@ -1178,10 +907,7 @@ class AILicenseAnalyticsService
         ];
     }
 
-    /**
-     * Get revenue by country.
-     * @return array<string, mixed>
-     */
+    /**   * Get revenue by country. * @return array<string, mixed> */
     private function getRevenueByCountry(int $days): array
     {
         return ['revenue_by_country' => [
@@ -1192,10 +918,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Calculate market penetration.
-     * @return array<string, mixed>
-     */
+    /**   * Calculate market penetration. * @return array<string, mixed> */
     private function calculateMarketPenetration(int $days): array
     {
         return ['market_penetration' => [
@@ -1205,10 +928,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Identify growth opportunities.
-     * @return array<string, mixed>
-     */
+    /**   * Identify growth opportunities. * @return array<string, mixed> */
     private function identifyGrowthOpportunities(int $days): array
     {
         return ['growth_opportunities' => [
@@ -1219,10 +939,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Detect license creation anomalies.
-     * @return array<string, mixed>
-     */
+    /**   * Detect license creation anomalies. * @return array<string, mixed> */
     private function detectLicenseCreationAnomalies(int $days): array
     {
         return ['license_anomalies' => [
@@ -1232,10 +949,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Detect suspicious activity.
-     * @return array<string, mixed>
-     */
+    /**   * Detect suspicious activity. * @return array<string, mixed> */
     private function detectSuspiciousActivity(int $days): array
     {
         return ['suspicious_activity' => [
@@ -1245,10 +959,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Detect revenue anomalies.
-     * @return array<string, mixed>
-     */
+    /**   * Detect revenue anomalies. * @return array<string, mixed> */
     private function detectRevenueAnomalies(int $days): array
     {
         return ['revenue_anomalies' => [
@@ -1258,28 +969,19 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Calculate confidence score for predictions.
-     * @param array<string, mixed> $data
-     */
+    /**   * Calculate confidence score for predictions. * @param array<string, mixed> $data */
     private function calculateConfidenceScore(array $data): float
     {
         return 0.85; // Mock data
     }
 
-    /**
-     * Get recommended action based on analysis.
-     * @param array<string, mixed> $data
-     */
+    /**   * Get recommended action based on analysis. * @param array<string, mixed> $data */
     private function getRecommendedAction(array $data): string
     {
         return 'Continue current strategy'; // Mock data
     }
 
-    /**
-     * Get historical revenue data.
-     * @return array<string, mixed>
-     */
+    /**   * Get historical revenue data. * @return array<string, mixed> */
     private function getHistoricalRevenue(int $days): array
     {
         return ['historical_revenue' => [
@@ -1289,11 +991,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Apply time series forecasting.
-     * @param array<string, mixed> $data
-     * @return array<string, mixed>
-     */
+    /**   * Apply time series forecasting. * @param array<string, mixed> $data * @return array<string, mixed> */
     private function applyTimeSeriesForecasting(array $data): array
     {
         return ['forecast' => [
@@ -1303,53 +1001,37 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Calculate confidence interval.
-     * @param array<string, mixed> $data
-     * @return array<string, mixed>
-     */
+    /**   * Calculate confidence interval. * @param array<string, mixed> $data * @return array<string, mixed> */
     private function calculateConfidenceInterval(array $data): array
     {
         return ['confidence_interval' => [0.8, 0.95]];
     }
 
-    /**
-     * Analyze revenue trend.
-     * @param array<string, mixed> $data
-     */
+    /**   * Analyze revenue trend. * @param array<string, mixed> $data */
     private function analyzeRevenueTrend(array $data): string
     {
         return 'increasing';
     }
 
-    /**
-     * Calculate churn score for customer.
-     */
+    /**   * Calculate churn score for customer. */
     private function calculateChurnScore(int $userId): float
     {
         return 0.25; // Mock data
     }
 
-    /**
-     * Get risk level for customer.
-     */
+    /**   * Get risk level for customer. */
     private function getRiskLevel(int $userId): string
     {
         return 'low';
     }
 
-    /**
-     * Get last activity for customer.
-     */
+    /**   * Get last activity for customer. */
     private function getLastActivity(int $userId): string
     {
         return now()->subDays(5)->toISOString() ?? '';
     }
 
-    /**
-     * Get churn prevention actions.
-     * @return array<string, mixed>
-     */
+    /**   * Get churn prevention actions. * @return array<string, mixed> */
     private function getChurnPreventionActions(int $userId): array
     {
         return ['churn_prevention_actions' => [
@@ -1359,10 +1041,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Get customer history.
-     * @return array<string, mixed>
-     */
+    /**   * Get customer history. * @return array<string, mixed> */
     private function getCustomerHistory(int $userId): array
     {
         return ['customer_history' => [
@@ -1372,18 +1051,13 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Get license usage factor.
-     */
+    /**   * Get license usage factor. */
     private function getLicenseUsageFactor(int $licenseId): float
     {
         return 0.75; // Mock data
     }
 
-    /**
-     * Get payment history.
-     * @return array<string, mixed>
-     */
+    /**   * Get payment history. * @return array<string, mixed> */
     private function getPaymentHistory(int $userId): array
     {
         return ['payment_history' => [
@@ -1393,9 +1067,7 @@ class AILicenseAnalyticsService
         ]];
     }
 
-    /**
-     * Get activity factor.
-     */
+    /**   * Get activity factor. */
     private function getActivityFactor(int $userId): float
     {
         return 0.8; // Mock data

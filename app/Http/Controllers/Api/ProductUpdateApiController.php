@@ -19,67 +19,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Product Update API Controller.
+ * Product Update API Controller. *
+ * This controller handles product update-related API endpoints including update * checking, version history, and update file downloads with license verification. * It provides comprehensive update management functionality with security measures. *
+ * Features: * - Update checking with version comparison * - Latest version information retrieval * - Secure update file downloads * - Changelog and version history * - License verification for all operations * - Domain verification and authorization * - Comprehensive error handling and logging *
  *
- * This controller handles product update-related API endpoints including update
- * checking, version history, and update file downloads with license verification.
- * It provides comprehensive update management functionality with security measures.
- *
- * Features:
- * - Update checking with version comparison
- * - Latest version information retrieval
- * - Secure update file downloads
- * - Changelog and version history
- * - License verification for all operations
- * - Domain verification and authorization
- * - Comprehensive error handling and logging
- *
- *
- * @example
- * // Check for updates
- * POST /api/product-updates/check
- * {
- *     "product_id": 1,
- *     "current_version": "1.0.0",
- *     "license_key": "ABC123-DEF456-GHI789",
- *     "domain": "example.com"
- * }
- */
+ * @example * // Check for updates * POST /api/product-updates/check * { * "product_id": 1, * "current_version": "1.0.0", * "license_key": "ABC123-DEF456-GHI789", * "domain": "example.com" * } */
 class ProductUpdateApiController extends Controller
 {
-    /**
-     * Check for available updates for a product with enhanced security.
-     *
-     * Verifies the license and checks for available updates for the specified product.
-     * Returns a list of all updates newer than the current version with comprehensive
-     * security measures and proper error handling.
-     *
-     * @param  ProductUpdateCheckRequest  $request
-     *         The validated request containing product_id, current_version, license_key, and domain
-     *
-     * @return JsonResponse JSON response with available updates or error
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request body:
-     * {
-     *     "product_id": 1,
-     *     "current_version": "1.0.0",
-     *     "license_key": "ABC123-DEF456-GHI789",
-     *     "domain": "example.com"
-     * }
-     *
-     * // Success response:
-     * {
-     *     "success": true,
-     *     "product_id": 1,
-     *     "current_version": "1.0.0",
-     *     "latest_version": "1.2.0",
-     *     "updates_available": 2,
-     *     "updates": [...]
-     * }
-     */
+    /**   * Check for available updates for a product with enhanced security. *   * Verifies the license and checks for available updates for the specified product. * Returns a list of all updates newer than the current version with comprehensive * security measures and proper error handling. *   * @param ProductUpdateCheckRequest $request * The validated request containing product_id, current_version, license_key, and domain *   * @return JsonResponse JSON response with available updates or error *   * @throws \Exception When database operations fail *   * @example * // Request body: * { * "product_id": 1, * "current_version": "1.0.0", * "license_key": "ABC123-DEF456-GHI789", * "domain": "example.com" * } *   * // Success response: * { * "success": true, * "product_id": 1, * "current_version": "1.0.0", * "latest_version": "1.2.0", * "updates_available": 2, * "updates": [...] * } */
     public function checkUpdates(ProductUpdateCheckRequest $request): JsonResponse
     {
         try {
@@ -155,38 +102,7 @@ class ProductUpdateApiController extends Controller
             ], 500);
         }
     }
-    /**
-     * Get latest version information with enhanced security.
-     *
-     * Retrieves information about the latest available version for a product
-     * after verifying the license and ensuring access permissions with
-     * comprehensive security measures and proper error handling.
-     *
-     * @param  ProductUpdateLatestVersionRequest  $request
-     *         The validated request containing product_id, license_key, and domain
-     *
-     * @return JsonResponse JSON response with latest version information or error
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request body:
-     * {
-     *     "product_id": 1,
-     *     "license_key": "ABC123-DEF456-GHI789",
-     *     "domain": "example.com"
-     * }
-     *
-     * // Success response:
-     * {
-     *     "success": true,
-     *     "product_id": 1,
-     *     "latest_version": "1.2.0",
-     *     "title": "New Features Update",
-     *     "description": "Added new features...",
-     *     "download_url": "..."
-     * }
-     */
+    /**   * Get latest version information with enhanced security. *   * Retrieves information about the latest available version for a product * after verifying the license and ensuring access permissions with * comprehensive security measures and proper error handling. *   * @param ProductUpdateLatestVersionRequest $request * The validated request containing product_id, license_key, and domain *   * @return JsonResponse JSON response with latest version information or error *   * @throws \Exception When database operations fail *   * @example * // Request body: * { * "product_id": 1, * "license_key": "ABC123-DEF456-GHI789", * "domain": "example.com" * } *   * // Success response: * { * "success": true, * "product_id": 1, * "latest_version": "1.2.0", * "title": "New Features Update", * "description": "Added new features...", * "download_url": "..." * } */
     public function getLatestVersion(ProductUpdateLatestVersionRequest $request): JsonResponse
     {
         try {
@@ -260,30 +176,7 @@ class ProductUpdateApiController extends Controller
             ], 500);
         }
     }
-    /**
-     * Download update file with enhanced security.
-     *
-     * Downloads the update file for a specific version after verifying
-     * the license and ensuring the update exists and is available with
-     * comprehensive security measures and proper error handling.
-     *
-     * @param  ProductUpdateDownloadRequest  $request  The validated request containing license_key and domain
-     * @param  int  $productId  The product ID to download update for
-     * @param  string  $version  The version to download
-     *
-     * @return Response File download or JSON error response
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // URL: /api/product-updates/download/{productId}/{version}
-     * // Request body:
-     * {
-     *     "license_key": "ABC123-DEF456-GHI789",
-     *     "domain": "example.com"
-     * }
-     * // Returns: File download or JSON error response
-     */
+    /**   * Download update file with enhanced security. *   * Downloads the update file for a specific version after verifying * the license and ensuring the update exists and is available with * comprehensive security measures and proper error handling. *   * @param ProductUpdateDownloadRequest $request The validated request containing license_key and domain * @param int $productId The product ID to download update for * @param string $version The version to download *   * @return Response File download or JSON error response *   * @throws \Exception When database operations fail *   * @example * // URL: /api/product-updates/download/{productId}/{version} * // Request body: * { * "license_key": "ABC123-DEF456-GHI789", * "domain": "example.com" * } * // Returns: File download or JSON error response */
     public function downloadUpdate(ProductUpdateDownloadRequest $request, int $productId, string $version): Response
     {
         try {
@@ -337,43 +230,7 @@ class ProductUpdateApiController extends Controller
             return new Response('Failed to download update', 500);
         }
     }
-    /**
-     * Get update changelog with enhanced security.
-     *
-     * Retrieves the complete changelog for a product, including all
-     * available updates with version information and release details with
-     * comprehensive security measures and proper error handling.
-     *
-     * @param  ProductUpdateChangelogRequest  $request
-     *         The validated request containing product_id, license_key, and domain
-     *
-     * @return JsonResponse JSON response with changelog information or error
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request body:
-     * {
-     *     "product_id": 1,
-     *     "license_key": "ABC123-DEF456-GHI789",
-     *     "domain": "example.com"
-     * }
-     *
-     * // Success response:
-     * {
-     *     "success": true,
-     *     "product_id": 1,
-     *     "changelog": [
-     *         {
-     *             "version": "1.2.0",
-     *             "title": "New Features Update",
-     *             "changelog": "Added new features...",
-     *             "is_major": true,
-     *             "released_at": "2024-01-01T00:00:00.000000Z"
-     *         }
-     *     ]
-     * }
-     */
+    /**   * Get update changelog with enhanced security. *   * Retrieves the complete changelog for a product, including all * available updates with version information and release details with * comprehensive security measures and proper error handling. *   * @param ProductUpdateChangelogRequest $request * The validated request containing product_id, license_key, and domain *   * @return JsonResponse JSON response with changelog information or error *   * @throws \Exception When database operations fail *   * @example * // Request body: * { * "product_id": 1, * "license_key": "ABC123-DEF456-GHI789", * "domain": "example.com" * } *   * // Success response: * { * "success": true, * "product_id": 1, * "changelog": [ * { * "version": "1.2.0", * "title": "New Features Update", * "changelog": "Added new features...", * "is_major": true, * "released_at": "2024-01-01T00:00:00.000000Z" * } * ] * } */
     public function getChangelog(ProductUpdateChangelogRequest $request): JsonResponse
     {
         try {

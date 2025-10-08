@@ -6,22 +6,13 @@ use App\Models\WebhookLog;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\WebhookLog>
- */
+     * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\WebhookLog> */
 class WebhookLogFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var class-string<WebhookLog>
-     */
+    /**   * The name of the factory's corresponding model. *   * @var class-string<WebhookLog> */
     protected $model = WebhookLog::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Define the model's default state. *   * @return array<string, mixed> */
     public function definition(): array
     {
         return [

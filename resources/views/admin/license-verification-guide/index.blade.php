@@ -391,10 +391,7 @@ class LicenseProtection
                             </button>
                         </div>
                         <pre id="wordpress-code" class="code-block-content"><code>&lt;?php
-/*
-Plugin Name: License Verification
-Description: Verifies license for premium features
-*/
+/* Plugin Name: License Verification Description: Verifies license for premium features */
 
 // Prevent direct access
 if (!defined('ABSPATH')) {

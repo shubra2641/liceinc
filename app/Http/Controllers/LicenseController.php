@@ -11,49 +11,15 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 /**
- * License Controller with enhanced security and comprehensive license management.
+ * License Controller with enhanced security and comprehensive license management. *
+ * This controller handles license management operations including creation, editing, * deletion, and viewing of licenses with comprehensive security measures, validation, * and access control to ensure proper license administration. *
+ * Features: * - Comprehensive license CRUD operations with security validation * - License key generation with uniqueness validation * - User and product association management * - License status and expiration management * - Domain limit configuration and validation * - Enhanced error handling and logging * - Input validation and sanitization *
  *
- * This controller handles license management operations including creation, editing,
- * deletion, and viewing of licenses with comprehensive security measures, validation,
- * and access control to ensure proper license administration.
- *
- * Features:
- * - Comprehensive license CRUD operations with security validation
- * - License key generation with uniqueness validation
- * - User and product association management
- * - License status and expiration management
- * - Domain limit configuration and validation
- * - Enhanced error handling and logging
- * - Input validation and sanitization
- *
- *
- * @example
- * // List all licenses
- * GET /admin/licenses
- *
- * // Create a new license
- * POST /admin/licenses
- */
+ * @example * // List all licenses * GET /admin/licenses *
+ * // Create a new license * POST /admin/licenses */
 class LicenseController extends Controller
 {
-    /**
-     * Display a listing of licenses with filtering and pagination.
-     *
-     * Shows all licenses with optional filtering by user or customer,
-     * includes proper pagination and relationship loading for optimal performance.
-     *
-     * @return \Illuminate\View\View The licenses index view
-     *
-     * @example
-     * // List all licenses
-     * GET /admin/licenses
-     *
-     * // Filter by user
-     * GET /admin/licenses?user=4
-     *
-     * // Filter by customer (backwards compatibility)
-     * GET /admin/licenses?customer=3
-     */
+    /**   * Display a listing of licenses with filtering and pagination. *   * Shows all licenses with optional filtering by user or customer, * includes proper pagination and relationship loading for optimal performance. *   * @return \Illuminate\View\View The licenses index view *   * @example * // List all licenses * GET /admin/licenses *   * // Filter by user * GET /admin/licenses?user=4 *   * // Filter by customer (backwards compatibility) * GET /admin/licenses?customer=3 */
     public function index()
     {
         try {
@@ -83,21 +49,7 @@ class LicenseController extends Controller
             return view('admin.licenses.index', ['licenses' => collect()]);
         }
     }
-    /**
-     * Show the form for creating a new license with security validation.
-     *
-     * Displays the license creation form with users and products data,
-     * includes proper validation and security measures.
-     *
-     * @return \Illuminate\View\View The license creation form view
-     *
-     * @example
-     * // Show create form
-     * GET /admin/licenses/create
-     *
-     * // Show create form with pre-selected user
-     * GET /admin/licenses/create?user_id=4
-     */
+    /**   * Show the form for creating a new license with security validation. *   * Displays the license creation form with users and products data, * includes proper validation and security measures. *   * @return \Illuminate\View\View The license creation form view *   * @example * // Show create form * GET /admin/licenses/create *   * // Show create form with pre-selected user * GET /admin/licenses/create?user_id=4 */
     public function create()
     {
         try {
@@ -122,31 +74,7 @@ class LicenseController extends Controller
             ]);
         }
     }
-    /**
-     * Store a newly created license with comprehensive security validation.
-     *
-     * Creates a new license with proper validation, sanitization, and security measures
-     * including automatic license key generation and proper data mapping.
-     *
-     * @param  LicenseRequest  $request  The HTTP request containing license data
-     *
-     * @return \Illuminate\Http\RedirectResponse Redirect to licenses index
-     *
-     * @throws \Exception When license creation fails
-     *
-     * @example
-     * // Create a new license
-     * POST /admin/licenses
-     * {
-     *     "user_id": 1,
-     *     "product_id": 2,
-     *     "license_type": "regular",
-     *     "status": "active",
-     *     "expires_at": "2024-12-31",
-     *     "max_domains": 1,
-     *     "notes": "License notes"
-     * }
-     */
+    /**   * Store a newly created license with comprehensive security validation. *   * Creates a new license with proper validation, sanitization, and security measures * including automatic license key generation and proper data mapping. *   * @param LicenseRequest $request The HTTP request containing license data *   * @return \Illuminate\Http\RedirectResponse Redirect to licenses index *   * @throws \Exception When license creation fails *   * @example * // Create a new license * POST /admin/licenses * { * "user_id": 1, * "product_id": 2, * "license_type": "regular", * "status": "active", * "expires_at": "2024-12-31", * "max_domains": 1, * "notes": "License notes" * } */
     public function store(LicenseRequest $request)
     {
         try {
@@ -210,26 +138,20 @@ class LicenseController extends Controller
                 ->withInput();
         }
     }
-    /**
-     * Display the specified resource.
-     */
+    /**   * Display the specified resource. */
     public function show(License $license): \Illuminate\View\View
     {
         $license->load(['user', 'product', 'logs']);
         return view('admin.licenses.show', ['license' => $license]);
     }
-    /**
-     * Show the form for editing the specified resource.
-     */
+    /**   * Show the form for editing the specified resource. */
     public function edit(License $license): \Illuminate\View\View
     {
         $users = \App\Models\User::all();
         $products = Product::all();
         return view('admin.licenses.edit', ['license' => $license, 'users' => $users, 'products' => $products]);
     }
-    /**
-     * Update the specified resource in storage.
-     */
+    /**   * Update the specified resource in storage. */
     public function update(LicenseRequest $request, License $license): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
@@ -265,25 +187,14 @@ class LicenseController extends Controller
         return redirect()->route('admin.licenses.index')
             ->with('success', trans('app.License updated successfully.'));
     }
-    /**
-     * Remove the specified resource from storage.
-     */
+    /**   * Remove the specified resource from storage. */
     public function destroy(License $license): \Illuminate\Http\RedirectResponse
     {
         $license->delete();
         return redirect()->route('admin.licenses.index')
             ->with('success', trans('app.License deleted successfully.'));
     }
-    /**
-     * Generate a unique license key with security validation.
-     *
-     * Creates a unique license key with proper format and validation
-     * to ensure uniqueness and security of license keys.
-     *
-     * @return string The generated unique license key
-     *
-     * @throws \Exception When license key generation fails
-     */
+    /**   * Generate a unique license key with security validation. *   * Creates a unique license key with proper format and validation * to ensure uniqueness and security of license keys. *   * @return string The generated unique license key *   * @throws \Exception When license key generation fails */
     private function generateLicenseKey(): string
     {
         try {

@@ -9,27 +9,11 @@ use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 
 /**
- * Envato Socialite Provider with enhanced security and error handling.
- *
- * This service provider extends Laravel Socialite to support Envato OAuth authentication.
- * It provides secure integration with Envato's OAuth API, including proper error handling,
- * input validation, and comprehensive logging for debugging and monitoring.
- */
+ * Envato Socialite Provider with enhanced security and error handling. *
+ * This service provider extends Laravel Socialite to support Envato OAuth authentication. * It provides secure integration with Envato's OAuth API, including proper error handling, * input validation, and comprehensive logging for debugging and monitoring. */
 class EnvatoSocialiteProvider extends ServiceProvider
 {
-    /**
-     * Register services with enhanced security validation.
-     *
-     * Registers the Envato Socialite provider with proper dependency injection
-     * and security validation. This method ensures that all required services
-     * are properly bound and validated before use.
-     *
-     * @throws \Exception When service registration fails
-     *
-     * @example
-     * // The provider is automatically registered by Laravel's service container
-     * // No manual registration required
-     */
+    /**   * Register services with enhanced security validation. *   * Registers the Envato Socialite provider with proper dependency injection * and security validation. This method ensures that all required services * are properly bound and validated before use. *   * @throws \Exception When service registration fails *   * @example * // The provider is automatically registered by Laravel's service container * // No manual registration required */
     public function register(): void
     {
         try {
@@ -45,19 +29,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             throw $e;
         }
     }
-    /**
-     * Bootstrap services with comprehensive error handling and security validation.
-     *
-     * Extends Laravel Socialite with Envato OAuth provider support. This method
-     * includes comprehensive error handling, input validation, and security measures
-     * to ensure safe OAuth integration with Envato's API.
-     *
-     * @throws \Exception When provider extension fails
-     *
-     * @example
-     * // Provider is automatically booted by Laravel
-     * // Usage: Socialite::driver('envato')->redirect()
-     */
+    /**   * Bootstrap services with comprehensive error handling and security validation. *   * Extends Laravel Socialite with Envato OAuth provider support. This method * includes comprehensive error handling, input validation, and security measures * to ensure safe OAuth integration with Envato's API. *   * @throws \Exception When provider extension fails *   * @example * // Provider is automatically booted by Laravel * // Usage: Socialite::driver('envato')->redirect() */
     public function boot(): void
     {
         try {
@@ -72,24 +44,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             throw $e;
         }
     }
-    /**
-     * Create and configure the Envato provider with enhanced security validation.
-     *
-     * Creates a new EnvatoProvider instance with validated settings from the
-     * EnvatoService. Includes comprehensive error handling and input validation
-     * to ensure secure OAuth configuration.
-     *
-     * @param  mixed  $app  The Laravel application instance
-     *
-     * @return EnvatoProvider The configured Envato provider
-     *
-     * @throws InvalidArgumentException When required settings are missing or invalid
-     * @throws \Exception When provider creation fails
-     *
-     * @example
-     * $provider = $this->createEnvatoProvider($app);
-     * $user = $provider->user();
-     */
+    /**   * Create and configure the Envato provider with enhanced security validation. *   * Creates a new EnvatoProvider instance with validated settings from the * EnvatoService. Includes comprehensive error handling and input validation * to ensure secure OAuth configuration. *   * @param mixed $app The Laravel application instance *   * @return EnvatoProvider The configured Envato provider *   * @throws InvalidArgumentException When required settings are missing or invalid * @throws \Exception When provider creation fails *   * @example * $provider = $this->createEnvatoProvider($app); * $user = $provider->user(); */
     private function createEnvatoProvider($app): EnvatoProvider
     {
         try {
@@ -121,16 +76,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             throw $e;
         }
     }
-    /**
-     * Get the Envato service instance with error handling.
-     *
-     * Retrieves the EnvatoService instance from the service container
-     * with proper error handling and validation.
-     *
-     * @return EnvatoService The Envato service instance
-     *
-     * @throws \Exception When service cannot be resolved
-     */
+    /**   * Get the Envato service instance with error handling. *   * Retrieves the EnvatoService instance from the service container * with proper error handling and validation. *   * @return EnvatoService The Envato service instance *   * @throws \Exception When service cannot be resolved */
     private function getEnvatoService(): EnvatoService
     {
         try {
@@ -144,18 +90,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             throw $e;
         }
     }
-    /**
-     * Get and validate Envato settings with comprehensive error handling.
-     *
-     * Retrieves settings from the EnvatoService and validates their structure
-     * and content to ensure they meet security requirements.
-     *
-     * @param  EnvatoService  $envatoService  The Envato service instance
-     *
-     * @return array<string, mixed> The validated settings array
-     *
-     * @throws \Exception When settings retrieval or validation fails
-     */
+    /**   * Get and validate Envato settings with comprehensive error handling. *   * Retrieves settings from the EnvatoService and validates their structure * and content to ensure they meet security requirements. *   * @param EnvatoService $envatoService The Envato service instance *   * @return array<string, mixed> The validated settings array *   * @throws \Exception When settings retrieval or validation fails */
     private function getValidatedSettings(EnvatoService $envatoService): array
     {
         try {
@@ -169,16 +104,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             throw $e;
         }
     }
-    /**
-     * Validate that all required settings are present and valid.
-     *
-     * Ensures that all required OAuth settings are present and meet
-     * security requirements for safe OAuth integration.
-     *
-     * @param  array<string, mixed>  $settings  The settings array to validate
-     *
-     * @throws InvalidArgumentException When required settings are missing or invalid
-     */
+    /**   * Validate that all required settings are present and valid. *   * Ensures that all required OAuth settings are present and meet * security requirements for safe OAuth integration. *   * @param  array<string, mixed>  $settings  The settings array to validate *   * @throws InvalidArgumentException When required settings are missing or invalid */
     private function validateRequiredSettings(array $settings): void
     {
         $requiredSettings = ['client_id', 'client_secret', 'redirect'];
@@ -197,16 +123,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             throw new InvalidArgumentException('Invalid redirect URL format');
         }
     }
-    /**
-     * Sanitize setting values to prevent XSS and injection attacks.
-     *
-     * Applies security sanitization to setting values to prevent
-     * XSS attacks and other security vulnerabilities.
-     *
-     * @param  string|null  $value  The value to sanitize
-     *
-     * @return string|null The sanitized value
-     */
+    /**   * Sanitize setting values to prevent XSS and injection attacks. *   * Applies security sanitization to setting values to prevent * XSS attacks and other security vulnerabilities. *   * @param  string|null  $value  The value to sanitize *   * @return string|null The sanitized value */
     private function sanitizeSetting(?string $value): ?string
     {
         if ($value === null) {

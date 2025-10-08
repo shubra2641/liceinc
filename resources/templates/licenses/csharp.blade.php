@@ -1,8 +1,5 @@
 /**
- * License Verification System
- * Product: {{product}}
- * Generated: {{date}}
- */
+ * License Verification System * Product: {{product}} * Generated: {{date}} */
 
 using System;
 using System.Net.Http;

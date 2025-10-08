@@ -8,21 +8,13 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TicketReply>
- */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TicketReply> */
 class TicketReplyFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var class-string<TicketReply> */
+    /**   * The name of the factory's corresponding model. *   * @var class-string<TicketReply> */
     protected $model = TicketReply::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Define the model's default state. *   * @return array<string, mixed> */
     public function definition(): array
     {
         return [
@@ -33,9 +25,7 @@ class TicketReplyFactory extends Factory
         ];
     }
 
-    /**
-     * Create an admin reply.
-     */
+    /**   * Create an admin reply. */
     public function adminReply(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -43,9 +33,7 @@ class TicketReplyFactory extends Factory
         ]);
     }
 
-    /**
-     * Create a customer reply.
-     */
+    /**   * Create a customer reply. */
     public function customerReply(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -53,9 +41,7 @@ class TicketReplyFactory extends Factory
         ]);
     }
 
-    /**
-     * Set a short message.
-     */
+    /**   * Set a short message. */
     public function shortMessage(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -63,9 +49,7 @@ class TicketReplyFactory extends Factory
         ]);
     }
 
-    /**
-     * Associate with a ticket.
-     */
+    /**   * Associate with a ticket. */
     public function forTicket(Ticket $ticket): static
     {
         return $this->state(fn (array $attributes) => [
@@ -73,9 +57,7 @@ class TicketReplyFactory extends Factory
         ]);
     }
 
-    /**
-     * Associate with a user.
-     */
+    /**   * Associate with a user. */
     public function byUser(User $user): static
     {
         return $this->state(fn (array $attributes) => [

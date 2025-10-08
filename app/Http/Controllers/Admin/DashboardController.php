@@ -22,62 +22,16 @@ use Illuminate\Validation\ValidationException;
 use App\Helpers\SecureFileHelper;
 
 /**
- * Admin Dashboard Controller with enhanced security.
+ * Admin Dashboard Controller with enhanced security. *
+ * This controller handles the admin dashboard functionality including statistics, * charts, analytics, and system overview data. It provides comprehensive * dashboard management with real-time data visualization. *
+ * Features: * - Dashboard statistics and metrics * - System overview and analytics * - License distribution tracking * - Revenue and financial reporting * - Activity timeline monitoring * - API performance metrics * - Cache management and optimization * - Comprehensive error handling with database transactions * - Real-time data visualization * - Enhanced security measures (XSS protection, input validation) * - Proper logging for errors and warnings only * - Model scope integration for optimized queries *
  *
- * This controller handles the admin dashboard functionality including statistics,
- * charts, analytics, and system overview data. It provides comprehensive
- * dashboard management with real-time data visualization.
- *
- * Features:
- * - Dashboard statistics and metrics
- * - System overview and analytics
- * - License distribution tracking
- * - Revenue and financial reporting
- * - Activity timeline monitoring
- * - API performance metrics
- * - Cache management and optimization
- * - Comprehensive error handling with database transactions
- * - Real-time data visualization
- * - Enhanced security measures (XSS protection, input validation)
- * - Proper logging for errors and warnings only
- * - Model scope integration for optimized queries
- *
- *
- * @example
- * // Get dashboard statistics
- * GET /admin/dashboard/stats
- *
- * // Get system overview data
- * GET /admin/dashboard/system-overview
- *
- * // Get revenue data for specific period
- * GET /admin/dashboard/revenue?period=monthly&year=2024
- */
+ * @example * // Get dashboard statistics * GET /admin/dashboard/stats *
+ * // Get system overview data * GET /admin/dashboard/system-overview *
+ * // Get revenue data for specific period * GET /admin/dashboard/revenue?period=monthly&year=2024 */
 class DashboardController extends Controller
 {
-    /**
-     * Display the admin dashboard with comprehensive statistics and enhanced security.
-     *
-     * Shows the main admin dashboard with key metrics including products,
-     * customers, licenses, tickets, invoices, and API statistics.
-     *
-     * @return \Illuminate\View\View The dashboard view with statistics
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access the dashboard
-     * GET /admin/dashboard
-     *
-     * // Returns view with:
-     * // - Product count
-     * // - Customer count
-     * // - Active licenses
-     * // - Open tickets
-     * // - KB articles
-     * // - Invoice statistics
-     * // - API metrics
-     */
+    /**   * Display the admin dashboard with comprehensive statistics and enhanced security. *   * Shows the main admin dashboard with key metrics including products, * customers, licenses, tickets, invoices, and API statistics. *   * @return \Illuminate\View\View The dashboard view with statistics *   * @throws \Exception When database operations fail *   * @example * // Access the dashboard * GET /admin/dashboard *   * // Returns view with: * // - Product count * // - Customer count * // - Active licenses * // - Open tickets * // - KB articles * // - Invoice statistics * // - API metrics */
     public function index()
     {
         try {
@@ -153,26 +107,7 @@ class DashboardController extends Controller
             return view('admin.dashboard', ['stats' => $stats, 'isMaintenance' => $isMaintenance]);
         }
     }
-    /**
-     * Get system overview chart data with enhanced security.
-     *
-     * Retrieves data for the system overview chart showing active licenses,
-     * expired licenses, pending requests, and total products.
-     *
-     * @return JsonResponse JSON response with chart data
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request:
-     * GET /admin/dashboard/system-overview
-     *
-     * // Success response:
-     * {
-     *     "labels": ["Active Licenses", "Expired Licenses", "Pending Requests", "Total Products"],
-     *     "data": [150, 25, 10, 5]
-     * }
-     */
+    /**   * Get system overview chart data with enhanced security. *   * Retrieves data for the system overview chart showing active licenses, * expired licenses, pending requests, and total products. *   * @return JsonResponse JSON response with chart data *   * @throws \Exception When database operations fail *   * @example * // Request: * GET /admin/dashboard/system-overview *   * // Success response: * { * "labels": ["Active Licenses", "Expired Licenses", "Pending Requests", "Total Products"], * "data": [150, 25, 10, 5] * } */
     public function getSystemOverviewData(): JsonResponse
     {
         try {
@@ -199,30 +134,7 @@ class DashboardController extends Controller
             ]);
         }
     }
-    /**
-     * Get license distribution chart data.
-     *
-     * Retrieves data for the license distribution chart showing the count
-     * of regular and extended licenses in the system.
-     *
-     * @return JsonResponse JSON response with license distribution data
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     *
-     * @example
-     * // Request:
-     * GET /admin/dashboard/license-distribution
-     *
-     * // Success response:
-     * {
-     *     "labels": ["Regular", "Extended"],
-     *     "data": [120, 30]
-     * }
-     */
+    /**   * Get license distribution chart data. *   * Retrieves data for the license distribution chart showing the count * of regular and extended licenses in the system. *   * @return JsonResponse JSON response with license distribution data *   * @version 1.0.6 *   *   *   *   *   * @example * // Request: * GET /admin/dashboard/license-distribution *   * // Success response: * { * "labels": ["Regular", "Extended"], * "data": [120, 30] * } */
     public function getLicenseDistributionData(): JsonResponse
     {
         try {
@@ -243,29 +155,7 @@ class DashboardController extends Controller
             ]);
         }
     }
-    /**
-     * Get revenue chart data with enhanced security.
-     *
-     * Retrieves revenue data for charts based on the specified period
-     * (monthly, quarterly, or yearly) and year.
-     *
-     * @param  Request  $request  The HTTP request containing period and year parameters
-     *
-     * @return JsonResponse JSON response with revenue chart data
-     *
-     * @throws ValidationException When validation fails
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request:
-     * GET /admin/dashboard/revenue?period=monthly&year=2024
-     *
-     * // Success response:
-     * {
-     *     "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-     *     "data": [1500.00, 2300.00, 1800.00, 2100.00, 1900.00, 2400.00]
-     * }
-     */
+    /**   * Get revenue chart data with enhanced security. *   * Retrieves revenue data for charts based on the specified period * (monthly, quarterly, or yearly) and year. *   * @param Request $request The HTTP request containing period and year parameters *   * @return JsonResponse JSON response with revenue chart data *   * @throws ValidationException When validation fails * @throws \Exception When database operations fail *   * @example * // Request: * GET /admin/dashboard/revenue?period=monthly&year=2024 *   * // Success response: * { * "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"], * "data": [1500.00, 2300.00, 1800.00, 2100.00, 1900.00, 2400.00] * } */
     public function getRevenueData(Request $request): JsonResponse
     {
         try {
@@ -344,30 +234,7 @@ class DashboardController extends Controller
             ]);
         }
     }
-    /**
-     * Get activity timeline chart data.
-     *
-     * Retrieves activity data for the last 7 days showing daily totals
-     * of tickets created and licenses created.
-     *
-     * @return JsonResponse JSON response with activity timeline data
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     *
-     * @example
-     * // Request:
-     * GET /admin/dashboard/activity-timeline
-     *
-     * // Success response:
-     * {
-     *     "labels": ["Jan 15", "Jan 16", "Jan 17", "Jan 18", "Jan 19", "Jan 20", "Jan 21"],
-     *     "data": [5, 8, 3, 12, 7, 9, 4]
-     * }
-     */
+    /**   * Get activity timeline chart data. *   * Retrieves activity data for the last 7 days showing daily totals * of tickets created and licenses created. *   * @return JsonResponse JSON response with activity timeline data *   * @version 1.0.6 *   *   *   *   *   * @example * // Request: * GET /admin/dashboard/activity-timeline *   * // Success response: * { * "labels": ["Jan 15", "Jan 16", "Jan 17", "Jan 18", "Jan 19", "Jan 20", "Jan 21"], * "data": [5, 8, 3, 12, 7, 9, 4] * } */
     public function getActivityTimelineData(): JsonResponse
     {
         try {
@@ -400,35 +267,7 @@ class DashboardController extends Controller
             ]);
         }
     }
-    /**
-     * Get dashboard statistics.
-     *
-     * Retrieves comprehensive dashboard statistics including products,
-     * customers, licenses, tickets, and knowledge base articles.
-     *
-     * @return JsonResponse JSON response with dashboard statistics
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     *
-     * @example
-     * // Request:
-     * GET /admin/dashboard/stats
-     *
-     * // Success response:
-     * {
-     *     "products": 5,
-     *     "customers": 150,
-     *     "licenses_active": 120,
-     *     "licenses_expired": 30,
-     *     "tickets_open": 8,
-     *     "tickets_closed": 45,
-     *     "kb_articles": 25
-     * }
-     */
+    /**   * Get dashboard statistics. *   * Retrieves comprehensive dashboard statistics including products, * customers, licenses, tickets, and knowledge base articles. *   * @return JsonResponse JSON response with dashboard statistics *   * @version 1.0.6 *   *   *   *   *   * @example * // Request: * GET /admin/dashboard/stats *   * // Success response: * { * "products": 5, * "customers": 150, * "licenses_active": 120, * "licenses_expired": 30, * "tickets_open": 8, * "tickets_closed": 45, * "kb_articles": 25 * } */
     public function getStats(): JsonResponse
     {
         try {
@@ -457,20 +296,7 @@ class DashboardController extends Controller
             ]);
         }
     }
-    /**
-     * Calculate API success rate.
-     *
-     * Calculates the percentage of successful API requests out of total requests
-     * based on license verification logs.
-     *
-     * @return float The API success rate as a percentage
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Calculate API success rate. *   * Calculates the percentage of successful API requests out of total requests * based on license verification logs. *   * @return float The API success rate as a percentage *   * @version 1.0.6 *   *   *   *   */
     private function calculateApiSuccessRate(): float
     {
         $totalRequests = LicenseLog::count();
@@ -480,20 +306,7 @@ class DashboardController extends Controller
         $successfulRequests = LicenseLog::where('status', 'success')->count();
         return round(($successfulRequests / $totalRequests) * 100, 2);
     }
-    /**
-     * Get API errors today from Laravel logs.
-     *
-     * Counts the number of API errors that occurred today by parsing
-     * the Laravel log file for license verification errors.
-     *
-     * @return int The number of API errors today
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Get API errors today from Laravel logs. *   * Counts the number of API errors that occurred today by parsing * the Laravel log file for license verification errors. *   * @return int The number of API errors today *   * @version 1.0.6 *   *   *   *   */
     private function getApiErrorsToday(): int
     {
         $logFile = storage_path('logs/laravel.log');
@@ -516,20 +329,7 @@ class DashboardController extends Controller
         }
         return $errorCount;
     }
-    /**
-     * Get API errors this month from Laravel logs.
-     *
-     * Counts the number of API errors that occurred this month by parsing
-     * the Laravel log file for license verification errors.
-     *
-     * @return int The number of API errors this month
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Get API errors this month from Laravel logs. *   * Counts the number of API errors that occurred this month by parsing * the Laravel log file for license verification errors. *   * @return int The number of API errors this month *   * @version 1.0.6 *   *   *   *   */
     private function getApiErrorsThisMonth(): int
     {
         $logFile = storage_path('logs/laravel.log');
@@ -552,33 +352,7 @@ class DashboardController extends Controller
         }
         return $errorCount;
     }
-    /**
-     * Get API requests chart data with enhanced security.
-     *
-     * Retrieves API request data for charts showing total, successful,
-     * and failed requests over a specified period (daily or hourly).
-     *
-     * @param  Request  $request  The HTTP request containing period and days parameters
-     *
-     * @return JsonResponse JSON response with API requests chart data
-     *
-     * @throws ValidationException When validation fails
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request:
-     * GET /admin/dashboard/api-requests?period=daily&days=7
-     *
-     * // Success response:
-     * {
-     *     "labels": ["Jan 15", "Jan 16", "Jan 17"],
-     *     "datasets": [
-     *         {"label": "Total Requests", "data": [100, 120, 90]},
-     *         {"label": "Successful", "data": [95, 115, 85]},
-     *         {"label": "Failed", "data": [5, 5, 5]}
-     *     ]
-     * }
-     */
+    /**   * Get API requests chart data with enhanced security. *   * Retrieves API request data for charts showing total, successful, * and failed requests over a specified period (daily or hourly). *   * @param Request $request The HTTP request containing period and days parameters *   * @return JsonResponse JSON response with API requests chart data *   * @throws ValidationException When validation fails * @throws \Exception When database operations fail *   * @example * // Request: * GET /admin/dashboard/api-requests?period=daily&days=7 *   * // Success response: * { * "labels": ["Jan 15", "Jan 16", "Jan 17"], * "datasets": [ * {"label": "Total Requests", "data": [100, 120, 90]}, * {"label": "Successful", "data": [95, 115, 85]}, * {"label": "Failed", "data": [5, 5, 5]} * ] * } */
     public function getApiRequestsData(Request $request): JsonResponse
     {
         try {
@@ -673,44 +447,7 @@ class DashboardController extends Controller
             ]);
         }
     }
-    /**
-     * Get API performance metrics.
-     *
-     * Retrieves comprehensive API performance metrics including today's
-     * and yesterday's statistics, success rates, and top domains.
-     *
-     * @return JsonResponse JSON response with API performance data
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     *
-     * @example
-     * // Request:
-     * GET /admin/dashboard/api-performance
-     *
-     * // Success response:
-     * {
-     *     "today": {
-     *         "total": 150,
-     *         "success": 145,
-     *         "failed": 5,
-     *         "success_rate": 96.67
-     *     },
-     *     "yesterday": {
-     *         "total": 120,
-     *         "success": 115,
-     *         "failed": 5,
-     *         "success_rate": 95.83
-     *     },
-     *     "top_domains": [
-     *         {"domain": "example.com", "count": 25},
-     *         {"domain": "test.com", "count": 20}
-     *     ]
-     * }
-     */
+    /**   * Get API performance metrics. *   * Retrieves comprehensive API performance metrics including today's * and yesterday's statistics, success rates, and top domains. *   * @return JsonResponse JSON response with API performance data *   * @version 1.0.6 *   *   *   *   *   * @example * // Request: * GET /admin/dashboard/api-performance *   * // Success response: * { * "today": { * "total": 150, * "success": 145, * "failed": 5, * "success_rate": 96.67 * }, * "yesterday": { * "total": 120, * "success": 115, * "failed": 5, * "success_rate": 95.83 * }, * "top_domains": [ * {"domain": "example.com", "count": 25}, * {"domain": "test.com", "count": 20} * ] * } */
     public function getApiPerformanceData(): JsonResponse
     {
         try {
@@ -736,15 +473,13 @@ class DashboardController extends Controller
                     'total' => $todayRequests,
                     'success' => $todaySuccess,
                     'failed' => $todayFailed,
-                    'success_rate' => $todayRequests > 0 ? round(($todaySuccess / $todayRequests) * 100, 2) : 0,
-                ],
+                    'success_rate' => $todayRequests > 0 ? round(($todaySuccess / $todayRequests) * 100, 2) : 0, ],
                 'yesterday' => [
                     'total' => $yesterdayRequests,
                     'success' => $yesterdaySuccess,
                     'failed' => $yesterdayFailed,
                     'success_rate' => $yesterdayRequests > 0
-                        ? round(($yesterdaySuccess / $yesterdayRequests) * 100, 2)
-                        : 0,
+                        ? round(($yesterdaySuccess / $yesterdayRequests) * 100, 2) : 0,
                 ],
                 'top_domains' => $topDomains,
             ]);
@@ -756,23 +491,7 @@ class DashboardController extends Controller
             ]);
         }
     }
-    /**
-     * Clear all application caches with enhanced security.
-     *
-     * Clears all application caches including application cache, config cache,
-     * route cache, view cache, compiled classes, and license-specific caches.
-     *
-     * @return \Illuminate\Http\RedirectResponse Redirect back with success message
-     *
-     * @throws \Exception When cache clearing operations fail
-     *
-     * @example
-     * // Request:
-     * POST /admin/dashboard/clear-cache
-     *
-     * // Response: Redirect back with success message
-     * // "All caches cleared successfully!"
-     */
+    /**   * Clear all application caches with enhanced security. *   * Clears all application caches including application cache, config cache, * route cache, view cache, compiled classes, and license-specific caches. *   * @return \Illuminate\Http\RedirectResponse Redirect back with success message *   * @throws \Exception When cache clearing operations fail *   * @example * // Request: * POST /admin/dashboard/clear-cache *   * // Response: Redirect back with success message * // "All caches cleared successfully!" */
     public function clearCache()
     {
         try {

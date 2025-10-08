@@ -20,70 +20,25 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 /**
- * User Ticket Controller with enhanced security.
- *
- * This controller handles user ticket management functionality including
- * ticket creation, viewing, updating, and replying with enhanced security
- * measures and proper error handling.
- *
- * Features:
- * - User ticket listing with pagination
- * - Ticket creation with category validation
- * - Purchase code verification and license creation
- * - Ticket viewing with authorization
- * - Ticket updating and deletion
- * - Ticket replies with email notifications
- * - Enhanced security measures (XSS protection, input validation)
- * - Comprehensive error handling with database transactions
- * - Proper logging for errors and warnings only
- * - Model relationship integration for optimized queries
- */
+ * User Ticket Controller with enhanced security. *
+ * This controller handles user ticket management functionality including * ticket creation, viewing, updating, and replying with enhanced security * measures and proper error handling. *
+ * Features: * - User ticket listing with pagination * - Ticket creation with category validation * - Purchase code verification and license creation * - Ticket viewing with authorization * - Ticket updating and deletion * - Ticket replies with email notifications * - Enhanced security measures (XSS protection, input validation) * - Comprehensive error handling with database transactions * - Proper logging for errors and warnings only * - Model relationship integration for optimized queries */
 class TicketController extends Controller
 {
-    /**
-     * Pagination limit for ticket listing.
-     */
+    /**   * Pagination limit for ticket listing. */
     private const PAGINATION_LIMIT = 10;
-    /**
-     * Valid ticket priorities.
-     */
+    /**   * Valid ticket priorities. */
     private const VALID_PRIORITIES = ['low', 'medium', 'high'];
-    /**
-     * Valid ticket statuses.
-     */
+    /**   * Valid ticket statuses. */
     private const VALID_STATUSES = ['open', 'pending', 'resolved', 'closed'];
-    /**
-     * The email service instance.
-     */
+    /**   * The email service instance. */
     protected EmailService $emailService;
-    /**
-     * Create a new controller instance.
-     *
-     * @param  EmailService  $emailService  The email service instance
-     */
+    /**   * Create a new controller instance. *   * @param EmailService $emailService The email service instance */
     public function __construct(EmailService $emailService)
     {
         $this->emailService = $emailService;
     }
-    /**
-     * Display a listing of user tickets with enhanced security.
-     *
-     * Shows paginated list of user tickets with proper authorization,
-     * comprehensive error handling, and security measures.
-     *
-     * @return View The ticket listing view
-     *
-     * @throws Exception When database operations fail
-     *
-     * @example
-     * // Access user tickets:
-     * GET /user/tickets
-     *
-     * // Returns view with:
-     * // - Paginated tickets (10 per page)
-     * // - User authorization check
-     * // - Latest tickets first
-     */
+    /**   * Display a listing of user tickets with enhanced security. *   * Shows paginated list of user tickets with proper authorization, * comprehensive error handling, and security measures. *   * @return View The ticket listing view *   * @throws Exception When database operations fail *   * @example * // Access user tickets: * GET /user/tickets *   * // Returns view with: * // - Paginated tickets (10 per page) * // - User authorization check * // - Latest tickets first */
     public function index(): View
     {
         try {
@@ -107,25 +62,7 @@ class TicketController extends Controller
                 ->with('error', 'Failed to load tickets. Please try again.');
         }
     }
-    /**
-     * Show the form for creating a new ticket with enhanced security.
-     *
-     * Displays ticket creation form with category validation, license
-     * information, and proper authorization checking.
-     *
-     * @return View|RedirectResponse The ticket creation view or redirect
-     *
-     * @throws Exception When database operations fail
-     *
-     * @example
-     * // Access ticket creation form:
-     * GET /user/tickets/create
-     *
-     * // Returns view with:
-     * // - Available categories
-     * // - User licenses (if authenticated)
-     * // - Category requirements validation
-     */
+    /**   * Show the form for creating a new ticket with enhanced security. *   * Displays ticket creation form with category validation, license * information, and proper authorization checking. *   * @return View|RedirectResponse The ticket creation view or redirect *   * @throws Exception When database operations fail *   * @example * // Access ticket creation form: * GET /user/tickets/create *   * // Returns view with: * // - Available categories * // - User licenses (if authenticated) * // - Category requirements validation */
     public function create(): View|RedirectResponse
     {
         try {
@@ -158,29 +95,7 @@ class TicketController extends Controller
             return redirect()->back()->with('error', 'Failed to load ticket creation form. Please try again.');
         }
     }
-    /**
-     * Store a newly created ticket with enhanced security.
-     *
-     * Creates a new ticket with comprehensive validation, purchase code
-     * verification, license creation, and email notifications.
-     *
-     * @param  Request  $request  The HTTP request containing ticket data
-     *
-     * @return RedirectResponse The redirect response
-     *
-     * @throws Exception When database operations fail
-     *
-     * @example
-     * // Create a new ticket:
-     * POST /user/tickets
-     * {
-     *     "subject": "Issue with product",
-     *     "priority": "high",
-     *     "content": "Description of the issue",
-     *     "category_id": 1,
-     *     "purchase_code": "ABC123-DEF456"
-     * }
-     */
+    /**   * Store a newly created ticket with enhanced security. *   * Creates a new ticket with comprehensive validation, purchase code * verification, license creation, and email notifications. *   * @param Request $request The HTTP request containing ticket data *   * @return RedirectResponse The redirect response *   * @throws Exception When database operations fail *   * @example * // Create a new ticket: * POST /user/tickets * { * "subject": "Issue with product", * "priority": "high", * "content": "Description of the issue", * "category_id": 1, * "purchase_code": "ABC123-DEF456" * } */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -247,28 +162,7 @@ class TicketController extends Controller
             return back()->with('error', 'Failed to create ticket. Please try again.')->withInput();
         }
     }
-    /**
-     * Display the specified ticket with enhanced security.
-     *
-     * Shows detailed ticket information with proper user authorization,
-     * relationship loading, and comprehensive error handling.
-     *
-     * @param  Ticket  $ticket  The ticket instance
-     *
-     * @return View The ticket detail view
-     *
-     * @throws Exception When database operations fail
-     *
-     * @example
-     * // Access specific ticket:
-     * GET /user/tickets/123
-     *
-     * // Returns view with:
-     * // - Ticket details
-     * // - User information
-     * // - Ticket replies
-     * // - User authorization check
-     */
+    /**   * Display the specified ticket with enhanced security. *   * Shows detailed ticket information with proper user authorization, * relationship loading, and comprehensive error handling. *   * @param Ticket $ticket The ticket instance *   * @return View The ticket detail view *   * @throws Exception When database operations fail *   * @example * // Access specific ticket: * GET /user/tickets/123 *   * // Returns view with: * // - Ticket details * // - User information * // - Ticket replies * // - User authorization check */
     public function show(Ticket $ticket): View
     {
         try {
@@ -298,39 +192,12 @@ class TicketController extends Controller
             abort(500, 'Failed to load ticket details. Please try again.');
         }
     }
-    /**
-     * Show the form for editing the specified ticket.
-     *
-     * @param  Ticket  $ticket  The ticket instance
-     *
-     * @deprecated This method is not implemented
-     */
+    /**   * Show the form for editing the specified ticket. *   * @param Ticket $ticket The ticket instance *   * @deprecated This method is not implemented */
     public function edit(Ticket $ticket): void
     {
         // Not implemented
     }
-    /**
-     * Update the specified ticket with enhanced security.
-     *
-     * Updates ticket information with proper authorization, validation,
-     * and comprehensive error handling.
-     *
-     * @param  Request  $request  The HTTP request containing update data
-     * @param  Ticket  $ticket  The ticket instance
-     *
-     * @return RedirectResponse The redirect response
-     *
-     * @throws Exception When database operations fail
-     *
-     * @example
-     * // Update ticket:
-     * PUT /user/tickets/123
-     * {
-     *     "subject": "Updated subject",
-     *     "priority": "high",
-     *     "status": "pending"
-     * }
-     */
+    /**   * Update the specified ticket with enhanced security. *   * Updates ticket information with proper authorization, validation, * and comprehensive error handling. *   * @param Request $request The HTTP request containing update data * @param Ticket $ticket The ticket instance *   * @return RedirectResponse The redirect response *   * @throws Exception When database operations fail *   * @example * // Update ticket: * PUT /user/tickets/123 * { * "subject": "Updated subject", * "priority": "high", * "status": "pending" * } */
     public function update(Request $request, Ticket $ticket): RedirectResponse
     {
         try {
@@ -360,21 +227,7 @@ class TicketController extends Controller
             return back()->with('error', 'Failed to update ticket. Please try again.');
         }
     }
-    /**
-     * Remove the specified ticket with enhanced security.
-     *
-     * Deletes ticket with proper authorization and comprehensive error handling.
-     *
-     * @param  Ticket  $ticket  The ticket instance
-     *
-     * @return RedirectResponse The redirect response
-     *
-     * @throws Exception When database operations fail
-     *
-     * @example
-     * // Delete ticket:
-     * DELETE /user/tickets/123
-     */
+    /**   * Remove the specified ticket with enhanced security. *   * Deletes ticket with proper authorization and comprehensive error handling. *   * @param Ticket $ticket The ticket instance *   * @return RedirectResponse The redirect response *   * @throws Exception When database operations fail *   * @example * // Delete ticket: * DELETE /user/tickets/123 */
     public function destroy(Ticket $ticket): RedirectResponse
     {
         try {
@@ -402,26 +255,7 @@ class TicketController extends Controller
             return back()->with('error', 'Failed to delete ticket. Please try again.');
         }
     }
-    /**
-     * Add a reply to the specified ticket with enhanced security.
-     *
-     * Creates a new ticket reply with proper authorization, validation,
-     * and email notifications.
-     *
-     * @param  Request  $request  The HTTP request containing reply data
-     * @param  Ticket  $ticket  The ticket instance
-     *
-     * @return RedirectResponse The redirect response
-     *
-     * @throws Exception When database operations fail
-     *
-     * @example
-     * // Add reply to ticket:
-     * POST /user/tickets/123/reply
-     * {
-     *     "message": "Thank you for the update"
-     * }
-     */
+    /**   * Add a reply to the specified ticket with enhanced security. *   * Creates a new ticket reply with proper authorization, validation, * and email notifications. *   * @param Request $request The HTTP request containing reply data * @param Ticket $ticket The ticket instance *   * @return RedirectResponse The redirect response *   * @throws Exception When database operations fail *   * @example * // Add reply to ticket: * POST /user/tickets/123/reply * { * "message": "Thank you for the update" * } */
     public function reply(Request $request, Ticket $ticket): RedirectResponse
     {
         try {
@@ -457,15 +291,7 @@ class TicketController extends Controller
             return back()->with('error', 'Failed to add reply. Please try again.');
         }
     }
-    /**
-     * Validate ticket creation data.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return array<string, mixed> The validated data
-     *
-     * @throws \InvalidArgumentException When validation fails
-     */
+    /**   * Validate ticket creation data. *   * @param Request $request The HTTP request *   * @return array<string, mixed> The validated data *   * @throws \InvalidArgumentException When validation fails */
     private function validateTicketData(Request $request): array
     {
         $validated = $request->validate([
@@ -479,20 +305,12 @@ class TicketController extends Controller
             'invoice_id' => ['nullable', 'exists:invoices,id'],
             'category_id' => ['required', 'exists:ticket_categories,id'],
         ]);
-        
+
         /** @var array<string, mixed> $result */
         $result = $validated;
         return $result;
     }
-    /**
-     * Validate ticket update data.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return array<string, mixed> The validated data
-     *
-     * @throws \InvalidArgumentException When validation fails
-     */
+    /**   * Validate ticket update data. *   * @param Request $request The HTTP request *   * @return array<string, mixed> The validated data *   * @throws \InvalidArgumentException When validation fails */
     private function validateTicketUpdateData(Request $request): array
     {
         $validated = $request->validate([
@@ -501,35 +319,23 @@ class TicketController extends Controller
             'status' => ['sometimes', 'in:' . implode(', ', self::VALID_STATUSES)],
             'content' => ['sometimes', 'string'],
         ]);
-        
+
         /** @var array<string, mixed> $result */
         $result = $validated;
         return $result;
     }
-    /**
-     * Validate reply data.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return array<string, mixed> The validated data
-     */
+    /**   * Validate reply data. *   * @param Request $request The HTTP request *   * @return array<string, mixed> The validated data */
     private function validateReplyData(Request $request): array
     {
         $validated = $request->validate([
             'message' => ['required', 'string'],
         ]);
-        
+
         /** @var array<string, mixed> $result */
         $result = $validated;
         return $result;
     }
-    /**
-     * Validate and create license from purchase code.
-     *
-     * @param  array<string, mixed>  $validated  The validated request data
-     *
-     * @return License|null The created or existing license
-     */
+    /**   * Validate and create license from purchase code. *   * @param  array<string, mixed>  $validated  The validated request data *   * @return License|null The created or existing license */
     private function validateAndCreateLicense(array $validated): ?License
     {
         try {
@@ -573,15 +379,7 @@ class TicketController extends Controller
             return null;
         }
     }
-    /**
-     * Prepare ticket data for creation.
-     *
-     * @param  array<string, mixed>  $validated  The validated request data
-     * @param  TicketCategory  $category  The ticket category
-     * @param  License|null  $license  The license instance
-     *
-     * @return array<string, mixed> The prepared ticket data
-     */
+    /**   * Prepare ticket data for creation. *   * @param  array<string, mixed>  $validated  The validated request data * @param TicketCategory $category The ticket category * @param  License|null  $license  The license instance *   * @return array<string, mixed> The prepared ticket data */
     private function prepareTicketData(array $validated, TicketCategory $category, ?License $license): array
     {
         return [
@@ -596,14 +394,7 @@ class TicketController extends Controller
             'browser_info' => $validated['browser_info'] ?? null,
         ];
     }
-    /**
-     * Attach invoice data to ticket data.
-     *
-     * @param  array<string, mixed>  $ticketData  The ticket data
-     * @param  int  $invoiceId  The invoice ID
-     *
-     * @return array<string, mixed> The updated ticket data
-     */
+    /**   * Attach invoice data to ticket data. *   * @param  array<string, mixed>  $ticketData  The ticket data * @param int $invoiceId The invoice ID *   * @return array<string, mixed> The updated ticket data */
     private function attachInvoiceData(array $ticketData, int $invoiceId): array
     {
         $invoice = Invoice::with('license', 'product')->find($invoiceId);
@@ -620,11 +411,7 @@ class TicketController extends Controller
         }
         return $ticketData;
     }
-    /**
-     * Send ticket creation notifications.
-     *
-     * @param  Ticket  $ticket  The created ticket
-     */
+    /**   * Send ticket creation notifications. *   * @param Ticket $ticket The created ticket */
     private function sendTicketNotifications(Ticket $ticket): void
     {
         try {
@@ -648,12 +435,7 @@ class TicketController extends Controller
             Log::error('Failed to send ticket notifications: ' . $e->getMessage());
         }
     }
-    /**
-     * Send reply notification.
-     *
-     * @param  Ticket  $ticket  The ticket
-     * @param  string  $message  The reply message
-     */
+    /**   * Send reply notification. *   * @param Ticket $ticket The ticket * @param string $message The reply message */
     private function sendReplyNotification(Ticket $ticket, string $message): void
     {
         try {
@@ -668,26 +450,14 @@ class TicketController extends Controller
             Log::error('Failed to send reply notification: ' . $e->getMessage());
         }
     }
-    /**
-     * Check if user can view ticket.
-     *
-     * @param  Ticket  $ticket  The ticket instance
-     *
-     * @return bool True if user can view ticket
-     */
+    /**   * Check if user can view ticket. *   * @param Ticket $ticket The ticket instance *   * @return bool True if user can view ticket */
     private function canViewTicket(Ticket $ticket): bool
     {
         $user = Auth::user();
         return ! $ticket->user_id || // Guest ticket
                (Auth::check() && ($ticket->user_id === Auth::id() || ($user && $user->hasRole('admin')))); // Logged in user
     }
-    /**
-     * Check if user can modify ticket.
-     *
-     * @param  Ticket  $ticket  The ticket instance
-     *
-     * @return bool True if user can modify ticket
-     */
+    /**   * Check if user can modify ticket. *   * @param Ticket $ticket The ticket instance *   * @return bool True if user can modify ticket */
     private function canModifyTicket(Ticket $ticket): bool
     {
         return $ticket->user_id === Auth::id() || Auth::user()?->hasRole('admin');

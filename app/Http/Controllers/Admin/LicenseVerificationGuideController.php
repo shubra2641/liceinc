@@ -10,63 +10,19 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
 /**
- * License Verification Guide Controller with enhanced security.
- *
- * This controller displays the license verification guide for developers
- * and administrators, providing comprehensive documentation on how to implement
- * license verification in their applications with security best practices.
- *
- * Features:
- * - Developer documentation and guides
- * - License verification examples and code samples
- * - API integration instructions with security guidelines
- * - Best practices and security implementation guides
- * - Comprehensive error handling with proper logging
- * - Enhanced security measures for documentation access
- * - Rate limiting and authorization checks
- * - Proper logging for errors and warnings only
- * - Database transaction support for future enhancements
- */
+ * License Verification Guide Controller with enhanced security. *
+ * This controller displays the license verification guide for developers * and administrators, providing comprehensive documentation on how to implement * license verification in their applications with security best practices. *
+ * Features: * - Developer documentation and guides * - License verification examples and code samples * - API integration instructions with security guidelines * - Best practices and security implementation guides * - Comprehensive error handling with proper logging * - Enhanced security measures for documentation access * - Rate limiting and authorization checks * - Proper logging for errors and warnings only * - Database transaction support for future enhancements */
 class LicenseVerificationGuideController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * Apply middleware for authentication and authorization.
-     *
-     * @return void
-     */
+    /**   * Create a new controller instance. *   * Apply middleware for authentication and authorization. *   * @return void */
     public function __construct()
     {
         $this->middleware('auth');
         $this->middleware('user');
         $this->middleware('verified');
     }
-    /**
-     * Display the license verification guide for developers with enhanced security.
-     *
-     * Shows comprehensive documentation for license verification implementation,
-     * including API examples, security best practices, and integration guides.
-     * Implements rate limiting and proper error handling with fallback mechanisms.
-     *
-     * @param  Request  $request  The HTTP request instance
-     *
-     * @return View The license verification guide view
-     *
-     * @throws \Exception When view rendering fails or rate limit exceeded
-     *
-     * @example
-     * // Access the license verification guide:
-     * GET /admin/license-verification-guide
-     *
-     * // Returns view with:
-     * // - Developer documentation
-     * // - API integration examples
-     * // - Security best practices
-     * // - Code samples and templates
-     * // - Rate limiting protection
-     * // - Enhanced error handling
-     */
+    /**   * Display the license verification guide for developers with enhanced security. *   * Shows comprehensive documentation for license verification implementation, * including API examples, security best practices, and integration guides. * Implements rate limiting and proper error handling with fallback mechanisms. *   * @param Request $request The HTTP request instance *   * @return View The license verification guide view *   * @throws \Exception When view rendering fails or rate limit exceeded *   * @example * // Access the license verification guide: * GET /admin/license-verification-guide *   * // Returns view with: * // - Developer documentation * // - API integration examples * // - Security best practices * // - Code samples and templates * // - Rate limiting protection * // - Enhanced error handling */
     public function index(Request $request): View
     {
         try {

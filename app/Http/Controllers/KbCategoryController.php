@@ -14,55 +14,15 @@ use Illuminate\View\View;
 use Throwable;
 
 /**
- * Knowledge Base Category Controller with enhanced security and comprehensive category management.
+ * Knowledge Base Category Controller with enhanced security and comprehensive category management. *
+ * This controller provides comprehensive knowledge base category management functionality including * CRUD operations, hierarchical category support, article management, and enhanced security measures * with comprehensive error handling and logging. *
+ * Features: * - Enhanced knowledge base category CRUD operations * - Hierarchical category support with parent-child relationships * - Article count tracking and management * - Product association and serial protection * - SEO metadata management * - Comprehensive error handling and logging * - Input validation and sanitization * - Enhanced security measures for category operations * - Database transaction support for data integrity * - Proper error responses for different scenarios * - Comprehensive logging for security monitoring *
  *
- * This controller provides comprehensive knowledge base category management functionality including
- * CRUD operations, hierarchical category support, article management, and enhanced security measures
- * with comprehensive error handling and logging.
- *
- * Features:
- * - Enhanced knowledge base category CRUD operations
- * - Hierarchical category support with parent-child relationships
- * - Article count tracking and management
- * - Product association and serial protection
- * - SEO metadata management
- * - Comprehensive error handling and logging
- * - Input validation and sanitization
- * - Enhanced security measures for category operations
- * - Database transaction support for data integrity
- * - Proper error responses for different scenarios
- * - Comprehensive logging for security monitoring
- *
- *
- * @example
- * // List categories
- * GET /admin/kb-categories
- *
- * // Create category
- * POST /admin/kb-categories
- * {
- *     "name": "Getting Started",
- *     "description": "Basic setup and configuration",
- *     "parent_id": null,
- *     "product_id": 1
- * }
- */
+ * @example * // List categories * GET /admin/kb-categories *
+ * // Create category * POST /admin/kb-categories * { * "name": "Getting Started", * "description": "Basic setup and configuration", * "parent_id": null, * "product_id": 1 * } */
 class KbCategoryController extends Controller
 {
-    /**
-     * Display a listing of knowledge base categories with enhanced security.
-     *
-     * This method displays a paginated list of knowledge base categories
-     * with article counts and parent relationships.
-     *
-     * @return View The categories index view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Display categories list
-     * $view = $kbCategoryController->index();
-     */
+    /**   * Display a listing of knowledge base categories with enhanced security. *   * This method displays a paginated list of knowledge base categories * with article counts and parent relationships. *   * @return View The categories index view *   * @throws \Exception When database operations fail *   * @example * // Display categories list * $view = $kbCategoryController->index(); */
     public function index(): View
     {
         try {
@@ -81,20 +41,7 @@ class KbCategoryController extends Controller
                 ->with('error', 'Failed to load categories. Please try again.');
         }
     }
-    /**
-     * Show the form for creating a new knowledge base category with enhanced security.
-     *
-     * This method displays the form for creating a new knowledge base category
-     * with parent categories and active products.
-     *
-     * @return View The category creation form view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Show create form
-     * $view = $kbCategoryController->create();
-     */
+    /**   * Show the form for creating a new knowledge base category with enhanced security. *   * This method displays the form for creating a new knowledge base category * with parent categories and active products. *   * @return View The category creation form view *   * @throws \Exception When database operations fail *   * @example * // Show create form * $view = $kbCategoryController->create(); */
     public function create(): View
     {
         try {
@@ -112,22 +59,7 @@ class KbCategoryController extends Controller
             ])->with('error', 'Failed to load form data. Please try again.');
         }
     }
-    /**
-     * Store a newly created knowledge base category with enhanced security and validation.
-     *
-     * This method creates a new knowledge base category with comprehensive
-     * validation, sanitization, and error handling.
-     *
-     * @param  Request  $request  The current HTTP request instance
-     *
-     * @return RedirectResponse Redirect response with success or error message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Create new category
-     * $response = $kbCategoryController->store($request);
-     */
+    /**   * Store a newly created knowledge base category with enhanced security and validation. *   * This method creates a new knowledge base category with comprehensive * validation, sanitization, and error handling. *   * @param Request $request The current HTTP request instance *   * @return RedirectResponse Redirect response with success or error message *   * @throws \Exception When database operations fail *   * @example * // Create new category * $response = $kbCategoryController->store($request); */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -175,22 +107,7 @@ class KbCategoryController extends Controller
         }
         return $result instanceof RedirectResponse ? $result : back();
     }
-    /**
-     * Display the specified knowledge base category with enhanced security.
-     *
-     * This method displays a specific knowledge base category with its
-     * articles and related information.
-     *
-     * @param  KbCategory  $kbCategory  The knowledge base category to display
-     *
-     * @return View The category detail view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Show category details
-     * $view = $kbCategoryController->show($kbCategory);
-     */
+    /**   * Display the specified knowledge base category with enhanced security. *   * This method displays a specific knowledge base category with its * articles and related information. *   * @param KbCategory $kbCategory The knowledge base category to display *   * @return View The category detail view *   * @throws \Exception When database operations fail *   * @example * // Show category details * $view = $kbCategoryController->show($kbCategory); */
     public function show(KbCategory $kbCategory): View|\Illuminate\Http\RedirectResponse
     {
         try {
@@ -215,22 +132,7 @@ class KbCategoryController extends Controller
                 ->with('error', 'Failed to load category details. Please try again.');
         }
     }
-    /**
-     * Show the form for editing the specified knowledge base category with enhanced security.
-     *
-     * This method displays the form for editing a knowledge base category
-     * with parent categories and active products.
-     *
-     * @param  KbCategory  $kbCategory  The knowledge base category to edit
-     *
-     * @return View The category edit form view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Show edit form
-     * $view = $kbCategoryController->edit($kbCategory);
-     */
+    /**   * Show the form for editing the specified knowledge base category with enhanced security. *   * This method displays the form for editing a knowledge base category * with parent categories and active products. *   * @param KbCategory $kbCategory The knowledge base category to edit *   * @return View The category edit form view *   * @throws \Exception When database operations fail *   * @example * // Show edit form * $view = $kbCategoryController->edit($kbCategory); */
     public function edit(KbCategory $kbCategory): View|\Illuminate\Http\RedirectResponse
     {
         try {
@@ -251,23 +153,7 @@ class KbCategoryController extends Controller
                 ->with('error', 'Failed to load edit form. Please try again.');
         }
     }
-    /**
-     * Update the specified knowledge base category with enhanced security and validation.
-     *
-     * This method updates a knowledge base category with comprehensive
-     * validation, sanitization, and error handling.
-     *
-     * @param  Request  $request  The current HTTP request instance
-     * @param  KbCategory  $kbCategory  The knowledge base category to update
-     *
-     * @return RedirectResponse Redirect response with success or error message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Update category
-     * $response = $kbCategoryController->update($request, $kbCategory);
-     */
+    /**   * Update the specified knowledge base category with enhanced security and validation. *   * This method updates a knowledge base category with comprehensive * validation, sanitization, and error handling. *   * @param Request $request The current HTTP request instance * @param KbCategory $kbCategory The knowledge base category to update *   * @return RedirectResponse Redirect response with success or error message *   * @throws \Exception When database operations fail *   * @example * // Update category * $response = $kbCategoryController->update($request, $kbCategory); */
     public function update(Request $request, KbCategory $kbCategory): RedirectResponse
     {
         try {
@@ -310,22 +196,7 @@ class KbCategoryController extends Controller
         }
         return $result instanceof RedirectResponse ? $result : back();
     }
-    /**
-     * Remove the specified knowledge base category with enhanced security and comprehensive handling.
-     *
-     * This method removes a knowledge base category with support for different
-     * deletion modes and comprehensive error handling.
-     *
-     * @param  KbCategory  $kbCategory  The knowledge base category to delete
-     *
-     * @return RedirectResponse Redirect response with success or error message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Delete category
-     * $response = $kbCategoryController->destroy($kbCategory);
-     */
+    /**   * Remove the specified knowledge base category with enhanced security and comprehensive handling. *   * This method removes a knowledge base category with support for different * deletion modes and comprehensive error handling. *   * @param KbCategory $kbCategory The knowledge base category to delete *   * @return RedirectResponse Redirect response with success or error message *   * @throws \Exception When database operations fail *   * @example * // Delete category * $response = $kbCategoryController->destroy($kbCategory); */
     public function destroy(KbCategory $kbCategory): RedirectResponse
     {
         try {
@@ -378,13 +249,7 @@ class KbCategoryController extends Controller
         }
         return $result instanceof RedirectResponse ? $result : back();
     }
-    /**
-     * Sanitize category data to prevent XSS attacks.
-     *
-     * @param  array<string, mixed>  $data  The category data to sanitize
-     *
-     * @return array<string, mixed> The sanitized category data
-     */
+    /**   * Sanitize category data to prevent XSS attacks. *   * @param  array<string, mixed>  $data  The category data to sanitize *   * @return array<string, mixed> The sanitized category data */
     private function sanitizeCategoryData(array $data): array
     {
         $sanitized = [];

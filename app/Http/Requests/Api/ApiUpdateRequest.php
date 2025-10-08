@@ -5,41 +5,22 @@ namespace App\Http\Requests\Api;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * API Update Request with enhanced security.
- *
- * This unified request class handles validation for all API update operations
- * including update checking, version history, latest version, and update info
- * with comprehensive security measures and input sanitization.
- *
- * Features:
- * - Unified validation for all API update operations
- * - XSS protection and input sanitization
- * - Custom validation messages for better user experience
- * - Proper type hints and return types
- * - Security validation rules (XSS protection, SQL injection prevention)
- * - License key validation
- * - Version format validation
- * - Domain validation
- */
+ * API Update Request with enhanced security. *
+ * This unified request class handles validation for all API update operations * including update checking, version history, latest version, and update info * with comprehensive security measures and input sanitization. *
+ * Features: * - Unified validation for all API update operations * - XSS protection and input sanitization * - Custom validation messages for better user experience * - Proper type hints and return types * - Security validation rules (XSS protection, SQL injection prevention) * - License key validation * - Version format validation * - Domain validation */
 class ApiUpdateRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    /**   * Determine if the user is authorized to make this request. */
     public function authorize(): bool
     {
         return true; // API requests are generally public but validated by license
     }
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Get the validation rules that apply to the request. *   * @return array<string, mixed> */
     public function rules(): array
     {
         $route = $this->route();
         $routeName = $route?->getName() ?? '';
-        
+
         $isCheck = $this->isMethod('POST') && str_contains($routeName, 'check');
         $isHistory = $this->isMethod('POST') && str_contains($routeName, 'history');
         $isLatest = $this->isMethod('POST') && str_contains($routeName, 'latest');
@@ -314,11 +295,7 @@ class ApiUpdateRequest extends FormRequest
         // Default validation (should not reach here)
         return [];
     }
-    /**
-     * Get custom validation messages.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom validation messages. *   * @return array<string, string> */
     public function messages(): array
     {
         return [
@@ -362,11 +339,7 @@ class ApiUpdateRequest extends FormRequest
             'include_rollback_info.boolean' => 'Include rollback info must be true or false.',
         ];
     }
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom attributes for validator errors. *   * @return array<string, string> */
     public function attributes(): array
     {
         return [
@@ -399,9 +372,7 @@ class ApiUpdateRequest extends FormRequest
             'include_rollback_info' => 'include rollback info',
         ];
     }
-    /**
-     * Prepare the data for validation.
-     */
+    /**   * Prepare the data for validation. */
     protected function prepareForValidation(): void
     {
         // Sanitize input to prevent XSS
@@ -449,23 +420,17 @@ class ApiUpdateRequest extends FormRequest
             'sort_order' => $this->sort_order ?? 'desc',
         ]);
     }
-    /**
-     * Sanitize input to prevent XSS attacks.
-     *
-     * @param  mixed  $input  The input to sanitize
-     *
-     * @return string|null The sanitized input
-     */
+    /**   * Sanitize input to prevent XSS attacks. *   * @param mixed $input The input to sanitize *   * @return string|null The sanitized input */
     private function sanitizeInput(mixed $input): ?string
     {
         if ($input === null || $input === '') {
             return null;
         }
-        
+
         if (!is_string($input)) {
             return null;
         }
-        
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

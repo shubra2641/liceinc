@@ -13,63 +13,28 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Generate Renewal Invoices Command with Enhanced Security.
- *
- * This console command generates renewal invoices for licenses that are about to expire.
- * It provides comprehensive invoice generation functionality with enhanced security measures.
- *
- * Features:
- * - Automated renewal invoice generation for expiring licenses
- * - Email notifications for customers and administrators
- * - Database transaction support for data integrity
- * - Enhanced security measures and input validation
- * - Comprehensive error handling and logging
- * - Configurable expiry period for invoice generation
- * - Duplicate invoice prevention
- */
+ * Generate Renewal Invoices Command with Enhanced Security. *
+ * This console command generates renewal invoices for licenses that are about to expire. * It provides comprehensive invoice generation functionality with enhanced security measures. *
+ * Features: * - Automated renewal invoice generation for expiring licenses * - Email notifications for customers and administrators * - Database transaction support for data integrity * - Enhanced security measures and input validation * - Comprehensive error handling and logging * - Configurable expiry period for invoice generation * - Duplicate invoice prevention */
 class GenerateRenewalInvoices extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
+    /**   * The name and signature of the console command. *   * @var string */
     protected $signature = 'licenses:generate-renewal-invoices '
         . '{--days=7 : Number of days before expiry to generate invoices}';
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
+    /**   * The console command description. *   * @var string */
     protected $description = 'Generate renewal invoices for licenses that are about to expire with enhanced security';
-    /**
-     * The invoice service instance.
-     */
+    /**   * The invoice service instance. */
     protected InvoiceService $invoiceService;
-    /**
-     * The email service instance.
-     */
+    /**   * The email service instance. */
     protected EmailService $emailService;
-    /**
-     * Create a new command instance with enhanced security.
-     *
-     * @param  InvoiceService  $invoiceService  The invoice service instance
-     * @param  EmailService  $emailService  The email service instance
-     */
+    /**   * Create a new command instance with enhanced security. *   * @param InvoiceService $invoiceService The invoice service instance * @param EmailService $emailService The email service instance */
     public function __construct(InvoiceService $invoiceService, EmailService $emailService)
     {
         parent::__construct();
         $this->invoiceService = $invoiceService;
         $this->emailService = $emailService;
     }
-    /**
-     * Execute the console command with enhanced security and database transactions.
-     *
-     * @return int Command exit code
-     *
-     * @throws \InvalidArgumentException When invalid options are provided
-     * @throws \Exception When command execution fails
-     */
+    /**   * Execute the console command with enhanced security and database transactions. *   * @return int Command exit code *   * @throws \InvalidArgumentException When invalid options are provided * @throws \Exception When command execution fails */
     public function handle(): int
     {
         try {
@@ -128,13 +93,7 @@ class GenerateRenewalInvoices extends Command
             return Command::FAILURE;
         }
     }
-    /**
-     * Validate and sanitize the days option with enhanced security.
-     *
-     * @return int The validated days value
-     *
-     * @throws \InvalidArgumentException When invalid days value is provided
-     */
+    /**   * Validate and sanitize the days option with enhanced security. *   * @return int The validated days value *   * @throws \InvalidArgumentException When invalid days value is provided */
     protected function validateAndSanitizeDaysOption(): int
     {
         $days = (int)$this->option('days');
@@ -144,15 +103,7 @@ class GenerateRenewalInvoices extends Command
         }
         return $days;
     }
-    /**
-     * Get expiring licenses with enhanced security and validation.
-     *
-     * @param  Carbon  $expiryDate  The expiry date to check against
-     *
-     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\License> The collection of expiring licenses
-     *
-     * @throws \Exception When database query fails
-     */
+    /**   * Get expiring licenses with enhanced security and validation. *   * @param Carbon $expiryDate The expiry date to check against *   * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\License> The collection of expiring licenses *   * @throws \Exception When database query fails */
     protected function getExpiringLicenses(Carbon $expiryDate): \Illuminate\Database\Eloquent\Collection
     {
         try {
@@ -177,15 +128,7 @@ class GenerateRenewalInvoices extends Command
             throw $e;
         }
     }
-    /**
-     * Generate renewal invoice for a license with enhanced security.
-     *
-     * @param  License  $license  The license to generate invoice for
-     *
-     * @return \App\Models\Invoice|null The generated invoice or null if failed
-     *
-     * @throws \Exception When invoice generation fails
-     */
+    /**   * Generate renewal invoice for a license with enhanced security. *   * @param License $license The license to generate invoice for *   * @return \App\Models\Invoice|null The generated invoice or null if failed *   * @throws \Exception When invoice generation fails */
     protected function generateRenewalInvoice(License $license): ?\App\Models\Invoice
     {
         try {
@@ -246,17 +189,7 @@ class GenerateRenewalInvoices extends Command
             throw $e;
         }
     }
-    /**
-     * Calculate new expiry date based on renewal period with enhanced validation.
-     *
-     * @param  License  $license  The license to calculate expiry for
-     * @param  Product  $product  The product with renewal period settings
-     *
-     * @return Carbon The calculated new expiry date
-     *
-     * @throws \InvalidArgumentException When invalid renewal period is provided
-     * @throws \Exception When date calculation fails
-     */
+    /**   * Calculate new expiry date based on renewal period with enhanced validation. *   * @param License $license The license to calculate expiry for * @param Product $product The product with renewal period settings *   * @return Carbon The calculated new expiry date *   * @throws \InvalidArgumentException When invalid renewal period is provided * @throws \Exception When date calculation fails */
     protected function calculateNewExpiryDate(License $license, Product $product): Carbon
     {
         try {
@@ -317,16 +250,7 @@ class GenerateRenewalInvoices extends Command
             throw $e;
         }
     }
-    /**
-     * Send renewal notifications with enhanced security and validation.
-     *
-     * @param  License  $license  The license to send notifications for
-     * @param  \App\Models\Invoice  $invoice  The generated invoice
-     *
-     * @return bool True if notifications were sent successfully, false otherwise
-     *
-     * @throws \Exception When notification sending fails
-     */
+    /**   * Send renewal notifications with enhanced security and validation. *   * @param License $license The license to send notifications for * @param  \App\Models\Invoice  $invoice  The generated invoice *   * @return bool True if notifications were sent successfully, false otherwise *   * @throws \Exception When notification sending fails */
     protected function sendRenewalNotifications(License $license, \App\Models\Invoice $invoice): bool
     {
         try {

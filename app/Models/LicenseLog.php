@@ -7,47 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int $id
- * @property int $license_id
- * @property string $domain
- * @property string $ip_address
- * @property string $serial
- * @property string $status
- * @property string|null $user_agent
- * @property array<array-key, mixed>|null $request_data
- * @property array<array-key, mixed>|null $response_data
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read string|null $action
- * @property-read string|null $message
- * @property-read \App\Models\License $license
- * @method static \Database\Factories\LicenseLogFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereDomain($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereIpAddress($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereLicenseId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereRequestData($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereResponseData($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereSerial($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereUserAgent($value)
- * @mixin \Eloquent
- */
+ * @property int $id * @property int $license_id * @property string $domain * @property string $ip_address * @property string $serial * @property string $status * @property string|null $user_agent * @property array<array-key, mixed>|null $request_data * @property array<array-key, mixed>|null $response_data * @property \Illuminate\Support\Carbon|null $created_at * @property \Illuminate\Support\Carbon|null $updated_at * @property-read string|null $action * @property-read string|null $message * @property-read \App\Models\License $license * @method static \Database\Factories\LicenseLogFactory factory($count = null, $state = []) * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog newModelQuery() * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog newQuery() * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog query() * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereCreatedAt($value) * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereDomain($value) * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereId($value) * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereIpAddress($value) * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereLicenseId($value) * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereRequestData($value) * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereResponseData($value) * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereSerial($value) * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereStatus($value) * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereUpdatedAt($value) * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereUserAgent($value) * @mixin \Eloquent */
 class LicenseLog extends Model
 {
-    /**
-     * @phpstan-ignore-next-line
-     */
+    /**   * @phpstan-ignore-next-line */
     use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
+    /**   * @phpstan-ignore-next-line */
     protected static $factory = LicenseLogFactory::class;
 
     protected $fillable = [
@@ -64,16 +30,12 @@ class LicenseLog extends Model
         'request_data' => 'array',
         'response_data' => 'array',
     ];
-    /**
-     * @return BelongsTo<License, $this>
-     */
+    /**   * @return BelongsTo<License, $this> */
     public function license(): BelongsTo
     {
         return $this->belongsTo(License::class);
     }
-    /**
-     * Virtual attribute to access the action from request_data.
-     */
+    /**   * Virtual attribute to access the action from request_data. */
     public function getActionAttribute(): ?string
     {
         $data = $this->request_data;
@@ -84,9 +46,7 @@ class LicenseLog extends Model
         $action = $data['action'] ?? null;
         return is_string($action) ? $action : null;
     }
-    /**
-     * Virtual attribute to access the message from response_data.
-     */
+    /**   * Virtual attribute to access the message from response_data. */
     public function getMessageAttribute(): ?string
     {
         $data = $this->response_data;
@@ -97,10 +57,7 @@ class LicenseLog extends Model
         $message = $data['message'] ?? null;
         return is_string($message) ? $message : null;
     }
-    /**
-     * Get API calls grouped by date for the last N days.
-     * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
-     */
+    /**   * Get API calls grouped by date for the last N days. * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog> */
     public static function getApiCallsByDate(int $days = 30): \Illuminate\Database\Eloquent\Collection
     {
         return static::selectRaw('DATE(created_at) as date, COUNT(*) as count')
@@ -109,10 +66,7 @@ class LicenseLog extends Model
             ->orderBy('date')
             ->get();
     }
-    /**
-     * Get API status distribution for the last N days.
-     * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
-     */
+    /**   * Get API status distribution for the last N days. * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog> */
     public static function getApiStatusDistribution(int $days = 30): \Illuminate\Database\Eloquent\Collection
     {
         return static::selectRaw('status, COUNT(*) as count')
@@ -120,10 +74,7 @@ class LicenseLog extends Model
             ->groupBy('status')
             ->get();
     }
-    /**
-     * Get top domains by API calls.
-     * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
-     */
+    /**   * Get top domains by API calls. * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog> */
     public static function getTopDomainsByCalls(int $limit = 10): \Illuminate\Database\Eloquent\Collection
     {
         return static::selectRaw('domain, COUNT(*) as calls')
@@ -133,10 +84,7 @@ class LicenseLog extends Model
             ->limit($limit)
             ->get();
     }
-    /**
-     * Get API calls by hour for today.
-     * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog>
-     */
+    /**   * Get API calls by hour for today. * @return \Illuminate\Database\Eloquent\Collection<int, LicenseLog> */
     public static function getApiCallsByHour(): \Illuminate\Database\Eloquent\Collection
     {
         return static::selectRaw('HOUR(created_at) as hour, COUNT(*) as count')

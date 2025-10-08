@@ -1,11 +1,6 @@
 /**
- * License Verification System
- * Product: {{product}}
- * Language: Swift
- * Generated: {{date}}
- *
- * This is a generic template. Please customize according to Swift best practices.
- */
+ * License Verification System * Product: {{product}} * Language: Swift * Generated: {{date}} *
+ * This is a generic template. Please customize according to Swift best practices. */
 
 // License verification for Swift
 // API URL: {{license_api_url}}

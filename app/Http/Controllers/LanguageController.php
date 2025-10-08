@@ -7,21 +7,11 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Language Controller.
- *
- * Handles switching the application language with validation and security.
- */
+ * Language Controller. *
+ * Handles switching the application language with validation and security. */
 class LanguageController extends Controller
 {
-    /**
-     * Switch application language.
-     *
-     * @param  string  $locale  Requested locale code
-     *
-     * @return RedirectResponse Redirects back with status message
-     *
-     * @throws \Exception On unexpected failure
-     */
+    /**   * Switch application language. *   * @param string $locale Requested locale code *   * @return RedirectResponse Redirects back with status message *   * @throws \Exception On unexpected failure */
     public function switch(string $locale): RedirectResponse
     {
         try {
@@ -50,11 +40,7 @@ class LanguageController extends Controller
             return back()->with('error', 'Failed to switch language. Please try again.');
         }
     }
-    /**
-     * Get available languages from resources/lang directory.
-     *
-     * @return array<string>
-     */
+    /**   * Get available languages from resources/lang directory. *   * @return array<string> */
     private function getAvailableLanguages(): array
     {
         $available = [];
@@ -72,11 +58,7 @@ class LanguageController extends Controller
         }
         return $available;
     }
-    /**
-     * Get available languages with metadata for views.
-     *
-     * @return array<int, array<string, string>> The available languages with metadata
-     */
+    /**   * Get available languages with metadata for views. *   * @return array<int, array<string, string>> The available languages with metadata */
     public static function getAvailableLanguagesWithMetadata(): array
     {
         $languages = [];

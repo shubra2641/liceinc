@@ -11,51 +11,15 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
- * Product File Service with enhanced security and encryption.
+ * Product File Service with enhanced security and encryption. *
+ * This service handles secure file upload, storage, and download for products * with comprehensive encryption, validation, and access control mechanisms. *
+ * Features: * - Secure file upload with encryption and validation * - File content scanning for malicious patterns * - License and invoice verification for downloads * - Comprehensive access control and permissions * - File integrity verification with checksums * - Support for product updates and versioning * - Automatic file cleanup and management * - Multi-format file support with type validation *
  *
- * This service handles secure file upload, storage, and download for products
- * with comprehensive encryption, validation, and access control mechanisms.
- *
- * Features:
- * - Secure file upload with encryption and validation
- * - File content scanning for malicious patterns
- * - License and invoice verification for downloads
- * - Comprehensive access control and permissions
- * - File integrity verification with checksums
- * - Support for product updates and versioning
- * - Automatic file cleanup and management
- * - Multi-format file support with type validation
- *
- *
- * @example
- * // Upload a file for a product
- * $service = new ProductFileService();
- * $file = $service->uploadFile($product, $uploadedFile, 'Product documentation');
- *
- * // Download a file with permission check
- * $result = $service->downloadFile($file, $userId);
- */
+ * @example * // Upload a file for a product * $service = new ProductFileService(); * $file = $service->uploadFile($product, $uploadedFile, 'Product documentation'); *
+ * // Download a file with permission check * $result = $service->downloadFile($file, $userId); */
 class ProductFileService
 {
-    /**
-     * Upload and encrypt a file for a product with comprehensive security validation.
-     *
-     * Handles secure file upload with encryption, validation, and malicious content
-     * scanning. Includes proper error handling and security measures to prevent
-     * unauthorized access and file corruption.
-     *
-     * @param  Product  $product  The product to upload file for
-     * @param  UploadedFile  $file  The uploaded file to process
-     * @param  string|null  $description  Optional description for the file
-     *
-     * @return ProductFile The created product file record
-     *
-     * @throws \Exception When file upload fails or validation errors occur
-     *
-     * @example
-     * $file = $service->uploadFile($product, $uploadedFile, 'Product documentation');
-     * echo "File uploaded with ID: " . $file->id;
-     */
+    /**   * Upload and encrypt a file for a product with comprehensive security validation. *   * Handles secure file upload with encryption, validation, and malicious content * scanning. Includes proper error handling and security measures to prevent * unauthorized access and file corruption. *   * @param Product $product The product to upload file for * @param UploadedFile $file The uploaded file to process * @param  string|null  $description  Optional description for the file *   * @return ProductFile The created product file record *   * @throws \Exception When file upload fails or validation errors occur *   * @example * $file = $service->uploadFile($product, $uploadedFile, 'Product documentation'); * echo "File uploaded with ID: " . $file->id; */
     public function uploadFile(Product $product, UploadedFile $file, ?string $description = null): ProductFile
     {
         try {
@@ -112,29 +76,8 @@ class ProductFileService
             throw $e;
         }
     }
-    /**
-     * Download a file for a user with comprehensive security and permission validation.
-     *
-     * Handles secure file download with license verification, invoice validation,
-     * file integrity checks, and access control. Includes proper error handling
-     * and security measures to prevent unauthorized access.
-     *
-     * @param  ProductFile  $file  The product file to download
-     * @param  int|null  $userId  The user ID requesting the download
-     *
-     * @return array|null The file data array or null if access denied
-     *
-     * @throws \Exception When download fails or security validation errors occur
-     *
-     * @example
-     * $result = $service->downloadFile($file, $userId);
-     * if ($result) {
-     *     echo "File: " . $result['filename'];
-     * }
-     */
-    /**
-     * @return array<string, mixed>|null
-     */
+    /**   * Download a file for a user with comprehensive security and permission validation. *   * Handles secure file download with license verification, invoice validation, * file integrity checks, and access control. Includes proper error handling * and security measures to prevent unauthorized access. *   * @param ProductFile $file The product file to download * @param  int|null  $userId  The user ID requesting the download *   * @return array|null The file data array or null if access denied *   * @throws \Exception When download fails or security validation errors occur *   * @example * $result = $service->downloadFile($file, $userId); * if ($result) { * echo "File: " . $result['filename']; * } */
+    /**   * @return array<string, mixed>|null */
     public function downloadFile(ProductFile $file, ?int $userId = null): ?array
     {
         try {
@@ -193,24 +136,7 @@ class ProductFileService
             throw $e;
         }
     }
-    /**
-     * Delete a product file with comprehensive security validation.
-     *
-     * Safely removes both the physical file and database record with proper
-     * error handling and security validation to prevent unauthorized access.
-     *
-     * @param  ProductFile  $file  The product file to delete
-     *
-     * @return bool True if deletion successful, false otherwise
-     *
-     * @throws \Exception When deletion fails
-     *
-     * @example
-     * $success = $service->deleteFile($file);
-     * if ($success) {
-     *     echo "File deleted successfully";
-     * }
-     */
+    /**   * Delete a product file with comprehensive security validation. *   * Safely removes both the physical file and database record with proper * error handling and security validation to prevent unauthorized access. *   * @param ProductFile $file The product file to delete *   * @return bool True if deletion successful, false otherwise *   * @throws \Exception When deletion fails *   * @example * $success = $service->deleteFile($file); * if ($success) { * echo "File deleted successfully"; * } */
     public function deleteFile(ProductFile $file): bool
     {
         try {
@@ -233,26 +159,8 @@ class ProductFileService
             throw $e;
         }
     }
-    /**
-     * Get files for a product with validation and filtering.
-     *
-     * Retrieves product files with optional filtering for active files only.
-     * Includes proper validation and error handling for secure data access.
-     *
-     * @param  Product  $product  The product to get files for
-     * @param  bool  $activeOnly  Whether to return only active files
-     *
-     * @return \Illuminate\Database\Eloquent\Collection The collection of product files
-     *
-     * @throws \Exception When file retrieval fails
-     *
-     * @example
-     * $files = $service->getProductFiles($product, true);
-     * echo "Found " . $files->count() . " active files";
-     */
-    /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, ProductFile>
-     */
+    /**   * Get files for a product with validation and filtering. *   * Retrieves product files with optional filtering for active files only. * Includes proper validation and error handling for secure data access. *   * @param Product $product The product to get files for * @param bool $activeOnly Whether to return only active files *   * @return \Illuminate\Database\Eloquent\Collection The collection of product files *   * @throws \Exception When file retrieval fails *   * @example * $files = $service->getProductFiles($product, true); * echo "Found " . $files->count() . " active files"; */
+    /**   * @return \Illuminate\Database\Eloquent\Collection<int, ProductFile> */
     public function getProductFiles(Product $product, bool $activeOnly = true): \Illuminate\Database\Eloquent\Collection
     {
         try {
@@ -275,17 +183,7 @@ class ProductFileService
             throw $e;
         }
     }
-    /**
-     * Sanitize input data to prevent XSS and injection attacks.
-     *
-     * Provides comprehensive input sanitization for file names, descriptions,
-     * and other user inputs to ensure security and prevent various types
-     * of injection attacks.
-     *
-     * @param  string|null  $input  The input string to sanitize
-     *
-     * @return string The sanitized input string
-     */
+    /**   * Sanitize input data to prevent XSS and injection attacks. *   * Provides comprehensive input sanitization for file names, descriptions, * and other user inputs to ensure security and prevent various types * of injection attacks. *   * @param  string|null  $input  The input string to sanitize *   * @return string The sanitized input string */
     private function sanitizeInput(?string $input): string
     {
         if ($input === null) {
@@ -299,17 +197,7 @@ class ProductFileService
         $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
         return $input;
     }
-    /**
-     * Validate uploaded file with comprehensive security checks.
-     *
-     * Performs thorough validation of uploaded files including size limits,
-     * file type restrictions, and malicious content scanning to ensure
-     * security and prevent unauthorized file uploads.
-     *
-     * @param  UploadedFile  $file  The uploaded file to validate
-     *
-     * @throws \Exception When file validation fails
-     */
+    /**   * Validate uploaded file with comprehensive security checks. *   * Performs thorough validation of uploaded files including size limits, * file type restrictions, and malicious content scanning to ensure * security and prevent unauthorized file uploads. *   * @param UploadedFile $file The uploaded file to validate *   * @throws \Exception When file validation fails */
     private function validateFile(UploadedFile $file): void
     {
         try {
@@ -361,17 +249,7 @@ class ProductFileService
             throw $e;
         }
     }
-    /**
-     * Scan file for malicious content with comprehensive pattern detection.
-     *
-     * Performs thorough security scanning of file content to detect common
-     * malicious patterns and potential security threats. Includes proper
-     * error handling and detailed logging for security monitoring.
-     *
-     * @param  UploadedFile  $file  The uploaded file to scan
-     *
-     * @throws \Exception When malicious content is detected
-     */
+    /**   * Scan file for malicious content with comprehensive pattern detection. *   * Performs thorough security scanning of file content to detect common * malicious patterns and potential security threats. Includes proper * error handling and detailed logging for security monitoring. *   * @param UploadedFile $file The uploaded file to scan *   * @throws \Exception When malicious content is detected */
     private function scanFileForMaliciousContent(UploadedFile $file): void
     {
         try {
@@ -416,19 +294,7 @@ class ProductFileService
             throw $e;
         }
     }
-    /**
-     * Encrypt file content with AES-256-CBC encryption.
-     *
-     * Provides secure file content encryption using AES-256-CBC algorithm
-     * with proper initialization vector generation for enhanced security.
-     *
-     * @param  string  $content  The content to encrypt
-     * @param  string  $key  The encryption key
-     *
-     * @return string The encrypted content
-     *
-     * @throws \Exception When encryption fails
-     */
+    /**   * Encrypt file content with AES-256-CBC encryption. *   * Provides secure file content encryption using AES-256-CBC algorithm * with proper initialization vector generation for enhanced security. *   * @param string $content The content to encrypt * @param string $key The encryption key *   * @return string The encrypted content *   * @throws \Exception When encryption fails */
     private function encryptContent(string $content, string $key): string
     {
         try {
@@ -456,9 +322,7 @@ class ProductFileService
             throw $e;
         }
     }
-    /**
-     * Check if user has active license for product.
-     */
+    /**   * Check if user has active license for product. */
     private function userHasLicense(Product $product, int $userId): bool
     {
         return $product->licenses()
@@ -470,9 +334,7 @@ class ProductFileService
             })
             ->exists();
     }
-    /**
-     * Check if user has paid invoice for product.
-     */
+    /**   * Check if user has paid invoice for product. */
     private function userHasPaidInvoice(Product $product, int $userId): bool
     {
         return \App\Models\Invoice::where('product_id', $product->id)
@@ -480,12 +342,8 @@ class ProductFileService
             ->where('status', 'paid')
             ->exists();
     }
-    /**
-     * Check if user can download files (has license AND paid invoice).
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Check if user can download files (has license AND paid invoice). */
+    /**   * @return array<string, mixed> */
     public function userCanDownloadFiles(Product $product, int $userId): array
     {
         $hasLicense = $this->userHasLicense($product, $userId);
@@ -497,9 +355,7 @@ class ProductFileService
             'message' => $this->getDownloadPermissionMessage($hasLicense, $hasPaidInvoice),
         ];
     }
-    /**
-     * Get appropriate message based on download permissions.
-     */
+    /**   * Get appropriate message based on download permissions. */
     private function getDownloadPermissionMessage(bool $hasLicense, bool $hasPaidInvoice): string
     {
         if (! $hasLicense && ! $hasPaidInvoice) {
@@ -511,12 +367,8 @@ class ProductFileService
         }
         return '';
     }
-    /**
-     * Get all available versions (updates + base files) for a product.
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Get all available versions (updates + base files) for a product. */
+    /**   * @return array<string, mixed> */
     public function getAllProductVersions(Product $product, int $userId): array
     {
         // First check if user can download files
@@ -554,9 +406,7 @@ class ProductFileService
         // Return all versions without logging success
         return ['all_versions' => $allVersions];
     }
-    /**
-     * Get the latest update file for a product or return the base product file.
-     */
+    /**   * Get the latest update file for a product or return the base product file. */
     public function getLatestProductFile(Product $product, int $userId): ?ProductFile
     {
         // First check if user can download files
@@ -579,9 +429,7 @@ class ProductFileService
             ->orderBy('created_at', 'desc')
             ->first();
     }
-    /**
-     * Get the latest version for a product (from updates or base version).
-     */
+    /**   * Get the latest version for a product (from updates or base version). */
     public function getLatestProductVersion(Product $product): string
     {
         // Check if there are any product updates available
@@ -596,9 +444,7 @@ class ProductFileService
         // If no updates available, return the base product version
         return $product->version ?? '1.0';
     }
-    /**
-     * Create a ProductFile record for an update file.
-     */
+    /**   * Create a ProductFile record for an update file. */
     private function createUpdateFileRecord(\Illuminate\Database\Eloquent\Model $update): ProductFile
     {
         // Create a temporary ProductFile record for the update
@@ -625,13 +471,8 @@ class ProductFileService
         $file->is_update = true;
         return $file;
     }
-    /**
-     * Download update file directly from the update record.
-     */
-    /**
-     * @param \App\Models\ProductUpdate $update
-     * @return array<string, mixed>
-     */
+    /**   * Download update file directly from the update record. */
+    /**   * @param \App\Models\ProductUpdate $update * @return array<string, mixed> */
     public function downloadUpdateFile(\App\Models\ProductUpdate $update, int $userId): array
     {
         if (! $update->file_path || ! Storage::disk('private')->exists($update->file_path)) {

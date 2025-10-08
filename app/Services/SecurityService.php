@@ -8,51 +8,13 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 
 /**
- * Security Service with enhanced security.
- *
- * A comprehensive security service that provides centralized security functionality
- * including input validation, threat detection, security monitoring, and comprehensive
- * error handling with enhanced security measures.
- *
- * Features:
- * - Advanced input validation and sanitization
- * - XSS protection and HTML sanitization
- * - Threat detection and suspicious activity monitoring
- * - Rate limiting and IP blacklisting
- * - File upload security validation
- * - Attack pattern detection
- * - Security event logging
- * - Enhanced error handling and validation
- * - Comprehensive security measures
- * - Clean code structure with no duplicate patterns
- * - Proper type hints and return types
- */
+ * Security Service with enhanced security. *
+ * A comprehensive security service that provides centralized security functionality * including input validation, threat detection, security monitoring, and comprehensive * error handling with enhanced security measures. *
+ * Features: * - Advanced input validation and sanitization * - XSS protection and HTML sanitization * - Threat detection and suspicious activity monitoring * - Rate limiting and IP blacklisting * - File upload security validation * - Attack pattern detection * - Security event logging * - Enhanced error handling and validation * - Comprehensive security measures * - Clean code structure with no duplicate patterns * - Proper type hints and return types */
 class SecurityService
 {
-    /**
-     * Validate and sanitize input data with enhanced security.
-     *
-     * Validates and sanitizes input data with comprehensive security measures
-     * including XSS protection, length validation, and custom rule application.
-     *
-     * @param  array  $data  The input data to validate and sanitize
-     * @param  array  $rules  Custom validation rules to apply
-     *
-     * @return array The validated and sanitized data
-     *
-     * @throws \InvalidArgumentException When input data is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
-    /**
-     * @param array<mixed> $data
-     * @param array<mixed> $rules
-     * @return array<mixed>
-     */
+    /**   * Validate and sanitize input data with enhanced security. *   * Validates and sanitizes input data with comprehensive security measures * including XSS protection, length validation, and custom rule application. *   * @param array $data The input data to validate and sanitize * @param array $rules Custom validation rules to apply *   * @return array The validated and sanitized data *   * @throws \InvalidArgumentException When input data is invalid *   * @version 1.0.6 *   *   *   *   */
+    /**   * @param array<mixed> $data * @param array<mixed> $rules * @return array<mixed> */
     public function validateAndSanitizeInput(array $data, array $rules = []): array
     {
         try {
@@ -90,24 +52,7 @@ class SecurityService
             throw $e;
         }
     }
-    /**
-     * Sanitize HTML content with enhanced security.
-     *
-     * Sanitizes HTML content by removing dangerous patterns, converting
-     * special characters, and applying comprehensive XSS protection.
-     *
-     * @param  string  $content  The HTML content to sanitize
-     *
-     * @return string The sanitized HTML content
-     *
-     * @throws \InvalidArgumentException When content is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Sanitize HTML content with enhanced security. *   * Sanitizes HTML content by removing dangerous patterns, converting * special characters, and applying comprehensive XSS protection. *   * @param string $content The HTML content to sanitize *   * @return string The sanitized HTML content *   * @throws \InvalidArgumentException When content is invalid *   * @version 1.0.6 *   *   *   *   */
     public function sanitizeHtml(string $content): string
     {
         try {
@@ -131,22 +76,7 @@ class SecurityService
             return '';
         }
     }
-    /**
-     * Remove dangerous patterns from content with enhanced security.
-     *
-     * Removes dangerous JavaScript patterns, malicious scripts, and
-     * other security threats from content.
-     *
-     * @param  string  $content  The content to clean
-     *
-     * @return string The cleaned content
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Remove dangerous patterns from content with enhanced security. *   * Removes dangerous JavaScript patterns, malicious scripts, and * other security threats from content. *   * @param string $content The content to clean *   * @return string The cleaned content *   * @version 1.0.6 *   *   *   *   */
     private function removeDangerousPatterns(string $content): string
     {
         try {
@@ -182,25 +112,7 @@ class SecurityService
             return (string)$content;
         }
     }
-    /**
-     * Apply specific validation rule with enhanced security.
-     *
-     * Applies specific validation rules to values with comprehensive
-     * error handling and security measures.
-     *
-     * @param  mixed  $value  The value to validate
-     * @param  string  $rule  The validation rule to apply
-     *
-     * @return mixed The validated value
-     *
-     * @throws \InvalidArgumentException When rule is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Apply specific validation rule with enhanced security. *   * Applies specific validation rules to values with comprehensive * error handling and security measures. *   * @param mixed $value The value to validate * @param string $rule The validation rule to apply *   * @return mixed The validated value *   * @throws \InvalidArgumentException When rule is invalid *   * @version 1.0.6 *   *   *   *   */
     private function applyValidationRule($value, string $rule)
     {
         try {
@@ -227,24 +139,7 @@ class SecurityService
             return $value;
         }
     }
-    /**
-     * Check if request is from a suspicious source with enhanced security.
-     *
-     * Analyzes the request for suspicious indicators including rate limiting,
-     * user agent analysis, header inspection, and attack pattern detection.
-     *
-     * @param  Request  $request  The HTTP request to analyze
-     *
-     * @return bool True if request is suspicious, false otherwise
-     *
-     * @throws \InvalidArgumentException When request is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Check if request is from a suspicious source with enhanced security. *   * Analyzes the request for suspicious indicators including rate limiting, * user agent analysis, header inspection, and attack pattern detection. *   * @param Request $request The HTTP request to analyze *   * @return bool True if request is suspicious, false otherwise *   * @throws \InvalidArgumentException When request is invalid *   * @version 1.0.6 *   *   *   *   */
     public function isSuspiciousRequest(Request $request): bool
     {
         try {
@@ -270,9 +165,7 @@ class SecurityService
             return false;
         }
     }
-    /**
-     * Check if request has high rate.
-     */
+    /**   * Check if request has high rate. */
     private function hasHighRequestRate(Request $request): bool
     {
         $key = 'rate_limit:' . $request->ip();
@@ -280,9 +173,7 @@ class SecurityService
         $maxRequestsInt = is_numeric($maxRequests) ? (int)$maxRequests : 60;
         return RateLimiter::tooManyAttempts($key, $maxRequestsInt);
     }
-    /**
-     * Check if user agent is suspicious.
-     */
+    /**   * Check if user agent is suspicious. */
     private function hasSuspiciousUserAgent(Request $request): bool
     {
         $userAgent = strtolower($request->userAgent() ?? '');
@@ -298,9 +189,7 @@ class SecurityService
         }
         return false;
     }
-    /**
-     * Check if request has suspicious headers.
-     */
+    /**   * Check if request has suspicious headers. */
     private function hasSuspiciousHeaders(Request $request): bool
     {
         $suspiciousHeaders = [
@@ -316,9 +205,7 @@ class SecurityService
         }
         return false;
     }
-    /**
-     * Check if IP is blacklisted.
-     */
+    /**   * Check if IP is blacklisted. */
     private function isFromBlacklistedIP(Request $request): bool
     {
         $ip = $request->ip();
@@ -327,9 +214,7 @@ class SecurityService
         $blacklist = explode(', ', $blacklistString);
         return in_array($ip, array_filter($blacklist));
     }
-    /**
-     * Check if request contains known attack patterns.
-     */
+    /**   * Check if request contains known attack patterns. */
     private function hasKnownAttackPatterns(Request $request): bool
     {
         $attackPatterns = [
@@ -376,27 +261,8 @@ class SecurityService
         }
         return false;
     }
-    /**
-     * Log security event with enhanced security.
-     *
-     * Logs security events with comprehensive context and proper
-     * error handling for security monitoring and analysis.
-     *
-     * @param  string  $event  The security event type
-     * @param  array  $data  Additional event data
-     * @param  string  $level  The log level (warning, error, info)
-     *
-     * @throws \InvalidArgumentException When parameters are invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
-    /**
-     * @param array<string, mixed> $data
-     */
+    /**   * Log security event with enhanced security. *   * Logs security events with comprehensive context and proper * error handling for security monitoring and analysis. *   * @param string $event The security event type * @param array $data Additional event data * @param string $level The log level (warning, error, info) *   * @throws \InvalidArgumentException When parameters are invalid *   * @version 1.0.6 *   *   *   *   */
+    /**   * @param array<string, mixed> $data */
     public function logSecurityEvent(string $event, array $data = [], string $level = 'warning'): void
     {
         try {
@@ -420,24 +286,7 @@ class SecurityService
             Log::error('Failed to log security event: ' . $e->getMessage());
         }
     }
-    /**
-     * Generate secure token with enhanced security.
-     *
-     * Generates a cryptographically secure random token with
-     * proper validation and error handling.
-     *
-     * @param  int  $length  The length of the token in characters
-     *
-     * @return string The generated secure token
-     *
-     * @throws \InvalidArgumentException When length is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Generate secure token with enhanced security. *   * Generates a cryptographically secure random token with * proper validation and error handling. *   * @param int $length The length of the token in characters *   * @return string The generated secure token *   * @throws \InvalidArgumentException When length is invalid *   * @version 1.0.6 *   *   *   *   */
     public function generateSecureToken(int $length = 32): string
     {
         try {
@@ -453,31 +302,9 @@ class SecurityService
             throw $e;
         }
     }
-    /**
-     * Validate file upload security with enhanced security.
-     *
-     * Validates file uploads for security threats including size limits,
-     * file type validation, MIME type checking, and content scanning.
-     *
-     * @param  mixed  $file  The uploaded file to validate
-     *
-     * @return array Validation result with valid flag and errors
-     *
-     * @throws \InvalidArgumentException When file is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
-    /**
-     * @return array<string, mixed>
-     */
-    /**
-     * @param mixed $file
-     * @return array<string, mixed>
-     */
+    /**   * Validate file upload security with enhanced security. *   * Validates file uploads for security threats including size limits, * file type validation, MIME type checking, and content scanning. *   * @param mixed $file The uploaded file to validate *   * @return array Validation result with valid flag and errors *   * @throws \InvalidArgumentException When file is invalid *   * @version 1.0.6 *   *   *   *   */
+    /**   * @return array<string, mixed> */
+    /**   * @param mixed $file * @return array<string, mixed> */
     public function validateFileUpload($file): array
     {
         try {
@@ -499,7 +326,7 @@ class SecurityService
             // Check file extension
             $allowedExtensionsConfig = config('security.file_upload_security.allowed_extensions', []);
             $allowedExtensions = is_array($allowedExtensionsConfig) ? $allowedExtensionsConfig : [];
-            $extension = method_exists($file, 'getClientOriginalExtension') ? 
+            $extension = method_exists($file, 'getClientOriginalExtension') ?
                 (is_string($file->getClientOriginalExtension()) ? strtolower($file->getClientOriginalExtension()) : '') : '';
             $isAllowed = false;
             foreach ($allowedExtensions as $category => $extensions) {
@@ -514,7 +341,7 @@ class SecurityService
                 $result['errors'][] = 'File type not allowed';
             }
             // Check MIME type
-            $mimeType = method_exists($file, 'getMimeType') ? 
+            $mimeType = method_exists($file, 'getMimeType') ?
                 (is_string($file->getMimeType()) ? $file->getMimeType() : '') : '';
             if (!$this->isAllowedMimeType($mimeType)) {
                 $result['valid'] = false;
@@ -522,13 +349,13 @@ class SecurityService
             }
             // Scan file content for malicious patterns
             if (config('security.file_upload_security.validate_file_content', true)) {
-            $filePath = method_exists($file, 'getRealPath') ? $file->getRealPath() : '';
-            $filePathString = is_string($filePath) ? $filePath : '';
-            $content = file_get_contents($filePathString);
-            if ($content === false) {
-                $result['valid'] = false;
-                $result['errors'][] = 'Unable to read file content';
-            } elseif ($this->containsMaliciousContent($content)) {
+                $filePath = method_exists($file, 'getRealPath') ? $file->getRealPath() : '';
+                $filePathString = is_string($filePath) ? $filePath : '';
+                $content = file_get_contents($filePathString);
+                if ($content === false) {
+                    $result['valid'] = false;
+                    $result['errors'][] = 'Unable to read file content';
+                } elseif ($this->containsMaliciousContent($content)) {
                     $result['valid'] = false;
                     $result['errors'][] = 'File contains potentially malicious content';
                 }
@@ -552,22 +379,7 @@ class SecurityService
             ];
         }
     }
-    /**
-     * Check if MIME type is allowed with enhanced security.
-     *
-     * Validates MIME types against a whitelist of allowed types
-     * with comprehensive security measures.
-     *
-     * @param  string  $mimeType  The MIME type to validate
-     *
-     * @return bool True if MIME type is allowed, false otherwise
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Check if MIME type is allowed with enhanced security. *   * Validates MIME types against a whitelist of allowed types * with comprehensive security measures. *   * @param string $mimeType The MIME type to validate *   * @return bool True if MIME type is allowed, false otherwise *   * @version 1.0.6 *   *   *   *   */
     private function isAllowedMimeType(string $mimeType): bool
     {
         try {
@@ -595,22 +407,7 @@ class SecurityService
             return false;
         }
     }
-    /**
-     * Check if content contains malicious patterns with enhanced security.
-     *
-     * Scans content for malicious patterns including PHP code, JavaScript,
-     * and other potentially dangerous content.
-     *
-     * @param  string  $content  The content to scan
-     *
-     * @return bool True if malicious content is found, false otherwise
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Check if content contains malicious patterns with enhanced security. *   * Scans content for malicious patterns including PHP code, JavaScript, * and other potentially dangerous content. *   * @param string $content The content to scan *   * @return bool True if malicious content is found, false otherwise *   * @version 1.0.6 *   *   *   *   */
     private function containsMaliciousContent(string $content): bool
     {
         try {
@@ -650,26 +447,7 @@ class SecurityService
             return true; // Fail safe - assume malicious if scan fails
         }
     }
-    /**
-     * Rate limit a specific action with enhanced security.
-     *
-     * Checks if rate limit has been exceeded for a specific action
-     * with proper validation and error handling.
-     *
-     * @param  string  $key  The rate limit key
-     * @param  int  $maxAttempts  Maximum number of attempts allowed
-     * @param  int  $decayMinutes  Decay time in minutes
-     *
-     * @return bool True if rate limit exceeded, false otherwise
-     *
-     * @throws \InvalidArgumentException When parameters are invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Rate limit a specific action with enhanced security. *   * Checks if rate limit has been exceeded for a specific action * with proper validation and error handling. *   * @param string $key The rate limit key * @param int $maxAttempts Maximum number of attempts allowed * @param int $decayMinutes Decay time in minutes *   * @return bool True if rate limit exceeded, false otherwise *   * @throws \InvalidArgumentException When parameters are invalid *   * @version 1.0.6 *   *   *   *   */
     public function rateLimitExceeded(string $key, int $maxAttempts, int $decayMinutes): bool
     {
         try {
@@ -688,22 +466,7 @@ class SecurityService
             return false;
         }
     }
-    /**
-     * Clear rate limit for a key with enhanced security.
-     *
-     * Clears the rate limit for a specific key with proper
-     * validation and error handling.
-     *
-     * @param  string  $key  The rate limit key to clear
-     *
-     * @throws \InvalidArgumentException When key is invalid
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Clear rate limit for a key with enhanced security. *   * Clears the rate limit for a specific key with proper * validation and error handling. *   * @param string $key The rate limit key to clear *   * @throws \InvalidArgumentException When key is invalid *   * @version 1.0.6 *   *   *   *   */
     public function clearRateLimit(string $key): void
     {
         try {

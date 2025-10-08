@@ -1,11 +1,6 @@
 /**
- * License Verification System
- * Product: {{product}}
- * Language: Go
- * Generated: {{date}}
- *
- * This is a generic template. Please customize according to Go best practices.
- */
+ * License Verification System * Product: {{product}} * Language: Go * Generated: {{date}} *
+ * This is a generic template. Please customize according to Go best practices. */
 
 // License verification for Go
 // API URL: {{license_api_url}}

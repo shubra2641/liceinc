@@ -2,3 +2,29 @@
 [2025-10-07 11:52:32] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/vendor/assets/bootstrap/css/bootstrap.min.css.map","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-07 11:52:32"} 
 [2025-10-07 22:45:23] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/vendor/assets/bootstrap/bootstrap.bundle.min.js.map","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-07 22:45:23"} 
 [2025-10-07 22:45:23] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/vendor/assets/bootstrap/css/bootstrap.min.css.map","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-07 22:45:23"} 
+[2025-10-08 13:25:26] laravel.EMERGENCY: Unable to create configured logger. Using emergency logger. {"exception":"[object] (InvalidArgumentException(code: 0): Log [] is not defined. at D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Log\\LogManager.php:222)
+[stacktrace]
+#0 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Log\\LogManager.php(138): Illuminate\\Log\\LogManager->resolve(NULL, NULL)
+#1 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Log\\LogManager.php(125): Illuminate\\Log\\LogManager->get(NULL)
+#2 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Log\\LogManager.php(703): Illuminate\\Log\\LogManager->driver()
+#3 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Exceptions\\Handler.php(403): Illuminate\\Log\\LogManager->error('App\\\\Helpers\\\\Sec...', Array)
+#4 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Exceptions\\Handler.php(366): Illuminate\\Foundation\\Exceptions\\Handler->reportThrowable(Object(TypeError))
+#5 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(562): Illuminate\\Foundation\\Exceptions\\Handler->report(Object(TypeError))
+#6 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(146): Illuminate\\Foundation\\Http\\Kernel->reportException(Object(TypeError))
+#7 D:\\xampp\\htdocs\\my-logos\\public\\index.php(52): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#8 {main}
+"} 
+[2025-10-08 13:25:26] laravel.ERROR: App\Helpers\SecureFileHelper::parseUrl(): Argument #1 ($url) must be of type string, null given, called in D:\xampp\htdocs\my-logos\config\license_server.php on line 16 {"exception":"[object] (TypeError(code: 0): App\\Helpers\\SecureFileHelper::parseUrl(): Argument #1 ($url) must be of type string, null given, called in D:\\xampp\\htdocs\\my-logos\\config\\license_server.php on line 16 at D:\\xampp\\htdocs\\my-logos\\app\\Helpers\\SecureFileHelper.php:168)
+[stacktrace]
+#0 D:\\xampp\\htdocs\\my-logos\\config\\license_server.php(16): App\\Helpers\\SecureFileHelper::parseUrl(NULL, 1)
+#1 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\LoadConfiguration.php(99): require('D:\\\\xampp\\\\htdocs...')
+#2 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\LoadConfiguration.php(99): Illuminate\\Foundation\\Bootstrap\\LoadConfiguration->Illuminate\\Foundation\\Bootstrap\\{closure}()
+#3 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\LoadConfiguration.php(80): Illuminate\\Foundation\\Bootstrap\\LoadConfiguration->loadConfigurationFile(Object(Illuminate\\Config\\Repository), 'license_server', 'D:\\\\xampp\\\\htdocs...', Array)
+#4 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\LoadConfiguration.php(39): Illuminate\\Foundation\\Bootstrap\\LoadConfiguration->loadConfigurationFiles(Object(Illuminate\\Foundation\\Application), Object(Illuminate\\Config\\Repository))
+#5 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(342): Illuminate\\Foundation\\Bootstrap\\LoadConfiguration->bootstrap(Object(Illuminate\\Foundation\\Application))
+#6 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(186): Illuminate\\Foundation\\Application->bootstrapWith(Array)
+#7 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(170): Illuminate\\Foundation\\Http\\Kernel->bootstrap()
+#8 D:\\xampp\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#9 D:\\xampp\\htdocs\\my-logos\\public\\index.php(52): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#10 {main}
+"} 

@@ -16,53 +16,18 @@ use Illuminate\View\View;
 use App\Helpers\SecureFileHelper;
 
 /**
- * Admin License Controller with enhanced security.
- *
- * This controller handles comprehensive license management in the admin panel
- * including creation, editing, status management, and export functionality.
- *
- * Features:
- * - License CRUD operations with validation
- * - Automatic invoice generation
- * - Email notifications for license events
- * - License status management and toggling
- * - CSV export functionality
- * - Product inheritance for license types
- * - Domain limit management
- * - Comprehensive error handling with database transactions
- * - Enhanced security measures (XSS protection, input validation)
- * - Proper logging for errors and warnings only
- * - Model scope integration for optimized queries
- */
+ * Admin License Controller with enhanced security. *
+ * This controller handles comprehensive license management in the admin panel * including creation, editing, status management, and export functionality. *
+ * Features: * - License CRUD operations with validation * - Automatic invoice generation * - Email notifications for license events * - License status management and toggling * - CSV export functionality * - Product inheritance for license types * - Domain limit management * - Comprehensive error handling with database transactions * - Enhanced security measures (XSS protection, input validation) * - Proper logging for errors and warnings only * - Model scope integration for optimized queries */
 class LicenseController extends Controller
 {
     protected EmailService $emailService;
-    /**
-     * Create a new controller instance.
-     *
-     * @param  EmailService  $emailService  The email service for notifications
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Create a new controller instance. *   * @param EmailService $emailService The email service for notifications *   * @version 1.0.6 *   *   *   *   */
     public function __construct(EmailService $emailService)
     {
         $this->emailService = $emailService;
     }
-    /**
-     * Display a listing of licenses with pagination.
-     *
-     * @return View The licenses index view
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Display a listing of licenses with pagination. *   * @return View The licenses index view *   * @version 1.0.6 *   *   *   *   */
     public function index(): View
     {
         $licenses = License::with(['user', 'product'])
@@ -70,17 +35,7 @@ class LicenseController extends Controller
             ->paginate(10);
         return view('admin.licenses.index', ['licenses' => $licenses]);
     }
-    /**
-     * Show the form for creating a new license.
-     *
-     * @return View The license creation form view
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Show the form for creating a new license. *   * @return View The license creation form view *   * @version 1.0.6 *   *   *   *   */
     public function create(): View
     {
         $users = User::all();
@@ -88,19 +43,7 @@ class LicenseController extends Controller
         $selectedUserId = null;
         return view('admin.licenses.create', ['users' => $users, 'products' => $products, 'selectedUserId' => $selectedUserId]);
     }
-    /**
-     * Store a newly created resource in storage with enhanced security.
-     *
-     * Creates a new license with comprehensive validation, automatic invoice
-     * generation, and email notifications. Includes product inheritance
-     * and proper error handling.
-     *
-     * @param  LicenseRequest  $request  The HTTP request containing license data
-     *
-     * @return RedirectResponse Redirect to license details with success message
-     *
-     * @throws \Exception When database operations fail
-     */
+    /**   * Store a newly created resource in storage with enhanced security. *   * Creates a new license with comprehensive validation, automatic invoice * generation, and email notifications. Includes product inheritance * and proper error handling. *   * @param LicenseRequest $request The HTTP request containing license data *   * @return RedirectResponse Redirect to license details with success message *   * @throws \Exception When database operations fail */
     public function store(LicenseRequest $request): RedirectResponse
     {
         try {
@@ -193,62 +136,20 @@ class LicenseController extends Controller
                 ->with('error', 'Failed to create license. Please try again.');
         }
     }
-    /**
-     * Display the specified license with related data.
-     *
-     * Shows detailed information about a specific license including
-     * user details, product information, associated domains, and logs.
-     *
-     * @param  License  $license  The license to display
-     *
-     * @return View The license details view
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Display the specified license with related data. *   * Shows detailed information about a specific license including * user details, product information, associated domains, and logs. *   * @param License $license The license to display *   * @return View The license details view *   * @version 1.0.6 *   *   *   *   */
     public function show(License $license): View
     {
         $license->load(['user', 'product', 'domains', 'logs']);
         return view('admin.licenses.show', ['license' => $license]);
     }
-    /**
-     * Show the form for editing the specified license.
-     *
-     * Displays the license edit form with populated data and
-     * available users and products for selection.
-     *
-     * @param  License  $license  The license to edit
-     *
-     * @return View The license edit form view
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Show the form for editing the specified license. *   * Displays the license edit form with populated data and * available users and products for selection. *   * @param License $license The license to edit *   * @return View The license edit form view *   * @version 1.0.6 *   *   *   *   */
     public function edit(License $license): View
     {
         $users = User::all();
         $products = Product::all();
         return view('admin.licenses.edit', ['license' => $license, 'users' => $users, 'products' => $products]);
     }
-    /**
-     * Update the specified resource in storage with enhanced security.
-     *
-     * Updates an existing license with comprehensive validation and proper
-     * error handling. Includes product inheritance and domain management.
-     *
-     * @param  LicenseRequest  $request  The HTTP request containing updated license data
-     * @param  License  $license  The license to update
-     *
-     * @return RedirectResponse Redirect to license details with success message
-     *
-     * @throws \Exception When database operations fail
-     */
+    /**   * Update the specified resource in storage with enhanced security. *   * Updates an existing license with comprehensive validation and proper * error handling. Includes product inheritance and domain management. *   * @param LicenseRequest $request The HTTP request containing updated license data * @param License $license The license to update *   * @return RedirectResponse Redirect to license details with success message *   * @throws \Exception When database operations fail */
     public function update(LicenseRequest $request, License $license): RedirectResponse
     {
         try {
@@ -311,17 +212,7 @@ class LicenseController extends Controller
                 ->with('error', 'Failed to update license. Please try again.');
         }
     }
-    /**
-     * Remove the specified resource from storage with enhanced security.
-     *
-     * Deletes a license with proper validation and error handling.
-     *
-     * @param  License  $license  The license to delete
-     *
-     * @return RedirectResponse Redirect to licenses list with success message
-     *
-     * @throws \Exception When database operations fail
-     */
+    /**   * Remove the specified resource from storage with enhanced security. *   * Deletes a license with proper validation and error handling. *   * @param License $license The license to delete *   * @return RedirectResponse Redirect to licenses list with success message *   * @throws \Exception When database operations fail */
     public function destroy(License $license): RedirectResponse
     {
         try {
@@ -342,18 +233,7 @@ class LicenseController extends Controller
                 ->with('error', 'Failed to delete license. Please try again.');
         }
     }
-    /**
-     * Toggle license status with enhanced security.
-     *
-     * Toggles the license status between active and inactive with proper
-     * error handling and database transactions.
-     *
-     * @param  License  $license  The license to toggle
-     *
-     * @return RedirectResponse Redirect back with success message
-     *
-     * @throws \Exception When database operations fail
-     */
+    /**   * Toggle license status with enhanced security. *   * Toggles the license status between active and inactive with proper * error handling and database transactions. *   * @param License $license The license to toggle *   * @return RedirectResponse Redirect back with success message *   * @throws \Exception When database operations fail */
     public function toggle(License $license): RedirectResponse
     {
         try {
@@ -373,20 +253,7 @@ class LicenseController extends Controller
             return back()->with('error', 'Failed to update license status. Please try again.');
         }
     }
-    /**
-     * Export licenses to CSV format with comprehensive data.
-     *
-     * Generates a CSV file containing all licenses with their associated
-     * user and product information for administrative purposes.
-     *
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse The CSV download response
-     *
-     * @version 1.0.6
-     *
-     *
-     *
-     *
-     */
+    /**   * Export licenses to CSV format with comprehensive data. *   * Generates a CSV file containing all licenses with their associated * user and product information for administrative purposes. *   * @return \Symfony\Component\HttpFoundation\StreamedResponse The CSV download response *   * @version 1.0.6 *   *   *   *   */
     public function export(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $licenses = License::with(['user', 'product'])->get();

@@ -16,83 +16,21 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
 /**
- * License API Controller with enhanced security.
- *
- * This controller handles license verification requests with support for both
- * local database licenses and Envato Market licenses. It provides comprehensive
- * license management and verification functionality with enhanced security measures.
- *
- * Features:
- * - License verification with local database and Envato API fallback
- * - Rate limiting and enhanced security measures
- * - Integration file generation for products
- * - Comprehensive error handling with database transactions
- * - Support for both system-generated and Envato Market licenses
- * - Domain verification and authorization
- * - Enhanced security measures (XSS protection, input validation, rate limiting)
- * - Proper logging for errors and warnings only
- * - Model scope integration for optimized queries
- * - Request class compatibility with comprehensive validation
- * - Authorization checks and middleware protection
- *
- * @example
- * // Verify a license
- * POST /api/license/verify
- * {
- *     "purchase_code": "ABC123-DEF456-GHI789",
- *     "product_slug": "my-product",
- *     "domain": "example.com"
- * }
- */
+ * License API Controller with enhanced security. *
+ * This controller handles license verification requests with support for both * local database licenses and Envato Market licenses. It provides comprehensive * license management and verification functionality with enhanced security measures. *
+ * Features: * - License verification with local database and Envato API fallback * - Rate limiting and enhanced security measures * - Integration file generation for products * - Comprehensive error handling with database transactions * - Support for both system-generated and Envato Market licenses * - Domain verification and authorization * - Enhanced security measures (XSS protection, input validation, rate limiting) * - Proper logging for errors and warnings only * - Model scope integration for optimized queries * - Request class compatibility with comprehensive validation * - Authorization checks and middleware protection *
+ * @example * // Verify a license * POST /api/license/verify * { * "purchase_code": "ABC123-DEF456-GHI789", * "product_slug": "my-product", * "domain": "example.com" * } */
 class LicenseController extends Controller
 {
     protected EnvatoService $envatoService;
 
-    /**
-     * Create a new controller instance.
-     *
-     * @param  EnvatoService  $envatoService  The Envato service for API integration
-     *
-     * @return void
-     */
+    /**   * Create a new controller instance. *   * @param EnvatoService $envatoService The Envato service for API integration *   * @return void */
     public function __construct(EnvatoService $envatoService)
     {
         $this->envatoService = $envatoService;
     }
 
-    /**
-     * Verify license with enhanced security - checks local database first, then Envato as fallback.
-     *
-     * This method handles license verification requests by first checking the local
-     * database for existing licenses, and if not found, falling back to Envato API
-     * verification. It includes rate limiting, enhanced security, and comprehensive logging.
-     *
-     * @param  LicenseVerifyRequest  $request  The validated request containing purchase_code, product_slug, and domain
-     *
-     * @return JsonResponse JSON response with license verification result
-     *
-     * @throws ValidationException When validation fails
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request body:
-     * {
-     *     "purchase_code": "ABC123-DEF456-GHI789",
-     *     "product_slug": "my-product",
-     *     "domain": "example.com"
-     * }
-     *
-     * // Success response:
-     * {
-     *     "valid": true,
-     *     "source": "local",
-     *     "license_type": "system_generated",
-     *     "purchase_code": "ABC123-DEF456-GHI789",
-     *     "product": {...},
-     *     "domain_allowed": true,
-     *     "status": "active"
-     * }
-     */
+    /**   * Verify license with enhanced security - checks local database first, then Envato as fallback. *   * This method handles license verification requests by first checking the local * database for existing licenses, and if not found, falling back to Envato API * verification. It includes rate limiting, enhanced security, and comprehensive logging. *   * @param LicenseVerifyRequest $request The validated request containing purchase_code, product_slug, and domain *   * @return JsonResponse JSON response with license verification result *   * @throws ValidationException When validation fails * @throws \Exception When database operations fail *   * @example * // Request body: * { * "purchase_code": "ABC123-DEF456-GHI789", * "product_slug": "my-product", * "domain": "example.com" * } *   * // Success response: * { * "valid": true, * "source": "local", * "license_type": "system_generated", * "purchase_code": "ABC123-DEF456-GHI789", * "product": {...}, * "domain_allowed": true, * "status": "active" * } */
     public function verify(LicenseVerifyRequest $request): JsonResponse
     {
         try {
@@ -105,14 +43,14 @@ class LicenseController extends Controller
             $domain = $validated['domain'];
             // Enhanced rate limiting with multiple keys
             $purchaseCodeStr = is_string($purchaseCode) ? $purchaseCode : '';
-            $rateLimitKey = 'license-verify:'.$request->ip().':'.substr($purchaseCodeStr, 0, 8);
-            $globalRateLimitKey = 'license-verify-global:'.$request->ip();
+            $rateLimitKey = 'license-verify:' . $request->ip() . ':' . substr($purchaseCodeStr, 0, 8);
+            $globalRateLimitKey = 'license-verify-global:' . $request->ip();
             if (
                 RateLimiter::tooManyAttempts($rateLimitKey, 10) ||
                 RateLimiter::tooManyAttempts($globalRateLimitKey, 50)
             ) {
                 Log::warning('Rate limit exceeded for license verification', [
-                    'purchase_code' => substr($purchaseCodeStr, 0, 4).'...',
+                    'purchase_code' => substr($purchaseCodeStr, 0, 4) . '...',
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                     'rate_limit_key_attempts' => RateLimiter::attempts($rateLimitKey),
@@ -202,20 +140,7 @@ class LicenseController extends Controller
         }
     }
 
-    /**
-     * Check license in local database with enhanced security.
-     *
-     * Searches for an active license in the local database that matches the
-     * provided purchase code, product slug, and domain using proper model scopes.
-     *
-     * @param  string  $purchaseCode  The purchase code to search for
-     * @param  string  $productSlug  The product slug to match
-     * @param  string  $domain  The domain to verify against
-     *
-     * @return object|null License object with domain_allowed flag, or null if not found
-     *
-     * @throws \Exception When database operations fail
-     */
+    /**   * Check license in local database with enhanced security. *   * Searches for an active license in the local database that matches the * provided purchase code, product slug, and domain using proper model scopes. *   * @param string $purchaseCode The purchase code to search for * @param string $productSlug The product slug to match * @param string $domain The domain to verify against *   * @return object|null License object with domain_allowed flag, or null if not found *   * @throws \Exception When database operations fail */
     private function checkLocalLicense(string $purchaseCode, string $productSlug, string $domain): ?object
     {
         try {
@@ -240,7 +165,7 @@ class LicenseController extends Controller
             ];
         } catch (\Exception $e) {
             Log::error('Error checking local license', [
-                'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
                 'product_slug' => $productSlug,
                 'domain' => $domain,
                 'error' => $e->getMessage(),
@@ -249,20 +174,7 @@ class LicenseController extends Controller
         }
     }
 
-    /**
-     * Check license with Envato API with enhanced security.
-     *
-     * Verifies a license using the Envato API by checking the purchase code
-     * against the Envato Market. Returns license information if valid.
-     *
-     * @param  string  $purchaseCode  The purchase code to verify
-     * @param  string  $productSlug  The product slug to match
-     * @param  string  $domain  The domain (not used for Envato verification)
-     *
-     * @return array<string, mixed> Array with 'valid' key and license information if valid
-     *
-     * @throws \Exception When database operations fail
-     */
+    /**   * Check license with Envato API with enhanced security. *   * Verifies a license using the Envato API by checking the purchase code * against the Envato Market. Returns license information if valid. *   * @param string $purchaseCode The purchase code to verify * @param string $productSlug The product slug to match * @param string $domain The domain (not used for Envato verification) *   * @return array<string, mixed> Array with 'valid' key and license information if valid *   * @throws \Exception When database operations fail */
     private function checkEnvatoLicense(string $purchaseCode, string $productSlug, string $domain): array
     {
         try {
@@ -280,7 +192,7 @@ class LicenseController extends Controller
             $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
             if (! $envatoData) {
                 Log::warning('Envato verification failed', [
-                    'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                    'purchase_code' => substr($purchaseCode, 0, 4) . '...',
                     'product_slug' => $productSlug,
                 ]);
 
@@ -309,7 +221,7 @@ class LicenseController extends Controller
             ];
         } catch (\Exception $e) {
             Log::error('Envato license verification failed', [
-                'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
                 'product_slug' => $productSlug,
                 'error' => $e->getMessage(),
             ]);
@@ -318,21 +230,8 @@ class LicenseController extends Controller
         }
     }
 
-    /**
-     * Log license verification attempt.
-     *
-     * Creates a log entry for license verification attempts, including
-     * request data, response data, and status information.
-     *
-     * @param  License|null  $license  The license object if found
-     * @param  string  $domain  The domain being verified
-     * @param  LicenseVerifyRequest  $request  The HTTP request object
-     * @param  array  $response  The response data to log
-     * @param  string  $status  The verification status (success, failed, rate_limited)
-     */
-    /**
-     * @param array<string, mixed> $response
-     */
+    /**   * Log license verification attempt. *   * Creates a log entry for license verification attempts, including * request data, response data, and status information. *   * @param  License|null  $license  The license object if found * @param string $domain The domain being verified * @param LicenseVerifyRequest $request The HTTP request object * @param array $response The response data to log * @param string $status The verification status (success, failed, rate_limited) */
+    /**   * @param array<string, mixed> $response */
     private function logLicenseVerification(
         ?License $license,
         string $domain,
@@ -345,7 +244,7 @@ class LicenseController extends Controller
         // Mask sensitive fields
         if (isset($allowed['purchase_code']) && is_string($allowed['purchase_code'])) {
             $allowed['purchase_code'] = substr($allowed['purchase_code'], 0, 4)
-                .str_repeat('*', max(0, strlen($allowed['purchase_code']) - 4));
+                . str_repeat('*', max(0, strlen($allowed['purchase_code']) - 4));
         }
         LicenseLog::create([
             'license_id' => $license?->id,
@@ -359,32 +258,7 @@ class LicenseController extends Controller
         ]);
     }
 
-    /**
-     * Generate integration file for a product with enhanced security.
-     *
-     * Generates a PHP integration file that can be used by customers to
-     * integrate license verification into their applications.
-     *
-     * @param  LicenseIntegrationFileRequest  $request  The validated request containing product_slug
-     *
-     * @return JsonResponse JSON response with integration file content
-     *
-     * @throws ValidationException When validation fails
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request body:
-     * {
-     *     "product_slug": "my-product"
-     * }
-     *
-     * // Response:
-     * {
-     *     "product": {"name": "My Product", "slug": "my-product"},
-     *     "integration_file": "<?php\nclass LicenseManager...",
-     *     "filename": "license_integration_my-product.php"
-     * }
-     */
+    /**   * Generate integration file for a product with enhanced security. *   * Generates a PHP integration file that can be used by customers to * integrate license verification into their applications. *   * @param LicenseIntegrationFileRequest $request The validated request containing product_slug *   * @return JsonResponse JSON response with integration file content *   * @throws ValidationException When validation fails * @throws \Exception When database operations fail *   * @example * // Request body: * { * "product_slug": "my-product" * } *   * // Response: * { * "product": {"name": "My Product", "slug": "my-product"}, * "integration_file": "<?php\nclass LicenseManager...", * "filename": "license_integration_my-product.php" * } */
     public function generateIntegrationFile(LicenseIntegrationFileRequest $request): JsonResponse
     {
         try {
@@ -394,7 +268,7 @@ class LicenseController extends Controller
             // Extract sanitized input (already sanitized in Request class)
             $productSlug = $validated['product_slug'];
             // Rate limiting for integration file generation
-            $rateLimitKey = 'license-integration:'.$request->ip();
+            $rateLimitKey = 'license-integration:' . $request->ip();
             if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
                 Log::warning('Rate limit exceeded for integration file generation', [
                     'ip' => $request->ip(),
@@ -428,7 +302,7 @@ class LicenseController extends Controller
                     'slug' => $product->slug,
                 ],
                 'integration_file' => $integrationCode,
-                'filename' => 'license_integration_'.$product->slug.'.php',
+                'filename' => 'license_integration_' . $product->slug . '.php',
             ]);
         } catch (ValidationException $e) {
             DB::rollBack();
@@ -446,42 +320,23 @@ class LicenseController extends Controller
         }
     }
 
-    /**
-     * Generate PHP integration code for a product.
-     *
-     * Creates a complete PHP class that customers can use to integrate
-     * license verification into their applications.
-     *
-     * @param  Product  $product  The product to generate integration code for
-     *
-     * @return string The complete PHP integration code
-     */
+    /**   * Generate PHP integration code for a product. *   * Creates a complete PHP class that customers can use to integrate * license verification into their applications. *   * @param Product $product The product to generate integration code for *   * @return string The complete PHP integration code */
     private function generateIntegrationCode(Product $product): string
     {
         $apiDomain = rtrim(is_string(config('app.url')) ? config('app.url') : '', '/');
         $verificationEndpoint = is_string(config('license.verification_endpoint')) ? config('license.verification_endpoint') : '/api/license/verify';
-        $apiUrl = $apiDomain.'/'.ltrim($verificationEndpoint, '/');
+        $apiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
 
         return "<?php
 /**
- * License Integration for {$product->name}
- * Generated on ".now()->format('Y-m-d H:i:s')."
- *
- * This file provides license verification functionality for {$product->name}
- * It supports both local system licenses and Envato Market licenses
- */
+ * License Integration for {$product->name} * Generated on " . now()->format('Y-m-d H:i:s') . " *
+ * This file provides license verification functionality for {$product->name} * It supports both local system licenses and Envato Market licenses */
 class LicenseManager
 {
     private \$api_url = '{$apiUrl}';
     private \$product_slug = '{$product->slug}';
     private \$timeout = 30; // seconds
-    /**
-     * Verify license
-     *
-     * @param string \$license_key Purchase code or license key
-     * @param string \$domain Domain to verify against
-     * @return array Verification result
-     */
+    /**   * Verify license *   * @param string \$license_key Purchase code or license key * @param string \$domain Domain to verify against * @return array Verification result */
     public function verifyLicense(\$license_key, \$domain = null)
     {
         if (empty(\$license_key)) {
@@ -521,17 +376,13 @@ class LicenseManager
         }
         return \$data;
     }
-    /**
-     * Get current domain
-     */
+    /**   * Get current domain */
     private function getCurrentDomain()
     {
         // Use ServerHelper for safe domain retrieval
         return \App\Helpers\ServerHelper::getCurrentDomain();
     }
-    /**
-     * Make API call to license server
-     */
+    /**   * Make API call to license server */
     private function makeApiCall(\$url, \$data)
     {
         \$ch = curl_init();
@@ -550,9 +401,7 @@ class LicenseManager
         }
         return \$response;
     }
-    /**
-     * Check if license is valid and get details
-     */
+    /**   * Check if license is valid and get details */
     public function getLicenseInfo(\$license_key, \$domain = null)
     {
         \$result = \$this->verifyLicense(\$license_key, \$domain);

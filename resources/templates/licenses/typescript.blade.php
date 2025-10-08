@@ -1,11 +1,6 @@
 /**
- * License Verification System
- * Product: {{product}}
- * Language: TypeScript
- * Generated: {{date}}
- *
- * This is a generic template. Please customize according to TypeScript best practices.
- */
+ * License Verification System * Product: {{product}} * Language: TypeScript * Generated: {{date}} *
+ * This is a generic template. Please customize according to TypeScript best practices. */
 
 // License verification for TypeScript
 // API URL: {{license_api_url}}

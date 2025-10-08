@@ -13,52 +13,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 /**
- * User Invoice Controller with enhanced security.
- *
- * This controller handles user invoice management functionality including
- * invoice listing, filtering, and detailed invoice viewing with enhanced
- * security measures and proper error handling.
- *
- * Features:
- * - User invoice listing with pagination
- * - Invoice filtering by status
- * - Detailed invoice viewing with relationships
- * - User authorization and access control
- * - Enhanced security measures (XSS protection, input validation)
- * - Comprehensive error handling with database transactions
- * - Proper logging for errors and warnings only
- * - Model relationship integration for optimized queries
- */
+ * User Invoice Controller with enhanced security. *
+ * This controller handles user invoice management functionality including * invoice listing, filtering, and detailed invoice viewing with enhanced * security measures and proper error handling. *
+ * Features: * - User invoice listing with pagination * - Invoice filtering by status * - Detailed invoice viewing with relationships * - User authorization and access control * - Enhanced security measures (XSS protection, input validation) * - Comprehensive error handling with database transactions * - Proper logging for errors and warnings only * - Model relationship integration for optimized queries */
 class InvoiceController extends Controller
 {
-    /**
-     * Pagination limit for invoice listing.
-     */
+    /**   * Pagination limit for invoice listing. */
     private const PAGINATION_LIMIT = 10;
-    /**
-     * Display a listing of user invoices with enhanced security.
-     *
-     * Shows paginated list of user invoices with optional status filtering,
-     * proper authorization, and comprehensive error handling.
-     *
-     * @param  InvoiceFilterRequest  $request  The HTTP request containing filter parameters
-     *
-     * @return View The invoice listing view
-     *
-     * @throws Exception When database operations fail
-     *
-     * @example
-     * // Access user invoices:
-     * GET /user/invoices
-     *
-     * // Filter by status:
-     * GET /user/invoices?status=pending
-     *
-     * // Returns view with:
-     * // - Paginated invoices (10 per page)
-     * // - Status filtering
-     * // - Product and license relationships
-     */
+    /**   * Display a listing of user invoices with enhanced security. *   * Shows paginated list of user invoices with optional status filtering, * proper authorization, and comprehensive error handling. *   * @param InvoiceFilterRequest $request The HTTP request containing filter parameters *   * @return View The invoice listing view *   * @throws Exception When database operations fail *   * @example * // Access user invoices: * GET /user/invoices *   * // Filter by status: * GET /user/invoices?status=pending *   * // Returns view with: * // - Paginated invoices (10 per page) * // - Status filtering * // - Product and license relationships */
     public function index(InvoiceFilterRequest $request): View
     {
         try {
@@ -89,28 +51,7 @@ class InvoiceController extends Controller
                 ->with('error', 'Failed to load invoices. Please try again.');
         }
     }
-    /**
-     * Display the specified invoice with enhanced security.
-     *
-     * Shows detailed invoice information with proper user authorization,
-     * relationship loading, and comprehensive error handling.
-     *
-     * @param  Invoice  $invoice  The invoice instance
-     *
-     * @return View The invoice detail view
-     *
-     * @throws Exception When database operations fail
-     *
-     * @example
-     * // Access specific invoice:
-     * GET /user/invoices/123
-     *
-     * // Returns view with:
-     * // - Invoice details
-     * // - Product information
-     * // - License information
-     * // - User authorization check
-     */
+    /**   * Display the specified invoice with enhanced security. *   * Shows detailed invoice information with proper user authorization, * relationship loading, and comprehensive error handling. *   * @param Invoice $invoice The invoice instance *   * @return View The invoice detail view *   * @throws Exception When database operations fail *   * @example * // Access specific invoice: * GET /user/invoices/123 *   * // Returns view with: * // - Invoice details * // - Product information * // - License information * // - User authorization check */
     public function show(Invoice $invoice): View
     {
         try {
@@ -160,15 +101,7 @@ class InvoiceController extends Controller
             abort(500, 'Failed to load invoice details. Please try again.');
         }
     }
-    /**
-     * Validate invoice status parameter.
-     *
-     * @param  string  $status  The status to validate
-     *
-     * @return string The validated status
-     *
-     * @throws \InvalidArgumentException When status is invalid
-     */
+    /**   * Validate invoice status parameter. *   * @param string $status The status to validate *   * @return string The validated status *   * @throws \InvalidArgumentException When status is invalid */
     private function validateStatus(string $status): string
     {
         $validStatuses = ['pending', 'paid', 'overdue', 'cancelled'];

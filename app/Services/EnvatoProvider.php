@@ -8,85 +8,28 @@ use Laravel\Socialite\Two\ProviderInterface;
 use Laravel\Socialite\Two\User;
 
 /**
- * Envato OAuth Provider with enhanced security and error handling.
+ * Envato OAuth Provider with enhanced security and error handling. *
+ * This provider handles OAuth authentication with Envato's API, providing * secure user authentication, data mapping, and comprehensive error handling. *
+ * Features: * - Secure OAuth 2.0 authentication with Envato API * - Comprehensive user data mapping and validation * - Enhanced error handling and logging * - Input sanitization and security measures * - Proper token management and validation * - Fallback mechanisms for missing user data *
  *
- * This provider handles OAuth authentication with Envato's API, providing
- * secure user authentication, data mapping, and comprehensive error handling.
- *
- * Features:
- * - Secure OAuth 2.0 authentication with Envato API
- * - Comprehensive user data mapping and validation
- * - Enhanced error handling and logging
- * - Input sanitization and security measures
- * - Proper token management and validation
- * - Fallback mechanisms for missing user data
- *
- *
- * @example
- * // Configure in config/services.php
- * 'envato' => [
- *     'client_id' => env('ENVATO_CLIENT_ID'),
- *     'client_secret' => env('ENVATO_CLIENT_SECRET'),
- *     'redirect' => env('ENVATO_REDIRECT_URI'),
- * ],
- *
- * // Use in controller
- * return Socialite::driver('envato')->redirect();
- */
+ * @example * // Configure in config/services.php * 'envato' => [ * 'client_id' => env('ENVATO_CLIENT_ID'), * 'client_secret' => env('ENVATO_CLIENT_SECRET'), * 'redirect' => env('ENVATO_REDIRECT_URI'), * ], *
+ * // Use in controller * return Socialite::driver('envato')->redirect(); */
 class EnvatoProvider extends AbstractProvider implements ProviderInterface
 {
-    /**
-     * The base Envato API URL for secure communication.
-     */
+    /**   * The base Envato API URL for secure communication. */
     protected string $baseUrl = 'https://api.envato.com';
-    /**
-     * Get the authentication URL for the Envato OAuth provider.
-     *
-     * Constructs the secure authentication URL with proper state parameter
-     * for CSRF protection and OAuth flow security.
-     *
-     * @param  string  $state  The state parameter for CSRF protection
-     *
-     * @return string The complete authentication URL
-     *
-     * @throws \Exception When URL construction fails
-     */
+    /**   * Get the authentication URL for the Envato OAuth provider. *   * Constructs the secure authentication URL with proper state parameter * for CSRF protection and OAuth flow security. *   * @param string $state The state parameter for CSRF protection *   * @return string The complete authentication URL *   * @throws \Exception When URL construction fails */
     protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase('https://api.envato.com/authorization', $state);
     }
-    /**
-     * Get the token URL for OAuth token exchange.
-     *
-     * Returns the secure endpoint URL for exchanging authorization codes
-     * for access tokens during the OAuth 2.0 flow.
-     *
-     * @return string The token exchange endpoint URL
-     */
+    /**   * Get the token URL for OAuth token exchange. *   * Returns the secure endpoint URL for exchanging authorization codes * for access tokens during the OAuth 2.0 flow. *   * @return string The token exchange endpoint URL */
     protected function getTokenUrl(): string
     {
         return 'https://api.envato.com/token';
     }
-    /**
-     * Get the raw user data from Envato API using access token.
-     *
-     * Retrieves user account information from Envato's API with comprehensive
-     * error handling, input validation, and security measures. Includes
-     * proper token validation and response sanitization.
-     *
-     * @param  string  $token  The OAuth access token for API authentication
-     *
-     * @return array<mixed, mixed> The raw user data from Envato API
-     *
-     * @throws \Exception When API request fails or returns invalid data
-     *
-     * @example
-     * $userData = $this->getUserByToken($accessToken);
-     * $account = $userData['account'] ?? [];
-     */
-    /**
-     * @return array<mixed, mixed>
-     */
+    /**   * Get the raw user data from Envato API using access token. *   * Retrieves user account information from Envato's API with comprehensive * error handling, input validation, and security measures. Includes * proper token validation and response sanitization. *   * @param string $token The OAuth access token for API authentication *   * @return array<mixed, mixed> The raw user data from Envato API *   * @throws \Exception When API request fails or returns invalid data *   * @example * $userData = $this->getUserByToken($accessToken); * $account = $userData['account'] ?? []; */
+    /**   * @return array<mixed, mixed> */
     protected function getUserByToken($token): array
     {
         try {
@@ -124,26 +67,8 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
             throw $e;
         }
     }
-    /**
-     * Map the raw user array to a Socialite User instance with validation.
-     *
-     * Transforms raw Envato API user data into a standardized Socialite User
-     * object with comprehensive data validation, sanitization, and fallback
-     * mechanisms for missing or invalid data.
-     *
-     * @param  array  $user  The raw user data from Envato API
-     *
-     * @return User The mapped Socialite User instance
-     *
-     * @throws \Exception When user data mapping fails
-     *
-     * @example
-     * $user = $this->mapUserToObject($rawUserData);
-     * echo "User: " . $user->getName() . " (" . $user->getEmail() . ")";
-     */
-    /**
-     * @param array<string, mixed> $user
-     */
+    /**   * Map the raw user array to a Socialite User instance with validation. *   * Transforms raw Envato API user data into a standardized Socialite User * object with comprehensive data validation, sanitization, and fallback * mechanisms for missing or invalid data. *   * @param array $user The raw user data from Envato API *   * @return User The mapped Socialite User instance *   * @throws \Exception When user data mapping fails *   * @example * $user = $this->mapUserToObject($rawUserData); * echo "User: " . $user->getName() . " (" . $user->getEmail() . ")"; */
+    /**   * @param array<string, mixed> $user */
     protected function mapUserToObject(array $user): User
     {
         try {
@@ -160,8 +85,8 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
             $accountUsername = $account['username'] ?? null;
             $accountFirstname = $account['firstname'] ?? null;
             $accountSurname = $account['surname'] ?? null;
-            $username = is_string($accountUsername) ? $accountUsername : 
-                       strtolower((is_string($accountFirstname) ? $accountFirstname : 'user') . 
+            $username = is_string($accountUsername) ? $accountUsername :
+                       strtolower((is_string($accountFirstname) ? $accountFirstname : 'user') .
                                  (is_string($accountSurname) ? $accountSurname : ''));
             $username = $this->sanitizeInput($username);
             // For OAuth, we might not get email from this endpoint
@@ -198,19 +123,7 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
             throw $e;
         }
     }
-    /**
-     * Get the POST fields for the OAuth token request with validation.
-     *
-     * Prepares the required fields for OAuth token exchange including
-     * authorization code validation and proper grant type specification.
-     * Includes input sanitization and security measures.
-     *
-     * @param  string  $code  The authorization code from OAuth callback
-     *
-     * @return array<mixed, mixed> The token request fields with proper validation
-     *
-     * @throws \InvalidArgumentException When authorization code is invalid
-     */
+    /**   * Get the POST fields for the OAuth token request with validation. *   * Prepares the required fields for OAuth token exchange including * authorization code validation and proper grant type specification. * Includes input sanitization and security measures. *   * @param string $code The authorization code from OAuth callback *   * @return array<mixed, mixed> The token request fields with proper validation *   * @throws \InvalidArgumentException When authorization code is invalid */
     protected function getTokenFields($code): array
     {
         try {
@@ -232,16 +145,7 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
             throw $e;
         }
     }
-    /**
-     * Sanitize input data to prevent XSS and injection attacks.
-     *
-     * Provides comprehensive input sanitization for user data and API responses
-     * to ensure security and prevent various types of injection attacks.
-     *
-     * @param  string|null  $input  The input string to sanitize
-     *
-     * @return string The sanitized input string
-     */
+    /**   * Sanitize input data to prevent XSS and injection attacks. *   * Provides comprehensive input sanitization for user data and API responses * to ensure security and prevent various types of injection attacks. *   * @param  string|null  $input  The input string to sanitize *   * @return string The sanitized input string */
     private function sanitizeInput(?string $input): string
     {
         if ($input === null) {

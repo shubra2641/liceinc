@@ -10,56 +10,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Test License Generation Command with enhanced security.
- *
- * This console command tests license generation functionality with database tokens,
- * including comprehensive validation, error handling, and security measures.
- *
- * Features:
- * - Database token validation and testing
- * - License file generation testing
- * - File existence and content verification
- * - Token inclusion verification
- * - Comprehensive error handling and logging
- * - Security validation and input sanitization
- */
+ * Test License Generation Command with enhanced security. *
+ * This console command tests license generation functionality with database tokens, * including comprehensive validation, error handling, and security measures. *
+ * Features: * - Database token validation and testing * - License file generation testing * - File existence and content verification * - Token inclusion verification * - Comprehensive error handling and logging * - Security validation and input sanitization */
 class TestLicenseGeneration extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
+    /**   * The name and signature of the console command. *   * @var string */
     protected $signature = 'test:license-generation';
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
+    /**   * The console command description. *   * @var string */
     protected $description = 'Test license generation with database tokens';
-    /**
-     * Execute the console command with enhanced security and validation.
-     *
-     * Tests license generation functionality with comprehensive validation,
-     * error handling, and security measures including database token verification
-     * and file generation testing.
-     *
-     * @return int Command exit code (0 for success, 1 for failure)
-     *
-     * @throws \Exception When database operations or file generation fails
-     *
-     * @example
-     * // Run the command:
-     * php artisan test:license-generation
-     *
-     * // Expected output:
-     * // === Testing License Generation with Database Tokens ===
-     * // API Token from DB: Found
-     * // Envato Token from DB: Found
-     * // Product: My Product
-     * // Generated file: licenses/my-product-license.php
-     * // ✅ File exists and was created successfully!
-     */
+    /**   * Execute the console command with enhanced security and validation. *   * Tests license generation functionality with comprehensive validation, * error handling, and security measures including database token verification * and file generation testing. *   * @return int Command exit code (0 for success, 1 for failure) *   * @throws \Exception When database operations or file generation fails *   * @example * // Run the command: * php artisan test:license-generation *   * // Expected output: * // === Testing License Generation with Database Tokens === * // API Token from DB: Found * // Envato Token from DB: Found * // Product: My Product * // Generated file: licenses/my-product-license.php * // ✅ File exists and was created successfully! */
     public function handle(): int
     {
         $this->info('=== Testing License Generation with Database Tokens ===');
@@ -108,11 +68,7 @@ class TestLicenseGeneration extends Command
         $this->info("\n=== Test Complete ===");
         return 0;
     }
-    /**
-     * Validate and get settings with security checks.
-     *
-     * @return Setting|null The validated setting or null if validation fails
-     */
+    /**   * Validate and get settings with security checks. *   * @return Setting|null The validated setting or null if validation fails */
     private function validateAndGetSettings(): ?Setting
     {
         try {
@@ -132,21 +88,13 @@ class TestLicenseGeneration extends Command
             return null;
         }
     }
-    /**
-     * Display token status with security considerations.
-     *
-     * @param  Setting  $setting  The setting object containing tokens
-     */
+    /**   * Display token status with security considerations. *   * @param Setting $setting The setting object containing tokens */
     private function displayTokenStatus(Setting $setting): void
     {
         $this->info('API Token from DB: ' . ($setting->license_api_token ? 'Found' : 'Not found'));
         $this->info('Envato Token from DB: ' . ($setting->envato_personal_token ? 'Found' : 'Not found'));
     }
-    /**
-     * Validate and get product with security checks.
-     *
-     * @return Product|null The validated product or null if validation fails
-     */
+    /**   * Validate and get product with security checks. *   * @return Product|null The validated product or null if validation fails */
     private function validateAndGetProduct(): ?Product
     {
         try {
@@ -173,11 +121,7 @@ class TestLicenseGeneration extends Command
             return null;
         }
     }
-    /**
-     * Display product information with validation.
-     *
-     * @param  Product  $product  The product to display information for
-     */
+    /**   * Display product information with validation. *   * @param Product $product The product to display information for */
     private function displayProductInfo(Product $product): void
     {
         $this->info("Product: {$product->name}");
@@ -188,13 +132,7 @@ class TestLicenseGeneration extends Command
         $languageName = $programmingLanguage ? $programmingLanguage->name : 'Not set';
         $this->info("Programming Language: {$languageName}");
     }
-    /**
-     * Generate license file with validation and error handling.
-     *
-     * @param  Product  $product  The product to generate license for
-     *
-     * @return string|null The generated file path or null if generation fails
-     */
+    /**   * Generate license file with validation and error handling. *   * @param Product $product The product to generate license for *   * @return string|null The generated file path or null if generation fails */
     private function generateLicenseFile(Product $product): ?string
     {
         try {
@@ -219,14 +157,7 @@ class TestLicenseGeneration extends Command
             return null;
         }
     }
-    /**
-     * Validate generated file with comprehensive checks.
-     *
-     * @param  string  $filePath  The path to the generated file
-     * @param  Setting  $setting  The setting object containing tokens
-     *
-     * @return bool True if validation passes, false otherwise
-     */
+    /**   * Validate generated file with comprehensive checks. *   * @param string $filePath The path to the generated file * @param Setting $setting The setting object containing tokens *   * @return bool True if validation passes, false otherwise */
     private function validateGeneratedFile(string $filePath, Setting $setting): bool
     {
         try {
@@ -264,11 +195,7 @@ class TestLicenseGeneration extends Command
             return false;
         }
     }
-    /**
-     * Display first few lines of the generated file content.
-     *
-     * @param  string  $content  The file content to display
-     */
+    /**   * Display first few lines of the generated file content. *   * @param string $content The file content to display */
     private function displayFileContent(string $content): void
     {
         $lines = explode("\n", $content);
@@ -280,12 +207,7 @@ class TestLicenseGeneration extends Command
             $this->line(($i + 1) . ': ' . $lines[$i]);
         }
     }
-    /**
-     * Validate token inclusion in the generated file.
-     *
-     * @param  string  $content  The file content to validate
-     * @param  Setting  $setting  The setting object containing tokens
-     */
+    /**   * Validate token inclusion in the generated file. *   * @param string $content The file content to validate * @param Setting $setting The setting object containing tokens */
     private function validateTokenInclusion(string $content, Setting $setting): void
     {
         // Check API token inclusion

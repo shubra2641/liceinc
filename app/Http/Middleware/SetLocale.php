@@ -11,35 +11,11 @@ use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Set Locale Middleware with enhanced security and comprehensive locale management.
- *
- * This middleware sets the application locale based on session data or configuration.
- * It implements comprehensive security measures, input validation, and error handling
- * for reliable locale management and internationalization operations.
- */
+ * Set Locale Middleware with enhanced security and comprehensive locale management. *
+ * This middleware sets the application locale based on session data or configuration. * It implements comprehensive security measures, input validation, and error handling * for reliable locale management and internationalization operations. */
 class SetLocale
 {
-    /**
-     * Handle an incoming request with enhanced security and comprehensive locale management.
-     *
-     * Sets the application locale based on session data or configuration with
-     * comprehensive validation, security measures, and error handling for
-     * reliable locale management operations.
-     *
-     * @param  Request  $request  The incoming HTTP request
-     * @param  Closure  $next  The next middleware in the pipeline
-     *
-     * @return Response The HTTP response
-     *
-     * @throws InvalidArgumentException When locale data is invalid
-     * @throws \Exception When locale setting fails
-     *
-     * @example
-     * // This middleware is automatically applied to set the application locale
-     * Route::middleware('set.locale')->group(function () {
-     *     Route::get('/dashboard', [DashboardController::class, 'index']);
-     * });
-     */
+    /**   * Handle an incoming request with enhanced security and comprehensive locale management. *   * Sets the application locale based on session data or configuration with * comprehensive validation, security measures, and error handling for * reliable locale management operations. *   * @param Request $request The incoming HTTP request * @param Closure $next The next middleware in the pipeline *   * @return Response The HTTP response *   * @throws InvalidArgumentException When locale data is invalid * @throws \Exception When locale setting fails *   * @example * // This middleware is automatically applied to set the application locale * Route::middleware('set.locale')->group(function () { * Route::get('/dashboard', [DashboardController::class, 'index']); * }); */
     public function handle(Request $request, Closure $next): Response
     {
         try {
@@ -71,25 +47,13 @@ class SetLocale
             return $typedResponse;
         }
     }
-    /**
-     * Validate request with enhanced security and comprehensive validation.
-     *
-     * @param  Request  $request  The request to validate
-     */
+    /**   * Validate request with enhanced security and comprehensive validation. *   * @param Request $request The request to validate */
     private function validateRequest(Request $request): void
     {
         // Request is already typed as Request, no need to check instanceof
         // This method is kept for future validation logic
     }
-    /**
-     * Get locale from session or configuration with enhanced security.
-     *
-     * @param  Request  $request  The request object
-     *
-     * @return string The locale string
-     *
-     * @throws InvalidArgumentException When locale cannot be retrieved
-     */
+    /**   * Get locale from session or configuration with enhanced security. *   * @param Request $request The request object *   * @return string The locale string *   * @throws InvalidArgumentException When locale cannot be retrieved */
     private function getLocale(Request $request): string
     {
         try {
@@ -111,15 +75,7 @@ class SetLocale
             throw $e;
         }
     }
-    /**
-     * Validate and sanitize locale with enhanced security and comprehensive validation.
-     *
-     * @param  string  $locale  The locale to validate and sanitize
-     *
-     * @return string The validated and sanitized locale
-     *
-     * @throws InvalidArgumentException When locale is invalid
-     */
+    /**   * Validate and sanitize locale with enhanced security and comprehensive validation. *   * @param string $locale The locale to validate and sanitize *   * @return string The validated and sanitized locale *   * @throws InvalidArgumentException When locale is invalid */
     private function validateAndSanitizeLocale(string $locale): string
     {
         if (empty($locale)) {
@@ -149,13 +105,7 @@ class SetLocale
         }
         return $sanitizedLocale;
     }
-    /**
-     * Set application locale with enhanced security and error handling.
-     *
-     * @param  string  $locale  The locale to set
-     *
-     * @throws \Exception When locale setting fails
-     */
+    /**   * Set application locale with enhanced security and error handling. *   * @param string $locale The locale to set *   * @throws \Exception When locale setting fails */
     private function setApplicationLocale(string $locale): void
     {
         try {
@@ -169,11 +119,7 @@ class SetLocale
             throw $e;
         }
     }
-    /**
-     * Get supported locales with enhanced security and validation.
-     *
-     * @return array<mixed> Array of supported locale codes
-     */
+    /**   * Get supported locales with enhanced security and validation. *   * @return array<mixed> Array of supported locale codes */
     private function getSupportedLocales(): array
     {
         // Get supported locales from configuration
@@ -183,7 +129,11 @@ class SetLocale
             // return the keys; otherwise return the flat array as-is
             $keys = array_keys($configLocales);
             $isAssociative = array_filter($keys, 'is_string') === $keys;
-            return $isAssociative ? array_map(function($key) { return $key; }, $keys) : array_map(function($value) { return $value; }, array_values($configLocales));
+            return $isAssociative ? array_map(function ($key) {
+                return $key;
+            }, $keys) : array_map(function ($value) {
+                return $value;
+            }, array_values($configLocales));
         }
         // Default supported locales
         return [

@@ -6,44 +6,22 @@ use Illuminate\View\Component;
 use Illuminate\View\View;
 
 /**
- * Responsive Navigation Link Component with enhanced security and validation.
- *
- * This component provides a responsive navigation link with active state
- * management and customizable styling with comprehensive validation.
- *
- * Features:
- * - Active state management
- * - Responsive design support
- * - Dark mode compatibility
- * - Customizable CSS classes
- * - Input validation and sanitization
- * - Type safety and validation
- */
+ * Responsive Navigation Link Component with enhanced security and validation. *
+ * This component provides a responsive navigation link with active state * management and customizable styling with comprehensive validation. *
+ * Features: * - Active state management * - Responsive design support * - Dark mode compatibility * - Customizable CSS classes * - Input validation and sanitization * - Type safety and validation */
 class ResponsiveNavLink extends Component
 {
-    /**
-     * Whether the navigation link is in active state.
-     */
+    /**   * Whether the navigation link is in active state. */
     public bool $active;
-    /**
-     * The computed CSS classes for the navigation link.
-     */
+    /**   * The computed CSS classes for the navigation link. */
     public string $classes;
-    /**
-     * Create a new component instance with enhanced validation.
-     *
-     * @param  bool  $active  Whether the navigation link is in active state
-     */
+    /**   * Create a new component instance with enhanced validation. *   * @param bool $active Whether the navigation link is in active state */
     public function __construct(bool $active = false)
     {
         $this->active = $this->validateActive($active);
         $this->classes = $this->getClasses();
     }
-    /**
-     * Get the CSS classes for the navigation link based on active state.
-     *
-     * @return string The computed CSS classes for the navigation link
-     */
+    /**   * Get the CSS classes for the navigation link based on active state. *   * @return string The computed CSS classes for the navigation link */
     protected function getClasses(): string
     {
         if ($this->active) {
@@ -61,22 +39,12 @@ class ResponsiveNavLink extends Component
             'dark:focus:bg-gray-700 focus:border-gray-300 dark:focus:border-gray-600 ' .
             'transition duration-150 ease-in-out';
     }
-    /**
-     * Get the view / contents that represent the component.
-     *
-     * @return View The responsive navigation link component view
-     */
+    /**   * Get the view / contents that represent the component. *   * @return View The responsive navigation link component view */
     public function render(): View
     {
         return view('components.responsive-nav-link');
     }
-    /**
-     * Validate and sanitize the active parameter.
-     *
-     * @param  mixed  $active  The active value to validate
-     *
-     * @return bool The validated active state
-     */
+    /**   * Validate and sanitize the active parameter. *   * @param mixed $active The active value to validate *   * @return bool The validated active state */
     private function validateActive($active): bool
     {
         // Convert various truthy/falsy values to boolean

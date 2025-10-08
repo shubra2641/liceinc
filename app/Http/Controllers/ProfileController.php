@@ -15,50 +15,17 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
 /**
- * Profile Controller with enhanced security.
- *
- * This controller handles user profile management including viewing, editing,
- * updating, and account deletion with comprehensive security measures and
- * proper error handling.
- *
- * Features:
- * - User profile display with related data
- * - Profile editing form display
- * - Profile information updates
- * - Account deletion with password confirmation
- * - Enhanced security measures (XSS protection, input validation)
- * - Comprehensive error handling and logging
- * - Proper logging for errors and warnings only
- * - Rate limiting for profile operations
- * - Authorization checks for profile access
- */
+ * Profile Controller with enhanced security. *
+ * This controller handles user profile management including viewing, editing, * updating, and account deletion with comprehensive security measures and * proper error handling. *
+ * Features: * - User profile display with related data * - Profile editing form display * - Profile information updates * - Account deletion with password confirmation * - Enhanced security measures (XSS protection, input validation) * - Comprehensive error handling and logging * - Proper logging for errors and warnings only * - Rate limiting for profile operations * - Authorization checks for profile access */
 class ProfileController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
+    /**   * Create a new controller instance. *   * @return void */
     public function __construct()
     {
         $this->middleware(['auth', 'user', 'verified']);
     }
-    /**
-     * Display the user's profile with enhanced security.
-     *
-     * Shows the authenticated user's profile information including
-     * licenses, domains, and tickets with proper authorization checks.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return View The profile index view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access: GET /profile
-     * // Returns: View with user profile data
-     */
+    /**   * Display the user's profile with enhanced security. *   * Shows the authenticated user's profile information including * licenses, domains, and tickets with proper authorization checks. *   * @param Request $request The HTTP request *   * @return View The profile index view *   * @throws \Exception When database operations fail *   * @example * // Access: GET /profile * // Returns: View with user profile data */
     public function index(Request $request): View|RedirectResponse
     {
         try {
@@ -100,22 +67,7 @@ class ProfileController extends Controller
             abort(500, 'Failed to load profile');
         }
     }
-    /**
-     * Display the user's profile editing form with enhanced security.
-     *
-     * Shows the profile editing form for the authenticated user
-     * with proper authorization checks.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return View The profile editing form view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access: GET /profile/edit
-     * // Returns: View with profile editing form
-     */
+    /**   * Display the user's profile editing form with enhanced security. *   * Shows the profile editing form for the authenticated user * with proper authorization checks. *   * @param Request $request The HTTP request *   * @return View The profile editing form view *   * @throws \Exception When database operations fail *   * @example * // Access: GET /profile/edit * // Returns: View with profile editing form */
     public function edit(Request $request): View|RedirectResponse
     {
         try {
@@ -153,26 +105,7 @@ class ProfileController extends Controller
             abort(500, 'Failed to load profile edit form');
         }
     }
-    /**
-     * Update the user's profile information with enhanced security.
-     *
-     * Updates the authenticated user's profile information with
-     * comprehensive validation and security measures.
-     *
-     * @param  ProfileUpdateRequest  $request  The validated request containing profile data
-     *
-     * @return RedirectResponse Redirect to profile edit page with success message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request:
-     * PUT /profile
-     * {
-     *     "name": "John Doe",
-     *     "email": "john@example.com"
-     * }
-     */
+    /**   * Update the user's profile information with enhanced security. *   * Updates the authenticated user's profile information with * comprehensive validation and security measures. *   * @param ProfileUpdateRequest $request The validated request containing profile data *   * @return RedirectResponse Redirect to profile edit page with success message *   * @throws \Exception When database operations fail *   * @example * // Request: * PUT /profile * { * "name": "John Doe", * "email": "john@example.com" * } */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         try {
@@ -214,7 +147,7 @@ class ProfileController extends Controller
                         'old_email' => $user->getOriginal('email'),
                         'new_email' => $user->email,
                     'ip' => request()->ip(),
-                ]);
+                    ]);
                 }
                 $user->save();
             }
@@ -241,25 +174,7 @@ class ProfileController extends Controller
             return redirect()->back()->with('error', 'Failed to update profile. Please try again.');
         }
     }
-    /**
-     * Delete the user's account with enhanced security.
-     *
-     * Deletes the authenticated user's account with password confirmation
-     * and proper session cleanup.
-     *
-     * @param  Request  $request  The HTTP request containing password confirmation
-     *
-     * @return RedirectResponse Redirect to home page after account deletion
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request:
-     * DELETE /profile
-     * {
-     *     "password": "current_password"
-     * }
-     */
+    /**   * Delete the user's account with enhanced security. *   * Deletes the authenticated user's account with password confirmation * and proper session cleanup. *   * @param Request $request The HTTP request containing password confirmation *   * @return RedirectResponse Redirect to home page after account deletion *   * @throws \Exception When database operations fail *   * @example * // Request: * DELETE /profile * { * "password": "current_password" * } */
     public function destroy(Request $request): RedirectResponse
     {
         try {

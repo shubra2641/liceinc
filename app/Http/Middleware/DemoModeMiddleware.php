@@ -8,43 +8,12 @@ use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Demo Mode Middleware with enhanced security.
- *
- * This middleware handles demo mode functionality, preventing destructive operations
- * while allowing read-only access and authentication. It provides comprehensive
- * protection for demo environments with enhanced security measures.
- *
- * Features:
- * - Demo mode detection and enforcement
- * - Destructive operation blocking
- * - Read-only AJAX request handling
- * - Authentication route bypassing
- * - Enhanced security measures (XSS protection, input validation)
- * - Comprehensive error handling and logging
- * - Route-based action detection
- * - Method-based operation blocking
- */
+ * Demo Mode Middleware with enhanced security. *
+ * This middleware handles demo mode functionality, preventing destructive operations * while allowing read-only access and authentication. It provides comprehensive * protection for demo environments with enhanced security measures. *
+ * Features: * - Demo mode detection and enforcement * - Destructive operation blocking * - Read-only AJAX request handling * - Authentication route bypassing * - Enhanced security measures (XSS protection, input validation) * - Comprehensive error handling and logging * - Route-based action detection * - Method-based operation blocking */
 class DemoModeMiddleware
 {
-    /**
-     * Handle an incoming request with enhanced security.
-     *
-     * Processes incoming requests and blocks destructive operations in demo mode
-     * while allowing read-only access and authentication functionality.
-     *
-     * @param  Request  $request  The incoming HTTP request
-     * @param  Closure  $next  The next middleware in the pipeline
-     *
-     * @return Response The HTTP response
-     *
-     * @throws \Exception When demo mode operations fail
-     *
-     * @example
-     * // Blocks destructive operations in demo mode:
-     * // POST /admin/users/1/delete -> 403 Forbidden
-     * // PUT /admin/settings/update -> 403 Forbidden
-     * // GET /admin/users -> 200 OK (read-only allowed)
-     */
+    /**   * Handle an incoming request with enhanced security. *   * Processes incoming requests and blocks destructive operations in demo mode * while allowing read-only access and authentication functionality. *   * @param Request $request The incoming HTTP request * @param Closure $next The next middleware in the pipeline *   * @return Response The HTTP response *   * @throws \Exception When demo mode operations fail *   * @example * // Blocks destructive operations in demo mode: * // POST /admin/users/1/delete -> 403 Forbidden * // PUT /admin/settings/update -> 403 Forbidden * // GET /admin/users -> 200 OK (read-only allowed) */
     public function handle(Request $request, Closure $next): Response
     {
         try {
@@ -109,23 +78,13 @@ class DemoModeMiddleware
             return $typedResponse;
         }
     }
-    /**
-     * Check if demo mode is enabled with enhanced validation.
-     *
-     * @return bool True if demo mode is enabled, false otherwise
-     */
+    /**   * Check if demo mode is enabled with enhanced validation. *   * @return bool True if demo mode is enabled, false otherwise */
     private function isDemoModeEnabled(): bool
     {
         $demoMode = config('app.demo_mode', false);
         return $demoMode === true || $demoMode === '1' || $demoMode === 'true';
     }
-    /**
-     * Check if the request is for authentication routes.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return bool True if authentication route, false otherwise
-     */
+    /**   * Check if the request is for authentication routes. *   * @param Request $request The HTTP request *   * @return bool True if authentication route, false otherwise */
     private function isAuthenticationRoute(Request $request): bool
     {
         $authRoutes = [
@@ -156,25 +115,13 @@ class DemoModeMiddleware
         }
         return false;
     }
-    /**
-     * Check if the HTTP method is destructive with enhanced validation.
-     *
-     * @param  string  $method  The HTTP method to check
-     *
-     * @return bool True if destructive, false otherwise
-     */
+    /**   * Check if the HTTP method is destructive with enhanced validation. *   * @param string $method The HTTP method to check *   * @return bool True if destructive, false otherwise */
     private function isDestructiveMethod(string $method): bool
     {
         $destructiveMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
         return in_array(strtoupper($method), $destructiveMethods, true);
     }
-    /**
-     * Check if this is a login POST request with enhanced validation.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return bool True if login POST, false otherwise
-     */
+    /**   * Check if this is a login POST request with enhanced validation. *   * @param Request $request The HTTP request *   * @return bool True if login POST, false otherwise */
     private function isLoginPost(Request $request): bool
     {
         if (! $request->isMethod('POST')) {
@@ -196,13 +143,7 @@ class DemoModeMiddleware
         }
         return false;
     }
-    /**
-     * Check if the request is a destructive action with enhanced validation.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return bool True if destructive, false otherwise
-     */
+    /**   * Check if the request is a destructive action with enhanced validation. *   * @param Request $request The HTTP request *   * @return bool True if destructive, false otherwise */
     private function isDestructiveAction(Request $request): bool
     {
         $path = $this->sanitizeInput($request->path());
@@ -238,13 +179,7 @@ class DemoModeMiddleware
         }
         return false;
     }
-    /**
-     * Check if AJAX request is read-only with enhanced validation.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return bool True if read-only, false otherwise
-     */
+    /**   * Check if AJAX request is read-only with enhanced validation. *   * @param Request $request The HTTP request *   * @return bool True if read-only, false otherwise */
     private function isReadOnlyAjaxRequest(Request $request): bool
     {
         $path = $this->sanitizeInput($request->path());
@@ -260,13 +195,7 @@ class DemoModeMiddleware
         }
         return false;
     }
-    /**
-     * Handle demo mode blocking with enhanced security.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return Response The blocked response
-     */
+    /**   * Handle demo mode blocking with enhanced security. *   * @param Request $request The HTTP request *   * @return Response The blocked response */
     private function handleDemoModeBlock(Request $request): Response
     {
         $message = 'Demo Mode: This action is not allowed in demo mode. You can only view and browse the system.';
@@ -281,13 +210,7 @@ class DemoModeMiddleware
             ->with('error', $message)
             ->with('demo_mode', true);
     }
-    /**
-     * Sanitize input to prevent XSS attacks.
-     *
-     * @param  string|null  $input  The input to sanitize
-     *
-     * @return string|null The sanitized input
-     */
+    /**   * Sanitize input to prevent XSS attacks. *   * @param  string|null  $input  The input to sanitize *   * @return string|null The sanitized input */
     private function sanitizeInput(?string $input): ?string
     {
         if ($input === null) {

@@ -17,71 +17,22 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
 /**
- * Product Controller with enhanced security.
- *
- * This controller handles product listing, searching, filtering, and display
- * functionality for both authenticated users and guests with comprehensive
- * security measures and proper error handling.
- *
- * Features:
- * - Product listing with search and filtering
- * - Product details display with ownership checks
- * - Public product access for guests
- * - Download permission validation
- * - Related products suggestions
- * - Enhanced security measures (XSS protection, input validation)
- * - Comprehensive error handling and logging
- * - Proper logging for errors and warnings only
- * - Rate limiting for product access
- * - Authorization checks for product ownership
- */
+ * Product Controller with enhanced security. *
+ * This controller handles product listing, searching, filtering, and display * functionality for both authenticated users and guests with comprehensive * security measures and proper error handling. *
+ * Features: * - Product listing with search and filtering * - Product details display with ownership checks * - Public product access for guests * - Download permission validation * - Related products suggestions * - Enhanced security measures (XSS protection, input validation) * - Comprehensive error handling and logging * - Proper logging for errors and warnings only * - Rate limiting for product access * - Authorization checks for product ownership */
 class ProductController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
+    /**   * Create a new controller instance. *   * @return void */
     public function __construct()
     {
         $this->middleware(['auth', 'user', 'verified'])->only(['index', 'show']);
     }
-    /**
-     * Authenticated user product listing with enhanced security.
-     *
-     * Shows active products for authenticated users with search and filtering
-     * capabilities and proper authorization checks.
-     *
-     * @param  ProductSearchRequest  $request  The HTTP request containing search/filter parameters
-     *
-     * @return View The products listing view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access: GET /products?search=laravel&category=1&language=php
-     * // Returns: View with filtered products
-     */
+    /**   * Authenticated user product listing with enhanced security. *   * Shows active products for authenticated users with search and filtering * capabilities and proper authorization checks. *   * @param ProductSearchRequest $request The HTTP request containing search/filter parameters *   * @return View The products listing view *   * @throws \Exception When database operations fail *   * @example * // Access: GET /products?search=laravel&category=1&language=php * // Returns: View with filtered products */
     public function index(ProductSearchRequest $request): View
     {
         return $this->publicIndex($request);
     }
-    /**
-     * Public product listing for users and guests with enhanced security.
-     *
-     * Displays active products with comprehensive search, filtering, and sorting
-     * capabilities for both authenticated users and guests.
-     *
-     * @param  ProductSearchRequest|null  $request  The HTTP request containing search/filter parameters
-     *
-     * @return View The products listing view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access: GET /products/public?search=laravel&category=1&language=php&price_filter=paid&sort=price_low
-     * // Returns: View with filtered and sorted products
-     */
+    /**   * Public product listing for users and guests with enhanced security. *   * Displays active products with comprehensive search, filtering, and sorting * capabilities for both authenticated users and guests. *   * @param  ProductSearchRequest|null  $request  The HTTP request containing search/filter parameters *   * @return View The products listing view *   * @throws \Exception When database operations fail *   * @example * // Access: GET /products/public?search=laravel&category=1&language=php&price_filter=paid&sort=price_low * // Returns: View with filtered and sorted products */
     public function publicIndex(ProductSearchRequest $request = null): View
     {
         try {
@@ -165,22 +116,7 @@ class ProductController extends Controller
             abort(500, 'Failed to load products');
         }
     }
-    /**
-     * Show product details for authenticated users with enhanced security.
-     *
-     * Displays detailed product information with ownership checks, download
-     * permissions, and related products for authenticated users.
-     *
-     * @param  Product  $product  The product to display
-     *
-     * @return View The product details view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access: GET /products/{product}
-     * // Returns: View with product details and ownership information
-     */
+    /**   * Show product details for authenticated users with enhanced security. *   * Displays detailed product information with ownership checks, download * permissions, and related products for authenticated users. *   * @param Product $product The product to display *   * @return View The product details view *   * @throws \Exception When database operations fail *   * @example * // Access: GET /products/{product} * // Returns: View with product details and ownership information */
     public function show(Product $product): View
     {
         try {
@@ -235,12 +171,12 @@ class ProductController extends Controller
             $product->description_has_html = false;
             $product->requirements_has_html = false;
             $product->installation_guide_has_html = false;
-            
+
             // Check if fields are strings before processing
             $description = $product->description;
             $requirements = $product->requirements;
             $installationGuide = $product->installation_guide;
-            
+
             if (is_string($description)) {
                 $product->description_has_html = strip_tags($description) !== $description;
             }
@@ -295,22 +231,7 @@ class ProductController extends Controller
             abort(500, 'Failed to load product details');
         }
     }
-    /**
-     * Public product details (by slug) for guests with enhanced security.
-     *
-     * Displays detailed product information for guests accessing products
-     * via slug with comprehensive security measures.
-     *
-     * @param  string  $slug  The product slug
-     *
-     * @return View The product details view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access: GET /products/public/{slug}
-     * // Returns: View with product details
-     */
+    /**   * Public product details (by slug) for guests with enhanced security. *   * Displays detailed product information for guests accessing products * via slug with comprehensive security measures. *   * @param string $slug The product slug *   * @return View The product details view *   * @throws \Exception When database operations fail *   * @example * // Access: GET /products/public/{slug} * // Returns: View with product details */
     public function publicShow(string $slug): View
     {
         try {
@@ -370,12 +291,12 @@ class ProductController extends Controller
             $product->description_has_html = false;
             $product->requirements_has_html = false;
             $product->installation_guide_has_html = false;
-            
+
             // Check if fields are strings before processing
             $description = $product->description;
             $requirements = $product->requirements;
             $installationGuide = $product->installation_guide;
-            
+
             if (is_string($description)) {
                 $product->description_has_html = strip_tags($description) !== $description;
             }

@@ -7,34 +7,17 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
- * Profile Update Request with enhanced security.
- *
- * This request class handles validation for updating user profiles
- * with comprehensive security measures and input sanitization.
- *
- * Features:
- * - Comprehensive validation rules for profile updates
- * - XSS protection and input sanitization
- * - Custom validation messages for better user experience
- * - Proper type hints and return types
- * - Security validation rules (XSS protection, SQL injection prevention)
- * - Email uniqueness validation with ignore for current user
- * - Password confirmation support
- */
+ * Profile Update Request with enhanced security. *
+ * This request class handles validation for updating user profiles * with comprehensive security measures and input sanitization. *
+ * Features: * - Comprehensive validation rules for profile updates * - XSS protection and input sanitization * - Custom validation messages for better user experience * - Proper type hints and return types * - Security validation rules (XSS protection, SQL injection prevention) * - Email uniqueness validation with ignore for current user * - Password confirmation support */
 class ProfileUpdateRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    /**   * Determine if the user is authorized to make this request. */
     public function authorize(): bool
     {
         return auth()->check();
     }
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
+    /**   * Get the validation rules that apply to the request. *   * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string> */
     public function rules(): array
     {
         return [
@@ -141,11 +124,7 @@ class ProfileUpdateRequest extends FormRequest
             ],
         ];
     }
-    /**
-     * Get custom validation messages.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom validation messages. *   * @return array<string, string> */
     public function messages(): array
     {
         return [
@@ -167,11 +146,7 @@ class ProfileUpdateRequest extends FormRequest
             'password.confirmed' => 'The password confirmation does not match.',
         ];
     }
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
-     */
+    /**   * Get custom attributes for validator errors. *   * @return array<string, string> */
     public function attributes(): array
     {
         return [
@@ -189,9 +164,7 @@ class ProfileUpdateRequest extends FormRequest
             'password_confirmation' => 'password confirmation',
         ];
     }
-    /**
-     * Prepare the data for validation.
-     */
+    /**   * Prepare the data for validation. */
     protected function prepareForValidation(): void
     {
         // Sanitize input to prevent XSS
@@ -211,23 +184,17 @@ class ProfileUpdateRequest extends FormRequest
             'envato_id' => $this->input('envato_id') ? $this->sanitizeInput($this->input('envato_id')) : null,
         ]);
     }
-    /**
-     * Sanitize input to prevent XSS attacks.
-     *
-     * @param  mixed  $input  The input to sanitize
-     *
-     * @return string|null The sanitized input
-     */
+    /**   * Sanitize input to prevent XSS attacks. *   * @param mixed $input The input to sanitize *   * @return string|null The sanitized input */
     private function sanitizeInput(mixed $input): ?string
     {
         if ($input === null || $input === '') {
             return null;
         }
-        
+
         if (!is_string($input)) {
             return null;
         }
-        
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

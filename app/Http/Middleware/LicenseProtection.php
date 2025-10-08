@@ -13,43 +13,12 @@ use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * License Protection Middleware with enhanced security.
- *
- * This middleware handles license verification and protection for the application,
- * providing comprehensive license management with enhanced security measures
- * and proper error handling.
- *
- * Features:
- * - License verification and validation
- * - Periodic license checking (every 24 hours)
- * - License expiration handling
- * - Route-based license bypassing
- * - Enhanced security measures (XSS protection, input validation)
- * - Comprehensive error handling and logging
- * - Database transaction support
- * - License status monitoring
- */
+ * License Protection Middleware with enhanced security. *
+ * This middleware handles license verification and protection for the application, * providing comprehensive license management with enhanced security measures * and proper error handling. *
+ * Features: * - License verification and validation * - Periodic license checking (every 24 hours) * - License expiration handling * - Route-based license bypassing * - Enhanced security measures (XSS protection, input validation) * - Comprehensive error handling and logging * - Database transaction support * - License status monitoring */
 class LicenseProtection
 {
-    /**
-     * Handle an incoming request with enhanced security.
-     *
-     * Processes incoming requests and verifies license status with comprehensive
-     * validation and security measures.
-     *
-     * @param  Request  $request  The incoming HTTP request
-     * @param  Closure  $next  The next middleware in the pipeline
-     *
-     * @return Response The HTTP response
-     *
-     * @throws \Exception When license verification fails
-     *
-     * @example
-     * // Blocks unlicensed access:
-     * // GET /admin/dashboard -> 403 Forbidden (if license invalid)
-     * // GET /install -> 200 OK (installation routes bypassed)
-     * // GET /api/license/verify -> 200 OK (API routes bypassed)
-     */
+    /**   * Handle an incoming request with enhanced security. *   * Processes incoming requests and verifies license status with comprehensive * validation and security measures. *   * @param Request $request The incoming HTTP request * @param Closure $next The next middleware in the pipeline *   * @return Response The HTTP response *   * @throws \Exception When license verification fails *   * @example * // Blocks unlicensed access: * // GET /admin/dashboard -> 403 Forbidden (if license invalid) * // GET /install -> 200 OK (installation routes bypassed) * // GET /api/license/verify -> 200 OK (API routes bypassed) */
     public function handle(Request $request, Closure $next): Response
     {
         try {
@@ -116,35 +85,17 @@ class LicenseProtection
             return $typedResponse;
         }
     }
-    /**
-     * Check if the request is for installation routes.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return bool True if installation route, false otherwise
-     */
+    /**   * Check if the request is for installation routes. *   * @param Request $request The HTTP request *   * @return bool True if installation route, false otherwise */
     private function isInstallationRoute(Request $request): bool
     {
         return $request->is('install*');
     }
-    /**
-     * Check if the request is for API routes.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return bool True if API route, false otherwise
-     */
+    /**   * Check if the request is for API routes. *   * @param Request $request The HTTP request *   * @return bool True if API route, false otherwise */
     private function isApiRoute(Request $request): bool
     {
         return $request->is('api*');
     }
-    /**
-     * Check if the request is for public routes.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return bool True if public route, false otherwise
-     */
+    /**   * Check if the request is for public routes. *   * @param Request $request The HTTP request *   * @return bool True if public route, false otherwise */
     private function isPublicRoute(Request $request): bool
     {
         $publicRoutes = ['license-status*', 'kb*', 'support*'];
@@ -155,23 +106,13 @@ class LicenseProtection
         }
         return false;
     }
-    /**
-     * Check if the system is installed.
-     *
-     * @return bool True if installed, false otherwise
-     */
+    /**   * Check if the system is installed. *   * @return bool True if installed, false otherwise */
     private function isSystemInstalled(): bool
     {
         $installedFile = storage_path('.installed');
         return File::exists($installedFile);
     }
-    /**
-     * Get license information from database with enhanced security.
-     *
-     * @return array<string, mixed>|null The license information or null if not found
-     *
-     * @throws \Exception When database operations fail
-     */
+    /**   * Get license information from database with enhanced security. *   * @return array<string, mixed>|null The license information or null if not found *   * @throws \Exception When database operations fail */
     private function getLicenseInfo(): ?array
     {
         try {
@@ -196,13 +137,7 @@ class LicenseProtection
             return null;
         }
     }
-    /**
-     * Check if license is expired with enhanced validation.
-     *
-     * @param  array<string, mixed>  $licenseInfo  The license information
-     *
-     * @return bool True if expired, false otherwise
-     */
+    /**   * Check if license is expired with enhanced validation. *   * @param  array<string, mixed>  $licenseInfo  The license information *   * @return bool True if expired, false otherwise */
     private function isLicenseExpired(array $licenseInfo): bool
     {
         $expirationDate = $licenseInfo['license_expiration_date'] ?? null;
@@ -220,13 +155,7 @@ class LicenseProtection
             return false;
         }
     }
-    /**
-     * Check if we should verify license periodically with enhanced validation.
-     *
-     * @param  array<string, mixed>  $licenseInfo  The license information
-     *
-     * @return bool True if should verify, false otherwise
-     */
+    /**   * Check if we should verify license periodically with enhanced validation. *   * @param  array<string, mixed>  $licenseInfo  The license information *   * @return bool True if should verify, false otherwise */
     private function shouldVerifyLicense(array $licenseInfo): bool
     {
         $lastVerification = $licenseInfo['license_last_verification'] ?? null;
@@ -246,22 +175,15 @@ class LicenseProtection
             return true; // If we can't parse the date, verify anyway
         }
     }
-    /**
-     * Verify license periodically with enhanced security.
-     *
-     * @param  array<string, mixed>  $licenseInfo  The license information
-     *
-     * @throws \Exception When verification fails
-     */
+    /**   * Verify license periodically with enhanced security. *   * @param  array<string, mixed>  $licenseInfo  The license information *   * @throws \Exception When verification fails */
     private function verifyLicensePeriodically(array $licenseInfo): void
     {
         try {
             DB::beginTransaction();
             $licenseVerifier = new class {
-                /**
-                 * @return array<string, mixed>
-                 */
-                public function verifyLicense(string $purchaseCode, string $domain): array {
+                /**   * @return array<string, mixed> */
+                public function verifyLicense(string $purchaseCode, string $domain): array
+                {
                     // Mock implementation for development
                     return ['valid' => true, 'message' => 'License verified'];
                 }
@@ -292,14 +214,7 @@ class LicenseProtection
             ]);
         }
     }
-    /**
-     * Handle license error with enhanced security.
-     *
-     * @param  string  $message  The error message
-     * @param  Request  $request  The HTTP request
-     *
-     * @return Response The error response
-     */
+    /**   * Handle license error with enhanced security. *   * @param string $message The error message * @param Request $request The HTTP request *   * @return Response The error response */
     private function handleLicenseError(string $message, Request $request): Response
     {
         Log::warning('License protection triggered', [
@@ -313,13 +228,7 @@ class LicenseProtection
             'message' => $this->sanitizeInput($message),
         ], 403);
     }
-    /**
-     * Sanitize input to prevent XSS attacks.
-     *
-     * @param  string|null  $input  The input to sanitize
-     *
-     * @return string|null The sanitized input
-     */
+    /**   * Sanitize input to prevent XSS attacks. *   * @param  string|null  $input  The input to sanitize *   * @return string|null The sanitized input */
     private function sanitizeInput(?string $input): ?string
     {
         if ($input === null) {
@@ -327,13 +236,7 @@ class LicenseProtection
         }
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
-    /**
-     * Mask purchase code for security.
-     *
-     * @param  string  $purchaseCode  The purchase code to mask
-     *
-     * @return string The masked purchase code
-     */
+    /**   * Mask purchase code for security. *   * @param string $purchaseCode The purchase code to mask *   * @return string The masked purchase code */
     private function maskPurchaseCode(string $purchaseCode): string
     {
         if (strlen($purchaseCode) <= 8) {

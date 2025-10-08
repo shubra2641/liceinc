@@ -8,63 +8,22 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Purchase Code Service with enhanced security and validation.
+ * Purchase Code Service with enhanced security and validation. *
+ * This service handles purchase code verification, validation, and license management * with comprehensive security measures, dual verification systems, and access control. *
+ * Features: * - Purchase code format validation and sanitization * - Dual verification system (database + Envato API) * - Comprehensive license management and creation * - Knowledge base access control based on licenses * - Product access validation and authorization * - Secure license creation from Envato data * - Advanced error handling and logging *
  *
- * This service handles purchase code verification, validation, and license management
- * with comprehensive security measures, dual verification systems, and access control.
- *
- * Features:
- * - Purchase code format validation and sanitization
- * - Dual verification system (database + Envato API)
- * - Comprehensive license management and creation
- * - Knowledge base access control based on licenses
- * - Product access validation and authorization
- * - Secure license creation from Envato data
- * - Advanced error handling and logging
- *
- *
- * @example
- * // Verify a purchase code
- * $service = new PurchaseCodeService($envatoService);
- * $result = $service->verifyPurchaseCode('ABC123DEF456', $productId, $user);
- *
- * // Check user access to product
- * $hasAccess = $service->userHasProductAccess($user, $productId);
- */
+ * @example * // Verify a purchase code * $service = new PurchaseCodeService($envatoService); * $result = $service->verifyPurchaseCode('ABC123DEF456', $productId, $user); *
+ * // Check user access to product * $hasAccess = $service->userHasProductAccess($user, $productId); */
 class PurchaseCodeService
 {
-    /**
-     * The Envato service instance for API operations.
-     *
-     * @var EnvatoService
-     */
+    /**   * The Envato service instance for API operations. *   * @var EnvatoService */
     protected $envatoService;
-    /**
-     * Create a new PurchaseCodeService instance.
-     *
-     * @param  EnvatoService  $envatoService  The Envato service for API operations
-     */
+    /**   * Create a new PurchaseCodeService instance. *   * @param EnvatoService $envatoService The Envato service for API operations */
     public function __construct(EnvatoService $envatoService)
     {
         $this->envatoService = $envatoService;
     }
-    /**
-     * Clean and validate purchase code format with security validation.
-     *
-     * Sanitizes and normalizes purchase codes by removing whitespace and dashes,
-     * converting to uppercase for consistency, and applying security measures
-     * to prevent injection attacks.
-     *
-     * @param  string  $purchaseCode  The raw purchase code to clean
-     *
-     * @return string The cleaned and sanitized purchase code
-     *
-     * @throws \InvalidArgumentException When purchase code is invalid
-     *
-     * @example
-     * $cleaned = $service->cleanPurchaseCode('abc-123 def');
-     * // Returns: 'ABC123DEF'
-     */
+    /**   * Clean and validate purchase code format with security validation. *   * Sanitizes and normalizes purchase codes by removing whitespace and dashes, * converting to uppercase for consistency, and applying security measures * to prevent injection attacks. *   * @param string $purchaseCode The raw purchase code to clean *   * @return string The cleaned and sanitized purchase code *   * @throws \InvalidArgumentException When purchase code is invalid *   * @example * $cleaned = $service->cleanPurchaseCode('abc-123 def'); * // Returns: 'ABC123DEF' */
     public function cleanPurchaseCode(string $purchaseCode): string
     {
         try {
@@ -90,23 +49,7 @@ class PurchaseCodeService
             throw $e;
         }
     }
-    /**
-     * Validate purchase code format with comprehensive security checks.
-     *
-     * Performs thorough format validation of purchase codes including
-     * alphanumeric character validation, length restrictions, and
-     * security pattern detection to ensure code integrity.
-     *
-     * @param  string  $purchaseCode  The purchase code to validate
-     *
-     * @return bool True if format is valid, false otherwise
-     *
-     * @example
-     * $isValid = $service->isValidFormat('ABC123DEF456');
-     * if ($isValid) {
-     *     echo "Purchase code format is valid";
-     * }
-     */
+    /**   * Validate purchase code format with comprehensive security checks. *   * Performs thorough format validation of purchase codes including * alphanumeric character validation, length restrictions, and * security pattern detection to ensure code integrity. *   * @param string $purchaseCode The purchase code to validate *   * @return bool True if format is valid, false otherwise *   * @example * $isValid = $service->isValidFormat('ABC123DEF456'); * if ($isValid) { * echo "Purchase code format is valid"; * } */
     public function isValidFormat(string $purchaseCode): bool
     {
         try {
@@ -125,30 +68,8 @@ class PurchaseCodeService
             return false;
         }
     }
-    /**
-     * Verify purchase code with dual verification system and comprehensive security.
-     *
-     * Implements a dual verification system that first checks the local database
-     * and then falls back to Envato API verification. Includes comprehensive
-     * security validation, error handling, and detailed logging.
-     *
-     * @param  string  $purchaseCode  The purchase code to verify
-     * @param  int|null  $productId  Optional product ID for product-specific verification
-     * @param  User|null  $user  Optional user for license creation
-     *
-     * @return array Verification result with success status and details
-     *
-     * @throws \Exception When verification fails or security validation errors occur
-     *
-     * @example
-     * $result = $service->verifyPurchaseCode('ABC123DEF456', $productId, $user);
-     * if ($result['success']) {
-     *     echo "Purchase code verified from: " . $result['source'];
-     * }
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Verify purchase code with dual verification system and comprehensive security. *   * Implements a dual verification system that first checks the local database * and then falls back to Envato API verification. Includes comprehensive * security validation, error handling, and detailed logging. *   * @param string $purchaseCode The purchase code to verify * @param  int|null  $productId  Optional product ID for product-specific verification * @param  User|null  $user  Optional user for license creation *   * @return array Verification result with success status and details *   * @throws \Exception When verification fails or security validation errors occur *   * @example * $result = $service->verifyPurchaseCode('ABC123DEF456', $productId, $user); * if ($result['success']) { * echo "Purchase code verified from: " . $result['source']; * } */
+    /**   * @return array<string, mixed> */
     public function verifyPurchaseCode(string $purchaseCode, ?int $productId = null, ?User $user = null): array
     {
         try {
@@ -191,16 +112,7 @@ class PurchaseCodeService
             throw $e;
         }
     }
-    /**
-     * Sanitize input data to prevent XSS and injection attacks.
-     *
-     * Provides comprehensive input sanitization for purchase codes and other
-     * user inputs to ensure security and prevent various types of injection attacks.
-     *
-     * @param  string|null  $input  The input string to sanitize
-     *
-     * @return string The sanitized input string
-     */
+    /**   * Sanitize input data to prevent XSS and injection attacks. *   * Provides comprehensive input sanitization for purchase codes and other * user inputs to ensure security and prevent various types of injection attacks. *   * @param  string|null  $input  The input string to sanitize *   * @return string The sanitized input string */
     private function sanitizeInput(?string $input): string
     {
         if ($input === null) {
@@ -214,22 +126,8 @@ class PurchaseCodeService
         $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
         return $input;
     }
-    /**
-     * Verify against our database with comprehensive security validation.
-     *
-     * Performs database verification of purchase codes with proper security
-     * measures, license status validation, and expiration checks.
-     *
-     * @param  string  $purchaseCode  The cleaned purchase code to verify
-     * @param  int|null  $productId  Optional product ID for product-specific verification
-     *
-     * @return array Database verification result
-     *
-     * @throws \Exception When database verification fails
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Verify against our database with comprehensive security validation. *   * Performs database verification of purchase codes with proper security * measures, license status validation, and expiration checks. *   * @param string $purchaseCode The cleaned purchase code to verify * @param  int|null  $productId  Optional product ID for product-specific verification *   * @return array Database verification result *   * @throws \Exception When database verification fails */
+    /**   * @return array<string, mixed> */
     protected function verifyAgainstDatabase(string $purchaseCode, ?int $productId = null): array
     {
         try {
@@ -277,29 +175,8 @@ class PurchaseCodeService
             throw $e;
         }
     }
-    /**
-     * Verify raw code directly against database with comprehensive validation.
-     *
-     * Performs direct database verification without cleaning the input code,
-     * useful for license key verification where exact format must be preserved.
-     * Includes comprehensive status and expiration validation.
-     *
-     * @param  string  $rawCode  The raw code to verify (no cleaning applied)
-     * @param  int|null  $productId  Optional product ID for product-specific verification
-     *
-     * @return array Raw code verification result with detailed status information
-     *
-     * @throws \Exception When raw code verification fails
-     *
-     * @example
-     * $result = $service->verifyRawCode('ABC123DEF456', $productId);
-     * if ($result['success']) {
-     *     echo "Raw code verified successfully";
-     * }
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Verify raw code directly against database with comprehensive validation. *   * Performs direct database verification without cleaning the input code, * useful for license key verification where exact format must be preserved. * Includes comprehensive status and expiration validation. *   * @param string $rawCode The raw code to verify (no cleaning applied) * @param  int|null  $productId  Optional product ID for product-specific verification *   * @return array Raw code verification result with detailed status information *   * @throws \Exception When raw code verification fails *   * @example * $result = $service->verifyRawCode('ABC123DEF456', $productId); * if ($result['success']) { * echo "Raw code verified successfully"; * } */
+    /**   * @return array<string, mixed> */
     public function verifyRawCode(string $rawCode, ?int $productId = null): array
     {
         try {
@@ -376,9 +253,7 @@ class PurchaseCodeService
             throw $e;
         }
     }
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * @return array<string, mixed> */
     protected function verifyAgainstEnvato(string $purchaseCode, ?int $productId = null, ?User $user = null): array
     {
         try {
@@ -422,12 +297,8 @@ class PurchaseCodeService
             ];
         }
     }
-    /**
-     * Create license record from Envato data.
-     */
-    /**
-     * @param array<mixed> $envatoData
-     */
+    /**   * Create license record from Envato data. */
+    /**   * @param array<mixed> $envatoData */
     protected function createLicenseFromEnvato(
         User $user,
         string $purchaseCode,
@@ -469,9 +340,7 @@ class PurchaseCodeService
             return null;
         }
     }
-    /**
-     * Check if user has access to specific product via any license.
-     */
+    /**   * Check if user has access to specific product via any license. */
     public function userHasProductAccess(User $user, int $productId): bool
     {
         return $user->licenses()
@@ -483,9 +352,7 @@ class PurchaseCodeService
             })
             ->exists();
     }
-    /**
-     * Check if user has access to KB content via product license.
-     */
+    /**   * Check if user has access to KB content via product license. */
     public function userHasKbAccess(User $user, \App\Models\KbArticle $kbItem): bool
     {
         // If KB item is not linked to any product, allow access
@@ -495,12 +362,8 @@ class PurchaseCodeService
         // Check if user has license for the linked product
         return $this->userHasProductAccess($user, $kbItem->product_id);
     }
-    /**
-     * Get accessible KB content for user based on their licenses.
-     */
-    /**
-     * @return array<string, mixed>
-     */
+    /**   * Get accessible KB content for user based on their licenses. */
+    /**   * @return array<string, mixed> */
     public function getAccessibleKbContent(User $user): array
     {
         $userProductIds = $user->licenses()
@@ -522,9 +385,7 @@ class PurchaseCodeService
             })->where('is_published', true)->get(),
         ];
     }
-    /**
-     * Check if user has access to KB category via product license.
-     */
+    /**   * Check if user has access to KB category via product license. */
     public function userHasCategoryAccess(User $user, \App\Models\KbCategory $category): bool
     {
         // If category is not linked to any product, allow access
@@ -534,9 +395,7 @@ class PurchaseCodeService
         // Check if user has license for the linked product
         return $this->userHasProductAccess($user, $category->product_id);
     }
-    /**
-     * Check if user has access to KB article considering both direct product and category product.
-     */
+    /**   * Check if user has access to KB article considering both direct product and category product. */
     public function userHasArticleAccess(User $user, \App\Models\KbArticle $article): bool
     {
         // If article has direct product link, check that first

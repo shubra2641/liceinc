@@ -9,21 +9,13 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Ticket>
- */
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Ticket> */
 class TicketFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var class-string<Ticket> */
+    /**   * The name of the factory's corresponding model. *   * @var class-string<Ticket> */
     protected $model = Ticket::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /**   * Define the model's default state. *   * @return array<string, mixed> */
     public function definition(): array
     {
         return [
@@ -32,7 +24,7 @@ class TicketFactory extends Factory
             'status' => 'open',
             'priority' => 'medium',
             'department' => 'technical',
-            'purchase_code' => 'TEST-'.strtoupper(\Illuminate\Support\Str::random(8)),
+            'purchase_code' => 'TEST-' . strtoupper(\Illuminate\Support\Str::random(8)),
             'product_version' => '1.0.0',
             'browser_info' => 'Chrome/91.0',
             'created_at' => now(),
@@ -40,9 +32,7 @@ class TicketFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate that the ticket is closed.
-     */
+    /**   * Indicate that the ticket is closed. */
     public function closed(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -50,9 +40,7 @@ class TicketFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the ticket is resolved.
-     */
+    /**   * Indicate that the ticket is resolved. */
     public function resolved(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -60,9 +48,7 @@ class TicketFactory extends Factory
         ]);
     }
 
-    /**
-     * Set a specific priority.
-     */
+    /**   * Set a specific priority. */
     public function priority(string $priority): static
     {
         return $this->state(fn (array $attributes) => [
@@ -70,9 +56,7 @@ class TicketFactory extends Factory
         ]);
     }
 
-    /**
-     * Associate with a user.
-     */
+    /**   * Associate with a user. */
     public function forUser(User $user): static
     {
         return $this->state(fn (array $attributes) => [
@@ -80,9 +64,7 @@ class TicketFactory extends Factory
         ]);
     }
 
-    /**
-     * Associate with a category.
-     */
+    /**   * Associate with a category. */
     public function forCategory(TicketCategory $category): static
     {
         return $this->state(fn (array $attributes) => [
@@ -91,9 +73,7 @@ class TicketFactory extends Factory
         ]);
     }
 
-    /**
-     * Associate with a license.
-     */
+    /**   * Associate with a license. */
     public function forLicense(License $license): static
     {
         return $this->state(fn (array $attributes) => [

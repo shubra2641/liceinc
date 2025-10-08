@@ -3,9 +3,7 @@
 use Illuminate\Support\Str;
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Default Session Driver
+    /* |-------------------------------------------------------------------------- | Default Session Driver
     |--------------------------------------------------------------------------
     |
     | This option determines the default session driver that is utilized for
@@ -19,9 +17,7 @@ return [
 
     'driver' => env('SESSION_DRIVER', 'database'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Session Lifetime
+    /* |-------------------------------------------------------------------------- | Session Lifetime
     |--------------------------------------------------------------------------
     |
     | Here you may specify the number of minutes that you wish the session
@@ -35,9 +31,7 @@ return [
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Session Encryption
+    /* |-------------------------------------------------------------------------- | Session Encryption
     |--------------------------------------------------------------------------
     |
     | This option allows you to easily specify that all of your session data
@@ -48,9 +42,7 @@ return [
 
     'encrypt' => env('SESSION_ENCRYPT', false),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Session File Location
+    /* |-------------------------------------------------------------------------- | Session File Location
     |--------------------------------------------------------------------------
     |
     | When utilizing the "file" session driver, the session files are placed
@@ -61,9 +53,7 @@ return [
 
     'files' => storage_path('framework/sessions'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Session Database Connection
+    /* |-------------------------------------------------------------------------- | Session Database Connection
     |--------------------------------------------------------------------------
     |
     | When using the "database" or "redis" session drivers, you may specify a
@@ -74,9 +64,7 @@ return [
 
     'connection' => env('SESSION_CONNECTION'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Session Database Table
+    /* |-------------------------------------------------------------------------- | Session Database Table
     |--------------------------------------------------------------------------
     |
     | When using the "database" session driver, you may specify the table to
@@ -87,9 +75,7 @@ return [
 
     'table' => env('SESSION_TABLE', 'sessions'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Session Cache Store
+    /* |-------------------------------------------------------------------------- | Session Cache Store
     |--------------------------------------------------------------------------
     |
     | When using one of the framework's cache driven session backends, you may
@@ -102,9 +88,7 @@ return [
 
     'store' => env('SESSION_STORE'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Session Sweeping Lottery
+    /* |-------------------------------------------------------------------------- | Session Sweeping Lottery
     |--------------------------------------------------------------------------
     |
     | Some session drivers must manually sweep their storage location to get
@@ -115,9 +99,7 @@ return [
 
     'lottery' => [2, 100],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Session Cookie Name
+    /* |-------------------------------------------------------------------------- | Session Cookie Name
     |--------------------------------------------------------------------------
     |
     | Here you may change the name of the session cookie that is created by
@@ -128,12 +110,10 @@ return [
 
     'cookie' => env(
         'SESSION_COOKIE',
-        Str::slug(env('APP_NAME', 'laravel')).'-session',
+        Str::slug(env('APP_NAME', 'laravel')) . '-session',
     ),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Session Cookie Path
+    /* |-------------------------------------------------------------------------- | Session Cookie Path
     |--------------------------------------------------------------------------
     |
     | The session cookie path determines the path for which the cookie will
@@ -144,9 +124,7 @@ return [
 
     'path' => env('SESSION_PATH', '/'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Session Cookie Domain
+    /* |-------------------------------------------------------------------------- | Session Cookie Domain
     |--------------------------------------------------------------------------
     |
     | This value determines the domain and subdomains the session cookie is
@@ -157,9 +135,7 @@ return [
 
     'domain' => env('SESSION_DOMAIN'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | HTTPS Only Cookies
+    /* |-------------------------------------------------------------------------- | HTTPS Only Cookies
     |--------------------------------------------------------------------------
     |
     | By setting this option to true, session cookies will only be sent back
@@ -171,9 +147,7 @@ return [
     // Secure session configuration (defaults to true for production)
     'secure' => env('SESSION_SECURE_COOKIE', true),
 
-    /*
-    |--------------------------------------------------------------------------
-    | HTTP Access Only
+    /* |-------------------------------------------------------------------------- | HTTP Access Only
     |--------------------------------------------------------------------------
     |
     | Setting this value to true will prevent JavaScript from accessing the
@@ -184,9 +158,7 @@ return [
 
     'http_only' => env('SESSION_HTTP_ONLY', true),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Same-Site Cookies
+    /* |-------------------------------------------------------------------------- | Same-Site Cookies
     |--------------------------------------------------------------------------
     |
     | This option determines how your cookies behave when cross-site requests
@@ -201,9 +173,7 @@ return [
 
     'same_site' => env('SESSION_SAME_SITE', 'lax'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Partitioned Cookies
+    /* |-------------------------------------------------------------------------- | Partitioned Cookies
     |--------------------------------------------------------------------------
     |
     | Setting this value to true will tie the cookie to the top-level site for

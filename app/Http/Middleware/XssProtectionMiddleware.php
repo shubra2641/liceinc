@@ -11,36 +11,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 /**
- * XSS Protection Middleware with enhanced security and comprehensive input sanitization.
+ * XSS Protection Middleware with enhanced security and comprehensive input sanitization. *
+ * This middleware provides comprehensive protection against Cross-Site Scripting (XSS) attacks * by sanitizing input data, implementing content filtering, and providing enhanced security * measures with comprehensive error handling and logging. *
+ * Features: * - Enhanced XSS protection with comprehensive input sanitization * - Advanced pattern detection and removal of malicious content * - Configurable security settings and filtering options * - Security event logging for suspicious activity detection * - Input validation and sanitization * - Enhanced security measures for XSS prevention * - Proper error responses for different security scenarios * - Comprehensive logging for security monitoring *
  *
- * This middleware provides comprehensive protection against Cross-Site Scripting (XSS) attacks
- * by sanitizing input data, implementing content filtering, and providing enhanced security
- * measures with comprehensive error handling and logging.
- *
- * Features:
- * - Enhanced XSS protection with comprehensive input sanitization
- * - Advanced pattern detection and removal of malicious content
- * - Configurable security settings and filtering options
- * - Security event logging for suspicious activity detection
- * - Input validation and sanitization
- * - Enhanced security measures for XSS prevention
- * - Proper error responses for different security scenarios
- * - Comprehensive logging for security monitoring
- *
- *
- * @example
- * // Applied to routes that require XSS protection
- * Route::middleware(['xss.protection'])->group(function () {
- *     // Protected routes
- * });
- */
+ * @example * // Applied to routes that require XSS protection * Route::middleware(['xss.protection'])->group(function () { * // Protected routes * }); */
 class XssProtectionMiddleware
 {
-    /**
-     * Dangerous patterns for XSS detection and removal.
-     *
-     * @var array<string>
-     */
+    /**   * Dangerous patterns for XSS detection and removal. *   * @var array<string> */
     private const DANGEROUS_PATTERNS = [
         '/javascript:/i',
         '/vbscript:/i',
@@ -81,11 +59,7 @@ class XssProtectionMiddleware
         '/window\.(location|open|alert)/i',
         '/\b(alert|prompt|confirm)\s*\(/i',
     ];
-    /**
-     * Malicious content detection patterns.
-     *
-     * @var array<string>
-     */
+    /**   * Malicious content detection patterns. *   * @var array<string> */
     private const MALICIOUS_PATTERNS = [
         '/<script.*?>.*?<\/script>/si',
         '/javascript:/i',
@@ -105,22 +79,7 @@ class XssProtectionMiddleware
         '/window\.(location|open|alert)/i',
         '/\b(alert|prompt|confirm)\s*\(/i',
     ];
-    /**
-     * Handle an incoming request with enhanced XSS protection and comprehensive validation.
-     *
-     * This method performs comprehensive XSS protection including input sanitization,
-     * malicious content detection, and security logging for suspicious activity.
-     *
-     * @param  Request  $request  The current HTTP request instance
-     * @param  Closure  $next  The next middleware in the pipeline
-     *
-     * @return Response The response from the next middleware or error response
-     *
-     * @throws \Exception When an unexpected error occurs during processing
-     *
-     * @example
-     * // Middleware automatically applies XSS protection to all requests
-     */
+    /**   * Handle an incoming request with enhanced XSS protection and comprehensive validation. *   * This method performs comprehensive XSS protection including input sanitization, * malicious content detection, and security logging for suspicious activity. *   * @param Request $request The current HTTP request instance * @param Closure $next The next middleware in the pipeline *   * @return Response The response from the next middleware or error response *   * @throws \Exception When an unexpected error occurs during processing *   * @example * // Middleware automatically applies XSS protection to all requests */
     public function handle(Request $request, Closure $next): Response
     {
         try {
@@ -155,20 +114,7 @@ class XssProtectionMiddleware
             return $typedResponse;
         }
     }
-    /**
-     * Sanitize input data to prevent XSS attacks with enhanced security.
-     *
-     * This method sanitizes all input data with comprehensive validation
-     * and security measures to prevent XSS attacks.
-     *
-     * @param  Request  $request  The current HTTP request instance
-     * @param  array<string, mixed>  $config  The XSS protection configuration
-     *
-     * @throws \Exception When sanitization fails
-     *
-     * @example
-     * $this->sanitizeInput($request, $xssConfig);
-     */
+    /**   * Sanitize input data to prevent XSS attacks with enhanced security. *   * This method sanitizes all input data with comprehensive validation * and security measures to prevent XSS attacks. *   * @param Request $request The current HTTP request instance * @param  array<string, mixed>  $config  The XSS protection configuration *   * @throws \Exception When sanitization fails *   * @example * $this->sanitizeInput($request, $xssConfig); */
     private function sanitizeInput(Request $request, array $config): void
     {
         try {
@@ -192,20 +138,7 @@ class XssProtectionMiddleware
             throw $e;
         }
     }
-    /**
-     * Recursively sanitize array data with enhanced security.
-     *
-     * This method recursively sanitizes array data with comprehensive
-     * validation and security measures.
-     *
-     * @param  mixed  $data  The data to sanitize
-     * @param  array<string, mixed>  $config  The sanitization configuration
-     *
-     * @return mixed The sanitized data
-     *
-     * @example
-     * $sanitized = $this->recursiveSanitize($data, $config);
-     */
+    /**   * Recursively sanitize array data with enhanced security. *   * This method recursively sanitizes array data with comprehensive * validation and security measures. *   * @param mixed $data The data to sanitize * @param  array<string, mixed>  $config  The sanitization configuration *   * @return mixed The sanitized data *   * @example * $sanitized = $this->recursiveSanitize($data, $config); */
     private function recursiveSanitize($data, array $config)
     {
         try {
@@ -228,20 +161,7 @@ class XssProtectionMiddleware
             return $data; // Return original data if sanitization fails
         }
     }
-    /**
-     * Sanitize string data with enhanced security measures.
-     *
-     * This method sanitizes string data with comprehensive XSS protection
-     * including pattern removal and HTML entity encoding.
-     *
-     * @param  string  $data  The string data to sanitize
-     * @param  array<string, mixed>  $config  The sanitization configuration
-     *
-     * @return string The sanitized string
-     *
-     * @example
-     * $sanitized = $this->sanitizeString($data, $config);
-     */
+    /**   * Sanitize string data with enhanced security measures. *   * This method sanitizes string data with comprehensive XSS protection * including pattern removal and HTML entity encoding. *   * @param string $data The string data to sanitize * @param  array<string, mixed>  $config  The sanitization configuration *   * @return string The sanitized string *   * @example * $sanitized = $this->sanitizeString($data, $config); */
     private function sanitizeString(string $data, array $config): string
     {
         try {
@@ -268,19 +188,7 @@ class XssProtectionMiddleware
             return $data; // Return original data if sanitization fails
         }
     }
-    /**
-     * Remove dangerous JavaScript patterns with enhanced security.
-     *
-     * This method removes dangerous JavaScript patterns and malicious content
-     * using comprehensive pattern matching and removal.
-     *
-     * @param  string  $data  The data to clean
-     *
-     * @return string The cleaned data
-     *
-     * @example
-     * $cleaned = $this->removeDangerousPatterns($data);
-     */
+    /**   * Remove dangerous JavaScript patterns with enhanced security. *   * This method removes dangerous JavaScript patterns and malicious content * using comprehensive pattern matching and removal. *   * @param string $data The data to clean *   * @return string The cleaned data *   * @example * $cleaned = $this->removeDangerousPatterns($data); */
     private function removeDangerousPatterns(string $data): string
     {
         try {
@@ -297,19 +205,7 @@ class XssProtectionMiddleware
             return $data; // Return original data if pattern removal fails
         }
     }
-    /**
-     * Check if the request contains potentially malicious content with enhanced detection.
-     *
-     * This method checks for malicious content using comprehensive pattern matching
-     * and advanced detection algorithms.
-     *
-     * @param  string  $data  The data to check
-     *
-     * @return bool True if malicious content is detected, false otherwise
-     *
-     * @example
-     * $isMalicious = $this->containsMaliciousContent($data);
-     */
+    /**   * Check if the request contains potentially malicious content with enhanced detection. *   * This method checks for malicious content using comprehensive pattern matching * and advanced detection algorithms. *   * @param string $data The data to check *   * @return bool True if malicious content is detected, false otherwise *   * @example * $isMalicious = $this->containsMaliciousContent($data); */
     private function containsMaliciousContent(string $data): bool
     {
         try {
@@ -328,18 +224,7 @@ class XssProtectionMiddleware
             return true; // Assume malicious if detection fails to be safe
         }
     }
-    /**
-     * Log suspicious XSS attempts with enhanced security monitoring.
-     *
-     * This method logs suspicious XSS attempts with comprehensive context
-     * for security monitoring and threat detection.
-     *
-     * @param  Request  $request  The current HTTP request instance
-     * @param  mixed  $suspiciousData  The suspicious data that was detected
-     *
-     * @example
-     * $this->logSuspiciousActivity($request, $suspiciousData);
-     */
+    /**   * Log suspicious XSS attempts with enhanced security monitoring. *   * This method logs suspicious XSS attempts with comprehensive context * for security monitoring and threat detection. *   * @param Request $request The current HTTP request instance * @param mixed $suspiciousData The suspicious data that was detected *   * @example * $this->logSuspiciousActivity($request, $suspiciousData); */
     private function logSuspiciousActivity(Request $request, $suspiciousData): void
     {
         try {
@@ -372,13 +257,7 @@ class XssProtectionMiddleware
             ]);
         }
     }
-    /**
-     * Get a safe sample of data for logging purposes.
-     *
-     * @param  mixed  $data  The data to sample
-     *
-     * @return string A safe sample of the data
-     */
+    /**   * Get a safe sample of data for logging purposes. *   * @param mixed $data The data to sample *   * @return string A safe sample of the data */
     private function getDataSample($data): string
     {
         try {
