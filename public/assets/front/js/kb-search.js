@@ -3,6 +3,18 @@
  * Handles search result interactions and card click events
  */
 
+// Load SecurityUtils if not already loaded
+if (typeof SecurityUtils === 'undefined') {
+  // Create a minimal SecurityUtils fallback
+  window.SecurityUtils = {
+    escapeUrl: function(url) {
+      if (!url || typeof url !== 'string') return '/';
+      // Basic URL sanitization
+      return url.replace(/[<>'"]/g, '').replace(/javascript:/gi, '').replace(/data:/gi, '');
+    }
+  };
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initializeSearchResults();
 });

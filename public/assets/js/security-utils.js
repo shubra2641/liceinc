@@ -100,14 +100,14 @@ const SecurityUtils = {
     if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
       const array = new Uint32Array(1);
       crypto.getRandomValues(array);
-      return (array[0] / 4294967296) * max;
+      return (array[0] / 0x100000000) * max;
     }
     // Fallback for older browsers (less secure but better than Math.random)
     // Use crypto.getRandomValues for cryptographically secure random
     if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
       const array = new Uint32Array(1);
       crypto.getRandomValues(array);
-      return (array[0] / 4294967296) * max;
+      return (array[0] / 0x100000000) * max;
     } else {
       // Fallback: use timestamp-based pseudo-random
       const timestamp = Date.now();

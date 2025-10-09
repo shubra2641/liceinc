@@ -3,6 +3,22 @@
  * Handles license verification form interactions
  */
 
+// Load SecurityUtils if not already loaded
+if (typeof SecurityUtils === 'undefined') {
+  // Create a minimal SecurityUtils fallback
+  window.SecurityUtils = {
+    escapeUrl: function(url) {
+      if (!url || typeof url !== 'string') return '/';
+      // Basic URL sanitization
+      return url.replace(/[<>'"]/g, '').replace(/javascript:/gi, '').replace(/data:/gi, '');
+    },
+    safeInnerHTML: function(element, content, sanitize = true) {
+      if (!element || typeof content !== 'string') return;
+      element.textContent = content; // Use textContent for safety
+    }
+  };
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Get form elements
   const form = document.getElementById('licenseForm');

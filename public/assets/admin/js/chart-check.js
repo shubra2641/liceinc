@@ -3,7 +3,7 @@
  * - Attempts secondary CDN if primary failed
  * - Logs a concise console message only when needed
  */
-/* global window document console setTimeout */
+/* global document console setTimeout */
 (function() {
   if (typeof window === 'undefined') return;
   function loadFallback() {
