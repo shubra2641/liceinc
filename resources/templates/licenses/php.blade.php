@@ -1,9 +1,13 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * License Verification System
  * Product: {{product}}
  * Generated: {{date}}
  */
+ namespace App\Services;
 
 class LicenseVerifier {
     private $apiUrl = '{{license_api_url}}';

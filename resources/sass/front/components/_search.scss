@@ -142,6 +142,7 @@
     min-width: 0;
 }
 
+// Article Title - moved before locked state for proper specificity
 .user-kb-article-title {
     margin: 0 0 $spacing-sm 0;
     font-size: $font-size-lg;

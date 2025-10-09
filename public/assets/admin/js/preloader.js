@@ -110,7 +110,7 @@ class PreloaderManager {
 
     // Minimum display time for admin (shorter for better UX)
     const minDisplayTime = this.container ?
-      parseInt(this.container.dataset.minDuration || '0') :
+      parseInt(this.container.dataset.minDuration || '0', 10) :
       0;
 
     if (minDisplayTime > 0) {

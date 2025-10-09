@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * License Verification System for WordPress
  * Product: {{product}}
@@ -6,6 +9,8 @@
  *
  * Usage: Add this file to your WordPress theme/plugin and call verify_license() function
  */
+
+namespace App\Services;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
