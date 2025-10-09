@@ -3,8 +3,8 @@
  * Handles modal, dark mode, and responsive navigation
  */
 
-// Constants for magic numbers
-const CONSTANTS = {
+// Constants for magic numbers - using window object to avoid conflicts
+window.USER_DASHBOARD_CONSTANTS = {
   MOBILE_BREAKPOINT: 768,
   TOAST_TIMEOUT: 5000,
   ANIMATION_DURATION: 300
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle window resize
   const handleResize = () => {
-    const isMobile = window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT;
+    const isMobile = window.innerWidth <= window.USER_DASHBOARD_CONSTANTS.MOBILE_BREAKPOINT;
 
     if (isMobile) {
       // Hide desktop navigation on mobile
@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
           submitBtn.disabled = false;
           submitBtn.classList.remove('loading');
-        }, CONSTANTS.TOAST_TIMEOUT);
+        }, window.USER_DASHBOARD_CONSTANTS.TOAST_TIMEOUT);
       }
     });
   });
@@ -344,8 +344,8 @@ document.addEventListener('DOMContentLoaded', () => {
       notification.classList.remove('show');
       setTimeout(() => {
         notification.remove();
-        }, CONSTANTS.ANIMATION_DURATION);
-    }, CONSTANTS.TOAST_TIMEOUT);
+        }, window.USER_DASHBOARD_CONSTANTS.ANIMATION_DURATION);
+    }, window.USER_DASHBOARD_CONSTANTS.TOAST_TIMEOUT);
   });
 
   // ========================================

@@ -70,7 +70,7 @@ class UserTickets {
                 productSlugInput.style.borderColor = '';
                 productSlugInput.placeholder = 'Product identifier from URL';
                 
-                if (purchaseCode.length < 10) {
+                if (purchaseCode.length < (window.USER_TICKETS_CONSTANTS?.MIN_PURCHASE_CODE_LENGTH || 10)) {
                     productNameDisplay.classList.add('hidden');
                     productSlugInput.value = '';
                     return;
@@ -78,12 +78,12 @@ class UserTickets {
 
                 verificationTimeout = setTimeout(() => {
                     this.verifyPurchaseCode(purchaseCode);
-                }, 1000);
+                }, (window.USER_TICKETS_CONSTANTS?.DEBOUNCE_DELAY || 1000));
             });
         }
 
         // Set browser info
-        const browserInfo = navigator.userAgent + ' | ' + navigator.language + ' | ' + screen.width + 'x' + screen.height;
+        const browserInfo = navigator.userAgent + ' | ' + navigator.language + ' | ' + window.screen.width + 'x' + window.screen.height;
         const browserInfoInput = document.getElementById('browser_info');
         if (browserInfoInput) {
             browserInfoInput.value = browserInfo;
@@ -91,7 +91,7 @@ class UserTickets {
 
         // Initialize form state
         if (categorySelect && categorySelect.value) {
-            categorySelect.dispatchEvent(new Event('change'));
+            categorySelect.dispatchEvent(new window.Event('change'));
         }
     }
 
@@ -123,7 +123,7 @@ class UserTickets {
                     productSlugInput.placeholder = 'Product slug filled automatically';
                     
                     // Force update the display
-                    productSlugInput.dispatchEvent(new Event('input'));
+                    productSlugInput.dispatchEvent(new window.Event('input'));
                 } else {
                     productSlugInput.value = '';
                     productNameDisplay.classList.add('hidden');
@@ -131,7 +131,7 @@ class UserTickets {
                     productSlugInput.placeholder = 'Invalid purchase code';
                 }
             })
-            .catch(error => {
+            .catch(() => {
                 productSlugInput.value = '';
                 productNameDisplay.classList.add('hidden');
                 productSlugInput.style.borderColor = '#dc3545';
@@ -142,5 +142,6 @@ class UserTickets {
 
 // Initialize when DOM is ready
 if (typeof document !== 'undefined') {
+    // eslint-disable-next-line no-new
     new UserTickets();
 }

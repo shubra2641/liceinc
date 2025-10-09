@@ -5,8 +5,8 @@
  * including license type inheritance, domain count, and expiry dates.
  */
 
-// Constants for magic numbers
-const CONSTANTS = {
+// Constants for magic numbers - using window object to avoid conflicts
+window.LICENSE_CONSTANTS = {
   SINGLE_DOMAINS: 1,
   MULTI_DOMAINS: 5,
   DEVELOPER_DOMAINS: 10,
@@ -119,23 +119,23 @@ document.addEventListener('DOMContentLoaded', function() {
      * Calculate max domains based on license type
      */
     function calculateMaxDomains(licenseType) {
-        let maxDomains = CONSTANTS.SINGLE_DOMAINS;
+        let maxDomains = window.LICENSE_CONSTANTS.SINGLE_DOMAINS;
         
         switch (licenseType) {
             case 'single':
-                maxDomains = CONSTANTS.SINGLE_DOMAINS;
+                maxDomains = window.LICENSE_CONSTANTS.SINGLE_DOMAINS;
                 break;
             case 'multi':
-                maxDomains = CONSTANTS.MULTI_DOMAINS;
+                maxDomains = window.LICENSE_CONSTANTS.MULTI_DOMAINS;
                 break;
             case 'developer':
-                maxDomains = CONSTANTS.DEVELOPER_DOMAINS;
+                maxDomains = window.LICENSE_CONSTANTS.DEVELOPER_DOMAINS;
                 break;
             case 'extended':
-                maxDomains = CONSTANTS.EXTENDED_DOMAINS;
+                maxDomains = window.LICENSE_CONSTANTS.EXTENDED_DOMAINS;
                 break;
             default:
-                maxDomains = CONSTANTS.SINGLE_DOMAINS;
+                maxDomains = window.LICENSE_CONSTANTS.SINGLE_DOMAINS;
         }
         
         maxDomainsInput.value = maxDomains;
@@ -149,14 +149,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Calculate license expiry date
         if (data.duration_days && licenseExpiresAtInput) {
-            const licenseExpiry = new Date(today.getTime() + (data.duration_days * CONSTANTS.HOURS_PER_DAY * CONSTANTS.MINUTES_PER_HOUR * CONSTANTS.SECONDS_PER_MINUTE * CONSTANTS.MILLISECONDS_PER_SECOND));
-            licenseExpiresAtInput.value = licenseExpiry.toISOString().split('T')[CONSTANTS.ZERO];
+            const licenseExpiry = new Date(today.getTime() + (data.duration_days * window.LICENSE_CONSTANTS.HOURS_PER_DAY * window.LICENSE_CONSTANTS.MINUTES_PER_HOUR * window.LICENSE_CONSTANTS.SECONDS_PER_MINUTE * window.LICENSE_CONSTANTS.MILLISECONDS_PER_SECOND));
+            licenseExpiresAtInput.value = licenseExpiry.toISOString().split('T')[window.LICENSE_CONSTANTS.ZERO];
         }
         
         // Calculate support expiry date
         if (data.support_days && supportExpiresAtInput) {
-            const supportExpiry = new Date(today.getTime() + (data.support_days * CONSTANTS.HOURS_PER_DAY * CONSTANTS.MINUTES_PER_HOUR * CONSTANTS.SECONDS_PER_MINUTE * CONSTANTS.MILLISECONDS_PER_SECOND));
-            supportExpiresAtInput.value = supportExpiry.toISOString().split('T')[CONSTANTS.ZERO];
+            const supportExpiry = new Date(today.getTime() + (data.support_days * window.LICENSE_CONSTANTS.HOURS_PER_DAY * window.LICENSE_CONSTANTS.MINUTES_PER_HOUR * window.LICENSE_CONSTANTS.SECONDS_PER_MINUTE * window.LICENSE_CONSTANTS.MILLISECONDS_PER_SECOND));
+            supportExpiresAtInput.value = supportExpiry.toISOString().split('T')[window.LICENSE_CONSTANTS.ZERO];
         }
     }
     
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function clearCalculations() {
         licenseTypeSelect.value = '';
-        maxDomainsInput.value = CONSTANTS.SINGLE_DOMAINS;
+        maxDomainsInput.value = window.LICENSE_CONSTANTS.SINGLE_DOMAINS;
         if (licenseExpiresAtInput) licenseExpiresAtInput.value = '';
         if (supportExpiresAtInput) supportExpiresAtInput.value = '';
     }
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (userSelect && userSelect.value) {
             const selectedOption = userSelect.options[userSelect.selectedIndex];
-            const userName = selectedOption.text.split(' (')[CONSTANTS.ZERO];
+            const userName = selectedOption.text.split(' (')[window.LICENSE_CONSTANTS.ZERO];
             document.getElementById('preview-user').textContent = userName;
         }
         

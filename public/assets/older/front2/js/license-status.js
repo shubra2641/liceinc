@@ -22,12 +22,12 @@ function copyToClipboard(elementId) {
     if (element) {
         navigator.clipboard.writeText(element.textContent).then(function() {
             // Show success message
-        }).catch(function(err) {
+        }).catch(function() {
             // Copy failed
         });
     }
 }
 
-function viewDomainHistory(domain) {
+function viewDomainHistory() {
     // Implementation for viewing domain history
 }

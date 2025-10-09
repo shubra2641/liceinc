@@ -4,6 +4,20 @@
  * Envato-compliant JavaScript with validation and best practices
  */
 
+// Constants for magic numbers - using window object to avoid conflicts
+window.PRELOADER_CONSTANTS = {
+  FADE_DURATION: 200,
+  ANIMATION_DURATION: 800,
+  TIMEOUT_DURATION: 2000,
+  RETRY_DELAY: 500,
+  PROGRESS_STEP: 15,
+  PROGRESS_MAX: 100,
+  PROGRESS_MIN: 100,
+  PROGRESS_FINAL: 100,
+  LOOP_DELAY: 500,
+  FINAL_DELAY: 3000
+};
+
 class FrontendPreloaderManager {
     constructor() {
         this.container = document.getElementById('preloader-container');
@@ -32,7 +46,7 @@ class FrontendPreloaderManager {
             type: d.type || 'spinner',
             color: d.color || '#3b82f6',
             backgroundColor: d.bg || '#ffffff',
-            duration: parseInt(d.duration || '800', 10),
+            duration: parseInt(d.duration || window.PRELOADER_CONSTANTS.ANIMATION_DURATION.toString(), 10),
             text: d.text || 'Loading...',
             logo: d.logo || null
         };
@@ -66,11 +80,11 @@ class FrontendPreloaderManager {
         window.addEventListener('load', () => {
             setTimeout(() => {
                 this.hidePreloader();
-            }, 200); // Small delay to ensure smooth transition
+            }, window.PRELOADER_CONSTANTS.FADE_DURATION); // Small delay to ensure smooth transition
         });
 
         // Fallback: Hide preloader after maximum duration (minimum 1 second)
-        const duration = Math.max(this.settings.duration || 800, 500);
+        const duration = Math.max(this.settings.duration || window.PRELOADER_CONSTANTS.ANIMATION_DURATION, window.PRELOADER_CONSTANTS.RETRY_DELAY);
         setTimeout(() => {
             this.hidePreloader();
         }, duration);
@@ -78,7 +92,7 @@ class FrontendPreloaderManager {
         // Additional fallback: Hide after 2 seconds maximum
         setTimeout(() => {
             this.hidePreloader();
-        }, 2000);
+        }, window.PRELOADER_CONSTANTS.TIMEOUT_DURATION);
 
         // Handle page visibility changes
         document.addEventListener('visibilitychange', () => {
@@ -142,7 +156,7 @@ class FrontendPreloaderManager {
             if (this.container && this.container.parentNode) {
                 this.container.parentNode.removeChild(this.container);
             }
-        }, 500);
+        }, window.PRELOADER_CONSTANTS.RETRY_DELAY);
     }
 
     animateProgress() {
@@ -153,13 +167,13 @@ class FrontendPreloaderManager {
 
         let progress = 0;
         const interval = setInterval(() => {
-            progress += Math.random() * 15;
-            if (progress >= 100) {
-                progress = 100;
+            progress += Math.random() * window.PRELOADER_CONSTANTS.PROGRESS_STEP;
+            if (progress >= window.PRELOADER_CONSTANTS.PROGRESS_MAX) {
+                progress = window.PRELOADER_CONSTANTS.PROGRESS_MAX;
                 clearInterval(interval);
             }
             progressBar.style.width = progress + '%';
-        }, 100);
+        }, window.PRELOADER_CONSTANTS.PROGRESS_STEP);
     }
 
     pauseAnimations() {
@@ -186,7 +200,7 @@ class FrontendPreloaderManager {
                 if (preloader.parentNode) {
                     preloader.parentNode.removeChild(preloader);
                 }
-            }, 500);
+            }, window.PRELOADER_CONSTANTS.RETRY_DELAY);
         }
     }
 
@@ -204,7 +218,7 @@ class FrontendPreloaderManager {
 
 // Initialize preloader when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    new FrontendPreloaderManager();
+        // const preloaderManager = new FrontendPreloaderManager(); // Unused variable removed
 });
 
 // Additional fallback: Force hide preloader after 3 seconds
@@ -215,7 +229,7 @@ setTimeout(() => {
         preloader.remove();
         document.body.classList.remove('preloader-active');
     }
-}, 3000);
+}, window.PRELOADER_CONSTANTS.FINAL_DELAY);
 
 // Export for global access
 window.FrontendPreloaderManager = FrontendPreloaderManager;

@@ -3,8 +3,8 @@
  * Unified JavaScript for all admin pages
  */
 
-// Constants for magic numbers
-const CONSTANTS = {
+// Constants for magic numbers - using window object to avoid conflicts
+window.ADMIN_CONSTANTS = {
   NOTIFICATION_TIMEOUT: 4000,
   TOAST_TIMEOUT: 5000,
   DEBOUNCE_DELAY: 100,
@@ -58,7 +58,7 @@ function showNotification(message, type = 'info') {
         if (notification.parentNode) {
             notification.remove();
         }
-    }, CONSTANTS.NOTIFICATION_TIMEOUT);
+    }, window.ADMIN_CONSTANTS.NOTIFICATION_TIMEOUT);
 }
 
 // Toast Notification System
@@ -80,14 +80,14 @@ class ToastManager {
         }
     }
 
-    show(message, type = 'info', title = null, duration = CONSTANTS.TOAST_TIMEOUT) {
+    show(message, type = 'info', title = null, duration = window.ADMIN_CONSTANTS.TOAST_TIMEOUT) {
         const toast = this.createToast(message, type, title);
         this.container.appendChild(toast);
 
         // Trigger animation
         setTimeout(() => {
             toast.classList.add('show');
-        }, CONSTANTS.DEBOUNCE_DELAY);
+        }, window.ADMIN_CONSTANTS.DEBOUNCE_DELAY);
 
         // Auto remove
         if (duration > 0) {
@@ -139,22 +139,22 @@ class ToastManager {
             if (toast.parentNode) {
                 toast.parentNode.removeChild(toast);
             }
-        }, CONSTANTS.ANIMATION_DURATION);
+        }, window.ADMIN_CONSTANTS.ANIMATION_DURATION);
     }
 
-    success(message, title = null, duration = CONSTANTS.SUCCESS_DELAY) {
+    success(message, title = null, duration = window.ADMIN_CONSTANTS.SUCCESS_DELAY) {
         return this.show(message, 'success', title, duration);
     }
 
-    error(message, title = null, duration = CONSTANTS.ERROR_DELAY) {
+    error(message, title = null, duration = window.ADMIN_CONSTANTS.ERROR_DELAY) {
         return this.show(message, 'error', title, duration);
     }
 
-    warning(message, title = null, duration = CONSTANTS.WARNING_DELAY) {
+    warning(message, title = null, duration = window.ADMIN_CONSTANTS.WARNING_DELAY) {
         return this.show(message, 'warning', title, duration);
     }
 
-    info(message, title = null, duration = CONSTANTS.INFO_DELAY) {
+    info(message, title = null, duration = window.ADMIN_CONSTANTS.INFO_DELAY) {
         return this.show(message, 'info', title, duration);
     }
 }
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (infoMessage && window.toastManager) {
             window.toastManager.info(infoMessage.textContent);
         }
-        }, CONSTANTS.FADE_DURATION);
+        }, window.ADMIN_CONSTANTS.FADE_DURATION);
 });
 
 class AdminDashboard {
@@ -205,7 +205,7 @@ class AdminDashboard {
     }
 
     // Toast notification method for compatibility with existing code
-    showToast(message, type = 'info', duration = CONSTANTS.TOAST_TIMEOUT) {
+    showToast(message, type = 'info', duration = window.ADMIN_CONSTANTS.TOAST_TIMEOUT) {
         if (typeof window.toastManager !== 'undefined') {
             switch(type) {
                 case 'success':
@@ -379,7 +379,7 @@ class AdminDashboard {
             // Try again after a delay
             setTimeout(() => {
                 this.initSummernote();
-            }, CONSTANTS.FIVE_HUNDRED);
+            }, window.ADMIN_CONSTANTS.FIVE_HUNDRED);
             return;
         }
         
@@ -691,7 +691,7 @@ class AdminDashboard {
             }
             // Add actual Envato API integration here
             
-        }, CONSTANTS.TWO_THOUSAND);
+        }, window.ADMIN_CONSTANTS.TWO_THOUSAND);
     }
 
     // Set button loading state
@@ -1179,7 +1179,7 @@ class AdminDashboard {
         setTimeout(() => {
             notification.style.opacity = '1';
             notification.style.transform = 'translateX(0) scale(1)';
-        }, CONSTANTS.DEBOUNCE_DELAY);
+        }, window.ADMIN_CONSTANTS.DEBOUNCE_DELAY);
         
         // Remove after 4 seconds
         setTimeout(() => {
@@ -2987,7 +2987,7 @@ document.addEventListener('click', function(e) {
     if (e.target && e.target.getAttribute('data-action') === 'show-tab') {
         setTimeout(() => {
             initApiTestButtonDirectly();
-        }, CONSTANTS.DEBOUNCE_DELAY);
+        }, window.ADMIN_CONSTANTS.DEBOUNCE_DELAY);
     }
 });
 
