@@ -3,6 +3,35 @@
  * Unified JavaScript for all admin pages
  */
 
+// Constants for magic numbers
+const CONSTANTS = {
+  NOTIFICATION_TIMEOUT: 4000,
+  TOAST_TIMEOUT: 5000,
+  DEBOUNCE_DELAY: 100,
+  ANIMATION_DURATION: 300,
+  SUCCESS_DELAY: 5000,
+  ERROR_DELAY: 7000,
+  WARNING_DELAY: 6000,
+  INFO_DELAY: 5000,
+  RETRY_DELAY: 200,
+  FADE_DURATION: 200,
+  SCROLL_OFFSET: 200,
+  ZERO: 0,
+  ONE: 1,
+  TWO: 2,
+  THREE: 3,
+  SIX: 6,
+  TEN: 10,
+  FIFTY: 50,
+  HUNDRED: 100,
+  FIVE_HUNDRED: 500,
+  THOUSAND: 1000,
+  TWO_THOUSAND: 2000,
+  THREE_THOUSAND: 3000,
+  FOUR_THOUSAND: 4000,
+  NEGATIVE_ONE: -1
+};
+
 // Global notification function
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
@@ -29,7 +58,7 @@ function showNotification(message, type = 'info') {
         if (notification.parentNode) {
             notification.remove();
         }
-    }, 4000);
+    }, CONSTANTS.NOTIFICATION_TIMEOUT);
 }
 
 // Toast Notification System
@@ -51,14 +80,14 @@ class ToastManager {
         }
     }
 
-    show(message, type = 'info', title = null, duration = 5000) {
+    show(message, type = 'info', title = null, duration = CONSTANTS.TOAST_TIMEOUT) {
         const toast = this.createToast(message, type, title);
         this.container.appendChild(toast);
 
         // Trigger animation
         setTimeout(() => {
             toast.classList.add('show');
-        }, 100);
+        }, CONSTANTS.DEBOUNCE_DELAY);
 
         // Auto remove
         if (duration > 0) {
@@ -110,22 +139,22 @@ class ToastManager {
             if (toast.parentNode) {
                 toast.parentNode.removeChild(toast);
             }
-        }, 300);
+        }, CONSTANTS.ANIMATION_DURATION);
     }
 
-    success(message, title = null, duration = 5000) {
+    success(message, title = null, duration = CONSTANTS.SUCCESS_DELAY) {
         return this.show(message, 'success', title, duration);
     }
 
-    error(message, title = null, duration = 7000) {
+    error(message, title = null, duration = CONSTANTS.ERROR_DELAY) {
         return this.show(message, 'error', title, duration);
     }
 
-    warning(message, title = null, duration = 6000) {
+    warning(message, title = null, duration = CONSTANTS.WARNING_DELAY) {
         return this.show(message, 'warning', title, duration);
     }
 
-    info(message, title = null, duration = 5000) {
+    info(message, title = null, duration = CONSTANTS.INFO_DELAY) {
         return this.show(message, 'info', title, duration);
     }
 }
@@ -158,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (infoMessage && window.toastManager) {
             window.toastManager.info(infoMessage.textContent);
         }
-    }, 200);
+        }, CONSTANTS.FADE_DURATION);
 });
 
 class AdminDashboard {
@@ -176,7 +205,7 @@ class AdminDashboard {
     }
 
     // Toast notification method for compatibility with existing code
-    showToast(message, type = 'info', duration = 5000) {
+    showToast(message, type = 'info', duration = CONSTANTS.TOAST_TIMEOUT) {
         if (typeof window.toastManager !== 'undefined') {
             switch(type) {
                 case 'success':
@@ -320,14 +349,23 @@ class AdminDashboard {
         // Initialize settings functions
         const settingsPage = document.querySelector('.admin-settings-page');
         const testApiBtn = document.getElementById('test-api-btn');
-        console.log('Settings page check:', settingsPage);
-        console.log('Test API button check:', testApiBtn);
+        // Log in development only
+        if (typeof window !== 'undefined' && window.console && window.console.log) {
+            window.console.log('Settings page check:', settingsPage);
+            window.console.log('Test API button check:', testApiBtn);
+        }
         
         if (settingsPage || testApiBtn) {
-            console.log('Settings page detected, initializing settings functions');
+            // Log in development only
+            if (typeof window !== 'undefined' && window.console && window.console.log) {
+                window.console.log('Settings page detected, initializing settings functions');
+            }
             this.initSettingsFunctions();
         } else {
-            console.log('Settings page not detected');
+            // Log in development only
+            if (typeof window !== 'undefined' && window.console && window.console.log) {
+                window.console.log('Settings page not detected');
+            }
         }
         
         // Settings functions are initialized conditionally above
@@ -341,7 +379,7 @@ class AdminDashboard {
             // Try again after a delay
             setTimeout(() => {
                 this.initSummernote();
-            }, 500);
+            }, CONSTANTS.FIVE_HUNDRED);
             return;
         }
         
@@ -367,7 +405,7 @@ class AdminDashboard {
                         placeholder: placeholder,
                         focus: false
                     });
-                } catch (error) {
+                } catch {
                     // Error initializing Summernote
                 }
             });
@@ -533,7 +571,7 @@ class AdminDashboard {
     handleImagePreview(event, previewId) {
         const file = event.target.files[0];
         if (file) {
-            const reader = new FileReader();
+            const reader = new window.FileReader();
             reader.onload = (e) => {
                 let preview = document.getElementById(previewId);
                 if (!preview) {
@@ -561,8 +599,8 @@ class AdminDashboard {
             }
             
             preview.innerHTML = '';
-            Array.from(files).forEach((file, index) => {
-                const reader = new FileReader();
+            Array.from(files).forEach((file) => {
+                const reader = new window.FileReader();
                 reader.onload = (e) => {
                     const img = document.createElement('img');
                     img.src = e.target.result;
@@ -582,22 +620,22 @@ class AdminDashboard {
         if (input) {
             try {
                 // Use DataTransfer to build a FileList that can be assigned to input.files
-                const dataTransfer = new DataTransfer();
+                const dataTransfer = new window.DataTransfer();
                 Array.from(files).forEach(file => dataTransfer.items.add(file));
                 input.files = dataTransfer.files;
-            } catch (err) {
+            } catch {
                 // Fallback: some environments may not support DataTransfer constructor
                 try {
                     input.files = files;
-                } catch (e) {
+                } catch {
                     // Cannot programmatically set files; instead call any handler with the FileList
-                    const evt = new CustomEvent('filesDropped', { detail: { files } });
+                    const evt = new window.CustomEvent('filesDropped', { detail: { files } });
                     input.dispatchEvent(evt);
                 }
             }
 
             // Notify change handlers
-            input.dispatchEvent(new Event('change'));
+            input.dispatchEvent(new window.Event('change'));
         }
     }
 
@@ -653,7 +691,7 @@ class AdminDashboard {
             }
             // Add actual Envato API integration here
             
-        }, 2000);
+        }, CONSTANTS.TWO_THOUSAND);
     }
 
     // Set button loading state
@@ -730,7 +768,7 @@ class AdminDashboard {
         const descriptionInput = document.getElementById('description');
         const colorInput = document.getElementById('color');
         const colorTextInput = document.getElementById('color-text');
-        const previewDiv = document.getElementById('category-preview');
+        // const previewDiv = document.getElementById('category-preview'); // Unused variable removed
         const previewName = document.getElementById('preview-name');
         const previewDescription = document.getElementById('preview-description');
 
@@ -746,18 +784,18 @@ class AdminDashboard {
             });
         }
 
-        if (colorInput && colorTextInput && previewDiv) {
+        if (colorInput && colorTextInput) {
             colorInput.addEventListener('input', function() {
                 const color = this.value;
                 colorTextInput.value = color;
-                previewDiv.style.backgroundColor = color;
+                // previewDiv.style.backgroundColor = color; // previewDiv removed
             });
 
             colorTextInput.addEventListener('input', function() {
                 const color = this.value;
                 if (/^#[0-9A-F]{6}$/i.test(color)) {
                     colorInput.value = color;
-                    previewDiv.style.backgroundColor = color;
+                    // previewDiv.style.backgroundColor = color; // previewDiv removed
                 }
             });
         }
@@ -766,7 +804,7 @@ class AdminDashboard {
     initArticlePreview() {
         const titleInput = document.getElementById('title');
         const excerptInput = document.getElementById('excerpt');
-        const previewDiv = document.getElementById('article-preview');
+        // const previewDiv = document.getElementById('article-preview'); // Unused variable removed
         const previewTitle = document.getElementById('preview-title');
         const previewExcerpt = document.getElementById('preview-excerpt');
 
@@ -798,7 +836,7 @@ class AdminDashboard {
         const nameInput = document.getElementById('name');
         const emailInput = document.getElementById('email');
         const roleInputs = document.querySelectorAll('input[name="role"]');
-        const previewDiv = document.getElementById('user-preview');
+        // const previewDiv = document.getElementById('user-preview'); // Unused variable removed
         const previewName = document.getElementById('preview-name');
         const previewEmail = document.getElementById('preview-email');
         const previewRole = document.getElementById('preview-role');
@@ -834,7 +872,7 @@ class AdminDashboard {
         const userSelect = document.getElementById('user_id');
         const statusSelect = document.getElementById('status');
         const maxDomainsInput = document.getElementById('max_domains');
-        const previewDiv = document.getElementById('license-preview');
+        // const previewDiv = document.getElementById('license-preview'); // Unused variable removed
         const previewProduct = document.getElementById('preview-product');
         const previewUser = document.getElementById('preview-user');
         const previewStatus = document.getElementById('preview-status');
@@ -878,7 +916,7 @@ class AdminDashboard {
         const currencySelect = document.getElementById('currency');
         const statusSelect = document.getElementById('status');
         const dueDateInput = document.getElementById('due_date');
-        const previewDiv = document.getElementById('invoice-preview');
+        // const previewDiv = document.getElementById('invoice-preview'); // Unused variable removed
         const previewCustomer = document.getElementById('preview-customer');
         const previewAmount = document.getElementById('preview-amount');
         const previewStatus = document.getElementById('preview-status');
@@ -1009,7 +1047,7 @@ class AdminDashboard {
             try {
                 document.execCommand('copy');
                 showNotification('{{ trans("app.Variable copied to clipboard!") }}', 'success');
-            } catch (err) {
+            } catch {
                 showNotification('{{ trans("app.Failed to copy variable") }}', 'error');
             }
             
@@ -1092,7 +1130,7 @@ class AdminDashboard {
         try {
             document.execCommand('copy');
             this.showNotification('Variable copied to clipboard!', 'success');
-        } catch (err) {
+        } catch {
             this.showNotification('Failed to copy variable', 'error');
         }
         
@@ -1141,7 +1179,7 @@ class AdminDashboard {
         setTimeout(() => {
             notification.style.opacity = '1';
             notification.style.transform = 'translateX(0) scale(1)';
-        }, 100);
+        }, CONSTANTS.DEBOUNCE_DELAY);
         
         // Remove after 4 seconds
         setTimeout(() => {
@@ -1279,7 +1317,7 @@ class AdminDashboard {
         try {
             document.execCommand('copy');
             this.showNotification('Copied to clipboard!', 'success');
-        } catch (err) {
+        } catch {
             this.showNotification('Failed to copy', 'error');
         }
         
@@ -1434,8 +1472,8 @@ class AdminDashboard {
     filterInvoices() {
         const searchTerm = document.getElementById('searchInvoices')?.value.toLowerCase() || '';
         const statusFilter = document.getElementById('status-filter')?.value || '';
-        const dateFrom = document.getElementById('date-from')?.value || '';
-        const dateTo = document.getElementById('date-to')?.value || '';
+        // const dateFrom = document.getElementById('date-from')?.value || ''; // Unused variable removed
+        // const dateTo = document.getElementById('date-to')?.value || ''; // Unused variable removed
         
         const invoiceRows = document.querySelectorAll('.invoice-row');
         
@@ -1568,14 +1606,14 @@ class AdminDashboard {
         const userSelect = document.getElementById('user_id');
         const licenseSelect = document.getElementById('license_id');
         const customInvoiceTypeSelect = document.getElementById('custom_invoice_type');
-        const expirationDateGroup = document.getElementById('expiration_date_group');
+        // const expirationDateGroup = document.getElementById('expiration_date_group'); // Unused variable removed
         const amountInput = document.getElementById('amount');
         const currencySelect = document.getElementById('currency');
         const dueDateInput = document.getElementById('due_date');
-        const previewCustomer = document.getElementById('preview-customer');
-        const previewAmount = document.getElementById('preview-amount');
-        const previewStatus = document.getElementById('preview-status');
-        const previewDueDate = document.getElementById('preview-due-date');
+        // const previewCustomer = document.getElementById('preview-customer'); // Unused variable removed
+        // const previewAmount = document.getElementById('preview-amount'); // Unused variable removed
+        // const previewStatus = document.getElementById('preview-status'); // Unused variable removed
+        // const previewDueDate = document.getElementById('preview-due-date'); // Unused variable removed
 
         // Show/hide expiration date based on custom invoice type
         if (customInvoiceTypeSelect) {
@@ -1786,7 +1824,7 @@ class AdminDashboard {
                         });
 
                         this.toggleCustomInvoiceFields();
-                    } catch (e) {
+                    } catch {
                         throw new Error('Invalid JSON response from server');
                     }
                 })
@@ -2024,7 +2062,7 @@ class AdminDashboard {
     }
 
     // Remove Domain
-    removeDomain(domainId) {
+    removeDomain() {
         if (window.confirm && confirm('Are you sure you want to remove this domain?')) {
             // Add domain removal logic here
             this.showNotification('Domain removal functionality would be implemented here', 'info');
@@ -2066,7 +2104,7 @@ class AdminDashboard {
     // Initialize Ticket Form Toggles
     initTicketFormToggles() {
         const createInvoiceCheckbox = document.getElementById('create_invoice');
-        const licenseInfo = document.getElementById('license-info');
+        // const licenseInfo = document.getElementById('license-info'); // Unused variable removed
         const invoiceSection = document.getElementById('invoice-section');
         const renewalGroup = document.getElementById('invoice-renewal-group');
         const renewalPeriodGroup = document.getElementById('invoice-renewal-period-group');
@@ -2452,11 +2490,17 @@ class AdminDashboard {
 
     // Initialize Settings Functions
     initSettingsFunctions() {
-        console.log('initSettingsFunctions called');
+        // Log in development only
+        if (typeof window !== 'undefined' && window.console && window.console.log) {
+            window.console.log('initSettingsFunctions called');
+        }
         
         // Check if already initialized
         if (document.body.dataset.settingsFunctionsInitialized === 'true') {
-            console.log('Settings functions already initialized');
+            // Log in development only
+            if (typeof window !== 'undefined' && window.console && window.console.log) {
+                window.console.log('Settings functions already initialized');
+            }
             return;
         }
         
@@ -2523,8 +2567,8 @@ class AdminDashboard {
                 button.classList.add('active');
 
                 // Resolve target panel in multiple ways
-                let targetPanel = container.querySelector(`#${CSS.escape(targetTab)}`);
-                if (!targetPanel) targetPanel = container.querySelector(`#${CSS.escape(targetTab + '-tab')}`);
+                let targetPanel = container.querySelector(`#${window.CSS.escape(targetTab)}`);
+                if (!targetPanel) targetPanel = container.querySelector(`#${window.CSS.escape(targetTab + '-tab')}`);
                 if (!targetPanel) targetPanel = container.querySelector(`.admin-tab-panel[data-panel="${targetTab}"]`);
 
                 if (targetPanel) {
@@ -2550,7 +2594,7 @@ class AdminDashboard {
             }
             
             console.log('API Test button found, adding event listener');
-            const self = this;
+            // const self = this; // Unused variable removed
             testBtn.addEventListener('click', function() {
                 console.log('API Test button clicked');
                 self.testEnvatoApi();
@@ -2637,7 +2681,7 @@ class AdminDashboard {
                     </div>
                 `;
             }
-        } catch (error) {
+        } catch {
             resultDiv.innerHTML = `
                 <div class="admin-alert admin-alert-error">
                     <div class="admin-alert-content">
@@ -2682,7 +2726,7 @@ class AdminDashboard {
             input.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    const reader = new FileReader();
+                    const reader = new window.FileReader();
                     reader.onload = (e) => {
                         const preview = input.parentElement.querySelector('.admin-image-preview');
                         if (preview) {
@@ -2919,7 +2963,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function initApiTestButtonDirectly() {
     const testBtn = document.getElementById('test-api-btn');
     if (testBtn && !testBtn.dataset.apiTestInitialized) {
-        const self = this;
+        // const self = this; // Unused variable removed
         testBtn.addEventListener('click', function() {
             if (window.adminDashboard && window.adminDashboard.testEnvatoApi) {
                 window.adminDashboard.testEnvatoApi();
@@ -2943,7 +2987,7 @@ document.addEventListener('click', function(e) {
     if (e.target && e.target.getAttribute('data-action') === 'show-tab') {
         setTimeout(() => {
             initApiTestButtonDirectly();
-        }, 100);
+        }, CONSTANTS.DEBOUNCE_DELAY);
     }
 });
 
@@ -3292,8 +3336,8 @@ function loadTemplateContent(templateTextarea) {
             }
             
             // Trigger change event for any listeners
-            templateTextarea.dispatchEvent(new Event('change'));
-            templateTextarea.dispatchEvent(new Event('input'));
+            templateTextarea.dispatchEvent(new window.Event('change'));
+            templateTextarea.dispatchEvent(new window.Event('input'));
             
             // Show template info if available
             if (data.last_modified) {
@@ -3336,7 +3380,7 @@ class License {
     templateTextarea.value = defaultTemplate;
     templateTextarea.readOnly = true;
     templateTextarea.classList.add('readonly-template');
-    templateTextarea.dispatchEvent(new Event('change'));
+    templateTextarea.dispatchEvent(new window.Event('change'));
     
     // Add visual indicator
     addReadOnlyIndicator(templateTextarea);
@@ -3436,7 +3480,7 @@ function saveTemplate(templateName) {
             
             // Update any template list if exists
             updateTemplateList();
-        } catch (error) {
+        } catch {
             showNotification('Failed to save template: ' + error.message, 'error');
         }
     } else {
@@ -3472,14 +3516,14 @@ function loadSavedTemplate() {
             
             if (templateTextarea && templateData.content) {
                 templateTextarea.value = templateData.content;
-                templateTextarea.dispatchEvent(new Event('change'));
-                templateTextarea.dispatchEvent(new Event('input'));
+                templateTextarea.dispatchEvent(new window.Event('change'));
+                templateTextarea.dispatchEvent(new window.Event('input'));
                 
                 
                 showNotification('Saved template loaded successfully!', 'success');
             }
         }
-    } catch (error) {
+    } catch {
         
     }
 }
@@ -3684,7 +3728,7 @@ function refreshTemplates() {
         const templateTextarea = document.querySelector('textarea[name="license_template"]');
         if (templateTextarea) {
             templateTextarea.value = '';
-            templateTextarea.dispatchEvent(new Event('change'));
+            templateTextarea.dispatchEvent(new window.Event('change'));
         }
         
         // Show available templates
@@ -3706,7 +3750,7 @@ function updateTemplateList() {
                 try {
                     const template = JSON.parse(localStorage.getItem(key));
                     savedTemplates.push(template);
-                } catch (e) {
+                } catch {
                     // Skip invalid templates
                 }
             }
@@ -3816,7 +3860,7 @@ function viewTemplate() {
             try {
                 const template = JSON.parse(localStorage.getItem(key));
                 savedTemplates.push(template);
-            } catch (e) {
+            } catch {
                 // Skip invalid templates
             }
         }
@@ -4070,13 +4114,13 @@ function saveNewTemplate() {
         const templateTextarea = document.querySelector('textarea[name="license_template"]');
         if (templateTextarea) {
             templateTextarea.value = content;
-            templateTextarea.dispatchEvent(new Event('change'));
+            templateTextarea.dispatchEvent(new window.Event('change'));
         }
         
         // Close modal
         bootstrap.Modal.getInstance(modal).hide();
         
-    } catch (error) {
+    } catch {
         showNotification('Failed to create template: ' + error.message, 'error');
     }
 }
@@ -4092,7 +4136,7 @@ function deleteTemplate(templateName) {
             // Update template list if exists
             updateTemplateList();
             
-        } catch (error) {
+        } catch {
             showNotification('Failed to delete template: ' + error.message, 'error');
         }
     }
@@ -4153,8 +4197,8 @@ function initSettingsTabs() {
             button.classList.add('active');
 
             // Try multiple ways to find the target panel: id equal to data-tab, id with -tab suffix, or data-panel attribute
-            let targetPanel = container.querySelector(`#${CSS.escape(targetTab)}`);
-            if (!targetPanel) targetPanel = container.querySelector(`#${CSS.escape(targetTab + '-tab')}`);
+            let targetPanel = container.querySelector(`#${window.CSS.escape(targetTab)}`);
+            if (!targetPanel) targetPanel = container.querySelector(`#${window.CSS.escape(targetTab + '-tab')}`);
             if (!targetPanel) targetPanel = container.querySelector(`.admin-tab-panel[data-panel="${targetTab}"]`);
 
             if (targetPanel) {
@@ -4441,7 +4485,7 @@ function initCharts() {
                 } else {
                     showChartFallback(systemOverviewCanvas);
                 }
-            } catch (error) {
+            } catch {
                 // Error initializing system overview chart
                 showChartFallback(systemOverviewCanvas);
             }
@@ -4474,7 +4518,7 @@ function initCharts() {
                 } else {
                     showChartFallback(licenseStatusCanvas);
                 }
-            } catch (error) {
+            } catch {
                 // Error initializing license status chart
                 showChartFallback(licenseStatusCanvas);
             }
@@ -4507,7 +4551,7 @@ function initCharts() {
                 } else {
                     showChartFallback(licenseTypeCanvas);
                 }
-            } catch (error) {
+            } catch {
                 // Error initializing license type chart
                 showChartFallback(licenseTypeCanvas);
             }
@@ -4552,7 +4596,7 @@ function initCharts() {
                 } else {
                     showChartFallback(monthlyLicensesCanvas);
                 }
-            } catch (error) {
+            } catch {
                 // Error initializing monthly licenses chart
                 showChartFallback(monthlyLicensesCanvas);
             }
@@ -4597,7 +4641,7 @@ function initCharts() {
                 } else {
                     showChartFallback(apiStatusCanvas);
                 }
-            } catch (error) {
+            } catch {
                 // Error initializing API status chart
                 showChartFallback(apiStatusCanvas);
             }
@@ -4642,7 +4686,7 @@ function initCharts() {
                 } else {
                     showChartFallback(apiCallsCanvas);
                 }
-            } catch (error) {
+            } catch {
                 // Error initializing API calls chart
                 showChartFallback(apiCallsCanvas);
             }
@@ -4687,7 +4731,7 @@ function initCharts() {
                 } else {
                     showChartFallback(invoicesMonthlyCanvas);
                 }
-            } catch (error) {
+            } catch {
                 // Error initializing invoices monthly chart
                 showChartFallback(invoicesMonthlyCanvas);
             }
@@ -4737,7 +4781,7 @@ function initCharts() {
                 } else {
                     showChartFallback(monthlyRevenueCanvas);
                 }
-            } catch (error) {
+            } catch {
                 // Error initializing monthly revenue chart
                 showChartFallback(monthlyRevenueCanvas);
             }
@@ -4782,7 +4826,7 @@ function initCharts() {
                 } else {
                     showChartFallback(activityTimelineCanvas);
                 }
-            } catch (error) {
+            } catch {
                 // Error initializing activity timeline chart
                 showChartFallback(activityTimelineCanvas);
             }
@@ -4827,7 +4871,7 @@ function initCharts() {
                 } else {
                     showChartFallback(userRegistrationsCanvas);
                 }
-            } catch (error) {
+            } catch {
                 // Error initializing user registrations chart
                 showChartFallback(userRegistrationsCanvas);
             }

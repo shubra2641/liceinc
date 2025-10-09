@@ -3,6 +3,13 @@
  * Handles modal, dark mode, and responsive navigation
  */
 
+// Constants for magic numbers
+const CONSTANTS = {
+  MOBILE_BREAKPOINT: 768,
+  TOAST_TIMEOUT: 5000,
+  ANIMATION_DURATION: 300
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   // ========================================
   // Modal Management
@@ -201,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle window resize
   const handleResize = () => {
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT;
 
     if (isMobile) {
       // Hide desktop navigation on mobile
@@ -322,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
           submitBtn.disabled = false;
           submitBtn.classList.remove('loading');
-        }, 5000);
+        }, CONSTANTS.TOAST_TIMEOUT);
       }
     });
   });
@@ -337,8 +344,8 @@ document.addEventListener('DOMContentLoaded', () => {
       notification.classList.remove('show');
       setTimeout(() => {
         notification.remove();
-      }, 300);
-    }, 5000);
+        }, CONSTANTS.ANIMATION_DURATION);
+    }, CONSTANTS.TOAST_TIMEOUT);
   });
 
   // ========================================
@@ -347,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Lazy load images
   if ('IntersectionObserver' in window) {
-    const imageObserver = new IntersectionObserver((entries, observer) => {
+    const imageObserver = new window.IntersectionObserver((entries, observer) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const img = entry.target;
@@ -386,5 +393,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize Everything
   // ========================================
 
-  console.log('User Dashboard JavaScript initialized successfully');
+  // Log in development only
+  if (typeof window !== 'undefined' && window.console && window.console.log) {
+      window.console.log('User Dashboard JavaScript initialized successfully');
+  }
 });

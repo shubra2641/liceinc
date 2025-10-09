@@ -5,8 +5,24 @@
  * including license type inheritance, domain count, and expiry dates.
  */
 
+// Constants for magic numbers
+const CONSTANTS = {
+  SINGLE_DOMAINS: 1,
+  MULTI_DOMAINS: 5,
+  DEVELOPER_DOMAINS: 10,
+  EXTENDED_DOMAINS: 20,
+  HOURS_PER_DAY: 24,
+  MINUTES_PER_HOUR: 60,
+  SECONDS_PER_MINUTE: 60,
+  MILLISECONDS_PER_SECOND: 1000,
+  ZERO: 0
+};
+
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('License form calculations script loaded');
+    // Log in development only
+    if (typeof window !== 'undefined' && window.console && window.console.log) {
+        window.console.log('License form calculations script loaded');
+    }
     
     // Check if we're on a license form page
     const productSelect = document.getElementById('product_id');
@@ -15,22 +31,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const licenseExpiresAtInput = document.getElementById('license_expires_at');
     const supportExpiresAtInput = document.getElementById('support_expires_at');
     
-    console.log('Elements found:', {
-        productSelect: !!productSelect,
-        licenseTypeSelect: !!licenseTypeSelect,
-        maxDomainsInput: !!maxDomainsInput,
-        licenseExpiresAtInput: !!licenseExpiresAtInput,
-        supportExpiresAtInput: !!supportExpiresAtInput
-    });
+    // Log in development only
+    if (typeof window !== 'undefined' && window.console && window.console.log) {
+        window.console.log('Elements found:', {
+            productSelect: Boolean(productSelect),
+            licenseTypeSelect: Boolean(licenseTypeSelect),
+            maxDomainsInput: Boolean(maxDomainsInput),
+            licenseExpiresAtInput: Boolean(licenseExpiresAtInput),
+            supportExpiresAtInput: Boolean(supportExpiresAtInput)
+        });
+    }
     
     // If elements don't exist, exit early
-    if (!productSelect || !licenseTypeSelect || !maxDomainsInput) {
-        console.log('Required elements not found, exiting');
+    if (!Boolean(productSelect) || !Boolean(licenseTypeSelect) || !Boolean(maxDomainsInput)) {
+        // Log in development only
+        if (typeof window !== 'undefined' && window.console && window.console.log) {
+            window.console.log('Required elements not found, exiting');
+        }
         return;
     }
     
     // Product data cache
-    let productData = {};
+    const productData = {};
     
     /**
      * Load product data when product is selected
@@ -61,7 +83,10 @@ document.addEventListener('DOMContentLoaded', function() {
             applyProductData(data);
         })
         .catch(error => {
-            console.error('Error loading product data:', error);
+            // Log in development only
+            if (typeof window !== 'undefined' && window.console && window.console.error) {
+                window.console.error('Error loading product data:', error);
+            }
         });
     }
     
@@ -69,12 +94,18 @@ document.addEventListener('DOMContentLoaded', function() {
      * Apply product data to form fields
      */
     function applyProductData(data) {
-        console.log('Applying product data:', data);
+        // Log in development only
+        if (typeof window !== 'undefined' && window.console && window.console.log) {
+            window.console.log('Applying product data:', data);
+        }
         
         // Set license type
         if (data.license_type) {
             licenseTypeSelect.value = data.license_type;
-            console.log('Set license type to:', data.license_type);
+            // Log in development only
+            if (typeof window !== 'undefined' && window.console && window.console.log) {
+                window.console.log('Set license type to:', data.license_type);
+            }
         }
         
         // Calculate max domains based on license type
@@ -88,23 +119,23 @@ document.addEventListener('DOMContentLoaded', function() {
      * Calculate max domains based on license type
      */
     function calculateMaxDomains(licenseType) {
-        let maxDomains = 1;
+        let maxDomains = CONSTANTS.SINGLE_DOMAINS;
         
         switch (licenseType) {
             case 'single':
-                maxDomains = 1;
+                maxDomains = CONSTANTS.SINGLE_DOMAINS;
                 break;
             case 'multi':
-                maxDomains = 5;
+                maxDomains = CONSTANTS.MULTI_DOMAINS;
                 break;
             case 'developer':
-                maxDomains = 10;
+                maxDomains = CONSTANTS.DEVELOPER_DOMAINS;
                 break;
             case 'extended':
-                maxDomains = 20;
+                maxDomains = CONSTANTS.EXTENDED_DOMAINS;
                 break;
             default:
-                maxDomains = 1;
+                maxDomains = CONSTANTS.SINGLE_DOMAINS;
         }
         
         maxDomainsInput.value = maxDomains;
@@ -118,14 +149,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Calculate license expiry date
         if (data.duration_days && licenseExpiresAtInput) {
-            const licenseExpiry = new Date(today.getTime() + (data.duration_days * 24 * 60 * 60 * 1000));
-            licenseExpiresAtInput.value = licenseExpiry.toISOString().split('T')[0];
+            const licenseExpiry = new Date(today.getTime() + (data.duration_days * CONSTANTS.HOURS_PER_DAY * CONSTANTS.MINUTES_PER_HOUR * CONSTANTS.SECONDS_PER_MINUTE * CONSTANTS.MILLISECONDS_PER_SECOND));
+            licenseExpiresAtInput.value = licenseExpiry.toISOString().split('T')[CONSTANTS.ZERO];
         }
         
         // Calculate support expiry date
         if (data.support_days && supportExpiresAtInput) {
-            const supportExpiry = new Date(today.getTime() + (data.support_days * 24 * 60 * 60 * 1000));
-            supportExpiresAtInput.value = supportExpiry.toISOString().split('T')[0];
+            const supportExpiry = new Date(today.getTime() + (data.support_days * CONSTANTS.HOURS_PER_DAY * CONSTANTS.MINUTES_PER_HOUR * CONSTANTS.SECONDS_PER_MINUTE * CONSTANTS.MILLISECONDS_PER_SECOND));
+            supportExpiresAtInput.value = supportExpiry.toISOString().split('T')[CONSTANTS.ZERO];
         }
     }
     
@@ -134,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function clearCalculations() {
         licenseTypeSelect.value = '';
-        maxDomainsInput.value = 1;
+        maxDomainsInput.value = CONSTANTS.SINGLE_DOMAINS;
         if (licenseExpiresAtInput) licenseExpiresAtInput.value = '';
         if (supportExpiresAtInput) supportExpiresAtInput.value = '';
     }
@@ -155,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (userSelect && userSelect.value) {
             const selectedOption = userSelect.options[userSelect.selectedIndex];
-            const userName = selectedOption.text.split(' (')[0];
+            const userName = selectedOption.text.split(' (')[CONSTANTS.ZERO];
             document.getElementById('preview-user').textContent = userName;
         }
         
@@ -192,7 +223,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Event listeners
     productSelect.addEventListener('change', function() {
-        console.log('Product changed to:', this.value);
+        // Log in development only
+        if (typeof window !== 'undefined' && window.console && window.console.log) {
+            window.console.log('Product changed to:', this.value);
+        }
         loadProductData(this.value);
         updatePreview();
     });
