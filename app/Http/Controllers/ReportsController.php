@@ -617,7 +617,8 @@ class ReportsController extends Controller
      * // Export reports to CSV
      * $response = $reportsController->export($request);
      */
-    public function export(Request $request): \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
+    public function export(Request $request):
+        \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
     {
         try {
             /**
@@ -723,12 +724,19 @@ class ReportsController extends Controller
                         if (is_object($license) && isset($license->license_key)) {
                             $csvData = [
                             is_string($license->license_key) ? $license->license_key : '',
-                            (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
-                            (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
+                            (isset($license->product) && is_object($license->product) &&
+                                isset($license->product->name)) ? $license->product->name : 'N/A',
+                            (isset($license->user) && is_object($license->user) &&
+                                isset($license->user->name)) ? $license->user->name : 'N/A',
                             (isset($license->status) && is_string($license->status)) ? $license->status : '',
-                            (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
+                            (isset($license->created_at) && is_object($license->created_at) &&
+                                method_exists($license->created_at, 'format')) ?
+                                $license->created_at->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->license_expires_at) && is_object($license->license_expires_at) &&
+                                method_exists($license->license_expires_at, 'format')) ?
+                                $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->product) && is_object($license->product) &&
+                                isset($license->product->price)) ? $license->product->price : '0',
                             ];
                             /**
  * @var array<int|string, bool|float|int|string|null> $typedCsvData
@@ -772,12 +780,19 @@ class ReportsController extends Controller
                         if (is_object($license) && isset($license->license_key)) {
                             $csvData = [
                             is_string($license->license_key) ? $license->license_key : '',
-                            (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
-                            (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
+                            (isset($license->product) && is_object($license->product) &&
+                                isset($license->product->name)) ? $license->product->name : 'N/A',
+                            (isset($license->user) && is_object($license->user) &&
+                                isset($license->user->name)) ? $license->user->name : 'N/A',
                             (isset($license->status) && is_string($license->status)) ? $license->status : '',
-                            (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
+                            (isset($license->created_at) && is_object($license->created_at) &&
+                                method_exists($license->created_at, 'format')) ?
+                                $license->created_at->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->license_expires_at) && is_object($license->license_expires_at) &&
+                                method_exists($license->license_expires_at, 'format')) ?
+                                $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->product) && is_object($license->product) &&
+                                isset($license->product->price)) ? $license->product->price : '0',
                             ];
                             /**
  * @var array<int|string, bool|float|int|string|null> $typedCsvData

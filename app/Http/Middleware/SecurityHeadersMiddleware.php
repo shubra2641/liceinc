@@ -174,23 +174,43 @@ class SecurityHeadersMiddleware
         try {
             // X-Frame-Options: Prevents clickjacking attacks
             if (isset($headers['x_frame_options']) && ! empty($headers['x_frame_options'])) {
-                $this->setSecurityHeader($response, 'X-Frame-Options', is_string($headers['x_frame_options']) ? $headers['x_frame_options'] : '');
+                $this->setSecurityHeader(
+                    $response,
+                    'X-Frame-Options',
+                    is_string($headers['x_frame_options']) ? $headers['x_frame_options'] : ''
+                );
             }
             // X-Content-Type-Options: Prevents MIME sniffing
             if (isset($headers['x_content_type_options']) && ! empty($headers['x_content_type_options'])) {
-                $this->setSecurityHeader($response, 'X-Content-Type-Options', is_string($headers['x_content_type_options']) ? $headers['x_content_type_options'] : '');
+                $this->setSecurityHeader(
+                    $response,
+                    'X-Content-Type-Options',
+                    is_string($headers['x_content_type_options']) ? $headers['x_content_type_options'] : ''
+                );
             }
             // X-XSS-Protection: Enables XSS filtering
             if (isset($headers['x_xss_protection']) && empty($headers['x_xss_protection']) === false) {
-                $this->setSecurityHeader($response, 'X-XSS-Protection', is_string($headers['x_xss_protection']) ? $headers['x_xss_protection'] : '');
+                $this->setSecurityHeader(
+                    $response,
+                    'X-XSS-Protection',
+                    is_string($headers['x_xss_protection']) ? $headers['x_xss_protection'] : ''
+                );
             }
             // Referrer-Policy: Controls referrer information
             if (isset($headers['referrer_policy']) && ! empty($headers['referrer_policy'])) {
-                $this->setSecurityHeader($response, 'Referrer-Policy', is_string($headers['referrer_policy']) ? $headers['referrer_policy'] : '');
+                $this->setSecurityHeader(
+                    $response,
+                    'Referrer-Policy',
+                    is_string($headers['referrer_policy']) ? $headers['referrer_policy'] : ''
+                );
             }
             // Permissions-Policy: Controls browser features
             if (isset($headers['permissions_policy']) && ! empty($headers['permissions_policy'])) {
-                $this->setSecurityHeader($response, 'Permissions-Policy', is_string($headers['permissions_policy']) ? $headers['permissions_policy'] : '');
+                $this->setSecurityHeader(
+                    $response,
+                    'Permissions-Policy',
+                    is_string($headers['permissions_policy']) ? $headers['permissions_policy'] : ''
+                );
             }
         } catch (\Exception $e) {
             Log::error('Error applying standard security headers', [
@@ -216,7 +236,11 @@ class SecurityHeadersMiddleware
                 isset($headers['strict_transport_security']) &&
                 empty($headers['strict_transport_security']) === false
             ) {
-                $this->setSecurityHeader($response, 'Strict-Transport-Security', is_string($headers['strict_transport_security']) ? $headers['strict_transport_security'] : '');
+                $this->setSecurityHeader(
+                    $response,
+                    'Strict-Transport-Security',
+                    is_string($headers['strict_transport_security']) ? $headers['strict_transport_security'] : ''
+                );
             }
         } catch (\Exception $e) {
             Log::error('Error applying HTTPS security headers', [

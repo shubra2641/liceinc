@@ -771,7 +771,9 @@ class InstallController extends Controller
             $dbPassword = is_array($config) ? ($config['db_password'] ?? null) : null;
 
             $connection = new \PDO(
-                "mysql:host=" . (is_string($dbHost) ? $dbHost : '') . ";port=" . (is_string($dbPort) ? $dbPort : '') . ";dbname=" . (is_string($dbName) ? $dbName : ''),
+                "mysql:host=" . (is_string($dbHost) ? $dbHost : '') .
+                ";port=" . (is_string($dbPort) ? $dbPort : '') .
+                ";dbname=" . (is_string($dbName) ? $dbName : ''),
                 is_string($dbUsername) ? $dbUsername : null,
                 is_string($dbPassword) ? $dbPassword : null,
             );
@@ -792,27 +794,43 @@ class InstallController extends Controller
         $envPath = base_path('.env');
         $envContent = File::get($envPath);
         // Update database configuration
-        $envContent = preg_replace('/DB_HOST=.*/', "DB_HOST=" . (is_string($databaseConfig['db_host'] ?? null) ? $databaseConfig['db_host'] : ''), $envContent) ?? $envContent;
-        $envContent = preg_replace('/DB_PORT=.*/', "DB_PORT=" . (is_string($databaseConfig['db_port'] ?? null) ? $databaseConfig['db_port'] : ''), $envContent) ?? $envContent;
-        $envContent = preg_replace('/DB_DATABASE=.*/', "DB_DATABASE=" . (is_string($databaseConfig['db_name'] ?? null) ? $databaseConfig['db_name'] : ''), $envContent) ?? $envContent;
         $envContent = preg_replace(
-            '/DB_USERNAME=.*/','DB_USERNAME=' . (is_string($databaseConfig['db_username'] ?? null) ? $databaseConfig['db_username'] : ''),
+            '/DB_HOST=.*/',
+            "DB_HOST=" . (is_string($databaseConfig['db_host'] ?? null) ? $databaseConfig['db_host'] : ''),
             $envContent
         ) ?? $envContent;
         $envContent = preg_replace(
-            '/DB_PASSWORD=.*/','DB_PASSWORD=' . (is_string($databaseConfig['db_password'] ?? null) ? $databaseConfig['db_password'] : ''),
+            '/DB_PORT=.*/',
+            "DB_PORT=" . (is_string($databaseConfig['db_port'] ?? null) ? $databaseConfig['db_port'] : ''),
+            $envContent
+        ) ?? $envContent;
+        $envContent = preg_replace(
+            '/DB_DATABASE=.*/',
+            "DB_DATABASE=" . (is_string($databaseConfig['db_name'] ?? null) ? $databaseConfig['db_name'] : ''),
+            $envContent
+        ) ?? $envContent;
+        $envContent = preg_replace(
+            '/DB_USERNAME=.*/',
+            'DB_USERNAME=' . (is_string($databaseConfig['db_username'] ?? null) ? $databaseConfig['db_username'] : ''),
+            $envContent
+        ) ?? $envContent;
+        $envContent = preg_replace(
+            '/DB_PASSWORD=.*/',
+            'DB_PASSWORD=' . (is_string($databaseConfig['db_password'] ?? null) ? $databaseConfig['db_password'] : ''),
             $envContent
         ) ?? $envContent;
         // Update application configuration
         $envContent = preg_replace(
-            '/APP_NAME=.*/','APP_NAME="' . (is_string($settingsConfig['site_name'] ?? null) ? $settingsConfig['site_name'] : '') . '"',
+            '/APP_NAME=.*/',
+            'APP_NAME="' . (is_string($settingsConfig['site_name'] ?? null) ? $settingsConfig['site_name'] : '') . '"',
             $envContent
         ) ?? $envContent;
         // Update APP_URL to current domain (this ensures emails use the correct domain)
         $currentUrl = request()->getSchemeAndHttpHost();
         $envContent = preg_replace('/APP_URL=.*/', "APP_URL={$currentUrl}", $envContent) ?? $envContent;
         $envContent = preg_replace(
-            '/APP_TIMEZONE=.*/','APP_TIMEZONE=' . (is_string($settingsConfig['timezone'] ?? null) ? $settingsConfig['timezone'] : ''),
+            '/APP_TIMEZONE=.*/',
+            'APP_TIMEZONE=' . (is_string($settingsConfig['timezone'] ?? null) ? $settingsConfig['timezone'] : ''),
             $envContent
         ) ?? $envContent;
         // Add APP_TIMEZONE if it doesn't exist
@@ -821,10 +839,15 @@ class InstallController extends Controller
                 ? $settingsConfig['timezone']
                 : '');
         }
-        $envContent = preg_replace('/APP_LOCALE=.*/', "APP_LOCALE=" . (is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace(
+            '/APP_LOCALE=.*/',
+            "APP_LOCALE=" . (is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : ''),
+            $envContent
+        ) ?? $envContent;
         // Add APP_LOCALE if it doesn't exist
         if ($envContent && ! str_contains($envContent, 'APP_LOCALE=')) {
-            $envContent .= "\nAPP_LOCALE=" . (is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : '');
+            $envContent .= "\nAPP_LOCALE=" .
+                (is_string($settingsConfig['locale'] ?? null) ? $settingsConfig['locale'] : '');
         }
         // Update APP_FALLBACK_LOCALE
         $locale = $settingsConfig['locale'] ?? null;
@@ -840,7 +863,11 @@ class InstallController extends Controller
         }
         // Update APP_FAKER_LOCALE
         $fakerLocale = $localeStr === 'ar' ? 'ar_SA' : 'en_US';
-        $envContent = preg_replace('/APP_FAKER_LOCALE=.*/', "APP_FAKER_LOCALE={$fakerLocale}", $envContent) ?? $envContent;
+        $envContent = preg_replace(
+            '/APP_FAKER_LOCALE=.*/',
+            "APP_FAKER_LOCALE={$fakerLocale}",
+            $envContent
+        ) ?? $envContent;
         // Add APP_FAKER_LOCALE if it doesn't exist
         if ($envContent && ! str_contains($envContent, 'APP_FAKER_LOCALE = ')) {
             $envContent .= "\nAPP_FAKER_LOCALE={$fakerLocale}";
@@ -856,9 +883,21 @@ class InstallController extends Controller
             $mailFromAddress = $settingsConfig['mail_from_address'] ?? null;
             $mailFromName = $settingsConfig['mail_from_name'] ?? null;
 
-            $envContent = preg_replace('/MAIL_MAILER=.*/', "MAIL_MAILER=" . (is_string($mailMailer) ? $mailMailer : ''), $envContent) ?? $envContent;
-            $envContent = preg_replace('/MAIL_HOST=.*/', "MAIL_HOST=" . (is_string($mailHost) ? $mailHost : ''), $envContent) ?? $envContent;
-            $envContent = preg_replace('/MAIL_PORT=.*/', "MAIL_PORT=" . (is_string($mailPort) ? $mailPort : ''), $envContent) ?? $envContent;
+            $envContent = preg_replace(
+                '/MAIL_MAILER=.*/',
+                "MAIL_MAILER=" . (is_string($mailMailer) ? $mailMailer : ''),
+                $envContent
+            ) ?? $envContent;
+            $envContent = preg_replace(
+                '/MAIL_HOST=.*/',
+                "MAIL_HOST=" . (is_string($mailHost) ? $mailHost : ''),
+                $envContent
+            ) ?? $envContent;
+            $envContent = preg_replace(
+                '/MAIL_PORT=.*/',
+                "MAIL_PORT=" . (is_string($mailPort) ? $mailPort : ''),
+                $envContent
+            ) ?? $envContent;
             $envContent = preg_replace(
                 '/MAIL_USERNAME=.*/',
                 "MAIL_USERNAME=" . (is_string($mailUsername) ? $mailUsername : ''),

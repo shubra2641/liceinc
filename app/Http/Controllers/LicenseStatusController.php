@@ -132,7 +132,10 @@ class LicenseStatusController extends Controller
                 $licenseCode = $this->sanitizeInput($request->validated('license_key'));
                 $email = $this->sanitizeInput($request->validated('email'));
                 // Search for license by code and email
-                $license = $this->findLicenseByCodeAndEmail(is_string($licenseCode) ? $licenseCode : '', is_string($email) ? $email : '');
+                $license = $this->findLicenseByCodeAndEmail(
+                    is_string($licenseCode) ? $licenseCode : '',
+                    is_string($email) ? $email : ''
+                );
                 if (! $license) {
                     Log::warning('License not found', [
                         'license_key' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
@@ -156,7 +159,13 @@ class LicenseStatusController extends Controller
                 // Check license status
                 $status = $this->getLicenseStatus($license);
                 // Get license details
-                $licenseDetails = $this->buildLicenseDetails($license, $status, $licenseType, $envatoData, is_string($email) ? $email : '');
+                $licenseDetails = $this->buildLicenseDetails(
+                    $license,
+                    $status,
+                    $licenseType,
+                    $envatoData,
+                    is_string($email) ? $email : ''
+                );
                 // Reset attempts on success
                 Cache::forget($key);
                 Log::debug('License status checked successfully', [
@@ -176,8 +185,12 @@ class LicenseStatusController extends Controller
         } catch (Throwable $e) {
             Log::error('License check error', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging(is_string($request->validated('license_key')) ? $request->validated('license_key') : ''),
-                'email' => $this->hashForLogging(is_string($request->validated('email')) ? $request->validated('email') : ''),
+                'license_key' => $this->hashForLogging(
+                    is_string($request->validated('license_key')) ? $request->validated('license_key') : ''
+                ),
+                'email' => $this->hashForLogging(
+                    is_string($request->validated('email')) ? $request->validated('email') : ''
+                ),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
@@ -228,7 +241,10 @@ class LicenseStatusController extends Controller
                 }
                 $licenseCode = $this->sanitizeInput($request->validated('license_key'));
                 $email = $this->sanitizeInput($request->validated('email'));
-                $license = $this->findLicenseByCodeAndEmail(is_string($licenseCode) ? $licenseCode : '', is_string($email) ? $email : '');
+                $license = $this->findLicenseByCodeAndEmail(
+                    is_string($licenseCode) ? $licenseCode : '',
+                    is_string($email) ? $email : ''
+                );
                 if (! $license) {
                     Log::warning('License not found for history request', [
                         'license_key' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
@@ -268,8 +284,12 @@ class LicenseStatusController extends Controller
         } catch (Throwable $e) {
             Log::error('License history error', [
                 'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging(is_string($request->validated('license_key')) ? $request->validated('license_key') : ''),
-                'email' => $this->hashForLogging(is_string($request->validated('email')) ? $request->validated('email') : ''),
+                'license_key' => $this->hashForLogging(
+                    is_string($request->validated('license_key')) ? $request->validated('license_key') : ''
+                ),
+                'email' => $this->hashForLogging(
+                    is_string($request->validated('email')) ? $request->validated('email') : ''
+                ),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
