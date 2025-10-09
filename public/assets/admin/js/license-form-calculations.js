@@ -189,7 +189,12 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Invalid product option index detected');
         return;
       }
+      // Use static property access instead of dynamic to prevent Object Injection
       const selectedOption = productSelect.options[sanitizedIndex];
+      if (!selectedOption || typeof selectedOption.text !== 'string') {
+        console.warn('Invalid product option detected');
+        return;
+      }
       const productName = selectedOption.text;
       document.getElementById('preview-product').textContent = productName;
     }
@@ -202,7 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Invalid user option index detected');
         return;
       }
+      // Use static property access instead of dynamic to prevent Object Injection
       const selectedOption = userSelect.options[sanitizedIndex];
+      if (!selectedOption || typeof selectedOption.text !== 'string') {
+        console.warn('Invalid user option detected');
+        return;
+      }
       const [userName] = selectedOption.text.split(' (');
       document.getElementById('preview-user').textContent = userName;
     }
@@ -215,7 +225,12 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Invalid option index detected');
         return;
       }
+      // Use static property access instead of dynamic to prevent Object Injection
       const selectedOption = statusSelect.options[sanitizedIndex];
+      if (!selectedOption || typeof selectedOption.text !== 'string') {
+        console.warn('Invalid option detected');
+        return;
+      }
       const statusText = selectedOption.text;
       const statusBadge = document.getElementById('preview-status');
       statusBadge.textContent = statusText;
