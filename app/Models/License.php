@@ -40,6 +40,7 @@ use Illuminate\Support\Str;
  * @property-read int|null $logs_count
  * @property-read \App\Models\Product|null $product
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|License active()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|License forCustomer($customerId)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|License forUser($user)
@@ -162,6 +163,7 @@ class License extends Model
      * Scope a query to only active licenses (status = active and not expired).
      *
      * @param Builder<License> $query
+     *
      * @return Builder<License>
      */
     public function scopeActive(Builder $query): Builder
@@ -179,6 +181,7 @@ class License extends Model
      */
     /**
      * @param Builder<License> $query
+     *
      * @return Builder<License>
      */
     public function scopeForUser(Builder $query, User|int $user): Builder
@@ -196,6 +199,7 @@ class License extends Model
      */
     /**
      * @param Builder<License> $query
+     *
      * @return Builder<License>
      */
     public function scopeForCustomer(Builder $query, int $customerId): Builder

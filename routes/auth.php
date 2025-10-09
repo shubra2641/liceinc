@@ -2,27 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * Security keywords for audit compliance:
- * validate, Validator::make, request()->validate,
- * htmlspecialchars, htmlentities, e(), strip_tags,
- * Auth::check, Auth::user, middleware auth,
- * throttle, RateLimiter, ThrottleRequests,
- * csrf, token, csrf_token, csrf_field, @csrf
- */
-
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\ConfirmablePasswordController;
-use App\Http\Controllers\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\Auth\EmailVerificationPromptController;
-use App\Http\Controllers\Auth\NewPasswordController;
-use App\Http\Controllers\Auth\PasswordController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\VerifyEmailController;
-use App\Http\Controllers\ErrorController;
-use Illuminate\Support\Facades\Route;
-
 /**
  * Authentication Routes with Enhanced Security and Comprehensive Access Control.
  *
@@ -39,6 +18,18 @@ use Illuminate\Support\Facades\Route;
  * - CSRF protection enabled (csrf, token, csrf_token, csrf_field, @csrf)
  * - Authentication middleware applied to protected routes (guest, throttle)
  */
+
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\ErrorController;
+use Illuminate\Support\Facades\Route;
 
 /**
  * Guest Routes - Enhanced Security and Rate Limiting.

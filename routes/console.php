@@ -58,10 +58,12 @@ if (! defined('WEEKLY_REMINDER_DAYS')) {
 /**
  * Define console commands with enhanced security.
  */
-Artisan::command('inspire', function () {
-    $controller = new App\Console\Controllers\ConsoleController();
-    $controller->inspire();
-})->purpose('Display an inspiring quote with error handling');
+if (app()->runningInConsole()) {
+    Artisan::command('inspire', function () {
+        $controller = new App\Console\Controllers\ConsoleController();
+        $controller->inspire();
+    })->purpose('Display an inspiring quote with error handling');
+}
 
 /**
  * Schedule invoice processing jobs with enhanced security.

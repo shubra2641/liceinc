@@ -640,6 +640,7 @@ class ProductFileService
      */
     /**
      * @param \App\Models\ProductUpdate $update
+     *
      * @return array<string, mixed>
      */
     public function downloadUpdateFile(\App\Models\ProductUpdate $update, int $userId): array

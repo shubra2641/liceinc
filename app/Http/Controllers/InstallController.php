@@ -605,6 +605,7 @@ class InstallController extends Controller
                 Artisan::call('storage:link');
             } catch (\Exception $e) {
                 // Storage link might already exist or fail, continue anyway
+                \Log::info('Storage link creation failed (may already exist): ' . $e->getMessage());
             }
             // Step 10: Create installed file
             File::put(storage_path('.installed'), now()->toDateTimeString());
@@ -761,6 +762,7 @@ class InstallController extends Controller
      */
     /**
      * @param mixed $config
+     *
      * @return array<string, mixed>
      */
     private function testDatabaseConnection($config)
@@ -1072,6 +1074,7 @@ class InstallController extends Controller
             } catch (\Exception $seederError) {
                 // Failed to run seeder
                 // Continue with other seeders even if one fails
+                \Log::warning('Seeder failed: ' . $seederError->getMessage());
             }
         }
         // Required database seeders execution completed

@@ -429,6 +429,7 @@ class UpdatePackageService
      */
     /**
      * @param array<string, mixed> $config
+     *
      * @return array<string, mixed>
      */
     private function processFileUpdates(string $extractPath, array $config): array
@@ -498,6 +499,7 @@ class UpdatePackageService
      */
     /**
      * @param array<string, mixed> $config
+     *
      * @return array<string, mixed>
      */
     private function processMigrations(string $extractPath, array $config): array
@@ -553,6 +555,7 @@ class UpdatePackageService
      */
     /**
      * @param array<string, mixed> $config
+     *
      * @return array<string, mixed>
      */
     private function updateVersionInfo(string $extractPath, array $config): array

@@ -155,6 +155,7 @@ class ProductFile extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductFile> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductFile>
      */
     public function scopeActive($query)

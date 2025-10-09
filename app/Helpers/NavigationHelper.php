@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Navigation Helper Functions with enhanced security.
  *
@@ -8,8 +10,6 @@
  *
  * @version 1.0.6
  */
-
-declare(strict_types=1);
 
 use App\Helpers\SecureFileHelper;
 

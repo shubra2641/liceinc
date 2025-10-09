@@ -2,72 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Admin\AutoUpdateController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\EmailTemplateController;
-use App\Http\Controllers\Admin\InvoiceController;
-use App\Http\Controllers\Admin\LicenseController;
-use App\Http\Controllers\Admin\LicenseVerificationGuideController;
-// ============================================================================
-// CONTROLLERS IMPORTS
-// Security: validate, Validator::make, request()->validate,
-// htmlspecialchars, htmlentities, e(), strip_tags,
-// Auth::check, Auth::user, middleware auth,
-// throttle, RateLimiter, ThrottleRequests,
-// csrf, token, csrf_token, csrf_field, @csrf
-// ============================================================================
-
-use App\Http\Controllers\Admin\LicenseVerificationLogController;
-use App\Http\Controllers\Admin\PaymentSettingsController;
-use App\Http\Controllers\Admin\ProductCategoryController;
-use App\Http\Controllers\Admin\ProductController as AdminProductController;
-use App\Http\Controllers\Admin\ProductFileController;
-use App\Http\Controllers\Admin\ProductUpdateController;
-use App\Http\Controllers\Admin\ProfileController;
-use App\Http\Controllers\Admin\ProgrammingLanguageController;
-use App\Http\Controllers\Admin\SettingController;
-use App\Http\Controllers\Admin\TicketCategoryController;
-use App\Http\Controllers\Admin\TicketController as AdminTicketController;
-use App\Http\Controllers\Admin\UpdateController;
-use App\Http\Controllers\Admin\UpdateNotificationController;
-// User Controllers
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\User\TicketController as UserTicketController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\InstallController;
-use App\Http\Controllers\KbArticleController;
-use App\Http\Controllers\KbCategoryController;
-// Admin Controllers
-use App\Http\Controllers\KbPublicController;
-use App\Http\Controllers\LanguageController;
-use App\Http\Controllers\LicenseDomainController;
-use App\Http\Controllers\LicenseStatusController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\PaymentPageController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ReportsController;
-use App\Http\Controllers\User\DashboardController as UserDashboardController;
-use App\Http\Controllers\User\EnvatoController as UserEnvatoController;
-use App\Http\Controllers\User\InvoiceController as UserInvoiceController;
-use App\Http\Controllers\User\LicenseController as UserLicenseController;
-use App\Http\Controllers\User\ProductFileController as UserProductFileController;
-use App\Http\Controllers\User\ProfileController as UserProfileController;
-// API Controllers
-
-// Legacy Controllers (to be reviewed)
-use App\Http\Middleware\CheckInstallation;
-use App\Http\Middleware\ProductFileSecurityMiddleware;
-use App\Models\Ticket;
-use Illuminate\Support\Facades\Route;
-
-// ============================================================================
-// PUBLIC ROUTES (No Authentication Required)
-// Security: Input validation via Controllers (validate, Validator::make, request()->validate),
-// Output sanitization via Controllers (htmlspecialchars, htmlentities, e(), strip_tags),
-// Rate limiting applied where needed (throttle, RateLimiter, ThrottleRequests)
-// Authentication: Auth::check, Auth::user, middleware auth applied to protected routes
-// ============================================================================
-
 /**
  * Public Routes with Enhanced Security and Validation.
  *
@@ -87,6 +21,51 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
  * security measures, and error handling.
  * Security: Input validation via Controller, Output sanitization via Controller.
  */
+
+use App\Http\Controllers\Admin\AutoUpdateController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EmailTemplateController;
+use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\LicenseController;
+use App\Http\Controllers\Admin\LicenseVerificationGuideController;
+use App\Http\Controllers\Admin\LicenseVerificationLogController;
+use App\Http\Controllers\Admin\PaymentSettingsController;
+use App\Http\Controllers\Admin\ProductCategoryController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ProductFileController;
+use App\Http\Controllers\Admin\ProductUpdateController;
+use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ProgrammingLanguageController;
+use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\TicketCategoryController;
+use App\Http\Controllers\Admin\TicketController as AdminTicketController;
+use App\Http\Controllers\Admin\UpdateController;
+use App\Http\Controllers\Admin\UpdateNotificationController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\User\TicketController as UserTicketController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InstallController;
+use App\Http\Controllers\KbArticleController;
+use App\Http\Controllers\KbCategoryController;
+use App\Http\Controllers\KbPublicController;
+use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\LicenseDomainController;
+use App\Http\Controllers\LicenseStatusController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaymentPageController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\User\EnvatoController as UserEnvatoController;
+use App\Http\Controllers\User\InvoiceController as UserInvoiceController;
+use App\Http\Controllers\User\LicenseController as UserLicenseController;
+use App\Http\Controllers\User\ProductFileController as UserProductFileController;
+use App\Http\Controllers\User\ProfileController as UserProfileController;
+use App\Http\Middleware\CheckInstallation;
+use App\Http\Middleware\ProductFileSecurityMiddleware;
+use App\Models\Ticket;
+use Illuminate\Support\Facades\Route;
+
 Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
 // ============================================================================

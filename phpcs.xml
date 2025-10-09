@@ -75,9 +75,8 @@
     
     <!-- Naming conventions -->
     <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
-    <rule ref="Squiz.NamingConventions.ValidFunctionName">
-        <exclude name="Squiz.NamingConventions.ValidFunctionName.NotCamelCaps"/>
-    </rule>
+    <rule ref="Squiz.NamingConventions.ValidVariableName"/>
+    <rule ref="Squiz.NamingConventions.ValidFunctionName"/>
     
     <!-- Disable rules that might conflict with PHPStan -->
     <rule ref="Generic.Commenting.DocComment.MissingParamTag">
@@ -113,6 +112,10 @@
         <exclude name="Squiz.Commenting.FunctionComment.InvalidParamComment"/>
     </rule>
     
+    <!-- Disable member variable naming for Laravel compatibility -->
+    <rule ref="Squiz.NamingConventions.ValidVariableName">
+        <exclude name="Squiz.NamingConventions.ValidVariableName.MemberVar"/>
+    </rule>
     
     <!-- Disable private method naming for Laravel compatibility -->
     <rule ref="Squiz.NamingConventions.ValidFunctionName">
@@ -161,7 +164,6 @@
         <exclude name="Squiz.Commenting.FunctionComment.TagOrder"/>
     </rule>
     
-    
     <!-- Disable type hint requirements -->
     <rule ref="Squiz.Commenting.FunctionComment.MissingParamType">
         <exclude name="Squiz.Commenting.FunctionComment.MissingParamType"/>
@@ -230,5 +232,19 @@
     <!-- Disable parameter comment validation -->
     <rule ref="Squiz.Commenting.FunctionComment.InvalidParamComment">
         <exclude name="Squiz.Commenting.FunctionComment.InvalidParamComment"/>
+    </rule>
+    
+    <!-- Disable camelCase detection -->
+    <rule ref="Squiz.NamingConventions.ValidVariableName">
+        <exclude name="Squiz.NamingConventions.ValidVariableName.NotCamelCaps"/>
+        <exclude name="Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps"/>
+    </rule>
+    
+    <rule ref="Squiz.NamingConventions.ValidFunctionName">
+        <exclude name="Squiz.NamingConventions.ValidFunctionName.NotCamelCaps"/>
+    </rule>
+    
+    <rule ref="Generic.NamingConventions.CamelCapsFunctionName">
+        <exclude name="Generic.NamingConventions.CamelCapsFunctionName"/>
     </rule>
 </ruleset>

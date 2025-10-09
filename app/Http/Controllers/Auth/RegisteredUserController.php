@@ -306,6 +306,7 @@ class RegisteredUserController extends Controller
             ]);
         } catch (\Exception $e) {
             // Silently handle email errors to not fail registration
+            \Log::error('Email sending failed during registration: ' . $e->getMessage());
         }
     }
     /**
@@ -319,6 +320,7 @@ class RegisteredUserController extends Controller
             $this->emailService->sendNewUserNotification($user);
         } catch (\Exception $e) {
             // Silently handle email errors to not fail registration
+            \Log::error('Admin notification email failed: ' . $e->getMessage());
         }
     }
     /**

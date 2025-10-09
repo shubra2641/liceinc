@@ -224,6 +224,7 @@ class ProductUpdate extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeActive($query)
@@ -235,6 +236,7 @@ class ProductUpdate extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeMajor($query)
@@ -246,6 +248,7 @@ class ProductUpdate extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeRequired($query)

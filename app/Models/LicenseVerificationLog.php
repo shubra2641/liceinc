@@ -87,6 +87,7 @@ class LicenseVerificationLog extends Model
      */
     /**
      * @param Builder<LicenseVerificationLog> $query
+     *
      * @return Builder<LicenseVerificationLog>
      */
     public function scopeSuccessful(Builder $query): Builder
@@ -97,6 +98,7 @@ class LicenseVerificationLog extends Model
      * Scope for failed verifications.
      *
      * @param Builder<LicenseVerificationLog> $query
+     *
      * @return Builder<LicenseVerificationLog>
      */
     public function scopeFailed(Builder $query): Builder
@@ -107,6 +109,7 @@ class LicenseVerificationLog extends Model
      * Scope for specific domain.
      *
      * @param Builder<LicenseVerificationLog> $query
+     *
      * @return Builder<LicenseVerificationLog>
      */
     public function scopeForDomain(Builder $query, string $domain): Builder
@@ -117,6 +120,7 @@ class LicenseVerificationLog extends Model
      * Scope for specific IP address.
      *
      * @param Builder<LicenseVerificationLog> $query
+     *
      * @return Builder<LicenseVerificationLog>
      */
     public function scopeForIp(Builder $query, string $ip): Builder
@@ -127,6 +131,7 @@ class LicenseVerificationLog extends Model
      * Scope for specific verification source.
      *
      * @param Builder<LicenseVerificationLog> $query
+     *
      * @return Builder<LicenseVerificationLog>
      */
     public function scopeFromSource(Builder $query, string $source): Builder
@@ -137,6 +142,7 @@ class LicenseVerificationLog extends Model
      * Scope for recent attempts (last 24 hours).
      *
      * @param Builder<LicenseVerificationLog> $query
+     *
      * @return Builder<LicenseVerificationLog>
      */
     public function scopeRecent(Builder $query, int $hours = 24): Builder

@@ -82,6 +82,7 @@ class Webhook extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<Webhook> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<Webhook>
      */
     public function scopeActive($query)
@@ -94,6 +95,7 @@ class Webhook extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<Webhook> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<Webhook>
      */
     public function scopeFailed($query)

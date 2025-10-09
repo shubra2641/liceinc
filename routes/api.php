@@ -2,29 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * Security keywords for audit compliance:
- * validate, Validator::make, request()->validate,
- * htmlspecialchars, htmlentities, e(), strip_tags,
- * Auth::check, Auth::user, middleware auth,
- * throttle, RateLimiter, ThrottleRequests,
- * csrf, token, csrf_token, csrf_field, @csrf
- */
-
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\ProgrammingLanguageController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Api\KbApiController;
-use App\Http\Controllers\Api\LicenseApiController;
-use App\Http\Controllers\Api\LicenseController;
-use App\Http\Controllers\Api\LicenseServerController;
-use App\Http\Controllers\Api\ProductApiController;
-use App\Http\Controllers\Api\ProductUpdateApiController;
-use App\Http\Controllers\Api\TicketApiController;
-use App\Http\Controllers\KbArticleController;
-use App\Http\Controllers\KbCategoryController;
-use Illuminate\Support\Facades\Route;
-
 /**
  * API Routes Configuration with Enhanced Security and Rate Limiting.
  *
@@ -51,6 +28,20 @@ use Illuminate\Support\Facades\Route;
  * // Knowledge base
  * GET /api/kb/article/{slug}/requirements
  */
+
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProgrammingLanguageController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Api\KbApiController;
+use App\Http\Controllers\Api\LicenseApiController;
+use App\Http\Controllers\Api\LicenseController;
+use App\Http\Controllers\Api\LicenseServerController;
+use App\Http\Controllers\Api\ProductApiController;
+use App\Http\Controllers\Api\ProductUpdateApiController;
+use App\Http\Controllers\Api\TicketApiController;
+use App\Http\Controllers\KbArticleController;
+use App\Http\Controllers\KbCategoryController;
+use Illuminate\Support\Facades\Route;
 
 // ============================================================================
 // AUTHENTICATED USER ENDPOINTS

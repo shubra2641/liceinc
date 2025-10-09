@@ -210,6 +210,7 @@ class PaymentSettingsController extends Controller
      */
     /**
      * @param array<string, mixed> $credentials
+     *
      * @return array<string, mixed>
      */
     protected function testPayPalConnection(array $credentials): array
@@ -298,6 +299,7 @@ class PaymentSettingsController extends Controller
      */
     /**
      * @param array<string, mixed> $credentials
+     *
      * @return array<string, mixed>
      */
     protected function testStripeConnection(array $credentials): array

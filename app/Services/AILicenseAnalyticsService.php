@@ -444,6 +444,7 @@ class AILicenseAnalyticsService
      */
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function applyAISmoothing(array $data): array
@@ -474,6 +475,7 @@ class AILicenseAnalyticsService
      */
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function predictFutureTrends(array $data, int $days): array
@@ -932,6 +934,7 @@ class AILicenseAnalyticsService
     }
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function detectSeasonality(array $data): array
@@ -1323,6 +1326,7 @@ class AILicenseAnalyticsService
      * Apply time series forecasting.
      *
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function applyTimeSeriesForecasting(array $data): array
@@ -1338,6 +1342,7 @@ class AILicenseAnalyticsService
      * Calculate confidence interval.
      *
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function calculateConfidenceInterval(array $data): array

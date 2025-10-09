@@ -186,6 +186,7 @@ class EmailService
     /**
      * @param array<string, mixed> $users
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     public function sendBulkEmail(array $users, string $templateName, array $data = []): array
@@ -294,6 +295,7 @@ class EmailService
      */
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     public function testTemplate(string $templateName, array $data = []): array

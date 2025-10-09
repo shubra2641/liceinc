@@ -234,7 +234,7 @@ class EnvatoController extends Controller
                 // Ensure user has proper role (if it's a new user or doesn't have admin role)
                 if (! $user->hasRole('admin')) {
                     // This is a regular user, no need to assign any specific role
-                    // The default behavior will work fine
+                    // The default behavior will work fine - user will have default permissions
                 }
                 Auth::login($user, true);
                 // Determine redirect route based on user role (same logic as AuthenticatedSessionController)
