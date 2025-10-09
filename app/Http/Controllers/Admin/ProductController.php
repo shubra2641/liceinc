@@ -479,9 +479,7 @@ class ProductController extends Controller
             if ($programmingLanguage) {
                 $extensions = $this->getFileExtensionsForLanguage($programmingLanguage->slug);
                 foreach ($extensions as $ext) {
-                    $oldFileWithExt = "integration/{$product->slug}." . (
-                        is_string($ext) ? $ext : (string)$ext
-                    );
+                    $oldFileWithExt = "integration/{$product->slug}." . $ext;
                     if (Storage::disk('public')->exists($oldFileWithExt)) {
                         Storage::disk('public')->delete($oldFileWithExt);
                     }
@@ -541,9 +539,7 @@ class ProductController extends Controller
             if ($programmingLanguage) {
                 $extensions = $this->getFileExtensionsForLanguage($programmingLanguage->slug);
                 foreach ($extensions as $ext) {
-                    $oldFileWithExt = "integration/{$product->slug}." . (
-                        is_string($ext) ? $ext : (string)$ext
-                    );
+                    $oldFileWithExt = "integration/{$product->slug}." . $ext;
                     if (Storage::disk('public')->exists($oldFileWithExt)) {
                         Storage::disk('public')->delete($oldFileWithExt);
                     }
