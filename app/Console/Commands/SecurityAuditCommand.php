@@ -28,8 +28,8 @@ use Illuminate\Support\Facades\Log;
  * - License system security verification
  * - Log file se    public function getExitCode(): int
     {
-        $criticalCount = count(array_filter($this->_issues, fn($i) => $i['severity'] === 'critical'));
-        $highCount = count(array_filter($this->_issues, fn($i) => $i['severity'] === 'high'));ty analysis
+        $criticalCount = count(array_filter($this->issues, fn($i) => $i['severity'] === 'critical'));
+        $highCount = count(array_filter($this->issues, fn($i) => $i['severity'] === 'high'));ty analysis
  * - Dependency security checking
  * - Environment security validation
  * - Automated issue fixing capabilities
@@ -129,7 +129,7 @@ class SecurityAuditCommand extends Command
                 $this->sendEmailReport($this->option('email')); // @phpstan-ignore-line
             }
             $this->auditStats['end_time'] = microtime(true);
-            $this->auditStats['issues_found'] = count($this->_issues);
+            $this->auditStats['issues_found'] = count($this->issues);
             $this->displaySummary();
 
             // Return appropriate exit code based on severity
@@ -583,14 +583,14 @@ class SecurityAuditCommand extends Command
         $this->info('Generating security report...');
         $report = [
             'audit_date' => now()->toISOString(),
-            'total_issues' => count($this->_issues),
+            'total_issues' => count($this->issues),
             'issues_by_severity' => [
-                'critical' => count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'critical')),
-                'high' => count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'high')),
-                'medium' => count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'medium')),
-                'low' => count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'low')),
+                'critical' => count(array_filter($this->issues, fn ($i) => $i['severity'] === 'critical')),
+                'high' => count(array_filter($this->issues, fn ($i) => $i['severity'] === 'high')),
+                'medium' => count(array_filter($this->issues, fn ($i) => $i['severity'] === 'medium')),
+                'low' => count(array_filter($this->issues, fn ($i) => $i['severity'] === 'low')),
             ],
-            'issues' => $this->_issues,
+            'issues' => $this->issues,
         ];
         $reportPath = storage_path('logs/security-audit-' . now()->format('Y-m-d-H-i-s') . '.json');
         $jsonContent = json_encode($report, JSON_PRETTY_PRINT);
@@ -608,7 +608,7 @@ class SecurityAuditCommand extends Command
     {
         $this->info('Attempting to fix security issues...');
         $fixedCount = 0;
-        foreach ($this->_issues as $issue) {
+        foreach ($this->issues as $issue) {
             if ($this->canAutoFix($issue)) {
                 if ($this->autoFix($issue)) {
                     $fixedCount++;
@@ -693,10 +693,10 @@ class SecurityAuditCommand extends Command
     private function displaySummary(): void
     {
         $this->info('Security audit completed.');
-        $criticalCount = count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'critical'));
-        $highCount = count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'high'));
-        $mediumCount = count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'medium'));
-        $lowCount = count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'low'));
+        $criticalCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'critical'));
+        $highCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'high'));
+        $mediumCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'medium'));
+        $lowCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'low'));
         $this->table(
             ['Severity', 'Count'],
             [
@@ -704,7 +704,7 @@ class SecurityAuditCommand extends Command
                 ['High', $highCount],
                 ['Medium', $mediumCount],
                 ['Low', $lowCount],
-                ['Total', count($this->_issues)],
+                ['Total', count($this->issues)],
             ],
         );
         if ($criticalCount > 0) {
@@ -783,8 +783,8 @@ class SecurityAuditCommand extends Command
      */
     private function getExitCode(): int
     {
-        $criticalCount = count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'critical'));
-        $highCount = count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'high'));
+        $criticalCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'critical'));
+        $highCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'high'));
 
         return ($criticalCount > 0 || $highCount > 0) ? 1 : 0;
     }

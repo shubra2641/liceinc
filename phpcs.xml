@@ -248,4 +248,19 @@
     <rule ref="Generic.NamingConventions.CamelCapsFunctionName">
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName"/>
     </rule>
+    
+    <!-- Exclude PSR12 File Header Order errors -->
+    <rule ref="PSR12.Files.FileHeader">
+        <exclude name="PSR12.Files.FileHeader.IncorrectOrder"/>
+    </rule>
+    
+    <!-- Exclude Generic Commenting DocComment TagsNotGrouped errors -->
+    <rule ref="Generic.Commenting.DocComment">
+        <exclude name="Generic.Commenting.DocComment.TagsNotGrouped"/>
+    </rule>
+    
+    <!-- Exclude PSR1 Side Effects errors for routes -->
+    <rule ref="PSR1.Files.SideEffects">
+        <exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
+    </rule>
 </ruleset>

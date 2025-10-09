@@ -12,16 +12,6 @@ declare(strict_types=1);
  * Authentication checks (Auth::check, Auth::user) applied via middleware to protected routes.
  */
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
-
-/**
- * Language Switcher Route with Enhanced Security and Validation.
- *
- * This route handles language switching with comprehensive validation,
- * security measures, and error handling.
- * Security: Input validation via Controller, Output sanitization via Controller.
- */
-
 use App\Http\Controllers\Admin\AutoUpdateController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailTemplateController;
@@ -65,6 +55,8 @@ use App\Http\Middleware\CheckInstallation;
 use App\Http\Middleware\ProductFileSecurityMiddleware;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 

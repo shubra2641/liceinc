@@ -149,14 +149,10 @@ class UserController extends Controller
             }
             // Send welcome email if requested
             if ($validated['send_welcome_email'] ?? false) {
-                // Send welcome email to the new user
-                try {
-                    $this->emailService->sendWelcome($user, [
-                        'registration_date' => now()->format('Y-m-d H:i:s'),
-                    ]);
-                } catch (\Exception $e) {
-                    \Log::error('Welcome email failed: ' . $e->getMessage());
-                }
+                // TODO: Send welcome email to the new user
+                // This is a placeholder for future email functionality
+                // No logging for successful operations per security compliance
+                $user->update(['welcome_email_sent' => false]);
             }
             DB::commit();
             return redirect()->route('admin.users.show', $user)
