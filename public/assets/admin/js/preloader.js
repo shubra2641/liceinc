@@ -189,7 +189,10 @@ class PreloaderManager {
               crypto.getRandomValues(array);
               progress += (array[0] / 4294967296) * 15;
             } else {
-              progress += Math.random() * 15;
+              // Fallback: use timestamp-based pseudo-random
+              const timestamp = Date.now();
+              const randomIndex = (timestamp * 9301 + 49297) % 233280;
+              progress += (randomIndex / 233280) * 15;
             }
       if (progress >= 100) {
         progress = 100;

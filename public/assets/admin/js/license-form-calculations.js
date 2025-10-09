@@ -53,10 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
           };
           return safeReplacements[match] || match;
         });
-        if (productData[sanitizedProductId]) {
-      applyProductData(productData[sanitizedProductId]);
-      return;
-    }
+        // Additional validation for product ID
+        const validProductIds = Object.keys(productData);
+        if (validProductIds.includes(sanitizedProductId)) {
+          applyProductData(productData[sanitizedProductId]);
+          return;
+        } else {
+          console.warn('Invalid product ID detected:', sanitizedProductId);
+        }
 
     // Fetch product data via AJAX
     fetch(`/admin/products/${productId}/data`, {
@@ -70,7 +74,13 @@ document.addEventListener('DOMContentLoaded', () => {
     })
       .then(response => response.json())
       .then(data => {
-            productData[sanitizedProductId] = data;
+            // Validate product ID before assignment
+            if (sanitizedProductId && typeof sanitizedProductId === 'string' && 
+                sanitizedProductId.length > 0 && sanitizedProductId.length < 100) {
+              productData[sanitizedProductId] = data;
+            } else {
+              console.warn('Invalid product ID for data assignment:', sanitizedProductId);
+            }
         applyProductData(data);
         return data;
       })
@@ -173,21 +183,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (productSelect && productSelect.value) {
       const { selectedIndex } = productSelect;
-      const selectedOption = productSelect.options[selectedIndex];
+      // Validate selectedIndex to prevent object injection
+      const sanitizedIndex = parseInt(selectedIndex, 10);
+      if (isNaN(sanitizedIndex) || sanitizedIndex < 0 || sanitizedIndex >= productSelect.options.length) {
+        console.warn('Invalid product option index detected');
+        return;
+      }
+      const selectedOption = productSelect.options[sanitizedIndex];
       const productName = selectedOption.text;
       document.getElementById('preview-product').textContent = productName;
     }
 
     if (userSelect && userSelect.value) {
       const { selectedIndex } = userSelect;
-      const selectedOption = userSelect.options[selectedIndex];
+      // Validate selectedIndex to prevent object injection
+      const sanitizedIndex = parseInt(selectedIndex, 10);
+      if (isNaN(sanitizedIndex) || sanitizedIndex < 0 || sanitizedIndex >= userSelect.options.length) {
+        console.warn('Invalid user option index detected');
+        return;
+      }
+      const selectedOption = userSelect.options[sanitizedIndex];
       const [userName] = selectedOption.text.split(' (');
       document.getElementById('preview-user').textContent = userName;
     }
 
     if (statusSelect && statusSelect.value) {
       const { selectedIndex } = statusSelect;
-      const selectedOption = statusSelect.options[selectedIndex];
+      // Validate selectedIndex to prevent object injection
+      const sanitizedIndex = parseInt(selectedIndex, 10);
+      if (isNaN(sanitizedIndex) || sanitizedIndex < 0 || sanitizedIndex >= statusSelect.options.length) {
+        console.warn('Invalid option index detected');
+        return;
+      }
+      const selectedOption = statusSelect.options[sanitizedIndex];
       const statusText = selectedOption.text;
       const statusBadge = document.getElementById('preview-status');
       statusBadge.textContent = statusText;

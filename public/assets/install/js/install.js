@@ -459,7 +459,15 @@
 
     function processNextStep() {
       if (currentStep < steps.length) {
-        const step = steps[currentStep];
+        // Validate currentStep to prevent object injection
+        const sanitizedStep = parseInt(currentStep, 10);
+        let step;
+        if (isNaN(sanitizedStep) || sanitizedStep < 0 || sanitizedStep >= steps.length) {
+          console.warn('Invalid step index detected, using default step');
+          step = steps[0];
+        } else {
+          step = steps[sanitizedStep];
+        }
         const stepElement = document.getElementById(step.id);
 
         if (stepElement) {
@@ -786,7 +794,13 @@
     const formData = new FormData(form);
     const data = {};
     for (const [key, value] of formData.entries()) {
-      data[key] = value;
+            // Validate key to prevent object injection
+            const sanitizedKey = key.replace(/[^a-zA-Z0-9_]/g, '');
+            if (sanitizedKey === key && sanitizedKey.length > 0 && sanitizedKey.length < 100) {
+              data[sanitizedKey] = value;
+            } else {
+              console.warn('Invalid object key detected, skipping:', key);
+            }
     }
     localStorage.setItem('install_form_data', JSON.stringify(data));
   }

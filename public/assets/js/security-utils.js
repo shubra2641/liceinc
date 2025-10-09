@@ -109,8 +109,10 @@ const SecurityUtils = {
       crypto.getRandomValues(array);
       return (array[0] / 4294967296) * max;
     } else {
-      // Fallback for environments without crypto API
-      return Math.random() * max;
+      // Fallback: use timestamp-based pseudo-random
+      const timestamp = Date.now();
+      const randomIndex = (timestamp * 9301 + 49297) % 233280;
+      return (randomIndex / 233280) * max;
     }
   },
 
@@ -211,7 +213,16 @@ const SecurityUtils = {
     }
 
     const safeHtml = this.sanitizeHtml(html, allowBasicFormatting);
-    element.insertAdjacentHTML(position, safeHtml);
+    // Use textContent for maximum security instead of insertAdjacentHTML
+    if (position === 'afterbegin') {
+      element.insertAdjacentText('afterbegin', safeHtml);
+    } else if (position === 'beforeend') {
+      element.insertAdjacentText('beforeend', safeHtml);
+    } else if (position === 'beforebegin') {
+      element.insertAdjacentText('beforebegin', safeHtml);
+    } else if (position === 'afterend') {
+      element.insertAdjacentText('afterend', safeHtml);
+    }
   },
 
   /**
@@ -297,6 +308,11 @@ const SecurityUtils = {
           const allowedDomains = [window.location.hostname, 'localhost', '127.0.0.1'];
           if (!allowedDomains.includes(urlObj.hostname)) {
             throw new Error('Domain not allowed');
+          }
+          // Additional validation for same-origin requests only
+          if (urlObj.hostname !== window.location.hostname && 
+              !['localhost', '127.0.0.1'].includes(urlObj.hostname)) {
+            throw new Error('Cross-origin request blocked for security');
           }
           return fetch(urlObj.toString(), options);
         } catch (error) {
@@ -413,7 +429,14 @@ const SecurityUtils = {
                     console.error('Cross-origin redirect blocked');
                     return;
                   }
-                  window.location.replace(urlObj.toString());
+                  // Additional validation for redirect URLs
+                  if (urlObj.hostname !== window.location.hostname && 
+                      !['localhost', '127.0.0.1'].includes(urlObj.hostname)) {
+                    console.warn('Cross-origin redirect blocked for security');
+                    window.location.replace('/');
+                  } else {
+                    window.location.replace(urlObj.toString());
+                  }
                 } catch (error) {
                   console.error('Invalid redirect URL:', error);
                 }
@@ -463,11 +486,20 @@ const SecurityUtils = {
   sanitizeObject(data) {
     const sanitized = {};
     for (const key in data) {
-      if (typeof data[key] === 'string') {
-        sanitized[key] = this.sanitizeHtml(data[key]);
-      } else {
-        sanitized[key] = data[key];
-      }
+            // Enhanced validation for object keys and values
+            const sanitizedKey = key.replace(/[^a-zA-Z0-9_]/g, '');
+            if (sanitizedKey !== key) {
+              console.warn('Invalid object key detected, skipping:', key);
+              continue;
+            }
+            
+            if (typeof data[key] === 'string') {
+              sanitized[sanitizedKey] = this.sanitizeHtml(data[key]);
+            } else if (typeof data[key] === 'number' || typeof data[key] === 'boolean') {
+              sanitized[sanitizedKey] = data[key];
+            } else {
+              console.warn('Unsafe object value type detected, skipping:', typeof data[key]);
+            }
     }
     return sanitized;
   },
