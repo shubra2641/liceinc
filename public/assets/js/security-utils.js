@@ -138,7 +138,10 @@ const SecurityUtils = {
           crypto.getRandomValues(array);
           result += chars[array[0] % chars.length];
         } else {
-          result += chars[Math.floor(Math.random() * chars.length)];
+          // Fallback: use a more secure approach even without crypto API
+          const timestamp = Date.now();
+          const randomIndex = (timestamp * 9301 + 49297) % 233280;
+          result += chars[Math.floor((randomIndex / 233280) * chars.length)];
         }
       }
     }

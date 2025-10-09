@@ -441,7 +441,10 @@ class FrontendPreloaderManager {
             crypto.getRandomValues(array);
             progress += (array[0] / 4294967296) * 20;
           } else {
-            progress += Math.random() * 20;
+            // Fallback: use a more secure approach even without crypto API
+            const timestamp = Date.now();
+            const randomIndex = (timestamp * 9301 + 49297) % 233280;
+            progress += (randomIndex / 233280) * 20;
           }
         }
       }

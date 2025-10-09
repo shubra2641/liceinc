@@ -623,7 +623,12 @@
           };
           return safeReplacements[match] || match;
         });
-        return icons[sanitizedType] || icons.info;
+        // Additional validation to prevent object injection
+        const validIconTypes = ['success', 'error', 'warning', 'info', 'loading', 'check', 'times', 'exclamation'];
+        if (validIconTypes.includes(sanitizedType)) {
+          return icons[sanitizedType] || icons.info;
+        }
+        return icons.info;
   }
 
   /**

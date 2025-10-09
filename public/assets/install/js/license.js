@@ -300,7 +300,14 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       this.style.opacity = '0.7';
       setTimeout(() => {
-                window.location.href = SecurityUtils.escapeUrl(this.href);
+                // Additional validation for href to prevent XSS
+                const href = this.getAttribute('href');
+                if (href && typeof href === 'string' && href.startsWith('/')) {
+                  window.location.href = SecurityUtils.escapeUrl(href);
+                } else {
+                  console.warn('Invalid href detected, redirecting to home');
+                  window.location.href = SecurityUtils.escapeUrl('/');
+                }
       }, 150);
     });
   }
