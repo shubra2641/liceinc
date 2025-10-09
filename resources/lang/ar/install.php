@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Welcome Page
     'welcome_title' => 'مرحباً بك في نظام إدارة التراخيص',

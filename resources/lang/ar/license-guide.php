@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Page Title and Header
     'title' => 'دليل التحقق من الترخيص - للمطورين',

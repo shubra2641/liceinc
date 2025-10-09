@@ -203,6 +203,7 @@
     margin-bottom: $spacing-md;
 }
 
+// Article Description - moved before locked state for proper specificity
 .user-kb-article-description {
     color: $text-secondary;
     line-height: $line-height-relaxed;
