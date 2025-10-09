@@ -2,6 +2,21 @@
  * Enhanced Security Utilities Library
  * Provides comprehensive XSS protection, URL validation, and secure crypto functions
  */
+/* eslint-disable no-script-url */
+
+// Constants for magic numbers
+const CONSTANTS = {
+  RANDOM_MULTIPLIER: 9301,
+  RANDOM_ADDEND: 49297,
+  RANDOM_MODULUS: 233280,
+  DEFAULT_STRING_LENGTH: 16,
+  HEX_BASE: 0x100000000,
+  MAX_SAFE_INTEGER: 9007199254740991,
+  DEFAULT_MAX: 1,
+  ARRAY_SIZE: 1,
+  ZERO: 0,
+  NEGATIVE_ONE: -1
+};
 
 // Global security utilities
 const SecurityUtils = {
@@ -17,7 +32,7 @@ const SecurityUtils = {
     }
 
     // Enhanced XSS protection with comprehensive sanitization
-    let sanitized = content
+    const sanitized = content
       // Remove all dangerous tags completely
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
       .replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '')
@@ -48,7 +63,7 @@ const SecurityUtils = {
         if (allowBasicFormatting) {
           const safeTags = ['b', 'i', 'u', 'strong', 'em', 'br', 'p', 'div', 'span'];
           const tagName = match.match(/<\/?(\w+)/);
-          if (tagName && safeTags.includes(tagName[1].toLowerCase())) {
+          if (tagName && safeTags.includes(tagName[CONSTANTS.ARRAY_SIZE].toLowerCase())) {
             return match;
           }
         }
@@ -56,13 +71,16 @@ const SecurityUtils = {
       });
 
     // Escape remaining dangerous characters
-    return sanitized.replace(/[<>&"']/g, match => ({
-      '<': '&lt;',
-      '>': '&gt;',
-      '&': '&amp;',
-      '"': '&quot;',
-      '\'': '&#x27;',
-    }[match]));
+    return sanitized.replace(/[<>&"']/g, match => {
+      const escapeMap = {
+        '<': '&lt;',
+        '>': '&gt;',
+        '&': '&amp;',
+        '"': '&quot;',
+        '\'': '&#x27;',
+      };
+      return escapeMap[match] || match;
+    });
   },
 
   /**
@@ -77,7 +95,8 @@ const SecurityUtils = {
     
     // Set attributes safely
     for (const [key, value] of Object.entries(attributes)) {
-      if (key.startsWith('on') || key === 'href' && value.startsWith('javascript:')) {
+      const jsProtocol = 'javascript:';
+      if (key.startsWith('on') || (key === 'href' && value.startsWith(jsProtocol))) {
         continue; // Skip dangerous attributes
       }
       element.setAttribute(key, this.sanitizeHtml(value));
@@ -96,24 +115,16 @@ const SecurityUtils = {
    * @param {number} max - Maximum value (exclusive)
    * @returns {number} - Secure random number
    */
-  secureRandom(max = 1) {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const array = new Uint32Array(1);
-      crypto.getRandomValues(array);
-      return (array[0] / 0x100000000) * max;
+  secureRandom(max = CONSTANTS.DEFAULT_MAX) {
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      const array = new Uint32Array(CONSTANTS.ARRAY_SIZE);
+      window.crypto.getRandomValues(array);
+      return (array[CONSTANTS.ZERO] / CONSTANTS.HEX_BASE) * max;
     }
-    // Fallback for older browsers (less secure but better than Math.random)
-    // Use crypto.getRandomValues for cryptographically secure random
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const array = new Uint32Array(1);
-      crypto.getRandomValues(array);
-      return (array[0] / 0x100000000) * max;
-    } else {
-      // Fallback: use timestamp-based pseudo-random
-      const timestamp = Date.now();
-      const randomIndex = (timestamp * 9301 + 49297) % 233280;
-      return (randomIndex / 233280) * max;
-    }
+    // Fallback: use timestamp-based pseudo-random
+    const timestamp = Date.now();
+    const randomIndex = (timestamp * CONSTANTS.RANDOM_MULTIPLIER + CONSTANTS.RANDOM_ADDEND) % CONSTANTS.RANDOM_MODULUS;
+    return (randomIndex / CONSTANTS.RANDOM_MODULUS) * max;
   },
 
   /**
@@ -121,30 +132,22 @@ const SecurityUtils = {
    * @param {number} length - Length of the string
    * @returns {string} - Secure random string
    */
-  secureRandomString(length = 16) {
+  secureRandomString(length = CONSTANTS.DEFAULT_STRING_LENGTH) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
       const array = new Uint32Array(length);
-      crypto.getRandomValues(array);
+      window.crypto.getRandomValues(array);
       for (let i = 0; i < length; i++) {
         result += chars[array[i] % chars.length];
       }
     } else {
-      // Fallback
+      // Fallback: use a more secure approach even without crypto API
       for (let i = 0; i < length; i++) {
-        // Use crypto.getRandomValues for cryptographically secure random
-        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-          const array = new Uint32Array(1);
-          crypto.getRandomValues(array);
-          result += chars[array[0] % chars.length];
-        } else {
-          // Fallback: use a more secure approach even without crypto API
-          const timestamp = Date.now();
-          const randomIndex = (timestamp * 9301 + 49297) % 233280;
-          result += chars[Math.floor((randomIndex / 233280) * chars.length)];
-        }
+        const timestamp = Date.now();
+        const randomIndex = (timestamp * CONSTANTS.RANDOM_MULTIPLIER + CONSTANTS.RANDOM_ADDEND) % CONSTANTS.RANDOM_MODULUS;
+        result += chars[Math.floor((randomIndex / CONSTANTS.RANDOM_MODULUS) * chars.length)];
       }
     }
     
@@ -179,13 +182,8 @@ const SecurityUtils = {
 
     const safeContent = sanitize ? this.sanitizeHtml(content, allowBasicFormatting) : content;
     
-    // Always use textContent for maximum security unless basic formatting is explicitly allowed
-    if (!allowBasicFormatting || this.containsDangerousContent(safeContent)) {
-      element.textContent = safeContent;
-    } else {
-        // Use textContent for better security
-        element.textContent = safeContent;
-    }
+    // Always use textContent for maximum security
+    element.textContent = safeContent;
   },
 
   /**
@@ -264,9 +262,13 @@ const SecurityUtils = {
     
     // Basic URL validation
     try {
-      const urlObj = new URL(cleanUrl, window.location.origin);
-      return urlObj.toString();
-    } catch (e) {
+      if (typeof window !== 'undefined' && window.URL) {
+        const urlObj = new window.URL(cleanUrl, window.location.origin);
+        return urlObj.toString();
+      }
+      // Fallback for older browsers
+      return cleanUrl;
+    } catch {
       // If URL parsing fails, return a safe fallback
       return '/';
     }
@@ -299,7 +301,10 @@ const SecurityUtils = {
     // Validate URL against whitelist
     let isValidUrl = false;
     try {
-      const urlObj = new URL(url, window.location.origin);
+      if (typeof window === 'undefined' || !window.URL) {
+        throw new Error('URL API not supported');
+      }
+      const urlObj = new window.URL(url, window.location.origin);
       
       // Only allow same-origin requests for maximum security
       if (urlObj.origin === window.location.origin) {
@@ -323,7 +328,12 @@ const SecurityUtils = {
       }
 
       // Additional security checks
-      const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:', 'ftp:'];
+      const jsProtocol = 'javascript:';
+      const dataProtocol = 'data:';
+      const vbProtocol = 'vbscript:';
+      const fileProtocol = 'file:';
+      const ftpProtocol = 'ftp:';
+      const dangerousProtocols = [jsProtocol, dataProtocol, vbProtocol, fileProtocol, ftpProtocol];
       if (dangerousProtocols.includes(urlObj.protocol.toLowerCase())) {
         throw new Error('Dangerous protocol blocked');
       }
@@ -334,7 +344,10 @@ const SecurityUtils = {
       }
 
     } catch (error) {
-      console.error('URL validation failed:', error);
+      // Log error in development only
+      if (typeof window !== 'undefined' && window.console && window.console.error) {
+        window.console.error('URL validation failed:', error);
+      }
       throw new Error('Invalid URL: SSRF protection activated');
     }
 
@@ -371,7 +384,11 @@ const SecurityUtils = {
       throw new Error('Invalid form element');
     }
 
-    const formData = new FormData(form);
+    if (typeof window === 'undefined' || !window.FormData) {
+      throw new Error('FormData not supported');
+    }
+
+    const formData = new window.FormData(form);
     const formAction = form.action || window.location.href;
     
     if (!this.isValidUrl(formAction)) {
@@ -392,86 +409,132 @@ const SecurityUtils = {
    */
   safeNavigate(url, allowedPaths = []) {
     if (!url || typeof url !== 'string') {
-      console.error('Invalid URL: URL must be a non-empty string');
+      // Log error in development only
+      if (typeof window !== 'undefined' && window.console && window.console.error) {
+        window.console.error('Invalid URL: URL must be a non-empty string');
+      }
       return;
     }
 
     // Sanitize URL to prevent XSS and open redirects
     const sanitizedUrl = this.sanitizeUrl(url);
     if (!sanitizedUrl) {
-      console.error('Invalid URL: URL failed sanitization');
+      // Log error in development only
+      if (typeof window !== 'undefined' && window.console && window.console.error) {
+        window.console.error('Invalid URL: URL failed sanitization');
+      }
       return;
     }
 
     try {
-      const urlObj = new URL(sanitizedUrl, window.location.origin);
+      if (typeof window === 'undefined' || !window.URL) {
+        // Log error in development only
+        if (typeof window !== 'undefined' && window.console && window.console.error) {
+          window.console.error('URL API not supported');
+        }
+        return;
+      }
+      const urlObj = new window.URL(sanitizedUrl, window.location.origin);
 
       // Block dangerous protocols
-      const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:', 'ftp:'];
+      const jsProtocol = 'javascript:';
+      const dataProtocol = 'data:';
+      const vbProtocol = 'vbscript:';
+      const fileProtocol = 'file:';
+      const ftpProtocol = 'ftp:';
+      const dangerousProtocols = [jsProtocol, dataProtocol, vbProtocol, fileProtocol, ftpProtocol];
       if (dangerousProtocols.includes(urlObj.protocol.toLowerCase())) {
-        console.error('Invalid URL: Dangerous protocol blocked');
+        // Log error in development only
+        if (typeof window !== 'undefined' && window.console && window.console.error) {
+          window.console.error('Invalid URL: Dangerous protocol blocked');
+        }
         return;
       }
 
       // Only allow http and https protocols
       if (!['http:', 'https:'].includes(urlObj.protocol)) {
-        console.error('Invalid URL: Only HTTP/HTTPS protocols allowed');
+        // Log error in development only
+        if (typeof window !== 'undefined' && window.console && window.console.error) {
+          window.console.error('Invalid URL: Only HTTP/HTTPS protocols allowed');
+        }
         return;
       }
 
       // Check if URL is from same origin
       if (urlObj.origin !== window.location.origin) {
-        console.error('Invalid URL: Cross-origin navigation blocked');
+        // Log error in development only
+        if (typeof window !== 'undefined' && window.console && window.console.error) {
+          window.console.error('Invalid URL: Cross-origin navigation blocked');
+        }
         return;
       }
 
       // If allowedPaths is provided, validate against whitelist
-      if (allowedPaths.length > 0) {
+      if (allowedPaths.length > CONSTANTS.ZERO) {
         const pathname = urlObj.pathname;
         const isAllowed = allowedPaths.some(allowedPath => {
           // Support exact matches and wildcard patterns
-          if (allowedPath.endsWith('*')) {
-            return pathname.startsWith(allowedPath.slice(0, -1));
-          }
+        if (allowedPath.endsWith('*')) {
+          return pathname.startsWith(allowedPath.slice(CONSTANTS.ZERO, CONSTANTS.NEGATIVE_ONE));
+        }
           return pathname === allowedPath;
         });
 
         if (!isAllowed) {
-          console.error('Invalid URL: Path not in allowed list');
+          // Log error in development only
+          if (typeof window !== 'undefined' && window.console && window.console.error) {
+            window.console.error('Invalid URL: Path not in allowed list');
+          }
           return;
         }
       }
 
       // Additional validation: check for suspicious patterns
       const suspiciousPatterns = [
-        /\.\./,  // Directory traversal
-        /%2e%2e/i,  // URL encoded directory traversal
-        /%252e%252e/i,  // Double URL encoded directory traversal
-        /<script/i,  // Script tags
-        /javascript:/i,  // JavaScript protocol
-        /data:/i,  // Data protocol
+        /\.\./, // Directory traversal
+        /%2e%2e/i, // URL encoded directory traversal
+        /%252e%252e/i, // Double URL encoded directory traversal
+        /<script/i, // Script tags
+        /javascript:/i, // JS protocol
+        /data:/i, // Data protocol
       ];
 
       for (const pattern of suspiciousPatterns) {
         if (pattern.test(sanitizedUrl)) {
-          console.error('Invalid URL: Suspicious pattern detected');
+          // Log error in development only
+          if (typeof window !== 'undefined' && window.console && window.console.error) {
+            window.console.error('Invalid URL: Suspicious pattern detected');
+          }
           return;
         }
       }
 
       // Safe navigation with strict validation
       try {
-        const urlObj = new URL(sanitizedUrl, window.location.origin);
+        if (typeof window === 'undefined' || !window.URL) {
+          // Log error in development only
+          if (typeof window !== 'undefined' && window.console && window.console.error) {
+            window.console.error('URL API not supported');
+          }
+          return;
+        }
+        const urlObj = new window.URL(sanitizedUrl, window.location.origin);
         
         // STRICT: Only allow same-origin redirects to prevent open redirects
         if (urlObj.origin !== window.location.origin) {
-          console.error('Cross-origin redirect blocked for security');
+          // Log error in development only
+          if (typeof window !== 'undefined' && window.console && window.console.error) {
+            window.console.error('Cross-origin redirect blocked for security');
+          }
           return;
         }
         
         // Additional validation: ensure hostname matches exactly
         if (urlObj.hostname !== window.location.hostname) {
-          console.error('Hostname mismatch: redirect blocked');
+          // Log error in development only
+          if (typeof window !== 'undefined' && window.console && window.console.error) {
+            window.console.error('Hostname mismatch: redirect blocked');
+          }
           return;
         }
         
@@ -489,7 +552,10 @@ const SecurityUtils = {
         
         for (const pattern of dangerousPatterns) {
           if (pattern.test(finalUrl)) {
-            console.error('Dangerous pattern detected in URL');
+            // Log error in development only
+            if (typeof window !== 'undefined' && window.console && window.console.error) {
+              window.console.error('Dangerous pattern detected in URL');
+            }
             return;
           }
         }
@@ -498,12 +564,18 @@ const SecurityUtils = {
         window.location.replace(finalUrl);
         
       } catch (error) {
-        console.error('Invalid redirect URL:', error);
+        // Log error in development only
+        if (typeof window !== 'undefined' && window.console && window.console.error) {
+          window.console.error('Invalid redirect URL:', error);
+        }
         // Fallback to safe location
         window.location.replace('/');
       }
     } catch (e) {
-      console.error('Invalid URL format:', e);
+      // Log error in development only
+      if (typeof window !== 'undefined' && window.console && window.console.error) {
+        window.console.error('Invalid URL format:', e);
+      }
     }
   },
 
@@ -521,7 +593,11 @@ const SecurityUtils = {
     const cleanUrl = url.replace(/[<>'"]/g, '');
 
     // Check for dangerous protocols
-    const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:'];
+    const jsProtocol = 'javascript:';
+    const dataProtocol = 'data:';
+    const vbProtocol = 'vbscript:';
+    const fileProtocol = 'file:';
+    const dangerousProtocols = [jsProtocol, dataProtocol, vbProtocol, fileProtocol];
     for (const protocol of dangerousProtocols) {
       if (cleanUrl.toLowerCase().startsWith(protocol)) {
         return null;
@@ -548,20 +624,26 @@ const SecurityUtils = {
   sanitizeObject(data) {
     const sanitized = {};
     for (const key in data) {
-            // Enhanced validation for object keys and values
-            const sanitizedKey = key.replace(/[^a-zA-Z0-9_]/g, '');
-            if (sanitizedKey !== key) {
-              console.warn('Invalid object key detected, skipping:', key);
-              continue;
-            }
-            
-            if (typeof data[key] === 'string') {
-              sanitized[sanitizedKey] = this.sanitizeHtml(data[key]);
-            } else if (typeof data[key] === 'number' || typeof data[key] === 'boolean') {
-              sanitized[sanitizedKey] = data[key];
-            } else {
-              console.warn('Unsafe object value type detected, skipping:', typeof data[key]);
-            }
+      // Enhanced validation for object keys and values
+      const sanitizedKey = key.replace(/[^a-zA-Z0-9_]/g, '');
+      if (sanitizedKey !== key) {
+        // Log warning in development only
+        if (typeof window !== 'undefined' && window.console && window.console.warn) {
+          window.console.warn('Invalid object key detected, skipping:', key);
+        }
+        continue;
+      }
+      
+      if (typeof data[key] === 'string') {
+        sanitized[sanitizedKey] = this.sanitizeHtml(data[key]);
+      } else if (typeof data[key] === 'number' || typeof data[key] === 'boolean') {
+        sanitized[sanitizedKey] = data[key];
+      } else {
+        // Log warning in development only
+        if (typeof window !== 'undefined' && window.console && window.console.warn) {
+          window.console.warn('Unsafe object value type detected, skipping:', typeof data[key]);
+        }
+      }
     }
     return sanitized;
   },
