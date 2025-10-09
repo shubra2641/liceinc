@@ -168,6 +168,7 @@ class ProductFile extends Model
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductFile> $query
      * @param int $productId
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductFile>
      */
     public function scopeForProduct($query, $productId)

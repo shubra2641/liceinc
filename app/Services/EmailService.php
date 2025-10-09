@@ -1015,6 +1015,7 @@ class EmailService
      */
     /**
      * @param array<mixed, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function sanitizeData(array $data): array

@@ -553,6 +553,7 @@ class AILicenseAnalyticsService
      */
     /**
      * @param array<string, mixed> $stats
+     *
      * @return array<string, mixed>
      */
     private function generateRecommendations(array $stats): array
@@ -968,6 +969,7 @@ class AILicenseAnalyticsService
      */
     /**
      * @param array<mixed, mixed> $eventData
+     *
      * @return array<string, mixed>
      */
     private function sanitizeEventData(array $eventData): array

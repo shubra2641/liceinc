@@ -108,6 +108,7 @@ class WebhookLog extends Model
     /**
      * @param \Illuminate\Database\Eloquent\Builder<WebhookLog> $query
      * @param string $eventType
+     *
      * @return \Illuminate\Database\Eloquent\Builder<WebhookLog>
      */
     public function scopeEventType($query, string $eventType)

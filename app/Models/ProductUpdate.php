@@ -261,6 +261,7 @@ class ProductUpdate extends Model
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
      * @param string $version
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeNewerThan($query, string $version)

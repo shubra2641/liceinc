@@ -602,6 +602,7 @@ class PaymentService
      *
      * @param Request $request The webhook request
      * @param string $gateway The payment gateway name
+     *
      * @return array<string, mixed> Webhook processing result
      */
     public function handleWebhook(ServiceRequest $request, string $gateway): array
