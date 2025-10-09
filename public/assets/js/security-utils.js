@@ -279,7 +279,62 @@ const SecurityUtils = {
    * @returns {Promise} - Fetch promise
    */
   safeFetch(url, options = {}) {
-    if (!this.isValidUrl(url)) {
+    // Validate URL input
+    if (!url || typeof url !== 'string') {
+      throw new Error('Invalid URL: URL must be a non-empty string');
+    }
+
+    // Define allowed URLs whitelist for SSRF protection
+    const allowedUrls = [
+      // Same origin URLs
+      window.location.origin,
+      `${window.location.protocol}//${window.location.host}`,
+      `${window.location.protocol}//${window.location.hostname}`,
+      // Relative URLs
+      '/',
+      './',
+      '../'
+    ];
+
+    // Validate URL against whitelist
+    let isValidUrl = false;
+    try {
+      const urlObj = new URL(url, window.location.origin);
+      
+      // Only allow same-origin requests for maximum security
+      if (urlObj.origin === window.location.origin) {
+        isValidUrl = true;
+      } else {
+        // Check against allowed URLs whitelist
+        isValidUrl = allowedUrls.some(allowedUrl => {
+          if (url.startsWith(allowedUrl)) {
+            return true;
+          }
+          // Check for relative paths
+          if (allowedUrl.startsWith('/') && url.startsWith(allowedUrl)) {
+            return true;
+          }
+          return false;
+        });
+      }
+
+      if (!isValidUrl) {
+        throw new Error('URL not in allowed whitelist: SSRF protection activated');
+      }
+
+      // Additional security checks
+      const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:', 'ftp:'];
+      if (dangerousProtocols.includes(urlObj.protocol.toLowerCase())) {
+        throw new Error('Dangerous protocol blocked');
+      }
+
+      // Only allow HTTP and HTTPS protocols
+      if (!['http:', 'https:'].includes(urlObj.protocol)) {
+        throw new Error('Only HTTP/HTTPS protocols allowed');
+      }
+
+    } catch (error) {
+      console.error('URL validation failed:', error);
       throw new Error('Invalid URL: SSRF protection activated');
     }
 
@@ -301,24 +356,8 @@ const SecurityUtils = {
       };
     }
 
-        // Validate and sanitize URL before fetch
-        try {
-          const urlObj = new URL(url, window.location.origin);
-          // Only allow same-origin or trusted domains
-          const allowedDomains = [window.location.hostname, 'localhost', '127.0.0.1'];
-          if (!allowedDomains.includes(urlObj.hostname)) {
-            throw new Error('Domain not allowed');
-          }
-          // Additional validation for same-origin requests only
-          if (urlObj.hostname !== window.location.hostname && 
-              !['localhost', '127.0.0.1'].includes(urlObj.hostname)) {
-            throw new Error('Cross-origin request blocked for security');
-          }
-          return fetch(urlObj.toString(), options);
-        } catch (error) {
-          console.error('Invalid URL:', error);
-          return Promise.reject(new Error('Invalid URL'));
-        }
+    // Safe fetch with validated URL
+    return fetch(url, options);
   },
 
   /**
@@ -420,26 +459,49 @@ const SecurityUtils = {
         }
       }
 
-      // Safe navigation
-                // Additional validation before redirect
-                try {
-                  const urlObj = new URL(sanitizedUrl, window.location.origin);
-                  // Only allow same-origin redirects
-                  if (urlObj.hostname !== window.location.hostname) {
-                    console.error('Cross-origin redirect blocked');
-                    return;
-                  }
-                  // Additional validation for redirect URLs
-                  if (urlObj.hostname !== window.location.hostname && 
-                      !['localhost', '127.0.0.1'].includes(urlObj.hostname)) {
-                    console.warn('Cross-origin redirect blocked for security');
-                    window.location.replace('/');
-                  } else {
-                    window.location.replace(urlObj.toString());
-                  }
-                } catch (error) {
-                  console.error('Invalid redirect URL:', error);
-                }
+      // Safe navigation with strict validation
+      try {
+        const urlObj = new URL(sanitizedUrl, window.location.origin);
+        
+        // STRICT: Only allow same-origin redirects to prevent open redirects
+        if (urlObj.origin !== window.location.origin) {
+          console.error('Cross-origin redirect blocked for security');
+          return;
+        }
+        
+        // Additional validation: ensure hostname matches exactly
+        if (urlObj.hostname !== window.location.hostname) {
+          console.error('Hostname mismatch: redirect blocked');
+          return;
+        }
+        
+        // Validate that the URL is safe for navigation
+        const finalUrl = urlObj.toString();
+        
+        // Double-check for dangerous patterns
+        const dangerousPatterns = [
+          /javascript:/i,
+          /data:/i,
+          /vbscript:/i,
+          /<script/i,
+          /on\w+\s*=/i
+        ];
+        
+        for (const pattern of dangerousPatterns) {
+          if (pattern.test(finalUrl)) {
+            console.error('Dangerous pattern detected in URL');
+            return;
+          }
+        }
+        
+        // Safe navigation - only proceed if all validations pass
+        window.location.replace(finalUrl);
+        
+      } catch (error) {
+        console.error('Invalid redirect URL:', error);
+        // Fallback to safe location
+        window.location.replace('/');
+      }
     } catch (e) {
       console.error('Invalid URL format:', e);
     }
