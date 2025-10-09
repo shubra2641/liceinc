@@ -13,13 +13,22 @@
     if (!html || typeof html !== 'string') {
       return '';
     }
-    // Remove script/style tags entirely
-    html = html
+    // Enhanced sanitization with proper encoding
+    let sanitized = html
       .replace(/<\/(script|style)>/gi, '')
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '')
+      .replace(/<object[^>]*>[\s\S]*?<\/object>/gi, '')
+      .replace(/<embed[^>]*>/gi, '')
+      .replace(/<applet[^>]*>[\s\S]*?<\/applet>/gi, '')
+      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/vbscript:/gi, '')
+      .replace(/data:text\/html/gi, '');
+    
     // Optionally allow <b><i><strong><em><u><p><br><ul><ol><li><a href="...">
-    return html.replace(/<([^\s>/]+)([^>]*)>/g, (match, tag, attrs) => {
+    return sanitized.replace(/<([^\s>/]+)([^>]*)>/g, (match, tag, attrs) => {
       tag = tag.toLowerCase();
       const allowed = [
         'b',

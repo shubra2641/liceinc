@@ -54,7 +54,6 @@ return $this->createLicenseResponse(false, 'Verification failed: ' . $e->getMess
         // Sanitize inputs to prevent XSS
         $purchase_code = sanitize_text_field($purchase_code); // @phpstan-ignore-line
         $domain = $domain ? sanitize_text_field($domain) : null; // @phpstan-ignore-line
-        
         $body = [
 'purchase_code' => $purchase_code,
 'product_slug' => $this->product_slug,
