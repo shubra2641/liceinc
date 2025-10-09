@@ -7,9 +7,11 @@ declare(strict_types=1);
  * Product: {{product}}
  * Generated: {{date}}
  */
- namespace App\Services;
 
-class LicenseVerifier {
+namespace App\Services;
+
+class LicenseVerifier
+{
     private $apiUrl = '{{license_api_url}}';
     private $productSlug = '{{product_slug}}';
     private $verificationKey = '{{verification_key}}';
@@ -19,31 +21,33 @@ class LicenseVerifier {
      * Verify license with purchase code
      * This method sends a single request to our system which handles both Envato and database verification
      */
-    public function verifyLicense($purchaseCode, $domain = null) {
+    public function verifyLicense($purchaseCode, $domain = null)
+    {
         try {
-            // Send single request to our system
-            $result = $this->verifyWithOurSystem($purchaseCode, $domain);
-            
-            if ($result['valid']) {
-                return $this->createLicenseResponse(true, $result['message'], $result['data']);
-            } else {
-                return $this->createLicenseResponse(false, $result['message']);
-            }
+// Send single request to our system
+$result = $this->verifyWithOurSystem($purchaseCode, $domain);
+
+if ($result['valid']) {
+    return $this->createLicenseResponse(true, $result['message'], $result['data']);
+} else {
+    return $this->createLicenseResponse(false, $result['message']);
+}
 
         } catch (Exception $e) {
-            return $this->createLicenseResponse(false, 'Verification failed: ' . $e->getMessage());
+return $this->createLicenseResponse(false, 'Verification failed: ' . $e->getMessage());
         }
     }
 
     /**
      * Verify with our license system
      */
-    private function verifyWithOurSystem($purchaseCode, $domain = null) {
+    private function verifyWithOurSystem($purchaseCode, $domain = null)
+    {
         $postData = [
-            'purchase_code' => $purchaseCode,
-            'product_slug' => $this->productSlug,
-            'domain' => $domain,
-            'verification_key' => $this->verificationKey
+'purchase_code' => $purchaseCode,
+'product_slug' => $this->productSlug,
+'domain' => $domain,
+'verification_key' => $this->verificationKey
         ];
 
         $ch = curl_init();
@@ -52,9 +56,9 @@ class LicenseVerifier {
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/x-www-form-urlencoded',
-            'User-Agent: LicenseVerifier/1.0',
-            'Authorization: Bearer ' . $this->apiToken
+'Content-Type: application/x-www-form-urlencoded',
+'User-Agent: LicenseVerifier/1.0',
+'Authorization: Bearer ' . $this->apiToken
         ]);
 
         $response = curl_exec($ch);
@@ -62,32 +66,33 @@ class LicenseVerifier {
         curl_close($ch);
 
         if ($httpCode === 200) {
-            $data = json_decode($response, true);
-            return [
-                'valid' => $data['valid'] ?? false,
-                'message' => $data['message'] ?? 'Verification completed',
-                'data' => $data,
-                'source' => 'our_system'
-            ];
+$data = json_decode($response, true);
+return [
+    'valid' => $data['valid'] ?? false,
+    'message' => $data['message'] ?? 'Verification completed',
+    'data' => $data,
+    'source' => 'our_system'
+];
         }
 
         return [
-            'valid' => false,
-            'error' => 'Unable to verify license with our system',
-            'http_code' => $httpCode
+'valid' => false,
+'error' => 'Unable to verify license with our system',
+'http_code' => $httpCode
         ];
     }
 
     /**
      * Create standardized response
      */
-    private function createLicenseResponse($valid, $message, $data = null) {
+    private function createLicenseResponse($valid, $message, $data = null)
+    {
         return [
-            'valid' => $valid,
-            'message' => $message,
-            'data' => $data,
-            'verified_at' => date('Y-m-d H:i:s'),
-            'product' => $this->productSlug
+'valid' => $valid,
+'message' => $message,
+'data' => $data,
+'verified_at' => date('Y-m-d H:i:s'),
+'product' => $this->productSlug
         ];
     }
 }
@@ -103,4 +108,3 @@ if ($result['valid']) {
     echo "License verification failed: " . $result['message'];
 }
 */
-?>

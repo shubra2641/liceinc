@@ -28,17 +28,16 @@ class LaravelLicenseVerifier
     public function verifyLicense(string $purchaseCode, ?string $domain = null): array
     {
         try {
-            // Send single request to our system
-            $result = $this->verifyWithOurSystem($purchaseCode, $domain);
-            
-            if ($result['valid']) {
-                return $this->createLicenseResponse(true, $result['message'], $result['data']);
-            } else {
-                return $this->createLicenseResponse(false, $result['message']);
-            }
+// Send single request to our system
+$result = $this->verifyWithOurSystem($purchaseCode, $domain);
+if ($result['valid']) {
+    return $this->createLicenseResponse(true, $result['message'], $result['data']);
+} else {
+    return $this->createLicenseResponse(false, $result['message']);
+}
 
         } catch (\Exception $e) {
-            return $this->createLicenseResponse(false, 'Verification failed: ' . $e->getMessage());
+return $this->createLicenseResponse(false, 'Verification failed: ' . $e->getMessage());
         }
     }
 
@@ -48,34 +47,34 @@ class LaravelLicenseVerifier
     protected function verifyWithOurSystem(string $purchaseCode, ?string $domain = null): array
     {
         try {
-            $response = Http::timeout(15)
-                ->withHeaders([
-                    'Content-Type' => 'application/x-www-form-urlencoded',
-                    'User-Agent' => 'LicenseVerifier/1.0',
-                    'Authorization' => 'Bearer ' . $this->apiToken
-                ])
-                ->asForm()
-                ->post($this->apiUrl, [
-                    'purchase_code' => $purchaseCode,
-                    'product_slug' => $this->productSlug,
-                    'domain' => $domain,
-                    'verification_key' => $this->verificationKey
-                ]);
+$response = Http::timeout(15)
+    ->withHeaders([
+        'Content-Type' => 'application/x-www-form-urlencoded',
+        'User-Agent' => 'LicenseVerifier/1.0',
+        'Authorization' => 'Bearer ' . $this->apiToken
+    ])
+    ->asForm()
+    ->post($this->apiUrl, [
+        'purchase_code' => $purchaseCode,
+        'product_slug' => $this->productSlug,
+        'domain' => $domain,
+        'verification_key' => $this->verificationKey
+    ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
+if ($response->successful()) {
+    $data = $response->json();
 
-                return $this->createLicenseResponse(
-                    $data['valid'] ?? false,
-                    $data['message'] ?? 'Verification completed',
-                    $data
-                );
-            }
+    return $this->createLicenseResponse(
+        $data['valid'] ?? false,
+        $data['message'] ?? 'Verification completed',
+        $data
+    );
+}
 
-            return $this->createLicenseResponse(false, 'Unable to verify license');
+return $this->createLicenseResponse(false, 'Unable to verify license');
         } catch (\Exception $e) {
-            // Log::error('License API network error', ['error' => $e->getMessage()]);
-            return $this->createLicenseResponse(false, 'Network error: ' . $e->getMessage());
+// Log::error('License API network error', ['error' => $e->getMessage()]);
+return $this->createLicenseResponse(false, 'Network error: ' . $e->getMessage());
         }
     }
 
@@ -85,11 +84,11 @@ class LaravelLicenseVerifier
     protected function createLicenseResponse(bool $valid, string $message, ?array $data = null): array
     {
         return [
-            'valid' => $valid,
-            'message' => $message,
-            'data' => $data,
-            'verified_at' => now()->toISOString(),
-            'product' => $this->productSlug
+'valid' => $valid,
+'message' => $message,
+'data' => $data,
+'verified_at' => now()->toISOString(),
+'product' => $this->productSlug
         ];
     }
 
@@ -138,4 +137,3 @@ if ($result['valid']) {
     return response()->json(['app.Status' => 'error', 'message' => $result['message']], 403);
 }
 */
-?>

@@ -87,9 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }),
     })
       .then(response => {
-        if (
-          response.headers.get('content-type')?.includes('application/json')
-        ) {
+        if (response.headers.get('content-type')?.includes('application/json')) {
           return response.json();
         }
         return response.text();

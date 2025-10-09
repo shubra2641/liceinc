@@ -285,7 +285,7 @@ class FrontendPreloaderManager {
 
   getSettings() {
     if (!this.container) {
-      return {};
+            return;
     }
 
     return {

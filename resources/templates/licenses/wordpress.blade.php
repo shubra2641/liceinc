@@ -16,7 +16,8 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-class WP_LicenseVerifier {
+class WP_LicenseVerifier
+{
     private $api_url = '{{license_api_url}}';
     private $product_slug = '{{product_slug}}';
     private $verification_key = '{{verification_key}}';
@@ -26,22 +27,21 @@ class WP_LicenseVerifier {
      * Verify license with purchase code
      * This method sends a single request to our system which handles both Envato and database verification
      */
-    public function verify_license($purchase_code, $domain = null) {
+    public function verifyLicense($purchase_code, $domain = null)
+    {
         try {
-            // Validate inputs
-            if (empty($purchase_code) || !is_string($purchase_code)) {
-                return $this->create_license_response(false, 'Invalid purchase code provided');
-            }
-            
-            if ($domain && !filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
-                return $this->create_license_response(false, 'Invalid domain format');
-            }
-            
-            // Send single request to our system
-            return $this->verify_with_our_system($purchase_code, $domain);
+// Validate inputs
+if (empty($purchase_code) || !is_string($purchase_code)) {
+    return $this->createLicenseResponse(false, 'Invalid purchase code provided');
+}
+if ($domain && !filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
+    return $this->createLicenseResponse(false, 'Invalid domain format');
+}
+// Send single request to our system
+return $this->verifyWithOurSystem($purchase_code, $domain);
 
         } catch (Exception $e) {
-            return $this->create_license_response(false, 'Verification failed: ' . $e->getMessage());
+return $this->createLicenseResponse(false, 'Verification failed: ' . $e->getMessage());
         }
     }
 
@@ -49,44 +49,44 @@ class WP_LicenseVerifier {
     /**
      * Verify with our license system
      */
-    private function verify_with_our_system($purchase_code, $domain = null) {
+    private function verifyWithOurSystem($purchase_code, $domain = null)
+    {
         // Sanitize inputs to prevent XSS
         $purchase_code = sanitize_text_field($purchase_code); // @phpstan-ignore-line
         $domain = $domain ? sanitize_text_field($domain) : null; // @phpstan-ignore-line
         
         $body = [
-            'purchase_code' => $purchase_code,
-            'product_slug' => $this->product_slug,
-            'domain' => $domain,
-            'verification_key' => $this->verification_key
+'purchase_code' => $purchase_code,
+'product_slug' => $this->product_slug,
+'domain' => $domain,
+'verification_key' => $this->verification_key
         ];
 
         $args = [
-            'body' => $body,
-            'headers' => [
-                'Content-Type' => 'application/x-www-form-urlencoded',
-                'User-Agent' => 'LicenseVerifier/1.0'
-            ],
-            'timeout' => 15
+'body' => $body,
+'headers' => [
+    'Content-Type' => 'application/x-www-form-urlencoded',
+    'User-Agent' => 'LicenseVerifier/1.0'
+],
+'timeout' => 15
         ];
 
         $response = wp_remote_post($this->api_url, $args); // @phpstan-ignore-line
 
         if (is_wp_error($response)) { // @phpstan-ignore-line
-            return $this->create_license_response(false, 'Network error: ' . $response->get_error_message());
+return $this->create_license_response(false, 'Network error: ' . $response->get_error_message());
         }
 
         $http_code = wp_remote_retrieve_response_code($response); // @phpstan-ignore-line
 
         if ($http_code === 200) {
-            $body = wp_remote_retrieve_body($response); // @phpstan-ignore-line
-            $data = json_decode($body, true);
+$body = wp_remote_retrieve_body($response); // @phpstan-ignore-line
+$data = json_decode($body, true);
 
-            // Validate response data
-            $valid = isset($data['valid']) ? (bool) $data['valid'] : false;
-            $message = isset($data['message']) ? sanitize_text_field($data['message']) : 'Verification completed'; // @phpstan-ignore-line
-            
-            return $this->create_license_response($valid, $message, $data);
+// Validate response data
+$valid = isset($data['valid']) ? (bool) $data['valid'] : false;
+$message = isset($data['message']) ? sanitize_text_field($data['message']) : 'Verification completed'; // @phpstan-ignore-line
+return $this->create_license_response($valid, $message, $data);
         }
 
         return $this->create_license_response(false, 'Unable to verify license - HTTP ' . $http_code);
@@ -95,24 +95,26 @@ class WP_LicenseVerifier {
     /**
      * Create standardized response
      */
-    private function create_license_response($valid, $message, $data = null) {
+    private function createLicenseResponse($valid, $message, $data = null)
+    {
         // Sanitize response data
         $message = sanitize_text_field($message); // @phpstan-ignore-line
         $data = $data ? array_map('sanitize_text_field', $data) : null; // @phpstan-ignore-line
         
-        return array(
-            'valid' => (bool) $valid,
-            'message' => $message,
-            'data' => $data,
-            'verified_at' => current_time('mysql'), // @phpstan-ignore-line
-            'product' => $this->product_slug
-        );
+        return [
+'valid' => (bool) $valid,
+'message' => $message,
+'data' => $data,
+'verified_at' => current_time('mysql'), // @phpstan-ignore-line
+'product' => $this->product_slug
+        ];
     }
 
     /**
      * Store license status in WordPress options
      */
-    public function store_license_status($license_data) {
+    public function storeLicenseStatus($license_data)
+    {
         // Sanitize license data before storing
         $sanitized_data = array_map('sanitize_text_field', $license_data); // @phpstan-ignore-line
         update_option('wp_license_status', $sanitized_data); // @phpstan-ignore-line
@@ -121,18 +123,20 @@ class WP_LicenseVerifier {
     /**
      * Get stored license status
      */
-    public function get_license_status() {
+    public function getLicenseStatus()
+    {
         return get_option('wp_license_status', null); // @phpstan-ignore-line
     }
 
     /**
      * Check if license is active
      */
-    public function is_license_active() {
-        $status = $this->get_license_status();
+    public function isLicenseActive()
+    {
+        $status = $this->getLicenseStatus();
 
         if (!$status || !isset($status['valid'])) {
-            return false;
+return false;
         }
 
         // Validate status value
@@ -141,20 +145,21 @@ class WP_LicenseVerifier {
 }
 
 // Global function for easy access
-function wp_verify_license($purchase_code, $domain = null) {
+function wpVerifyLicense($purchase_code, $domain = null)
+{
     // Validate inputs
     if (empty($purchase_code) || !is_string($purchase_code)) {
-        return array(
-            'valid' => false,
-            'message' => 'Invalid purchase code provided',
-            'data' => null,
-            'verified_at' => current_time('mysql'), // @phpstan-ignore-line
-            'product' => ''
-        );
+        return [
+'valid' => false,
+'message' => 'Invalid purchase code provided',
+'data' => null,
+'verified_at' => current_time('mysql'), // @phpstan-ignore-line
+'product' => ''
+        ];
     }
     
     $verifier = new WP_LicenseVerifier();
-    return $verifier->verify_license($purchase_code, $domain);
+    return $verifier->verifyLicense($purchase_code, $domain);
 }
 
 // Usage example:
@@ -175,4 +180,3 @@ if ($result['valid']) {
 // Or use the global function
 $result = wp_verify_license('YOUR_PURCHASE_CODE');
 */
-?>

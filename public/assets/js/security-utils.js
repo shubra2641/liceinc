@@ -155,16 +155,12 @@ const SecurityUtils = {
    * @returns {boolean} - True if URL is safe
    */
   isValidUrl(url) {
-    try {
-      const allowedOrigins = [
-        window.location.origin,
-        `${window.location.protocol}//${window.location.host}`,
-        `${window.location.protocol}//${window.location.hostname}`,
-      ];
-      return allowedOrigins.some(origin => url.startsWith(origin));
-    } catch (e) {
-      return false;
-    }
+    const allowedOrigins = [
+      window.location.origin,
+      `${window.location.protocol}//${window.location.host}`,
+      `${window.location.protocol}//${window.location.hostname}`,
+    ];
+    return allowedOrigins.some(origin => url.startsWith(origin));
   },
 
   /**
