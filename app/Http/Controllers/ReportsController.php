@@ -14,9 +14,11 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 use App\Helpers\SecureFileHelper;
 
@@ -617,8 +619,7 @@ class ReportsController extends Controller
      * // Export reports to CSV
      * $response = $reportsController->export($request);
      */
-    public function export(Request $request):
-        \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
+    public function export(Request $request): Response|JsonResponse|StreamedResponse
     {
         try {
             /**
