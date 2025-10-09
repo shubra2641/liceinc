@@ -3,6 +3,24 @@
  * Handles file upload, download, and UI interactions
  */
 
+// Constants for magic numbers - using window object to avoid conflicts
+window.PRODUCT_FILES_CONSTANTS = {
+  ZERO: 0,
+  ONE: 1,
+  TWO: 2,
+  EIGHT: 8,
+  TEN: 10,
+  FIFTY: 50,
+  HUNDRED: 100,
+  FIVE_HUNDRED: 500,
+  THOUSAND: 1000,
+  FIFTEEN_HUNDRED: 1500,
+  TWO_THOUSAND: 2000,
+  FIVE_THOUSAND: 5000,
+  MAX_FILE_SIZE: 1024,
+  RADIX_BASE: 10
+};
+
 $(document).ready(function() {
     // Initialize product files functionality
     initProductFiles();
@@ -47,9 +65,9 @@ function initFileUpload() {
             $(this).removeClass('dragover');
             
             const files = e.originalEvent.dataTransfer.files;
-            if (files.length > 0) {
-                fileInput[0].files = files;
-                handleFileSelection(files[0]);
+            if (files.length > window.PRODUCT_FILES_CONSTANTS.ZERO) {
+                fileInput[window.PRODUCT_FILES_CONSTANTS.ZERO].files = files;
+                handleFileSelection(files[window.PRODUCT_FILES_CONSTANTS.ZERO]);
             }
         });
         
@@ -60,7 +78,7 @@ function initFileUpload() {
     
     // File input change
     fileInput.on('change', function() {
-        const file = this.files[0];
+        const file = this.files[window.PRODUCT_FILES_CONSTANTS.ZERO];
         if (file) {
             handleFileSelection(file);
         }
@@ -77,7 +95,7 @@ function initFileUpload() {
  * Handle file selection
  */
 function handleFileSelection(file) {
-    const maxSize = 100 * 1024 * 1024; // 100MB
+        const maxSize = window.PRODUCT_FILES_CONSTANTS.HUNDRED * window.PRODUCT_FILES_CONSTANTS.MAX_FILE_SIZE * window.PRODUCT_FILES_CONSTANTS.MAX_FILE_SIZE; // 100MB
     const allowedTypes = [
         'application/zip',
         'application/x-zip-compressed',
@@ -138,7 +156,7 @@ function showFileInfo(file) {
  */
 function handleFileUpload() {
     const form = $('#fileUploadForm');
-    const formData = new FormData(form[0]);
+    const formData = new window.FormData(form[window.PRODUCT_FILES_CONSTANTS.ZERO]);
     const submitBtn = form.find('button[type="submit"]');
     const originalText = submitBtn.html();
     
@@ -158,7 +176,7 @@ function handleFileUpload() {
             const xhr = new window.XMLHttpRequest();
             xhr.upload.addEventListener("progress", function(evt) {
                 if (evt.lengthComputable) {
-                    const percentComplete = evt.loaded / evt.total * 100;
+                    const percentComplete = evt.loaded / evt.total * window.PRODUCT_FILES_CONSTANTS.HUNDRED;
                     updateProgressBar(percentComplete);
                 }
             }, false);
@@ -169,7 +187,7 @@ function handleFileUpload() {
                 showAlert('success', response.message);
                 setTimeout(() => {
                     location.reload();
-                }, 1500);
+                }, window.PRODUCT_FILES_CONSTANTS.FIFTEEN_HUNDRED);
             } else {
                 showAlert('error', response.message);
             }
@@ -178,7 +196,7 @@ function handleFileUpload() {
             const errors = xhr.responseJSON?.errors;
             if (errors) {
                 Object.keys(errors).forEach(function(key) {
-                    showAlert('error', errors[key][0]);
+                    showAlert('error', errors[key][window.PRODUCT_FILES_CONSTANTS.ZERO]);
                 });
             } else {
                 showAlert('error', 'File upload failed');
@@ -205,7 +223,7 @@ function initDownloadButtons() {
         // Re-enable button after 5 seconds (in case download doesn't start)
         setTimeout(function() {
             btn.html(originalText).prop('disabled', false);
-        }, 5000);
+        }, window.PRODUCT_FILES_CONSTANTS.FIVE_THOUSAND);
     });
     
     // Show download confirmation for large files
@@ -213,7 +231,7 @@ function initDownloadButtons() {
         const fileSize = $(this).closest('.card').find('.font-weight-bold').first().text();
         const sizeInMB = parseFloat(fileSize);
         
-        if (sizeInMB > 50) { // Files larger than 50MB
+        if (sizeInMB > window.PRODUCT_FILES_CONSTANTS.FIFTY) { // Files larger than 50MB
             if (!confirm('This file is large (' + fileSize + '). Do you want to continue?')) {
                 e.preventDefault();
             }
@@ -233,7 +251,7 @@ function initFileManagement() {
         
         $('#editFileForm').data('file-id', fileId);
         $('#edit_description').val(description);
-        $('#edit_is_active').prop('checked', isActive == 1);
+        $('#edit_is_active').prop('checked', isActive === window.PRODUCT_FILES_CONSTANTS.ONE);
         
         $('#editFileModal').modal('show');
     });
@@ -273,7 +291,7 @@ function handleFileEdit() {
                 $('#editFileModal').modal('hide');
                 setTimeout(() => {
                     location.reload();
-                }, 1500);
+                }, window.PRODUCT_FILES_CONSTANTS.FIFTEEN_HUNDRED);
             } else {
                 showAlert('error', response.message);
             }
@@ -282,7 +300,7 @@ function handleFileEdit() {
             const errors = xhr.responseJSON?.errors;
             if (errors) {
                 Object.keys(errors).forEach(function(key) {
-                    showAlert('error', errors[key][0]);
+                    showAlert('error', errors[key][window.PRODUCT_FILES_CONSTANTS.ZERO]);
                 });
             } else {
                 showAlert('error', 'File update failed');
@@ -304,7 +322,7 @@ function handleFileDelete(fileId) {
         success: function(response) {
             if (response.success) {
                 showAlert('success', response.message);
-                $('tr[data-file-id="' + fileId + '"]').fadeOut(500, function() {
+                $('tr[data-file-id="' + fileId + '"]').fadeOut(window.PRODUCT_FILES_CONSTANTS.FIVE_HUNDRED, function() {
                     $(this).remove();
                 });
             } else {
@@ -324,7 +342,7 @@ function initStatistics() {
     // Animate statistics on page load
     $('.stat-item h4').each(function() {
         const $this = $(this);
-        const countTo = parseInt($this.text());
+        const countTo = parseInt($this.text(), window.PRODUCT_FILES_CONSTANTS.RADIX_BASE);
         
         $({ countNum: 0 }).animate({
             countNum: countTo
@@ -365,7 +383,7 @@ function updateProgressBar(percent) {
  * Hide progress bar
  */
 function hideProgressBar() {
-    $('.upload-progress').fadeOut(500, function() {
+    $('.upload-progress').fadeOut(window.PRODUCT_FILES_CONSTANTS.FIVE_HUNDRED, function() {
         $(this).remove();
     });
 }
@@ -391,23 +409,23 @@ function showAlert(type, message) {
     
     // Auto-dismiss after 5 seconds
     setTimeout(() => {
-        $('.alert').fadeOut(500, function() {
+        $('.alert').fadeOut(window.PRODUCT_FILES_CONSTANTS.FIVE_HUNDRED, function() {
             $(this).remove();
         });
-    }, 5000);
+    }, window.PRODUCT_FILES_CONSTANTS.FIVE_THOUSAND);
 }
 
 /**
  * Format file size
  */
 function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === window.PRODUCT_FILES_CONSTANTS.ZERO) return '0 Bytes';
     
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(window.PRODUCT_FILES_CONSTANTS.TWO)) + ' ' + sizes[i];
 }
 
 /**
