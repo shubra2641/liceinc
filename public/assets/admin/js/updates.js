@@ -109,8 +109,15 @@ function showUpdateModal(version) {
   document.getElementById('confirmUpdate').checked = false;
   document.getElementById('confirm-update-btn').disabled = true;
 
-  const modal = new bootstrap.Modal(document.getElementById('updateModal'));
-  modal.show();
+  // Check if bootstrap is available
+  if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    const modal = new bootstrap.Modal(document.getElementById('updateModal'));
+    modal.show();
+  } else {
+    // Fallback: show modal manually
+    document.getElementById('updateModal').style.display = 'block';
+    document.getElementById('updateModal').classList.add('show');
+  }
 }
 
 function performUpdate(version) {
@@ -163,9 +170,16 @@ function performUpdate(version) {
         btn.textContent = originalText;
       }
       btn.disabled = false;
-      bootstrap.Modal.getInstance(
-        document.getElementById('updateModal'),
-      ).hide();
+      // Check if bootstrap is available
+      if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        bootstrap.Modal.getInstance(
+          document.getElementById('updateModal'),
+        ).hide();
+      } else {
+        // Fallback: hide modal manually
+        document.getElementById('updateModal').style.display = 'none';
+        document.getElementById('updateModal').classList.remove('show');
+      }
     });
 }
 
@@ -290,10 +304,17 @@ function showVersionDetails(version) {
           contentElement.textContent = 'Version details loaded';
         }
 
-        const modal = new bootstrap.Modal(
-          document.getElementById('versionDetailsModal'),
-        );
-        modal.show();
+        // Check if bootstrap is available
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          const modal = new bootstrap.Modal(
+            document.getElementById('versionDetailsModal'),
+          );
+          modal.show();
+        } else {
+          // Fallback: show modal manually
+          document.getElementById('versionDetailsModal').style.display = 'block';
+          document.getElementById('versionDetailsModal').classList.add('show');
+        }
       } else {
         showAlert('error', data.message || 'Failed to load version details');
       }

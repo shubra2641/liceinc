@@ -3,6 +3,9 @@
  * 
  * This file contains all SCSS mixins for the frontend
  * including responsive design, animations, and utilities.
+ * 
+ * Note: This is a SCSS file, not CSS. The @mixin and @include
+ * directives are SCSS-specific and will be compiled to CSS.
  */
 
 /* Responsive Mixins */

@@ -29,25 +29,32 @@ class CreateRenewalInvoices implements ShouldQueue
     use Queueable;
 
     /**
+     * @var \App\Models\License
+     */
+    private $license;
+
+    /**
      * The number of times the job may be attempted.
      *
      * @var int
      */
     public $tries = 3;
+
     /**
      * The number of seconds the job can run before timing out.
      *
      * @var int
      */
     public $timeout = 300;
+
     /**
-     * Create a new job instance with enhanced configuration.
+     * Create a new job instance.
      *
-     * Initializes the job with proper timeout and retry settings
-     * for reliable processing of renewal invoice creation.
+     * @param \App\Models\License $license
      */
-    public function __construct()
+    public function __construct(\App\Models\License $license)
     {
+        $this->license = $license;
         $this->onQueue('invoices');
     }
     /**
@@ -65,10 +72,8 @@ class CreateRenewalInvoices implements ShouldQueue
         try {
             DB::beginTransaction();
             // Create renewal invoices with validation
-            $licenseInstance = $license instanceof \App\Models\License ? $license : null;
-            if ($licenseInstance === null) {
-                throw new \InvalidArgumentException('Invalid license instance provided');
-            }
+            $licenseInstance = $this->license;
+            // License is already validated in constructor
             $result = $invoiceService->createRenewalInvoice($licenseInstance);
             // Invoice created successfully
             DB::commit();

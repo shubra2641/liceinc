@@ -418,7 +418,14 @@ class FrontendPreloaderManager {
       if (typeof SecurityUtils !== 'undefined' && SecurityUtils.secureRandom) {
         progress += SecurityUtils.secureRandom(20);
       } else {
-        progress += Math.random() * 20; // Fallback for older browsers
+        // Fallback: use crypto.getRandomValues if available, otherwise Math.random
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+          const array = new Uint32Array(1);
+          crypto.getRandomValues(array);
+          progress += (array[0] / 4294967296) * 20;
+        } else {
+          progress += Math.random() * 20;
+        }
       }
       if (progress >= 100) {
         progress = 100;

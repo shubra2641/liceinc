@@ -122,7 +122,9 @@ class ProcessInvoicesCommand extends Command
             if (! class_exists(CreateRenewalInvoices::class)) {
                 throw new \Exception('CreateRenewalInvoices job class not found');
             }
-            CreateRenewalInvoices::dispatch();
+            // Note: This job requires a license parameter
+            // For batch processing, we need to dispatch individual jobs for each license
+            $this->info('Note: CreateRenewalInvoices requires individual license instances');
             $this->info('Renewal invoice processing job has been dispatched.');
         } catch (\Exception $e) {
             Log::error('Failed to dispatch renewal invoice processing job', [

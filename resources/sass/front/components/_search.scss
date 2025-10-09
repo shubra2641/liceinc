@@ -142,7 +142,7 @@
     min-width: 0;
 }
 
-// Article Title - moved before locked state for proper specificity
+/* Article Title - moved before locked state for proper specificity */
 .user-kb-article-title {
     margin: 0 0 $spacing-sm 0;
     font-size: $font-size-lg;
@@ -254,7 +254,7 @@
     gap: $spacing-sm;
 }
 
-// Search Highlighting
+/* Search Highlighting */
 .search-highlight {
     background: rgba(255, 235, 59, 0.3);
     padding: 0.125rem 0.25rem;
@@ -262,7 +262,7 @@
     font-weight: $font-weight-medium;
 }
 
-// Empty States
+/* Empty States */
 .user-empty-state {
     text-align: center;
     padding: $spacing-3xl $spacing-lg;
@@ -292,7 +292,7 @@
     margin-bottom: $spacing-xl;
 }
 
-// Responsive Design
+/* Responsive Design */
 @include mobile {
     .user-kb-search-wrapper {
         flex-direction: column;
