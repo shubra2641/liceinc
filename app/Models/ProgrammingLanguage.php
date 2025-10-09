@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -96,7 +98,9 @@ class ProgrammingLanguage extends Model
     private function getDefaultLicenseTemplate(): string
     {
         $templates = [
-            'php' => "<?php\n/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n" .
+            'php' => "<?php
+
+declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n" .
                 " * License: {LICENSE_CODE}\n * Valid Until: {VALID_UNTIL}\n */\n\n" .
                 "define('LICENSE_CODE', '{LICENSE_CODE}');\n" .
                 "define('LICENSE_DOMAIN', '{DOMAIN}');\n" .

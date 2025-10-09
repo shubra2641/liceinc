@@ -9,6 +9,8 @@
  * @version 1.0.6
  */
 
+declare(strict_types=1);
+
 use App\Helpers\SecureFileHelper;
 
 if (! function_exists('is_active_route')) {

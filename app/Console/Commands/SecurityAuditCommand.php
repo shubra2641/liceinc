@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\License;
@@ -436,7 +438,7 @@ class SecurityAuditCommand extends Command
             $logFiles = File::files($logPath);
             $totalSize = 0;
             foreach ($logFiles as $file) {
-                $totalSize += File::size($file);
+                $totalSize += File::size($file->getPathname());
             }
             // Check if logs are too large (>100MB)
             if ($totalSize > 100 * 1024 * 1024) {
@@ -448,11 +450,11 @@ class SecurityAuditCommand extends Command
             }
             // Check for publicly accessible log files
             foreach ($logFiles as $file) {
-                if (is_readable($file) && fileperms($file) & 0004) {
+                if (is_readable($file->getPathname()) && fileperms($file->getPathname()) & 0004) {
                     $this->addIssue(
                         'medium',
                         'Log Files',
-                        'Log file ' . basename($file) . ' is world-readable',
+                        'Log file ' . basename($file->getPathname()) . ' is world-readable',
                     );
                 }
             }
@@ -561,12 +563,9 @@ class SecurityAuditCommand extends Command
     {
         $files = File::allFiles($directory);
         foreach ($files as $file) {
-            if (is_writable($file) && (fileperms($file) & 0002)) {
+            if (is_writable($file->getPathname()) && (fileperms($file->getPathname()) & 0002)) {
                 $relativePath = $file->getRelativePathname();
-                if (!is_string($relativePath)) {
-                    continue;
-                }
-                $permissions = fileperms($file);
+                $permissions = fileperms($file->getPathname());
                 $writableFiles[$relativePath] = [
                     'path' => $relativePath,
                     'permissions' => $permissions !== false ? $permissions : 0,
