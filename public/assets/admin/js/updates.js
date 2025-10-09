@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function checkForUpdates() {
   const btn = document.getElementById('check-updates-btn');
-  const originalText = btn.innerHTML;
+    const originalText = btn.textContent;
 
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
@@ -122,7 +122,7 @@ function showUpdateModal(version) {
 
 function performUpdate(version) {
   const btn = document.getElementById('confirm-update-btn');
-  const originalText = btn.innerHTML;
+    const originalText = btn.textContent;
 
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
@@ -190,13 +190,17 @@ function showVersionDetails(version) {
     .then(data => {
       if (data.success) {
         // Sanitize version to prevent XSS
-        const sanitizedVersion = version.replace(/[<>&"']/g, match => ({
-          '<': '&lt;',
-          '>': '&gt;',
-          '&': '&amp;',
-          '"': '&quot;',
-          '\'': '&#x27;',
-        }[match]));
+        const sanitizedVersion = version.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
+      ));
         // Use SecurityUtils for safe HTML insertion
         const titleElement = document.getElementById('versionDetailsTitle');
         if (typeof SecurityUtils !== 'undefined') {
@@ -219,12 +223,16 @@ function showVersionDetails(version) {
             // Sanitize feature to prevent XSS
             const sanitizedFeature = feature.replace(
               /[<>&"']/g,
-              match => ({
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                '\'': '&#x27;',
+              match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
               }[match]),
             );
             content += `<li class="list-group-item"><i class="fas fa-check text-success me-2"></i>${sanitizedFeature}</li>`;
@@ -238,13 +246,17 @@ function showVersionDetails(version) {
           content += '<ul class="list-group list-group-flush mb-4">';
           data.data.info.fixes.forEach(fix => {
             // Sanitize fix to prevent XSS
-            const sanitizedFix = fix.replace(/[<>&"']/g, match => ({
-              '<': '&lt;',
-              '>': '&gt;',
-              '&': '&amp;',
-              '"': '&quot;',
-              '\'': '&#x27;',
-            }[match]));
+            const sanitizedFix = fix.replace(/[<>&"']/g, match => {
+              const safeReplacements = {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+              };
+              return safeReplacements[match] || match;
+            }
+          ));
             content += `<li class="list-group-item"><i class="fas fa-check text-warning me-2"></i>${sanitizedFix}</li>`;
           });
           content += '</ul>';
@@ -261,12 +273,16 @@ function showVersionDetails(version) {
             // Sanitize improvement to prevent XSS
             const sanitizedImprovement = improvement.replace(
               /[<>&"']/g,
-              match => ({
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                '\'': '&#x27;',
+              match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
               }[match]),
             );
             content += `<li class="list-group-item"><i class="fas fa-check text-info me-2"></i>${sanitizedImprovement}</li>`;
@@ -282,12 +298,16 @@ function showVersionDetails(version) {
             // Sanitize instruction to prevent XSS
             const sanitizedInstruction = instruction.replace(
               /[<>&"']/g,
-              match => ({
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                '\'': '&#x27;',
+              match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
               }[match]),
             );
             content += `<li class="list-group-item"><i class="fas fa-arrow-right text-primary me-2"></i>${sanitizedInstruction}</li>`;
@@ -338,7 +358,7 @@ function showRollbackModal(version) {
 
 function performRollback(version) {
   const btn = document.getElementById('confirm-rollback-btn');
-  const originalText = btn.innerHTML;
+    const originalText = btn.textContent;
 
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
@@ -432,16 +452,28 @@ function displayUpdateInfo(updateData) {
     updateData.update_info.title || 'Update';
   document.getElementById('update-version').textContent =
     updateData.latest_version;
-  document.getElementById('update-major').innerHTML = updateData.update_info
-    .is_major ?
-    '<span class="badge bg-warning">Yes</span>' :
-    '<span class="badge bg-info">No</span>';
-  document.getElementById('update-required').innerHTML = updateData.update_info
-    .is_required ?
-    '<span class="badge bg-danger">Yes</span>' :
-    '<span class="badge bg-success">No</span>';
-  document.getElementById('update-status').innerHTML =
-    '<span class="badge bg-success">Available</span>';
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+    const majorHtml = updateData.update_info.is_major ? 
+      '<span class="badge bg-warning">Yes</span>' : 
+      '<span class="badge bg-info">No</span>';
+    SecurityUtils.safeInnerHTML(document.getElementById('update-major'), majorHtml, true, true);
+    
+    const requiredHtml = updateData.update_info.is_required ? 
+      '<span class="badge bg-danger">Yes</span>' : 
+      '<span class="badge bg-success">No</span>';
+    SecurityUtils.safeInnerHTML(document.getElementById('update-required'), requiredHtml, true, true);
+  } else {
+    document.getElementById('update-major').textContent = updateData.update_info.is_major ? 'Yes' : 'No';
+    document.getElementById('update-required').textContent = updateData.update_info.is_required ? 'Yes' : 'No';
+  }
+  
+  // Update status
+  if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+    SecurityUtils.safeInnerHTML(document.getElementById('update-status'), '<span class="badge bg-success">Available</span>', true, true);
+  } else {
+    document.getElementById('update-status').textContent = 'Available';
+  }
   document.getElementById('update-release-date').textContent =
     updateData.update_info.release_date || 'Not specified';
   document.getElementById('update-file-size').textContent = formatFileSize(
@@ -458,13 +490,17 @@ function displayUpdateInfo(updateData) {
   ) {
     // Sanitize changelog items to prevent XSS
     const sanitizedChangelog = updateData.update_info.changelog.map(item => {
-      const sanitizedItem = item.replace(/[<>&"']/g, match => ({
-        '<': '&lt;',
-        '>': '&gt;',
-        '&': '&amp;',
-        '"': '&quot;',
-        '\'': '&#x27;',
-      }[match]));
+      const sanitizedItem = item.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
+      ));
       return `<li><i class="fas fa-check text-success me-2"></i>${sanitizedItem}</li>`;
     });
     // Use SecurityUtils for safe HTML insertion
@@ -575,7 +611,12 @@ function showProductUpdateInfo(updateData, productName) {
   } else {
     // Fallback: create element safely
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = modalHtml;
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+      SecurityUtils.safeInnerHTML(tempDiv, modalHtml, true, true);
+    } else {
+      tempDiv.textContent = 'Modal';
+    }
     while (tempDiv.firstChild) {
       document.body.appendChild(tempDiv.firstChild);
     }
@@ -619,7 +660,7 @@ function checkAutoUpdates() {
   }
 
   const btn = document.getElementById('check-auto-updates-btn');
-  const originalText = btn.innerHTML;
+    const originalText = btn.textContent;
 
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
@@ -709,22 +750,30 @@ function showAutoUpdateInfo(updateData) {
   // Sanitize update data to prevent XSS
   const sanitizedCurrentVersion = updateData.current_version.replace(
     /[<>&"']/g,
-    match => ({
-      '<': '&lt;',
-      '>': '&gt;',
-      '&': '&amp;',
-      '"': '&quot;',
-      '\'': '&#x27;',
+    match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
     }[match]),
   );
   const sanitizedLatestVersion = updateData.latest_version.replace(
     /[<>&"']/g,
-    match => ({
-      '<': '&lt;',
-      '>': '&gt;',
-      '&': '&amp;',
-      '"': '&quot;',
-      '\'': '&#x27;',
+    match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
     }[match]),
   );
   // Use SecurityUtils for safe HTML insertion
@@ -791,7 +840,7 @@ function installAutoUpdate(version) {
   }
 
   const btn = document.querySelector('#auto-update-info .btn-primary');
-  const originalText = btn.innerHTML;
+    const originalText = btn.textContent;
 
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
@@ -874,7 +923,12 @@ function showAlert(type, message) {
   } else {
     // Fallback: create element safely
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = alertHtml;
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+      SecurityUtils.safeInnerHTML(tempDiv, alertHtml, true, true);
+    } else {
+      tempDiv.textContent = 'Alert';
+    }
     while (tempDiv.firstChild) {
       container.insertBefore(tempDiv.firstChild, container.firstChild);
     }

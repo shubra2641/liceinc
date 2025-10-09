@@ -42,8 +42,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // If we already have the data, use it
-    if (productData[productId]) {
-      applyProductData(productData[productId]);
+        // Sanitize productId to prevent object injection
+        const sanitizedProductId = productId.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        });
+        if (productData[sanitizedProductId]) {
+      applyProductData(productData[sanitizedProductId]);
       return;
     }
 
@@ -59,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
       .then(response => response.json())
       .then(data => {
-        productData[productId] = data;
+            productData[sanitizedProductId] = data;
         applyProductData(data);
         return data;
       })

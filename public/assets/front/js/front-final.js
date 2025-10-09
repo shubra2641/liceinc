@@ -946,7 +946,7 @@ window.ProductShowManager = ProductShowManager;
   };
 
   const showCopySuccess = button => {
-    const originalText = button.innerHTML;
+        const originalText = button.textContent;
     // Use SecurityUtils for safe HTML insertion
     if (typeof SecurityUtils !== 'undefined') {
       SecurityUtils.safeInnerHTML(button, '<i class="fas fa-check"></i> Copied!', true, true);
@@ -966,7 +966,7 @@ window.ProductShowManager = ProductShowManager;
   };
 
   const showCopyError = button => {
-    const originalText = button.innerHTML;
+        const originalText = button.textContent;
     // Use SecurityUtils for safe HTML insertion
     if (typeof SecurityUtils !== 'undefined') {
       SecurityUtils.safeInnerHTML(button, '<i class="fas fa-times"></i> Failed', true, true);
@@ -1356,12 +1356,16 @@ window.ProductShowManager = ProductShowManager;
       // Sanitize domains to prevent XSS
       const sanitizedDomains = domains.map(domain => ({
         ...domain,
-        domain: domain.domain.replace(/[<>&"']/g, match => ({
-          '<': '&lt;',
-          '>': '&gt;',
-          '&': '&amp;',
-          '"': '&quot;',
-          '\'': '&#x27;',
+        domain: domain.domain.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
         }[match])),
       }));
       // Use SecurityUtils for safe HTML insertion
@@ -1491,28 +1495,64 @@ window.ProductShowManager = ProductShowManager;
           // Sanitize mock history data to prevent XSS
           const sanitizedHistory = mockHistory.map(item => ({
             ...item,
-            title: item.title.replace(/[<>&"']/g, match => ({
+            title: item.title.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
               '<': '&lt;',
               '>': '&gt;',
               '&': '&amp;',
               '"': '&quot;',
               '\'': '&#x27;',
             }[match])),
-            description: item.description.replace(/[<>&"']/g, match => ({
+            description: item.description.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
               '<': '&lt;',
               '>': '&gt;',
               '&': '&amp;',
               '"': '&quot;',
               '\'': '&#x27;',
             }[match])),
-            date: item.date.replace(/[<>&"']/g, match => ({
+            date: item.date.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
               '<': '&lt;',
               '>': '&gt;',
               '&': '&amp;',
               '"': '&quot;',
               '\'': '&#x27;',
             }[match])),
-            ip: item.ip.replace(/[<>&"']/g, match => ({
+            ip: item.ip.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
               '<': '&lt;',
               '>': '&gt;',
               '&': '&amp;',
@@ -1573,7 +1613,18 @@ window.ProductShowManager = ProductShowManager;
         suspension: 'exclamation-circle',
         renewal: 'refresh',
       };
-      return icons[type] || 'info-circle';
+            // Sanitize type to prevent object injection
+            const sanitizedType = type.replace(/[<>&"']/g, match => {
+              const safeReplacements = {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+              };
+              return safeReplacements[match] || match;
+            });
+            return icons[sanitizedType] || 'info-circle';
     };
 
     const exportHistory = () => {
@@ -2103,7 +2154,7 @@ class MaintenanceManager {
     // Show loading state
     const refreshBtn = document.querySelector('[data-action="reload"]');
     if (refreshBtn) {
-      const originalText = refreshBtn.innerHTML;
+        const originalText = refreshBtn.textContent;
       // Use SecurityUtils for safe HTML insertion
       if (typeof SecurityUtils !== 'undefined') {
         SecurityUtils.safeInnerHTML(refreshBtn, 

@@ -121,7 +121,7 @@ function initializeSortFunctionality() {
       const urlString = currentUrl.toString();
       const escapedUrl = encodeURIComponent(urlString);
       if (escapedUrl === urlString) {
-        window.location.href = urlString; // security-ignore: VALIDATED_URL
+                window.location.href = SecurityUtils.escapeUrl(urlString);
       } else {
         console.error('Invalid URL: Contains dangerous characters');
       }

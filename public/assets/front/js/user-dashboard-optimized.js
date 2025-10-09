@@ -355,25 +355,25 @@
   };
 
   const showCopySuccess = button => {
-    const originalText = button.innerHTML;
+        const originalText = button.textContent;
     // Sanitize original text to prevent XSS
     // Text will be sanitized by SecurityUtils
     button.innerHTML = '<i class="fas fa-check"></i> Copied!';
     button.style.background = '#10b981';
 
     setTimeout(() => {
-      button.innerHTML = originalText;
+            button.textContent = originalText;
       button.style.background = '';
     }, 2000);
   };
 
   const showCopyError = button => {
-    const originalText = button.innerHTML;
+        const originalText = button.textContent;
     button.innerHTML = '<i class="fas fa-times"></i> Failed';
     button.style.background = '#ef4444';
 
     setTimeout(() => {
-      button.innerHTML = originalText;
+            button.textContent = originalText;
       button.style.background = '';
     }, 2000);
   };
@@ -731,12 +731,16 @@
       // Sanitize domains to prevent XSS
       const sanitizedDomains = domains.map(domain => ({
         ...domain,
-        domain: domain.domain.replace(/[<>&"']/g, match => ({
-          '<': '&lt;',
-          '>': '&gt;',
-          '&': '&amp;',
-          '"': '&quot;',
-          '\'': '&#x27;',
+        domain: domain.domain.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
         }[match])),
       }));
       domainsList.innerHTML = sanitizedDomains
@@ -850,28 +854,64 @@
           // Sanitize mock history data to prevent XSS
           const sanitizedHistory = mockHistory.map(item => ({
             ...item,
-            title: item.title.replace(/[<>&"']/g, match => ({
+            title: item.title.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
               '<': '&lt;',
               '>': '&gt;',
               '&': '&amp;',
               '"': '&quot;',
               '\'': '&#x27;',
             }[match])),
-            description: item.description.replace(/[<>&"']/g, match => ({
+            description: item.description.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
               '<': '&lt;',
               '>': '&gt;',
               '&': '&amp;',
               '"': '&quot;',
               '\'': '&#x27;',
             }[match])),
-            date: item.date.replace(/[<>&"']/g, match => ({
+            date: item.date.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
               '<': '&lt;',
               '>': '&gt;',
               '&': '&amp;',
               '"': '&quot;',
               '\'': '&#x27;',
             }[match])),
-            ip: item.ip.replace(/[<>&"']/g, match => ({
+            ip: item.ip.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
               '<': '&lt;',
               '>': '&gt;',
               '&': '&amp;',
@@ -880,25 +920,25 @@
             }[match])),
           }));
 
-          historyContent.innerHTML = sanitizedHistory
-            .map(
-              item => `
-                        <div class="history-item">
-                            <div class="history-item-icon ${item.type}">
-                                <i class="fas fa-${getHistoryIcon(item.type)}"></i>
-                            </div>
-                            <div class="history-item-content">
-                                <div class="history-item-title">${item.title}</div>
-                                <div class="history-item-description">${item.description}</div>
-                                <div class="history-item-meta">
-                                    <span class="history-item-time">${item.date}</span>
-                                    <span class="history-item-ip">IP: ${item.ip}</span>
-                                </div>
-                            </div>
+          // Use SecurityUtils for safe HTML insertion
+          if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+            const historyHtml = sanitizedHistory
+              .map(item => `
+                <div class="history-item">
+                    <div class="history-item-icon ${item.type}">
+                        <i class="fas fa-${getHistoryIcon(item.type)}"></i>
+                    </div>
+                    <div class="history-item-content">
+                        <div class="history-item-title">${item.title}</div>
+                        <div class="history-item-description">${item.description}</div>
+                        <div class="history-item-meta">
+                            <span class="history-item-time">${item.date}</span>
+                            <span class="history-item-ip">IP: ${item.ip}</span>
                         </div>
-                    `,
-            )
-            .join('');
+                    </div>
+                </div>
+              `).join('');
+            SecurityUtils.safeInnerHTML(historyContent, historyHtml, true, true);
         }, 1000);
       }
     };
@@ -925,7 +965,18 @@
         suspension: 'exclamation-circle',
         renewal: 'refresh',
       };
-      return icons[type] || 'info-circle';
+            // Sanitize type to prevent object injection
+            const sanitizedType = type.replace(/[<>&"']/g, match => {
+              const safeReplacements = {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#x27;'
+              };
+              return safeReplacements[match] || match;
+            });
+            return icons[sanitizedType] || 'info-circle';
     };
 
     const exportHistory = () => {

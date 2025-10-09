@@ -16,24 +16,33 @@ const SecurityUtils = {
       return '';
     }
 
-    // Remove all script tags and event handlers
+    // Enhanced XSS protection with comprehensive sanitization
     let sanitized = content
-      .replace(/<script[^>]*>.*?<\/script>/gi, '')
-      .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
-      .replace(/<object[^>]*>.*?<\/object>/gi, '')
-      .replace(/<embed[^>]*>.*?<\/embed>/gi, '')
-      .replace(/<form[^>]*>.*?<\/form>/gi, '')
+      // Remove all dangerous tags completely
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '')
+      .replace(/<object[^>]*>[\s\S]*?<\/object>/gi, '')
+      .replace(/<embed[^>]*>[\s\S]*?<\/embed>/gi, '')
+      .replace(/<form[^>]*>[\s\S]*?<\/form>/gi, '')
       .replace(/<input[^>]*>/gi, '')
-      .replace(/<textarea[^>]*>.*?<\/textarea>/gi, '')
-      .replace(/<select[^>]*>.*?<\/select>/gi, '')
-      .replace(/<button[^>]*>.*?<\/button>/gi, '')
+      .replace(/<textarea[^>]*>[\s\S]*?<\/textarea>/gi, '')
+      .replace(/<select[^>]*>[\s\S]*?<\/select>/gi, '')
+      .replace(/<button[^>]*>[\s\S]*?<\/button>/gi, '')
       .replace(/<link[^>]*>/gi, '')
       .replace(/<meta[^>]*>/gi, '')
-      .replace(/<style[^>]*>.*?<\/style>/gi, '')
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      // Remove all event handlers
       .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+      .replace(/on\w+\s*=\s*[^>\s]+/gi, '')
+      // Remove dangerous protocols
       .replace(/javascript:/gi, '')
       .replace(/vbscript:/gi, '')
-      .replace(/data:/gi, '')
+      .replace(/data:text\/html/gi, '')
+      .replace(/data:application\/javascript/gi, '')
+      .replace(/data:application\/x-javascript/gi, '')
+      // Remove dangerous attributes
+      .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+      .replace(/\s*on\w+\s*=\s*[^>\s]+/gi, '')
       .replace(/<[^>]*>/g, match => {
         // Allow only safe tags if basic formatting is allowed
         if (allowBasicFormatting) {
@@ -158,7 +167,8 @@ const SecurityUtils = {
     if (!allowBasicFormatting || this.containsDangerousContent(safeContent)) {
       element.textContent = safeContent;
     } else {
-      element.innerHTML = safeContent;
+        // Use textContent for better security
+        element.textContent = safeContent;
     }
   },
 
@@ -208,6 +218,33 @@ const SecurityUtils = {
     ];
 
     return dangerousPatterns.some(pattern => pattern.test(content));
+  },
+
+  /**
+   * Safely escape URL for location.href assignment
+   * @param {string} url - The URL to escape
+   * @returns {string} - Safely escaped URL
+   */
+  escapeUrl(url) {
+    if (typeof url !== 'string') {
+      return '';
+    }
+    
+    // Remove any dangerous protocols
+    const cleanUrl = url
+      .replace(/javascript:/gi, '')
+      .replace(/vbscript:/gi, '')
+      .replace(/data:/gi, '')
+      .replace(/on\w+\s*=/gi, '');
+    
+    // Basic URL validation
+    try {
+      const urlObj = new URL(cleanUrl, window.location.origin);
+      return urlObj.toString();
+    } catch (e) {
+      // If URL parsing fails, return a safe fallback
+      return '/';
+    }
   },
 
   /**

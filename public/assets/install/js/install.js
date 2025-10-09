@@ -415,10 +415,10 @@
         setTimeout(() => {
           try {
             if (result.redirect) {
-              window.location.href = `${result.redirect}?from_install=1`;
+              window.location.href = SecurityUtils.escapeUrl(`${result.redirect}?from_install=1`);
             } else {
               // Fallback to login page
-              window.location.href = '/login?from_install=1';
+                            window.location.href = SecurityUtils.escapeUrl('/login?from_install=1');
             }
           } catch (redirectError) {
             // If redirect fails, try alternative method
@@ -521,18 +521,21 @@
     if (loading) {
       button.classList.add('loading');
       button.disabled = true;
-      const originalText = button.innerHTML;
+            const originalText = button.textContent;
       button.dataset.originalText = originalText;
       // Sanitize translation text to prevent XSS
       const sanitizedTranslation = getTranslation('testing').replace(
         /[<>&"']/g,
-        match => ({
-          '<': '&lt;',
-          '>': '&gt;',
-          '&': '&amp;',
-          '"': '&quot;',
-          '\'': '&#x27;',
-        }[match]),
+        match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
       );
       // Use SecurityUtils for safe HTML insertion
       if (typeof SecurityUtils !== 'undefined') {
@@ -609,7 +612,18 @@
       warning: 'fa-exclamation-triangle',
       info: 'fa-info-circle',
     };
-    return icons[type] || icons.info;
+        // Sanitize icon type to prevent object injection
+        const sanitizedType = type.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        });
+        return icons[sanitizedType] || icons.info;
   }
 
   /**
@@ -622,7 +636,7 @@
     const urlString = currentUrl.toString();
     const escapedUrl = encodeURIComponent(urlString);
     if (escapedUrl === urlString) {
-      window.location.href = urlString; // security-ignore: VALIDATED_URL
+            window.location.href = SecurityUtils.escapeUrl(urlString);
     } else {
       console.error('Invalid URL: Contains dangerous characters');
     }
@@ -642,7 +656,18 @@
       invalid_port: 'Port must be between 1 and 65535',
       testing: 'Testing...',
     };
-    return translations[key] || key;
+        // Sanitize translation key to prevent object injection
+        const sanitizedKey = key.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        });
+        return translations[sanitizedKey] || sanitizedKey;
   }
 
   /**

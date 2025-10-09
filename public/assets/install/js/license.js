@@ -135,7 +135,11 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function handleHtmlResponse(html) {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
+        // Sanitize HTML before parsing
+        const sanitizedHtml = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+          .replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '')
+          .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
+        const doc = parser.parseFromString(sanitizedHtml, 'text/html');
 
     // Check for errors
     const errors = doc.querySelectorAll(
@@ -288,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       this.style.opacity = '0.7';
       setTimeout(() => {
-        window.location.href = this.href;
+                window.location.href = SecurityUtils.escapeUrl(this.href);
       }, 150);
     });
   }

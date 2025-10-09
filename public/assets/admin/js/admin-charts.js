@@ -1664,13 +1664,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const modalContent = document.getElementById('logDetailsContent');
       if (modalContent) {
         // Sanitize logId to prevent XSS
-        const sanitizedLogId = logId.replace(/[<>&"']/g, match => ({
-          '<': '&lt;',
-          '>': '&gt;',
-          '&': '&amp;',
-          '"': '&quot;',
-          '\'': '&#x27;',
-        }[match]));
+        const sanitizedLogId = logId.replace(/[<>&"']/g, match => {
+          const safeReplacements = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#x27;'
+          };
+          return safeReplacements[match] || match;
+        }
+      ));
         window.SecurityUtils.safeInnerHTML(
           this,
           `

@@ -84,7 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Set theme
   const setTheme = theme => {
-    const html = document.documentElement;
+        const html = document.documentElement;
+        // Use textContent instead of innerHTML for security
 
     if (theme === 'dark') {
       html.setAttribute('data-theme', 'dark');

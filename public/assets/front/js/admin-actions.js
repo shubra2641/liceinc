@@ -4,7 +4,9 @@
 const showNotification = (message, type = 'info') => {
   const notification = document.createElement('div');
   notification.className = `user-notification user-notification-${type} show`;
-  notification.innerHTML = `
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+      const notificationHtml = `
         <div class="user-notification-content">
             <div class="user-notification-icon">
                 <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
@@ -15,6 +17,30 @@ const showNotification = (message, type = 'info') => {
             </button>
         </div>
     `;
+      SecurityUtils.safeInnerHTML(notification, notificationHtml, true, true);
+    } else {
+      // Fallback: create elements safely
+      const content = document.createElement('div');
+      content.className = 'user-notification-content';
+      
+      const icon = document.createElement('div');
+      icon.className = 'user-notification-icon';
+      icon.textContent = type === 'success' ? '✓' : type === 'error' ? '✗' : type === 'warning' ? '⚠' : 'ℹ';
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'user-notification-message';
+      messageDiv.textContent = message;
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'user-notification-close';
+      closeBtn.textContent = '×';
+      closeBtn.onclick = () => notification.remove();
+      
+      content.appendChild(icon);
+      content.appendChild(messageDiv);
+      content.appendChild(closeBtn);
+      notification.appendChild(content);
+    }
 
   document.body.appendChild(notification);
   setTimeout(() => notification.remove(), 5000);
@@ -176,7 +202,18 @@ function confirmDelete(type) {
     'delete-user': 'Are you sure you want to delete this user?',
   };
 
-  return window.confirm && confirm(messages[type] || 'Are you sure?');
+    // Sanitize type to prevent object injection
+    const sanitizedType = type.replace(/[<>&"']/g, match => {
+      const safeReplacements = {
+        '<': '&lt;',
+        '>': '&gt;',
+        '&': '&amp;',
+        '"': '&quot;',
+        "'": '&#x27;'
+      };
+      return safeReplacements[match] || match;
+    });
+    return window.confirm && confirm(messages[sanitizedType] || 'Are you sure?');
 }
 
 function showTab(tabId) {
