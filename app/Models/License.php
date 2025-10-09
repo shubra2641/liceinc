@@ -33,10 +33,10 @@ use Illuminate\Support\Str;
  * @property-read int $active_domains_count
  * @property-read int $remaining_domains
  * @property-read mixed $support_active
- * @property mixed $expires_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
  * @property-read int|null $invoices_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LicenseLog> $logs
+ * @property mixed $expires_at
  * @property-read int|null $logs_count
  * @property-read \App\Models\Product|null $product
  * @property-read \App\Models\User|null $user

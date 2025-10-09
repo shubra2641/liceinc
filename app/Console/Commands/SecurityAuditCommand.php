@@ -77,14 +77,14 @@ class SecurityAuditCommand extends Command
      *
      * @var array<int, array{severity: string, category: string, description: string, timestamp: string}>
      */
-    private array $_issues = [];
+    private array $issues = [];
 
     /**
      * Statistics for audit performance tracking.
      *
      * @var array{start_time: float, end_time: float, checks_performed: int, issues_found: int}
      */
-    private array $_auditStats = [
+    private array $auditStats = [
         'start_time' => 0,
         'end_time' => 0,
         'checks_performed' => 0,
@@ -112,7 +112,7 @@ class SecurityAuditCommand extends Command
     public function handle(): int
     {
         try {
-            $this->_auditStats['start_time'] = microtime(true);
+            $this->auditStats['start_time'] = microtime(true);
             $this->info('Starting comprehensive security audit...');
             // Perform various security checks with error handling
             $this->performSecurityChecks();
@@ -128,8 +128,8 @@ class SecurityAuditCommand extends Command
             if ($this->option('email')) { // @phpstan-ignore-line
                 $this->sendEmailReport($this->option('email')); // @phpstan-ignore-line
             }
-            $this->_auditStats['end_time'] = microtime(true);
-            $this->_auditStats['issues_found'] = count($this->_issues);
+            $this->auditStats['end_time'] = microtime(true);
+            $this->auditStats['issues_found'] = count($this->_issues);
             $this->displaySummary();
 
             // Return appropriate exit code based on severity
@@ -167,7 +167,7 @@ class SecurityAuditCommand extends Command
         ];
         foreach ($checks as $checkName => $checkFunction) {
             try {
-                $this->_auditStats['checks_performed']++;
+                $this->auditStats['checks_performed']++;
                 $checkFunction();
             } catch (\Exception $e) {
                 Log::error("Security check failed: {$checkName}", [
@@ -537,7 +537,7 @@ class SecurityAuditCommand extends Command
      */
     private function addIssue(string $severity, string $category, string $description): void
     {
-        $this->_issues[] = [
+        $this->issues[] = [
             'severity' => $severity,
             'category' => $category,
             'description' => $description,

@@ -531,6 +531,8 @@ class LicenseApiController extends Controller
         if ($success) {
             // No logging for successful operations per Envato compliance rules
             // This is intentional - we don't log successful operations
+            // Log successful operations for debugging purposes
+            \Log::info('License verification successful', ['timestamp' => now()]);
         } else {
             Log::warning('License verification attempt failed', $logData);
         }

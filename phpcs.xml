@@ -238,6 +238,7 @@
     <rule ref="Squiz.NamingConventions.ValidVariableName">
         <exclude name="Squiz.NamingConventions.ValidVariableName.NotCamelCaps"/>
         <exclude name="Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps"/>
+        <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore"/>
     </rule>
     
     <rule ref="Squiz.NamingConventions.ValidFunctionName">
