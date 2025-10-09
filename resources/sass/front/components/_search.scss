@@ -5,13 +5,13 @@
  * search forms, results, and interactions.
  */
 
-// Search Container
+/* Search Container */
 .user-kb-search-container {
     max-width: 800px;
     margin: 0 auto;
 }
 
-// Search Form
+/* Search Form */
 .user-kb-search-form {
     margin-bottom: $spacing-xl;
 }
@@ -81,7 +81,7 @@
     font-size: $font-size-sm;
 }
 
-// Search Results
+/* Search Results */
 .user-kb-articles-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -118,7 +118,7 @@
     }
 }
 
-// Article Header
+/* Article Header */
 .user-kb-article-header {
     display: flex;
     align-items: flex-start;
@@ -161,7 +161,7 @@
     }
 }
 
-// Article Badges
+/* Article Badges */
 .user-kb-article-badges {
     display: flex;
     flex-wrap: wrap;
@@ -199,12 +199,12 @@
     }
 }
 
-// Article Content
+/* Article Content */
 .user-kb-article-content {
     margin-bottom: $spacing-md;
 }
 
-// Article Description - moved before locked state for proper specificity
+/* Article Description - moved before locked state for proper specificity */
 .user-kb-article-description {
     color: $text-secondary;
     line-height: $line-height-relaxed;
@@ -226,7 +226,7 @@
     font-size: $font-size-sm;
 }
 
-// Article Footer
+/* Article Footer */
 .user-kb-article-footer {
     display: flex;
     align-items: center;

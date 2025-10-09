@@ -5,11 +5,11 @@
  * primary, secondary, and special buttons.
  */
 
-// Base Button Styles
+/* Base Button Styles */
 .btn {
     @include button-base;
     
-    // Size variations
+    /* Size variations */
     &.btn-sm {
         padding: $spacing-xs $spacing-sm;
         font-size: $font-size-sm;
@@ -20,7 +20,7 @@
         font-size: $font-size-lg;
     }
     
-    // State variations
+    /* State variations */
     &:disabled {
         opacity: 0.6;
         cursor: not-allowed;
@@ -28,17 +28,17 @@
     }
 }
 
-// Primary Button
+/* Primary Button */
 .btn-primary {
     @include button-primary;
 }
 
-// Secondary Button
+/* Secondary Button */
 .btn-secondary {
     @include button-secondary;
 }
 
-// Outline Button
+/* Outline Button */
 .btn-outline {
     @include button-base;
     background: transparent;
@@ -51,7 +51,7 @@
     }
 }
 
-// Ghost Button
+/* Ghost Button */
 .btn-ghost {
     @include button-base;
     background: transparent;
@@ -64,7 +64,7 @@
     }
 }
 
-// Danger Button
+/* Danger Button */
 .btn-danger {
     @include button-base;
     background: #ef4444;
@@ -77,7 +77,7 @@
     }
 }
 
-// Success Button
+/* Success Button */
 .btn-success {
     @include button-base;
     background: #10b981;
@@ -90,7 +90,7 @@
     }
 }
 
-// Icon Button
+/* Icon Button */
 .btn-icon {
     @include button-base;
     padding: $spacing-sm;
@@ -104,7 +104,7 @@
     }
 }
 
-// Loading Button
+/* Loading Button */
 .btn-loading {
     position: relative;
     color: transparent !important;
@@ -124,7 +124,7 @@
     }
 }
 
-// Button Group
+/* Button Group */
 .btn-group {
     display: inline-flex;
     border-radius: $border-radius-md;
@@ -147,7 +147,7 @@
     }
 }
 
-// Animations
+/* Animations */
 @keyframes spin {
     to {
         transform: rotate(360deg);

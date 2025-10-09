@@ -5,7 +5,7 @@
  * including responsive design, animations, and utilities.
  */
 
-// Responsive Mixins
+/* Responsive Mixins */
 @mixin mobile {
     @media (max-width: #{$breakpoint-sm - 1px}) {
         @content;
@@ -30,7 +30,7 @@
     }
 }
 
-// Flexbox Mixins
+/* Flexbox Mixins */
 @mixin flex-center {
     display: flex;
     align-items: center;
@@ -48,7 +48,7 @@
     flex-direction: column;
 }
 
-// Button Mixins
+/* Button Mixins */
 @mixin button-base {
     display: inline-flex;
     align-items: center;
@@ -92,7 +92,7 @@
     }
 }
 
-// Card Mixins
+/* Card Mixins */
 @mixin card-base {
     background: $bg-primary;
     border-radius: $border-radius-lg;
@@ -109,7 +109,7 @@
     padding: $spacing-lg;
 }
 
-// Form Mixins
+/* Form Mixins */
 @mixin input-base {
     width: 100%;
     padding: $spacing-sm $spacing-md;
@@ -130,7 +130,7 @@
     }
 }
 
-// Animation Mixins
+/* Animation Mixins */
 @mixin fade-in($duration: $transition-normal) {
     opacity: 0;
     animation: fadeIn $duration ease forwards;
@@ -142,7 +142,7 @@
     animation: slideUp $duration ease forwards;
 }
 
-// Utility Mixins
+/* Utility Mixins */
 @mixin sr-only {
     position: absolute;
     width: 1px;
@@ -179,7 +179,7 @@
     }
 }
 
-// Dark Mode Mixin
+/* Dark Mode Mixin */
 @mixin dark-mode {
     @media (prefers-color-scheme: dark) {
         @content;
