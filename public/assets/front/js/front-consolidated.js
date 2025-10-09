@@ -38,7 +38,12 @@ const showNotification = (message, type = 'info') => {
     
     const closeBtn = document.createElement('button');
     closeBtn.className = 'user-notification-close';
-    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+      SecurityUtils.safeInnerHTML(closeBtn, '<i class="fas fa-times"></i>', true, true);
+    } else {
+      closeBtn.textContent = '×';
+    }
     closeBtn.onclick = () => notification.remove();
     
     content.appendChild(icon);
@@ -430,7 +435,14 @@ class FrontendPreloaderManager {
           crypto.getRandomValues(array);
           progress += (array[0] / 4294967296) * 20;
         } else {
-          progress += Math.random() * 20;
+          // Use crypto.getRandomValues for better security
+          if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            const array = new Uint32Array(1);
+            crypto.getRandomValues(array);
+            progress += (array[0] / 4294967296) * 20;
+          } else {
+            progress += Math.random() * 20;
+          }
         }
       }
       if (progress >= 100) {

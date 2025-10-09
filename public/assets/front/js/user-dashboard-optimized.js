@@ -358,7 +358,12 @@
         const originalText = button.textContent;
     // Sanitize original text to prevent XSS
     // Text will be sanitized by SecurityUtils
-    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+      SecurityUtils.safeInnerHTML(button, '<i class="fas fa-check"></i> Copied!', true, true);
+    } else {
+      button.textContent = '✓ Copied!';
+    }
     button.style.background = '#10b981';
 
     setTimeout(() => {
@@ -369,7 +374,12 @@
 
   const showCopyError = button => {
         const originalText = button.textContent;
-    button.innerHTML = '<i class="fas fa-times"></i> Failed';
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+      SecurityUtils.safeInnerHTML(button, '<i class="fas fa-times"></i> Failed', true, true);
+    } else {
+      button.textContent = '✗ Failed';
+    }
     button.style.background = '#ef4444';
 
     setTimeout(() => {
@@ -743,7 +753,9 @@
         }
         }[match])),
       }));
-      domainsList.innerHTML = sanitizedDomains
+      // Use SecurityUtils for safe HTML insertion
+      if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+        const domainsHtml = sanitizedDomains
         .map(
           domain => `
                 <div class="domain-item">
@@ -767,6 +779,10 @@
             `,
         )
         .join('');
+        SecurityUtils.safeInnerHTML(domainsList, domainsHtml, true, true);
+      } else {
+        domainsList.textContent = 'Domains data';
+      }
     };
 
     const updateEnvatoStatus = envatoData => {
@@ -829,8 +845,9 @@
       // Simulate loading license history
       const historyContent = $('.user-history-content');
       if (historyContent) {
-        historyContent.innerHTML =
-          '<div class="text-center p-4">Loading history...</div>';
+        // Use SecurityUtils for safe HTML insertion
+        if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+          SecurityUtils.safeInnerHTML(historyContent, '<div class="text-center p-4">Loading history...</div>', true, true);
 
         // Simulate API call
         setTimeout(() => {

@@ -63,7 +63,14 @@ if (typeof window.AdminCharts === 'undefined') {
           if (!this.isValidUrl(primaryUrl)) {
             throw new Error('Invalid URL: SSRF protection activated');
           }
-          const resp = await fetch(primaryUrl, opts);
+                    // Validate URL before fetch
+                    try {
+                      const urlObj = new URL(primaryUrl, window.location.origin);
+                      // Only allow same-origin requests
+                      if (urlObj.hostname !== window.location.hostname) {
+                        throw new Error('Cross-origin request blocked');
+                      }
+                      const resp = await fetch(urlObj.toString(), opts);
           return await tryParseJson(resp);
         } catch (e) {
           if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -901,8 +908,18 @@ if (typeof window.AdminCharts === 'undefined') {
             if (elements.length > 0) {
               const [element] = elements;
               const { datasetIndex, index } = element;
-              const label = chart.data.labels[index];
-              const value = chart.data.datasets[datasetIndex].data[index];
+                            // Sanitize index to prevent object injection
+                            const sanitizedIndex = parseInt(index, 10);
+                            if (isNaN(sanitizedIndex) || sanitizedIndex < 0 || sanitizedIndex >= chart.data.labels.length) {
+                              return;
+                            }
+                            const label = chart.data.labels[sanitizedIndex];
+                            // Sanitize datasetIndex to prevent object injection
+                            const sanitizedDatasetIndex = parseInt(datasetIndex, 10);
+                            if (isNaN(sanitizedDatasetIndex) || sanitizedDatasetIndex < 0 || sanitizedDatasetIndex >= chart.data.datasets.length) {
+                              return;
+                            }
+                            const value = chart.data.datasets[sanitizedDatasetIndex].data[sanitizedIndex];
 
               this.showChartDetail(chart, label, value, datasetIndex);
             }
@@ -925,7 +942,12 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     showChartDetail(chart, label, value, datasetIndex) {
-      const dataset = chart.data.datasets[datasetIndex];
+            // Sanitize datasetIndex to prevent object injection
+            const sanitizedIndex = parseInt(datasetIndex, 10);
+            if (isNaN(sanitizedIndex) || sanitizedIndex < 0 || sanitizedIndex >= chart.data.datasets.length) {
+              return;
+            }
+            const dataset = chart.data.datasets[sanitizedIndex];
       const detail = {
         title: dataset.label || 'Chart Detail',
         label,
@@ -974,7 +996,12 @@ if (typeof window.AdminCharts === 'undefined') {
 
     // Method to export chart data
     exportChartData(chartId, format = 'csv') {
-      const chart = this.charts[chartId];
+            // Sanitize chartId to prevent object injection
+            const sanitizedChartId = chartId.replace(/[^a-zA-Z0-9_-]/g, '');
+            if (!sanitizedChartId || !this.charts[sanitizedChartId]) {
+              return;
+            }
+            const chart = this.charts[sanitizedChartId];
       if (!chart) {
         return;
       }

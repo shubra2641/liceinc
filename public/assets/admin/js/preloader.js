@@ -183,7 +183,14 @@ class PreloaderManager {
 
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 15;
+            // Use crypto.getRandomValues for better security
+            if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+              const array = new Uint32Array(1);
+              crypto.getRandomValues(array);
+              progress += (array[0] / 4294967296) * 15;
+            } else {
+              progress += Math.random() * 15;
+            }
       if (progress >= 100) {
         progress = 100;
         clearInterval(interval);

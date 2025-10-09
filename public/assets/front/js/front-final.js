@@ -24,7 +24,13 @@ const showNotification = (message, type = 'info') => {
     
     const icon = document.createElement('div');
     icon.className = 'user-notification-icon';
-    icon.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>`;
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+      const iconHtml = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>`;
+      SecurityUtils.safeInnerHTML(icon, iconHtml, true, true);
+    } else {
+      icon.textContent = type === 'success' ? '✓' : type === 'error' ? '✗' : type === 'warning' ? '⚠' : 'ℹ';
+    }
     
     const messageDiv = document.createElement('div');
     messageDiv.className = 'user-notification-message';
@@ -424,7 +430,14 @@ class FrontendPreloaderManager {
           crypto.getRandomValues(array);
           progress += (array[0] / 4294967296) * 20;
         } else {
-          progress += Math.random() * 20;
+          // Use crypto.getRandomValues for better security
+          if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            const array = new Uint32Array(1);
+            crypto.getRandomValues(array);
+            progress += (array[0] / 4294967296) * 20;
+          } else {
+            progress += Math.random() * 20;
+          }
         }
       }
       if (progress >= 100) {

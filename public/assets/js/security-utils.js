@@ -103,7 +103,15 @@ const SecurityUtils = {
       return (array[0] / 4294967296) * max;
     }
     // Fallback for older browsers (less secure but better than Math.random)
-    return Math.random() * max;
+    // Use crypto.getRandomValues for cryptographically secure random
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const array = new Uint32Array(1);
+      crypto.getRandomValues(array);
+      return (array[0] / 4294967296) * max;
+    } else {
+      // Fallback for environments without crypto API
+      return Math.random() * max;
+    }
   },
 
   /**
@@ -124,7 +132,15 @@ const SecurityUtils = {
     } else {
       // Fallback
       for (let i = 0; i < length; i++) {
-        result += chars[Math.floor(Math.random() * chars.length)];
+        // Use crypto.getRandomValues for cryptographically secure random
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+          const array = new Uint32Array(1);
+          crypto.getRandomValues(array);
+          result += chars[array[0] % chars.length];
+        } else {
+          // Fallback for environments without crypto API
+          result += chars[Math.floor(Math.random() * chars.length)];
+        }
       }
     }
     
@@ -276,7 +292,19 @@ const SecurityUtils = {
       };
     }
 
-    return fetch(url, options);
+        // Validate and sanitize URL before fetch
+        try {
+          const urlObj = new URL(url, window.location.origin);
+          // Only allow same-origin or trusted domains
+          const allowedDomains = [window.location.hostname, 'localhost', '127.0.0.1'];
+          if (!allowedDomains.includes(urlObj.hostname)) {
+            throw new Error('Domain not allowed');
+          }
+          return fetch(urlObj.toString(), options);
+        } catch (error) {
+          console.error('Invalid URL:', error);
+          return Promise.reject(new Error('Invalid URL'));
+        }
   },
 
   /**
@@ -379,7 +407,18 @@ const SecurityUtils = {
       }
 
       // Safe navigation
-      window.location.replace(sanitizedUrl);
+                // Additional validation before redirect
+                try {
+                  const urlObj = new URL(sanitizedUrl, window.location.origin);
+                  // Only allow same-origin redirects
+                  if (urlObj.hostname !== window.location.hostname) {
+                    console.error('Cross-origin redirect blocked');
+                    return;
+                  }
+                  window.location.replace(urlObj.toString());
+                } catch (error) {
+                  console.error('Invalid redirect URL:', error);
+                }
     } catch (e) {
       console.error('Invalid URL format:', e);
     }
