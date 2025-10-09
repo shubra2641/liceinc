@@ -273,13 +273,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loading) {
       verifyBtn.disabled = true;
       verifyBtn.classList.add('loading');
-      verifyBtn.innerHTML =
-        '<i class="fas fa-spinner fa-spin"></i> <span>Verifying...</span>';
+      // Use SecurityUtils for safe HTML insertion
+      if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+        SecurityUtils.safeInnerHTML(verifyBtn, '<i class="fas fa-spinner fa-spin"></i> <span>Verifying...</span>', true, true);
+      } else {
+        verifyBtn.textContent = 'Verifying...';
+      }
     } else {
       verifyBtn.disabled = false;
       verifyBtn.classList.remove('loading');
-      verifyBtn.innerHTML =
-        '<i class="fas fa-check"></i> <span>Verify License</span>';
+      // Use SecurityUtils for safe HTML insertion
+      if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+        SecurityUtils.safeInnerHTML(verifyBtn, '<i class="fas fa-check"></i> <span>Verify License</span>', true, true);
+      } else {
+        verifyBtn.textContent = 'Verify License';
+      }
     }
   }
 

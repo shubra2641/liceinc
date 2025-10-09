@@ -38,7 +38,12 @@ const showNotification = (message, type = 'info') => {
     
     const closeBtn = document.createElement('button');
     closeBtn.className = 'user-notification-close';
-    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined' && SecurityUtils.safeInnerHTML) {
+      SecurityUtils.safeInnerHTML(closeBtn, '<i class="fas fa-times"></i>', true, true);
+    } else {
+      closeBtn.textContent = '×';
+    }
     closeBtn.onclick = () => notification.remove();
     
     content.appendChild(icon);

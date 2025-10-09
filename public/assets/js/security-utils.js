@@ -138,7 +138,6 @@ const SecurityUtils = {
           crypto.getRandomValues(array);
           result += chars[array[0] % chars.length];
         } else {
-          // Fallback for environments without crypto API
           result += chars[Math.floor(Math.random() * chars.length)];
         }
       }
