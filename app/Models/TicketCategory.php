@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,16 +18,15 @@ use Illuminate\Database\Eloquent\Builder;
  * @property string|null $icon
  * @property string $priority
  * @property string $color
- * @property int $sortOrder
- * @property bool $isActive
+ * @property int $sort_order
+ * @property bool $is_active
  * @property bool $requires_login
  * @property bool $requires_valid_purchase_code
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Ticket> $tickets
  * @property-read int|null $tickets_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory active()
- * @method static \Database\Factories\TicketCategoryFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory ordered()
@@ -57,12 +54,7 @@ class TicketCategory extends Model
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = TicketCategoryFactory::class;
 
     protected $table = 'ticket_categories';
     protected $fillable = [
@@ -70,8 +62,8 @@ class TicketCategory extends Model
         'slug',
         'description',
         'color',
-        'sortOrder',
-        'isActive',
+        'sort_order',
+        'is_active',
         'requires_login',
         'requires_valid_purchase_code',
         'meta_title',
@@ -81,8 +73,8 @@ class TicketCategory extends Model
         'priority',
     ];
     protected $casts = [
-        'isActive' => 'boolean',
-        'sortOrder' => 'integer',
+        'is_active' => 'boolean',
+        'sort_order' => 'integer',
         'requires_login' => 'boolean',
         'requires_valid_purchase_code' => 'boolean',
     ];
@@ -101,23 +93,21 @@ class TicketCategory extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<TicketCategory> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<TicketCategory>
      */
     public function scopeActive(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        return $query->where('isActive', true);
+        return $query->where('is_active', true);
     }
     /**
-     * Scope to order by sortOrder.
+     * Scope to order by sort_order.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<TicketCategory> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<TicketCategory>
      */
     public function scopeOrdered(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        return $query->orderBy('sortOrder');
+        return $query->orderBy('sort_order');
     }
 }

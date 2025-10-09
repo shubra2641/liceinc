@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Admin\LicenseRequest;
@@ -66,7 +64,7 @@ class LicenseController extends Controller
                     $query->forUser((int)$userId);
                 }
             }
-            // Backwards-compat: if a customer query param is provided, treat it as userId
+            // Backwards-compat: if a customer query param is provided, treat it as user_id
             if ($customerId = request('customer')) {
                 $customerId = $this->sanitizeInput($customerId);
                 if (is_numeric($customerId) && $customerId > 0) {
@@ -77,7 +75,7 @@ class LicenseController extends Controller
             return view('admin.licenses.index', ['licenses' => $licenses]);
         } catch (\Exception $e) {
             Log::error('Error displaying licenses index', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -97,26 +95,22 @@ class LicenseController extends Controller
      * GET /admin/licenses/create
      *
      * // Show create form with pre-selected user
-     * GET /admin/licenses/create?userId=4
+     * GET /admin/licenses/create?user_id=4
      */
     public function create()
     {
         try {
             $users = \App\Models\User::all();
             $products = Product::all();
-            $selectedUserId = $this->sanitizeInput(request('userId'));
+            $selectedUserId = $this->sanitizeInput(request('user_id'));
             // Validate selected user ID if provided
             if ($selectedUserId && (! is_numeric($selectedUserId) || $selectedUserId <= 0)) {
                 $selectedUserId = null;
             }
-            return view('admin.licenses.create', [
-                'users' => $users,
-                'products' => $products,
-                'selectedUserId' => $selectedUserId
-            ]);
+            return view('admin.licenses.create', ['users' => $users, 'products' => $products, 'selectedUserId' => $selectedUserId]);
         } catch (\Exception $e) {
             Log::error('Error showing license creation form', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -143,12 +137,12 @@ class LicenseController extends Controller
      * // Create a new license
      * POST /admin/licenses
      * {
-     *     "userId": 1,
-     *     "productId": 2,
-     *     "licenseType": "regular",
+     *     "user_id": 1,
+     *     "product_id": 2,
+     *     "license_type": "regular",
      *     "status": "active",
-     *     "expiresAt": "2024-12-31",
-     *     "maxDomains": 1,
+     *     "expires_at": "2024-12-31",
+     *     "max_domains": 1,
      *     "notes": "License notes"
      * }
      */
@@ -156,20 +150,20 @@ class LicenseController extends Controller
     {
         try {
             $validated = $request->validate([
-                'userId' => 'required|exists:users, id',
-                'productId' => 'required|exists:products, id',
-                'licenseType' => 'required|in:regular, extended',
+                'user_id' => 'required|exists:users, id',
+                'product_id' => 'required|exists:products, id',
+                'license_type' => 'required|in:regular, extended',
                 'status' => 'required|in:active, inactive, suspended, expired',
-                'expiresAt' => 'nullable|date|after:today',
-                'maxDomains' => 'nullable|integer|min:1',
+                'expires_at' => 'nullable|date|after:today',
+                'max_domains' => 'nullable|integer|min:1',
                 'notes' => 'nullable|string|max:1000',
             ]);
-            // Keep backwards-compatible customer_id if passed (optional) - map to userId
+            // Keep backwards-compatible customer_id if passed (optional) - map to user_id
             if ($request->filled('customer_id')) {
                 $customerId = $this->sanitizeInput($request->validated('customer_id'));
                 if (is_numeric($customerId) && $customerId > 0) {
                     $validatedArray = is_array($validated) ? $validated : [];
-                    $validatedArray['userId'] = $customerId;
+                    $validatedArray['user_id'] = $customerId;
                     $validated = $validatedArray;
                 }
             }
@@ -180,23 +174,23 @@ class LicenseController extends Controller
                 $validated = $validatedArray;
             }
             // Map UI field to DB column with proper parsing and allowing null to clear
-            if (array_key_exists('expiresAt', $validatedArray)) {
-                $expiresAt = $validatedArray['expiresAt'];
-                $validatedArray['licenseExpiresAt'] = ($expiresAt !== null
+            if (array_key_exists('expires_at', $validatedArray)) {
+                $expiresAt = $validatedArray['expires_at'];
+                $validatedArray['license_expires_at'] = ($expiresAt !== null
                     && $expiresAt !== '')
                     ? Carbon::parse(is_string($expiresAt) ? $expiresAt : '')->format('Y-m-d H:i:s')
                     : null;
-                unset($validatedArray['expiresAt']);
+                unset($validatedArray['expires_at']);
                 $validated = $validatedArray;
             }
             // Generate license key automatically
-            $validatedArray['licenseKey'] = $this->generateLicenseKey();
-            // Set purchase_code to be the same as licenseKey for now
+            $validatedArray['license_key'] = $this->generateLicenseKey();
+            // Set purchase_code to be the same as license_key for now
             // This ensures consistency between what users enter and what's stored
-            $validatedArray['purchase_code'] = $validatedArray['licenseKey'];
+            $validatedArray['purchase_code'] = $validatedArray['license_key'];
             // Set default values
-            if (! isset($validatedArray['maxDomains'])) {
-                $validatedArray['maxDomains'] = 1;
+            if (! isset($validatedArray['max_domains'])) {
+                $validatedArray['max_domains'] = 1;
             }
             $validated = $validatedArray;
             // @phpstan-ignore-next-line
@@ -205,7 +199,7 @@ class LicenseController extends Controller
                 ->with('success', trans('app.License created successfully.'));
         } catch (\Exception $e) {
             Log::error('Error creating license', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'request_data' => $request->except(['password', 'password_confirmation']),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -238,31 +232,31 @@ class LicenseController extends Controller
     public function update(LicenseRequest $request, License $license): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
-            'userId' => 'required|exists:users, id',
-            'productId' => 'required|exists:products, id',
-            'licenseType' => 'required|in:regular, extended',
+            'user_id' => 'required|exists:users, id',
+            'product_id' => 'required|exists:products, id',
+            'license_type' => 'required|in:regular, extended',
             'status' => ['required', Rule::in(['active', 'inactive', 'suspended', 'expired'])],
-            'expiresAt' => ['nullable', 'date'],
+            'expires_at' => ['nullable', 'date'],
             'notes' => ['nullable', 'string'],
-            'maxDomains' => ['nullable', 'integer', 'min:1'],
+            'max_domains' => ['nullable', 'integer', 'min:1'],
         ]);
         $validatedArray = is_array($validated) ? $validated : [];
         if ($request->filled('customer_id')) {
-            $validatedArray['userId'] = $request->validated('customer_id');
+            $validatedArray['user_id'] = $request->validated('customer_id');
             $validated = $validatedArray;
         }
         // Map UI field to DB column with proper parsing and allowing null to clear
-        if (array_key_exists('expiresAt', $validatedArray)) {
-            $expiresAt = $validatedArray['expiresAt'];
-            $validatedArray['licenseExpiresAt'] = ($expiresAt !== null && $expiresAt !== '')
+        if (array_key_exists('expires_at', $validatedArray)) {
+            $expiresAt = $validatedArray['expires_at'];
+            $validatedArray['license_expires_at'] = ($expiresAt !== null && $expiresAt !== '')
                 ? Carbon::parse(is_string($expiresAt) ? $expiresAt : '')->format('Y-m-d H:i:s')
                 : null;
-            unset($validatedArray['expiresAt']);
+            unset($validatedArray['expires_at']);
             $validated = $validatedArray;
         }
         // Set default values
-        if (! isset($validatedArray['maxDomains'])) {
-            $validatedArray['maxDomains'] = 1;
+        if (! isset($validatedArray['max_domains'])) {
+            $validatedArray['max_domains'] = 1;
             $validated = $validatedArray;
         }
         // @phpstan-ignore-next-line
@@ -296,13 +290,12 @@ class LicenseController extends Controller
             $maxAttempts = 100;
             do {
                 $key = strtoupper(substr(md5(microtime() . uniqid()), 0, 16));
-                $key = substr($key, 0, 4) . '-' . substr($key, 4, 4) . '-'
-                    . substr($key, 8, 4) . '-' . substr($key, 12, 4);
+                $key = substr($key, 0, 4) . '-' . substr($key, 4, 4) . '-' . substr($key, 8, 4) . '-' . substr($key, 12, 4);
                 $attempts++;
                 if ($attempts >= $maxAttempts) {
                     throw new \Exception('Unable to generate unique license key after ' . $maxAttempts . ' attempts');
                 }
-            } while (License::where('licenseKey', $key)->exists());
+            } while (License::where('license_key', $key)->exists());
             return $key;
         } catch (\Exception $e) {
             Log::error('Error generating license key', [

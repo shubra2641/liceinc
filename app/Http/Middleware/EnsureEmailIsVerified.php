@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Middleware;
 
 use Closure;
@@ -76,7 +74,7 @@ class EnsureEmailIsVerified
             Log::error('Email verification middleware failed: ' . $e->getMessage(), [
                 'request_url' => $request->fullUrl(),
                 'request_method' => $request->method(),
-                'userId' => $request->user()?->id,
+                'user_id' => $request->user()?->id,
                 'trace' => $e->getTraceAsString(),
             ]);
             // Fail safe - redirect to verification notice

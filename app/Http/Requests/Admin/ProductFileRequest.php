@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,7 +29,7 @@ class ProductFileRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -43,7 +41,7 @@ class ProductFileRequest extends FormRequest
         $fileId = $this->route('file')->id ?? null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
-            'productId' => [
+            'product_id' => [
                 'required',
                 'integer',
                 'exists:products,id',
@@ -73,7 +71,7 @@ class ProductFileRequest extends FormRequest
                 'max:50',
                 'regex:/^[0-9]+\.[0-9]+\.[0-9]+$/',
             ],
-            'fileType' => [
+            'file_type' => [
                 'required',
                 'string',
                 Rule::in([
@@ -81,16 +79,16 @@ class ProductFileRequest extends FormRequest
                     'plugin', 'theme', 'library', 'other',
                 ]),
             ],
-            'isActive' => [
+            'is_active' => [
                 'boolean',
             ],
-            'isRequired' => [
+            'is_required' => [
                 'boolean',
             ],
             'is_premium' => [
                 'boolean',
             ],
-            'downloadCount' => [
+            'download_count' => [
                 'nullable',
                 'integer',
                 'min:0',
@@ -137,7 +135,7 @@ class ProductFileRequest extends FormRequest
                 'max:5000',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
-            'sortOrder' => [
+            'sort_order' => [
                 'nullable',
                 'integer',
                 'min:0',
@@ -153,22 +151,22 @@ class ProductFileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'productId.required' => 'Product selection is required.',
-            'productId.exists' => 'Selected product does not exist.',
+            'product_id.required' => 'Product selection is required.',
+            'product_id.exists' => 'Selected product does not exist.',
             'name.required' => 'File name is required.',
             'name.regex' => 'File name contains invalid characters.',
             'description.regex' => 'Description contains invalid characters.',
             'file.required' => 'File upload is required.',
-            'file.mimes' => 'File must be a valid file type (zip, rar, 7z, tar, gz, java, cpp, c, cs, go, rb, ' .
-                'swift, kt, scala, rs, html, css, json, xml, yaml, yml, md, txt, pdf, doc, docx, xls, xlsx, ' .
-                'ppt, pptx).',
+            'file.mimes' => 'File must be a valid file type (zip, rar, 7z, tar, gz, java, cpp, c, cs, go, rb, '
+                . 'swift, kt, scala, rs, html, css, json, xml, yaml, yml, md, txt, pdf, '
+                . 'doc, docx, xls, xlsx, ppt, pptx).',
             'file.max' => 'File size must not exceed 100MB.',
             'version.required' => 'File version is required.',
             'version.regex' => 'Version must be in format: x.y.z (e.g., 1.0.0).',
-            'fileType.required' => 'File type is required.',
-            'fileType.in' => 'File type must be one of: source, binary, documentation, demo, '
+            'file_type.required' => 'File type is required.',
+            'file_type.in' => 'File type must be one of: source, binary, documentation, demo, '
                 . 'template, plugin, theme, library, other.',
-            'downloadCount.min' => 'Download count cannot be negative.',
+            'download_count.min' => 'Download count cannot be negative.',
             'file_size.min' => 'File size must be at least 1 byte.',
             'file_size.max' => 'File size must not exceed 1GB.',
             'checksum.regex' => 'Checksum must be a valid hexadecimal string.',
@@ -177,8 +175,8 @@ class ProductFileRequest extends FormRequest
             'compatibility.regex' => 'Compatibility information contains invalid characters.',
             'requirements.regex' => 'Requirements contain invalid characters.',
             'installation_instructions.regex' => 'Installation instructions contain invalid characters.',
-            'sortOrder.min' => 'Sort order must be at least 0.',
-            'sortOrder.max' => 'Sort order must not exceed 9999.',
+            'sort_order.min' => 'Sort order must be at least 0.',
+            'sort_order.max' => 'Sort order must not exceed 9999.',
         ];
     }
     /**
@@ -189,16 +187,16 @@ class ProductFileRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'productId' => 'product',
+            'product_id' => 'product',
             'name' => 'file name',
             'description' => 'file description',
             'file' => 'file upload',
             'version' => 'file version',
-            'fileType' => 'file type',
-            'isActive' => 'active status',
-            'isRequired' => 'required file',
+            'file_type' => 'file type',
+            'is_active' => 'active status',
+            'is_required' => 'required file',
             'is_premium' => 'premium file',
-            'downloadCount' => 'download count',
+            'download_count' => 'download count',
             'file_size' => 'file size',
             'checksum' => 'file checksum',
             'release_notes' => 'release notes',
@@ -206,7 +204,7 @@ class ProductFileRequest extends FormRequest
             'compatibility' => 'compatibility',
             'requirements' => 'system requirements',
             'installation_instructions' => 'installation instructions',
-            'sortOrder' => 'sort order',
+            'sort_order' => 'sort order',
         ];
     }
     /**
@@ -221,10 +219,10 @@ class ProductFileRequest extends FormRequest
             'release_notes' => $this->input('release_notes')
                 ? $this->sanitizeInput($this->input('release_notes'))
                 : null,
-            'changelog' => $this->input('changelog') ? $this->sanitizeInput($this->input('changelog')) : null,
-            'compatibility' => $this->input('compatibility')
-                ? $this->sanitizeInput($this->input('compatibility'))
+            'changelog' => $this->input('changelog')
+                ? $this->sanitizeInput($this->input('changelog'))
                 : null,
+            'compatibility' => $this->input('compatibility') ? $this->sanitizeInput($this->input('compatibility')) : null,
             'requirements' => $this->input('requirements') ? $this->sanitizeInput($this->input('requirements')) : null,
             'installation_instructions' => $this->input('installation_instructions')
                 ? $this->sanitizeInput($this->input('installation_instructions'))
@@ -232,15 +230,15 @@ class ProductFileRequest extends FormRequest
         ]);
         // Handle checkbox values
         $this->merge([
-            'isActive' => $this->has('isActive'),
-            'isRequired' => $this->has('isRequired'),
+            'is_active' => $this->has('is_active'),
+            'is_required' => $this->has('is_required'),
             'is_premium' => $this->has('is_premium'),
         ]);
         // Set default values
         $this->merge([
-            'isActive' => $this->isActive ?? true,
-            'downloadCount' => $this->downloadCount ?? 0,
-            'sortOrder' => $this->sortOrder ?? 0,
+            'is_active' => $this->is_active ?? true,
+            'download_count' => $this->download_count ?? 0,
+            'sort_order' => $this->sort_order ?? 0,
         ]);
     }
     /**

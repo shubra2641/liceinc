@@ -78,7 +78,7 @@ class PaymentController extends Controller
             $key = 'payment-gateways:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for payment gateways', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -88,19 +88,19 @@ class PaymentController extends Controller
             // Check if user is authenticated
             if (! Auth::check()) {
                 Log::warning('Unauthenticated access attempt to payment gateways', [
-                    'productId' => $product->id,
+                    'product_id' => $product->id,
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
                 return redirect()->route('login')->with('error', trans('app.Please login to purchase this product'));
             }
             // Check if product is active and has a price
-            if (! $product->isActive || $product->price <= 0) {
+            if (! $product->is_active || $product->price <= 0) {
                 Log::warning('Invalid product access attempt', [
-                    'productId' => $product->id,
-                    'isActive' => $product->isActive,
+                    'product_id' => $product->id,
+                    'is_active' => $product->is_active,
                     'price' => $product->price,
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                 ]);
                 return redirect()->back()->with('error', trans('app.Product is not available for purchase'));
@@ -109,8 +109,8 @@ class PaymentController extends Controller
             $enabledGateways = PaymentSetting::getEnabledGateways();
             if (empty($enabledGateways)) {
                 Log::warning('No payment gateways available', [
-                    'productId' => $product->id,
-                    'userId' => Auth::id(),
+                    'product_id' => $product->id,
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                 ]);
                 return redirect()->back()->with('error', trans('app.No payment gateways are currently available'));
@@ -122,8 +122,8 @@ class PaymentController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'productId' => $product->id,
-                'userId' => Auth::id(),
+                'product_id' => $product->id,
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->back()->with('error', 'Failed to load payment options. Please try again.');
@@ -157,7 +157,7 @@ class PaymentController extends Controller
             $key = 'payment-process:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for payment processing', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -171,7 +171,7 @@ class PaymentController extends Controller
             $validatedArray = is_array($validated) ? $validated : [];
             if (! Auth::check()) {
                 Log::warning('Unauthenticated payment processing attempt', [
-                    'productId' => $product->id,
+                    'product_id' => $product->id,
                     'gateway' => $validatedArray['gateway'] ?? 'unknown',
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
@@ -183,7 +183,7 @@ class PaymentController extends Controller
             if (! PaymentSetting::isGatewayEnabled($gateway)) {
                 Log::warning('Disabled gateway access attempt', [
                     'gateway' => $gateway,
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                 ]);
                 return redirect()->back()->with('error', trans('app.Selected payment gateway is not available'));
@@ -194,14 +194,14 @@ class PaymentController extends Controller
             $invoiceId = $validatedArray['invoice_id'] ?? null;
             if (isset($invoiceId) && $invoiceId) {
                 $invoice = Invoice::where('id', $invoiceId)
-                    ->where('userId', Auth::id())
+                    ->where('user_id', Auth::id())
                     ->where('status', 'pending')
                     ->first();
                 if (! $invoice) {
                     DB::rollBack();
                     Log::warning('Invalid invoice access attempt', [
                         'invoice_id' => $invoiceId,
-                        'userId' => Auth::id(),
+                        'user_id' => Auth::id(),
                         'ip' => request()->ip(),
                     ]);
                     return redirect()->back()->with('error', trans('app.Invoice not found or already paid'));
@@ -209,8 +209,8 @@ class PaymentController extends Controller
             }
             // Create temporary order data for payment processing
             $orderData = [
-                'userId' => Auth::id(),
-                'productId' => $product->id,
+                'user_id' => Auth::id(),
+                'product_id' => $product->id,
                 'amount' => $invoice ? $invoice->amount : $product->price,
                 'currency' => 'USD',
                 'payment_gateway' => $gateway,
@@ -218,7 +218,7 @@ class PaymentController extends Controller
                 'invoice_id' => $invoice ? $invoice->id : null,
             ];
             // Store product info in session for success callback
-            session(['payment_productId' => $product->id]);
+            session(['payment_product_id' => $product->id]);
             if ($invoice) {
                 session(['payment_invoice_id' => $invoice->id]);
             }
@@ -239,7 +239,7 @@ class PaymentController extends Controller
             DB::rollBack();
             Log::warning('Payment processing validation failed', [
                 'errors' => $e->errors(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->back()->withErrors($e->errors())->withInput();
@@ -250,7 +250,7 @@ class PaymentController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->back()->with('error', trans('app.Payment processing failed. Please try again.'));
@@ -282,7 +282,7 @@ class PaymentController extends Controller
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for payment success callback', [
                     'gateway' => $gateway,
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -299,9 +299,9 @@ class PaymentController extends Controller
                 Log::warning('PayPal Payment Success Callback', [
                     'gateway' => $gateway,
                     'all_params' => $this->sanitizeLogData($sanitizedData),
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'session_data' => [
-                        'payment_productId' => session('payment_productId'),
+                        'payment_product_id' => session('payment_product_id'),
                         'payment_invoice_id' => session('payment_invoice_id'),
                     ],
                 ]);
@@ -320,14 +320,11 @@ class PaymentController extends Controller
                 if ($gateway === 'paypal') {
                     Log::error('No PayPal transaction ID found in request', [
                         'gateway' => $gateway,
-                        'userId' => Auth::id(),
+                        'user_id' => Auth::id(),
                         'ip' => request()->ip(),
                     ]);
                 }
-                return redirect()->route('user.dashboard')->with(
-                    'error',
-                    trans('app.Invalid payment response')
-                );
+                return redirect()->route('user.dashboard')->with('error', trans('app.Invalid payment response'));
             }
             $user = Auth::user();
             // Verify payment with gateway
@@ -345,7 +342,7 @@ class PaymentController extends Controller
                     if (! $existingInvoice || $existingInvoice instanceof \Illuminate\Database\Eloquent\Collection) {
                         Log::error('Custom invoice not found', [
                             'invoice_id' => $invoiceId,
-                            'userId' => Auth::id(),
+                            'user_id' => Auth::id(),
                             'ip' => request()->ip(),
                         ]);
                         return redirect()->route('user.dashboard')->with('error', trans('app.Invoice not found'));
@@ -369,7 +366,7 @@ class PaymentController extends Controller
                         Log::error('Failed to send custom invoice payment emails', [
                             'error' => $e->getMessage(),
                             'invoice_id' => $invoiceId,
-                            'userId' => Auth::id(),
+                            'user_id' => Auth::id(),
                         ]);
                     }
                     // Clear session
@@ -379,14 +376,14 @@ class PaymentController extends Controller
                         ->with('invoice', $existingInvoice);
                 } else {
                     // Handle product purchase
-                    $productId = session('payment_productId');
+                    $productId = session('payment_product_id');
                     $product = $productId
                         ? Product::find($productId)
-                        : Product::where('isActive', true)->where('price', '>', 0)->first();
+                        : Product::where('is_active', true)->where('price', '>', 0)->first();
                     if (! $product) {
                         Log::error('No products available for purchase', [
-                            'productId' => $productId,
-                            'userId' => Auth::id(),
+                            'product_id' => $productId,
+                            'user_id' => Auth::id(),
                             'ip' => request()->ip(),
                         ]);
                         return redirect()->route('user.dashboard')->with(
@@ -400,8 +397,8 @@ class PaymentController extends Controller
                     }
                     // Create order data
                     $orderData = [
-                        'userId' => $user?->id,
-                        'productId' => $product->id,
+                        'user_id' => $user?->id,
+                        'product_id' => $product->id,
                         'amount' => $existingInvoice ? $existingInvoice->amount : $product->price,
                         'currency' => 'USD',
                         'payment_gateway' => $gateway,
@@ -420,35 +417,27 @@ class PaymentController extends Controller
                     );
                     Log::warning('License and invoice creation result', [
                         'success' => $result['success'] ?? false,
-                        'licenseId' => (is_object($result['license'] ?? null)
-                            && isset($result['license']->id))
+                        'license_id' => (is_object($result['license'] ?? null) && isset($result['license']->id))
                             ? $result['license']->id
                             : 'N/A',
-                        'invoice_id' => (is_object($result['invoice'] ?? null)
-                            && isset($result['invoice']->id))
+                        'invoice_id' => (is_object($result['invoice'] ?? null) && isset($result['invoice']->id))
                             ? $result['invoice']->id
                             : 'N/A',
                     ]);
                     if ($result['success']) {
                         // Clear payment session
-                        session()->forget(['payment_productId', 'payment_invoice_id']);
+                        session()->forget(['payment_product_id', 'payment_invoice_id']);
                         // Send emails
                         try {
-                            if (
-                                $result['license'] instanceof \App\Models\License
-                                && $result['invoice'] instanceof \App\Models\Invoice
-                            ) {
+                            if ($result['license'] instanceof \App\Models\License && $result['invoice'] instanceof \App\Models\Invoice) {
                                 $this->emailService->sendPaymentConfirmation($result['license'], $result['invoice']);
                                 $this->emailService->sendLicenseCreated($result['license']);
-                                $this->emailService->sendAdminPaymentNotification(
-                                    $result['license'],
-                                    $result['invoice']
-                                );
+                                $this->emailService->sendAdminPaymentNotification($result['license'], $result['invoice']);
                             }
                         } catch (\Exception $e) {
                             Log::error('Failed to send payment emails', [
                                 'error' => $e->getMessage(),
-                                'licenseId' => $result['license']->id ?? 'N/A',
+                                'license_id' => $result['license']->id ?? 'N/A',
                                 'invoice_id' => $result['invoice']->id ?? 'N/A',
                             ]);
                         }
@@ -475,7 +464,7 @@ class PaymentController extends Controller
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
                 'gateway' => $gateway,
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->route('payment.failure-page', $gateway)
@@ -506,7 +495,7 @@ class PaymentController extends Controller
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for payment cancellation', [
                     'gateway' => $gateway,
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -514,7 +503,7 @@ class PaymentController extends Controller
             }
             RateLimiter::hit($key, 300); // 5 minutes
             // Clear payment session
-            session()->forget('payment_productId');
+            session()->forget('payment_product_id');
             return redirect()->route('payment.cancel', $gateway)
                 ->with('info', trans('app.Payment was cancelled. You can try again anytime.'));
         } catch (\Exception $e) {
@@ -524,7 +513,7 @@ class PaymentController extends Controller
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
                 'gateway' => $gateway,
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->route('user.dashboard')->with('error', 'Payment cancellation failed. Please try again.');
@@ -554,7 +543,7 @@ class PaymentController extends Controller
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for payment failure handling', [
                     'gateway' => $gateway,
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -562,19 +551,16 @@ class PaymentController extends Controller
             }
             RateLimiter::hit($key, 300); // 5 minutes
             // Clear payment session
-            session()->forget('payment_productId');
+            session()->forget('payment_product_id');
             $error = $this->sanitizeInput($request->get('error', 'Unknown error'));
             Log::warning('Payment failure', [
                 'gateway' => $gateway,
                 'error' => $error,
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->route('payment.failure', $gateway)
-                ->with('error_message', trans(
-                    'app.Payment failed: :error',
-                    ['error' => is_string($error) ? $error : 'Unknown error']
-                ));
+                ->with('error_message', trans('app.Payment failed: :error', ['error' => is_string($error) ? $error : 'Unknown error']));
         } catch (\Exception $e) {
             Log::error('Payment failure handling failed', [
                 'error' => $e->getMessage(),
@@ -582,7 +568,7 @@ class PaymentController extends Controller
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
                 'gateway' => $gateway,
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->route('user.dashboard')->with(
@@ -673,7 +659,7 @@ class PaymentController extends Controller
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for custom payment processing', [
                     'invoice_id' => $invoice->id,
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -690,17 +676,17 @@ class PaymentController extends Controller
                 Log::warning('Disabled gateway access attempt for custom payment', [
                     'gateway' => $gateway,
                     'invoice_id' => $invoice->id,
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                 ]);
                 return redirect()->back()->with('error', 'Payment gateway is not available');
             }
             // Check if user owns this invoice
-            if ($invoice->userId !== Auth::id()) {
+            if ($invoice->user_id !== Auth::id()) {
                 Log::warning('Unauthorized custom invoice access attempt', [
                     'invoice_id' => $invoice->id,
-                    'invoice_userId' => $invoice->userId,
-                    'current_userId' => Auth::id(),
+                    'invoice_user_id' => $invoice->user_id,
+                    'current_user_id' => Auth::id(),
                     'ip' => request()->ip(),
                 ]);
                 abort(403);
@@ -710,15 +696,15 @@ class PaymentController extends Controller
                 Log::warning('Invalid custom invoice status access attempt', [
                     'invoice_id' => $invoice->id,
                     'status' => $invoice->status,
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                 ]);
                 return redirect()->back()->with('error', 'Invoice is not available for payment');
             }
             // Create order data for custom invoice
             $orderData = [
-                'userId' => $invoice->userId,
-                'productId' => null, // No product for custom invoices
+                'user_id' => $invoice->user_id,
+                'product_id' => null, // No product for custom invoices
                 'amount' => $invoice->amount,
                 'currency' => $invoice->currency,
                 'invoice_id' => $invoice->id,
@@ -732,7 +718,7 @@ class PaymentController extends Controller
             Log::warning('Custom payment result', [
                 'result' => $this->sanitizeLogData($result),
                 'invoice_id' => $invoice->id,
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
             ]);
             if ($result['success']) {
                 return redirect()->to(is_string($result['redirect_url'] ?? null) ? $result['redirect_url'] : '/');
@@ -743,7 +729,7 @@ class PaymentController extends Controller
             Log::warning('Custom payment validation failed', [
                 'errors' => $e->errors(),
                 'invoice_id' => $invoice->id,
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->back()->withErrors($e->errors())->withInput();
@@ -754,7 +740,7 @@ class PaymentController extends Controller
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
                 'invoice_id' => $invoice->id,
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return redirect()->back()->with('error', 'Payment processing failed');
@@ -773,7 +759,7 @@ class PaymentController extends Controller
             'password',
             'password_confirmation',
             'api_token',
-            'licenseKey',
+            'license_key',
             'purchase_code',
             'credit_card',
             'ssn',

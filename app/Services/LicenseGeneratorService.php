@@ -73,7 +73,7 @@ class LicenseGeneratorService
     private function getEnvatoToken(): string
     {
         try {
-            $token = \App\Helpers\ConfigHelper::getSetting('envatoPersonalToken', '', 'envatoPersonalToken');
+            $token = \App\Helpers\ConfigHelper::getSetting('envato_personal_token', '', 'ENVATO_PERSONAL_TOKEN');
             if (empty($token) || !is_string($token)) {
                 throw new \Exception('Envato personal token not configured');
             }
@@ -119,12 +119,11 @@ class LicenseGeneratorService
             // Delete old files for this product first
             $this->deleteOldLicenseFiles($product);
             // Check if we need to generate a new file
-            $existingPath = $product->integrationFilePath;
-            $existingPathStr = is_string($existingPath) ? $existingPath : null;
-            $shouldGenerateNew = $this->shouldGenerateNewFile($product, $existingPathStr);
-            if (! $shouldGenerateNew && $existingPathStr && Storage::disk('public')->exists($existingPathStr)) {
+            $existingPath = $product->integration_file_path;
+            $shouldGenerateNew = $this->shouldGenerateNewFile($product, $existingPath);
+            if (! $shouldGenerateNew && $existingPath && Storage::disk('public')->exists($existingPath)) {
                 // Return existing file path without regenerating
-                return $existingPathStr;
+                return $existingPath;
             }
             // Generate new file
             $template = $this->getLicenseTemplate($language);
@@ -132,11 +131,11 @@ class LicenseGeneratorService
             $fileName = $this->generateFileName($product, $language);
             $filePath = $this->saveLicenseFile($fileContent, $fileName, $product);
             // Update product with new integration file path
-            $product->update(['integrationFilePath' => $filePath]);
+            $product->update(['integration_file_path' => $filePath]);
             return $filePath;
         } catch (\Exception $e) {
             Log::error('Error generating license file', [
-                'productId' => $product->id ?? 'unknown',
+                'product_id' => $product->id ?? 'unknown',
                 'product_slug' => $product->slug ?? 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -180,7 +179,7 @@ class LicenseGeneratorService
             }
         } catch (\Exception $e) {
             Log::error('Error deleting old license files', [
-                'productId' => $product->id ?? 'unknown',
+                'product_id' => $product->id ?? 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -288,7 +287,7 @@ class LicenseGeneratorService
                 'verification_key' => $this->generateVerificationKey($product),
                 // Get tokens from database settings
                 'api_token' => $this->getApiToken(),
-                'envatoToken' => $this->getEnvatoToken(),
+                'envato_token' => $this->getEnvatoToken(),
                 'envato_client_id' => '',
                 // envato_api_base is safe to include (no secret) if needed by templates
                 'envato_api_base' => config('envato.api_base'),
@@ -308,7 +307,7 @@ class LicenseGeneratorService
             $productId = $product->id ?? 'unknown';
             $productSlug = $product->slug ?? 'unknown';
             Log::error('Error compiling license template', [
-                'productId' => $productId,
+                'product_id' => $productId,
                 'product_slug' => $productSlug,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -342,7 +341,7 @@ class LicenseGeneratorService
             return hash('sha256', $keyData);
         } catch (\Exception $e) {
             Log::error('Error generating verification key', [
-                'productId' => $product->id ?? 'unknown',
+                'product_id' => $product->id ?? 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -501,7 +500,7 @@ class LicenseGeneratorService
             $productId = $product->id ?? 'unknown';
             $fileNameValue = $fileName;
             Log::error('Error saving license file', [
-                'productId' => $productId,
+                'product_id' => $productId,
                 'filename' => $fileNameValue,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -553,7 +552,7 @@ class LicenseVerifier {
     private $productSlug = '{{product_slug}}';
     private $verificationKey = '{{verification_key}}';
     private $apiToken = '{{api_token}}';
-    private $envatoToken = '{{envatoToken}}';
+    private $envatoToken = '{{envato_token}}';
     private $envatoApiBase = '{{envato_api_base}}';
     /**
      * Verify license with purchase code
@@ -732,7 +731,7 @@ class LicenseVerifier {
                 `https://api.envato.com/v3/market/author/sale?code = ${encodeURIComponent(purchaseCode)}`,
                 {
                 headers: {
-                    'Authorization': 'Bearer YOUR_envatoToken',
+                    'Authorization': 'Bearer YOUR_ENVATO_TOKEN',
                     'User-Agent': 'LicenseVerifier/1.0'
                 }
             });
@@ -854,7 +853,7 @@ class LicenseVerifier:
         """
         try:
             headers = {
-                'Authorization': 'Bearer YOUR_envatoToken',
+                'Authorization': 'Bearer YOUR_ENVATO_TOKEN',
                 'User-Agent': 'LicenseVerifier/1.0'
             }
             response = requests.get(
@@ -943,14 +942,14 @@ PYTHON;
 // Product Slug: {{product_slug}}
 // Verification Key: {{verification_key}}
 // API Token: {{api_token}}
-// Envato Token: {{envatoToken}}
+// Envato Token: {{envato_token}}
 // IMPORTANT: This is a generic template. You need to implement the actual license verification
 // logic according to {$language->name} best practices. The system will provide:
 // - API URL: {{license_api_url}}
 // - Product Slug: {{product_slug}}
 // - Verification Key: {{verification_key}}
 // - API Token: {{api_token}}
-// - Envato Token: {{envatoToken}}
+// - Envato Token: {{envato_token}}
 // Example implementation structure:
 // 1. Create a license verification class/function
 // 2. Use the provided API URL and tokens

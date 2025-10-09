@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
 use App\Helpers\SecureFileHelper;
@@ -89,7 +87,7 @@ class UpdateController extends Controller
             Log::error('Failed to load update management page', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
             ]);
 
             return view('admin.updates.index', [
@@ -137,7 +135,7 @@ class UpdateController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Update check failed', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -236,7 +234,7 @@ class UpdateController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('System update failed', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['confirm']),
@@ -280,14 +278,13 @@ class UpdateController extends Controller
             Cache::flush();
             $steps['all_caches'] = 'All caches cleared';
             // Step 8: Run any version-specific update instructions
-            $instructions = VersionHelper::getUpdateInstructions(
-                $targetVersion
-            );
+            $instructions = VersionHelper::getUpdateInstructions($targetVersion);
             if (! empty($instructions)) {
                 foreach ($instructions as $key => $instruction) {
                     // Here you could add custom update logic based on instructions
-                    $steps['instruction_' . $key] = 'Custom instruction: '
-                        . (is_string($instruction) ? $instruction : '');
+                    $steps['instruction_' . $key] = 'Custom instruction: ' . (
+                        is_string($instruction) ? $instruction : ''
+                    );
                 }
             }
             // Step 9: Optimize application (if not in debug mode)
@@ -411,7 +408,7 @@ class UpdateController extends Controller
             // Update last update timestamp in settings
             $setting = \App\Models\Setting::first();
             if ($setting) {
-                $setting->lastUpdatedAt = now();
+                $setting->last_updated_at = now();
                 $setting->save();
             } else {
                 Log::warning('Settings model not found during update info update');
@@ -453,7 +450,7 @@ class UpdateController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to get version info', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'version' => $version,
                 'error' => $e->getMessage(),
             ]);
@@ -537,7 +534,7 @@ class UpdateController extends Controller
             $rollbackSteps = $this->performRollback($targetVersionStr, $currentVersionStr, $backupPath);
             DB::commit();
             Log::warning('System rollback performed', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'from_version' => $currentVersion,
                 'to_version' => $targetVersion,
                 'backup_used' => basename($backupPath),
@@ -555,7 +552,7 @@ class UpdateController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('System rollback failed', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['confirm']),
@@ -586,14 +583,14 @@ class UpdateController extends Controller
                             'filename' => basename($file),
                             'path' => $file,
                             'size' => filesize($file),
-                            'createdAt' => date('Y-m-d H:i:s', (int)filemtime($file)),
+                            'created_at' => date('Y-m-d H:i:s', (int)filemtime($file)),
                             'version' => $this->extractVersionFromBackupName(basename($file)),
                         ];
                     }
                 }
                 // Sort by creation date (newest first)
                 usort($backups, function ($a, $b) {
-                    return strtotime($b['createdAt']) - strtotime($a['createdAt']);
+                    return strtotime($b['created_at']) - strtotime($a['created_at']);
                 });
             }
 
@@ -677,14 +674,17 @@ class UpdateController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'message' => 'Update package uploaded but processing failed: '
-                        . (is_string($processResult['message'] ?? null) ? $processResult['message'] : 'Unknown error'),
+                    'message' => 'Update package uploaded but processing failed: ' . (
+                        is_string($processResult['message'] ?? null)
+                            ? $processResult['message']
+                            : 'Unknown error'
+                    ),
                 ], 422);
             }
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to upload update package', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -836,7 +836,7 @@ class UpdateController extends Controller
      * // Check for auto updates:
      * POST /admin/updates/check-auto
      * {
-     *     "licenseKey": "abc123...",
+     *     "license_key": "abc123...",
      *     "product_slug": "the-ultimate-license-management-system",
      *     "domain": "example.com",
      *     "current_version": "1.0.0"
@@ -859,7 +859,7 @@ class UpdateController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $licenseKey = is_string($validated['licenseKey']) ? $validated['licenseKey'] : '';
+            $licenseKey = is_string($validated['license_key']) ? $validated['license_key'] : '';
             // Get values automatically from system
             $productSlug = 'the-ultimate-license-management-system'; // Fixed product slug
             $currentVersion = VersionHelper::getCurrentVersion(); // Get from database
@@ -946,10 +946,10 @@ class UpdateController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Auto update check failed', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'request_data' => $request->except(['licenseKey']),
+                'request_data' => $request->except(['license_key']),
             ]);
 
             return response()->json([
@@ -987,8 +987,8 @@ class UpdateController extends Controller
                 return [
                     'success' => false,
                     'message' => "Cannot update to version " . $version
-                        . ". Current version is " . $currentVersion
-                        . ". Only newer versions are allowed.",
+                        . ". Current version is " . $currentVersion . ". "
+                        . 'Only newer versions are allowed.',
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
                     'current_version' => $currentVersion,
                     'target_version' => $version,
@@ -998,7 +998,7 @@ class UpdateController extends Controller
             $downloadResult = $this->licenseServerService->downloadUpdate($licenseKey, $version, $productSlug, $domain);
             if (! $downloadResult['success']) {
                 Log::error('Failed to download update package', [
-                    'userId' => auth()->id(),
+                    'user_id' => auth()->id(),
                     'version' => $version,
                     'error' => $downloadResult['message'] ?? 'Unknown error',
                 ]);
@@ -1015,8 +1015,8 @@ class UpdateController extends Controller
             }
             // Install the update
             $installResult = $this->updatePackageService->installUpdateFiles(
-                is_string($downloadResult['filePath'] ?? null)
-                    ? $downloadResult['filePath']
+                is_string($downloadResult['file_path'] ?? null)
+                    ? $downloadResult['file_path']
                     : ''
             );
             if ($installResult['success']) {
@@ -1033,13 +1033,13 @@ class UpdateController extends Controller
                 if (! $versionUpdateResult) {
                     Log::error('Failed to update version in database after successful installation', [
                         'version' => $version,
-                        'userId' => auth()->id(),
+                        'user_id' => auth()->id(),
                     ]);
 
                     return [
                         'success' => false,
-                        'message' => 'Update installed but failed to update version in database. '
-                            . 'Please check logs.',
+                        'message' => 'Update installed but failed to update version '
+                            . 'in database. Please check logs.',
                         'error_code' => 'VERSION_UPDATE_FAILED',
                     ];
                 }
@@ -1061,7 +1061,7 @@ class UpdateController extends Controller
                 ];
             } else {
                 Log::error('Failed to install update files', [
-                    'userId' => auth()->id(),
+                    'user_id' => auth()->id(),
                     'version' => $version,
                     'error' => $installResult['message'] ?? 'Unknown error',
                 ]);
@@ -1078,7 +1078,7 @@ class UpdateController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('Auto update process failed', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'version' => $version,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -1108,7 +1108,7 @@ class UpdateController extends Controller
      * // Install auto update:
      * POST /admin/updates/install-auto
      * {
-     *     "licenseKey": "abc123...",
+     *     "license_key": "abc123...",
      *     "product_slug": "the-ultimate-license-management-system",
      *     "domain": "example.com",
      *     "version": "1.0.1",
@@ -1132,7 +1132,7 @@ class UpdateController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $licenseKey = is_string($validated['licenseKey']) ? $validated['licenseKey'] : '';
+            $licenseKey = is_string($validated['license_key']) ? $validated['license_key'] : '';
             $version = is_string($validated['version']) ? $validated['version'] : '';
             // Get values automatically from system
             $productSlug = 'the-ultimate-license-management-system'; // Fixed product slug
@@ -1193,7 +1193,7 @@ class UpdateController extends Controller
                 SecureFileHelper::createDirectory(storage_path('app/updates'), 0755, true);
             }
             // Use the downloaded file directly
-            $updateFilePath = $downloadResult['filePath'];
+            $updateFilePath = $downloadResult['file_path'];
             // Extract and install update
             $installResult = $this->updatePackageService->installUpdateFiles(
                 is_string($updateFilePath) ? $updateFilePath : ''
@@ -1207,13 +1207,13 @@ class UpdateController extends Controller
                     DB::rollBack();
                     Log::error('Failed to update version in database after successful installation', [
                         'version' => $version,
-                        'userId' => auth()->id(),
+                        'user_id' => auth()->id(),
                     ]);
 
                     return response()->json([
                         'success' => false,
-                        'message' => 'Update installed but failed to update version in database. '
-                            . 'Please check logs.',
+                        'message' => 'Update installed but failed to update version '
+                            . 'in database. Please check logs.',
                         'error_code' => 'VERSION_UPDATE_FAILED',
                     ], 500);
                 }
@@ -1221,7 +1221,8 @@ class UpdateController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Update installed successfully and version updated in database',
+                    'message' => 'Update installed successfully '
+                        . 'and version updated in database',
                     'data' => [
                         'version' => $version,
                         'installed_at' => now()->toISOString(),
@@ -1241,10 +1242,10 @@ class UpdateController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Auto update installation failed', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'request_data' => $request->except(['licenseKey']),
+                'request_data' => $request->except(['license_key']),
             ]);
 
             return response()->json([
@@ -1274,7 +1275,8 @@ class UpdateController extends Controller
             if ($latestVersionData['success']) {
                 $data = $latestVersionData['data'];
                 // Check if update is available
-                $isUpdateAvailable = (is_array($data) && isset($data['is_update_available']))
+                $isUpdateAvailable = (is_array($data)
+                    && isset($data['is_update_available']))
                     ? $data['is_update_available']
                     : false;
                 $nextVersion = (is_array($data) && isset($data['next_version'])) ? $data['next_version'] : null;
@@ -1396,7 +1398,7 @@ class UpdateController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to get current version from database', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
             ]);
 
@@ -1423,7 +1425,7 @@ class UpdateController extends Controller
      * // Get version history:
      * POST /admin/updates/version-history
      * {
-     *     "licenseKey": "abc123...",
+     *     "license_key": "abc123...",
      *     "product_slug": "the-ultimate-license-management-system",
      *     "domain": "example.com"
      * }
@@ -1433,8 +1435,8 @@ class UpdateController extends Controller
      *     "success": true,
      *     "data": {
      *         "versions": [
-     *             {"version": "1.0.1", "releasedAt": "2024-01-15", "changelog": "..."},
-     *             {"version": "1.0.0", "releasedAt": "2024-01-01", "changelog": "..."}
+     *             {"version": "1.0.1", "released_at": "2024-01-15", "changelog": "..."},
+     *             {"version": "1.0.0", "released_at": "2024-01-01", "changelog": "..."}
      *         ]
      *     }
      * }
@@ -1443,7 +1445,7 @@ class UpdateController extends Controller
     {
         try {
             $validated = $request->validated();
-            $licenseKey = is_string($validated['licenseKey']) ? $validated['licenseKey'] : '';
+            $licenseKey = is_string($validated['license_key']) ? $validated['license_key'] : '';
             $productSlug = is_string($validated['product_slug']) ? $validated['product_slug'] : '';
             $domain = is_string($validated['domain']) ? $validated['domain'] : null;
             // Get version history from central API
@@ -1462,10 +1464,10 @@ class UpdateController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('Failed to get version history from central API', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'request_data' => $request->except(['licenseKey']),
+                'request_data' => $request->except(['license_key']),
             ]);
 
             return response()->json([
@@ -1492,7 +1494,7 @@ class UpdateController extends Controller
      * // Get latest version:
      * POST /admin/updates/latest-version
      * {
-     *     "licenseKey": "abc123...",
+     *     "license_key": "abc123...",
      *     "product_slug": "the-ultimate-license-management-system",
      *     "domain": "example.com"
      * }
@@ -1512,7 +1514,7 @@ class UpdateController extends Controller
     {
         try {
             $validated = $request->validated();
-            $licenseKey = is_string($validated['licenseKey']) ? $validated['licenseKey'] : '';
+            $licenseKey = is_string($validated['license_key']) ? $validated['license_key'] : '';
             $productSlug = is_string($validated['product_slug']) ? $validated['product_slug'] : '';
             $domain = is_string($validated['domain']) ? $validated['domain'] : null;
             // Get latest version from central API
@@ -1535,10 +1537,10 @@ class UpdateController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('Failed to get latest version from central API', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'request_data' => $request->except(['licenseKey']),
+                'request_data' => $request->except(['license_key']),
             ]);
 
             return response()->json([

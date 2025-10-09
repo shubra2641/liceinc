@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -32,7 +30,7 @@ class ProductRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -74,10 +72,10 @@ class ProductRequest extends FormRequest
                 'integer',
                 'exists:product_categories,id',
             ],
-            'programmingLanguage_id' => [
+            'programming_language_id' => [
                 'nullable',
                 'integer',
-                'exists:programmingLanguages,id',
+                'exists:programming_languages,id',
             ],
             'price' => [
                 'required',
@@ -103,7 +101,7 @@ class ProductRequest extends FormRequest
                 'max:50',
                 'regex:/^[0-9]+\.[0-9]+\.[0-9]+$/',
             ],
-            'isActive' => [
+            'is_active' => [
                 'boolean',
             ],
             'is_featured' => [
@@ -188,7 +186,7 @@ class ProductRequest extends FormRequest
             'short_description.regex' => 'Short description contains invalid characters.',
             'category_id.required' => 'Product category is required.',
             'category_id.exists' => 'Selected category does not exist.',
-            'programmingLanguage_id.exists' => 'Selected programming language does not exist.',
+            'programming_language_id.exists' => 'Selected programming language does not exist.',
             'price.required' => 'Product price is required.',
             'price.min' => 'Price must be at least 0.',
             'price.max' => 'Price cannot exceed 999,999.99.',
@@ -222,12 +220,12 @@ class ProductRequest extends FormRequest
             'description' => 'product description',
             'short_description' => 'short description',
             'category_id' => 'product category',
-            'programmingLanguage_id' => 'programming language',
+            'programming_language_id' => 'programming language',
             'price' => 'product price',
             'currency' => 'currency',
             'image' => 'product image',
             'version' => 'product version',
-            'isActive' => 'active status',
+            'is_active' => 'active status',
             'is_featured' => 'featured status',
             'is_popular' => 'popular status',
             'is_downloadable' => 'downloadable status',
@@ -266,7 +264,7 @@ class ProductRequest extends FormRequest
         ]);
         // Handle checkbox values
         $this->merge([
-            'isActive' => $this->has('isActive'),
+            'is_active' => $this->has('is_active'),
             'is_featured' => $this->has('is_featured'),
             'is_popular' => $this->has('is_popular'),
             'is_downloadable' => $this->has('is_downloadable'),
@@ -276,7 +274,7 @@ class ProductRequest extends FormRequest
         ]);
         // Set default values
         $this->merge([
-            'isActive' => $this->isActive ?? true,
+            'is_active' => $this->is_active ?? true,
             'currency' => $this->currency ?? 'USD',
         ]);
     }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -67,7 +65,7 @@ class ConfirmablePasswordController extends Controller
             }
             if (! $this->validatePassword($request)) {
                 Log::warning('Password confirmation failed', [
-                    'userId' => $user->id,
+                    'user_id' => $user->id,
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
@@ -87,7 +85,7 @@ class ConfirmablePasswordController extends Controller
             Log::error('Password confirmation failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => $user?->id,
+                'user_id' => $user?->id,
                 'ip' => $request->ip(),
             ]);
             throw ValidationException::withMessages([

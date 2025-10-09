@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +27,7 @@ class SystemUpdateRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -66,10 +64,10 @@ class SystemUpdateRequest extends FormRequest
                     'max:500',
                     'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
                 ],
-                'notifyUsers' => [
+                'notify_users' => [
                     'boolean',
                 ],
-                'maintenanceMode' => [
+                'maintenance_mode' => [
                     'boolean',
                 ],
             ];
@@ -87,7 +85,7 @@ class SystemUpdateRequest extends FormRequest
                 'boolean',
                 'accepted',
             ],
-            'autoBackup' => [
+            'auto_backup' => [
                 'boolean',
             ],
             'force_update' => [
@@ -99,16 +97,16 @@ class SystemUpdateRequest extends FormRequest
                 'max:1000',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
-            'notifyUsers' => [
+            'notify_users' => [
                 'boolean',
             ],
-            'maintenanceMode' => [
+            'maintenance_mode' => [
                 'boolean',
             ],
             'skip_migrations' => [
                 'boolean',
             ],
-            'clearCaches' => [
+            'clear_caches' => [
                 'boolean',
             ],
             'restart_services' => [
@@ -123,16 +121,16 @@ class SystemUpdateRequest extends FormRequest
             'update_config' => [
                 'boolean',
             ],
-            'backupDatabase' => [
+            'backup_database' => [
                 'boolean',
             ],
-            'backupFiles' => [
+            'backup_files' => [
                 'boolean',
             ],
-            'backupConfig' => [
+            'backup_config' => [
                 'boolean',
             ],
-            'rollbackOnError' => [
+            'rollback_on_error' => [
                 'boolean',
             ],
             'test_mode' => [
@@ -152,28 +150,27 @@ class SystemUpdateRequest extends FormRequest
     {
         return [
             'version.required' => 'Version is required.',
-            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix ' .
-                '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
+            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix (e.g., 1.0, 1.0.0, 1.0.0-beta).',
             'confirm.required' => 'Confirmation is required for this operation.',
             'confirm.accepted' => 'You must confirm this operation to proceed.',
             'backup_required.boolean' => 'Backup required must be true or false.',
             'force_rollback.boolean' => 'Force rollback must be true or false.',
             'rollback_reason.regex' => 'Rollback reason contains invalid characters.',
-            'notifyUsers.boolean' => 'Notify users must be true or false.',
-            'maintenanceMode.boolean' => 'Maintenance mode must be true or false.',
-            'autoBackup.boolean' => 'Auto backup must be true or false.',
+            'notify_users.boolean' => 'Notify users must be true or false.',
+            'maintenance_mode.boolean' => 'Maintenance mode must be true or false.',
+            'auto_backup.boolean' => 'Auto backup must be true or false.',
             'force_update.boolean' => 'Force update must be true or false.',
             'update_notes.regex' => 'Update notes contain invalid characters.',
             'skip_migrations.boolean' => 'Skip migrations must be true or false.',
-            'clearCaches.boolean' => 'Clear caches must be true or false.',
+            'clear_caches.boolean' => 'Clear caches must be true or false.',
             'restart_services.boolean' => 'Restart services must be true or false.',
             'update_database.boolean' => 'Update database must be true or false.',
             'update_files.boolean' => 'Update files must be true or false.',
             'update_config.boolean' => 'Update config must be true or false.',
-            'backupDatabase.boolean' => 'Backup database must be true or false.',
-            'backupFiles.boolean' => 'Backup files must be true or false.',
-            'backupConfig.boolean' => 'Backup config must be true or false.',
-            'rollbackOnError.boolean' => 'Rollback on error must be true or false.',
+            'backup_database.boolean' => 'Backup database must be true or false.',
+            'backup_files.boolean' => 'Backup files must be true or false.',
+            'backup_config.boolean' => 'Backup config must be true or false.',
+            'rollback_on_error.boolean' => 'Rollback on error must be true or false.',
             'test_mode.boolean' => 'Test mode must be true or false.',
             'dry_run.boolean' => 'Dry run must be true or false.',
         ];
@@ -191,21 +188,21 @@ class SystemUpdateRequest extends FormRequest
             'backup_required' => 'backup required',
             'force_rollback' => 'force rollback',
             'rollback_reason' => 'rollback reason',
-            'notifyUsers' => 'notify users',
-            'maintenanceMode' => 'maintenance mode',
-            'autoBackup' => 'auto backup',
+            'notify_users' => 'notify users',
+            'maintenance_mode' => 'maintenance mode',
+            'auto_backup' => 'auto backup',
             'force_update' => 'force update',
             'update_notes' => 'update notes',
             'skip_migrations' => 'skip migrations',
-            'clearCaches' => 'clear caches',
+            'clear_caches' => 'clear caches',
             'restart_services' => 'restart services',
             'update_database' => 'update database',
             'update_files' => 'update files',
             'update_config' => 'update config',
-            'backupDatabase' => 'backup database',
-            'backupFiles' => 'backup files',
-            'backupConfig' => 'backup config',
-            'rollbackOnError' => 'rollback on error',
+            'backup_database' => 'backup database',
+            'backup_files' => 'backup files',
+            'backup_config' => 'backup config',
+            'rollback_on_error' => 'rollback on error',
             'test_mode' => 'test mode',
             'dry_run' => 'dry run',
         ];
@@ -218,9 +215,7 @@ class SystemUpdateRequest extends FormRequest
         // Sanitize input to prevent XSS
         $this->merge([
             'version' => $this->sanitizeInput($this->input('version')),
-            'rollback_reason' => $this->input('rollback_reason')
-                ? $this->sanitizeInput($this->input('rollback_reason'))
-                : null,
+            'rollback_reason' => $this->input('rollback_reason') ? $this->sanitizeInput($this->input('rollback_reason')) : null,
             'update_notes' => $this->input('update_notes') ? $this->sanitizeInput($this->input('update_notes')) : null,
         ]);
         // Handle checkbox values
@@ -228,33 +223,33 @@ class SystemUpdateRequest extends FormRequest
             'confirm' => $this->has('confirm'),
             'backup_required' => $this->has('backup_required'),
             'force_rollback' => $this->has('force_rollback'),
-            'notifyUsers' => $this->has('notifyUsers'),
-            'maintenanceMode' => $this->has('maintenanceMode'),
-            'autoBackup' => $this->has('autoBackup'),
+            'notify_users' => $this->has('notify_users'),
+            'maintenance_mode' => $this->has('maintenance_mode'),
+            'auto_backup' => $this->has('auto_backup'),
             'force_update' => $this->has('force_update'),
             'skip_migrations' => $this->has('skip_migrations'),
-            'clearCaches' => $this->has('clearCaches'),
+            'clear_caches' => $this->has('clear_caches'),
             'restart_services' => $this->has('restart_services'),
             'update_database' => $this->has('update_database'),
             'update_files' => $this->has('update_files'),
             'update_config' => $this->has('update_config'),
-            'backupDatabase' => $this->has('backupDatabase'),
-            'backupFiles' => $this->has('backupFiles'),
-            'backupConfig' => $this->has('backupConfig'),
-            'rollbackOnError' => $this->has('rollbackOnError'),
+            'backup_database' => $this->has('backup_database'),
+            'backup_files' => $this->has('backup_files'),
+            'backup_config' => $this->has('backup_config'),
+            'rollback_on_error' => $this->has('rollback_on_error'),
             'test_mode' => $this->has('test_mode'),
             'dry_run' => $this->has('dry_run'),
         ]);
         // Set default values
         $this->merge([
-            'autoBackup' => $this->autoBackup ?? true,
-            'notifyUsers' => $this->notifyUsers ?? true,
-            'maintenanceMode' => $this->maintenanceMode ?? true,
-            'clearCaches' => $this->clearCaches ?? true,
-            'backupDatabase' => $this->backupDatabase ?? true,
-            'backupFiles' => $this->backupFiles ?? true,
-            'backupConfig' => $this->backupConfig ?? true,
-            'rollbackOnError' => $this->rollbackOnError ?? true,
+            'auto_backup' => $this->auto_backup ?? true,
+            'notify_users' => $this->notify_users ?? true,
+            'maintenance_mode' => $this->maintenance_mode ?? true,
+            'clear_caches' => $this->clear_caches ?? true,
+            'backup_database' => $this->backup_database ?? true,
+            'backup_files' => $this->backup_files ?? true,
+            'backup_config' => $this->backup_config ?? true,
+            'rollback_on_error' => $this->rollback_on_error ?? true,
         ]);
     }
     /**

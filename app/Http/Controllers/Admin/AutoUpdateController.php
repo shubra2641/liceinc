@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -91,7 +89,7 @@ class AutoUpdateController extends Controller
      * // Request:
      * POST /admin/auto-update/check
      * {
-     *     "licenseKey": "ABC123-DEF456-GHI789",
+     *     "license_key": "ABC123-DEF456-GHI789",
      *     "product_slug": "my-product",
      *     "domain": "example.com",
      *     "current_version": "1.0.0"
@@ -112,7 +110,7 @@ class AutoUpdateController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validate([
-                'licenseKey' => [
+                'license_key' => [
                     'required',
                     'string',
                     'min:10',
@@ -138,14 +136,14 @@ class AutoUpdateController extends Controller
                     'regex:/^[0-9\.]+$/',
                 ],
             ], [
-                'licenseKey.regex' => 'License key contains invalid characters.',
+                'license_key.regex' => 'License key contains invalid characters.',
                 'product_slug.regex' => 'Product slug contains invalid characters.',
                 'domain.regex' => 'Domain contains invalid characters.',
                 'current_version.regex' => 'Version contains invalid characters.',
             ]);
             // Sanitize input to prevent XSS attacks
             $validatedArray = is_array($validated) ? $validated : [];
-            $licenseKey = $this->sanitizeInput($validatedArray['licenseKey'] ?? '');
+            $licenseKey = $this->sanitizeInput($validatedArray['license_key'] ?? '');
             $productSlug = $this->sanitizeInput($validatedArray['product_slug'] ?? '');
             $domain = isset($validatedArray['domain']) && $validatedArray['domain']
                 ? $this->sanitizeInput($validatedArray['domain'])
@@ -167,7 +165,7 @@ class AutoUpdateController extends Controller
                 ]);
             } else {
                 Log::warning('Update check failed', [
-                    'licenseKey' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4) . '...',
+                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4) . '...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'current_version' => $currentVersion,
@@ -221,7 +219,7 @@ class AutoUpdateController extends Controller
      * // Request:
      * POST /admin/auto-update/install
      * {
-     *     "licenseKey": "ABC123-DEF456-GHI789",
+     *     "license_key": "ABC123-DEF456-GHI789",
      *     "product_slug": "my-product",
      *     "domain": "example.com",
      *     "version": "1.1.0"
@@ -242,7 +240,7 @@ class AutoUpdateController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validate([
-                'licenseKey' => [
+                'license_key' => [
                     'required',
                     'string',
                     'min:10',
@@ -268,14 +266,14 @@ class AutoUpdateController extends Controller
                     'regex:/^[0-9\.]+$/',
                 ],
             ], [
-                'licenseKey.regex' => 'License key contains invalid characters.',
+                'license_key.regex' => 'License key contains invalid characters.',
                 'product_slug.regex' => 'Product slug contains invalid characters.',
                 'domain.regex' => 'Domain contains invalid characters.',
                 'version.regex' => 'Version contains invalid characters.',
             ]);
             // Sanitize input to prevent XSS attacks
             $validatedArray = is_array($validated) ? $validated : [];
-            $licenseKey = $this->sanitizeInput($validatedArray['licenseKey'] ?? '');
+            $licenseKey = $this->sanitizeInput($validatedArray['license_key'] ?? '');
             $productSlug = $this->sanitizeInput($validatedArray['product_slug'] ?? '');
             $domain = isset($validatedArray['domain']) && $validatedArray['domain']
                 ? $this->sanitizeInput($validatedArray['domain'])
@@ -290,7 +288,7 @@ class AutoUpdateController extends Controller
             );
             if (! $updateData['success']) {
                 Log::warning('License verification failed during update installation', [
-                    'licenseKey' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4) . '...',
+                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4) . '...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'version' => $version,
@@ -314,7 +312,7 @@ class AutoUpdateController extends Controller
             );
             if (! $downloadResult['success']) {
                 Log::error('Update download failed', [
-                    'licenseKey' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4) . '...',
+                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4) . '...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'version' => $version,
@@ -443,7 +441,7 @@ class AutoUpdateController extends Controller
             Log::error('Update package installation failed', [
                 'error' => $e->getMessage(),
                 'version' => $version,
-                'filePath' => $updateFilePath,
+                'file_path' => $updateFilePath,
             ]);
 
             return [

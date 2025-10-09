@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,15 +15,14 @@ use Illuminate\Support\Facades\Storage;
  * @property string|null $description
  * @property string $status
  * @property string|null $icon
- * @property bool $isActive
- * @property int $sortOrder
- * @property string|null $fileExtension
- * @property string|null $licenseTemplate
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property string|null $file_extension
+ * @property string|null $license_template
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
  * @property-read int|null $products_count
- * @method static \Database\Factories\ProgrammingLanguageFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage query()
@@ -48,32 +45,27 @@ class ProgrammingLanguage extends Model
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = ProgrammingLanguageFactory::class;
 
     protected $fillable = [
         'name',
         'slug',
         'description',
         'icon',
-        'isActive',
-        'sortOrder',
-        'fileExtension',
-        'licenseTemplate',
+        'is_active',
+        'sort_order',
+        'file_extension',
+        'license_template',
     ];
     protected $casts = [
-        'isActive' => 'boolean',
+        'is_active' => 'boolean',
     ];
     /**
      * @return HasMany<Product, $this>
      */
     public function products(): HasMany
     {
-        return $this->hasMany(Product::class, 'programmingLanguage');
+        return $this->hasMany(Product::class, 'programming_language');
     }
     protected static function boot()
     {
@@ -96,7 +88,7 @@ class ProgrammingLanguage extends Model
      */
     public function getLicenseTemplate(): string
     {
-        return $this->licenseTemplate ?: $this->getDefaultLicenseTemplate();
+        return $this->license_template ?: $this->getDefaultLicenseTemplate();
     }
     /**
      * Get default license template for this language.
@@ -104,11 +96,10 @@ class ProgrammingLanguage extends Model
     private function getDefaultLicenseTemplate(): string
     {
         $templates = [
-            'php' => "<?php
-declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n" .
+            'php' => "<?php\n/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n" .
                 " * License: {LICENSE_CODE}\n * Valid Until: {VALID_UNTIL}\n */\n\n" .
                 "define('LICENSE_CODE', '{LICENSE_CODE}');\n" .
-                "define('licenseDomain', '{DOMAIN}');\n" .
+                "define('LICENSE_DOMAIN', '{DOMAIN}');\n" .
                 "define('LICENSE_VALID_UNTIL', '{VALID_UNTIL}');\n\n" .
                 "define('PRODUCT_NAME', '{PRODUCT_NAME}');\n" .
                 "define('PRODUCT_VERSION', '{PRODUCT_VERSION}');\n\n" .
@@ -135,7 +126,7 @@ declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAM
             'python' => "# License Verification\n# Product: {PRODUCT_NAME}\n# Domain: {DOMAIN}\n" .
                 "# License: {LICENSE_CODE}\n# Valid Until: {VALID_UNTIL}\n\n" .
                 "LICENSE_CODE = '{LICENSE_CODE}'\n" .
-                "licenseDomain = '{DOMAIN}'\n" .
+                "LICENSE_DOMAIN = '{DOMAIN}'\n" .
                 "LICENSE_VALID_UNTIL = '{VALID_UNTIL}'\n\n" .
                 "PRODUCT_NAME = '{PRODUCT_NAME}'\n" .
                 "PRODUCT_VERSION = '{PRODUCT_VERSION}'\n\n" .
@@ -230,12 +221,12 @@ declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAM
         $templatePath = $this->getTemplateFilePath();
         return [
             'has_file' => $this->hasTemplateFile(),
-            'filePath' => $templatePath,
+            'file_path' => $templatePath,
             'file_size' => $this->hasTemplateFile() ? filesize($templatePath) : 0,
             'last_modified' => $this->hasTemplateFile()
                 ? date('Y-m-d H:i:s', filemtime($templatePath) ?: time())
                 : null,
-            'templateContent' => $this->hasTemplateFile() ?
+            'template_content' => $this->hasTemplateFile() ?
                 file_get_contents($templatePath) : $this->getLicenseTemplate(),
         ];
     }
@@ -263,7 +254,7 @@ declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAM
                 // Remove both .php and .blade.php extensions
                 $cleanName = str_replace(['.php', '.blade.php'], '', $filename);
                 $templates[$cleanName] = [
-                    'filePath' => $file,
+                    'file_path' => $file,
                     'file_size' => filesize($file),
                     'last_modified' => date('Y-m-d H:i:s', Storage::disk('local')->lastModified($file)),
                 ];

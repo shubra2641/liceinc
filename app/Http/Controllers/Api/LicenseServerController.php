@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -44,8 +42,8 @@ use Illuminate\Support\Facades\Storage;
  * // Check for updates
  * POST /api/license/check-updates
  * {
- *     "licenseKey": "ABC123-DEF456-GHI789",
- *     "currentVersion": "1.0.0",
+ *     "license_key": "ABC123-DEF456-GHI789",
+ *     "current_version": "1.0.0",
  *     "domain": "example.com",
  *     "product_slug": "my-product"
  * }
@@ -67,8 +65,8 @@ class LicenseServerController extends Controller
      * @example
      * // Request body:
      * {
-     *     "licenseKey": "ABC123-DEF456-GHI789",
-     *     "currentVersion": "1.0.0",
+     *     "license_key": "ABC123-DEF456-GHI789",
+     *     "current_version": "1.0.0",
      *     "domain": "example.com",
      *     "product_slug": "my-product"
      * }
@@ -77,7 +75,7 @@ class LicenseServerController extends Controller
      * {
      *     "success": true,
      *     "data": {
-     *         "currentVersion": "1.0.0",
+     *         "current_version": "1.0.0",
      *         "latest_version": "1.1.0",
      *         "is_update_available": true,
      *         "update_info": {...}
@@ -99,8 +97,8 @@ class LicenseServerController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $licenseKey = $validated['licenseKey'];
-            $currentVersion = $validated['currentVersion'];
+            $licenseKey = $validated['license_key'];
+            $currentVersion = $validated['current_version'];
             $domain = $validated['domain'];
             $productSlug = $validated['product_slug'];
             // Verify license
@@ -131,8 +129,8 @@ class LicenseServerController extends Controller
                 ], 404);
             }
             // Get latest update
-            $latestUpdate = ProductUpdate::where('productId', $product->id)
-                ->where('isActive', true)
+            $latestUpdate = ProductUpdate::where('product_id', $product->id)
+                ->where('is_active', true)
                 ->orderBy('version', 'desc')
                 ->first();
             if (! $latestUpdate) {
@@ -141,7 +139,7 @@ class LicenseServerController extends Controller
                 return response()->json([
                     'success' => true,
                     'data' => [
-                        'currentVersion' => $currentVersion,
+                        'current_version' => $currentVersion,
                         'latest_version' => $currentVersion,
                         'is_update_available' => false,
                         'update_info' => null,
@@ -160,7 +158,7 @@ class LicenseServerController extends Controller
                 is_string($currentVersionStr) ? $currentVersionStr : ''
             ) > 0;
             $responseData = [
-                'currentVersion' => $currentVersion,
+                'current_version' => $currentVersion,
                 'latest_version' => $latestUpdate->version,
                 'is_update_available' => $isUpdateAvailable,
                 'product' => [
@@ -172,12 +170,12 @@ class LicenseServerController extends Controller
                     'title' => $latestUpdate->title,
                     'description' => $latestUpdate->description,
                     'changelog' => $latestUpdate->changelog,
-                    'isMajor' => $latestUpdate->isMajor,
-                    'isRequired' => $latestUpdate->isRequired,
-                    'releasedAt' => $latestUpdate->releasedAt?->toISOString(),
-                    'fileSize' => $latestUpdate->fileSize,
+                    'is_major' => $latestUpdate->is_major,
+                    'is_required' => $latestUpdate->is_required,
+                    'released_at' => $latestUpdate->released_at?->toISOString(),
+                    'file_size' => $latestUpdate->file_size,
                     'download_url' => route('api.license.download-update', [
-                        'licenseKey' => $licenseKey,
+                        'license_key' => $licenseKey,
                         'version' => $latestUpdate->version,
                     ]) . '?product_slug=' . (is_string($productSlug) ? $productSlug : ''),
                 ] : null,
@@ -192,9 +190,9 @@ class LicenseServerController extends Controller
             DB::rollBack();
             Log::error('Update check failed', [
                 'error' => $e->getMessage(),
-                'licenseKey' => substr(
-                    is_string($request->input('licenseKey', ''))
-                        ? $request->input('licenseKey', '')
+                'license_key' => substr(
+                    is_string($request->input('license_key', ''))
+                        ? $request->input('license_key', '')
                         : '',
                     0,
                     8
@@ -226,7 +224,7 @@ class LicenseServerController extends Controller
      * @example
      * // Request body:
      * {
-     *     "licenseKey": "ABC123-DEF456-GHI789",
+     *     "license_key": "ABC123-DEF456-GHI789",
      *     "domain": "example.com",
      *     "product_slug": "my-product"
      * }
@@ -255,7 +253,7 @@ class LicenseServerController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $licenseKey = $validated['licenseKey'];
+            $licenseKey = $validated['license_key'];
             $domain = $validated['domain'];
             $productSlug = $validated['product_slug'];
             // Verify license
@@ -286,8 +284,8 @@ class LicenseServerController extends Controller
                 ], 404);
             }
             // Get all updates
-            $updates = ProductUpdate::where('productId', $product->id)
-                ->where('isActive', true)
+            $updates = ProductUpdate::where('product_id', $product->id)
+                ->where('is_active', true)
                 ->orderBy('version', 'desc')
                 ->get()
                 ->map(function ($update) use ($licenseKey, $productSlug) {
@@ -296,12 +294,12 @@ class LicenseServerController extends Controller
                         'title' => $update->title,
                         'description' => $update->description,
                         'changelog' => $update->changelog,
-                        'isMajor' => $update->isMajor,
-                        'isRequired' => $update->isRequired,
-                        'releasedAt' => $update->releasedAt?->toISOString(),
-                        'fileSize' => $update->fileSize,
+                        'is_major' => $update->is_major,
+                        'is_required' => $update->is_required,
+                        'released_at' => $update->released_at?->toISOString(),
+                        'file_size' => $update->file_size,
                         'download_url' => route('api.license.download-update', [
-                            'licenseKey' => $licenseKey,
+                            'license_key' => $licenseKey,
                             'version' => $update->version,
                         ]) . '?product_slug=' . (is_string($productSlug) ? $productSlug : ''),
                     ];
@@ -314,7 +312,7 @@ class LicenseServerController extends Controller
                     'product' => [
                         'name' => $product->name,
                         'slug' => $product->slug,
-                        'currentVersion' => $product->currentVersion,
+                        'current_version' => $product->current_version,
                     ],
                     'versions' => $updates,
                 ],
@@ -323,9 +321,9 @@ class LicenseServerController extends Controller
             DB::rollBack();
             Log::error('Version history request failed', [
                 'error' => $e->getMessage(),
-                'licenseKey' => substr(
-                    is_string($request->input('licenseKey', ''))
-                        ? $request->input('licenseKey', '')
+                'license_key' => substr(
+                    is_string($request->input('license_key', ''))
+                        ? $request->input('license_key', '')
                         : '',
                     0,
                     8
@@ -417,9 +415,9 @@ class LicenseServerController extends Controller
                 ], 404);
             }
             // Get update
-            $update = ProductUpdate::where('productId', $product->id)
+            $update = ProductUpdate::where('product_id', $product->id)
                 ->where('version', $version)
-                ->where('isActive', true)
+                ->where('is_active', true)
                 ->first();
             if (! $update) {
                 DB::rollBack();
@@ -430,7 +428,7 @@ class LicenseServerController extends Controller
                     'error_code' => 'UPDATE_NOT_FOUND',
                 ], 404);
             }
-            if (! $update->filePath || ! Storage::exists($update->filePath)) {
+            if (! $update->file_path || ! Storage::exists($update->file_path)) {
                 DB::rollBack();
 
                 return response()->json([
@@ -442,16 +440,16 @@ class LicenseServerController extends Controller
             DB::commit();
 
             // Return file download with security headers
-            $response = Storage::download($update->filePath, $update->fileName ?? "update_{$version}.zip");
+            $response = Storage::download($update->file_path, $update->file_name ?? "update_{$version}.zip");
             $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
             $response->headers->set('Pragma', 'no-cache');
             $response->headers->set('Expires', '0');
-            return new JsonResponse(['success' => true, 'download_url' => $update->filePath]);
+            return new JsonResponse(['success' => true, 'download_url' => $update->file_path]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Update download failed', [
                 'error' => $e->getMessage(),
-                'licenseKey' => substr($licenseKey, 0, 8) . '...',
+                'license_key' => substr($licenseKey, 0, 8) . '...',
                 'product_slug' => $request->input('product_slug', ''),
                 'version' => $version,
                 'trace' => $e->getTraceAsString(),
@@ -480,7 +478,7 @@ class LicenseServerController extends Controller
      * @example
      * // Request body:
      * {
-     *     "licenseKey": "ABC123-DEF456-GHI789",
+     *     "license_key": "ABC123-DEF456-GHI789",
      *     "domain": "example.com",
      *     "product_slug": "my-product"
      * }
@@ -511,7 +509,7 @@ class LicenseServerController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $licenseKey = $validated['licenseKey'];
+            $licenseKey = $validated['license_key'];
             $domain = $validated['domain'];
             $productSlug = $validated['product_slug'];
             // Verify license
@@ -542,8 +540,8 @@ class LicenseServerController extends Controller
                 ], 404);
             }
             // Get latest update
-            $latestUpdate = ProductUpdate::where('productId', $product->id)
-                ->where('isActive', true)
+            $latestUpdate = ProductUpdate::where('product_id', $product->id)
+                ->where('is_active', true)
                 ->orderBy('version', 'desc')
                 ->first();
             if (! $latestUpdate) {
@@ -568,12 +566,12 @@ class LicenseServerController extends Controller
                     'title' => $latestUpdate->title,
                     'description' => $latestUpdate->description,
                     'changelog' => $latestUpdate->changelog,
-                    'isMajor' => $latestUpdate->isMajor,
-                    'isRequired' => $latestUpdate->isRequired,
-                    'releasedAt' => $latestUpdate->releasedAt?->toISOString(),
-                    'fileSize' => $latestUpdate->fileSize,
+                    'is_major' => $latestUpdate->is_major,
+                    'is_required' => $latestUpdate->is_required,
+                    'released_at' => $latestUpdate->released_at?->toISOString(),
+                    'file_size' => $latestUpdate->file_size,
                     'download_url' => route('api.license.download-update', [
-                        'licenseKey' => $licenseKey,
+                        'license_key' => $licenseKey,
                         'version' => $latestUpdate->version,
                     ]) . '?product_slug=' . (is_string($productSlug) ? $productSlug : ''),
                 ],
@@ -582,9 +580,9 @@ class LicenseServerController extends Controller
             DB::rollBack();
             Log::error('Latest version request failed', [
                 'error' => $e->getMessage(),
-                'licenseKey' => substr(
-                    is_string($request->input('licenseKey', ''))
-                        ? $request->input('licenseKey', '')
+                'license_key' => substr(
+                    is_string($request->input('license_key', ''))
+                        ? $request->input('license_key', '')
                         : '',
                     0,
                     8
@@ -617,7 +615,7 @@ class LicenseServerController extends Controller
      * // Request body:
      * {
      *     "product_slug": "my-product",
-     *     "currentVersion": "1.0.0"
+     *     "current_version": "1.0.0"
      * }
      *
      * // Success response:
@@ -625,7 +623,7 @@ class LicenseServerController extends Controller
      *     "success": true,
      *     "data": {
      *         "is_update_available": true,
-     *         "currentVersion": "1.0.0",
+     *         "current_version": "1.0.0",
      *         "next_version": "1.1.0",
      *         "update_info": {...}
      *     }
@@ -647,7 +645,7 @@ class LicenseServerController extends Controller
             DB::beginTransaction();
             $validated = $request->validated();
             $productSlug = $validated['product_slug'];
-            $currentVersion = $validated['currentVersion'];
+            $currentVersion = $validated['current_version'];
             // Get product
             $product = Product::where('slug', $productSlug)->first();
             if (! $product) {
@@ -660,8 +658,8 @@ class LicenseServerController extends Controller
                 ], 404);
             }
             // Get the next sequential update (not the latest)
-            $nextUpdate = ProductUpdate::where('productId', $product->id)
-                ->where('isActive', true)
+            $nextUpdate = ProductUpdate::where('product_id', $product->id)
+                ->where('is_active', true)
                 ->whereRaw('version > ?', [$currentVersion])
                 ->orderBy('version', 'asc') // Get the next version, not the latest
                 ->first();
@@ -695,19 +693,19 @@ class LicenseServerController extends Controller
                 'success' => true,
                 'data' => [
                     'is_update_available' => $isUpdateAvailable,
-                    'currentVersion' => $currentVersion,
+                    'current_version' => $currentVersion,
                     'next_version' => $nextUpdate->version,
                     'message' => $isUpdateAvailable ? 'Update available' : 'No newer updates available',
                     'update_info' => $isUpdateAvailable ? [
                         'title' => $nextUpdate->title,
                         'description' => $nextUpdate->description,
                         'changelog' => $nextUpdate->changelog,
-                        'isMajor' => $nextUpdate->isMajor,
-                        'isRequired' => $nextUpdate->isRequired,
-                        'releaseDate' => $nextUpdate->releaseDate,
-                        'fileSize' => $nextUpdate->fileSize,
+                        'is_major' => $nextUpdate->is_major,
+                        'is_required' => $nextUpdate->is_required,
+                        'release_date' => $nextUpdate->release_date,
+                        'file_size' => $nextUpdate->file_size,
                         'download_url' => route('api.license.download-update', [
-                            'licenseKey' => 'REQUIRED',
+                            'license_key' => 'REQUIRED',
                             'version' => $nextUpdate->version,
                         ]),
                     ] : null,
@@ -775,7 +773,7 @@ class LicenseServerController extends Controller
         RateLimiter::hit($key, 300); // 5 minutes
         try {
             DB::beginTransaction();
-            $products = Product::where('isActive', true)
+            $products = Product::where('is_active', true)
                 ->select(['id', 'name', 'slug', 'description', 'version'])
                 ->get();
             DB::commit();
@@ -822,19 +820,19 @@ class LicenseServerController extends Controller
             $product = Product::where('slug', $productSlug)->first();
             if (! $product) {
                 Log::warning('Product not found for license verification', [
-                    'licenseKey' => substr($licenseKey, 0, 8) . '...',
+                    'license_key' => substr($licenseKey, 0, 8) . '...',
                     'product_slug' => $productSlug,
                 ]);
 
                 return false;
             }
-            // Find license by licenseKey (which is same as purchaseCode in our system)
-            $license = License::where('licenseKey', $licenseKey)
-                ->where('productId', $product->id)
+            // Find license by license_key (which is same as purchase_code in our system)
+            $license = License::where('license_key', $licenseKey)
+                ->where('product_id', $product->id)
                 ->first();
             if (! $license) {
                 Log::warning('License not found in database', [
-                    'licenseKey' => substr($licenseKey, 0, 8) . '...',
+                    'license_key' => substr($licenseKey, 0, 8) . '...',
                     'product_slug' => $productSlug,
                 ]);
 
@@ -843,17 +841,17 @@ class LicenseServerController extends Controller
             // Check if license is active
             if ($license->status !== 'active') {
                 Log::warning('License is not active', [
-                    'licenseKey' => substr($licenseKey, 0, 8) . '...',
+                    'license_key' => substr($licenseKey, 0, 8) . '...',
                     'status' => $license->status,
                 ]);
 
                 return false;
             }
             // Check if license has expired
-            if ($license->licenseExpiresAt && $license->licenseExpiresAt->isPast()) {
+            if ($license->license_expires_at && $license->license_expires_at->isPast()) {
                 Log::warning('License has expired', [
-                    'licenseKey' => substr($licenseKey, 0, 8) . '...',
-                    'expiresAt' => $license->licenseExpiresAt->toISOString(),
+                    'license_key' => substr($licenseKey, 0, 8) . '...',
+                    'expires_at' => $license->license_expires_at->toISOString(),
                 ]);
 
                 return false;
@@ -869,7 +867,7 @@ class LicenseServerController extends Controller
                         $this->registerDomainForLicense($license, $domain);
                     } catch (\Exception $e) {
                         Log::warning('Domain limit exceeded', [
-                            'licenseKey' => substr($licenseKey, 0, 8) . '...',
+                            'license_key' => substr($licenseKey, 0, 8) . '...',
                             'domain' => $domain,
                             'error' => $e->getMessage(),
                         ]);
@@ -880,7 +878,7 @@ class LicenseServerController extends Controller
                     // Verification mode: Verify domain authorization
                     if (! $this->verifyDomain($license, $domain)) {
                         Log::warning('Domain not authorized for this license', [
-                            'licenseKey' => substr($licenseKey, 0, 8) . '...',
+                            'license_key' => substr($licenseKey, 0, 8) . '...',
                             'domain' => $domain,
                         ]);
 
@@ -894,7 +892,7 @@ class LicenseServerController extends Controller
         } catch (\Exception $e) {
             Log::error('License verification exception', [
                 'error' => $e->getMessage(),
-                'licenseKey' => substr($licenseKey, 0, 8) . '...',
+                'license_key' => substr($licenseKey, 0, 8) . '...',
                 'domain' => $domain,
                 'product_slug' => $productSlug,
                 'trace' => $e->getTraceAsString(),
@@ -930,19 +928,25 @@ class LicenseServerController extends Controller
 
                 return true;
             } catch (\Exception $e) {
-                Log::warning('Cannot auto-register domain due to limit', [
-                    'licenseId' => $license->id,
+                Log::warning(
+                    'Cannot auto-register domain due to limit',
+                    [
+                    'license_id' => $license->id,
                     'domain' => $domain,
                     'error' => $e->getMessage(),
                     'ip' => request()->ip(),
-                ]);
+                    ]
+                );
 
                 return false;
             }
         }
         foreach ($authorizedDomains as $authorizedDomain) {
-            $authDomain = preg_replace('/^https?:\/\//', '', $authorizedDomain->domain ?? '')
-                ?? $authorizedDomain->domain ?? '';
+            $authDomain = preg_replace(
+                '/^https?:\/\//',
+                '',
+                $authorizedDomain->domain ?? ''
+            ) ?? $authorizedDomain->domain ?? '';
             $authDomain = preg_replace('/^www\./', '', $authDomain) ?? $authDomain;
             if ($authDomain === $domain) {
                 // Update last used timestamp
@@ -1018,17 +1022,15 @@ class LicenseServerController extends Controller
     {
         if ($license->hasReachedDomainLimit() === true) {
             Log::warning('Domain limit exceeded for license', [
-                'licenseId' => $license->id,
-                'purchaseCode' => !empty($license->purchaseCode)
-                    ? substr($license->purchaseCode, 0, 8) . '...'
-                    : 'unknown',
+                'license_id' => $license->id,
+                'purchase_code' => substr($license->purchase_code, 0, 8) . '...',
                 'domain' => $domain,
-                'current_domains' => $license->activeDomainsCount,
-                'maxDomains' => $license->maxDomains ?? 1,
-                'licenseType' => $license->licenseType,
+                'current_domains' => $license->active_domains_count,
+                'max_domains' => $license->max_domains ?? 1,
+                'license_type' => $license->license_type,
                 'ip' => request()->ip(),
             ]);
-            $maxDomains = $license->maxDomains ?? 1;
+            $maxDomains = $license->max_domains ?? 1;
             throw new \Exception("License has reached its maximum domain limit ({$maxDomains} domain"
                 . ($maxDomains > 1 ? 's' : '') . "). Cannot register new domain: {$domain}");
         }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,13 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property int $id
  * @property string $gateway
- * @property bool $isEnabled
+ * @property bool $is_enabled
  * @property bool $is_sandbox
  * @property array<array-key, mixed>|null $credentials
  * @property string|null $webhook_url
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
- * @method static \Database\Factories\PaymentSettingFactory factory($count = null, $state = [])
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting query()
@@ -35,22 +32,17 @@ class PaymentSetting extends Model
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = PaymentSettingFactory::class;
 
     protected $fillable = [
         'gateway',
-        'isEnabled',
+        'is_enabled',
         'is_sandbox',
         'credentials',
         'webhook_url',
     ];
     protected $casts = [
-        'isEnabled' => 'boolean',
+        'is_enabled' => 'boolean',
         'is_sandbox' => 'boolean',
         'credentials' => 'array',
     ];
@@ -67,7 +59,7 @@ class PaymentSetting extends Model
     public static function isGatewayEnabled(string $gateway): bool
     {
         $setting = static::getByGateway($gateway);
-        return $setting ? $setting->isEnabled : false;
+        return $setting ? $setting->is_enabled : false;
     }
     /**
      * Get enabled gateways.
@@ -77,7 +69,7 @@ class PaymentSetting extends Model
      */
     public static function getEnabledGateways(): array
     {
-        $gateways = static::where('isEnabled', true)
+        $gateways = static::where('is_enabled', true)
             ->pluck('gateway')
             ->toArray();
         $result = [];

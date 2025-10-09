@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,7 +29,7 @@ class EmailTemplateRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -40,7 +38,7 @@ class EmailTemplateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $template = $this->route('emailTemplate');
+        $template = $this->route('email_template');
         $templateId = $template && is_object($template) && property_exists($template, 'id') ? $template->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         $route = $this->route();
@@ -70,8 +68,8 @@ class EmailTemplateRequest extends FormRequest
                 'string',
                 'max:255',
                 $isUpdate ?
-                    Rule::unique('emailTemplates', 'name')->ignore($templateId) :
-                    'unique:emailTemplates, name',
+                    Rule::unique('email_templates', 'name')->ignore($templateId) :
+                    'unique:email_templates, name',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
             'subject' => [
@@ -98,7 +96,7 @@ class EmailTemplateRequest extends FormRequest
                     'update', 'notification', 'marketing', 'support',
                 ]),
             ],
-            'isActive' => [
+            'is_active' => [
                 'boolean',
             ],
             'variables' => [
@@ -179,7 +177,7 @@ class EmailTemplateRequest extends FormRequest
             'body' => 'email body',
             'type' => 'template type',
             'category' => 'template category',
-            'isActive' => 'active status',
+            'is_active' => 'active status',
             'variables' => 'template variables',
             'description' => 'template description',
             'priority' => 'template priority',
@@ -202,18 +200,18 @@ class EmailTemplateRequest extends FormRequest
         ]);
         // Handle checkbox values
         $this->merge([
-            'isActive' => $this->has('isActive'),
+            'is_active' => $this->has('is_active'),
             'send_immediately' => $this->has('send_immediately'),
         ]);
         // Set default values
         $this->merge([
-            'isActive' => $this->isActive ?? true,
+            'is_active' => $this->is_active ?? true,
             'priority' => $this->priority ?? 5,
         ]);
         // Sanitize test data if present
-        if ($this->testData && is_array($this->testData)) {
+        if ($this->test_data && is_array($this->test_data)) {
             $sanitizedTestData = [];
-            foreach ($this->testData as $key => $value) {
+            foreach ($this->test_data as $key => $value) {
                 $sanitizedTestData[$key] = $this->sanitizeInput($value);
             }
             $this->merge(['test_data' => $sanitizedTestData]);

@@ -89,14 +89,14 @@ class ProductController extends Controller
             $key = 'products-index:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 30)) {
                 Log::warning('Rate limit exceeded for products index', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
                 abort(429, 'Too many requests');
             }
             RateLimiter::hit($key, 300); // 5 minutes
-            $productsQuery = Product::with(['category', 'programmingLanguage'])->where('isActive', true);
+            $productsQuery = Product::with(['category', 'programmingLanguage'])->where('is_active', true);
             // Search functionality
             if ($request && $request->filled('search')) {
                 $search = $this->sanitizeInput($request->validated('search'));
@@ -111,14 +111,14 @@ class ProductController extends Controller
             if ($request && $request->filled('category')) {
                 $categoryId = $this->sanitizeInput($request->validated('category'));
                 if (is_numeric($categoryId)) {
-                    $productsQuery->where('categoryId', (int)$categoryId);
+                    $productsQuery->where('category_id', (int)$categoryId);
                 }
             }
             // Programming language filtering
             if ($request && $request->filled('language')) {
                 $languageId = $this->sanitizeInput($request->validated('language'));
                 if (is_numeric($languageId)) {
-                    $productsQuery->where('programmingLanguage', (int)$languageId);
+                    $productsQuery->where('programming_language', (int)$languageId);
                 }
             }
             // Price filtering
@@ -140,14 +140,14 @@ class ProductController extends Controller
                     $productsQuery->orderBy('price', 'desc');
                     break;
                 case 'newest':
-                    $productsQuery->orderBy('createdAt', 'desc');
+                    $productsQuery->orderBy('created_at', 'desc');
                     break;
                 default:
                     $productsQuery->orderBy('name', 'asc');
             }
             $products = $productsQuery->paginate(15)->withQueryString();
-            $categories = ProductCategory::where('isActive', true)->orderBy('sortOrder')->get();
-            $programmingLanguages = ProgrammingLanguage::where('isActive', true)->orderBy('sortOrder')->get();
+            $categories = ProductCategory::where('is_active', true)->orderBy('sort_order')->get();
+            $programmingLanguages = ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get();
             return view('user.products.index', [
                 'products' => $products,
                 'categories' => $categories,
@@ -159,7 +159,7 @@ class ProductController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             abort(500, 'Failed to load products');
@@ -188,18 +188,18 @@ class ProductController extends Controller
             $key = 'product-show:' . (Auth::id() ?? request()->ip()) . ':' . $product->id;
             if (RateLimiter::tooManyAttempts($key, 20)) {
                 Log::warning('Rate limit exceeded for product show', [
-                    'productId' => $product->id,
-                    'userId' => Auth::id(),
+                    'product_id' => $product->id,
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
                 abort(429, 'Too many requests');
             }
             RateLimiter::hit($key, 300); // 5 minutes
-            if (! $product->isActive) {
+            if (! $product->is_active) {
                 Log::warning('Inactive product access attempt', [
-                    'productId' => $product->id,
-                    'userId' => Auth::id(),
+                    'product_id' => $product->id,
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                 ]);
                 abort(404);
@@ -212,19 +212,19 @@ class ProductController extends Controller
             if (Auth::check()) {
                 $user = Auth::user();
                 $userOwnsProduct = $user ? $user->licenses()
-                    ->where('productId', $product->id)
+                    ->where('product_id', $product->id)
                     ->where('status', 'active')
                     ->where(function ($q) {
-                        $q->whereNull('licenseExpiresAt')
-                            ->orWhere('licenseExpiresAt', '>', now());
+                        $q->whereNull('license_expires_at')
+                            ->orWhere('license_expires_at', '>', now());
                     })
                     ->exists() : false;
                 // Check if user has purchased this product before (any license, even expired)
                 $userHasPurchasedBefore = $user?->licenses()
-                    ->where('productId', $product->id)
+                    ->where('product_id', $product->id)
                     ->exists();
                 // Check download permissions if product is downloadable
-                if ($product->isDownloadable) {
+                if ($product->is_downloadable) {
                     $productFileService = app(ProductFileService::class);
                     $permissions = $productFileService->userCanDownloadFiles(
                         $product,
@@ -235,37 +235,37 @@ class ProductController extends Controller
                 }
             }
             // Process content for HTML/text detection
-            $product->descriptionHasHtml = false;
-            $product->requirementsHasHtml = false;
-            $product->installationGuideHasHtml = false;
+            $product->description_has_html = false;
+            $product->requirements_has_html = false;
+            $product->installation_guide_has_html = false;
 
             // Check if fields are strings before processing
             $description = $product->description;
             $requirements = $product->requirements;
-            $installationGuide = $product->installationGuide;
+            $installationGuide = $product->installation_guide;
 
             if (is_string($description)) {
-                $product->descriptionHasHtml = strip_tags($description) !== $description;
+                $product->description_has_html = strip_tags($description) !== $description;
             }
             if (is_string($requirements)) {
-                $product->requirementsHasHtml = strip_tags($requirements) !== $requirements;
+                $product->requirements_has_html = strip_tags($requirements) !== $requirements;
             }
             if (is_string($installationGuide)) {
-                $product->installationGuideHasHtml = strip_tags($installationGuide) !== $installationGuide;
+                $product->installation_guide_has_html = strip_tags($installationGuide) !== $installationGuide;
             }
             // Get license count for this product
-            $licenseCount = License::where('productId', $product->id)
+            $licenseCount = License::where('product_id', $product->id)
                 ->where('status', 'active')
                 ->where(function ($q) {
-                    $q->whereNull('licenseExpiresAt')
-                        ->orWhere('licenseExpiresAt', '>', now());
+                    $q->whereNull('license_expires_at')
+                        ->orWhere('license_expires_at', '>', now());
                 })
                 ->count();
-            $relatedProducts = Product::where('categoryId', $product->categoryId)
+            $relatedProducts = Product::where('category_id', $product->category_id)
                 ->where('id', '!=', $product->id)
-                ->where('isActive', true)
+                ->where('is_active', true)
                 ->with(['category', 'programmingLanguage'])
-                ->orderBy('createdAt', 'desc')
+                ->orderBy('created_at', 'desc')
                 ->limit(3)
                 ->get();
             // Process screenshots data
@@ -291,8 +291,8 @@ class ProductController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'productId' => $product->id,
-                'userId' => Auth::id(),
+                'product_id' => $product->id,
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             abort(500, 'Failed to load product details');
@@ -322,7 +322,7 @@ class ProductController extends Controller
             if (RateLimiter::tooManyAttempts($key, 20)) {
                 Log::warning('Rate limit exceeded for public product show', [
                     'slug' => $slug,
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -333,13 +333,13 @@ class ProductController extends Controller
             if (! $sanitizedSlug) {
                 Log::warning('Invalid slug provided for public product show', [
                     'slug' => $slug,
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                 ]);
                 abort(404);
             }
             $product = Product::where('slug', $sanitizedSlug)
-                ->where('isActive', true)
+                ->where('is_active', true)
                 ->with(['category', 'programmingLanguage'])
                 ->firstOrFail();
             // Check if user owns this product and has paid invoice
@@ -350,19 +350,19 @@ class ProductController extends Controller
             if (Auth::check()) {
                 $user = Auth::user();
                 $userOwnsProduct = $user ? $user->licenses()
-                    ->where('productId', $product->id)
+                    ->where('product_id', $product->id)
                     ->where('status', 'active')
                     ->where(function ($q) {
-                        $q->whereNull('licenseExpiresAt')
-                            ->orWhere('licenseExpiresAt', '>', now());
+                        $q->whereNull('license_expires_at')
+                            ->orWhere('license_expires_at', '>', now());
                     })
                     ->exists() : false;
                 // Check if user has purchased this product before (any license, even expired)
                 $userHasPurchasedBefore = $user?->licenses()
-                    ->where('productId', $product->id)
+                    ->where('product_id', $product->id)
                     ->exists();
                 // Check download permissions if product is downloadable
-                if ($product->isDownloadable) {
+                if ($product->is_downloadable) {
                     $productFileService = app(ProductFileService::class);
                     $permissions = $productFileService->userCanDownloadFiles(
                         $product,
@@ -373,37 +373,37 @@ class ProductController extends Controller
                 }
             }
             // Process content for HTML/text detection
-            $product->descriptionHasHtml = false;
-            $product->requirementsHasHtml = false;
-            $product->installationGuideHasHtml = false;
+            $product->description_has_html = false;
+            $product->requirements_has_html = false;
+            $product->installation_guide_has_html = false;
 
             // Check if fields are strings before processing
             $description = $product->description;
             $requirements = $product->requirements;
-            $installationGuide = $product->installationGuide;
+            $installationGuide = $product->installation_guide;
 
             if (is_string($description)) {
-                $product->descriptionHasHtml = strip_tags($description) !== $description;
+                $product->description_has_html = strip_tags($description) !== $description;
             }
             if (is_string($requirements)) {
-                $product->requirementsHasHtml = strip_tags($requirements) !== $requirements;
+                $product->requirements_has_html = strip_tags($requirements) !== $requirements;
             }
             if (is_string($installationGuide)) {
-                $product->installationGuideHasHtml = strip_tags($installationGuide) !== $installationGuide;
+                $product->installation_guide_has_html = strip_tags($installationGuide) !== $installationGuide;
             }
             // Get license count for this product
-            $licenseCount = License::where('productId', $product->id)
+            $licenseCount = License::where('product_id', $product->id)
                 ->where('status', 'active')
                 ->where(function ($q) {
-                    $q->whereNull('licenseExpiresAt')
-                        ->orWhere('licenseExpiresAt', '>', now());
+                    $q->whereNull('license_expires_at')
+                        ->orWhere('license_expires_at', '>', now());
                 })
                 ->count();
-            $relatedProducts = Product::where('categoryId', $product->categoryId)
+            $relatedProducts = Product::where('category_id', $product->category_id)
                 ->where('id', '!=', $product->id)
-                ->where('isActive', true)
+                ->where('is_active', true)
                 ->with(['category', 'programmingLanguage'])
-                ->orderBy('createdAt', 'desc')
+                ->orderBy('created_at', 'desc')
                 ->limit(3)
                 ->get();
             return view('user.products.show', [
@@ -418,7 +418,7 @@ class ProductController extends Controller
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             Log::warning('Product not found for public show', [
                 'slug' => $slug,
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             abort(404);
@@ -429,7 +429,7 @@ class ProductController extends Controller
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
                 'slug' => $slug,
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             abort(500, 'Failed to load product details');

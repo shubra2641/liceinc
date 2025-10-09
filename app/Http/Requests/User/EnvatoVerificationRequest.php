@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +27,7 @@ class EnvatoVerificationRequest extends FormRequest
         return [
             'purchase_code' => ['required', 'string', 'max:255'],
             'product_slug' => ['nullable', 'string', 'max:255'],
-            'productId' => ['required', 'integer', 'exists:products,id'],
+            'product_id' => ['required', 'integer', 'exists:products,id'],
         ];
     }
 }

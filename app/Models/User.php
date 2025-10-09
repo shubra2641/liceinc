@@ -71,8 +71,10 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read int|null $license_logs_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\License> $licenses
  * @property-read int|null $licenses_count
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int,
- * \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<
+ *     int,
+ *     \Illuminate\Notifications\DatabaseNotification
+ * > $notifications
  * @property-read int|null $notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
  * @property-read int|null $permissions_count
@@ -80,7 +82,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Ticket> $tickets
  * @property-read int|null $tickets_count
- * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User permission($permissions, $without = false)
@@ -149,13 +150,9 @@ class User extends AuthenticatableBase implements
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = UserFactory::class;
     use HasRoles;
+    // Provides the email verification notification & helpers
     use MustVerifyEmailTrait;
     use Notifiable;
 
@@ -186,7 +183,6 @@ class User extends AuthenticatableBase implements
         'startdate',
         'expdate',
         'lastlogin',
-        'status',
         'language',
         'allow_sso',
         'email_verified',
@@ -255,45 +251,41 @@ class User extends AuthenticatableBase implements
         'email_preferences' => 'array',
     ];
     /**
-     * @return HasMany<License, User>
+     * @return HasMany<License, $this>
      */
     public function licenses(): HasMany
     {
-        // @phpstan-ignore-next-line
         return $this->hasMany(License::class);
     }
     /**
-     * @return HasMany<Ticket, User>
+     * @return HasMany<Ticket, $this>
      */
     public function tickets(): HasMany
     {
-        // @phpstan-ignore-next-line
         return $this->hasMany(Ticket::class);
     }
     /**
      * Invoices belonging to the user.
      */
     /**
-     * @return HasMany<Invoice, User>
+     * @return HasMany<Invoice, $this>
      */
     public function invoices(): HasMany
     {
-        // @phpstan-ignore-next-line
         return $this->hasMany(Invoice::class);
     }
     public function hasEnvatoAccount(): bool
     {
-        return ! empty($this->envatoUsername) && ! empty($this->envatoToken);
+        return ! empty($this->envato_username) && ! empty($this->envato_token);
     }
     /**
      * License logs that belong to the user through licenses.
      */
     /**
-     * @return HasManyThrough<LicenseLog, License, User>
+     * @return HasManyThrough<LicenseLog, License, $this>
      */
     public function licenseLogs(): HasManyThrough
     {
-        // @phpstan-ignore-next-line
         return $this->hasManyThrough(LicenseLog::class, License::class, 'user_id', 'license_id');
     }
 }

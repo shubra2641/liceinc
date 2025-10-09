@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests;
 
 use App\Models\User;
@@ -114,13 +112,13 @@ class ProfileUpdateRequest extends FormRequest
                 'max:100',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
-            'envatoUsername' => [
+            'envato_username' => [
                 'nullable',
                 'string',
                 'max:255',
                 'regex:/^[a-zA-Z0-9\s\-_]+$/',
             ],
-            'envatoId' => [
+            'envato_id' => [
                 'nullable',
                 'string',
                 'max:100',
@@ -163,8 +161,8 @@ class ProfileUpdateRequest extends FormRequest
             'state.regex' => 'State contains invalid characters.',
             'postcode.regex' => 'Postcode contains invalid characters.',
             'country.regex' => 'Country contains invalid characters.',
-            'envatoUsername.regex' => 'Envato username contains invalid characters.',
-            'envatoId.regex' => 'Envato ID contains invalid characters.',
+            'envato_username.regex' => 'Envato username contains invalid characters.',
+            'envato_id.regex' => 'Envato ID contains invalid characters.',
             'password.min' => 'The password must be at least 8 characters.',
             'password.confirmed' => 'The password confirmation does not match.',
         ];
@@ -185,8 +183,8 @@ class ProfileUpdateRequest extends FormRequest
             'address1' => 'address line 1',
             'address2' => 'address line 2',
             'postcode' => 'postal code',
-            'envatoUsername' => 'Envato username',
-            'envatoId' => 'Envato ID',
+            'envato_username' => 'Envato username',
+            'envato_id' => 'Envato ID',
             'current_password' => 'current password',
             'password_confirmation' => 'password confirmation',
         ];
@@ -209,10 +207,8 @@ class ProfileUpdateRequest extends FormRequest
             'state' => $this->input('state') ? $this->sanitizeInput($this->input('state')) : null,
             'postcode' => $this->input('postcode') ? $this->sanitizeInput($this->input('postcode')) : null,
             'country' => $this->input('country') ? $this->sanitizeInput($this->input('country')) : null,
-            'envatoUsername' => $this->input('envatoUsername')
-                ? $this->sanitizeInput($this->input('envatoUsername'))
-                : null,
-            'envatoId' => $this->input('envatoId') ? $this->sanitizeInput($this->input('envatoId')) : null,
+            'envato_username' => $this->input('envato_username') ? $this->sanitizeInput($this->input('envato_username')) : null,
+            'envato_id' => $this->input('envato_id') ? $this->sanitizeInput($this->input('envato_id')) : null,
         ]);
     }
     /**

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Helpers;
 
 use App\Models\Setting;
@@ -554,7 +552,7 @@ class ConfigHelper
     {
         return self::getSettings([
             'license_api_token',
-            'envatoPersonalToken',
+            'envato_personal_token',
             'envato_client_id',
             'envato_client_secret',
             'envato_redirect_uri',
@@ -571,12 +569,12 @@ class ConfigHelper
             'license_grace_period',
             // Domain management settings
             'license_allow_localhost',
-            'license_allow_ipAddresses',
+            'license_allow_ip_addresses',
             'license_allow_wildcards',
             'license_validate_ssl',
             'license_auto_approve_subdomains',
-            'license_maxDomains',
-            'licenseDomain_cooldown',
+            'license_max_domains',
+            'license_domain_cooldown',
             // License expiration settings
             'license_default_duration',
             'license_support_duration',
@@ -625,13 +623,13 @@ class ConfigHelper
     public static function getEnvatoSettings(): array
     {
         return self::getSettings([
-            'envatoPersonalToken',
+            'envato_personal_token',
             'envato_client_id',
             'envato_client_secret',
             'envato_redirect_uri',
             'envato_auth_enabled',
             'envato_oauth_enabled',
-            'envatoUsername',
+            'envato_username',
         ]);
     }
 

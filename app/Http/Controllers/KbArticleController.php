@@ -64,7 +64,7 @@ class KbArticleController extends Controller
             $key = 'kb-articles-index:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 20)) {
                 Log::warning('Rate limit exceeded for KB articles index', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -73,9 +73,9 @@ class KbArticleController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
             $user = Auth::user();
-            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to KB articles', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -90,7 +90,7 @@ class KbArticleController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             abort(500, 'Failed to load articles');
@@ -117,7 +117,7 @@ class KbArticleController extends Controller
             $key = 'kb-articles-create:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for KB article creation form', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -126,9 +126,9 @@ class KbArticleController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
             $user = Auth::user();
-            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to KB article creation form', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -142,7 +142,7 @@ class KbArticleController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             abort(500, 'Failed to load creation form');
@@ -164,7 +164,7 @@ class KbArticleController extends Controller
      * // Request:
      * POST /admin/kb-articles
      * {
-     *     "kbCategory_id": 1,
+     *     "kb_category_id": 1,
      *     "title": "How to Install",
      *     "content": "Installation guide...",
      *     "image": [file]
@@ -177,7 +177,7 @@ class KbArticleController extends Controller
             $key = 'kb-articles-store:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for KB article creation', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -186,9 +186,9 @@ class KbArticleController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
             $user = Auth::user();
-            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized attempt to create KB article', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -196,9 +196,9 @@ class KbArticleController extends Controller
             }
             DB::beginTransaction();
             $validated = $request->validate([
-                'kbCategory_id' => ['required', 'exists:kb_categories, id'],
+                'kb_category_id' => ['required', 'exists:kb_categories, id'],
                 'title' => ['required', 'string', 'max:255'],
-                'slug' => ['nullable', 'string', 'max:255', 'unique:kbArticles, slug'],
+                'slug' => ['nullable', 'string', 'max:255', 'unique:kb_articles, slug'],
                 'excerpt' => ['nullable', 'string'],
                 'content' => ['required', 'string'],
                 'image' => ['nullable', 'image', 'max:2048'],
@@ -222,12 +222,7 @@ class KbArticleController extends Controller
             $validatedArray['meta_title'] = $this->sanitizeInput($validatedArray['meta_title'] ?? '');
             $validatedArray['meta_description'] = $this->sanitizeInput($validatedArray['meta_description'] ?? '');
             $validatedArray['meta_keywords'] = $this->sanitizeInput($validatedArray['meta_keywords'] ?? '');
-            $validatedArray['slug'] = $validatedArray['slug']
-                ?: Str::slug(
-                    is_string($validatedArray['title'] ?? null)
-                        ? $validatedArray['title']
-                        : ''
-                );
+            $validatedArray['slug'] = $validatedArray['slug'] ?: Str::slug(is_string($validatedArray['title'] ?? null) ? $validatedArray['title'] : '');
             $validatedArray['is_published'] = $request->boolean('is_published');
             // Handle checkbox values
             $validatedArray['allow_comments'] = $request->has('allow_comments');
@@ -246,7 +241,7 @@ class KbArticleController extends Controller
             DB::rollBack();
             Log::warning('KB article creation validation failed', [
                 'errors' => $e->errors(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return back()->withErrors($e->errors())->withInput();
@@ -257,7 +252,7 @@ class KbArticleController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return back()->with('error', 'Failed to create article. Please try again.');
@@ -286,7 +281,7 @@ class KbArticleController extends Controller
             $key = 'kb-articles-edit:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for KB article editing form', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -295,9 +290,9 @@ class KbArticleController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
             $user = Auth::user();
-            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to KB article editing form', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -311,7 +306,7 @@ class KbArticleController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             abort(500, 'Failed to load editing form');
@@ -334,7 +329,7 @@ class KbArticleController extends Controller
      * // Request:
      * PUT /admin/kb-articles/{id}
      * {
-     *     "kbCategory_id": 1,
+     *     "kb_category_id": 1,
      *     "title": "Updated Title",
      *     "content": "Updated content...",
      *     "image": [file]
@@ -347,7 +342,7 @@ class KbArticleController extends Controller
             $key = 'kb-articles-update:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for KB article update', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -356,9 +351,9 @@ class KbArticleController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
             $user = Auth::user();
-            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized attempt to update KB article', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -366,9 +361,9 @@ class KbArticleController extends Controller
             }
             DB::beginTransaction();
             $validated = $request->validate([
-                'kbCategory_id' => ['required', 'exists:kb_categories, id'],
+                'kb_category_id' => ['required', 'exists:kb_categories, id'],
                 'title' => ['required', 'string', 'max:255'],
-                'slug' => ['required', 'string', 'max:255', 'unique:kbArticles, slug, ' . $kbArticle->id],
+                'slug' => ['required', 'string', 'max:255', 'unique:kb_articles, slug, ' . $kbArticle->id],
                 'excerpt' => ['nullable', 'string'],
                 'content' => ['required', 'string'],
                 'image' => ['nullable', 'image', 'max:2048'],
@@ -409,7 +404,7 @@ class KbArticleController extends Controller
             DB::rollBack();
             Log::warning('KB article update validation failed', [
                 'errors' => $e->errors(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return back()->withErrors($e->errors())->withInput();
@@ -420,7 +415,7 @@ class KbArticleController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return back()->with('error', 'Failed to update article. Please try again.');
@@ -450,7 +445,7 @@ class KbArticleController extends Controller
             $key = 'kb-articles-destroy:' . (Auth::id() ?? request()->ip());
             if (RateLimiter::tooManyAttempts($key, 3)) {
                 Log::warning('Rate limit exceeded for KB article deletion', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -459,9 +454,9 @@ class KbArticleController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
             $user = Auth::user();
-            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized attempt to delete KB article', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
@@ -478,7 +473,7 @@ class KbArticleController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             return back()->with('error', 'Failed to delete article. Please try again.');

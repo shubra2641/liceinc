@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 return [
     /*
     |--------------------------------------------------------------------------
@@ -17,7 +15,8 @@ return [
 
     'domain' => env(
         'LICENSE_SERVER_DOMAIN',
-        \App\Helpers\SecureFileHelper::parseUrl((string) env('APP_URL'), PHP_URL_HOST) ?: 'my-logos.com'
+        \App\Helpers\SecureFileHelper::parseUrl((string) env('APP_URL'), PHP_URL_HOST)
+            ?: 'my-logos.com'
     ),
 
     'timeout' => env('LICENSE_SERVER_TIMEOUT', 30),

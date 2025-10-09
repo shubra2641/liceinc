@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -76,7 +74,7 @@ class ProductController extends Controller
                     'envato_item_id' => $itemData['id'] ?? null,
                     'purchase_url_envato' => $itemData['url'] ?? null,
                     'purchase_url_buy' => $itemData['url'] ?? null, // Same as purchase URL for now
-                    'supportDays' => $this->calculateSupportDays($itemData),
+                    'support_days' => $this->calculateSupportDays($itemData),
                     'version' => $itemData['version'] ?? null,
                     'price' => isset($itemData['price_cents']) && is_numeric($itemData['price_cents'])
                         ? ($itemData['price_cents'] / 100)
@@ -184,8 +182,7 @@ class ProductController extends Controller
     private function getIntegrationCodeTemplate(Product $product, string $apiUrl): string
     {
         // Return a minimal placeholder integration file to avoid complex embedded templates here.
-        return "<?php
-declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// API: {$apiUrl}\n";
+        return "<?php\n// Integration placeholder for {$product->slug}\n// API: {$apiUrl}\n";
     }
 
     /**
@@ -207,7 +204,7 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
         // Removed category filter to display all products regardless of category assignment
         // Apply language filter
         if (request('language')) {
-            $productsQuery->where('programmingLanguage', request('language'));
+            $productsQuery->where('programming_language', request('language'));
         }
         // Apply price filter
         $priceFilter = request('price_filter');
@@ -226,14 +223,14 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
                 $productsQuery->orderBy('price', 'desc');
                 break;
             case 'newest':
-                $productsQuery->orderBy('createdAt', 'desc');
+                $productsQuery->orderBy('created_at', 'desc');
                 break;
             default:
                 $productsQuery->orderBy('name', 'asc');
         }
         $products = $productsQuery->paginate(10)->withQueryString();
-        $categories = \App\Models\ProductCategory::where('isActive', true)->orderBy('sortOrder')->get();
-        $programmingLanguages = \App\Models\ProgrammingLanguage::where('isActive', true)->orderBy('sortOrder')->get();
+        $categories = \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get();
+        $programmingLanguages = \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get();
         // Provide all products collection for grouped/category displays in the admin index
         $allProducts = Product::with(['category', 'programmingLanguage'])->get();
 
@@ -250,13 +247,13 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
      */
     public function create(): View
     {
-        $categories = \App\Models\ProductCategory::where('isActive', true)->orderBy('sortOrder')->get();
-        $programmingLanguages = \App\Models\ProgrammingLanguage::where('isActive', true)->orderBy('sortOrder')->get();
+        $categories = \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get();
+        $programmingLanguages = \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get();
         $kbCategories = KbCategory::where('is_published', true)->orderBy('name')->get(['id', 'name', 'slug']);
         $kbArticles = KbArticle::where('is_published', true)
             ->with('category:id, name')
             ->orderBy('title')
-            ->get(['id', 'title', 'slug', 'kbCategory_id']);
+            ->get(['id', 'title', 'slug', 'kb_category_id']);
 
         return view('admin.products.create', [
             'categories' => $categories,
@@ -282,10 +279,9 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
             if (isset($validated['requires_domain'])) {
                 $validated['requires_domain'] = (bool)$validated['requires_domain'];
             }
-            $validated['slug'] = $validated['slug']
-                ?? Str::slug(
-                    is_string($validated['name'] ?? null) ? $validated['name'] : ''
-                );
+            $validated['slug'] = $validated['slug'] ?? Str::slug(
+                is_string($validated['name'] ?? null) ? $validated['name'] : ''
+            );
             // Handle main image upload
             if ($request->hasFile('image')) {
                 $validated['image'] = $request->file('image')->store('products', 'public');
@@ -299,15 +295,15 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
                 $validated['gallery_images'] = $galleryPaths;
             }
             // Handle lifetime renewal period - set extended_supported_until to null for lifetime
-            if (isset($validated['renewalPeriod']) && $validated['renewalPeriod'] === 'lifetime') {
+            if (isset($validated['renewal_period']) && $validated['renewal_period'] === 'lifetime') {
                 $validated['extended_supported_until'] = null;
             }
             $product = Product::create($validated);
             // Handle product files upload
-            if ($request->hasFile('productFiles')) {
+            if ($request->hasFile('product_files')) {
                 try {
                     $productFileService = app(\App\Services\ProductFileService::class);
-                    foreach ($request->file('productFiles') as $file) {
+                    foreach ($request->file('product_files') as $file) {
                         if ($file->isValid()) {
                             $productFileService->uploadFile($product, $file);
                         }
@@ -375,15 +371,15 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
                 $validated['gallery_images'] = $galleryPaths;
             }
             // Handle lifetime renewal period - set extended_supported_until to null for lifetime
-            if (isset($validated['renewalPeriod']) && $validated['renewalPeriod'] === 'lifetime') {
+            if (isset($validated['renewal_period']) && $validated['renewal_period'] === 'lifetime') {
                 $validated['extended_supported_until'] = null;
             }
             $product->update($validated);
             // Handle product files upload
-            if ($request->hasFile('productFiles')) {
+            if ($request->hasFile('product_files')) {
                 try {
                     $productFileService = app(\App\Services\ProductFileService::class);
-                    foreach ($request->file('productFiles') as $file) {
+                    foreach ($request->file('product_files') as $file) {
                         if ($file->isValid()) {
                             $productFileService->uploadFile($product, $file);
                         }
@@ -395,7 +391,7 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
                 }
             }
             // Regenerate file if programming language or envato settings changed
-            if ($product->wasChanged(['programmingLanguage', 'envato_item_id', 'name', 'slug'])) {
+            if ($product->wasChanged(['programming_language', 'envato_item_id', 'name', 'slug'])) {
                 $this->generateIntegrationFile($product);
             }
             DB::commit();
@@ -441,12 +437,12 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
         return response()->json([
             'id' => $product->id,
             'name' => $product->name,
-            'licenseType' => $product->licenseType,
-            'durationDays' => $product->durationDays,
-            'supportDays' => $product->supportDays,
+            'license_type' => $product->license_type,
+            'duration_days' => $product->duration_days,
+            'support_days' => $product->support_days,
             'price' => $product->price,
-            'renewalPrice' => $product->renewalPrice,
-            'renewalPeriod' => $product->renewalPeriod,
+            'renewal_price' => $product->renewal_price,
+            'renewal_period' => $product->renewal_period,
         ]);
     }
 
@@ -455,8 +451,8 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
      */
     public function edit(Product $product): View
     {
-        $categories = \App\Models\ProductCategory::where('isActive', true)->orderBy('sortOrder')->get();
-        $programmingLanguages = \App\Models\ProgrammingLanguage::where('isActive', true)->orderBy('sortOrder')->get();
+        $categories = \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get();
+        $programmingLanguages = \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get();
         // Load product files
         $product->load('files');
 
@@ -483,7 +479,9 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
             if ($programmingLanguage) {
                 $extensions = $this->getFileExtensionsForLanguage($programmingLanguage->slug);
                 foreach ($extensions as $ext) {
-                    $oldFileWithExt = "integration/{$product->slug}.{(is_string($ext) ? $ext : (string)$ext)}";
+                    $oldFileWithExt = "integration/{$product->slug}." . (
+                        is_string($ext) ? $ext : (string)$ext
+                    );
                     if (Storage::disk('public')->exists($oldFileWithExt)) {
                         Storage::disk('public')->delete($oldFileWithExt);
                     }
@@ -496,9 +494,7 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
         } catch (\Exception $e) {
             // Fallback to old method if new service fails
             $apiDomain = rtrim(is_string(config('app.url')) ? config('app.url') : '', '/');
-            $verificationEndpoint = is_string(
-                config('license.verification_endpoint', '/api/license/verify')
-            )
+            $verificationEndpoint = is_string(config('license.verification_endpoint', '/api/license/verify'))
                 ? config('license.verification_endpoint', '/api/license/verify')
                 : '/api/license/verify';
             $apiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
@@ -508,7 +504,7 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
             Storage::disk('public')->put($filePath, $integrationCode);
             // Update product with integration file path
             $product->update([
-                'integrationFilePath' => $filePath,
+                'integration_file_path' => $filePath,
             ]);
 
             return $filePath;
@@ -522,16 +518,11 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
      */
     public function downloadIntegration(Product $product)
     {
-        $integrationFilePath = $product->integrationFilePath;
-        if (
-            ! $integrationFilePath
-            || ! is_string($integrationFilePath)
-            || ! Storage::disk('public')->exists($integrationFilePath)
-        ) {
+        if (! $product->integration_file_path || ! Storage::disk('public')->exists($product->integration_file_path)) {
             return redirect()->back()->with('error', 'Integration file not found. Please regenerate it.');
         }
 
-        return Storage::disk('public')->download($integrationFilePath, "{$product->slug}.php");
+        return Storage::disk('public')->download($product->integration_file_path, "{$product->slug}.php");
     }
 
     /**
@@ -550,7 +541,9 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
             if ($programmingLanguage) {
                 $extensions = $this->getFileExtensionsForLanguage($programmingLanguage->slug);
                 foreach ($extensions as $ext) {
-                    $oldFileWithExt = "integration/{$product->slug}.{(is_string($ext) ? $ext : (string)$ext)}";
+                    $oldFileWithExt = "integration/{$product->slug}." . (
+                        is_string($ext) ? $ext : (string)$ext
+                    );
                     if (Storage::disk('public')->exists($oldFileWithExt)) {
                         Storage::disk('public')->delete($oldFileWithExt);
                     }
@@ -623,20 +616,20 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
                     'name' => $validated['name'] ?? 'Test User',
                     'email' => $validated['email'],
                     'password' => bcrypt('password123'), // Default password for test users
-                    'emailVerifiedAt' => now(),
+                    'email_verified_at' => now(),
                 ],
             );
             // Generate unique purchase code
             $purchaseCode = 'TEST-' . strtoupper(Str::random(16));
-            // Create license (licenseKey will be automatically set to same value as purchase_code)
+            // Create license (license_key will be automatically set to same value as purchase_code)
             $license = License::create([
-                'productId' => $product->id,
-                'userId' => $user->id,
+                'product_id' => $product->id,
+                'user_id' => $user->id,
                 'purchase_code' => $purchaseCode,
                 'status' => 'active',
-                'licenseType' => 'regular',
-                'support_expiresAt' => now()->addDays($product->supportDays),
-                'licenseExpiresAt' => now()->addYear(),
+                'license_type' => 'regular',
+                'support_expires_at' => now()->addDays($product->support_days),
+                'license_expires_at' => now()->addYear(),
             ]);
             // Add domain
             $license->domains()->create([
@@ -659,8 +652,8 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
     public function logs(Product $product): View
     {
         $logs = LicenseLog::with(['license'])
-            ->whereHas('license', fn ($q) => $q->where('productId', $product->id))
-            ->orWhere('serial', 'like', '%TEST-%') // For test licenses without licenseId
+            ->whereHas('license', fn ($q) => $q->where('product_id', $product->id))
+            ->orWhere('serial', 'like', '%TEST-%') // For test licenses without license_id
             ->latest()
             ->paginate(50);
 
@@ -679,7 +672,7 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
             ->with('category:id, name')
             ->orderBy('title')
             ->get([
-                'id', 'title', 'slug', 'kbCategory_id',
+                'id', 'title', 'slug', 'kb_category_id',
             ]);
 
         return response()->json([
@@ -694,12 +687,12 @@ declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// AP
      */
     public function getKbArticles(int $categoryId): JsonResponse
     {
-        $articles = KbArticle::where('kbCategory_id', $categoryId)
+        $articles = KbArticle::where('kb_category_id', $categoryId)
             ->where('is_published', true)
             ->with('category:id, name')
             ->orderBy('title')
             ->get([
-                'id', 'title', 'slug', 'kbCategory_id',
+                'id', 'title', 'slug', 'kb_category_id',
             ]);
 
         return response()->json([

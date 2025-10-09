@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,14 +9,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
- * @property int|null $userId
+ * @property int|null $user_id
  * @property string $subject
  * @property string $priority
  * @property string $status
  * @property string $content
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
- * @property int|null $licenseId
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int|null $license_id
  * @property int|null $invoice_id
  * @property string|null $purchase_code
  * @property int|null $category_id
@@ -28,7 +26,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TicketReply> $replies
  * @property-read int|null $replies_count
  * @property-read \App\Models\User|null $user
- * @method static \Database\Factories\TicketFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket query()
@@ -51,16 +48,11 @@ class Ticket extends Model
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = TicketFactory::class;
 
     protected $fillable = [
-        'userId',
-        'licenseId',
+        'user_id',
+        'license_id',
         'invoice_id',
         'category_id',
         'purchase_code',
@@ -70,8 +62,8 @@ class Ticket extends Model
         'content',
     ];
     protected $casts = [
-        'userId' => 'integer',
-        'licenseId' => 'integer',
+        'user_id' => 'integer',
+        'license_id' => 'integer',
         'category_id' => 'integer',
     ];
     /**

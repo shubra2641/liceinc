@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,26 +21,26 @@ use Carbon\Carbon;
  * @property string|null $description Description as string
  * @property float $price
  * @property string $status
- * @property string $licenseType
- * @property int $supportDays
+ * @property string $license_type
+ * @property int $support_days
  * @property \Illuminate\Support\Carbon|null $supported_until
- * @property float|null $extendedSupportPrice
- * @property int|null $extended_supportDays
+ * @property float|null $extended_support_price
+ * @property int|null $extended_support_days
  * @property \Illuminate\Support\Carbon|null $extended_supported_until
- * @property array<array-key, mixed>|null $kbCategories Array of KB category IDs linked to this product
- * @property array<array-key, mixed>|null $kbArticles Array of KB article IDs linked to this product
- * @property bool $kbAccessRequired Whether KB access is required for this product
+ * @property array<array-key, mixed>|null $kb_categories Array of KB category IDs linked to this product
+ * @property array<array-key, mixed>|null $kb_articles Array of KB article IDs linked to this product
+ * @property bool $kb_access_required Whether KB access is required for this product
  * @property string|null $kb_access_message Custom message for KB access requirement
- * @property bool $isActive
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int|null $category_id
- * @property int|null $kbCategory_id
- * @property int|null $programmingLanguage
- * @property string|null $integration_filePath
- * @property float|null $renewalPrice
- * @property string|null $renewalPeriod
- * @property float $taxRate
+ * @property int|null $kb_category_id
+ * @property int|null $programming_language
+ * @property string|null $integration_file_path
+ * @property float|null $renewal_price
+ * @property string|null $renewal_period
+ * @property float $tax_rate
  * @property int $stock_quantity
  * @property bool $requires_domain
  * @property array<array-key, mixed>|null $features
@@ -58,7 +56,7 @@ use Carbon\Carbon;
  * @property string|null $image
  * @property array<array-key, mixed>|null $gallery_images
  * @property int|null $stock
- * @property int $durationDays
+ * @property int $duration_days
  * @property bool $auto_renewal
  * @property int $renewal_reminder_days
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ProductFile> $activeFiles
@@ -67,25 +65,24 @@ use Carbon\Carbon;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ProductFile> $files
  * @property-read int|null $files_count
  * @property-read string $current_version
- * @property-read mixed $formatted_extendedSupportPrice
+ * @property-read mixed $formatted_extended_support_price
  * @property-read mixed $formatted_price
- * @property-read mixed $formatted_renewalPrice
+ * @property-read mixed $formatted_renewal_price
  * @property-read string $latest_version
- * @property-read mixed $renewalPeriodLabel
+ * @property-read mixed $renewal_period_label
  * @property-read mixed $stock_status
- * @property-read mixed $taxAmount
+ * @property-read mixed $tax_amount
  * @property-read mixed $total_price
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
  * @property-read int|null $invoices_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle> $kbArticles
- * @property-read int|null $kbArticles_count
+ * @property-read int|null $kb_articles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory> $kbCategories
- * @property-read int|null $kbCategories_count
+ * @property-read int|null $kb_categories_count
  * @property-read \App\Models\ProductUpdate|null $latestUpdate
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\License> $licenses
  * @property-read int|null $licenses_count
  * @property-read \App\Models\ProgrammingLanguage|null $programmingLanguage
- * @method static \Database\Factories\ProductFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Product newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Product newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Product query()
@@ -143,12 +140,7 @@ class Product extends Model
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = ProductFactory::class;
 
     protected $fillable = [
         'name',
@@ -159,21 +151,21 @@ class Product extends Model
         'description',
         'price',
         'status',
-        'licenseType',
-        'renewalPrice',
-        'renewalPeriod',
-        'supportDays',
-        'taxRate',
+        'license_type',
+        'renewal_price',
+        'renewal_period',
+        'support_days',
+        'tax_rate',
         'stock_quantity',
         'supported_until',
-        'extendedSupportPrice',
-        'extended_supportDays',
+        'extended_support_price',
+        'extended_support_days',
         'extended_supported_until',
-        'isActive',
-        'integration_filePath',
-        'programmingLanguage',
+        'is_active',
+        'integration_file_path',
+        'programming_language',
         'category_id',
-        'kbCategory_id',
+        'kb_category_id',
         'requires_domain',
         'features',
         'requirements',
@@ -187,31 +179,31 @@ class Product extends Model
         'image',
         'gallery_images',
         'version',
-        'kbCategories',
-        'kbArticles',
-        'kbAccessRequired',
+        'kb_categories',
+        'kb_articles',
+        'kb_access_required',
         'kb_access_message',
         'stock',
-        'durationDays',
+        'duration_days',
         'auto_renewal',
         'renewal_reminder_days',
     ];
     protected $casts = [
         'price' => 'float',
-        'extendedSupportPrice' => 'float',
-        'renewalPrice' => 'float',
-        'taxRate' => 'float',
+        'extended_support_price' => 'float',
+        'renewal_price' => 'float',
+        'tax_rate' => 'float',
         'supported_until' => 'datetime',
         'extended_supported_until' => 'datetime',
-        'extended_supportDays' => 'integer',
-        'supportDays' => 'integer',
-        'durationDays' => 'integer',
+        'extended_support_days' => 'integer',
+        'support_days' => 'integer',
+        'duration_days' => 'integer',
         'renewal_reminder_days' => 'integer',
         'stock_quantity' => 'integer',
         'stock' => 'integer',
         'category_id' => 'integer',
-        'programmingLanguage' => 'integer',
-        'kbCategory_id' => 'integer',
+        'programming_language' => 'integer',
+        'kb_category_id' => 'integer',
         'envato_item_id' => 'integer',
         'version' => 'string',
         'image' => 'string',
@@ -222,23 +214,23 @@ class Product extends Model
         'description' => 'string',
         'purchase_url_envato' => 'string',
         'purchase_url_buy' => 'string',
-        'integration_filePath' => 'string',
+        'integration_file_path' => 'string',
         'status' => 'string',
-        'licenseType' => 'string',
-        'renewalPeriod' => 'string',
-        'isActive' => 'boolean',
+        'license_type' => 'string',
+        'renewal_period' => 'string',
+        'is_active' => 'boolean',
         'requires_domain' => 'boolean',
         'is_featured' => 'boolean',
         'is_popular' => 'boolean',
         'is_downloadable' => 'boolean',
-        'kbAccessRequired' => 'boolean',
+        'kb_access_required' => 'boolean',
         'features' => 'array',
         'requirements' => 'array',
         'installation_guide' => 'array',
         'tags' => 'array',
         'gallery_images' => 'array',
-        'kbCategories' => 'array',
-        'kbArticles' => 'array',
+        'kb_categories' => 'array',
+        'kb_articles' => 'array',
         'auto_renewal' => 'boolean',
     ];
     /**
@@ -293,21 +285,21 @@ class Product extends Model
      */
     public function activeFiles(): HasMany
     {
-        return $this->hasMany(ProductFile::class)->where('isActive', true);
+        return $this->hasMany(ProductFile::class)->where('is_active', true);
     }
     /**
      * @return BelongsTo<ProgrammingLanguage, $this>
      */
     public function programmingLanguage(): BelongsTo
     {
-        return $this->belongsTo(ProgrammingLanguage::class, 'programmingLanguage');
+        return $this->belongsTo(ProgrammingLanguage::class, 'programming_language');
     }
     /**
      * @return BelongsTo<ProductCategory, $this>
      */
     public function category(): BelongsTo
     {
-        // Specify foreign key explicitly to avoid default 'productCategory_id'
+        // Specify foreign key explicitly to avoid default 'product_category_id'
         return $this->belongsTo(ProductCategory::class, 'category_id');
     }
     /**
@@ -318,7 +310,7 @@ class Product extends Model
      */
     public function kbCategories(): BelongsToMany
     {
-        return $this->belongsToMany(KbCategory::class, 'product_kbCategories', 'productId', 'kbCategory_id');
+        return $this->belongsToMany(KbCategory::class, 'product_kb_categories', 'product_id', 'kb_category_id');
     }
     /**
      * Get KB articles linked to this product.
@@ -328,7 +320,7 @@ class Product extends Model
      */
     public function kbArticles(): BelongsToMany
     {
-        return $this->belongsToMany(KbArticle::class, 'product_kbArticles', 'productId', 'kbArticle_id');
+        return $this->belongsToMany(KbArticle::class, 'product_kb_articles', 'product_id', 'kb_article_id');
     }
     /**
      * Get KB categories by IDs stored in JSON.
@@ -366,10 +358,10 @@ class Product extends Model
      */
     public function getKbCategoriesCollection(): \Illuminate\Database\Eloquent\Collection
     {
-        if (empty($this->kbCategories)) {
+        if (! $this->kb_categories) {
             return new \Illuminate\Database\Eloquent\Collection();
         }
-        return KbCategory::whereIn('id', $this->kbCategories)->get();
+        return KbCategory::whereIn('id', $this->kb_categories)->get();
     }
     /**
      * Get KB articles as Collection.
@@ -379,19 +371,19 @@ class Product extends Model
      */
     public function getKbArticlesCollection(): \Illuminate\Database\Eloquent\Collection
     {
-        if ($this->kbArticles->count() === 0) {
+        if (! $this->kb_articles) {
             return new \Illuminate\Database\Eloquent\Collection();
         }
-        return KbArticle::whereIn('id', $this->kbArticles->pluck('id')->toArray())->get();
+        return KbArticle::whereIn('id', $this->kb_articles)->get();
     }
     /**
      * Check if product has KB access requirements.
      */
     public function hasKbAccess(): bool
     {
-        return (bool) $this->kbAccessRequired &&
-               ((!empty($this->kbCategories) && count($this->kbCategories) > 0) ||
-                ($this->kbArticles->count() > 0));
+        return $this->kb_access_required &&
+               ((is_array($this->kb_categories) && count($this->kb_categories) > 0) ||
+                (is_array($this->kb_articles) && count($this->kb_articles) > 0));
     }
     /**
      * Get all accessible KB content (categories + articles from selected categories).
@@ -400,8 +392,10 @@ class Product extends Model
      * @return array<string, Collection<int, KbCategory|KbArticle>>
      */
     /**
-     * @return array{categories: \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory>,
-     * articles: \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle>}
+     * @return array{
+     *     categories: \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory>,
+     *     articles: \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle>
+     * }
      */
     public function getAccessibleKbContent(): array
     {
@@ -410,17 +404,16 @@ class Product extends Model
             'articles' => new \Illuminate\Database\Eloquent\Collection(),
         ];
         // Get selected categories
-        if (!empty($this->kbCategories) && count($this->kbCategories) > 0) {
-            $categories = KbCategory::whereIn('id', $this->kbCategories)->get();
+        if (is_array($this->kb_categories) && count($this->kb_categories) > 0) {
+            $categories = KbCategory::whereIn('id', $this->kb_categories)->get();
             $accessibleContent['categories'] = $categories;
             // Get all articles from selected categories
-            $articles = KbArticle::whereIn('kbCategory_id', $this->kbCategories)->get();
+            $articles = KbArticle::whereIn('kb_category_id', $this->kb_categories)->get();
             $accessibleContent['articles'] = $articles;
         }
         // Add specifically selected articles
-        if ($this->kbArticles->count() > 0) {
-            $kbArticlesIds = $this->kbArticles->pluck('id')->toArray();
-            $specificArticles = KbArticle::whereIn('id', $kbArticlesIds)->get();
+        if (is_array($this->kb_articles) && count($this->kb_articles) > 0) {
+            $specificArticles = KbArticle::whereIn('id', $this->kb_articles)->get();
             $accessibleContent['articles'] = $accessibleContent['articles']->merge($specificArticles)->unique('id');
         }
         return $accessibleContent;
@@ -430,14 +423,14 @@ class Product extends Model
      */
     public function isSupportActive(Carbon $licenseCreatedAt): bool
     {
-        return $licenseCreatedAt->copy()->addDays($this->supportDays)->isFuture();
+        return $licenseCreatedAt->copy()->addDays($this->support_days)->isFuture();
     }
     /**
      * Get extended support price formatted.
      */
     public function getFormattedExtendedSupportPriceAttribute(): string
     {
-        $price = $this->extendedSupportPrice ?? 0.0;
+        $price = $this->extended_support_price ?? 0.0;
         return '$' . number_format((float)$price, 2);
     }
     /**
@@ -452,14 +445,14 @@ class Product extends Model
      */
     public function getFormattedRenewalPriceAttribute(): string
     {
-        return $this->renewalPrice ? '$' . number_format((float)$this->renewalPrice, 2) : 'N/A';
+        return $this->renewal_price ? '$' . number_format((float)$this->renewal_price, 2) : 'N/A';
     }
     /**
      * Get renewal period label.
      */
     public function getRenewalPeriodLabelAttribute(): string
     {
-        return match ($this->renewalPeriod ?? 'annual') {
+        return match ($this->renewal_period ?? 'annual') {
             'monthly' => 'Monthly',
             'quarterly' => 'Quarterly',
             'semi-annual' => 'Semi-Annual',
@@ -474,7 +467,7 @@ class Product extends Model
      */
     public function renewalPeriodLabel(): string
     {
-        $label = $this->renewalPeriodLabel ?? 'Annual';
+        $label = $this->renewal_period_label ?? 'Annual';
         return is_string($label) ? $label : 'Annual';
     }
     /**
@@ -534,7 +527,7 @@ class Product extends Model
      */
     public function getRenewalPrice(): float
     {
-        return (float)($this->renewalPrice ?? $this->price);
+        return (float)($this->renewal_price ?? $this->price);
     }
     /**
      * Calculate next renewal date.
@@ -542,21 +535,21 @@ class Product extends Model
     public function getNextRenewalDate(Carbon $fromDate = null): Carbon
     {
         $fromDate = $fromDate ?? now();
-        return $fromDate->copy()->addDays($this->durationDays);
+        return $fromDate->copy()->addDays($this->duration_days);
     }
     /**
      * Calculate tax amount.
      */
     public function getTaxAmountAttribute(): float
     {
-        return (float)$this->price * ((float)$this->taxRate / 100);
+        return (float)$this->price * ((float)$this->tax_rate / 100);
     }
     /**
      * Get total price including tax.
      */
     public function getTotalPriceAttribute(): float
     {
-        return (float)$this->price + (float)$this->taxAmount;
+        return (float)$this->price + (float)$this->tax_amount;
     }
     /**
      * Get the latest version for this product (from updates or base version).
@@ -565,7 +558,7 @@ class Product extends Model
     {
         // Check if there are any product updates available
         $latestUpdate = $this->updates()
-            ->where('isActive', true)
+            ->where('is_active', true)
             ->orderBy('version', 'desc')
             ->first();
         if ($latestUpdate) {

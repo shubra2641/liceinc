@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,13 +9,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $ticket_id
- * @property int $userId
+ * @property int $user_id
  * @property string $message
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Ticket $ticket
  * @property-read \App\Models\User $user
- * @method static \Database\Factories\TicketReplyFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketReply newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketReply newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketReply query()
@@ -34,7 +31,6 @@ class TicketReply extends Model
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
     /**
      * @phpstan-ignore-next-line
@@ -43,12 +39,12 @@ class TicketReply extends Model
 
     protected $fillable = [
         'ticket_id',
-        'userId',
+        'user_id',
         'message',
     ];
     protected $casts = [
         'ticket_id' => 'integer',
-        'userId' => 'integer',
+        'user_id' => 'integer',
     ];
     /**
      * @return BelongsTo<Ticket, $this>

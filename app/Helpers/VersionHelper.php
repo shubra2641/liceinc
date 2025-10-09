@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Helpers;
 
 use App\Models\Setting;
@@ -263,7 +261,7 @@ class VersionHelper
             }
             // Update the existing record
             $setting->version = $newVersion;
-            $setting->lastUpdatedAt = now();
+            $setting->last_updated_at = now();
             $setting->save();
             // Record version update in history
             self::recordVersionUpdate($newVersion, "Auto update from {$currentVersion}");
@@ -339,7 +337,8 @@ class VersionHelper
                     return [];
                 }
 
-                $changelog = (is_array($versionData) && isset($versionData['changelog'])
+                $changelog = (is_array($versionData)
+                    && isset($versionData['changelog'])
                     && is_array($versionData['changelog'])
                     && isset($versionData['changelog'][$version]))
                     ? $versionData['changelog'][$version]
@@ -665,7 +664,7 @@ class VersionHelper
                 ['key' => 'current_version'],
                 [
                     'value' => $newVersion,
-                    'updatedAt' => now(),
+                    'updated_at' => now(),
                 ],
             );
             // Clear cache
@@ -704,7 +703,7 @@ class VersionHelper
             DB::beginTransaction();
             try {
                 $versions = Setting::where('key', 'LIKE', 'version_%')
-                    ->orderBy('createdAt', 'desc')
+                    ->orderBy('created_at', 'desc')
                     ->get();
                 $history = $versions->map(function ($setting) {
                     $version = str_replace('version_', '', $setting->key ?? '');
@@ -720,7 +719,7 @@ class VersionHelper
 
                     return [
                         'version' => $version,
-                        'updatedAt' => $setting->createdAt,
+                        'updated_at' => $setting->created_at,
                         'value' => $setting->value,
                     ];
                 })->filter()->values()->toArray();
@@ -778,7 +777,7 @@ class VersionHelper
                 ['key' => "version_{$version}"],
                 [
                     'value' => $sanitizedDetails,
-                    'updatedAt' => now(),
+                    'updated_at' => now(),
                 ],
             );
             DB::commit();

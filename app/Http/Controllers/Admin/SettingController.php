@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -76,7 +74,7 @@ class SettingController extends Controller
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for settings page access', [
                     'ip' => request()->ip(),
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
 
@@ -88,11 +86,11 @@ class SettingController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes window
             // Validate user permissions
             $user = Auth::user();
-            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to settings page', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
-                    'isAdmin' => $user ? $user->isAdmin : false,
+                    'is_admin' => $user ? $user->is_admin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
 
@@ -114,14 +112,15 @@ class SettingController extends Controller
                     'support_phone' => '',
                     'timezone' => 'UTC',
                     'maintenance_mode' => false,
-                    'envatoPersonalToken' => '',
+                    'envato_personal_token' => '',
                     'envato_api_key' => '',
                     'envato_auth_enabled' => false,
-                    'envatoUsername' => '',
+                    'envato_username' => '',
                     'envato_client_id' => '',
                     'envato_client_secret' => '',
-                    'envato_redirect_uri' => (is_string(config('app.url')) ? config('app.url') : '')
-                        . '/auth/envato/callback',
+                    'envato_redirect_uri' => (is_string(config('app.url'))
+                        ? config('app.url')
+                        : '') . '/auth/envato/callback',
                     'envato_oauth_enabled' => false,
                     'auto_generate_license' => true,
                     'default_license_length' => 32,
@@ -152,13 +151,13 @@ class SettingController extends Controller
             $currentTimezone = old('timezone', $settings->timezone ?? 'UTC');
             // Process human questions for view
             $existingQuestions = [];
-            $humanQuestions = $settingsArray['humanQuestions'] ?? null;
+            $humanQuestions = $settingsArray['human_questions'] ?? null;
             if (! empty($humanQuestions) && is_string($humanQuestions)) {
                 $existingQuestions = json_decode($humanQuestions, true) ?: [];
             }
             // If old input exists (after validation error) prefer it
-            if (old('humanQuestions') && is_array(old('humanQuestions'))) {
-                $existingQuestions = old('humanQuestions');
+            if (old('human_questions') && is_array(old('human_questions'))) {
+                $existingQuestions = old('human_questions');
             }
             DB::commit();
 
@@ -173,7 +172,7 @@ class SettingController extends Controller
             Log::error('Settings page failed to load', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
 
@@ -215,7 +214,7 @@ class SettingController extends Controller
             if (RateLimiter::tooManyAttempts($key, 3)) {
                 Log::warning('Rate limit exceeded for settings update', [
                     'ip' => $request->ip(),
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
 
@@ -226,11 +225,11 @@ class SettingController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes window
             // Validate user permissions
             $user = Auth::user();
-            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to update settings', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => $request->ip(),
-                    'isAdmin' => $user ? $user->isAdmin : false,
+                    'is_admin' => $user ? $user->is_admin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
 
@@ -266,8 +265,8 @@ class SettingController extends Controller
             // Update settings
             $setting = Setting::firstOrCreate([]);
             foreach ($validated as $key => $value) {
-                // Handle humanQuestions special case
-                if ($key === 'humanQuestions') {
+                // Handle human_questions special case
+                if ($key === 'human_questions') {
                     if (is_array($value) && !empty($value)) {
                         $decoded = $value;
                     } elseif (! empty($value)) {
@@ -277,18 +276,18 @@ class SettingController extends Controller
                             DB::rollBack();
 
                             return back()->withErrors([
-                                'humanQuestions' => 'Invalid JSON: ' . $e->getMessage(),
+                                'human_questions' => 'Invalid JSON: ' . $e->getMessage(),
                             ])->withInput();
                         }
                     } else {
-                        $setting->humanQuestions = null;
+                        $setting->human_questions = null;
                         continue;
                     }
                     if (! is_array($decoded)) {
                         DB::rollBack();
 
                         return back()->withErrors([
-                            'humanQuestions' => 'Human questions must be an array',
+                            'human_questions' => 'Human questions must be an array',
                         ])->withInput();
                     }
                     // Normalize: keep only question & answer strings
@@ -304,7 +303,7 @@ class SettingController extends Controller
                         }
                         $normalized[] = ['question' => $q, 'answer' => $a];
                     }
-                    $setting->humanQuestions = ! empty($normalized) ? $normalized : [];
+                    $setting->human_questions = ! empty($normalized) ? $normalized : [];
                     continue;
                 }
                 $setting->$key = $value;
@@ -330,7 +329,7 @@ class SettingController extends Controller
         } catch (ValidationException $e) {
             DB::rollBack();
             Log::warning('Settings validation failed', [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'errors' => $e->errors(),
                 'ip' => $request->ip(),
             ]);
@@ -338,7 +337,7 @@ class SettingController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Settings update failed', [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'ip' => $request->ip(),
@@ -365,7 +364,7 @@ class SettingController extends Controller
      * // Test API connection:
      * POST /admin/settings/test-api
      * {
-     *     "token": "your_envatoToken_here"
+     *     "token": "your_envato_token_here"
      * }
      */
     public function testApi(SettingRequest $request): JsonResponse
@@ -376,7 +375,7 @@ class SettingController extends Controller
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for API testing', [
                     'ip' => $request->ip(),
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
 
@@ -388,11 +387,11 @@ class SettingController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes window
             // Validate user permissions
             $user = Auth::user();
-            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to test API', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => $request->ip(),
-                    'isAdmin' => $user ? $user->isAdmin : false,
+                    'is_admin' => $user ? $user->is_admin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
 
@@ -413,7 +412,7 @@ class SettingController extends Controller
                 ]);
             } else {
                 Log::warning('Envato API test failed - invalid token', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => $request->ip(),
                     'token_prefix' => substr(is_string($token) ? $token : '', 0, 8) . '...',
                 ]);
@@ -425,7 +424,7 @@ class SettingController extends Controller
             }
         } catch (ValidationException $e) {
             Log::warning('Envato API test validation failed', [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'errors' => $e->errors(),
                 'ip' => $request->ip(),
             ]);
@@ -441,7 +440,7 @@ class SettingController extends Controller
             ], 422);
         } catch (\Exception $e) {
             Log::error('Envato API test failed with exception', [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'ip' => $request->ip(),
@@ -482,7 +481,7 @@ class SettingController extends Controller
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for Envato guide access', [
                     'ip' => request()->ip(),
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
 
@@ -494,11 +493,11 @@ class SettingController extends Controller
             RateLimiter::hit($key, 300); // 5 minutes window
             // Validate user permissions
             $user = Auth::user();
-            if (! $user || (! $user->isAdmin && ! $user->hasRole('admin'))) {
+            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
                 Log::warning('Unauthorized access attempt to Envato guide', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ip' => request()->ip(),
-                    'isAdmin' => $user ? $user->isAdmin : false,
+                    'is_admin' => $user ? $user->is_admin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
 
@@ -513,7 +512,7 @@ class SettingController extends Controller
             Log::error('Envato guide view failed to load', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
 

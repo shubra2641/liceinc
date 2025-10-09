@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -129,13 +127,13 @@ class TicketController extends Controller
      * // Request:
      * POST /admin/tickets
      * {
-     *     "userId": 1,
+     *     "user_id": 1,
      *     "category_id": 1,
      *     "subject": "Support Request",
      *     "priority": "medium",
      *     "content": "Need help with installation",
      *     "create_invoice": true,
-     *     "invoice_productId": "custom",
+     *     "invoice_product_id": "custom",
      *     "invoice_amount": 99.99
      * }
      *
@@ -149,7 +147,7 @@ class TicketController extends Controller
             $validated = $request->validated();
             // Build ticket data
             $ticketData = [
-                'userId' => $validated['userId'],
+                'user_id' => $validated['user_id'],
                 'category_id' => $validated['category_id'],
                 'subject' => $validated['subject'],
                 'priority' => $validated['priority'],
@@ -158,19 +156,19 @@ class TicketController extends Controller
             ];
             // If admin requested to create an invoice for the user
             if ($request->filled('create_invoice') && $request->boolean('create_invoice')) {
-                $invoiceProductId = $request->input('invoice_productId');
+                $invoiceProductId = $request->input('invoice_product_id');
                 $billingType = $request->input('billing_type', 'one_time');
                 // If custom invoice selected
                 if ($invoiceProductId === 'custom' || empty($invoiceProductId)) {
                     $amount = $validated['invoice_amount'] ?? 0;
-                    $duration = $validated['invoice_durationDays'] ?? 0;
+                    $duration = $validated['invoice_duration_days'] ?? 0;
                     $dueDate = now()->addDays(is_numeric($duration) ? (int)$duration : 0)->toDateString();
                     $metadata = [];
                     if ($billingType !== 'one_time') {
                         if ($billingType === 'custom_recurring') {
-                            $metadata['renewalPrice'] = $request->input('invoice_renewalPrice')
+                            $metadata['renewal_price'] = $request->input('invoice_renewal_price')
                                 ?: $amount;
-                            $metadata['renewalPeriod_days'] = $request->input('invoice_renewalPeriod_days')
+                            $metadata['renewal_period_days'] = $request->input('invoice_renewal_period_days')
                                 ?: $duration;
                             $metadata['recurrence'] = 'custom';
                         } else {
@@ -181,10 +179,10 @@ class TicketController extends Controller
                                 'annual' => 365,
                             ];
                             $metadata['recurrence'] = $billingType;
-                            $metadata['renewalPeriod_days'] = (is_string($billingType) && isset($map[$billingType]))
+                            $metadata['renewal_period_days'] = (is_string($billingType) && isset($map[$billingType]))
                                 ? $map[$billingType]
                                 : $duration;
-                            $metadata['renewalPrice'] = $amount;
+                            $metadata['renewal_price'] = $amount;
                         }
                     }
                 } else {
@@ -193,10 +191,10 @@ class TicketController extends Controller
                     if (! $product) {
                         DB::rollBack();
 
-                        return back()->withErrors(['invoice_productId' => 'Invalid product selected'])->withInput();
+                        return back()->withErrors(['invoice_product_id' => 'Invalid product selected'])->withInput();
                     }
                     $amount = $request->input('invoice_amount') ?: $product->price;
-                    $duration = $request->input('invoice_durationDays') ?: $product->durationDays ?: null;
+                    $duration = $request->input('invoice_duration_days') ?: $product->duration_days ?: null;
                     $dueDate = $request->input('invoice_due_date')
                         ?: ($duration
                             ? now()->addDays(is_numeric($duration) ? (int)$duration : 0)->toDateString()
@@ -211,22 +209,23 @@ class TicketController extends Controller
                         ];
                         if ($billingType === 'custom_recurring') {
                             $metadata['recurrence'] = 'custom';
-                            $metadata['renewalPrice'] = $request->input('invoice_renewalPrice')
-                                ?: $product->renewalPrice ?? $amount;
-                            $metadata['renewalPeriod_days'] = $request->input('invoice_renewalPeriod_days')
-                                ?: $product->renewalPeriod ?: ($duration ?: 30);
+                            $metadata['renewal_price'] = $request->input('invoice_renewal_price')
+                                ?: $product->renewal_price ?? $amount;
+                            $metadata['renewal_period_days'] = $request->input('invoice_renewal_period_days')
+                                ?: $product->renewal_period
+                                ?: ($duration ?: 30);
                         } else {
                             $metadata['recurrence'] = $billingType;
-                            $metadata['renewalPeriod_days'] = (is_string($billingType)
-                                && array_key_exists($billingType, $map))
-                                ? $map[$billingType] : ($product->renewalPeriod ?? $duration);
-                            $metadata['renewalPrice'] = $product->renewalPrice ?? $amount;
+                            $metadata['renewal_period_days'] = (is_string($billingType) && array_key_exists($billingType, $map))
+                                ? $map[$billingType]
+                                : ($product->renewal_period ?? $duration);
+                            $metadata['renewal_price'] = $product->renewal_price ?? $amount;
                         }
                     }
                 }
                 $invoice = Invoice::create([
-                    'userId' => $validated['userId'],
-                    'productId' => is_numeric($invoiceProductId) ? $invoiceProductId : null,
+                    'user_id' => $validated['user_id'],
+                    'product_id' => is_numeric($invoiceProductId) ? $invoiceProductId : null,
                     'amount' => $amount,
                     'status' => $request->input('invoice_status') ?? 'pending',
                     'due_date' => $dueDate,
@@ -432,7 +431,7 @@ class TicketController extends Controller
             if ($user) {
                 $reply = TicketReply::create([
                     'ticket_id' => $ticket->id,
-                    'userId' => $user->id,
+                    'user_id' => $user->id,
                     'message' => $validated['message'],
                 ]);
             }
@@ -450,7 +449,7 @@ class TicketController extends Controller
                 Log::error('Failed to send ticket reply email', [
                     'error' => $e->getMessage(),
                     'ticket_id' => $ticket->id,
-                    'userId' => $ticket->userId,
+                    'user_id' => $ticket->user_id,
                 ]);
             }
             DB::commit();
@@ -519,7 +518,7 @@ class TicketController extends Controller
                 Log::error('Failed to send ticket status update email', [
                     'error' => $e->getMessage(),
                     'ticket_id' => $ticket->id,
-                    'userId' => $ticket->userId,
+                    'user_id' => $ticket->user_id,
                 ]);
             }
             DB::commit();

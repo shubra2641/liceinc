@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -25,13 +23,13 @@ class LicenseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'licenseKey' => ['required', 'string', 'max:255'],
-            'productId' => ['required', 'exists:products,id'],
-            'licenseType' => ['required', Rule::in(['regular', 'extended'])],
+            'license_key' => ['required', 'string', 'max:255'],
+            'product_id' => ['required', 'exists:products,id'],
+            'license_type' => ['required', Rule::in(['regular', 'extended'])],
             'status' => ['required', Rule::in(['active', 'inactive', 'suspended', 'expired'])],
-            'expiresAt' => ['nullable', 'date'],
+            'expires_at' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'maxDomains' => ['nullable', 'integer', 'min:1'],
+            'max_domains' => ['nullable', 'integer', 'min:1'],
             'customer_id' => ['nullable', 'integer', 'min:1'],
         ];
     }

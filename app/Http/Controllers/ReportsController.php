@@ -49,8 +49,8 @@ use App\Helpers\SecureFileHelper;
  * POST /admin/reports/export
  * {
  *     "format": "csv",
- *     "dateFrom": "2024-01-01",
- *     "dateTo": "2024-12-31"
+ *     "date_from": "2024-01-01",
+ *     "date_to": "2024-12-31"
  * }
  */
 class ReportsController extends Controller
@@ -87,11 +87,11 @@ class ReportsController extends Controller
                 $openTickets = Ticket::whereIn('status', ['open', 'pending'])->count();
                 // Monthly license data for charts - Last 3 months
                 $monthlyLicensesRaw = License::select(
-                    DB::raw('YEAR(createdAt) as year'),
-                    DB::raw('MONTH(createdAt) as month'),
+                    DB::raw('YEAR(created_at) as year'),
+                    DB::raw('MONTH(created_at) as month'),
                     DB::raw('COUNT(*) as count'),
                 )
-                    ->where('createdAt', '>=', now()->subMonths(3))
+                    ->where('created_at', '>=', now()->subMonths(3))
                     ->groupBy('year', 'month')
                     ->orderBy('year')
                     ->orderBy('month')
@@ -120,8 +120,12 @@ class ReportsController extends Controller
                 foreach ($last3Months as $month) {
                     $found = $monthlyRevenueRaw->first(function ($item) use ($month) {
                         return (is_string($item->year) ? $item->year : '') . '-'
-                            . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT)
-                            === $month;
+                            . str_pad(
+                                (string)(is_numeric($item->month) ? $item->month : 0),
+                                2,
+                                '0',
+                                STR_PAD_LEFT
+                            ) === $month;
                     });
                     $monthlyRevenueData[] = $found ? (float)(is_numeric($found->revenue) ? $found->revenue : 0) : 0;
                 }
@@ -145,8 +149,12 @@ class ReportsController extends Controller
                 foreach ($last3Months as $month) {
                     $found = $monthlyLicensesRaw->first(function ($item) use ($month) {
                         return (is_string($item->year) ? $item->year : '') . '-'
-                            . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT)
-                            === $month;
+                            . str_pad(
+                                (string)(is_numeric($item->month) ? $item->month : 0),
+                                2,
+                                '0',
+                                STR_PAD_LEFT
+                            ) === $month;
                     });
                     $monthlyLicensesData[] = $found ? (int)(is_numeric($found->count) ? $found->count : 0) : 0;
                 }
@@ -166,12 +174,12 @@ class ReportsController extends Controller
                     ]],
                 ];
                 // License type distribution (regular vs extended)
-                $licenseTypeDataRaw = License::select('licenseType', DB::raw('COUNT(*) as count'))
-                    ->groupBy('licenseType')
+                $licenseTypeDataRaw = License::select('license_type', DB::raw('COUNT(*) as count'))
+                    ->groupBy('license_type')
                     ->get();
                 // Convert to Chart.js format
                 $licenseTypeData = [
-                    'labels' => $licenseTypeDataRaw->pluck('licenseType')->map(function ($type) {
+                    'labels' => $licenseTypeDataRaw->pluck('license_type')->map(function ($type) {
                         return __('app.' . (is_string($type) ? $type : '')) ?: ucfirst(is_string($type) ? $type : '');
                     })->toArray(),
                     'datasets' => [[
@@ -238,19 +246,19 @@ class ReportsController extends Controller
                     });
                 // Recent license activities
                 $recentActivities = LicenseLog::with(['license', 'license.user'])
-                    ->orderBy('createdAt', 'desc')
+                    ->orderBy('created_at', 'desc')
                     ->limit(20)
                     ->get();
                 // Calculate total revenue (from products table via licenses relationship)
-                $totalRevenue = License::join('products', 'licenses.productId', '=', 'products.id')
+                $totalRevenue = License::join('products', 'licenses.product_id', '=', 'products.id')
                     ->sum('products.price') ?: 0;
                 // --- Invoices: monthly amounts and status totals - Last 3 months ---
                 $invoiceMonthlyRaw = Invoice::select(
-                    DB::raw('YEAR(createdAt) as year'),
-                    DB::raw('MONTH(createdAt) as month'),
+                    DB::raw('YEAR(created_at) as year'),
+                    DB::raw('MONTH(created_at) as month'),
                     DB::raw('SUM(amount) as total'),
                 )
-                    ->where('createdAt', '>=', now()->subMonths(3))
+                    ->where('created_at', '>=', now()->subMonths(3))
                     ->groupBy('year', 'month')
                     ->orderBy('year')
                     ->orderBy('month')
@@ -260,8 +268,12 @@ class ReportsController extends Controller
                 foreach ($last3Months as $month) {
                     $found = $invoiceMonthlyRaw->first(function ($item) use ($month) {
                         return (is_string($item->year) ? $item->year : '') . '-'
-                            . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT)
-                            === $month;
+                            . str_pad(
+                                (string)(is_numeric($item->month) ? $item->month : 0),
+                                2,
+                                '0',
+                                STR_PAD_LEFT
+                            ) === $month;
                     });
                     $invoiceMonthlyData[] = $found ? (float)(is_numeric($found->total) ? $found->total : 0) : 0;
                 }
@@ -294,11 +306,11 @@ class ReportsController extends Controller
                 $activeDomains = LicenseDomain::where('status', 'active')->count();
                 // User registrations data for charts - Last 3 months
                 $userRegistrationsRaw = User::select(
-                    DB::raw('YEAR(createdAt) as year'),
-                    DB::raw('MONTH(createdAt) as month'),
+                    DB::raw('YEAR(created_at) as year'),
+                    DB::raw('MONTH(created_at) as month'),
                     DB::raw('COUNT(*) as count'),
                 )
-                    ->where('createdAt', '>=', now()->subMonths(3))
+                    ->where('created_at', '>=', now()->subMonths(3))
                     ->groupBy('year', 'month')
                     ->orderBy('year')
                     ->orderBy('month')
@@ -308,8 +320,12 @@ class ReportsController extends Controller
                 foreach ($last3Months as $month) {
                     $found = $userRegistrationsRaw->first(function ($item) use ($month) {
                         return (is_string($item->year) ? $item->year : '') . '-'
-                            . str_pad((string)(is_numeric($item->month) ? $item->month : 0), 2, '0', STR_PAD_LEFT)
-                            === $month;
+                            . str_pad(
+                                (string)(is_numeric($item->month) ? $item->month : 0),
+                                2,
+                                '0',
+                                STR_PAD_LEFT
+                            ) === $month;
                     });
                     $userRegistrationsData[] = $found ? (int)(is_numeric($found->count) ? $found->count : 0) : 0;
                 }
@@ -346,8 +362,8 @@ class ReportsController extends Controller
                     $startOfDay = $date->copy()->startOfDay();
                     $endOfDay = $date->copy()->endOfDay();
                     // Sum total activity counts for the day (tickets created + licenses created)
-                    $ticketsCount = Ticket::whereBetween('createdAt', [$startOfDay, $endOfDay])->count();
-                    $licensesCount = License::whereBetween('createdAt', [$startOfDay, $endOfDay])->count();
+                    $ticketsCount = Ticket::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
+                    $licensesCount = License::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
                     $dailyTotal = $ticketsCount + $licensesCount;
                     $activityTimelineRaw[] = [
                         'date' => $date->format('M j'),
@@ -368,16 +384,16 @@ class ReportsController extends Controller
                 ];
                 // For demo purposes, we'll show some sample data if there are failed API calls
                 $failedApiCalls = LicenseLog::where('status', 'failed')
-                    ->where('createdAt', '>=', now()->subDays(1))
-                    ->select('ipAddress', DB::raw('COUNT(*) as attempts'))
-                    ->groupBy('ipAddress')
+                    ->where('created_at', '>=', now()->subDays(1))
+                    ->select('ip_address', DB::raw('COUNT(*) as attempts'))
+                    ->groupBy('ip_address')
                     ->having('attempts', '>=', 3)
                     ->get();
                 $rateLimitedIPs = collect();
                 $totalRateLimitedAttempts = 0;
                 foreach ($failedApiCalls as $failedCall) {
                     $rateLimitedIPs->push([
-                        'ip' => $failedCall->ipAddress,
+                        'ip' => $failedCall->ip_address,
                         'attempts' => $failedCall->attempts,
                         'blocked_until' => now()->addMinutes(15), // Default lockout time
                     ]);
@@ -484,10 +500,10 @@ class ReportsController extends Controller
                         $startDate = now()->subDays(30);
                 }
                 $data = License::select(
-                    DB::raw('DATE(createdAt) as date'),
+                    DB::raw('DATE(created_at) as date'),
                     DB::raw('COUNT(*) as count'),
                 )
-                    ->where('createdAt', '>=', $startDate)
+                    ->where('created_at', '>=', $startDate)
                     ->groupBy('date')
                     ->orderBy('date')
                     ->get();
@@ -555,9 +571,9 @@ class ReportsController extends Controller
                 $data = LicenseLog::select(
                     'status',
                     DB::raw('COUNT(*) as count'),
-                    DB::raw('DATE(createdAt) as date'),
+                    DB::raw('DATE(created_at) as date'),
                 )
-                    ->where('createdAt', '>=', $startDate)
+                    ->where('created_at', '>=', $startDate)
                     ->groupBy('status', 'date')
                     ->orderBy('date')
                     ->get();
@@ -601,8 +617,7 @@ class ReportsController extends Controller
      * // Export reports to CSV
      * $response = $reportsController->export($request);
      */
-    public function export(Request $request): \Illuminate\Http\Response|JsonResponse|
-        \Symfony\Component\HttpFoundation\StreamedResponse
+    public function export(Request $request): \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
     {
         try {
             /**
@@ -610,8 +625,8 @@ class ReportsController extends Controller
 */
             $result = $this->transaction(function () use ($request) {
                 $format = $this->sanitizeInput($request->get('format', 'pdf'));
-                $dateFrom = $this->sanitizeInput($request->get('dateFrom'));
-                $dateTo = $this->sanitizeInput($request->get('dateTo'));
+                $dateFrom = $this->sanitizeInput($request->get('date_from'));
+                $dateTo = $this->sanitizeInput($request->get('date_to'));
                 // Get data for export
                 $data = $this->getExportData(
                     is_string($dateFrom) ? $dateFrom : null,
@@ -619,8 +634,8 @@ class ReportsController extends Controller
                 );
                 Log::debug('Reports export initiated', [
                     'format' => $format,
-                    'dateFrom' => $dateFrom,
-                    'dateTo' => $dateTo,
+                    'date_from' => $dateFrom,
+                    'date_to' => $dateTo,
                     'records_count' => is_array($data['licenses']) ? count($data['licenses']) : 0,
                     'ip' => $request->ip(),
                 ]);
@@ -635,8 +650,8 @@ class ReportsController extends Controller
             Log::error('Failed to export reports', [
                 'error' => $e->getMessage(),
                 'format' => $request->get('format', 'pdf'),
-                'dateFrom' => $request->get('dateFrom'),
-                'dateTo' => $request->get('dateTo'),
+                'date_from' => $request->get('date_from'),
+                'date_to' => $request->get('date_to'),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
@@ -661,10 +676,10 @@ class ReportsController extends Controller
     {
         $query = License::with(['user', 'product']);
         if ($dateFrom) {
-            $query->where('createdAt', '>=', $dateFrom);
+            $query->where('created_at', '>=', $dateFrom);
         }
         if ($dateTo) {
-            $query->where('createdAt', '<=', $dateTo);
+            $query->where('created_at', '<=', $dateTo);
         }
         $licenses = $query->get();
         return [
@@ -672,13 +687,13 @@ class ReportsController extends Controller
             'summary' => [
                 'total_licenses' => $licenses->count(),
                 'active_licenses' => $licenses->where('status', 'active')->count(),
-                'expired_licenses' => $licenses->where('licenseExpiresAt', '<', now())->count(),
+                'expired_licenses' => $licenses->where('license_expires_at', '<', now())->count(),
                 'total_revenue' => $licenses->sum(function ($license) {
                     return $license->product ? $license->product->price : 0;
                 }),
             ],
-            'dateFrom' => $dateFrom,
-            'dateTo' => $dateTo,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
         ];
     }
     /**
@@ -705,33 +720,15 @@ class ReportsController extends Controller
             // CSV data
                 if (is_array($data['licenses'])) {
                     foreach ($data['licenses'] as $license) {
-                        if (is_object($license) && isset($license->licenseKey)) {
+                        if (is_object($license) && isset($license->license_key)) {
                             $csvData = [
-                            is_string($license->licenseKey)
-                                ? $license->licenseKey
-                                : '',
-                            (isset($license->product) && is_object($license->product) && isset($license->product->name))
-                                ? $license->product->name
-                                : 'N/A',
-                            (isset($license->user) && is_object($license->user) && isset($license->user->name))
-                                ? $license->user->name
-                                : 'N/A',
+                            is_string($license->license_key) ? $license->license_key : '',
+                            (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
+                            (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
                             (isset($license->status) && is_string($license->status)) ? $license->status : '',
-                            (isset($license->createdAt)
-                                && is_object($license->createdAt)
-                                && method_exists($license->createdAt, 'format'))
-                                ? $license->createdAt->format('Y-m-d H:i:s')
-                                : 'N/A',
-                            (isset($license->licenseExpiresAt)
-                                && is_object($license->licenseExpiresAt)
-                                && method_exists($license->licenseExpiresAt, 'format'))
-                                ? $license->licenseExpiresAt->format('Y-m-d H:i:s')
-                                : 'N/A',
-                            (isset($license->product)
-                                && is_object($license->product)
-                                && isset($license->product->price))
-                                ? $license->product->price
-                                : '0',
+                            (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
                             ];
                             /**
  * @var array<int|string, bool|float|int|string|null> $typedCsvData
@@ -772,33 +769,15 @@ class ReportsController extends Controller
                 fputcsv($file, ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price']);
                 if (is_array($data['licenses'])) {
                     foreach ($data['licenses'] as $license) {
-                        if (is_object($license) && isset($license->licenseKey)) {
+                        if (is_object($license) && isset($license->license_key)) {
                             $csvData = [
-                            is_string($license->licenseKey)
-                                ? $license->licenseKey
-                                : '',
-                            (isset($license->product) && is_object($license->product) && isset($license->product->name))
-                                ? $license->product->name
-                                : 'N/A',
-                            (isset($license->user) && is_object($license->user) && isset($license->user->name))
-                                ? $license->user->name
-                                : 'N/A',
+                            is_string($license->license_key) ? $license->license_key : '',
+                            (isset($license->product) && is_object($license->product) && isset($license->product->name)) ? $license->product->name : 'N/A',
+                            (isset($license->user) && is_object($license->user) && isset($license->user->name)) ? $license->user->name : 'N/A',
                             (isset($license->status) && is_string($license->status)) ? $license->status : '',
-                            (isset($license->createdAt)
-                                && is_object($license->createdAt)
-                                && method_exists($license->createdAt, 'format'))
-                                ? $license->createdAt->format('Y-m-d H:i:s')
-                                : 'N/A',
-                            (isset($license->licenseExpiresAt)
-                                && is_object($license->licenseExpiresAt)
-                                && method_exists($license->licenseExpiresAt, 'format'))
-                                ? $license->licenseExpiresAt->format('Y-m-d H:i:s')
-                                : 'N/A',
-                            (isset($license->product)
-                                && is_object($license->product)
-                                && isset($license->product->price))
-                                ? $license->product->price
-                                : '0',
+                            (isset($license->created_at) && is_object($license->created_at) && method_exists($license->created_at, 'format')) ? $license->created_at->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->license_expires_at) && is_object($license->license_expires_at) && method_exists($license->license_expires_at, 'format')) ? $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
+                            (isset($license->product) && is_object($license->product) && isset($license->product->price)) ? $license->product->price : '0',
                             ];
                             /**
  * @var array<int|string, bool|float|int|string|null> $typedCsvData

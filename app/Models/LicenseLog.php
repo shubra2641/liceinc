@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,20 +8,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
- * @property int $licenseId
+ * @property int $license_id
  * @property string $domain
- * @property string $ipAddress
+ * @property string $ip_address
  * @property string $serial
  * @property string $status
  * @property string|null $user_agent
- * @property array<array-key, mixed>|null $requestData
- * @property array<array-key, mixed>|null $responseData
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property array<array-key, mixed>|null $request_data
+ * @property array<array-key, mixed>|null $response_data
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read string|null $action
  * @property-read string|null $message
  * @property-read \App\Models\License $license
- * @method static \Database\Factories\LicenseLogFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog query()
@@ -45,26 +42,21 @@ class LicenseLog extends Model
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = LicenseLogFactory::class;
 
     protected $fillable = [
-        'licenseId',
+        'license_id',
         'domain',
-        'ipAddress',
+        'ip_address',
         'serial',
         'status',
         'user_agent',
-        'requestData',
-        'responseData',
+        'request_data',
+        'response_data',
     ];
     protected $casts = [
-        'requestData' => 'array',
-        'responseData' => 'array',
+        'request_data' => 'array',
+        'response_data' => 'array',
     ];
     /**
      * @return BelongsTo<License, $this>
@@ -74,11 +66,11 @@ class LicenseLog extends Model
         return $this->belongsTo(License::class);
     }
     /**
-     * Virtual attribute to access the action from requestData.
+     * Virtual attribute to access the action from request_data.
      */
     public function getActionAttribute(): ?string
     {
-        $data = $this->requestData;
+        $data = $this->request_data;
         if ($data === null) {
             return null;
         }
@@ -87,11 +79,11 @@ class LicenseLog extends Model
         return is_string($action) ? $action : null;
     }
     /**
-     * Virtual attribute to access the message from responseData.
+     * Virtual attribute to access the message from response_data.
      */
     public function getMessageAttribute(): ?string
     {
-        $data = $this->responseData;
+        $data = $this->response_data;
         if ($data === null) {
             return null;
         }
@@ -106,8 +98,8 @@ class LicenseLog extends Model
      */
     public static function getApiCallsByDate(int $days = 30): \Illuminate\Database\Eloquent\Collection
     {
-        return static::selectRaw('DATE(createdAt) as date, COUNT(*) as count')
-            ->where('createdAt', '>=', now()->subDays($days))
+        return static::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->where('created_at', '>=', now()->subDays($days))
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -120,7 +112,7 @@ class LicenseLog extends Model
     public static function getApiStatusDistribution(int $days = 30): \Illuminate\Database\Eloquent\Collection
     {
         return static::selectRaw('status, COUNT(*) as count')
-            ->where('createdAt', '>=', now()->subDays($days))
+            ->where('created_at', '>=', now()->subDays($days))
             ->groupBy('status')
             ->get();
     }
@@ -145,8 +137,8 @@ class LicenseLog extends Model
      */
     public static function getApiCallsByHour(): \Illuminate\Database\Eloquent\Collection
     {
-        return static::selectRaw('HOUR(createdAt) as hour, COUNT(*) as count')
-            ->whereDate('createdAt', today())
+        return static::selectRaw('HOUR(created_at) as hour, COUNT(*) as count')
+            ->whereDate('created_at', today())
             ->groupBy('hour')
             ->orderBy('hour')
             ->get();

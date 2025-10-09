@@ -429,7 +429,6 @@ class UpdatePackageService
      */
     /**
      * @param array<string, mixed> $config
-     *
      * @return array<string, mixed>
      */
     private function processFileUpdates(string $extractPath, array $config): array
@@ -499,7 +498,6 @@ class UpdatePackageService
      */
     /**
      * @param array<string, mixed> $config
-     *
      * @return array<string, mixed>
      */
     private function processMigrations(string $extractPath, array $config): array
@@ -555,7 +553,6 @@ class UpdatePackageService
      */
     /**
      * @param array<string, mixed> $config
-     *
      * @return array<string, mixed>
      */
     private function updateVersionInfo(string $extractPath, array $config): array
@@ -630,7 +627,7 @@ class UpdatePackageService
             return $backupPath;
         } catch (\Exception $e) {
             Log::error('Failed to create file backup', [
-                'filePath' => $filePath,
+                'file_path' => $filePath,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

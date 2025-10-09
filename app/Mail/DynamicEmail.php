@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Mail;
 
 use App\Models\EmailTemplate;
@@ -65,7 +63,7 @@ class DynamicEmail extends Mailable
     {
         try {
             // Validate template
-            if (!$template->isActive) {
+            if (!$template->is_active) {
                 throw new \InvalidArgumentException('Invalid or inactive email template provided');
             }
             // Sanitize input data

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,7 +29,7 @@ class ProductUpdateRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -40,11 +38,11 @@ class ProductUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $update = $this->route('productUpdate');
+        $update = $this->route('product_update');
         $updateId = $update && is_object($update) && property_exists($update, 'id') ? $update->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
-            'productId' => [
+            'product_id' => [
                 'required',
                 'integer',
                 'exists:products,id',
@@ -55,11 +53,11 @@ class ProductUpdateRequest extends FormRequest
                 'max:50',
                 'regex:/^[0-9]+\.[0-9]+\.[0-9]+$/',
                 $isUpdate
-                    ? Rule::unique('productUpdates', 'version')
-                        ->where('productId', $this->getProductId())
+                    ? Rule::unique('product_updates', 'version')
+                        ->where('product_id', $this->getProductId())
                         ->ignore($updateId)
-                    : Rule::unique('productUpdates', 'version')
-                        ->where('productId', $this->getProductId()),
+                    : Rule::unique('product_updates', 'version')
+                        ->where('product_id', $this->getProductId()),
             ],
             'title' => [
                 'required',
@@ -85,13 +83,13 @@ class ProductUpdateRequest extends FormRequest
                 'mimes:zip,rar,7z,tar,gz',
                 'max:102400', // 100MB
             ],
-            'isMajor' => [
+            'is_major' => [
                 'boolean',
             ],
-            'isRequired' => [
+            'is_required' => [
                 'boolean',
             ],
-            'isActive' => [
+            'is_active' => [
                 'boolean',
             ],
             'release_notes' => [
@@ -127,8 +125,8 @@ class ProductUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'productId.required' => 'Product selection is required.',
-            'productId.exists' => 'Selected product does not exist.',
+            'product_id.required' => 'Product selection is required.',
+            'product_id.exists' => 'Selected product does not exist.',
             'version.required' => 'Version number is required.',
             'version.regex' => 'Version must be in format: x.y.z (e.g., 1.0.0).',
             'version.unique' => 'This version already exists for the selected product.',
@@ -154,15 +152,15 @@ class ProductUpdateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'productId' => 'product',
+            'product_id' => 'product',
             'version' => 'version number',
             'title' => 'update title',
             'description' => 'update description',
             'changelog' => 'changelog',
             'update_file' => 'update file',
-            'isMajor' => 'major update',
-            'isRequired' => 'required update',
-            'isActive' => 'active status',
+            'is_major' => 'major update',
+            'is_required' => 'required update',
+            'is_active' => 'active status',
             'release_notes' => 'release notes',
             'download_url' => 'download URL',
             'file_size' => 'file size',
@@ -179,19 +177,17 @@ class ProductUpdateRequest extends FormRequest
             'title' => $this->sanitizeInput($this->input('title')),
             'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
             'changelog' => $this->input('changelog') ? $this->sanitizeInput($this->input('changelog')) : null,
-            'release_notes' => $this->input('release_notes')
-                ? $this->sanitizeInput($this->input('release_notes'))
-                : null,
+            'release_notes' => $this->input('release_notes') ? $this->sanitizeInput($this->input('release_notes')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
-            'isMajor' => $this->has('isMajor'),
-            'isRequired' => $this->has('isRequired'),
-            'isActive' => $this->has('isActive'),
+            'is_major' => $this->has('is_major'),
+            'is_required' => $this->has('is_required'),
+            'is_active' => $this->has('is_active'),
         ]);
         // Set default values
         $this->merge([
-            'isActive' => $this->isActive ?? true,
+            'is_active' => $this->is_active ?? true,
         ]);
     }
     /**
@@ -221,7 +217,7 @@ class ProductUpdateRequest extends FormRequest
      */
     private function getProductId(): ?int
     {
-        $productId = $this->input('productId');
+        $productId = $this->input('product_id');
         return is_numeric($productId) ? (int) $productId : null;
     }
 }

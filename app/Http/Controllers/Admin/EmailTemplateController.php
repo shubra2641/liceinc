@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -66,7 +64,7 @@ class EmailTemplateController extends Controller
      *
      * @example
      * // Request with filters:
-     * GET /admin/email-templates?type=user&category=license&search=welcome&isActive=1
+     * GET /admin/email-templates?type=user&category=license&search=welcome&is_active=1
      *
      * // Returns view with:
      * // - Paginated templates list
@@ -91,8 +89,8 @@ class EmailTemplateController extends Controller
                 $query->where('category', $category);
             }
             // Filter by active status
-            if ($request->filled('isActive')) {
-                $query->where('isActive', $request->boolean('isActive'));
+            if ($request->filled('is_active')) {
+                $query->where('is_active', $request->boolean('is_active'));
             }
             // Search with sanitization
             if ($request->filled('search')) {
@@ -185,7 +183,7 @@ class EmailTemplateController extends Controller
      *     "body": "Hello {{user_name}}, welcome to our platform!",
      *     "type": "user",
      *     "category": "registration",
-     *     "isActive": true
+     *     "is_active": true
      * }
      *
      * // Success response: Redirect to template details
@@ -223,7 +221,7 @@ class EmailTemplateController extends Controller
      * Shows detailed information about a specific email template including
      * its content, variables, and management options.
      *
-     * @param  EmailTemplate  $emailTemplate  The email template to display
+     * @param  EmailTemplate  $email_template  The email template to display
      *
      * @return View The email template show view
      *
@@ -239,9 +237,9 @@ class EmailTemplateController extends Controller
      * // - Action buttons (edit, test, toggle, delete)
      * // - Usage statistics
      */
-    public function show(EmailTemplate $emailTemplate): View
+    public function show(EmailTemplate $email_template): View
     {
-        return view('admin.email-templates.show', ['emailTemplate' => $emailTemplate]);
+        return view('admin.email-templates.show', ['email_template' => $email_template]);
     }
 
     /**
@@ -250,7 +248,7 @@ class EmailTemplateController extends Controller
      * Displays the email template editing form with pre-populated data
      * and predefined types and categories for template modification.
      *
-     * @param  EmailTemplate  $emailTemplate  The email template to edit
+     * @param  EmailTemplate  $email_template  The email template to edit
      *
      * @return View The email template edit form view
      *
@@ -267,13 +265,13 @@ class EmailTemplateController extends Controller
      * // - Active status toggle
      * // - Variable management
      */
-    public function edit(EmailTemplate $emailTemplate): View
+    public function edit(EmailTemplate $email_template): View
     {
         $types = ['user', 'admin'];
         $categories = ['registration', 'license', 'product', 'ticket', 'invoice'];
 
         return view('admin.email-templates.edit', [
-            'emailTemplate' => $emailTemplate,
+            'email_template' => $email_template,
             'types' => $types,
             'categories' => $categories
         ]);
@@ -286,7 +284,7 @@ class EmailTemplateController extends Controller
      * XSS protection, input sanitization, and proper error handling.
      *
      * @param  EmailTemplateRequest  $request  The validated request containing template data
-     * @param  EmailTemplate  $emailTemplate  The email template to update
+     * @param  EmailTemplate  $email_template  The email template to update
      *
      * @return RedirectResponse Redirect to template view or back with error
      *
@@ -303,29 +301,29 @@ class EmailTemplateController extends Controller
      *     "body": "Hello {{user_name}}, welcome to our updated platform!",
      *     "type": "user",
      *     "category": "registration",
-     *     "isActive": true
+     *     "is_active": true
      * }
      *
      * // Success response: Redirect to template details
      * // "Email template updated successfully."
      */
-    public function update(EmailTemplateRequest $request, EmailTemplate $emailTemplate): RedirectResponse
+    public function update(EmailTemplateRequest $request, EmailTemplate $email_template): RedirectResponse
     {
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $emailTemplate->update($validated);
+            $email_template->update($validated);
             DB::commit();
 
             return redirect()
-                ->route('admin.email-templates.show', $emailTemplate)
+                ->route('admin.email-templates.show', $email_template)
                 ->with('success', 'Email template updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Email template update failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'template_id' => $emailTemplate->id,
+                'template_id' => $email_template->id,
                 'request_data' => $request->except(['body']),
             ]);
 
@@ -342,7 +340,7 @@ class EmailTemplateController extends Controller
      * Deletes an email template with proper error handling and database
      * transaction management to ensure data integrity.
      *
-     * @param  EmailTemplate  $emailTemplate  The email template to delete
+     * @param  EmailTemplate  $email_template  The email template to delete
      *
      * @return RedirectResponse Redirect to templates index or back with error
      *
@@ -360,11 +358,11 @@ class EmailTemplateController extends Controller
      * // Error response: Redirect back with error
      * // "Failed to delete email template. Please try again."
      */
-    public function destroy(EmailTemplate $emailTemplate): RedirectResponse
+    public function destroy(EmailTemplate $email_template): RedirectResponse
     {
         try {
             DB::beginTransaction();
-            $emailTemplate->delete();
+            $email_template->delete();
             DB::commit();
 
             return redirect()
@@ -375,7 +373,7 @@ class EmailTemplateController extends Controller
             Log::error('Email template deletion failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'template_id' => $emailTemplate->id,
+                'template_id' => $email_template->id,
             ]);
 
             return redirect()
@@ -390,7 +388,7 @@ class EmailTemplateController extends Controller
      * Toggles the active status of an email template with proper error
      * handling and database transaction management.
      *
-     * @param  EmailTemplate  $emailTemplate  The email template to toggle
+     * @param  EmailTemplate  $email_template  The email template to toggle
      *
      * @return RedirectResponse Redirect back with success or error message
      *
@@ -408,12 +406,12 @@ class EmailTemplateController extends Controller
      * // Error response: Redirect back with error
      * // "Failed to toggle email template status. Please try again."
      */
-    public function toggle(EmailTemplate $emailTemplate): RedirectResponse
+    public function toggle(EmailTemplate $email_template): RedirectResponse
     {
         try {
             DB::beginTransaction();
-            $emailTemplate->update(['isActive' => ! $emailTemplate->isActive]);
-            $status = $emailTemplate->isActive ? 'activated' : 'deactivated';
+            $email_template->update(['is_active' => ! $email_template->is_active]);
+            $status = $email_template->is_active ? 'activated' : 'deactivated';
             DB::commit();
 
             return redirect()
@@ -424,7 +422,7 @@ class EmailTemplateController extends Controller
             Log::error('Email template toggle failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'template_id' => $emailTemplate->id,
+                'template_id' => $email_template->id,
             ]);
 
             return redirect()
@@ -440,7 +438,7 @@ class EmailTemplateController extends Controller
      * appear when sent. Includes comprehensive test data and error handling.
      *
      * @param  Request  $request  The HTTP request containing test data
-     * @param  EmailTemplate  $emailTemplate  The email template to test
+     * @param  EmailTemplate  $email_template  The email template to test
      *
      * @return View The email template test view
      *
@@ -458,18 +456,18 @@ class EmailTemplateController extends Controller
      * // - Variable substitution results
      * // - Send test email option
      */
-    public function test(Request $request, EmailTemplate $emailTemplate): View
+    public function test(Request $request, EmailTemplate $email_template): View
     {
         try {
             $testData = $request->get('test_data', []);
             $testData = $this->prepareTestData(['test_data' => $testData, 'test_email' => 'test@example.com']);
             try {
-                $rendered = $emailTemplate->render($testData);
+                $rendered = $email_template->render($testData);
             } catch (\Exception $e) {
                 Log::error('Email template rendering failed', [
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
-                    'template_id' => $emailTemplate->id,
+                    'template_id' => $email_template->id,
                 ]);
                 $rendered = [
                     'subject' => 'Error rendering template',
@@ -478,7 +476,7 @@ class EmailTemplateController extends Controller
             }
 
             return view('admin.email-templates.test', [
-                'emailTemplate' => $emailTemplate,
+                'email_template' => $email_template,
                 'testData' => $testData,
                 'rendered' => $rendered,
             ]);
@@ -486,12 +484,12 @@ class EmailTemplateController extends Controller
             Log::error('Email template test failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'template_id' => $emailTemplate->id,
+                'template_id' => $email_template->id,
             ]);
 
             // Return error view
             return view('admin.email-templates.test', [
-                'emailTemplate' => $emailTemplate,
+                'email_template' => $email_template,
                 'testData' => [],
                 'rendered' => [
                     'subject' => 'Error',
@@ -508,7 +506,7 @@ class EmailTemplateController extends Controller
      * validation, input sanitization, and error handling.
      *
      * @param  EmailTemplateRequest  $request  The validated request containing test email data
-     * @param  EmailTemplate  $emailTemplate  The email template to test
+     * @param  EmailTemplate  $email_template  The email template to test
      *
      * @return RedirectResponse Redirect back with success or error message
      *
@@ -533,7 +531,7 @@ class EmailTemplateController extends Controller
      * // Error response: Redirect back with error
      * // "Failed to send test email. Please check the logs for more details."
      */
-    public function sendTest(EmailTemplateRequest $request, EmailTemplate $emailTemplate): RedirectResponse
+    public function sendTest(EmailTemplateRequest $request, EmailTemplate $email_template): RedirectResponse
     {
         try {
             DB::beginTransaction();
@@ -541,7 +539,7 @@ class EmailTemplateController extends Controller
             $testData = $this->prepareTestData($validated);
             $emailService = app(EmailService::class);
             $success = $emailService->sendEmail(
-                $emailTemplate->name,
+                $email_template->name,
                 is_string($validated['test_email']) ? $validated['test_email'] : '',
                 $testData,
                 'Test User',
@@ -554,7 +552,7 @@ class EmailTemplateController extends Controller
                     ->with('success', 'Test email sent successfully.');
             } else {
                 Log::error('Email test failed - service returned false', [
-                    'template' => $emailTemplate->name,
+                    'template' => $email_template->name,
                     'recipient' => $validated['test_email'],
                 ]);
                 DB::commit();
@@ -566,7 +564,7 @@ class EmailTemplateController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Email test exception', [
-                'template' => $emailTemplate->name,
+                'template' => $email_template->name,
                 'recipient' => $request->get('test_email'),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -605,12 +603,13 @@ class EmailTemplateController extends Controller
             'site_name' => config('app.name'),
             'site_url' => config('app.url'),
             'current_year' => date('Y'),
-            'verification_url' => (is_string(config('app.url')) ? config('app.url') : '')
-                . '/verify-email?token=test-token',
+            'verification_url' => (is_string(config('app.url'))
+                ? config('app.url')
+                : '') . '/verify-email?token=test-token',
             'reset_url' => (is_string(config('app.url')) ? config('app.url') : '') . '/reset-password?token=test-token',
-            'licenseKey' => 'LIC-' . strtoupper(substr(md5((string)time()), 0, 8)),
+            'license_key' => 'LIC-' . strtoupper(substr(md5((string)time()), 0, 8)),
             'product_name' => 'Test Product',
-            'expiresAt' => now()->addYear()->format('M d, Y'),
+            'expires_at' => now()->addYear()->format('M d, Y'),
             'days_remaining' => 30,
             'ticket_id' => '12345',
             'ticket_subject' => 'Test Support Ticket',

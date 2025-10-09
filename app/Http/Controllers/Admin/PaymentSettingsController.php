@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -210,7 +208,6 @@ class PaymentSettingsController extends Controller
      */
     /**
      * @param array<string, mixed> $credentials
-     *
      * @return array<string, mixed>
      */
     protected function testPayPalConnection(array $credentials): array
@@ -299,7 +296,6 @@ class PaymentSettingsController extends Controller
      */
     /**
      * @param array<string, mixed> $credentials
-     *
      * @return array<string, mixed>
      */
     protected function testStripeConnection(array $credentials): array
@@ -320,7 +316,7 @@ class PaymentSettingsController extends Controller
                     'success' => true,
                     'message' => trans('app.Stripe connection successful'),
                     'account_id' => $account->id,
-                    'account_name' => 'N/A', // Stripe account name not available in this context
+                    'account_name' => $account->business_profile->name ?? 'N/A',
                 ];
             } else {
                 return [

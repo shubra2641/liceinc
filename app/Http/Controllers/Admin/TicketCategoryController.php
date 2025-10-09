@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -53,7 +51,7 @@ class TicketCategoryController extends Controller
     public function index(): View
     {
         try {
-            $categories = TicketCategory::orderBy('sortOrder')->paginate(15);
+            $categories = TicketCategory::orderBy('sort_order')->paginate(15);
             return view('admin.ticket-categories.index', ['categories' => $categories]);
         } catch (\Exception $e) {
             Log::error('Ticket categories listing failed', [
@@ -105,8 +103,8 @@ class TicketCategoryController extends Controller
      * {
      *     "name": "Technical Support",
      *     "color": "#FF0000",
-     *     "sortOrder": 1,
-     *     "isActive": true
+     *     "sort_order": 1,
+     *     "is_active": true
      * }
      *
      * // Returns redirect with:
@@ -125,10 +123,9 @@ class TicketCategoryController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug']
-                ?? Str::slug(
-                    is_string($validated['name'] ?? null) ? $validated['name'] : ''
-                );
+            $validated['slug'] = $validated['slug'] ?? Str::slug(
+                is_string($validated['name'] ?? null) ? $validated['name'] : ''
+            );
             TicketCategory::create($validated);
             DB::commit();
             return redirect()->route('admin.ticket-categories.index')
@@ -151,7 +148,7 @@ class TicketCategoryController extends Controller
      * Shows detailed information about a specific ticket category
      * including all relevant data and context.
      *
-     * @param  TicketCategory  $ticketCategory  The ticket category to display
+     * @param  TicketCategory  $ticket_category  The ticket category to display
      *
      * @return View The ticket category details view
      *
@@ -166,26 +163,26 @@ class TicketCategoryController extends Controller
      * // - Related tickets count
      * // - Category statistics
      */
-    public function show(TicketCategory $ticketCategory): View
+    public function show(TicketCategory $ticket_category): View
     {
         try {
             /**
  * @var view-string $viewName
 */
             $viewName = 'admin.ticket-categories.show';
-            return view($viewName, ['ticketCategory' => $ticketCategory]);
+            return view($viewName, ['ticket_category' => $ticket_category]);
         } catch (\Exception $e) {
             Log::error('Ticket category view failed to load', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'category_id' => $ticketCategory->id,
+                'category_id' => $ticket_category->id,
             ]);
             /**
  * @var view-string $viewName
 */
             $viewName = 'admin.ticket-categories.show';
             return view($viewName, [
-                'ticketCategory' => $ticketCategory,
+                'ticket_category' => $ticket_category,
                 'error' => 'Unable to load the category details. Please try again later.',
             ]);
         }
@@ -196,7 +193,7 @@ class TicketCategoryController extends Controller
      * Displays the form for editing a ticket category with
      * proper security measures and validation.
      *
-     * @param  TicketCategory  $ticketCategory  The ticket category to edit
+     * @param  TicketCategory  $ticket_category  The ticket category to edit
      *
      * @return View The ticket category edit form view
      *
@@ -209,10 +206,10 @@ class TicketCategoryController extends Controller
      * // - Pre-filled data
      * // - Validation rules
      */
-    public function edit(TicketCategory $ticketCategory): View
+    public function edit(TicketCategory $ticket_category): View
     {
         return view('admin.ticket-categories.edit', [
-            'ticketCategory' => $ticketCategory,
+            'ticketCategory' => $ticket_category,
         ]);
     }
     /**
@@ -222,7 +219,7 @@ class TicketCategoryController extends Controller
      * rate limiting, and security measures.
      *
      * @param  TicketCategoryRequest  $request  The validated request containing update data
-     * @param  TicketCategory  $ticketCategory  The ticket category to update
+     * @param  TicketCategory  $ticket_category  The ticket category to update
      *
      * @return RedirectResponse Redirect to categories index with success message
      *
@@ -234,15 +231,15 @@ class TicketCategoryController extends Controller
      * {
      *     "name": "Updated Technical Support",
      *     "color": "#00FF00",
-     *     "sortOrder": 2,
-     *     "isActive": true
+     *     "sort_order": 2,
+     *     "is_active": true
      * }
      *
      * // Returns redirect with:
      * // - Success message
      * // - Updated categories list
      */
-    public function update(TicketCategoryRequest $request, TicketCategory $ticketCategory): RedirectResponse
+    public function update(TicketCategoryRequest $request, TicketCategory $ticket_category): RedirectResponse
     {
         // Rate limiting for category updates
         $key = sprintf('ticket-category-update:%s', $request->ip()); // security-ignore: SQL_STRING_CONCAT
@@ -254,11 +251,10 @@ class TicketCategoryController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug']
-                ?? Str::slug(
-                    is_string($validated['name'] ?? null) ? $validated['name'] : ''
-                );
-            $ticketCategory->update($validated);
+            $validated['slug'] = $validated['slug'] ?? Str::slug(
+                is_string($validated['name'] ?? null) ? $validated['name'] : ''
+            );
+            $ticket_category->update($validated);
             DB::commit();
             return redirect()->route('admin.ticket-categories.index')
                 ->with('success', 'Ticket category updated successfully.');
@@ -267,7 +263,7 @@ class TicketCategoryController extends Controller
             Log::error('Ticket category update failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'category_id' => $ticketCategory->id,
+                'category_id' => $ticket_category->id,
                 'data' => $request->except(['_token', '_method']),
             ]);
             return redirect()->back()
@@ -281,7 +277,7 @@ class TicketCategoryController extends Controller
      * Deletes a ticket category with comprehensive security measures,
      * access control, and rate limiting to prevent abuse.
      *
-     * @param  TicketCategory  $ticketCategory  The ticket category to delete
+     * @param  TicketCategory  $ticket_category  The ticket category to delete
      *
      * @return RedirectResponse Redirect to categories index with success message
      *
@@ -296,7 +292,7 @@ class TicketCategoryController extends Controller
      * // - Updated categories list
      * // - Error details if failed
      */
-    public function destroy(TicketCategory $ticketCategory): RedirectResponse
+    public function destroy(TicketCategory $ticket_category): RedirectResponse
     {
         // Rate limiting for category deletions
         $key = 'ticket-category-delete:' . request()->ip();
@@ -307,7 +303,7 @@ class TicketCategoryController extends Controller
         RateLimiter::hit($key, 600); // 10 minutes
         try {
             DB::beginTransaction();
-            $ticketCategory->delete();
+            $ticket_category->delete();
             DB::commit();
             return redirect()->route('admin.ticket-categories.index')
                 ->with('success', 'Ticket category deleted successfully.');
@@ -316,7 +312,7 @@ class TicketCategoryController extends Controller
             Log::error('Ticket category deletion failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'category_id' => $ticketCategory->id,
+                'category_id' => $ticket_category->id,
             ]);
             return redirect()->back()
                 ->with('error', 'Failed to delete ticket category. Please try again.');

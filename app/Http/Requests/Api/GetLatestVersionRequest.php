@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,7 +28,7 @@ class GetLatestVersionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'licenseKey' => [
+            'license_key' => [
                 'required',
                 'string',
                 'max:255',
@@ -59,8 +57,8 @@ class GetLatestVersionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'licenseKey.required' => 'License key is required.',
-            'licenseKey.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
+            'license_key.required' => 'License key is required.',
+            'license_key.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
             'domain.required' => 'Domain is required.',
             'domain.regex' => 'Domain can only contain letters, numbers, hyphens, underscores, and dots.',
             'product_slug.required' => 'Product slug is required.',
@@ -74,7 +72,7 @@ class GetLatestVersionRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'licenseKey' => $this->sanitizeInput($this->input('licenseKey')),
+            'license_key' => $this->sanitizeInput($this->input('license_key')),
             'domain' => $this->sanitizeInput($this->input('domain')),
             'product_slug' => $this->sanitizeInput($this->input('product_slug')),
         ]);

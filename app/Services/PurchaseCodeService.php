@@ -184,8 +184,8 @@ class PurchaseCodeService
         } catch (\Exception $e) {
             Log::error('Error verifying purchase code', [
                 'purchase_code_length' => strlen($purchaseCode),
-                'productId' => $productId ?? 'null',
-                'userId' => $user->id ?? 'null',
+                'product_id' => $productId ?? 'null',
+                'user_id' => $user->id ?? 'null',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -241,18 +241,18 @@ class PurchaseCodeService
             $query = License::where('status', 'active')
                 ->where(function ($q) use ($purchaseCode) {
                     $q->where('purchase_code', $purchaseCode)
-                        ->orWhere('licenseKey', $purchaseCode);
+                        ->orWhere('license_key', $purchaseCode);
                 })
                 ->where(function ($q) {
-                    $q->whereNull('licenseExpiresAt')
-                        ->orWhere('licenseExpiresAt', '>', now());
+                    $q->whereNull('license_expires_at')
+                        ->orWhere('license_expires_at', '>', now());
                 });
             // If product ID is specified, ensure the license belongs to that product
             if ($productId) {
                 if ((int)$productId <= 0) {
                     throw new \InvalidArgumentException('Invalid product ID for database verification');
                 }
-                $query->where('productId', $productId);
+                $query->where('product_id', $productId);
             }
             $license = $query->first();
             if ($license) {
@@ -260,7 +260,7 @@ class PurchaseCodeService
                     'success' => true,
                     'license' => $license,
                     'source' => 'database',
-                    'productId' => $license->productId,
+                    'product_id' => $license->product_id,
                 ];
             }
             return [
@@ -271,7 +271,7 @@ class PurchaseCodeService
         } catch (\Exception $e) {
             Log::error('Error verifying against database', [
                 'purchase_code_length' => strlen($purchaseCode),
-                'productId' => $productId ?? 'null',
+                'product_id' => $productId ?? 'null',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -312,7 +312,7 @@ class PurchaseCodeService
             $sanitizedCode = $this->sanitizeInput($rawCode);
             // First, find the license by code (regardless of status or expiration)
             $license = License::where(function ($q) use ($sanitizedCode) {
-                $q->where('licenseKey', $sanitizedCode)
+                $q->where('license_key', $sanitizedCode)
                     ->orWhere('purchase_code', $sanitizedCode);
             })->first();
             // If license doesn't exist at all
@@ -325,13 +325,13 @@ class PurchaseCodeService
                 ];
             }
             // Check if license belongs to the correct product
-            if ($productId && $license->productId !== $productId) {
+            if ($productId && $license->product_id !== $productId) {
                 return [
                     'success' => false,
                     'error' => 'wrong_product',
                     'message' => trans('license_status.license_code_not_for_product'),
                     'source' => 'database_raw',
-                    'license_productId' => $license->productId,
+                    'license_product_id' => $license->product_id,
                 ];
             }
             // Check if license is active
@@ -351,12 +351,12 @@ class PurchaseCodeService
                 ];
             }
             // Check if license is expired
-            if ($license->licenseExpiresAt && now()->greaterThan($license->licenseExpiresAt)) {
+            if ($license->license_expires_at && now()->greaterThan($license->license_expires_at)) {
                 return [
                     'success' => false,
                     'error' => 'license_expired',
                     'message' => trans('license_status.license_expired'),
-                    'expiresAt' => $license->licenseExpiresAt,
+                    'expires_at' => $license->license_expires_at,
                     'source' => 'database_raw',
                 ];
             }
@@ -365,12 +365,12 @@ class PurchaseCodeService
                 'success' => true,
                 'license' => $license,
                 'source' => 'database_raw',
-                'productId' => $license->productId,
+                'product_id' => $license->product_id,
             ];
         } catch (\Exception $e) {
             Log::error('Error verifying raw code', [
                 'raw_code_length' => strlen($rawCode),
-                'productId' => $productId ?? 'null',
+                'product_id' => $productId ?? 'null',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -401,7 +401,7 @@ class PurchaseCodeService
             // If product ID is specified, verify it matches the Envato item
             if ($productId) {
                 $product = Product::find($productId);
-                if (!$product || !$product->envatoItemId || $product->envatoItemId != $envatoItemId) {
+                if (!$product || !$product->envato_item_id || $product->envato_item_id != $envatoItemId) {
                     return [
                         'success' => false,
                         'error' => 'Purchase code does not belong to this product',
@@ -417,7 +417,7 @@ class PurchaseCodeService
                 'success' => true,
                 'envato_data' => $envatoData,
                 'source' => 'envato',
-                'productId' => $productId,
+                'product_id' => $productId,
             ];
         } catch (\Exception $e) {
             // Envato API error during purchase verification
@@ -449,33 +449,39 @@ class PurchaseCodeService
         }
         // Create new license
         $licenseData = [
-            'userId' => $user->id,
+            'user_id' => $user->id,
             'purchase_code' => $purchaseCode,
-            'licenseKey' => 'envato_' . $purchaseCode,
-            'licenseType' => 'regular',
+            'license_key' => 'envato_' . $purchaseCode,
+            'license_type' => 'regular',
             'status' => 'active',
             'purchase_date' => data_get($envatoData, 'sold_at')
-                ? date('Y-m-d H:i:s', strtotime(
-                    is_string(data_get($envatoData, 'sold_at'))
-                        ? data_get($envatoData, 'sold_at')
-                        : ''
-                ) ?: time())
+                ? date(
+                    'Y-m-d H:i:s',
+                    strtotime(
+                        is_string(data_get($envatoData, 'sold_at'))
+                            ? data_get($envatoData, 'sold_at')
+                            : ''
+                    ) ?: time()
+                )
                 : now(),
-            'support_expiresAt' => data_get($envatoData, 'supported_until')
-                ? date('Y-m-d H:i:s', strtotime(
-                    is_string(data_get($envatoData, 'supported_until'))
-                        ? data_get($envatoData, 'supported_until')
-                        : ''
-                ) ?: time())
+            'support_expires_at' => data_get($envatoData, 'supported_until')
+                ? date(
+                    'Y-m-d H:i:s',
+                    strtotime(
+                        is_string(data_get($envatoData, 'supported_until'))
+                            ? data_get($envatoData, 'supported_until')
+                            : ''
+                    ) ?: time()
+                )
                 : null,
-            'licenseExpiresAt' => null, // Lifetime license
+            'license_expires_at' => null, // Lifetime license
         ];
         // Add product ID if specified
         if ($productId) {
-            $licenseData['productId'] = $productId;
+            $licenseData['product_id'] = $productId;
         }
         // Add user ID
-        $licenseData['userId'] = $user->id;
+        $licenseData['user_id'] = $user->id;
         try {
             return License::create($licenseData);
         } catch (\Exception $e) {
@@ -489,11 +495,11 @@ class PurchaseCodeService
     public function userHasProductAccess(User $user, int $productId): bool
     {
         return $user->licenses()
-            ->where('productId', $productId)
+            ->where('product_id', $productId)
             ->where('status', 'active')
             ->where(function ($q) {
-                $q->whereNull('licenseExpiresAt')
-                    ->orWhere('licenseExpiresAt', '>', now());
+                $q->whereNull('license_expires_at')
+                    ->orWhere('license_expires_at', '>', now());
             })
             ->exists();
     }
@@ -503,11 +509,11 @@ class PurchaseCodeService
     public function userHasKbAccess(User $user, \App\Models\KbArticle $kbItem): bool
     {
         // If KB item is not linked to any product, allow access
-        if (! $kbItem->productId) {
+        if (! $kbItem->product_id) {
             return true;
         }
         // Check if user has license for the linked product
-        return $this->userHasProductAccess($user, $kbItem->productId);
+        return $this->userHasProductAccess($user, $kbItem->product_id);
     }
     /**
      * Get accessible KB content for user based on their licenses.
@@ -520,19 +526,19 @@ class PurchaseCodeService
         $userProductIds = $user->licenses()
             ->where('status', 'active')
             ->where(function ($q) {
-                $q->whereNull('licenseExpiresAt')
-                    ->orWhere('licenseExpiresAt', '>', now());
+                $q->whereNull('license_expires_at')
+                    ->orWhere('license_expires_at', '>', now());
             })
-            ->pluck('productId')
+            ->pluck('product_id')
             ->toArray();
         return [
             'categories' => \App\Models\KbCategory::where(function ($query) use ($userProductIds) {
-                $query->whereNull('productId')
-                    ->orWhereIn('productId', $userProductIds);
+                $query->whereNull('product_id')
+                    ->orWhereIn('product_id', $userProductIds);
             })->where('is_published', true)->get(),
             'articles' => \App\Models\KbArticle::where(function ($query) use ($userProductIds) {
-                $query->whereNull('productId')
-                    ->orWhereIn('productId', $userProductIds);
+                $query->whereNull('product_id')
+                    ->orWhereIn('product_id', $userProductIds);
             })->where('is_published', true)->get(),
         ];
     }
@@ -542,11 +548,11 @@ class PurchaseCodeService
     public function userHasCategoryAccess(User $user, \App\Models\KbCategory $category): bool
     {
         // If category is not linked to any product, allow access
-        if (! $category->productId) {
+        if (! $category->product_id) {
             return true;
         }
         // Check if user has license for the linked product
-        return $this->userHasProductAccess($user, $category->productId);
+        return $this->userHasProductAccess($user, $category->product_id);
     }
     /**
      * Check if user has access to KB article considering both direct product and category product.
@@ -554,11 +560,11 @@ class PurchaseCodeService
     public function userHasArticleAccess(User $user, \App\Models\KbArticle $article): bool
     {
         // If article has direct product link, check that first
-        if (isset($article->productId) && $article->productId && $article->productId > 0) {
-            return $this->userHasProductAccess($user, $article->productId);
+        if (isset($article->product_id) && $article->product_id && $article->product_id > 0) {
+            return $this->userHasProductAccess($user, $article->product_id);
         }
         // If article doesn't have direct product but category does, check category access
-        if ($article->category->productId) {
+        if ($article->category->product_id) {
             return $this->userHasCategoryAccess($user, $article->category);
         }
         // No product restrictions

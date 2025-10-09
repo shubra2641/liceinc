@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,31 +9,30 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
- * @property int $productId
+ * @property int $product_id
  * @property string $version
  * @property string $title
  * @property string|null $description
  * @property array<array-key, mixed>|null $changelog
- * @property string|null $filePath
- * @property string|null $fileName
- * @property int|null $fileSize
+ * @property string|null $file_path
+ * @property string|null $file_name
+ * @property int|null $file_size
  * @property string|null $file_hash
- * @property string|null $update_filePath
- * @property bool $isMajor
- * @property bool $isRequired
- * @property bool $isActive
+ * @property string|null $update_file_path
+ * @property bool $is_major
+ * @property bool $is_required
+ * @property bool $is_active
  * @property array<array-key, mixed>|null $requirements
  * @property array<array-key, mixed>|null $compatibility
- * @property \Illuminate\Support\Carbon|null $releasedAt
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property \Illuminate\Support\Carbon|null $released_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read string $changelog_text
  * @property-read string|null $download_url
  * @property-read string|null $file_url
- * @property-read string $formattedFileSize
+ * @property-read string $formatted_file_size
  * @property-read \App\Models\Product $product
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate active()
- * @method static \Database\Factories\ProductUpdateFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate major()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate newQuery()
@@ -67,12 +64,7 @@ class ProductUpdate extends Model
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = ProductUpdateFactory::class;
 
     /**
      * The attributes that are mass assignable.
@@ -83,21 +75,21 @@ class ProductUpdate extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'productId',
+        'product_id',
         'version',
         'title',
         'description',
         'changelog',
-        'filePath',
-        'fileName',
-        'fileSize',
+        'file_path',
+        'file_name',
+        'file_size',
         'file_hash',
-        'isMajor',
-        'isRequired',
-        'isActive',
+        'is_major',
+        'is_required',
+        'is_active',
         'requirements',
         'compatibility',
-        'releasedAt',
+        'released_at',
     ];
     /**
      * The attributes that should be cast.
@@ -105,13 +97,13 @@ class ProductUpdate extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'isMajor' => 'boolean',
-        'isRequired' => 'boolean',
-        'isActive' => 'boolean',
+        'is_major' => 'boolean',
+        'is_required' => 'boolean',
+        'is_active' => 'boolean',
         'changelog' => 'array',
         'requirements' => 'array',
         'compatibility' => 'array',
-        'releasedAt' => 'datetime',
+        'released_at' => 'datetime',
     ];
     /**
      * Get the product that owns the update.
@@ -128,21 +120,21 @@ class ProductUpdate extends Model
      */
     public function getFileUrlAttribute(): ?string
     {
-        if (! $this->filePath) {
+        if (! $this->file_path) {
             return null;
         }
-        return Storage::url($this->filePath);
+        return Storage::url($this->file_path);
     }
     /**
      * Get the update file download URL.
      */
     public function getDownloadUrlAttribute(): ?string
     {
-        if (! $this->filePath) {
+        if (! $this->file_path) {
             return null;
         }
         return route('api.product-updates.download', [
-            'product' => $this->productId,
+            'product' => $this->product_id,
             'version' => $this->version,
         ]);
     }
@@ -214,10 +206,10 @@ class ProductUpdate extends Model
      */
     public function getFormattedFileSizeAttribute(): string
     {
-        if (! $this->fileSize) {
+        if (! $this->file_size) {
             return 'Unknown';
         }
-        $bytes = $this->fileSize;
+        $bytes = $this->file_size;
         $units = ['B', 'KB', 'MB', 'GB'];
         $unitsCount = count($units);
         for ($i = 0; $bytes > 1024 && $i < $unitsCount - 1; $i++) {
@@ -230,36 +222,33 @@ class ProductUpdate extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeActive($query)
     {
-        return $query->where('isActive', true);
+        return $query->where('is_active', true);
     }
     /**
      * Scope for major updates.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeMajor($query)
     {
-        return $query->where('isMajor', true);
+        return $query->where('is_major', true);
     }
     /**
      * Scope for required updates.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeRequired($query)
     {
-        return $query->where('isRequired', true);
+        return $query->where('is_required', true);
     }
     /**
      * Scope for updates newer than version.
@@ -267,7 +256,6 @@ class ProductUpdate extends Model
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
      * @param string $version
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeNewerThan($query, string $version)

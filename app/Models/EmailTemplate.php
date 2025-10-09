@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -22,12 +20,11 @@ use Illuminate\Database\Eloquent\Collection;
  * @property string $type Template type: 'user' or 'admin'
  * @property string $category Template category: 'registration', 'license', 'ticket', 'invoice', etc.
  * @property array<string, mixed>|null $variables Available variables for this template
- * @property bool $isActive Whether the template is active
+ * @property bool $is_active Whether the template is active
  * @property string|null $description Template description
- * @property \Carbon\Carbon $createdAt
- * @property \Carbon\Carbon $updatedAt
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
  * @method static Builder<static>|EmailTemplate active()
- * @method static \Database\Factories\EmailTemplateFactory factory($count = null, $state = [])
  * @method static Builder<static>|EmailTemplate forCategory(string $category)
  * @method static Builder<static>|EmailTemplate forType(string $type)
  * @method static Builder<static>|EmailTemplate newModelQuery()
@@ -49,16 +46,6 @@ use Illuminate\Database\Eloquent\Collection;
 class EmailTemplate extends Model
 {
     /**
-     * @phpstan-ignore-next-line
-     */
-    use HasFactory;
-
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = EmailTemplateFactory::class;
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -73,7 +60,7 @@ class EmailTemplate extends Model
         'type',
         'category',
         'variables',
-        'isActive',
+        'is_active',
         'description',
     ];
     /**
@@ -83,24 +70,22 @@ class EmailTemplate extends Model
      */
     protected $casts = [
         'variables' => 'array',
-        'isActive' => 'boolean',
+        'is_active' => 'boolean',
     ];
     /**
      * Scope a query to only include active templates.
      *
      * @param Builder<EmailTemplate> $query
-     *
      * @return Builder<EmailTemplate>
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('isActive', true);
+        return $query->where('is_active', true);
     }
     /**
      * Scope a query to only include templates for a specific type.
      *
      * @param Builder<EmailTemplate> $query
-     *
      * @return Builder<EmailTemplate>
      */
     public function scopeForType(Builder $query, string $type): Builder
@@ -111,7 +96,6 @@ class EmailTemplate extends Model
      * Scope a query to only include templates for a specific category.
      *
      * @param Builder<EmailTemplate> $query
-     *
      * @return Builder<EmailTemplate>
      */
     public function scopeForCategory(Builder $query, string $category): Builder
@@ -142,7 +126,6 @@ class EmailTemplate extends Model
      */
     /**
      * @param array<string, mixed> $data
-     *
      * @return array<string, string>
      */
     public function render(array $data = []): array

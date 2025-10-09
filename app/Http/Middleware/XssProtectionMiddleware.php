@@ -148,7 +148,7 @@ class XssProtectionMiddleware
                 'method' => $request->method(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'trace' => $e->getTraceAsString(),
             ]);
             // Continue processing even if XSS protection fails to prevent service disruption
@@ -353,7 +353,7 @@ class XssProtectionMiddleware
                 'method' => $request->method(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'timestamp' => now()->toISOString(),
                 'request_id' => $request->header('X-Request-ID'),
                 'referer' => $request->header('Referer'),

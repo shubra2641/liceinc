@@ -83,8 +83,8 @@ class EnhancedLicenseApiController extends BaseController
      *     "success": true,
      *     "message": "License verified successfully",
      *     "data": {
-     *         "licenseId": 123,
-     *         "licenseType": "regular",
+     *         "license_id": 123,
+     *         "license_type": "regular",
      *         "status": "active"
      *     }
      * }
@@ -189,7 +189,7 @@ class EnhancedLicenseApiController extends BaseController
      *     "success": true,
      *     "message": "License registered successfully",
      *     "data": {
-     *         "licenseId": 123,
+     *         "license_id": 123,
      *         "status": "created"
      *     }
      * }
@@ -221,13 +221,13 @@ class EnhancedLicenseApiController extends BaseController
             }
             // Check if license already exists
             $existingLicense = License::where('purchase_code', $validated['purchase_code'])
-                ->where('productId', $product->id)
+                ->where('product_id', $product->id)
                 ->first();
             if ($existingLicense) {
                 DB::commit();
 
                 return $this->jsonResponse([
-                    'licenseId' => $existingLicense->id,
+                    'license_id' => $existingLicense->id,
                     'status' => 'already_exists',
                 ], 'License already exists');
             }
@@ -236,7 +236,7 @@ class EnhancedLicenseApiController extends BaseController
             DB::commit();
 
             return $this->jsonResponse([
-                'licenseId' => $license->id,
+                'license_id' => $license->id,
                 'status' => 'created',
             ], 'License registered successfully');
         } catch (ValidationException $e) {
@@ -275,7 +275,7 @@ class EnhancedLicenseApiController extends BaseController
      * // Request:
      * POST /api/license/status
      * {
-     *     "licenseKey": "ABC123-DEF456-GHI789",
+     *     "license_key": "ABC123-DEF456-GHI789",
      *     "product_slug": "my-product"
      * }
      *
@@ -284,9 +284,9 @@ class EnhancedLicenseApiController extends BaseController
      *     "success": true,
      *     "message": "License status retrieved",
      *     "data": {
-     *         "licenseId": 123,
+     *         "license_id": 123,
      *         "status": "active",
-     *         "isActive": true
+     *         "is_active": true
      *     }
      * }
      */
@@ -316,12 +316,12 @@ class EnhancedLicenseApiController extends BaseController
                 return $this->errorResponse('Product not found', null, Response::HTTP_NOT_FOUND);
             }
             // Find license
-            $license = License::where('licenseKey', $validated['licenseKey'])
-                ->where('productId', $product->id)
+            $license = License::where('license_key', $validated['license_key'])
+                ->where('product_id', $product->id)
                 ->first();
             if (! $license) {
                 Log::warning('License not found during enhanced status check', [
-                    'licenseKey' => $validated['licenseKey'],
+                    'license_key' => $validated['license_key'],
                     'product_slug' => $validated['product_slug'],
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
@@ -332,14 +332,12 @@ class EnhancedLicenseApiController extends BaseController
             // Check license status
             $isActive = $this->isLicenseActive($license);
             $statusData = [
-                'licenseId' => $license->id,
-                'type' => $license->licenseType,
-                'expiresAt' => $license->licenseExpiresAt?->toISOString(),
-                'supportExpiresAt' => ($license->supportExpiresAt instanceof \Carbon\Carbon)
-                    ? $license->supportExpiresAt->toISOString()
-                    : null,
+                'license_id' => $license->id,
+                'type' => $license->license_type,
+                'expires_at' => $license->license_expires_at?->toISOString(),
+                'support_expires_at' => $license->support_expires_at?->toISOString(),
                 'status' => $license->status,
-                'isActive' => $isActive,
+                'is_active' => $isActive,
             ];
             DB::commit();
 
@@ -470,7 +468,7 @@ class EnhancedLicenseApiController extends BaseController
         $domain = is_string($validated['domain'] ?? null) ? $validated['domain'] : null;
         // Check database first
         $license = License::where('purchase_code', $purchaseCode)
-            ->where('productId', $product->id)
+            ->where('product_id', $product->id)
             ->first();
         if ($license) {
             return $this->verifyExistingLicense($license, $domain, $request);
@@ -489,7 +487,7 @@ class EnhancedLicenseApiController extends BaseController
     {
         if (! $this->isLicenseActive($license)) {
             $this->logSecurityEvent('Inactive license verification attempt', $request, [
-                'licenseId' => $license->id,
+                'license_id' => $license->id,
                 'status' => $license->status,
             ]);
             abort(Response::HTTP_FORBIDDEN, 'License is not active');
@@ -497,19 +495,17 @@ class EnhancedLicenseApiController extends BaseController
         // Handle domain verification
         if ($domain && ! $this->verifyDomain($license, $domain)) {
             $this->logSecurityEvent('Unauthorized domain verification attempt', $request, [
-                'licenseId' => $license->id,
+                'license_id' => $license->id,
                 'domain' => $domain,
             ]);
             abort(Response::HTTP_FORBIDDEN, 'Domain not authorized for this license');
         }
 
         return [
-            'licenseId' => $license->id,
-            'licenseType' => $license->licenseType,
-            'expiresAt' => $license->licenseExpiresAt?->toISOString(),
-            'supportExpiresAt' => ($license->supportExpiresAt instanceof \Carbon\Carbon)
-                ? $license->supportExpiresAt->toISOString()
-                : null,
+            'license_id' => $license->id,
+            'license_type' => $license->license_type,
+            'expires_at' => $license->license_expires_at?->toISOString(),
+            'support_expires_at' => $license->support_expires_at?->toISOString(),
             'status' => $license->status,
             'verification_method' => 'database',
         ];
@@ -520,12 +516,8 @@ class EnhancedLicenseApiController extends BaseController
      *
      * @return array<string, mixed>
      */
-    private function verifyWithEnvato(
-        Product $product,
-        string $purchaseCode,
-        ?string $domain,
-        Request $request
-    ): array {
+    private function verifyWithEnvato(Product $product, string $purchaseCode, ?string $domain, Request $request): array
+    {
         $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
 
         if (
@@ -536,15 +528,15 @@ class EnhancedLicenseApiController extends BaseController
         ) {
             $this->logSecurityEvent('Invalid Envato verification', $request, [
                 'purchase_code' => $this->securityService->hashForLogging($purchaseCode),
-                'productId' => $product->id,
+                'product_id' => $product->id,
             ]);
             abort(Response::HTTP_NOT_FOUND, 'License not found');
         }
 
-        if ($envatoData['item']['id'] != $product->envatoItemId) {
+        if ($envatoData['item']['id'] != $product->envato_item_id) {
             $this->logSecurityEvent('Invalid Envato verification', $request, [
                 'purchase_code' => $this->securityService->hashForLogging($purchaseCode),
-                'productId' => $product->id,
+                'product_id' => $product->id,
             ]);
             abort(Response::HTTP_NOT_FOUND, 'License not found');
         }
@@ -556,12 +548,10 @@ class EnhancedLicenseApiController extends BaseController
         $license = $this->createLicenseFromEnvato($product, $purchaseCode, $envatoDataTyped);
 
         return [
-            'licenseId' => $license->id,
-            'licenseType' => $license->licenseType,
-            'expiresAt' => $license->licenseExpiresAt?->toISOString(),
-            'supportExpiresAt' => ($license->supportExpiresAt instanceof \Carbon\Carbon)
-                ? $license->supportExpiresAt->toISOString()
-                : null,
+            'license_id' => $license->id,
+            'license_type' => $license->license_type,
+            'expires_at' => $license->license_expires_at?->toISOString(),
+            'support_expires_at' => $license->support_expires_at?->toISOString(),
             'status' => $license->status,
             'verification_method' => 'envato_auto_created',
         ];
@@ -575,7 +565,7 @@ class EnhancedLicenseApiController extends BaseController
         if ($license->status !== 'active') {
             return false;
         }
-        if ($license->licenseExpiresAt && $license->licenseExpiresAt->isPast()) {
+        if ($license->license_expires_at && $license->license_expires_at->isPast()) {
             return false;
         }
 
@@ -648,12 +638,12 @@ class EnhancedLicenseApiController extends BaseController
     private function createLicenseFromEnvato(Product $product, string $purchaseCode, array $envatoData): License
     {
         return License::create([
-            'productId' => $product->id,
+            'product_id' => $product->id,
             'purchase_code' => $purchaseCode,
-            'licenseKey' => $purchaseCode,
-            'licenseType' => $product->licenseType ?? 'regular',
-            'supportExpiresAt' => now()->addDays($product->supportDays ?? 365),
-            'licenseExpiresAt' => $product->licenseType === 'extended' ? now()->addYear() : null,
+            'license_key' => $purchaseCode,
+            'license_type' => $product->license_type ?? 'regular',
+            'support_expires_at' => now()->addDays($product->support_days ?? 365),
+            'license_expires_at' => $product->license_type === 'extended' ? now()->addYear() : null,
             'status' => 'active',
         ]);
     }
@@ -666,12 +656,12 @@ class EnhancedLicenseApiController extends BaseController
     private function createLicense(Product $product, array $validated): License
     {
         $license = License::create([
-            'productId' => $product->id,
+            'product_id' => $product->id,
             'purchase_code' => $validated['purchase_code'],
-            'licenseKey' => $this->generateLicenseKey(),
-            'licenseType' => $product->licenseType ?? 'regular',
-            'supportExpiresAt' => now()->addDays($product->supportDays ?? 365),
-            'licenseExpiresAt' => $product->licenseType === 'extended' ? now()->addYear() : null,
+            'license_key' => $this->generateLicenseKey(),
+            'license_type' => $product->license_type ?? 'regular',
+            'support_expires_at' => now()->addDays($product->support_days ?? 365),
+            'license_expires_at' => $product->license_type === 'extended' ? now()->addYear() : null,
             'status' => 'active',
         ]);
         if (isset($validated['domain'])) {
@@ -694,7 +684,7 @@ class EnhancedLicenseApiController extends BaseController
                          substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
                          substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
                          substr(md5(uniqid((string)mt_rand(), true)), 0, 8));
-        } while (License::where('licenseKey', $key)->exists());
+        } while (License::where('license_key', $key)->exists());
 
         return $key;
     }

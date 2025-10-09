@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Console\Commands;
 
 use App\Models\Product;
@@ -141,8 +139,8 @@ class TestLicenseGeneration extends Command
      */
     private function displayTokenStatus(Setting $setting): void
     {
-        $this->info('API Token from DB: ' . ($setting->licenseApiToken ? 'Found' : 'Not found'));
-        $this->info('Envato Token from DB: ' . ($setting->envatoPersonalToken ? 'Found' : 'Not found'));
+        $this->info('API Token from DB: ' . ($setting->license_api_token ? 'Found' : 'Not found'));
+        $this->info('Envato Token from DB: ' . ($setting->envato_personal_token ? 'Found' : 'Not found'));
     }
     /**
      * Validate and get product with security checks.
@@ -161,7 +159,7 @@ class TestLicenseGeneration extends Command
             if (! $product->programmingLanguage) {
                 $this->error('Product has no associated programming language!');
                 Log::warning('Product missing programming language during license generation test', [
-                    'productId' => $product->id,
+                    'product_id' => $product->id,
                 ]);
                 return null;
             }
@@ -207,7 +205,7 @@ class TestLicenseGeneration extends Command
             if (! $filePath) {
                 $this->error('License generation service returned null file path');
                 Log::error('License generation service returned null file path', [
-                    'productId' => $product->id,
+                    'product_id' => $product->id,
                 ]);
                 return null;
             }
@@ -216,7 +214,7 @@ class TestLicenseGeneration extends Command
         } catch (\Exception $e) {
             $this->error('Failed to generate license file: ' . $e->getMessage());
             Log::error('Failed to generate license file', [
-                'productId' => $product->id,
+                'product_id' => $product->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -238,7 +236,7 @@ class TestLicenseGeneration extends Command
             if (! file_exists($fullPath)) {
                 $this->error("❌ File was not created at: {$fullPath}");
                 Log::error('Generated license file does not exist', [
-                    'filePath' => $fullPath,
+                    'file_path' => $fullPath,
                     'relative_path' => $filePath,
                 ]);
                 return false;
@@ -249,7 +247,7 @@ class TestLicenseGeneration extends Command
             if ($content === false) {
                 $this->error('❌ Failed to read generated file content');
                 Log::error('Failed to read generated license file content', [
-                    'filePath' => $fullPath,
+                    'file_path' => $fullPath,
                 ]);
                 return false;
             }
@@ -261,7 +259,7 @@ class TestLicenseGeneration extends Command
         } catch (\Exception $e) {
             $this->error('Failed to validate generated file: ' . $e->getMessage());
             Log::error('Failed to validate generated license file', [
-                'filePath' => $filePath,
+                'file_path' => $filePath,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -293,19 +291,18 @@ class TestLicenseGeneration extends Command
     private function validateTokenInclusion(string $content, Setting $setting): void
     {
         // Check API token inclusion
-        $apiToken = $setting->licenseApiToken;
-        if ($apiToken && is_string($apiToken) && strpos($content, $apiToken) !== false) {
+        if ($setting->license_api_token && strpos($content, $setting->license_api_token) !== false) {
             $this->info("\n✅ API Token found in generated file!");
         } else {
             $this->error("\n❌ API Token NOT found in generated file!");
             Log::warning('API token not found in generated license file');
         }
         // Check Envato token inclusion
-        if ($setting->envatoPersonalToken && strpos($content, $setting->envatoPersonalToken) !== false) {
+        if ($setting->envato_personal_token && strpos($content, $setting->envato_personal_token) !== false) {
             $this->info('✅ Envato Token found in generated file!');
         } else {
             $this->warn('⚠️ Envato Token not found (may be empty)');
-            if ($setting->envatoPersonalToken) {
+            if ($setting->envato_personal_token) {
                 Log::warning('Envato token not found in generated license file');
             }
         }

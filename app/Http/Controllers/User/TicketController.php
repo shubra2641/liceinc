@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
@@ -94,7 +92,7 @@ class TicketController extends Controller
                 throw new Exception('User not authenticated');
             }
             DB::beginTransaction();
-            $tickets = Ticket::where('userId', $userId)
+            $tickets = Ticket::where('user_id', $userId)
                 ->latest()
                 ->paginate(self::PAGINATION_LIMIT);
             DB::commit();
@@ -102,7 +100,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load user tickets: ' . $e->getMessage(), [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
             return view('user.tickets.index', ['tickets' => collect()])
@@ -135,11 +133,11 @@ class TicketController extends Controller
             $allCategories = TicketCategory::active()->ordered()->get();
             // If user is not logged in, show only categories that don't require login
             if (! auth()->check()) {
-                $categories = $allCategories->where('requiresLogin', false);
+                $categories = $allCategories->where('requires_login', false);
             } else {
                 $categories = $allCategories;
             }
-            $requiresLoginCount = $allCategories->where('requiresLogin', true)->count();
+            $requiresLoginCount = $allCategories->where('requires_login', true)->count();
             $totalCount = $allCategories->count();
             // If all categories require login and user is not logged in
             if ($totalCount > 0 && $requiresLoginCount === $totalCount && ! auth()->check()) {
@@ -154,7 +152,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load ticket creation form: ' . $e->getMessage(), [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString(),
             ]);
             return redirect()->back()->with('error', 'Failed to load ticket creation form. Please try again.');
@@ -195,13 +193,13 @@ class TicketController extends Controller
                 return back()->withErrors(['category_id' => 'Invalid category selected'])->withInput();
             }
             // If category requires login, ensure user is authenticated
-            if ($category->requiresLogin && ! Auth::check()) {
+            if ($category->requires_login && ! Auth::check()) {
                 DB::rollBack();
                 return redirect()->route('login');
             }
             // If category requires a valid purchase code, validate it
             $license = null;
-            if ($category->requiresValidPurchaseCode) {
+            if ($category->requires_valid_purchase_code) {
                 if (empty($validated['purchase_code'])) {
                     DB::rollBack();
                     return back()->withErrors(['purchase_code' => 'Purchase code is required for this category'])
@@ -224,7 +222,9 @@ class TicketController extends Controller
             if (empty($validated['invoice_id']) === false) {
                 $ticketData = $this->attachInvoiceData(
                     $ticketData,
-                    is_numeric($validated['invoice_id']) ? (int)$validated['invoice_id'] : 0
+                    is_numeric($validated['invoice_id'])
+                        ? (int)$validated['invoice_id']
+                        : 0
                 );
             }
             if (! empty($validated['purchase_code'])) {
@@ -236,10 +236,8 @@ class TicketController extends Controller
             DB::commit();
             // Redirect based on user authentication status
             if (Auth::check()) {
-                return redirect()->route('user.tickets.show', $ticket)->with(
-                    'success',
-                    'Ticket created successfully'
-                );
+                return redirect()->route('user.tickets.show', $ticket)
+                    ->with('success', 'Ticket created successfully');
             } else {
                 // For guests, redirect to support ticket view
                 return redirect()->route('support.tickets.show', $ticket)
@@ -251,7 +249,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to create ticket: ' . $e->getMessage(), [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -284,14 +282,14 @@ class TicketController extends Controller
     {
         try {
             // Ticket is already validated by type hint
-            // Allow viewing ticket if it has no userId (for guests) or if user is logged in
+            // Allow viewing ticket if it has no user_id (for guests) or if user is logged in
             // and is ticket owner or admin
             if (! $this->canViewTicket($ticket)) {
                 Log::warning('Unauthorized ticket access attempt', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
-                    'ticket_userId' => $ticket->userId,
-                    'ipAddress' => request()->ip(),
+                    'ticket_user_id' => $ticket->user_id,
+                    'ip_address' => request()->ip(),
                 ]);
                 abort(403, 'Unauthorized access to ticket');
             }
@@ -302,7 +300,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load ticket details: ' . $e->getMessage(), [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -348,10 +346,10 @@ class TicketController extends Controller
             // Request and ticket are already validated by type hints
             if (! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket modification attempt', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
-                    'ticket_userId' => $ticket->userId,
-                    'ipAddress' => request()->ip(),
+                    'ticket_user_id' => $ticket->user_id,
+                    'ip_address' => request()->ip(),
                 ]);
                 abort(403, 'Unauthorized access to modify ticket');
             }
@@ -363,7 +361,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to update ticket: ' . $e->getMessage(), [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
@@ -392,10 +390,10 @@ class TicketController extends Controller
             // Ticket is validated by type hint
             if (! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket deletion attempt', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
-                    'ticket_userId' => $ticket->userId,
-                    'ipAddress' => request()->ip(),
+                    'ticket_user_id' => $ticket->user_id,
+                    'ip_address' => request()->ip(),
                 ]);
                 abort(403, 'Unauthorized access to delete ticket');
             }
@@ -406,7 +404,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to delete ticket: ' . $e->getMessage(), [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -439,10 +437,10 @@ class TicketController extends Controller
             // Request and ticket are already validated by type hints
             if (! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket reply attempt', [
-                    'userId' => Auth::id(),
+                    'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
-                    'ticket_userId' => $ticket->userId,
-                    'ipAddress' => request()->ip(),
+                    'ticket_user_id' => $ticket->user_id,
+                    'ip_address' => request()->ip(),
                 ]);
                 abort(403, 'Unauthorized access to reply to ticket');
             }
@@ -450,7 +448,7 @@ class TicketController extends Controller
             DB::beginTransaction();
             $reply = TicketReply::create([
                 'ticket_id' => $ticket->id,
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'message' => $validated['message'],
             ]);
             // Send email notification to admin when user replies
@@ -460,7 +458,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to add ticket reply: ' . $e->getMessage(), [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
@@ -551,8 +549,7 @@ class TicketController extends Controller
     {
         try {
             // First try to find an existing license record
-            $license = License::where('purchase_code', $validated['purchase_code'])
-                ->first();
+            $license = License::where('purchase_code', $validated['purchase_code'])->first();
             if (! $license) {
                 // Try to verify via Envato service if available
                 try {
@@ -578,16 +575,19 @@ class TicketController extends Controller
                     if ($product) {
                         $license = License::create([
                             'purchase_code' => $validated['purchase_code'],
-                            'productId' => $product->id,
-                            'userId' => Auth::id(),
-                            'licenseType' => 'regular',
+                            'product_id' => $product->id,
+                            'user_id' => Auth::id(),
+                            'license_type' => 'regular',
                             'status' => 'active',
-                            'support_expiresAt' => data_get($sale, 'supported_until')
-                                ? date('Y-m-d', strtotime(
-                                    is_string(data_get($sale, 'supported_until'))
-                                        ? data_get($sale, 'supported_until')
-                                        : ''
-                                ) ?: time())
+                            'support_expires_at' => data_get($sale, 'supported_until')
+                                ? date(
+                                    'Y-m-d',
+                                    strtotime(
+                                        is_string(data_get($sale, 'supported_until'))
+                                            ? data_get($sale, 'supported_until')
+                                            : ''
+                                    ) ?: time()
+                                )
                                 : null,
                         ]);
                     }
@@ -611,12 +611,12 @@ class TicketController extends Controller
     private function prepareTicketData(array $validated, TicketCategory $category, ?License $license): array
     {
         return [
-            'userId' => Auth::check() === true ? Auth::id() : null, // Can be null for guests
+            'user_id' => Auth::check() === true ? Auth::id() : null, // Can be null for guests
             'subject' => $validated['subject'],
             'priority' => $validated['priority'],
             'status' => 'open',
             'content' => $validated['content'],
-            'licenseId' => $license?->id,
+            'license_id' => $license?->id,
             'category_id' => $category->id,
             'product_version' => $validated['product_version'] ?? null,
             'browser_info' => $validated['browser_info'] ?? null,
@@ -637,7 +637,7 @@ class TicketController extends Controller
             $ticketData['invoice_id'] = $invoice->id;
             // prefer invoice license if exists
             if ($invoice->license) {
-                $ticketData['licenseId'] = $invoice->license->id;
+                $ticketData['license_id'] = $invoice->license->id;
             }
             // if purchase_code not provided, try to set from invoice license
             if (empty($ticketData['purchase_code']) && $invoice->license?->purchase_code) {
@@ -704,9 +704,11 @@ class TicketController extends Controller
     private function canViewTicket(Ticket $ticket): bool
     {
         $user = Auth::user();
-        return ! $ticket->userId || // Guest ticket
-               (Auth::check() && ($ticket->userId === Auth::id()
-                   || ($user && $user->hasRole('admin')))); // Logged in user
+        return ! $ticket->user_id || // Guest ticket
+               (Auth::check() && (
+                   $ticket->user_id === Auth::id()
+                   || ($user && $user->hasRole('admin'))
+               )); // Logged in user
     }
     /**
      * Check if user can modify ticket.
@@ -717,6 +719,6 @@ class TicketController extends Controller
      */
     private function canModifyTicket(Ticket $ticket): bool
     {
-        return $ticket->userId === Auth::id() || Auth::user()?->hasRole('admin');
+        return $ticket->user_id === Auth::id() || Auth::user()?->hasRole('admin');
     }
 }

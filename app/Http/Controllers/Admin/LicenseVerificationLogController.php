@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
 use App\Helpers\SecureFileHelper;
@@ -50,7 +48,7 @@ class LicenseVerificationLogController extends Controller
      *
      * @example
      * // Request with filters:
-     * GET /admin/license-verification-logs?status=success&source=api&dateFrom=2024-01-01
+     * GET /admin/license-verification-logs?status=success&source=api&date_from=2024-01-01
      *
      * // Returns view with:
      * // - Paginated logs list
@@ -63,13 +61,13 @@ class LicenseVerificationLogController extends Controller
         try {
             DB::beginTransaction();
             $query = $this->applyFilters(LicenseVerificationLog::query(), $request);
-            $logs = $query->orderBy('createdAt', 'desc')->paginate(20);
+            $logs = $query->orderBy('created_at', 'desc')->paginate(20);
             // Get statistics
             $stats = LicenseVerificationLogger::getStats(30);
             // Get suspicious activity
             $suspiciousActivity = LicenseVerificationLogger::getSuspiciousActivity(24, 3);
             // Get unique sources and domains for filters
-            $sources = LicenseVerificationLog::distinct()->pluck('verificationSource')->filter();
+            $sources = LicenseVerificationLog::distinct()->pluck('verification_source')->filter();
             $domains = LicenseVerificationLog::distinct()->pluck('domain')->filter();
             DB::commit();
 
@@ -295,7 +293,7 @@ class LicenseVerificationLogController extends Controller
      *
      * @example
      * // Export logs with filters:
-     * GET /admin/license-verification-logs/export?status=success&dateFrom=2024-01-01
+     * GET /admin/license-verification-logs/export?status=success&date_from=2024-01-01
      *
      * // Returns CSV file with:
      * // - Filtered log data
@@ -315,8 +313,8 @@ class LicenseVerificationLogController extends Controller
         try {
             DB::beginTransaction();
             $query = $this->applyFilters(LicenseVerificationLog::query(), $request);
-            $logs = $query->orderBy('createdAt', 'desc')->get();
-            $filename = 'licenseVerificationLogs_' . date('Y-m-d_H-i-s') . '.csv';
+            $logs = $query->orderBy('created_at', 'desc')->get();
+            $filename = 'license_verification_logs_' . date('Y-m-d_H-i-s') . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
                 'Content-Disposition' => 'attachment; filename="' . $filename . '"',
@@ -335,14 +333,14 @@ class LicenseVerificationLogController extends Controller
                 foreach ($logs as $log) {
                     fputcsv($file, [
                         $log->id,
-                        $log->purchaseCodeHash,
+                        $log->purchase_code_hash,
                         $this->sanitizeOutput($log->domain),
-                        $log->ipAddress,
+                        $log->ip_address,
                         $log->status,
-                        $log->verificationSource,
-                        $log->isValid ? 'Yes' : 'No',
-                        $this->sanitizeOutput($log->responseMessage),
-                        $log->createdAt?->format('Y-m-d H:i:s'),
+                        $log->verification_source,
+                        $log->is_valid ? 'Yes' : 'No',
+                        $this->sanitizeOutput($log->response_message),
+                        $log->created_at?->format('Y-m-d H:i:s'),
                     ]);
                 }
                 SecureFileHelper::closeFile($file);
@@ -401,7 +399,7 @@ class LicenseVerificationLogController extends Controller
         }
         // Apply source filter
         if (! empty($validated['source'])) {
-            $query->where('verificationSource', $validated['source']);
+            $query->where('verification_source', $validated['source']);
         }
         // Apply domain filter
         if (! empty($validated['domain'])) {
@@ -409,15 +407,15 @@ class LicenseVerificationLogController extends Controller
         }
         // Apply IP address filter
         if (! empty($validated['ip'])) {
-            $query->where('ipAddress', 'like', '%' . (is_string($validated['ip']) ? $validated['ip'] : '') . '%');
+            $query->where('ip_address', 'like', '%' . (is_string($validated['ip']) ? $validated['ip'] : '') . '%');
         }
         // Apply date from filter
-        if (! empty($validated['dateFrom'])) {
-            $query->whereDate('createdAt', '>=', is_string($validated['dateFrom']) ? $validated['dateFrom'] : null);
+        if (! empty($validated['date_from'])) {
+            $query->whereDate('created_at', '>=', is_string($validated['date_from']) ? $validated['date_from'] : null);
         }
         // Apply date to filter
-        if (! empty($validated['dateTo'])) {
-            $query->whereDate('createdAt', '<=', is_string($validated['dateTo']) ? $validated['dateTo'] : null);
+        if (! empty($validated['date_to'])) {
+            $query->whereDate('created_at', '<=', is_string($validated['date_to']) ? $validated['date_to'] : null);
         }
 
         return $query;

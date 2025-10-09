@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -51,7 +49,7 @@ class TicketIndexRequest extends FormRequest
                 'integer',
                 'exists:ticket_categories,id',
             ],
-            'userId' => [
+            'user_id' => [
                 'sometimes',
                 'integer',
                 'exists:users,id',
@@ -81,7 +79,7 @@ class TicketIndexRequest extends FormRequest
             'status.in' => 'Status must be one of: open, closed, in_progress.',
             'priority.in' => 'Priority must be one of: low, medium, high.',
             'category_id.exists' => 'Selected category does not exist.',
-            'userId.exists' => 'Selected user does not exist.',
+            'user_id.exists' => 'Selected user does not exist.',
             'search.regex' => 'Search contains invalid characters.',
             'search.max' => 'Search cannot exceed 255 characters.',
             'per_page.min' => 'Per page must be at least 1.',
@@ -99,7 +97,7 @@ class TicketIndexRequest extends FormRequest
             'status' => 'ticket status',
             'priority' => 'ticket priority',
             'category_id' => 'category',
-            'userId' => 'user',
+            'user_id' => 'user',
             'search' => 'search term',
             'per_page' => 'items per page',
         ];
@@ -113,7 +111,7 @@ class TicketIndexRequest extends FormRequest
             'status' => $this->status && is_string($this->status) ? trim($this->status) : null,
             'priority' => $this->priority && is_string($this->priority) ? trim($this->priority) : null,
             'search' => $this->search && is_string($this->search) ? trim($this->search) : null,
-            'per_page' => $this->perPage && is_numeric($this->perPage) ? (int)$this->perPage : null,
+            'per_page' => $this->per_page && is_numeric($this->per_page) ? (int)$this->per_page : null,
         ]);
     }
 }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -77,7 +75,7 @@ class ProductApiController extends Controller
      *     "product_slug": "my-product",
      *     "product_name": "My Product",
      *     "license_exists": true,
-     *     "licenseId": 123
+     *     "license_id": 123
      * }
      *
      * // Success response (license found via Envato API):
@@ -111,7 +109,7 @@ class ProductApiController extends Controller
                     'product_slug' => $this->sanitizeOutput($existingLicense->product->slug),
                     'product_name' => $this->sanitizeOutput($existingLicense->product->name),
                     'license_exists' => true,
-                    'licenseId' => $existingLicense->id,
+                    'license_id' => $existingLicense->id,
                 ]);
             }
             // If not found in database, try Envato API

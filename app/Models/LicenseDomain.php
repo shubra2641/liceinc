@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,17 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
- * @property int $licenseId
+ * @property int $license_id
  * @property string $domain
  * @property string $status
  * @property bool $is_verified
  * @property \Illuminate\Support\Carbon|null $verified_at
  * @property \Illuminate\Support\Carbon|null $added_at
  * @property \Illuminate\Support\Carbon|null $last_used_at
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\License $license
- * @method static \Database\Factories\LicenseDomainFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain query()
@@ -41,18 +38,13 @@ class LicenseDomain extends Model
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = LicenseDomainFactory::class;
 
     protected $fillable = [
-        'licenseId', 'domain', 'status', 'is_verified', 'verified_at', 'added_at', 'last_used_at',
+        'license_id', 'domain', 'status', 'is_verified', 'verified_at', 'added_at', 'last_used_at',
     ];
     protected $casts = [
-        'licenseId' => 'integer',
+        'license_id' => 'integer',
         'is_verified' => 'boolean',
         'verified_at' => 'datetime',
         'added_at' => 'datetime',

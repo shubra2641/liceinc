@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,20 +21,19 @@ use Illuminate\Support\Str;
  * @property string|null $text_color
  * @property string|null $icon
  * @property string|null $image
- * @property bool $isActive
+ * @property bool $is_active
  * @property bool $show_in_menu
  * @property bool $is_featured
  * @property bool $allow_subcategories
- * @property int $sortOrder
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductCategory> $children
  * @property-read int|null $children_count
  * @property-read ProductCategory|null $parent
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
  * @property-read int|null $products_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory active()
- * @method static \Database\Factories\ProductCategoryFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory featured()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory menuVisible()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductCategory newModelQuery()
@@ -69,20 +66,15 @@ class ProductCategory extends Model
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = ProductCategoryFactory::class;
 
     protected $fillable = [
         'name',
         'slug',
         'description',
         'image',
-        'isActive',
-        'sortOrder',
+        'is_active',
+        'sort_order',
         'parent_id',
         'meta_title',
         'meta_keywords',
@@ -95,7 +87,7 @@ class ProductCategory extends Model
         'allow_subcategories',
     ];
     protected $casts = [
-        'isActive' => 'boolean',
+        'is_active' => 'boolean',
         'show_in_menu' => 'boolean',
         'is_featured' => 'boolean',
         'allow_subcategories' => 'boolean',
@@ -132,7 +124,6 @@ class ProductCategory extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeRoots($query)
@@ -144,19 +135,17 @@ class ProductCategory extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeActive($query)
     {
-        return $query->where('isActive', true);
+        return $query->where('is_active', true);
     }
     /**
      * Scope a query to only include categories that show in menu.
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeMenuVisible($query)
@@ -168,7 +157,6 @@ class ProductCategory extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeFeatured($query)

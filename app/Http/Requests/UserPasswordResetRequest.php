@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +27,7 @@ class UserPasswordResetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'userId' => [
+            'user_id' => [
                 'required',
                 'integer',
                 'exists:users,id',
@@ -49,9 +47,9 @@ class UserPasswordResetRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'userId.required' => 'User ID is required.',
-            'userId.integer' => 'User ID must be a valid integer.',
-            'userId.exists' => 'The specified user does not exist.',
+            'user_id.required' => 'User ID is required.',
+            'user_id.integer' => 'User ID must be a valid integer.',
+            'user_id.exists' => 'The specified user does not exist.',
             'confirm_reset.required' => 'Password reset confirmation is required.',
             'confirm_reset.accepted' => 'You must confirm the password reset action.',
         ];
@@ -61,12 +59,12 @@ class UserPasswordResetRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        // Ensure userId is properly cast to integer
-        if ($this->has('userId')) {
-            $userId = $this->input('userId');
+        // Ensure user_id is properly cast to integer
+        if ($this->has('user_id')) {
+            $userId = $this->input('user_id');
             if (is_numeric($userId)) {
                 $this->merge([
-                    'userId' => (int)$userId,
+                    'user_id' => (int)$userId,
                 ]);
             }
         }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -10,19 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int $id
- * @property string $purchaseCodeHash
+ * @property string $purchase_code_hash
  * @property string $domain
- * @property string $ipAddress
+ * @property string $ip_address
  * @property string|null $user_agent
- * @property bool $isValid
- * @property string|null $responseMessage
+ * @property bool $is_valid
+ * @property string|null $response_message
  * @property array<array-key, mixed>|null $response_data
- * @property string $verificationSource
+ * @property string $verification_source
  * @property string $status
  * @property string|null $error_details
  * @property \Illuminate\Support\Carbon|null $verified_at
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read string $masked_purchase_code
  * @property-read string $source_badge_class
  * @property-read string $status_badge_class
@@ -63,20 +61,20 @@ class LicenseVerificationLog extends Model
      */
     protected static $factory = LicenseVerificationLogFactory::class;
     protected $fillable = [
-        'purchaseCodeHash',
+        'purchase_code_hash',
         'domain',
-        'ipAddress',
+        'ip_address',
         'user_agent',
-        'isValid',
-        'responseMessage',
+        'is_valid',
+        'response_message',
         'response_data',
-        'verificationSource',
+        'verification_source',
         'status',
         'error_details',
         'verified_at',
     ];
     protected $casts = [
-        'isValid' => 'boolean',
+        'is_valid' => 'boolean',
         'response_data' => 'array',
         'verified_at' => 'datetime',
     ];
@@ -87,29 +85,26 @@ class LicenseVerificationLog extends Model
      */
     /**
      * @param Builder<LicenseVerificationLog> $query
-     *
      * @return Builder<LicenseVerificationLog>
      */
     public function scopeSuccessful(Builder $query): Builder
     {
-        return $query->where('isValid', true)->where('status', 'success');
+        return $query->where('is_valid', true)->where('status', 'success');
     }
     /**
      * Scope for failed verifications.
      *
      * @param Builder<LicenseVerificationLog> $query
-     *
      * @return Builder<LicenseVerificationLog>
      */
     public function scopeFailed(Builder $query): Builder
     {
-        return $query->where('isValid', false);
+        return $query->where('is_valid', false);
     }
     /**
      * Scope for specific domain.
      *
      * @param Builder<LicenseVerificationLog> $query
-     *
      * @return Builder<LicenseVerificationLog>
      */
     public function scopeForDomain(Builder $query, string $domain): Builder
@@ -120,34 +115,31 @@ class LicenseVerificationLog extends Model
      * Scope for specific IP address.
      *
      * @param Builder<LicenseVerificationLog> $query
-     *
      * @return Builder<LicenseVerificationLog>
      */
     public function scopeForIp(Builder $query, string $ip): Builder
     {
-        return $query->where('ipAddress', $ip);
+        return $query->where('ip_address', $ip);
     }
     /**
      * Scope for specific verification source.
      *
      * @param Builder<LicenseVerificationLog> $query
-     *
      * @return Builder<LicenseVerificationLog>
      */
     public function scopeFromSource(Builder $query, string $source): Builder
     {
-        return $query->where('verificationSource', $source);
+        return $query->where('verification_source', $source);
     }
     /**
      * Scope for recent attempts (last 24 hours).
      *
      * @param Builder<LicenseVerificationLog> $query
-     *
      * @return Builder<LicenseVerificationLog>
      */
     public function scopeRecent(Builder $query, int $hours = 24): Builder
     {
-        return $query->where('createdAt', '>=', now()->subHours($hours));
+        return $query->where('created_at', '>=', now()->subHours($hours));
     }
     /**
      * Get masked purchase code for display.
@@ -155,7 +147,7 @@ class LicenseVerificationLog extends Model
     public function getMaskedPurchaseCodeAttribute(): string
     {
         // Show first 4 and last 4 characters, mask the middle
-        $hash = $this->purchaseCodeHash;
+        $hash = $this->purchase_code_hash;
         if (strlen($hash) > 8) {
             return substr($hash, 0, 4) . '****' . substr($hash, -4);
         }
@@ -178,7 +170,7 @@ class LicenseVerificationLog extends Model
      */
     public function getSourceBadgeClassAttribute(): string
     {
-        return match ($this->verificationSource) {
+        return match ($this->verification_source) {
             'install' => 'badge-primary',
             'api' => 'badge-info',
             'admin' => 'badge-warning',

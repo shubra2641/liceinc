@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,8 +9,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
- * @property int $kbCategory_id
- * @property int|null $productId
+ * @property int $kb_category_id
+ * @property int|null $product_id
  * @property string $title
  * @property string $slug
  * @property string|null $excerpt
@@ -24,16 +22,15 @@ use Illuminate\Database\Eloquent\Builder;
  * @property string|null $serial
  * @property int $requires_serial
  * @property string|null $serial_message
- * @property int $sortOrder
+ * @property int $sort_order
  * @property int $views
  * @property bool $is_published
  * @property bool $allow_comments
  * @property bool $is_featured
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\KbCategory $category
  * @property-read \App\Models\Product|null $product
- * @method static \Database\Factories\KbArticleFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbArticle newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbArticle newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KbArticle published()
@@ -66,15 +63,10 @@ class KbArticle extends Model
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = KbArticleFactory::class;
 
     protected $fillable = [
-        'kbCategory_id', 'title', 'slug', 'excerpt', 'content', 'views', 'is_published',
+        'kb_category_id', 'title', 'slug', 'excerpt', 'content', 'views', 'is_published',
         'serial', 'requires_serial', 'serial_message', 'image', 'meta_title', 'meta_description', 'meta_keywords',
         'allow_comments', 'is_featured',
     ];
@@ -88,7 +80,7 @@ class KbArticle extends Model
      */
     public function category(): BelongsTo
     {
-        return $this->belongsTo(KbCategory::class, 'kbCategory_id');
+        return $this->belongsTo(KbCategory::class, 'kb_category_id');
     }
     /**
      * @return BelongsTo<Product, $this>
@@ -99,7 +91,6 @@ class KbArticle extends Model
     }
     /**
      * @param Builder<KbArticle> $query
-     *
      * @return Builder<KbArticle>
      */
     public function scopePublished(Builder $query): Builder

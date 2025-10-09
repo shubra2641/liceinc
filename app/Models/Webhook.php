@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,19 +13,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property string $url
  * @property string $secret
- * @property bool $isActive
+ * @property bool $is_active
  * @property int $failed_attempts
  * @property \Carbon\Carbon|null $last_successful_at
  * @property \Carbon\Carbon|null $last_failed_at
- * @property \Carbon\Carbon|null $createdAt
- * @property \Carbon\Carbon|null $updatedAt
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
  */
 class Webhook extends Model
 {
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
     /**
      * @phpstan-ignore-next-line
@@ -46,7 +43,7 @@ class Webhook extends Model
         'name',
         'url',
         'secret',
-        'isActive',
+        'is_active',
         'failed_attempts',
         'last_successful_at',
         'last_failed_at',
@@ -58,7 +55,7 @@ class Webhook extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'isActive' => 'boolean',
+        'is_active' => 'boolean',
         'failed_attempts' => 'integer',
         'last_successful_at' => 'datetime',
         'last_failed_at' => 'datetime',
@@ -83,12 +80,11 @@ class Webhook extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<Webhook> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<Webhook>
      */
     public function scopeActive($query)
     {
-        return $query->where('isActive', true);
+        return $query->where('is_active', true);
     }
 
     /**
@@ -96,7 +92,6 @@ class Webhook extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<Webhook> $query
-     *
      * @return \Illuminate\Database\Eloquent\Builder<Webhook>
      */
     public function scopeFailed($query)

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Auth;
 
 use App\Helpers\ConfigHelper;
@@ -190,13 +188,20 @@ class RegisteredUserController extends Controller
                 : ''
         ));
         $index = $request->validated('human_question_index', null);
-        if (! $this->isValidHumanAnswer($given, is_numeric($index) ? (int)$index : 0, $humanQuestions)) {
+        if (
+            ! $this->isValidHumanAnswer(
+                $given,
+                is_numeric($index) ? (int)$index : 0,
+                $humanQuestions
+            )
+        ) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
-                response()->json(
-                    ['errors' => ['human_answer' => [__('Incorrect answer to the anti-spam question')]]],
-                    422
-                )
+                response()->json([
+                    'errors' => [
+                        'human_answer' => [__('Incorrect answer to the anti-spam question')]
+                    ]
+                ], 422)
             );
         }
     }
@@ -210,7 +215,7 @@ class RegisteredUserController extends Controller
      */
     private function getHumanQuestions(): array
     {
-        $humanQuestionsJson = ConfigHelper::getSetting('humanQuestions', null);
+        $humanQuestionsJson = ConfigHelper::getSetting('human_questions', null);
         if (empty($humanQuestionsJson)) {
             return [];
         }
@@ -242,7 +247,9 @@ class RegisteredUserController extends Controller
         }
         if (! isset($humanQuestions[(string)$index])) {
             $expected = ConfigHelper::getSetting('human_question_answer', '5');
-            return strtolower(trim(is_string($expected) ? $expected : '')) === $given;
+            return strtolower(trim(
+                is_string($expected) ? $expected : ''
+            )) === $given;
         }
 
         $questionData = $humanQuestions[(string)$index] ?? null;
@@ -297,9 +304,6 @@ class RegisteredUserController extends Controller
             ]);
         } catch (\Exception $e) {
             // Silently handle email errors to not fail registration
-            Log::warning('Failed to send welcome email to user: ' . $user->email, [
-                'error' => $e->getMessage()
-            ]);
         }
     }
     /**
@@ -313,9 +317,6 @@ class RegisteredUserController extends Controller
             $this->emailService->sendNewUserNotification($user);
         } catch (\Exception $e) {
             // Silently handle email errors to not fail registration
-            Log::warning('Failed to send admin notification for new user: ' . $user->email, [
-                'error' => $e->getMessage()
-            ]);
         }
     }
     /**
@@ -358,10 +359,13 @@ class RegisteredUserController extends Controller
         $enableCaptcha = ConfigHelper::getSetting('enable_captcha', false);
         $captchaSiteKey = ConfigHelper::getSetting('captcha_site_key', '');
         $enableHumanQuestion = ConfigHelper::getSetting('enable_human_question', true);
-        $humanQuestionsJson = ConfigHelper::getSetting('humanQuestions', null);
+        $humanQuestionsJson = ConfigHelper::getSetting('human_questions', null);
         $humanQuestions = [];
         if (! empty($humanQuestionsJson)) {
-            $decoded = json_decode(is_string($humanQuestionsJson) ? $humanQuestionsJson : '', true);
+            $decoded = json_decode(
+                is_string($humanQuestionsJson) ? $humanQuestionsJson : '',
+                true
+            );
             $humanQuestions = is_array($decoded) ? $decoded : [];
         }
         // Choose a random question (server-side) and include its index in a hidden field

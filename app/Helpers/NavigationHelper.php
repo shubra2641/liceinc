@@ -9,11 +9,9 @@
  * @version 1.0.6
  */
 
-declare(strict_types=1);
-
 use App\Helpers\SecureFileHelper;
 
-if (! function_exists('isActiveRoute')) {
+if (! function_exists('is_active_route')) {
     /**
      * Check if the current route matches the given route name with enhanced security.
      *
@@ -28,7 +26,7 @@ if (! function_exists('isActiveRoute')) {
      *
      * @version 1.0.6
      */
-    function isActiveRoute(string $routeName): bool
+    function is_active_route(string $routeName): bool
     {
         if (empty($routeName)) {
             throw new InvalidArgumentException('Route name cannot be empty');
@@ -37,7 +35,7 @@ if (! function_exists('isActiveRoute')) {
         return request()->routeIs($sanitizedRouteName);
     }
 }
-if (! function_exists('isActiveRoutePattern')) {
+if (! function_exists('is_active_route_pattern')) {
     /**
      * Check if the current route matches the given pattern with enhanced security.
      *
@@ -52,7 +50,7 @@ if (! function_exists('isActiveRoutePattern')) {
      *
      * @version 1.0.6
      */
-    function isActiveRoutePattern(string $pattern): bool
+    function is_active_route_pattern(string $pattern): bool
     {
         if (empty($pattern)) {
             throw new InvalidArgumentException('Route pattern cannot be empty');
@@ -61,18 +59,21 @@ if (! function_exists('isActiveRoutePattern')) {
         return request()->routeIs($sanitizedPattern);
     }
 }
-if (! function_exists('getBreadcrumbs')) {
+if (! function_exists('get_breadcrumbs')) {
     /**
      * Generate breadcrumbs for the current route with enhanced security.
      *
      * Creates a breadcrumb navigation structure based on the current route
      * with proper input sanitization and error handling.
      *
-     * @return array<int, array<string, mixed>> Array of breadcrumb items with name, url, and active status
+     * @return array Array of breadcrumb items with name, url, and active status
      *
      * @version 1.0.6
      */
-    function getBreadcrumbs(): array
+    /**
+ * @return array<int, array<string, mixed>>
+*/
+    function get_breadcrumbs(): array
     {
         try {
             $route = request()->route();
@@ -106,18 +107,21 @@ if (! function_exists('getBreadcrumbs')) {
         }
     }
 }
-if (! function_exists('getNavigationTree')) {
+if (! function_exists('get_navigation_tree')) {
     /**
      * Get navigation tree structure with enhanced security.
      *
      * Returns a structured navigation tree for the admin panel with proper
      * sanitization and security measures.
      *
-     * @return array<int, array<string, mixed>> Array of navigation items with name, route, icon, and children
+     * @return array Array of navigation items with name, route, icon, and children
      *
      * @version 1.0.6
      */
-    function getNavigationTree(): array
+    /**
+ * @return array<int, array<string, mixed>>
+*/
+    function get_navigation_tree(): array
     {
         return [
             [
@@ -178,18 +182,21 @@ if (! function_exists('getNavigationTree')) {
         ];
     }
 }
-if (function_exists('getAvailableLanguages') === false) {
+if (function_exists('get_available_languages') === false) {
     /**
      * Get available languages from the lang directory with enhanced security.
      *
      * Scans the language directory and returns available languages with proper
      * error handling and security measures.
      *
-     * @return array<int, array<string, string>> Array of language information with code, name, flag, and native name
+     * @return array Array of language information with code, name, flag, and native name
      *
      * @version 1.0.6
      */
-    function getAvailableLanguages(): array
+    /**
+ * @return array<int, array<string, string>>
+*/
+    function get_available_languages(): array
     {
         try {
             $languages = [];
@@ -204,9 +211,9 @@ if (function_exists('getAvailableLanguages') === false) {
                     if (! empty($sanitizedCode)) {
                         $languages[] = [
                             'code' => $sanitizedCode,
-                            'name' => getLanguageName($sanitizedCode),
-                            'flag' => getLanguageFlag($sanitizedCode),
-                            'native_name' => getLanguageNativeName($sanitizedCode),
+                            'name' => get_language_name($sanitizedCode),
+                            'flag' => get_language_flag($sanitizedCode),
+                            'native_name' => get_language_native_name($sanitizedCode),
                         ];
                     }
                 }
@@ -217,7 +224,7 @@ if (function_exists('getAvailableLanguages') === false) {
         }
     }
 }
-if (! function_exists('getLanguageName')) {
+if (! function_exists('get_language_name')) {
     /**
      * Get language name by code with enhanced security.
      *
@@ -232,7 +239,7 @@ if (! function_exists('getLanguageName')) {
      *
      * @version 1.0.6
      */
-    function getLanguageName(string $code): string
+    function get_language_name(string $code): string
     {
         $names = [
             'en' => 'English',
@@ -338,7 +345,7 @@ if (! function_exists('getLanguageName')) {
         return $names[$sanitizedCode] ?? ucfirst($sanitizedCode);
     }
 }
-if (! function_exists('getLanguageFlag')) {
+if (! function_exists('get_language_flag')) {
     /**
      * Get language flag emoji by code with enhanced security.
      *
@@ -353,7 +360,7 @@ if (! function_exists('getLanguageFlag')) {
      *
      * @version 1.0.6
      */
-    function getLanguageFlag(string $code): string
+    function get_language_flag(string $code): string
     {
         $flags = [
             'en' => '🇺🇸',
@@ -459,7 +466,7 @@ if (! function_exists('getLanguageFlag')) {
         return $flags[$sanitizedCode] ?? '🌐';
     }
 }
-if (! function_exists('getLanguageNativeName')) {
+if (! function_exists('get_language_native_name')) {
     /**
      * Get language native name by code with enhanced security.
      *
@@ -474,7 +481,7 @@ if (! function_exists('getLanguageNativeName')) {
      *
      * @version 1.0.6
      */
-    function getLanguageNativeName(string $code): string
+    function get_language_native_name(string $code): string
     {
         $nativeNames = [
             'en' => 'English',
@@ -577,6 +584,6 @@ if (! function_exists('getLanguageNativeName')) {
             throw new InvalidArgumentException('Language code cannot be empty');
         }
         $sanitizedCode = htmlspecialchars(trim($code), ENT_QUOTES, 'UTF-8');
-        return $nativeNames[$sanitizedCode] ?? getLanguageName($sanitizedCode);
+        return $nativeNames[$sanitizedCode] ?? get_language_name($sanitizedCode);
     }
 }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
 use App\Helpers\VersionHelper;
@@ -60,7 +58,7 @@ class UpdateNotificationController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Update notification check failed', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -147,7 +145,7 @@ class UpdateNotificationController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to dismiss notification', [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
             ]);
             return response()->json([

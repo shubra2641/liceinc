@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -51,7 +49,7 @@ class ProductSearchRequest extends FormRequest
             'language' => [
                 'nullable',
                 'integer',
-                'exists:programmingLanguages,id',
+                'exists:programming_languages,id',
             ],
             'price_filter' => [
                 'nullable',
@@ -61,7 +59,7 @@ class ProductSearchRequest extends FormRequest
             'sort' => [
                 'nullable',
                 'string',
-                'in:name,price,createdAt,updatedAt',
+                'in:name,price,created_at,updated_at',
             ],
         ];
     }
@@ -82,7 +80,7 @@ class ProductSearchRequest extends FormRequest
             'language.integer' => 'Language must be a valid ID.',
             'language.exists' => 'Selected language does not exist.',
             'price_filter.in' => 'Price filter must be one of: free, paid, all.',
-            'sort.in' => 'Sort must be one of: name, price, createdAt, updatedAt.',
+            'sort.in' => 'Sort must be one of: name, price, created_at, updated_at.',
         ];
     }
 

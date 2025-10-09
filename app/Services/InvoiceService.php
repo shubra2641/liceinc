@@ -70,8 +70,8 @@ class InvoiceService
             DB::beginTransaction();
             $invoice = Invoice::create([
                 'invoice_number' => $this->generateInvoiceNumber(),
-                'userId' => $license->userId,
-                'licenseId' => $license->id,
+                'user_id' => $license->user_id,
+                'license_id' => $license->id,
                 'amount' => $this->sanitizeAmount($license->product->price ?? 0),
                 'currency' => 'USD',
                 'status' => $this->sanitizeStatus($paymentStatus),
@@ -86,8 +86,8 @@ class InvoiceService
             Log::error('Failed to create initial invoice', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'licenseId' => $license->id,
-                'userId' => $license->userId,
+                'license_id' => $license->id,
+                'user_id' => $license->user_id,
             ]);
             throw $e;
         }
@@ -163,8 +163,8 @@ class InvoiceService
 
             $invoice = Invoice::create([
                 'invoice_number' => $this->generateInvoiceNumber(),
-                'userId' => $license->userId,
-                'licenseId' => $license->id,
+                'user_id' => $license->user_id,
+                'license_id' => $license->id,
                 'amount' => $this->sanitizeAmount($amount),
                 'currency' => 'USD',
                 'status' => 'pending',
@@ -188,8 +188,8 @@ class InvoiceService
             Log::error('Failed to create renewal invoice', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'licenseId' => $license->id,
-                'userId' => $license->userId,
+                'license_id' => $license->id,
+                'user_id' => $license->user_id,
             ]);
             throw $e;
         }
@@ -214,7 +214,7 @@ class InvoiceService
             $this->validateInvoice($invoice);
             DB::beginTransaction();
             $invoice->status = 'paid';
-            $invoice->paidAt = now();
+            $invoice->paid_at = now();
             $invoice->save();
             DB::commit();
         } catch (\Exception $e) {
@@ -223,7 +223,7 @@ class InvoiceService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'invoice_id' => $invoice->id,
-                'invoice_number' => $invoice->invoiceNumber,
+                'invoice_number' => $invoice->invoice_number,
             ]);
             throw $e;
         }
@@ -256,7 +256,7 @@ class InvoiceService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'invoice_id' => $invoice->id,
-                'invoice_number' => $invoice->invoiceNumber,
+                'invoice_number' => $invoice->invoice_number,
             ]);
             throw $e;
         }
@@ -331,16 +331,16 @@ class InvoiceService
             $this->validatePaymentInvoiceParameters($user, $license, $product, $amount, $currency, $gateway);
             DB::beginTransaction();
             $invoice = Invoice::create([
-                'userId' => $user->id,
-                'licenseId' => $license->id,
-                'productId' => $product->id,
+                'user_id' => $user->id,
+                'license_id' => $license->id,
+                'product_id' => $product->id,
                 'invoice_number' => $this->generateInvoiceNumber(),
                 'amount' => $this->sanitizeAmount($amount),
                 'currency' => $this->sanitizeCurrency($currency),
                 'status' => 'paid',
                 'paid_at' => now(),
                 'due_date' => now()->addDays(30),
-                'billing_address' => $this->sanitizeInput($user->billingAddress ?? null),
+                'billing_address' => $this->sanitizeInput($user->billing_address ?? null),
                 'tax_rate' => 0,
                 'tax_amount' => 0,
                 'total_amount' => $this->sanitizeAmount($amount),
@@ -357,9 +357,9 @@ class InvoiceService
             Log::error('Failed to create payment invoice', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => $user->id,
-                'licenseId' => $license->id,
-                'productId' => $product->id,
+                'user_id' => $user->id,
+                'license_id' => $license->id,
+                'product_id' => $product->id,
                 'amount' => $amount,
                 'gateway' => $gateway,
             ]);
@@ -396,7 +396,7 @@ class InvoiceService
         if (! $license->exists) {
             throw new \InvalidArgumentException('License does not exist');
         }
-        if (! $license->userId) {
+        if (! $license->user_id) {
             throw new \InvalidArgumentException('License must have a user');
         }
         if (! $license->product) {

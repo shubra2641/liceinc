@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +27,7 @@ class SettingRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -88,13 +86,13 @@ class SettingRequest extends FormRequest
                 'max:3',
                 'regex:/^[A-Z]{3}$/',
             ],
-            'dateFormat' => [
+            'date_format' => [
                 'nullable',
                 'string',
                 'max:20',
                 'regex:/^[a-zA-Z0-9\s\-_.,!?@#$%&*():YmdHis]+$/',
             ],
-            'timeFormat' => [
+            'time_format' => [
                 'nullable',
                 'string',
                 'max:20',
@@ -163,7 +161,7 @@ class SettingRequest extends FormRequest
                 'max:500',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
-            'envatoPersonalToken' => [
+            'envato_personal_token' => [
                 'nullable',
                 'string',
                 'max:255',
@@ -213,7 +211,7 @@ class SettingRequest extends FormRequest
             'enable_human_question' => [
                 'boolean',
             ],
-            'humanQuestions' => [
+            'human_questions' => [
                 'nullable',
                 'array',
             ],
@@ -322,13 +320,13 @@ class SettingRequest extends FormRequest
             'license_auto_register_domains' => [
                 'boolean',
             ],
-            'license_maxDomains' => [
+            'license_max_domains' => [
                 'nullable',
                 'integer',
                 'min:1',
                 'max:100',
             ],
-            'licenseDomain_cooldown' => [
+            'license_domain_cooldown' => [
                 'nullable',
                 'integer',
                 'min:1',
@@ -372,7 +370,7 @@ class SettingRequest extends FormRequest
                 'min:1',
                 'max:1440', // 24 hours in minutes
             ],
-            'max_licenseDomains' => [
+            'max_license_domains' => [
                 'nullable',
                 'integer',
                 'min:1',
@@ -562,17 +560,17 @@ class SettingRequest extends FormRequest
             'timezone.regex' => 'Timezone contains invalid characters.',
             'currency.required' => 'Currency is required.',
             'currency.regex' => 'Currency must be a 3-letter code (e.g., USD).',
-            'dateFormat.required' => 'Date format is required.',
-            'dateFormat.regex' => 'Date format contains invalid characters.',
-            'timeFormat.required' => 'Time format is required.',
-            'timeFormat.regex' => 'Time format contains invalid characters.',
+            'date_format.required' => 'Date format is required.',
+            'date_format.regex' => 'Date format contains invalid characters.',
+            'time_format.required' => 'Time format is required.',
+            'time_format.regex' => 'Time format contains invalid characters.',
             'maintenance_message.regex' => 'Maintenance message contains invalid characters.',
             'license_api_token.regex' => 'License API token can only contain letters and numbers.',
             'license_api_url.url' => 'License API URL must be a valid URL.',
             'license_verification_interval.min' => 'Verification interval must be at least 1 minute.',
             'license_verification_interval.max' => 'Verification interval cannot exceed 1440 minutes (24 hours).',
-            'max_licenseDomains.min' => 'Maximum license domains must be at least 1.',
-            'max_licenseDomains.max' => 'Maximum license domains cannot exceed 100.',
+            'max_license_domains.min' => 'Maximum license domains must be at least 1.',
+            'max_license_domains.max' => 'Maximum license domains cannot exceed 100.',
             'license_expiry_warning_days.min' => 'Expiry warning days must be at least 1.',
             'license_expiry_warning_days.max' => 'Expiry warning days cannot exceed 365.',
             'renewal_reminder_days.min' => 'Renewal reminder days must be at least 1.',
@@ -628,8 +626,8 @@ class SettingRequest extends FormRequest
             'admin_email' => 'admin email',
             'timezone' => 'timezone',
             'currency' => 'currency',
-            'dateFormat' => 'date format',
-            'timeFormat' => 'time format',
+            'date_format' => 'date format',
+            'time_format' => 'time format',
             'maintenance_mode' => 'maintenance mode',
             'maintenance_message' => 'maintenance message',
             'license_api_token' => 'license API token',
@@ -637,7 +635,7 @@ class SettingRequest extends FormRequest
             'license_verification_enabled' => 'license verification enabled',
             'license_auto_verification' => 'license auto verification',
             'license_verification_interval' => 'license verification interval',
-            'max_licenseDomains' => 'maximum license domains',
+            'max_license_domains' => 'maximum license domains',
             'license_expiry_warning_days' => 'license expiry warning days',
             'auto_renewal_enabled' => 'auto renewal enabled',
             'renewal_reminder_days' => 'renewal reminder days',
@@ -746,8 +744,8 @@ class SettingRequest extends FormRequest
         $this->merge([
             'currency' => $this->currency ?? 'USD',
             'timezone' => $this->timezone ?? 'UTC',
-            'dateFormat' => $this->dateFormat ?? 'Y-m-d',
-            'timeFormat' => $this->timeFormat ?? 'H:i:s',
+            'date_format' => $this->date_format ?? 'Y-m-d',
+            'time_format' => $this->time_format ?? 'H:i:s',
         ]);
     }
     /**

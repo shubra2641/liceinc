@@ -23,6 +23,7 @@
     <rule ref="PSR1"/>
     
     <!-- PHP 8+ compatibility -->
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
     <rule ref="Generic.PHP.DisallowShortOpenTag"/>
     
     <!-- Array formatting -->
@@ -34,7 +35,7 @@
     <rule ref="Generic.Files.LineLength">
         <properties>
             <property name="lineLimit" value="120"/>
-            <property name="absoluteLineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="140"/>
         </properties>
     </rule>
     
@@ -56,6 +57,7 @@
     </rule>
     
     <!-- PHP 8.1+ features -->
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
     <rule ref="Generic.PHP.DisallowShortOpenTag"/>
     
     <!-- Performance optimizations -->

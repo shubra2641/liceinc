@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -49,7 +47,7 @@ class ProductUpdateApiRequest extends FormRequest
         // Check updates validation
         if ($isCheck) {
             return [
-                'productId' => [
+                'product_id' => [
                     'required',
                     'integer',
                     'min:1',
@@ -60,7 +58,7 @@ class ProductUpdateApiRequest extends FormRequest
                     'max:20',
                     'regex:/^[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z0-9]+)?$/',
                 ],
-                'licenseKey' => [
+                'license_key' => [
                     'required',
                     'string',
                     'max:255',
@@ -72,19 +70,19 @@ class ProductUpdateApiRequest extends FormRequest
                     'max:255',
                     'regex:/^[a-zA-Z0-9\-_.]+$/',
                 ],
-                'includeChangelog' => [
+                'include_changelog' => [
                     'boolean',
                 ],
-                'includeDependencies' => [
+                'include_dependencies' => [
                     'boolean',
                 ],
-                'includeSecurityUpdates' => [
+                'include_security_updates' => [
                     'boolean',
                 ],
-                'includeFeatureUpdates' => [
+                'include_feature_updates' => [
                     'boolean',
                 ],
-                'includeBugFixes' => [
+                'include_bug_fixes' => [
                     'boolean',
                 ],
                 'check_beta' => [
@@ -104,12 +102,12 @@ class ProductUpdateApiRequest extends FormRequest
         // Latest version validation
         if ($isLatest) {
             return [
-                'productId' => [
+                'product_id' => [
                     'required',
                     'integer',
                     'min:1',
                 ],
-                'licenseKey' => [
+                'license_key' => [
                     'required',
                     'string',
                     'max:255',
@@ -121,19 +119,19 @@ class ProductUpdateApiRequest extends FormRequest
                     'max:255',
                     'regex:/^[a-zA-Z0-9\-_.]+$/',
                 ],
-                'includeChangelog' => [
+                'include_changelog' => [
                     'boolean',
                 ],
-                'includeDependencies' => [
+                'include_dependencies' => [
                     'boolean',
                 ],
-                'includeSecurityUpdates' => [
+                'include_security_updates' => [
                     'boolean',
                 ],
-                'includeFeatureUpdates' => [
+                'include_feature_updates' => [
                     'boolean',
                 ],
-                'includeBugFixes' => [
+                'include_bug_fixes' => [
                     'boolean',
                 ],
                 'check_beta' => [
@@ -151,13 +149,13 @@ class ProductUpdateApiRequest extends FormRequest
                 'compare_versions' => [
                     'boolean',
                 ],
-                'includeDownloadUrl' => [
+                'include_download_url' => [
                     'boolean',
                 ],
-                'includeChecksums' => [
+                'include_checksums' => [
                     'boolean',
                 ],
-                'includeFileList' => [
+                'include_file_list' => [
                     'boolean',
                 ],
             ];
@@ -165,7 +163,7 @@ class ProductUpdateApiRequest extends FormRequest
         // Download validation
         if ($isDownload) {
             return [
-                'productId' => [
+                'product_id' => [
                     'required',
                     'integer',
                     'min:1',
@@ -176,7 +174,7 @@ class ProductUpdateApiRequest extends FormRequest
                     'max:20',
                     'regex:/^[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z0-9]+)?$/',
                 ],
-                'licenseKey' => [
+                'license_key' => [
                     'required',
                     'string',
                     'max:255',
@@ -188,19 +186,19 @@ class ProductUpdateApiRequest extends FormRequest
                     'max:255',
                     'regex:/^[a-zA-Z0-9\-_.]+$/',
                 ],
-                'includeChecksums' => [
+                'include_checksums' => [
                     'boolean',
                 ],
-                'includeFileList' => [
+                'include_file_list' => [
                     'boolean',
                 ],
-                'includeInstallationNotes' => [
+                'include_installation_notes' => [
                     'boolean',
                 ],
-                'includeRollbackInfo' => [
+                'include_rollback_info' => [
                     'boolean',
                 ],
-                'verifyIntegrity' => [
+                'verify_integrity' => [
                     'boolean',
                 ],
                 'download_type' => [
@@ -214,12 +212,12 @@ class ProductUpdateApiRequest extends FormRequest
         // Changelog validation
         if ($isChangelog) {
             return [
-                'productId' => [
+                'product_id' => [
                     'required',
                     'integer',
                     'min:1',
                 ],
-                'licenseKey' => [
+                'license_key' => [
                     'required',
                     'string',
                     'max:255',
@@ -231,19 +229,19 @@ class ProductUpdateApiRequest extends FormRequest
                     'max:255',
                     'regex:/^[a-zA-Z0-9\-_.]+$/',
                 ],
-                'includeChangelog' => [
+                'include_changelog' => [
                     'boolean',
                 ],
-                'includeDependencies' => [
+                'include_dependencies' => [
                     'boolean',
                 ],
-                'includeSecurityUpdates' => [
+                'include_security_updates' => [
                     'boolean',
                 ],
-                'includeFeatureUpdates' => [
+                'include_feature_updates' => [
                     'boolean',
                 ],
-                'includeBugFixes' => [
+                'include_bug_fixes' => [
                     'boolean',
                 ],
                 'limit' => [
@@ -257,7 +255,7 @@ class ProductUpdateApiRequest extends FormRequest
                     'integer',
                     'min:0',
                 ],
-                'sortOrder' => [
+                'sort_order' => [
                     'nullable',
                     'string',
                     'max:10',
@@ -269,22 +267,22 @@ class ProductUpdateApiRequest extends FormRequest
                     'max:20',
                     'regex:/^[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z0-9]+)?$/',
                 ],
-                'filter_dateFrom' => [
+                'filter_date_from' => [
                     'nullable',
                     'date',
                 ],
-                'filter_dateTo' => [
+                'filter_date_to' => [
                     'nullable',
                     'date',
-                    'after_or_equal:filter_dateFrom',
+                    'after_or_equal:filter_date_from',
                 ],
-                'includeReleaseNotes' => [
+                'include_release_notes' => [
                     'boolean',
                 ],
-                'includeBreakingChanges' => [
+                'include_breaking_changes' => [
                     'boolean',
                 ],
-                'includeDeprecations' => [
+                'include_deprecations' => [
                     'boolean',
                 ],
             ];
@@ -300,48 +298,48 @@ class ProductUpdateApiRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'productId.required' => 'Product ID is required.',
-            'productId.integer' => 'Product ID must be a valid integer.',
-            'productId.min' => 'Product ID must be at least 1.',
+            'product_id.required' => 'Product ID is required.',
+            'product_id.integer' => 'Product ID must be a valid integer.',
+            'product_id.min' => 'Product ID must be at least 1.',
             'current_version.required' => 'Current version is required.',
             'current_version.regex' => 'Current version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
-            'licenseKey.required' => 'License key is required.',
-            'licenseKey.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
+            'license_key.required' => 'License key is required.',
+            'license_key.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
             'domain.required' => 'Domain is required.',
             'domain.regex' => 'Domain can only contain letters, numbers, hyphens, underscores, and dots.',
             'version.required' => 'Version is required.',
             'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
-            'includeChangelog.boolean' => 'Include changelog must be true or false.',
-            'includeDependencies.boolean' => 'Include dependencies must be true or false.',
-            'includeSecurityUpdates.boolean' => 'Include security updates must be true or false.',
-            'includeFeatureUpdates.boolean' => 'Include feature updates must be true or false.',
-            'includeBugFixes.boolean' => 'Include bug fixes must be true or false.',
+            'include_changelog.boolean' => 'Include changelog must be true or false.',
+            'include_dependencies.boolean' => 'Include dependencies must be true or false.',
+            'include_security_updates.boolean' => 'Include security updates must be true or false.',
+            'include_feature_updates.boolean' => 'Include feature updates must be true or false.',
+            'include_bug_fixes.boolean' => 'Include bug fixes must be true or false.',
             'check_beta.boolean' => 'Check beta must be true or false.',
             'check_prerelease.boolean' => 'Check prerelease must be true or false.',
             'auto_install.boolean' => 'Auto install must be true or false.',
             'notify_on_available.boolean' => 'Notify on available must be true or false.',
             'compare_versions.boolean' => 'Compare versions must be true or false.',
-            'includeDownloadUrl.boolean' => 'Include download URL must be true or false.',
-            'includeChecksums.boolean' => 'Include checksums must be true or false.',
-            'includeFileList.boolean' => 'Include file list must be true or false.',
-            'includeInstallationNotes.boolean' => 'Include installation notes must be true or false.',
-            'includeRollbackInfo.boolean' => 'Include rollback info must be true or false.',
-            'verifyIntegrity.boolean' => 'Verify integrity must be true or false.',
+            'include_download_url.boolean' => 'Include download URL must be true or false.',
+            'include_checksums.boolean' => 'Include checksums must be true or false.',
+            'include_file_list.boolean' => 'Include file list must be true or false.',
+            'include_installation_notes.boolean' => 'Include installation notes must be true or false.',
+            'include_rollback_info.boolean' => 'Include rollback info must be true or false.',
+            'verify_integrity.boolean' => 'Verify integrity must be true or false.',
             'download_type.regex' => 'Download type contains invalid characters.',
             'limit.min' => 'Limit must be at least 1.',
             'limit.max' => 'Limit cannot exceed 100.',
             'offset.min' => 'Offset must be at least 0.',
-            'sortOrder.regex' => 'Sort order contains invalid characters.',
+            'sort_order.regex' => 'Sort order contains invalid characters.',
             'filter_version.regex' => 'Filter version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
-            'filter_dateFrom.date' => 'Filter date from must be a valid date.',
-            'filter_dateTo.date' => 'Filter date to must be a valid date.',
-            'filter_dateTo.after_or_equal' => 'Filter date to must be after or equal to filter date from.',
-            'includeReleaseNotes.boolean' => 'Include release notes must be true or false.',
-            'includeBreakingChanges.boolean' => 'Include breaking changes must be true or false.',
-            'includeDeprecations.boolean' => 'Include deprecations must be true or false.',
+            'filter_date_from.date' => 'Filter date from must be a valid date.',
+            'filter_date_to.date' => 'Filter date to must be a valid date.',
+            'filter_date_to.after_or_equal' => 'Filter date to must be after or equal to filter date from.',
+            'include_release_notes.boolean' => 'Include release notes must be true or false.',
+            'include_breaking_changes.boolean' => 'Include breaking changes must be true or false.',
+            'include_deprecations.boolean' => 'Include deprecations must be true or false.',
         ];
     }
     /**
@@ -352,37 +350,37 @@ class ProductUpdateApiRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'productId' => 'product ID',
+            'product_id' => 'product ID',
             'current_version' => 'current version',
-            'licenseKey' => 'license key',
+            'license_key' => 'license key',
             'domain' => 'domain',
             'version' => 'version',
-            'includeChangelog' => 'include changelog',
-            'includeDependencies' => 'include dependencies',
-            'includeSecurityUpdates' => 'include security updates',
-            'includeFeatureUpdates' => 'include feature updates',
-            'includeBugFixes' => 'include bug fixes',
+            'include_changelog' => 'include changelog',
+            'include_dependencies' => 'include dependencies',
+            'include_security_updates' => 'include security updates',
+            'include_feature_updates' => 'include feature updates',
+            'include_bug_fixes' => 'include bug fixes',
             'check_beta' => 'check beta versions',
             'check_prerelease' => 'check prerelease versions',
             'auto_install' => 'auto install',
             'notify_on_available' => 'notify on available',
             'compare_versions' => 'compare versions',
-            'includeDownloadUrl' => 'include download URL',
-            'includeChecksums' => 'include checksums',
-            'includeFileList' => 'include file list',
-            'includeInstallationNotes' => 'include installation notes',
-            'includeRollbackInfo' => 'include rollback info',
-            'verifyIntegrity' => 'verify integrity',
+            'include_download_url' => 'include download URL',
+            'include_checksums' => 'include checksums',
+            'include_file_list' => 'include file list',
+            'include_installation_notes' => 'include installation notes',
+            'include_rollback_info' => 'include rollback info',
+            'verify_integrity' => 'verify integrity',
             'download_type' => 'download type',
             'limit' => 'limit',
             'offset' => 'offset',
-            'sortOrder' => 'sort order',
+            'sort_order' => 'sort order',
             'filter_version' => 'filter version',
-            'filter_dateFrom' => 'filter date from',
-            'filter_dateTo' => 'filter date to',
-            'includeReleaseNotes' => 'include release notes',
-            'includeBreakingChanges' => 'include breaking changes',
-            'includeDeprecations' => 'include deprecations',
+            'filter_date_from' => 'filter date from',
+            'filter_date_to' => 'filter date to',
+            'include_release_notes' => 'include release notes',
+            'include_breaking_changes' => 'include breaking changes',
+            'include_deprecations' => 'include deprecations',
         ];
     }
     /**
@@ -392,61 +390,55 @@ class ProductUpdateApiRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'current_version' => $this->input('current_version')
-                ? $this->sanitizeInput($this->input('current_version'))
-                : null,
-            'licenseKey' => $this->sanitizeInput($this->input('licenseKey')),
+            'current_version' => $this->input('current_version') ? $this->sanitizeInput($this->input('current_version')) : null,
+            'license_key' => $this->sanitizeInput($this->input('license_key')),
             'domain' => $this->sanitizeInput($this->input('domain')),
             'version' => $this->input('version') ? $this->sanitizeInput($this->input('version')) : null,
-            'filter_version' => $this->input('filter_version')
-                ? $this->sanitizeInput($this->input('filter_version'))
-                : null,
-            'sortOrder' => $this->input('sortOrder') ? $this->sanitizeInput($this->input('sortOrder')) : null,
-            'download_type' => $this->input('download_type')
-                ? $this->sanitizeInput($this->input('download_type'))
-                : null,
+            'filter_version' => $this->input('filter_version') ? $this->sanitizeInput($this->input('filter_version')) : null,
+            'sort_order' => $this->input('sort_order') ? $this->sanitizeInput($this->input('sort_order')) : null,
+            'download_type' => $this->input('download_type') ? $this->sanitizeInput($this->input('download_type')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
-            'includeChangelog' => $this->has('includeChangelog'),
-            'includeDependencies' => $this->has('includeDependencies'),
-            'includeSecurityUpdates' => $this->has('includeSecurityUpdates'),
-            'includeFeatureUpdates' => $this->has('includeFeatureUpdates'),
-            'includeBugFixes' => $this->has('includeBugFixes'),
+            'include_changelog' => $this->has('include_changelog'),
+            'include_dependencies' => $this->has('include_dependencies'),
+            'include_security_updates' => $this->has('include_security_updates'),
+            'include_feature_updates' => $this->has('include_feature_updates'),
+            'include_bug_fixes' => $this->has('include_bug_fixes'),
             'check_beta' => $this->has('check_beta'),
             'check_prerelease' => $this->has('check_prerelease'),
             'auto_install' => $this->has('auto_install'),
             'notify_on_available' => $this->has('notify_on_available'),
             'compare_versions' => $this->has('compare_versions'),
-            'includeDownloadUrl' => $this->has('includeDownloadUrl'),
-            'includeChecksums' => $this->has('includeChecksums'),
-            'includeFileList' => $this->has('includeFileList'),
-            'includeInstallationNotes' => $this->has('includeInstallationNotes'),
-            'includeRollbackInfo' => $this->has('includeRollbackInfo'),
-            'verifyIntegrity' => $this->has('verifyIntegrity'),
-            'includeReleaseNotes' => $this->has('includeReleaseNotes'),
-            'includeBreakingChanges' => $this->has('includeBreakingChanges'),
-            'includeDeprecations' => $this->has('includeDeprecations'),
+            'include_download_url' => $this->has('include_download_url'),
+            'include_checksums' => $this->has('include_checksums'),
+            'include_file_list' => $this->has('include_file_list'),
+            'include_installation_notes' => $this->has('include_installation_notes'),
+            'include_rollback_info' => $this->has('include_rollback_info'),
+            'verify_integrity' => $this->has('verify_integrity'),
+            'include_release_notes' => $this->has('include_release_notes'),
+            'include_breaking_changes' => $this->has('include_breaking_changes'),
+            'include_deprecations' => $this->has('include_deprecations'),
         ]);
         // Set default values
         $this->merge([
-            'includeChangelog' => $this->includeChangelog ?? true,
-            'includeDependencies' => $this->includeDependencies ?? true,
-            'includeSecurityUpdates' => $this->includeSecurityUpdates ?? true,
-            'includeFeatureUpdates' => $this->includeFeatureUpdates ?? true,
-            'includeBugFixes' => $this->includeBugFixes ?? true,
-            'includeDownloadUrl' => $this->includeDownloadUrl ?? true,
-            'includeChecksums' => $this->includeChecksums ?? false,
-            'includeFileList' => $this->includeFileList ?? false,
-            'includeInstallationNotes' => $this->includeInstallationNotes ?? false,
-            'includeRollbackInfo' => $this->includeRollbackInfo ?? false,
-            'verifyIntegrity' => $this->verifyIntegrity ?? true,
-            'includeReleaseNotes' => $this->includeReleaseNotes ?? true,
-            'includeBreakingChanges' => $this->includeBreakingChanges ?? true,
-            'includeDeprecations' => $this->includeDeprecations ?? true,
+            'include_changelog' => $this->include_changelog ?? true,
+            'include_dependencies' => $this->include_dependencies ?? true,
+            'include_security_updates' => $this->include_security_updates ?? true,
+            'include_feature_updates' => $this->include_feature_updates ?? true,
+            'include_bug_fixes' => $this->include_bug_fixes ?? true,
+            'include_download_url' => $this->include_download_url ?? true,
+            'include_checksums' => $this->include_checksums ?? false,
+            'include_file_list' => $this->include_file_list ?? false,
+            'include_installation_notes' => $this->include_installation_notes ?? false,
+            'include_rollback_info' => $this->include_rollback_info ?? false,
+            'verify_integrity' => $this->verify_integrity ?? true,
+            'include_release_notes' => $this->include_release_notes ?? true,
+            'include_breaking_changes' => $this->include_breaking_changes ?? true,
+            'include_deprecations' => $this->include_deprecations ?? true,
             'limit' => $this->limit ?? 20,
             'offset' => $this->offset ?? 0,
-            'sortOrder' => $this->sortOrder ?? 'desc',
+            'sort_order' => $this->sort_order ?? 'desc',
         ]);
     }
     /**

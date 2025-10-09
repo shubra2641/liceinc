@@ -212,14 +212,19 @@ return [
         'client_secret' => function () {
             return App\Helpers\ConfigHelper::getSetting('envato_client_secret', '', 'ENVATO_CLIENT_SECRET');
         },
-        'redirect_uri' => function () {
+        'redirect_uri' => function (): string {
             $appUrl = config('app.url');
-            $baseUrl = is_string($appUrl) ? $appUrl : '';
-            return App\Helpers\ConfigHelper::getSetting(
+            if ($appUrl && is_string($appUrl)) {
+                $defaultUri = $appUrl . '/auth/envato/callback';
+            } else {
+                $defaultUri = '/auth/envato/callback';
+            }
+            $result = App\Helpers\ConfigHelper::getSetting(
                 'envato_redirect_uri',
-                $baseUrl . '/auth/envato/callback',
+                $defaultUri,
                 'ENVATO_REDIRECT_URI',
             );
+            return is_string($result) ? $result : $defaultUri;
         },
         'timeout_seconds' => env('ENVATO_TIMEOUT', 30),
         'retry_attempts' => env('ENVATO_RETRY_ATTEMPTS', 3),

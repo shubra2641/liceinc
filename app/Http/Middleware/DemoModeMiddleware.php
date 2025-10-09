@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Middleware;
 
 use Closure;
@@ -224,11 +222,7 @@ class DemoModeMiddleware
     private function isDestructiveAction(Request $request): bool
     {
         $path = $this->sanitizeInput($request->path());
-        $action = $this->sanitizeInput(
-            is_string($request->get('_method', $request->method()))
-                ? $request->get('_method', $request->method())
-                : null
-        );
+        $action = $this->sanitizeInput(is_string($request->get('_method', $request->method())) ? $request->get('_method', $request->method()) : null);
         // List of destructive actions
         $destructiveActions = [
             'create', 'store', 'edit', 'update', 'destroy', 'delete',

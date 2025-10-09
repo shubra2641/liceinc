@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -101,49 +99,49 @@ class LicenseController extends Controller
             DB::beginTransaction();
             $validated = $request->validated();
             // Get product details
-            $product = Product::find($validated['productId']);
+            $product = Product::find($validated['product_id']);
             if (! $product) {
                 DB::rollBack();
-                return back()->withErrors(['productId' => 'Product not found.']);
+                return back()->withErrors(['product_id' => 'Product not found.']);
             }
             // Inherit license type from product if not specified
-            if (empty($validated['licenseType'])) {
-                $validated['licenseType'] = $product->licenseType ?? 'single';
+            if (empty($validated['license_type'])) {
+                $validated['license_type'] = $product->license_type ?? 'single';
             }
-            // Set maxDomains based on license type
-            if (empty($validated['maxDomains'])) {
-                switch ($validated['licenseType']) {
+            // Set max_domains based on license type
+            if (empty($validated['max_domains'])) {
+                switch ($validated['license_type']) {
                     case 'single':
-                        $validated['maxDomains'] = 1;
+                        $validated['max_domains'] = 1;
                         break;
                     case 'multi':
-                        $validated['maxDomains'] = $request->input('maxDomains', 5); // Default to 5 for multi
+                        $validated['max_domains'] = $request->input('max_domains', 5); // Default to 5 for multi
                         break;
                     case 'developer':
-                        $validated['maxDomains'] = $request->input('maxDomains', 10); // Default to 10 for developer
+                        $validated['max_domains'] = $request->input('max_domains', 10); // Default to 10 for developer
                         break;
                     case 'extended':
-                        $validated['maxDomains'] = $request->input('maxDomains', 20); // Default to 20 for extended
+                        $validated['max_domains'] = $request->input('max_domains', 20); // Default to 20 for extended
                         break;
                     default:
-                        $validated['maxDomains'] = 1;
+                        $validated['max_domains'] = 1;
                 }
             }
             // Set default values
             $validated['status'] = $validated['status'] ?? 'active';
             // Calculate license expiration date based on product duration
-            if (empty($validated['licenseExpiresAt'])) {
-                if ($product->durationDays) {
-                    $validated['licenseExpiresAt'] = now()->addDays(
-                        is_numeric($product->durationDays) ? (int)$product->durationDays : 0
+            if (empty($validated['license_expires_at'])) {
+                if ($product->duration_days) {
+                    $validated['license_expires_at'] = now()->addDays(
+                        is_numeric($product->duration_days) ? (int)$product->duration_days : 0
                     );
                 }
             }
             // Calculate support expiration date based on product support days
-            if (empty($validated['support_expiresAt'])) {
-                if ($product->supportDays) {
-                    $validated['support_expiresAt'] = now()->addDays(
-                        is_numeric($product->supportDays) ? (int)$product->supportDays : 0
+            if (empty($validated['support_expires_at'])) {
+                if ($product->support_days) {
+                    $validated['support_expires_at'] = now()->addDays(
+                        is_numeric($product->support_days) ? (int)$product->support_days : 0
                     );
                 }
             }
@@ -167,7 +165,7 @@ class LicenseController extends Controller
                 }
                 // Send notification to admin
                 $this->emailService->sendAdminLicenseCreated([
-                    'licenseKey' => $license->licenseKey,
+                    'license_key' => $license->license_key,
                     'product_name' => $license->product->name ?? 'Unknown Product',
                     'customer_name' => $license->user ? $license->user->name : 'Unknown User',
                     'customer_email' => $license->user ? $license->user->email : 'No email provided',
@@ -176,7 +174,7 @@ class LicenseController extends Controller
                 // Log email errors but don't fail license creation
                 Log::warning('Email notification failed during license creation', [
                     'error' => $e->getMessage(),
-                    'licenseId' => $license->id,
+                    'license_id' => $license->id,
                 ]);
             }
             DB::commit();
@@ -248,47 +246,50 @@ class LicenseController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            // Map UI field to DB column with proper parsing and allowing null to clear
-            if (array_key_exists('expiresAt', $validated)) {
-                $validated['licenseExpiresAt'] = ($validated['expiresAt'] !== null
-                && $validated['expiresAt'] !== '')
+            // Map UI field to DB column with proper parsing
+            // and allowing null to clear
+            if (array_key_exists('expires_at', $validated)) {
+                $validated['license_expires_at'] = ($validated['expires_at'] !== null
+                && $validated['expires_at'] !== '')
                     ? \Carbon\Carbon::parse(
-                        is_string($validated['expiresAt']) ? $validated['expiresAt'] : ''
+                        is_string($validated['expires_at'])
+                            ? $validated['expires_at']
+                            : ''
                     )->format('Y-m-d H:i:s')
                     : null;
-                unset($validated['expiresAt']);
+                unset($validated['expires_at']);
             }
             // Get product details for inheritance
-            $product = Product::find($validated['productId']);
+            $product = Product::find($validated['product_id']);
             if (! $product) {
                 DB::rollBack();
-                return back()->withErrors(['productId' => 'Product not found.']);
+                return back()->withErrors(['product_id' => 'Product not found.']);
             }
             // Inherit license type from product if not specified
-            if (empty($validated['licenseType'])) {
-                $validated['licenseType'] = $product->licenseType ?? 'single';
+            if (empty($validated['license_type'])) {
+                $validated['license_type'] = $product->license_type ?? 'single';
             }
-            // Set maxDomains based on license type
-            if (empty($validated['maxDomains'])) {
-                switch ($validated['licenseType']) {
+            // Set max_domains based on license type
+            if (empty($validated['max_domains'])) {
+                switch ($validated['license_type']) {
                     case 'single':
-                        $validated['maxDomains'] = 1;
+                        $validated['max_domains'] = 1;
                         break;
                     case 'multi':
-                        $validated['maxDomains'] = 5;
+                        $validated['max_domains'] = 5;
                         break;
                     case 'developer':
-                        $validated['maxDomains'] = 10;
+                        $validated['max_domains'] = 10;
                         break;
                     case 'extended':
-                        $validated['maxDomains'] = 20;
+                        $validated['max_domains'] = 20;
                         break;
                     default:
-                        $validated['maxDomains'] = 1;
+                        $validated['max_domains'] = 1;
                 }
             }
             // Set default values
-            $validated['maxDomains'] = $validated['maxDomains'];
+            $validated['max_domains'] = $validated['max_domains'];
             $license->update($validated);
             DB::commit();
             return redirect()->route('admin.licenses.show', $license)
@@ -298,7 +299,7 @@ class LicenseController extends Controller
             Log::error('License update failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'licenseId' => $license->id,
+                'license_id' => $license->id,
                 'request_data' => $request->except(['notes']),
             ]);
             return redirect()
@@ -331,7 +332,7 @@ class LicenseController extends Controller
             Log::error('License deletion failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'licenseId' => $license->id,
+                'license_id' => $license->id,
             ]);
             return redirect()
                 ->back()
@@ -364,7 +365,7 @@ class LicenseController extends Controller
             Log::error('License status toggle failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'licenseId' => $license->id,
+                'license_id' => $license->id,
             ]);
             return back()->with('error', 'Failed to update license status. Please try again.');
         }
@@ -406,14 +407,14 @@ class LicenseController extends Controller
             // CSV Data
             foreach ($licenses as $license) {
                 fputcsv($file, [
-                    (string) $license->id,
-                    (string) $license->licenseKey,
-                    (string) ($license->user->name ?? 'N/A'),
-                    (string) ($license->product->name ?? 'N/A'),
-                    (string) $license->status,
-                    (string) ($license->maxDomains ?? 0),
-                    (string) $license->expiresAt,
-                    (string) $license->createdAt,
+                    $license->id,
+                    $license->license_key,
+                    $license->user->name ?? 'N/A',
+                    $license->product->name ?? 'N/A',
+                    $license->status,
+                    $license->max_domains,
+                    $license->expires_at,
+                    $license->created_at,
                 ]);
             }
             SecureFileHelper::closeFile($file);

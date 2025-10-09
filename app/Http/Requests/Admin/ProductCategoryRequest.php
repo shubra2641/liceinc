@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -32,7 +30,7 @@ class ProductCategoryRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -41,7 +39,7 @@ class ProductCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        $category = $this->route('productCategory');
+        $category = $this->route('product_category');
         $categoryId = $category && is_object($category) && property_exists($category, 'id') ? $category->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
@@ -75,10 +73,10 @@ class ProductCategoryRequest extends FormRequest
                 'max:2048',
                 'dimensions:max_width=1920, max_height=1080',
             ],
-            'isActive' => [
+            'is_active' => [
                 'boolean',
             ],
-            'sortOrder' => [
+            'sort_order' => [
                 'nullable',
                 'integer',
                 'min:0',
@@ -159,8 +157,8 @@ class ProductCategoryRequest extends FormRequest
             'meta_title.regex' => 'Meta title contains invalid characters.',
             'meta_keywords.regex' => 'Meta keywords contain invalid characters.',
             'meta_description.regex' => 'Meta description contains invalid characters.',
-            'sortOrder.min' => 'Sort order must be at least 0.',
-            'sortOrder.max' => 'Sort order must not exceed 9999.',
+            'sort_order.min' => 'Sort order must be at least 0.',
+            'sort_order.max' => 'Sort order must not exceed 9999.',
             'parent_id.exists' => 'Selected parent category does not exist.',
             'parent_id.not_in' => 'A category cannot be its own parent.',
         ];
@@ -177,8 +175,8 @@ class ProductCategoryRequest extends FormRequest
             'slug' => 'category slug',
             'description' => 'category description',
             'image' => 'category image',
-            'isActive' => 'active status',
-            'sortOrder' => 'sort order',
+            'is_active' => 'active status',
+            'sort_order' => 'sort order',
             'meta_title' => 'meta title',
             'meta_keywords' => 'meta keywords',
             'meta_description' => 'meta description',
@@ -218,7 +216,7 @@ class ProductCategoryRequest extends FormRequest
         }
         // Handle checkbox values
         $this->merge([
-            'isActive' => $this->has('isActive'),
+            'is_active' => $this->has('is_active'),
             'show_in_menu' => $this->has('show_in_menu'),
             'is_featured' => $this->has('is_featured'),
             'allow_subcategories' => $this->has('allow_subcategories'),

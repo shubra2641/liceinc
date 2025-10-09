@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Console\Commands;
 
 use App\Models\License;
@@ -28,8 +26,8 @@ use Illuminate\Support\Facades\Log;
  * - License system security verification
  * - Log file se    public function getExitCode(): int
     {
-        $criticalCount = count(array_filter($this->_issues, fn($i) => $i['severity'] === 'critical'));
-        $highCount = count(array_filter($this->_issues, fn($i) => $i['severity'] === 'high'));ty analysis
+        $criticalCount = count(array_filter($this->issues, fn($i) => $i['severity'] === 'critical'));
+        $highCount = count(array_filter($this->issues, fn($i) => $i['severity'] === 'high'));ty analysis
  * - Dependency security checking
  * - Environment security validation
  * - Automated issue fixing capabilities
@@ -77,14 +75,14 @@ class SecurityAuditCommand extends Command
      *
      * @var array<int, array{severity: string, category: string, description: string, timestamp: string}>
      */
-    private array $_issues = [];
+    private array $issues = [];
 
     /**
      * Statistics for audit performance tracking.
      *
      * @var array{start_time: float, end_time: float, checks_performed: int, issues_found: int}
      */
-    private array $_auditStats = [
+    private array $auditStats = [
         'start_time' => 0,
         'end_time' => 0,
         'checks_performed' => 0,
@@ -112,7 +110,7 @@ class SecurityAuditCommand extends Command
     public function handle(): int
     {
         try {
-            $this->_auditStats['start_time'] = microtime(true);
+            $this->auditStats['start_time'] = microtime(true);
             $this->info('Starting comprehensive security audit...');
             // Perform various security checks with error handling
             $this->performSecurityChecks();
@@ -128,8 +126,8 @@ class SecurityAuditCommand extends Command
             if ($this->option('email')) { // @phpstan-ignore-line
                 $this->sendEmailReport($this->option('email')); // @phpstan-ignore-line
             }
-            $this->_auditStats['end_time'] = microtime(true);
-            $this->_auditStats['issues_found'] = count($this->_issues);
+            $this->auditStats['end_time'] = microtime(true);
+            $this->auditStats['issues_found'] = count($this->issues);
             $this->displaySummary();
 
             // Return appropriate exit code based on severity
@@ -167,7 +165,7 @@ class SecurityAuditCommand extends Command
         ];
         foreach ($checks as $checkName => $checkFunction) {
             try {
-                $this->_auditStats['checks_performed']++;
+                $this->auditStats['checks_performed']++;
                 $checkFunction();
             } catch (\Exception $e) {
                 Log::error("Security check failed: {$checkName}", [
@@ -362,7 +360,7 @@ class SecurityAuditCommand extends Command
     {
         $this->info('Checking user account security...');
         // Check for users without email verification
-        $unverifiedUsers = User::whereNull('emailVerifiedAt')->count();
+        $unverifiedUsers = User::whereNull('email_verified_at')->count();
         if ($unverifiedUsers > 0) {
             $this->addIssue(
                 'low',
@@ -374,7 +372,7 @@ class SecurityAuditCommand extends Command
         $inactiveAdmins = User::whereHas('roles', function ($query) {
             $query->where('name', 'admin');
         })
-            ->where('updatedAt', '<', now()->subMonths(6))
+            ->where('updated_at', '<', now()->subMonths(6))
             ->count();
         if ($inactiveAdmins > 0) {
             $this->addIssue(
@@ -395,7 +393,7 @@ class SecurityAuditCommand extends Command
         $this->info('Checking license system security...');
         // Check for licenses without proper validation
         $invalidLicenses = License::where('status', 'active')
-            ->where('licenseExpiresAt', '<', now())
+            ->where('license_expires_at', '<', now())
             ->count();
         if ($invalidLicenses > 0) {
             $this->addIssue(
@@ -406,8 +404,8 @@ class SecurityAuditCommand extends Command
         }
         // Check for suspicious license patterns
         $duplicateKeys = DB::table('licenses')
-            ->select('licenseKey')
-            ->groupBy('licenseKey')
+            ->select('license_key')
+            ->groupBy('license_key')
             ->havingRaw('COUNT(*) > 1')
             ->count();
         if ($duplicateKeys > 0) {
@@ -438,7 +436,7 @@ class SecurityAuditCommand extends Command
             $logFiles = File::files($logPath);
             $totalSize = 0;
             foreach ($logFiles as $file) {
-                $totalSize += File::size($file->getPathname());
+                $totalSize += File::size($file);
             }
             // Check if logs are too large (>100MB)
             if ($totalSize > 100 * 1024 * 1024) {
@@ -450,11 +448,11 @@ class SecurityAuditCommand extends Command
             }
             // Check for publicly accessible log files
             foreach ($logFiles as $file) {
-                if (is_readable($file->getPathname()) && fileperms($file->getPathname()) & 0004) {
+                if (is_readable($file) && fileperms($file) & 0004) {
                     $this->addIssue(
                         'medium',
                         'Log Files',
-                        'Log file ' . basename($file->getPathname()) . ' is world-readable',
+                        'Log file ' . basename($file) . ' is world-readable',
                     );
                 }
             }
@@ -537,7 +535,7 @@ class SecurityAuditCommand extends Command
      */
     private function addIssue(string $severity, string $category, string $description): void
     {
-        $this->_issues[] = [
+        $this->issues[] = [
             'severity' => $severity,
             'category' => $category,
             'description' => $description,
@@ -563,9 +561,12 @@ class SecurityAuditCommand extends Command
     {
         $files = File::allFiles($directory);
         foreach ($files as $file) {
-            if (is_writable($file->getPathname()) && (fileperms($file->getPathname()) & 0002)) {
+            if (is_writable($file) && (fileperms($file) & 0002)) {
                 $relativePath = $file->getRelativePathname();
-                $permissions = fileperms($file->getPathname());
+                if (!is_string($relativePath)) {
+                    continue;
+                }
+                $permissions = fileperms($file);
                 $writableFiles[$relativePath] = [
                     'path' => $relativePath,
                     'permissions' => $permissions !== false ? $permissions : 0,
@@ -583,14 +584,14 @@ class SecurityAuditCommand extends Command
         $this->info('Generating security report...');
         $report = [
             'audit_date' => now()->toISOString(),
-            'total_issues' => count($this->_issues),
+            'total_issues' => count($this->issues),
             'issues_by_severity' => [
-                'critical' => count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'critical')),
-                'high' => count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'high')),
-                'medium' => count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'medium')),
-                'low' => count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'low')),
+                'critical' => count(array_filter($this->issues, fn ($i) => $i['severity'] === 'critical')),
+                'high' => count(array_filter($this->issues, fn ($i) => $i['severity'] === 'high')),
+                'medium' => count(array_filter($this->issues, fn ($i) => $i['severity'] === 'medium')),
+                'low' => count(array_filter($this->issues, fn ($i) => $i['severity'] === 'low')),
             ],
-            'issues' => $this->_issues,
+            'issues' => $this->issues,
         ];
         $reportPath = storage_path('logs/security-audit-' . now()->format('Y-m-d-H-i-s') . '.json');
         $jsonContent = json_encode($report, JSON_PRETTY_PRINT);
@@ -608,7 +609,7 @@ class SecurityAuditCommand extends Command
     {
         $this->info('Attempting to fix security issues...');
         $fixedCount = 0;
-        foreach ($this->_issues as $issue) {
+        foreach ($this->issues as $issue) {
             if ($this->canAutoFix($issue)) {
                 if ($this->autoFix($issue)) {
                     $fixedCount++;
@@ -693,10 +694,10 @@ class SecurityAuditCommand extends Command
     private function displaySummary(): void
     {
         $this->info('Security audit completed.');
-        $criticalCount = count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'critical'));
-        $highCount = count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'high'));
-        $mediumCount = count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'medium'));
-        $lowCount = count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'low'));
+        $criticalCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'critical'));
+        $highCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'high'));
+        $mediumCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'medium'));
+        $lowCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'low'));
         $this->table(
             ['Severity', 'Count'],
             [
@@ -704,7 +705,7 @@ class SecurityAuditCommand extends Command
                 ['High', $highCount],
                 ['Medium', $mediumCount],
                 ['Low', $lowCount],
-                ['Total', count($this->_issues)],
+                ['Total', count($this->issues)],
             ],
         );
         if ($criticalCount > 0) {
@@ -769,9 +770,9 @@ class SecurityAuditCommand extends Command
      */
     private function checkSuspiciousActivity(): int
     {
-        return LicenseLog::where('createdAt', '>', now()->subDays(7))
+        return LicenseLog::where('created_at', '>', now()->subDays(7))
             ->where('action', 'verification')
-            ->groupBy('ipAddress')
+            ->groupBy('ip_address')
             ->havingRaw('COUNT(*) > 100')
             ->count();
     }
@@ -783,8 +784,8 @@ class SecurityAuditCommand extends Command
      */
     private function getExitCode(): int
     {
-        $criticalCount = count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'critical'));
-        $highCount = count(array_filter($this->_issues, fn ($i) => $i['severity'] === 'high'));
+        $criticalCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'critical'));
+        $highCount = count(array_filter($this->issues, fn ($i) => $i['severity'] === 'high'));
 
         return ($criticalCount > 0 || $highCount > 0) ? 1 : 0;
     }

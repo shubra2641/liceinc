@@ -49,7 +49,6 @@ class SecurityService
     /**
      * @param array<mixed> $data
      * @param array<mixed> $rules
-     *
      * @return array<mixed>
      */
     public function validateAndSanitizeInput(array $data, array $rules = []): array
@@ -447,7 +446,6 @@ class SecurityService
      */
     /**
      * @param mixed $file
-     *
      * @return array<string, mixed>
      */
     public function validateFileUpload($file): array
@@ -471,8 +469,7 @@ class SecurityService
             // Check file extension
             $allowedExtensionsConfig = config('security.file_upload_security.allowed_extensions', []);
             $allowedExtensions = is_array($allowedExtensionsConfig) ? $allowedExtensionsConfig : [];
-            $extension = method_exists($file, 'getClientOriginalExtension')
-                ?
+            $extension = method_exists($file, 'getClientOriginalExtension') ?
                 (is_string($file->getClientOriginalExtension())
                     ? strtolower($file->getClientOriginalExtension())
                     : '') : '';
@@ -512,7 +509,7 @@ class SecurityService
                 $fileName = method_exists($file, 'getClientOriginalName') ? $file->getClientOriginalName() : '';
                 $fileSize = method_exists($file, 'getSize') ? $file->getSize() : 0;
                 $this->logSecurityEvent('file_upload_validation_failed', [
-                    'fileName' => is_string($fileName) ? $fileName : '',
+                    'file_name' => is_string($fileName) ? $fileName : '',
                     'file_size' => is_numeric($fileSize) ? (int)$fileSize : 0,
                     'mime_type' => $mimeType,
                     'errors' => $result['errors'],

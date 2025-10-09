@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +9,7 @@ use Illuminate\Support\Facades\Cache;
 /**
  * @property int $id
  * @property string $version
- * @property \Illuminate\Support\Carbon|null $last_updatedAt
+ * @property \Illuminate\Support\Carbon|null $last_updated_at
  * @property string|null $key
  * @property string|null $value
  * @property string $type
@@ -33,10 +31,10 @@ use Illuminate\Support\Facades\Cache;
  * @property string $timezone
  * @property bool $maintenance_mode
  * @property string|null $maintenance_message
- * @property string|null $envatoPersonalToken
+ * @property string|null $envato_personal_token
  * @property string|null $envato_api_key
  * @property bool $envato_auth_enabled
- * @property string|null $envatoUsername
+ * @property string|null $envato_username
  * @property string|null $envato_client_id
  * @property string|null $envato_client_secret
  * @property string|null $envato_redirect_uri
@@ -50,7 +48,7 @@ use Illuminate\Support\Facades\Cache;
  * @property bool $license_verification_enabled
  * @property bool $license_auto_verification
  * @property int|null $license_verification_interval
- * @property int|null $max_licenseDomains
+ * @property int|null $max_license_domains
  * @property int|null $license_expiry_warning_days
  * @property bool $auto_renewal_enabled
  * @property int|null $renewal_reminder_days
@@ -58,7 +56,7 @@ use Illuminate\Support\Facades\Cache;
  * @property string|null $captcha_site_key
  * @property string|null $captcha_secret_key
  * @property int $enable_human_question
- * @property array<array-key, mixed>|null $humanQuestions
+ * @property array<array-key, mixed>|null $human_questions
  * @property bool $auto_generate_license
  * @property int $default_license_length
  * @property int $license_max_attempts
@@ -70,13 +68,13 @@ use Illuminate\Support\Facades\Cache;
  * @property bool $license_allow_offline
  * @property int $license_grace_period
  * @property bool $license_allow_localhost
- * @property bool $license_allow_ipAddresses
+ * @property bool $license_allow_ip_addresses
  * @property bool $license_allow_wildcards
  * @property bool $license_validate_ssl
  * @property bool $license_auto_approve_subdomains
  * @property bool $license_auto_register_domains
- * @property int $license_maxDomains
- * @property int $licenseDomain_cooldown
+ * @property int $license_max_domains
+ * @property int $license_domain_cooldown
  * @property int $license_default_duration
  * @property int $license_support_duration
  * @property int $license_renewal_reminder
@@ -114,8 +112,8 @@ use Illuminate\Support\Facades\Cache;
  * @property string $preloader_background_color
  * @property int $preloader_duration
  * @property string|null $preloader_custom_css
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $seo_site_title
  * @property string|null $seo_site_description
  * @property string|null $seo_og_image
@@ -145,7 +143,6 @@ use Illuminate\Support\Facades\Cache;
  * @property string|null $seo_kb_description
  * @property string|null $seo_tickets_title
  * @property string|null $seo_tickets_description
- * @method static \Database\Factories\SettingFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting query()
@@ -307,10 +304,10 @@ class Setting extends Model
         'support_phone',
         'timezone',
         'maintenance_mode',
-        'envatoPersonalToken',
+        'envato_personal_token',
         'envato_api_key',
         'envato_auth_enabled',
-        'envatoUsername',
+        'envato_username',
         'auto_generate_license',
         'default_license_length',
         'envato_client_id',
@@ -327,13 +324,13 @@ class Setting extends Model
         'license_allow_offline',
         'license_grace_period',
         'license_allow_localhost',
-        'license_allow_ipAddresses',
+        'license_allow_ip_addresses',
         'license_allow_wildcards',
         'license_validate_ssl',
         'license_auto_approve_subdomains',
         'license_auto_register_domains',
-        'license_maxDomains',
-        'licenseDomain_cooldown',
+        'license_max_domains',
+        'license_domain_cooldown',
         'license_default_duration',
         'license_support_duration',
         'license_renewal_reminder',
@@ -390,14 +387,14 @@ class Setting extends Model
         'captcha_site_key',
         'captcha_secret_key',
         'enable_human_question',
-        'humanQuestions',
+        'human_questions',
         'version',
         'site_keywords',
         'maintenance_message',
         'license_verification_enabled',
         'license_auto_verification',
         'license_verification_interval',
-        'max_licenseDomains',
+        'max_license_domains',
         'license_expiry_warning_days',
         'auto_renewal_enabled',
         'renewal_reminder_days',
@@ -435,7 +432,7 @@ class Setting extends Model
         'logo_width' => 'integer',
         'logo_height' => 'integer',
         'avg_response_time' => 'integer',
-        'last_updatedAt' => 'datetime',
+        'last_updated_at' => 'datetime',
         // License verification settings
         'license_verify_envato' => 'boolean',
         'license_fallback_internal' => 'boolean',
@@ -445,13 +442,13 @@ class Setting extends Model
         'license_grace_period' => 'integer',
         // Domain management settings
         'license_allow_localhost' => 'boolean',
-        'license_allow_ipAddresses' => 'boolean',
+        'license_allow_ip_addresses' => 'boolean',
         'license_allow_wildcards' => 'boolean',
         'license_validate_ssl' => 'boolean',
         'license_auto_approve_subdomains' => 'boolean',
         'license_auto_register_domains' => 'boolean',
-        'license_maxDomains' => 'integer',
-        'licenseDomain_cooldown' => 'integer',
+        'license_max_domains' => 'integer',
+        'license_domain_cooldown' => 'integer',
         // License expiration settings
         'license_default_duration' => 'integer',
         'license_support_duration' => 'integer',
@@ -484,7 +481,7 @@ class Setting extends Model
         'license_bypass_testing' => 'boolean',
         'license_mock_envato' => 'boolean',
         'license_generate_fake_data' => 'boolean',
-        'humanQuestions' => 'array',
+        'human_questions' => 'array',
         'license_verification_enabled' => 'boolean',
         'license_auto_verification' => 'boolean',
         'auto_renewal_enabled' => 'boolean',

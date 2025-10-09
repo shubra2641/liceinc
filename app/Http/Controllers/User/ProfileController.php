@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
@@ -73,7 +71,7 @@ class ProfileController extends Controller
             Log::error('User profile display failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -118,7 +116,7 @@ class ProfileController extends Controller
             Log::error('Profile edit form display failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -161,7 +159,7 @@ class ProfileController extends Controller
             }
             $user->fill($request->validated());
             if ($user->isDirty('email')) {
-                $user->emailVerifiedAt = null;
+                $user->email_verified_at = null;
             }
             $user->save();
             DB::commit();
@@ -177,7 +175,7 @@ class ProfileController extends Controller
             Log::error('Profile update failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -212,11 +210,11 @@ class ProfileController extends Controller
             if (! $user) {
                 throw new \Exception('User not authenticated');
             }
-            $user->envatoUsername = null;
-            $user->envatoId = null;
-            $user->envatoToken = null;
-            $user->envatoRefreshToken = null;
-            $user->envatoTokenExpiresAt = null;
+            $user->envato_username = null;
+            $user->envato_id = null;
+            $user->envato_token = null;
+            $user->envato_refresh_token = null;
+            $user->envato_token_expires_at = null;
             $user->save();
             DB::commit();
             return Redirect::route('profile.edit')
@@ -226,7 +224,7 @@ class ProfileController extends Controller
             Log::error('Envato account unlink failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -278,7 +276,7 @@ class ProfileController extends Controller
             Log::error('Account deletion failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -302,7 +300,7 @@ class ProfileController extends Controller
      * // Link Envato account:
      * POST /profile/link-envato
      * {
-     *     "envatoUsername": "username"
+     *     "envato_username": "username"
      * }
      *
      * // Response: Redirect to profile edit with success message
@@ -313,14 +311,14 @@ class ProfileController extends Controller
         try {
             DB::beginTransaction();
             $request->validate([
-                'envatoUsername' => 'required|string|max:255',
+                'envato_username' => 'required|string|max:255',
             ]);
             $user = $request->user();
             if (! $user) {
                 throw new \Exception('User not authenticated');
             }
             $user->update([
-                'envatoUsername' => $this->sanitizeInput($request->envatoUsername),
+                'envato_username' => $this->sanitizeInput($request->envato_username),
             ]);
             DB::commit();
             return redirect()->route('profile.edit')->with('success', 'envato-linked');
@@ -329,7 +327,7 @@ class ProfileController extends Controller
             Log::error('Envato account link failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);

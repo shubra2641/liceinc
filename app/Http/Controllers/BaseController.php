@@ -58,7 +58,6 @@ abstract class BaseController extends Controller
     /**
      * @param array<string, string> $rules
      * @param array<string, string> $messages
-     *
      * @return array<string, mixed>
      */
     protected function validateRequest(Request $request, array $rules, array $messages = []): array
@@ -171,7 +170,7 @@ abstract class BaseController extends Controller
             'method' => $request->method(),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'userId' => Auth::id(),
+            'user_id' => Auth::id(),
             'errors' => $errors,
             'input' => $this->sanitizeLogData($request->all()),
         ]);
@@ -202,7 +201,7 @@ abstract class BaseController extends Controller
             'method' => $request->method(),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'userId' => Auth::id(),
+            'user_id' => Auth::id(),
         ], $context));
     }
     /**
@@ -221,7 +220,6 @@ abstract class BaseController extends Controller
      */
     /**
      * @param array<mixed, mixed> $data
-     *
      * @return array<string, mixed>
      */
     protected function sanitizeLogData(array $data): array
@@ -230,7 +228,7 @@ abstract class BaseController extends Controller
             'password',
             'password_confirmation',
             'api_token',
-            'licenseKey',
+            'license_key',
             'purchase_code',
             'credit_card',
             'ssn',
@@ -288,7 +286,7 @@ abstract class BaseController extends Controller
             'url' => $request->fullUrl(),
             'method' => $request->method(),
             'ip' => $request->ip(),
-            'userId' => Auth::id(),
+            'user_id' => Auth::id(),
         ]);
         return $this->errorResponse($message, null, $statusCode);
     }
@@ -332,7 +330,7 @@ abstract class BaseController extends Controller
         if (! $this->hasPermission($permission)) {
             Log::warning('Permission denied', [
                 'permission' => $permission,
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
             abort(Response::HTTP_FORBIDDEN, 'Insufficient permissions');
@@ -355,7 +353,6 @@ abstract class BaseController extends Controller
      */
     /**
      * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, mixed> $paginator
-     *
      * @return array<string, mixed>
      */
     protected function getPaginationMeta(\Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator): array

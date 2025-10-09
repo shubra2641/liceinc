@@ -122,7 +122,7 @@ class EmailService
             'user_name' => $this->sanitizeString($user->name),
             'user_firstname' => $this->sanitizeString($user->firstname ?? ''),
             'user_lastname' => $this->sanitizeString($user->lastname ?? ''),
-            'userId' => $user->id,
+            'user_id' => $user->id,
         ];
         return $this->sendEmail($templateName, $user->email, array_merge($data, $userData), $user->name);
     }
@@ -186,7 +186,6 @@ class EmailService
     /**
      * @param array<string, mixed> $users
      * @param array<string, mixed> $data
-     *
      * @return array<string, mixed>
      */
     public function sendBulkEmail(array $users, string $templateName, array $data = []): array
@@ -295,7 +294,6 @@ class EmailService
      */
     /**
      * @param array<string, mixed> $data
-     *
      * @return array<string, mixed>
      */
     public function testTemplate(string $templateName, array $data = []): array
@@ -324,14 +322,12 @@ class EmailService
      */
     public function sendUserWelcome(User $user): bool
     {
-        if (!$user->createdAt) {
+        if (!$user->created_at) {
             Log::error('Invalid user provided for welcome email');
             return false;
         }
         return $this->sendToUser($user, 'user_welcome', [
-            'registration_date' => $user->createdAt instanceof \Carbon\Carbon
-                ? $user->createdAt->format('M d, Y')
-                : 'Unknown',
+            'registration_date' => $user->created_at->format('M d, Y'),
         ]);
     }
     /**
@@ -354,14 +350,12 @@ class EmailService
      */
     public function sendWelcome(User $user, array $data = []): bool
     {
-        if (!$user->createdAt) {
+        if (!$user->created_at) {
             Log::error('Invalid user provided for welcome email');
             return false;
         }
         $welcomeData = array_merge([
-            'registration_date' => $user->createdAt instanceof \Carbon\Carbon
-                ? $user->createdAt->format('M d, Y')
-                : 'Unknown',
+            'registration_date' => $user->created_at->format('M d, Y'),
         ], $this->sanitizeData($data));
         return $this->sendToUser($user, 'user_welcome', $welcomeData);
     }
@@ -415,9 +409,7 @@ class EmailService
             'user_lastname' => $this->sanitizeString($user->lastname ?? ''),
             'user_phone' => $this->sanitizeString($user->phonenumber ?? 'Not provided'),
             'user_country' => $this->sanitizeString($user->country ?? 'Not provided'),
-            'registration_date' => $user->createdAt instanceof \Carbon\Carbon
-                ? $user->createdAt->format('M d, Y \a\t g:i A')
-                : 'Unknown',
+            'registration_date' => $user->created_at ? $user->created_at->format('M d, Y \a\t g:i A') : 'Unknown',
             'registration_ip' => $this->sanitizeString(request()->ip() ?? 'Unknown'),
             'user_agent' => $this->sanitizeString(request()->userAgent() ?? 'Unknown'),
         ]);
@@ -443,26 +435,30 @@ class EmailService
             Log::error('Invalid license or invoice provided for payment confirmation');
             return false;
         }
-        return $this->sendToUser($license->user, 'payment_confirmation', [
+        return $this->sendToUser(
+            $license->user,
+            'payment_confirmation',
+            [
             'customer_name' => $this->sanitizeString($license->user->name),
             'customer_email' => $this->sanitizeString($license->user->email),
             'product_name' => $this->sanitizeString($license->product->name ?? ''),
-            'order_number' => $this->sanitizeString($invoice->invoiceNumber),
-            'licenseKey' => $this->sanitizeString($license->licenseKey),
-            'invoiceNumber' => $this->sanitizeString($invoice->invoiceNumber),
+            'order_number' => $this->sanitizeString($invoice->invoice_number),
+            'license_key' => $this->sanitizeString($license->license_key),
+            'invoice_number' => $this->sanitizeString($invoice->invoice_number),
             'amount' => $invoice->amount,
             'currency' => $this->sanitizeString($invoice->currency),
-            'payment_method' => $this->sanitizeString(ucfirst(
-                is_string($invoice->metadata['gateway'] ?? null)
-                    ? $invoice->metadata['gateway']
-                    : 'Unknown'
-            )),
-            'payment_date' => $invoice->paidAt instanceof \DateTime
-                ? $invoice->paidAt->format('M d, Y \a\t g:i A')
-                : 'Unknown',
-            'licenseExpiresAt' => $license->licenseExpiresAt ?
-                $license->licenseExpiresAt->format('M d, Y') : 'Never',
-        ]);
+            'payment_method' => $this->sanitizeString(
+                ucfirst(
+                    is_string($invoice->metadata['gateway'] ?? null)
+                        ? $invoice->metadata['gateway']
+                        : 'Unknown'
+                )
+            ),
+            'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
+            'license_expires_at' => $license->license_expires_at ?
+                $license->license_expires_at->format('M d, Y') : 'Never',
+            ]
+        );
     }
     /**
      * Send password reset email.
@@ -482,15 +478,15 @@ class EmailService
      */
     public function sendLicenseExpiring(User $user, array $licenseData): bool
     {
-        $licenseKey = $licenseData['licenseKey'] ?? '';
+        $licenseKey = $licenseData['license_key'] ?? '';
         $productName = $licenseData['product_name'] ?? '';
-        $expiresAt = $licenseData['expiresAt'] ?? '';
+        $expiresAt = $licenseData['expires_at'] ?? '';
         $daysRemaining = $licenseData['days_remaining'] ?? 0;
 
         return $this->sendToUser($user, 'user_license_expiring', array_merge($licenseData, [
-            'licenseKey' => is_string($licenseKey) ? $licenseKey : '',
+            'license_key' => is_string($licenseKey) ? $licenseKey : '',
             'product_name' => is_string($productName) ? $productName : '',
-            'expiresAt' => is_string($expiresAt) ? $expiresAt : '',
+            'expires_at' => is_string($expiresAt) ? $expiresAt : '',
             'days_remaining' => is_numeric($daysRemaining) ? (int)$daysRemaining : 0,
         ]));
     }
@@ -503,7 +499,7 @@ class EmailService
     public function sendLicenseUpdated(User $user, array $licenseData): bool
     {
         return $this->sendToUser($user, 'user_license_updated', array_merge($licenseData, [
-            'licenseKey' => $licenseData['licenseKey'] ?? '',
+            'license_key' => $licenseData['license_key'] ?? '',
             'product_name' => $licenseData['product_name'] ?? '',
             'update_type' => $licenseData['update_type'] ?? 'updated',
         ]));
@@ -564,7 +560,7 @@ class EmailService
      */
     public function sendTicketReply(User $user, array $ticketData): bool
     {
-        return $this->sendToUser($user, 'user_ticketReply', array_merge($ticketData, [
+        return $this->sendToUser($user, 'user_ticket_reply', array_merge($ticketData, [
             'ticket_id' => $ticketData['ticket_id'] ?? '',
             'ticket_subject' => $ticketData['ticket_subject'] ?? '',
             'reply_message' => $ticketData['reply_message'] ?? '',
@@ -579,13 +575,13 @@ class EmailService
      */
     public function sendInvoiceApproachingDue(User $user, array $invoiceData): bool
     {
-        $invoiceNumber = $invoiceData['invoiceNumber'] ?? '';
+        $invoiceNumber = $invoiceData['invoice_number'] ?? '';
         $invoiceAmount = $invoiceData['invoice_amount'] ?? 0;
         $dueDate = $invoiceData['due_date'] ?? '';
         $daysRemaining = $invoiceData['days_remaining'] ?? 0;
 
         return $this->sendToUser($user, 'user_invoice_approaching_due', array_merge($invoiceData, [
-            'invoiceNumber' => is_string($invoiceNumber) ? $invoiceNumber : '',
+            'invoice_number' => is_string($invoiceNumber) ? $invoiceNumber : '',
             'invoice_amount' => is_numeric($invoiceAmount) ? (float)$invoiceAmount : 0.0,
             'due_date' => is_string($dueDate) ? $dueDate : '',
             'days_remaining' => is_numeric($daysRemaining) ? (int)$daysRemaining : 0,
@@ -600,7 +596,7 @@ class EmailService
     public function sendInvoicePaid(User $user, array $invoiceData): bool
     {
         return $this->sendToUser($user, 'user_invoice_paid', array_merge($invoiceData, [
-            'invoiceNumber' => $invoiceData['invoiceNumber'] ?? '',
+            'invoice_number' => $invoiceData['invoice_number'] ?? '',
             'invoice_amount' => $invoiceData['invoice_amount'] ?? 0,
             'payment_date' => $invoiceData['payment_date'] ?? '',
             'payment_method' => $invoiceData['payment_method'] ?? '',
@@ -615,7 +611,7 @@ class EmailService
     public function sendInvoiceCancelled(User $user, array $invoiceData): bool
     {
         return $this->sendToUser($user, 'user_invoice_cancelled', array_merge($invoiceData, [
-            'invoiceNumber' => $invoiceData['invoiceNumber'] ?? '',
+            'invoice_number' => $invoiceData['invoice_number'] ?? '',
             'invoice_amount' => $invoiceData['invoice_amount'] ?? 0,
             'cancellation_reason' => $invoiceData['cancellation_reason'] ?? '',
         ]));
@@ -628,13 +624,13 @@ class EmailService
      */
     public function sendAdminLicenseCreated(array $licenseData): bool
     {
-        $licenseKey = $licenseData['licenseKey'] ?? '';
+        $licenseKey = $licenseData['license_key'] ?? '';
         $productName = $licenseData['product_name'] ?? '';
         $customerName = $licenseData['customer_name'] ?? '';
         $customerEmail = $licenseData['customer_email'] ?? '';
 
         return $this->sendToAdmin('admin_license_created', array_merge($licenseData, [
-            'licenseKey' => is_string($licenseKey) ? $licenseKey : '',
+            'license_key' => is_string($licenseKey) ? $licenseKey : '',
             'product_name' => is_string($productName) ? $productName : '',
             'customer_name' => is_string($customerName) ? $customerName : '',
             'customer_email' => is_string($customerEmail) ? $customerEmail : '',
@@ -649,11 +645,11 @@ class EmailService
     public function sendAdminLicenseExpiring(array $licenseData): bool
     {
         return $this->sendToAdmin('admin_license_expiring', array_merge($licenseData, [
-            'licenseKey' => $licenseData['licenseKey'] ?? '',
+            'license_key' => $licenseData['license_key'] ?? '',
             'product_name' => $licenseData['product_name'] ?? '',
             'customer_name' => $licenseData['customer_name'] ?? '',
             'customer_email' => $licenseData['customer_email'] ?? '',
-            'expiresAt' => $licenseData['expiresAt'] ?? '',
+            'expires_at' => $licenseData['expires_at'] ?? '',
             'days_remaining' => $licenseData['days_remaining'] ?? 0,
         ]));
     }
@@ -666,11 +662,11 @@ class EmailService
     public function sendAdminLicenseRenewed(array $licenseData): bool
     {
         return $this->sendToAdmin('admin_license_renewed', array_merge($licenseData, [
-            'licenseKey' => $licenseData['licenseKey'] ?? '',
+            'license_key' => $licenseData['license_key'] ?? '',
             'product_name' => $licenseData['product_name'] ?? '',
             'customer_name' => $licenseData['customer_name'] ?? '',
             'customer_email' => $licenseData['customer_email'] ?? '',
-            'new_expiresAt' => $licenseData['new_expiresAt'] ?? '',
+            'new_expires_at' => $licenseData['new_expires_at'] ?? '',
         ]));
     }
     /**
@@ -704,9 +700,9 @@ class EmailService
     public function sendRenewalReminder(User $user, array $renewalData): bool
     {
         return $this->sendToUser($user, 'user_renewal_reminder', array_merge($renewalData, [
-            'licenseKey' => $renewalData['licenseKey'] ?? '',
+            'license_key' => $renewalData['license_key'] ?? '',
             'product_name' => $renewalData['product_name'] ?? '',
-            'expiresAt' => $renewalData['expiresAt'] ?? '',
+            'expires_at' => $renewalData['expires_at'] ?? '',
             'invoice_amount' => $renewalData['invoice_amount'] ?? 0,
             'invoice_due_date' => $renewalData['invoice_due_date'] ?? '',
             'invoice_id' => $renewalData['invoice_id'] ?? '',
@@ -721,11 +717,11 @@ class EmailService
     public function sendAdminRenewalReminder(array $renewalData): bool
     {
         return $this->sendToAdmin('admin_renewal_reminder', array_merge($renewalData, [
-            'licenseKey' => $renewalData['licenseKey'] ?? '',
+            'license_key' => $renewalData['license_key'] ?? '',
             'product_name' => $renewalData['product_name'] ?? '',
             'customer_name' => $renewalData['customer_name'] ?? '',
             'customer_email' => $renewalData['customer_email'] ?? '',
-            'expiresAt' => $renewalData['expiresAt'] ?? '',
+            'expires_at' => $renewalData['expires_at'] ?? '',
             'invoice_amount' => $renewalData['invoice_amount'] ?? 0,
             'invoice_id' => $renewalData['invoice_id'] ?? '',
         ]));
@@ -738,7 +734,7 @@ class EmailService
      */
     public function sendAdminTicketReply(array $ticketData): bool
     {
-        return $this->sendToAdmin('admin_ticketReply', array_merge($ticketData, [
+        return $this->sendToAdmin('admin_ticket_reply', array_merge($ticketData, [
             'ticket_id' => $ticketData['ticket_id'] ?? '',
             'ticket_subject' => $ticketData['ticket_subject'] ?? '',
             'customer_name' => $ticketData['customer_name'] ?? '',
@@ -771,7 +767,7 @@ class EmailService
     public function sendAdminInvoiceApproachingDue(array $invoiceData): bool
     {
         return $this->sendToAdmin('admin_invoice_approaching_due', array_merge($invoiceData, [
-            'invoiceNumber' => $invoiceData['invoiceNumber'] ?? '',
+            'invoice_number' => $invoiceData['invoice_number'] ?? '',
             'invoice_amount' => $invoiceData['invoice_amount'] ?? 0,
             'customer_name' => $invoiceData['customer_name'] ?? '',
             'customer_email' => $invoiceData['customer_email'] ?? '',
@@ -788,7 +784,7 @@ class EmailService
     public function sendAdminInvoiceCancelled(array $invoiceData): bool
     {
         return $this->sendToAdmin('admin_invoice_cancelled', array_merge($invoiceData, [
-            'invoiceNumber' => $invoiceData['invoiceNumber'] ?? '',
+            'invoice_number' => $invoiceData['invoice_number'] ?? '',
             'invoice_amount' => $invoiceData['invoice_amount'] ?? 0,
             'customer_name' => $invoiceData['customer_name'] ?? '',
             'customer_email' => $invoiceData['customer_email'] ?? '',
@@ -800,22 +796,23 @@ class EmailService
      */
     public function sendPaymentFailureNotification(Invoice $order): bool
     {
-        return $this->sendToAdmin('admin_payment_failure', [
+        return $this->sendToAdmin(
+            'admin_payment_failure',
+            [
             'customer_name' => $order->user->name,
             'customer_email' => $order->user->email,
             'product_name' => $order->product->name ?? '',
-            'order_number' => $order->orderNumber,
+            'order_number' => $order->order_number,
             'amount' => $order->amount,
             'currency' => $order->currency,
-            'payment_method' => ucfirst(is_string($order->paymentGateway)
-                ? $order->paymentGateway
-                : 'Unknown'),
-            'failure_reason' => (is_array($order->gatewayResponse)
-                && isset($order->gatewayResponse['error']))
-                ? $order->gatewayResponse['error']
+            'payment_method' => ucfirst((string)($order->payment_gateway ?? 'Unknown')),
+            'failure_reason' => (is_array($order->gateway_response)
+                && isset($order->gateway_response['error']))
+                ? $order->gateway_response['error']
                 : 'Unknown error',
             'failure_date' => now()->format('M d, Y \a\t g:i A'),
-        ]);
+            ]
+        );
     }
     /**
      * Send license creation notification to user.
@@ -831,15 +828,14 @@ class EmailService
             'customer_name' => $license->user->name ?? '',
             'customer_email' => $license->user->email ?? '',
             'product_name' => $license->product->name ?? '',
-            'licenseKey' => $license->licenseKey,
-            'licenseType' => ucfirst((string)($license->licenseType ?? 'Unknown')),
-            'maxDomains' => $license->maxDomains,
-            'licenseExpiresAt' => $license->licenseExpiresAt ?
-                $license->licenseExpiresAt->format('M d, Y') : 'Never',
-            'support_expiresAt' => $license->supportExpiresAt instanceof \DateTime
-                ? $license->supportExpiresAt->format('M d, Y')
-                : 'Never',
-            'created_date' => $license->createdAt?->format('M d, Y \a\t g:i A') ?? 'Unknown',
+            'license_key' => $license->license_key,
+            'license_type' => ucfirst((string)($license->license_type ?? 'Unknown')),
+            'max_domains' => $license->max_domains,
+            'license_expires_at' => $license->license_expires_at ?
+                $license->license_expires_at->format('M d, Y') : 'Never',
+            'support_expires_at' => $license->support_expires_at ?
+                $license->support_expires_at->format('M d, Y') : 'Never',
+            'created_date' => $license->created_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
         ]);
     }
     /**
@@ -851,8 +847,8 @@ class EmailService
             'customer_name' => $license->user->name ?? '',
             'customer_email' => $license->user->email ?? '',
             'product_name' => $license->product->name ?? '',
-            'licenseKey' => $license->licenseKey,
-            'invoiceNumber' => $invoice->invoiceNumber,
+            'license_key' => $license->license_key,
+            'invoice_number' => $invoice->invoice_number,
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
             'payment_method' => ucfirst(
@@ -861,11 +857,9 @@ class EmailService
                     : 'Unknown'
             ),
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
-            'payment_date' => $invoice->paidAt instanceof \DateTime
-                ? $invoice->paidAt->format('M d, Y \a\t g:i A')
-                : 'Unknown',
-            'licenseType' => ucfirst((string)($license->licenseType ?? 'Unknown')),
-            'maxDomains' => $license->maxDomains,
+            'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
+            'license_type' => ucfirst((string)($license->license_type ?? 'Unknown')),
+            'max_domains' => $license->max_domains,
         ]);
     }
     /**
@@ -877,7 +871,7 @@ class EmailService
         return $this->sendToUser($invoice->user, 'custom_invoice_payment_confirmation', [
             'customer_name' => $invoice->user->name ?? '',
             'customer_email' => $invoice->user->email,
-            'invoiceNumber' => $invoice->invoiceNumber,
+            'invoice_number' => $invoice->invoice_number,
             'service_description' => $invoice->notes ?? 'Custom Service',
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
@@ -886,9 +880,7 @@ class EmailService
                     ? $invoice->metadata['gateway']
                     : 'Unknown'
             ),
-            'payment_date' => $invoice->paidAt instanceof \DateTime
-                ? $invoice->paidAt->format('M d, Y \a\t g:i A')
-                : 'Unknown',
+            'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
         ]);
     }
@@ -900,7 +892,7 @@ class EmailService
         return $this->sendToAdmin('admin_custom_invoice_payment', [
             'customer_name' => $invoice->user->name ?? '',
             'customer_email' => $invoice->user->email,
-            'invoiceNumber' => $invoice->invoiceNumber,
+            'invoice_number' => $invoice->invoice_number,
             'service_description' => $invoice->notes ?? 'Custom Service',
             'amount' => $invoice->amount,
             'currency' => $invoice->currency,
@@ -910,9 +902,7 @@ class EmailService
                     : 'Unknown'
             ),
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
-            'payment_date' => $invoice->paidAt instanceof \DateTime
-                ? $invoice->paidAt->format('M d, Y \a\t g:i A')
-                : 'Unknown',
+            'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
         ]);
     }
     /**
@@ -1023,7 +1013,6 @@ class EmailService
      */
     /**
      * @param array<mixed, mixed> $data
-     *
      * @return array<string, mixed>
      */
     private function sanitizeData(array $data): array

@@ -84,7 +84,7 @@ class HomeController extends Controller
     private function getActiveProducts()
     {
         try {
-            return Product::where('isActive', true)
+            return Product::where('is_active', true)
                 ->latest()
                 ->limit(6)
                 ->get();

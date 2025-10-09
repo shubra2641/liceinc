@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -41,7 +39,7 @@ use Illuminate\Validation\ValidationException;
  * // Verify a license
  * POST /api/license/verify
  * {
- *     "purchaseCode": "ABC123-DEF456-GHI789",
+ *     "purchase_code": "ABC123-DEF456-GHI789",
  *     "product_slug": "my-product",
  *     "domain": "example.com"
  * }
@@ -69,7 +67,7 @@ class LicenseController extends Controller
      * database for existing licenses, and if not found, falling back to Envato API
      * verification. It includes rate limiting, enhanced security, and comprehensive logging.
      *
-     * @param  LicenseVerifyRequest  $request  The validated request containing purchaseCode, product_slug, and domain
+     * @param  LicenseVerifyRequest  $request  The validated request containing purchase_code, product_slug, and domain
      *
      * @return JsonResponse JSON response with license verification result
      *
@@ -79,7 +77,7 @@ class LicenseController extends Controller
      * @example
      * // Request body:
      * {
-     *     "purchaseCode": "ABC123-DEF456-GHI789",
+     *     "purchase_code": "ABC123-DEF456-GHI789",
      *     "product_slug": "my-product",
      *     "domain": "example.com"
      * }
@@ -88,10 +86,10 @@ class LicenseController extends Controller
      * {
      *     "valid": true,
      *     "source": "local",
-     *     "licenseType": "system_generated",
-     *     "purchaseCode": "ABC123-DEF456-GHI789",
+     *     "license_type": "system_generated",
+     *     "purchase_code": "ABC123-DEF456-GHI789",
      *     "product": {...},
-     *     "domainAllowed": true,
+     *     "domain_allowed": true,
      *     "status": "active"
      * }
      */
@@ -102,7 +100,7 @@ class LicenseController extends Controller
             // Get validated data from Request class
             $validated = $request->validated();
             // Extract sanitized inputs (already sanitized in Request class)
-            $purchaseCode = $validated['purchaseCode'];
+            $purchaseCode = $validated['purchase_code'];
             $productSlug = $validated['product_slug'];
             $domain = $validated['domain'];
             // Enhanced rate limiting with multiple keys
@@ -114,7 +112,7 @@ class LicenseController extends Controller
                 RateLimiter::tooManyAttempts($globalRateLimitKey, 50)
             ) {
                 Log::warning('Rate limit exceeded for license verification', [
-                    'purchaseCode' => substr($purchaseCodeStr, 0, 4) . '...',
+                    'purchase_code' => substr($purchaseCodeStr, 0, 4) . '...',
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                     'rate_limit_key_attempts' => RateLimiter::attempts($rateLimitKey),
@@ -142,23 +140,25 @@ class LicenseController extends Controller
                 $response = [
                     'valid' => true,
                     'source' => 'local',
-                    'licenseType' => 'system_generated',
-                    'purchaseCode' => $localLicense->purchaseCode ?? null,
-                    'product' => property_exists($localLicense, 'product') && $localLicense->product
-                        && is_object($localLicense->product) && method_exists($localLicense->product, 'only')
-                        ? $localLicense->product->only(['id', 'name', 'slug', 'envatoItemId'])
+                    'license_type' => 'system_generated',
+                    'purchase_code' => $localLicense->purchase_code ?? null,
+                    'product' => property_exists($localLicense, 'product')
+                        && $localLicense->product
+                        && is_object($localLicense->product)
+                        && method_exists($localLicense->product, 'only')
+                        ? $localLicense->product->only(['id', 'name', 'slug', 'envato_item_id'])
                         : null,
-                    'domainAllowed' => $localLicense->domainAllowed ?? null,
+                    'domain_allowed' => $localLicense->domain_allowed ?? null,
                     'status' => $localLicense->status ?? null,
-                    'supportExpiresAt' => property_exists($localLicense, 'supportExpiresAt')
-                        && is_object($localLicense->supportExpiresAt)
-                        && method_exists($localLicense->supportExpiresAt, 'toDateString')
-                        ? $localLicense->supportExpiresAt->toDateString()
+                    'support_expires_at' => property_exists($localLicense, 'support_expires_at')
+                        && is_object($localLicense->support_expires_at)
+                        && method_exists($localLicense->support_expires_at, 'toDateString')
+                        ? $localLicense->support_expires_at->toDateString()
                         : null,
-                    'licenseExpiresAt' => property_exists($localLicense, 'licenseExpiresAt')
-                        && is_object($localLicense->licenseExpiresAt)
-                        && method_exists($localLicense->licenseExpiresAt, 'toDateString')
-                        ? $localLicense->licenseExpiresAt->toDateString()
+                    'license_expires_at' => property_exists($localLicense, 'license_expires_at')
+                        && is_object($localLicense->license_expires_at)
+                        && method_exists($localLicense->license_expires_at, 'toDateString')
+                        ? $localLicense->license_expires_at->toDateString()
                         : null,
                 ];
                 $this->logLicenseVerification(
@@ -178,13 +178,13 @@ class LicenseController extends Controller
                 $response = [
                     'valid' => true,
                     'source' => 'envato',
-                    'licenseType' => 'envato_market',
-                    'purchaseCode' => $purchaseCode,
+                    'license_type' => 'envato_market',
+                    'purchase_code' => $purchaseCode,
                     'product' => $envatoResult['product'],
-                    'domainAllowed' => $envatoResult['domainAllowed'],
+                    'domain_allowed' => $envatoResult['domain_allowed'],
                     'status' => 'active',
-                    'supportExpiresAt' => $envatoResult['supportExpiresAt'],
-                    'licenseExpiresAt' => $envatoResult['licenseExpiresAt'],
+                    'support_expires_at' => $envatoResult['support_expires_at'],
+                    'license_expires_at' => $envatoResult['license_expires_at'],
                 ];
                 $this->logLicenseVerification(null, $domainStr, $request, $response, 'success');
                 DB::commit();
@@ -231,7 +231,7 @@ class LicenseController extends Controller
      * @param  string  $productSlug  The product slug to match
      * @param  string  $domain  The domain to verify against
      *
-     * @return object|null License object with domainAllowed flag, or null if not found
+     * @return object|null License object with domain_allowed flag, or null if not found
      *
      * @throws \Exception When database operations fail
      */
@@ -240,7 +240,7 @@ class LicenseController extends Controller
         try {
             $license = License::active()
                 ->with(['product', 'domains'])
-                ->where('purchaseCode', $purchaseCode)
+                ->where('purchase_code', $purchaseCode)
                 ->whereHas('product', fn ($q) => $q->where('slug', $productSlug))
                 ->first();
             if (! $license) {
@@ -250,16 +250,16 @@ class LicenseController extends Controller
 
             return (object)[
                 'license' => $license,
-                'domainAllowed' => $domainAllowed,
-                'purchaseCode' => $license->purchaseCode,
+                'domain_allowed' => $domainAllowed,
+                'purchase_code' => $license->purchase_code,
                 'product' => $license->product,
                 'status' => $license->status,
-                'supportExpiresAt' => $license->supportExpiresAt,
-                'licenseExpiresAt' => $license->licenseExpiresAt,
+                'support_expires_at' => $license->support_expires_at,
+                'license_expires_at' => $license->license_expires_at,
             ];
         } catch (\Exception $e) {
             Log::error('Error checking local license', [
-                'purchaseCode' => substr($purchaseCode, 0, 4) . '...',
+                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
                 'product_slug' => $productSlug,
                 'domain' => $domain,
                 'error' => $e->getMessage(),
@@ -285,12 +285,12 @@ class LicenseController extends Controller
     private function checkEnvatoLicense(string $purchaseCode, string $productSlug, string $domain): array
     {
         try {
-            // Find product by slug to get envatoItemId
+            // Find product by slug to get envato_item_id
             $product = Product::where('slug', $productSlug)->first();
-            if (! $product || ! $product->envatoItemId) {
+            if (! $product || ! $product->envato_item_id) {
                 Log::warning('Product not found or missing Envato item ID', [
                     'product_slug' => $productSlug,
-                    'has_envatoId' => $product ? (bool)$product->envatoItemId : false,
+                    'has_envato_id' => $product ? (bool)$product->envato_item_id : false,
                 ]);
 
                 return ['valid' => false];
@@ -299,7 +299,7 @@ class LicenseController extends Controller
             $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
             if (! $envatoData) {
                 Log::warning('Envato verification failed', [
-                    'purchaseCode' => substr($purchaseCode, 0, 4) . '...',
+                    'purchase_code' => substr($purchaseCode, 0, 4) . '...',
                     'product_slug' => $productSlug,
                 ]);
 
@@ -309,10 +309,12 @@ class LicenseController extends Controller
             $envatoItemIdValue = data_get($envatoData, 'item.id');
             $envatoItemId = is_string($envatoItemIdValue)
                 ? $envatoItemIdValue
-                : (is_scalar($envatoItemIdValue) ? (string)$envatoItemIdValue : '');
-            if (is_string($product->envatoItemId) && $product->envatoItemId !== $envatoItemId) {
+                : (is_scalar($envatoItemIdValue)
+                    ? (string)$envatoItemIdValue
+                    : '');
+            if ((string)$product->envato_item_id !== $envatoItemId) {
                 Log::warning('Envato item ID mismatch', [
-                    'expected_item_id' => $product->envatoItemId,
+                    'expected_item_id' => $product->envato_item_id,
                     'actual_item_id' => $envatoItemId,
                     'product_slug' => $productSlug,
                 ]);
@@ -323,14 +325,14 @@ class LicenseController extends Controller
             // For Envato licenses, domain is always allowed (no domain restrictions)
             return [
                 'valid' => true,
-                'product' => $product->only(['id', 'name', 'slug', 'envatoItemId']),
-                'domainAllowed' => true, // Envato licenses don't restrict domains
-                'supportExpiresAt' => $envatoData['supported_until'] ?? null,
-                'licenseExpiresAt' => null, // Envato licenses don't expire
+                'product' => $product->only(['id', 'name', 'slug', 'envato_item_id']),
+                'domain_allowed' => true, // Envato licenses don't restrict domains
+                'support_expires_at' => $envatoData['supported_until'] ?? null,
+                'license_expires_at' => null, // Envato licenses don't expire
             ];
         } catch (\Exception $e) {
             Log::error('Envato license verification failed', [
-                'purchaseCode' => substr($purchaseCode, 0, 4) . '...',
+                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
                 'product_slug' => $productSlug,
                 'error' => $e->getMessage(),
             ]);
@@ -362,17 +364,17 @@ class LicenseController extends Controller
         string $status,
     ): void {
         // Whitelist request fields to avoid storing sensitive or unexpected data
-        $allowed = $request->only(['purchaseCode', 'product_slug', 'domain', 'verification_key']);
+        $allowed = $request->only(['purchase_code', 'product_slug', 'domain', 'verification_key']);
         // Mask sensitive fields
-        if (isset($allowed['purchaseCode']) && is_string($allowed['purchaseCode'])) {
-            $allowed['purchaseCode'] = substr($allowed['purchaseCode'], 0, 4)
-                . str_repeat('*', max(0, strlen($allowed['purchaseCode']) - 4));
+        if (isset($allowed['purchase_code']) && is_string($allowed['purchase_code'])) {
+            $allowed['purchase_code'] = substr($allowed['purchase_code'], 0, 4)
+                . str_repeat('*', max(0, strlen($allowed['purchase_code']) - 4));
         }
         LicenseLog::create([
-            'licenseId' => $license?->id,
+            'license_id' => $license?->id,
             'domain' => $domain,
-            'ipAddress' => $request->ip(),
-            'serial' => $request->input('purchaseCode'),
+            'ip_address' => $request->ip(),
+            'serial' => $request->input('purchase_code'),
             'status' => $status,
             'user_agent' => $request->userAgent(),
             'request_data' => $allowed,
@@ -402,8 +404,7 @@ class LicenseController extends Controller
      * // Response:
      * {
      *     "product": {"name": "My Product", "slug": "my-product"},
-     *     "integration_file": "<?php
-declare(strict_types=1);\nclass LicenseManager...",
+     *     "integration_file": "<?php\nclass LicenseManager...",
      *     "filename": "license_integration_my-product.php"
      * }
      */
@@ -487,7 +488,6 @@ declare(strict_types=1);\nclass LicenseManager...",
         $apiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
 
         return "<?php
-declare(strict_types=1);
 /**
  * License Integration for {$product->name}
  * Generated on " . now()->format('Y-m-d H:i:s') . "
@@ -503,13 +503,13 @@ class LicenseManager
     /**
      * Verify license
      *
-     * @param string \$licenseKey Purchase code or license key
+     * @param string \$license_key Purchase code or license key
      * @param string \$domain Domain to verify against
      * @return array Verification result
      */
-    public function verifyLicense(\$licenseKey, \$domain = null)
+    public function verifyLicense(\$license_key, \$domain = null)
     {
-        if (empty(\$licenseKey)) {
+        if (empty(\$license_key)) {
             return [
                 'valid' => false,
                 'error' => 'License key is required'
@@ -520,7 +520,7 @@ class LicenseManager
             \$domain = \$this->getCurrentDomain();
         }
         \$postData = [
-            'purchaseCode' => \$licenseKey,
+            'purchase_code' => \$license_key,
             'product_slug'  => \$this->product_slug,
             'domain' => \$domain
         ];
@@ -578,32 +578,32 @@ class LicenseManager
     /**
      * Check if license is valid and get details
      */
-    public function getLicenseInfo(\$licenseKey, \$domain = null)
+    public function getLicenseInfo(\$license_key, \$domain = null)
     {
-        \$result = \$this->verifyLicense(\$licenseKey, \$domain);
+        \$result = \$this->verifyLicense(\$license_key, \$domain);
         if (!\$result['valid']) {
             return false;
         }
         return [
-            'licenseKey'  => \$licenseKey,
+            'license_key'  => \$license_key,
             'product' => \$result['product'] ?? null,
             'source' => \$result['source'] ?? 'unknown',
-            'licenseType' => \$result['licenseType'] ?? 'unknown',
+            'license_type' => \$result['license_type'] ?? 'unknown',
             'status' => \$result['status'] ?? 'unknown',
-            'domainAllowed' => \$result['domainAllowed'] ?? false,
-            'supportExpiresAt' => \$result['supportExpiresAt'] ?? null,
-            'licenseExpiresAt' => \$result['licenseExpiresAt'] ?? null,
+            'domain_allowed' => \$result['domain_allowed'] ?? false,
+            'support_expires_at' => \$result['support_expires_at'] ?? null,
+            'license_expires_at' => \$result['license_expires_at'] ?? null,
         ];
     }
 }
 // Usage example:
 /*
 \$licenseManager = new LicenseManager();
-\$result = \$licenseManager->verifyLicense('YOUR_licenseKey');
+\$result = \$licenseManager->verifyLicense('YOUR_LICENSE_KEY');
 if (\$result['valid']) {
     echo 'License is valid!';
     echo 'Source: ' . \$result['source'];
-    echo 'Type: ' . \$result['licenseType'];
+    echo 'Type: ' . \$result['license_type'];
 } else {
     echo 'License is invalid: ' . (\$result['error'] ?? 'Unknown error');
 }

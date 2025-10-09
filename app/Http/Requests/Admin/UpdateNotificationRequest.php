@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,7 +28,7 @@ class UpdateNotificationRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -66,7 +64,7 @@ class UpdateNotificationRequest extends FormRequest
                 'permanent_dismiss' => [
                     'boolean',
                 ],
-                'notifyOthers' => [
+                'notify_others' => [
                     'boolean',
                 ],
                 'dismiss_all_types' => [
@@ -102,13 +100,13 @@ class UpdateNotificationRequest extends FormRequest
                 'integer',
                 'exists:users,id',
             ],
-            'sendEmail' => [
+            'send_email' => [
                 'boolean',
             ],
-            'sendPush' => [
+            'send_push' => [
                 'boolean',
             ],
-            'sendSms' => [
+            'send_sms' => [
                 'boolean',
             ],
             'schedule_time' => [
@@ -116,15 +114,15 @@ class UpdateNotificationRequest extends FormRequest
                 'date',
                 'after:now',
             ],
-            'expiresAt' => [
+            'expires_at' => [
                 'nullable',
                 'date',
                 'after:now',
             ],
-            'autoDismiss' => [
+            'auto_dismiss' => [
                 'boolean',
             ],
-            'dismissAfterHours' => [
+            'dismiss_after_hours' => [
                 'nullable',
                 'integer',
                 'min:1',
@@ -145,7 +143,7 @@ class UpdateNotificationRequest extends FormRequest
             'dismiss_type.regex' => 'Dismiss type contains invalid characters.',
             'dismiss_reason.regex' => 'Dismiss reason contains invalid characters.',
             'permanent_dismiss.boolean' => 'Permanent dismiss must be true or false.',
-            'notifyOthers.boolean' => 'Notify others must be true or false.',
+            'notify_others.boolean' => 'Notify others must be true or false.',
             'dismiss_all_types.boolean' => 'Dismiss all types must be true or false.',
             'notification_type.required' => 'Notification type is required.',
             'notification_type.regex' => 'Notification type contains invalid characters.',
@@ -153,16 +151,16 @@ class UpdateNotificationRequest extends FormRequest
             'priority.regex' => 'Priority contains invalid characters.',
             'target_users.*.integer' => 'Target user must be a valid user ID.',
             'target_users.*.exists' => 'Target user does not exist.',
-            'sendEmail.boolean' => 'Send email must be true or false.',
-            'sendPush.boolean' => 'Send push must be true or false.',
-            'sendSms.boolean' => 'Send SMS must be true or false.',
+            'send_email.boolean' => 'Send email must be true or false.',
+            'send_push.boolean' => 'Send push must be true or false.',
+            'send_sms.boolean' => 'Send SMS must be true or false.',
             'schedule_time.date' => 'Schedule time must be a valid date.',
             'schedule_time.after' => 'Schedule time must be in the future.',
-            'expiresAt.date' => 'Expires at must be a valid date.',
-            'expiresAt.after' => 'Expires at must be in the future.',
-            'autoDismiss.boolean' => 'Auto dismiss must be true or false.',
-            'dismissAfterHours.min' => 'Dismiss after hours must be at least 1.',
-            'dismissAfterHours.max' => 'Dismiss after hours cannot exceed 168 (1 week).',
+            'expires_at.date' => 'Expires at must be a valid date.',
+            'expires_at.after' => 'Expires at must be in the future.',
+            'auto_dismiss.boolean' => 'Auto dismiss must be true or false.',
+            'dismiss_after_hours.min' => 'Dismiss after hours must be at least 1.',
+            'dismiss_after_hours.max' => 'Dismiss after hours cannot exceed 168 (1 week).',
         ];
     }
     /**
@@ -177,20 +175,20 @@ class UpdateNotificationRequest extends FormRequest
             'dismiss_type' => 'dismiss type',
             'dismiss_reason' => 'dismiss reason',
             'permanent_dismiss' => 'permanent dismiss',
-            'notifyOthers' => 'notify others',
+            'notify_others' => 'notify others',
             'dismiss_all_types' => 'dismiss all types',
             'notification_type' => 'notification type',
             'message' => 'notification message',
             'priority' => 'notification priority',
             'target_users' => 'target users',
             'target_users.*' => 'target user',
-            'sendEmail' => 'send email',
-            'sendPush' => 'send push notification',
-            'sendSms' => 'send SMS',
+            'send_email' => 'send email',
+            'send_push' => 'send push notification',
+            'send_sms' => 'send SMS',
             'schedule_time' => 'schedule time',
-            'expiresAt' => 'expiration date',
-            'autoDismiss' => 'auto dismiss',
-            'dismissAfterHours' => 'dismiss after hours',
+            'expires_at' => 'expiration date',
+            'auto_dismiss' => 'auto dismiss',
+            'dismiss_after_hours' => 'dismiss after hours',
         ];
     }
     /**
@@ -200,36 +198,30 @@ class UpdateNotificationRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'dismiss_type' => $this->input('dismiss_type')
-                ? $this->sanitizeInput($this->input('dismiss_type'))
-                : null,
-            'dismiss_reason' => $this->input('dismiss_reason')
-                ? $this->sanitizeInput($this->input('dismiss_reason'))
-                : null,
-            'notification_type' => $this->input('notification_type')
-                ? $this->sanitizeInput($this->input('notification_type'))
-                : null,
+            'dismiss_type' => $this->input('dismiss_type') ? $this->sanitizeInput($this->input('dismiss_type')) : null,
+            'dismiss_reason' => $this->input('dismiss_reason') ? $this->sanitizeInput($this->input('dismiss_reason')) : null,
+            'notification_type' => $this->input('notification_type') ? $this->sanitizeInput($this->input('notification_type')) : null,
             'message' => $this->input('message') ? $this->sanitizeInput($this->input('message')) : null,
             'priority' => $this->input('priority') ? $this->sanitizeInput($this->input('priority')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
             'permanent_dismiss' => $this->has('permanent_dismiss'),
-            'notifyOthers' => $this->has('notifyOthers'),
+            'notify_others' => $this->has('notify_others'),
             'dismiss_all_types' => $this->has('dismiss_all_types'),
-            'sendEmail' => $this->has('sendEmail'),
-            'sendPush' => $this->has('sendPush'),
-            'sendSms' => $this->has('sendSms'),
-            'autoDismiss' => $this->has('autoDismiss'),
+            'send_email' => $this->has('send_email'),
+            'send_push' => $this->has('send_push'),
+            'send_sms' => $this->has('send_sms'),
+            'auto_dismiss' => $this->has('auto_dismiss'),
         ]);
         // Set default values
         $this->merge([
-            'notifyOthers' => $this->notifyOthers ?? false,
-            'sendEmail' => $this->sendEmail ?? true,
-            'sendPush' => $this->sendPush ?? false,
-            'sendSms' => $this->sendSms ?? false,
-            'autoDismiss' => $this->autoDismiss ?? false,
-            'dismissAfterHours' => $this->dismissAfterHours ?? 24,
+            'notify_others' => $this->notify_others ?? false,
+            'send_email' => $this->send_email ?? true,
+            'send_push' => $this->send_push ?? false,
+            'send_sms' => $this->send_sms ?? false,
+            'auto_dismiss' => $this->auto_dismiss ?? false,
+            'dismiss_after_hours' => $this->dismiss_after_hours ?? 24,
         ]);
     }
     /**

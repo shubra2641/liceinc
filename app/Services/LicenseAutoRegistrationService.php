@@ -125,8 +125,8 @@ class LicenseAutoRegistrationService
         } catch (\Exception $e) {
             Log::error('Failed to auto-register license', [
                 'purchase_code' => $purchaseCode,
-                'productId' => $productId,
-                'userId' => Auth::id(),
+                'product_id' => $productId,
+                'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -197,8 +197,8 @@ class LicenseAutoRegistrationService
         } catch (\Exception $e) {
             Log::error('Failed to check purchase code', [
                 'purchase_code' => $purchaseCode,
-                'productId' => $productId,
-                'userId' => Auth::id(),
+                'product_id' => $productId,
+                'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -252,12 +252,12 @@ class LicenseAutoRegistrationService
     {
         try {
             return License::where('purchase_code', $purchaseCode)
-                ->where('userId', $userId)
+                ->where('user_id', $userId)
                 ->first();
         } catch (\Exception $e) {
             Log::error('Failed to find existing license', [
                 'purchase_code' => $purchaseCode,
-                'userId' => $userId,
+                'user_id' => $userId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -280,7 +280,7 @@ class LicenseAutoRegistrationService
         if ($productId) {
             return $productId;
         }
-        return is_numeric($verificationResult['productId'] ?? null) ? (int)$verificationResult['productId'] : null;
+        return is_numeric($verificationResult['product_id'] ?? null) ? (int)$verificationResult['product_id'] : null;
     }
     /**
      * Find product by ID with enhanced error handling.
@@ -297,7 +297,7 @@ class LicenseAutoRegistrationService
             return Product::find($productId);
         } catch (\Exception $e) {
             Log::error('Failed to find product', [
-                'productId' => $productId,
+                'product_id' => $productId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -328,18 +328,18 @@ class LicenseAutoRegistrationService
         try {
             $licenseData = [
                 'purchase_code' => htmlspecialchars($purchaseCode, ENT_QUOTES, 'UTF-8'),
-                'productId' => $productId,
-                'userId' => $userId,
-                'licenseType' => 'regular',
+                'product_id' => $productId,
+                'user_id' => $userId,
+                'license_type' => 'regular',
                 'status' => 'active',
-                'support_expiresAt' => $verificationResult['support_expiresAt'] ?? null,
+                'support_expires_at' => $verificationResult['support_expires_at'] ?? null,
             ];
             return License::create($licenseData);
         } catch (\Exception $e) {
             Log::error('Failed to create license', [
                 'purchase_code' => $purchaseCode,
-                'productId' => $productId,
-                'userId' => $userId,
+                'product_id' => $productId,
+                'user_id' => $userId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -359,7 +359,7 @@ class LicenseAutoRegistrationService
             $this->invoiceService->createInitialInvoice($license);
         } catch (\Exception $e) {
             Log::error('Failed to create initial invoice', [
-                'licenseId' => $license->id,
+                'license_id' => $license->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -379,7 +379,7 @@ class LicenseAutoRegistrationService
             $product->decreaseStock();
         } catch (\Exception $e) {
             Log::error('Failed to decrease product stock', [
-                'productId' => $product->id,
+                'product_id' => $product->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

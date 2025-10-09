@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -109,9 +107,7 @@ class LicenseVerifyRequest extends FormRequest
             'purchase_code' => $this->sanitizeInput($this->input('purchase_code')),
             'product_slug' => $this->sanitizeInput($this->input('product_slug')),
             'domain' => $this->sanitizeDomain($this->input('domain')),
-            'verification_key' => $this->input('verification_key')
-                ? $this->sanitizeInput($this->input('verification_key'))
-                : null,
+            'verification_key' => $this->input('verification_key') ? $this->sanitizeInput($this->input('verification_key')) : null,
         ]);
     }
     /**

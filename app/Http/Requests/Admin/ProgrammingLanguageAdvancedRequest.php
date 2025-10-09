@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,7 +28,7 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -83,7 +81,7 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
         // Content creation validation
         if ($isContent) {
             return [
-                'templateContent' => [
+                'template_content' => [
                     'required',
                     'string',
                     'max:50000',
@@ -107,7 +105,7 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
                     'max:500',
                     'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
                 ],
-                'isActive' => [
+                'is_active' => [
                     'boolean',
                 ],
                 'version' => [
@@ -181,9 +179,9 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
             'template_type.required' => 'Template type is required.',
             'template_type.regex' => 'Template type contains invalid characters.',
             'template_description.regex' => 'Template description contains invalid characters.',
-            'templateContent.required' => 'Template content is required.',
-            'templateContent.min' => 'Template content must be at least 10 characters.',
-            'templateContent.max' => 'Template content must not exceed 50,000 characters.',
+            'template_content.required' => 'Template content is required.',
+            'template_content.min' => 'Template content must be at least 10 characters.',
+            'template_content.max' => 'Template content must not exceed 50,000 characters.',
             'template_name.required' => 'Template name is required.',
             'template_name.regex' => 'Template name contains invalid characters.',
             'version.regex' => 'Version must be in format: x.y or x.y.z (e.g., 1.0 or 1.0.0).',
@@ -211,9 +209,9 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
             'is_default' => 'default template',
             'version' => 'template version',
             'compatibility' => 'compatibility',
-            'templateContent' => 'template content',
+            'template_content' => 'template content',
             'template_name' => 'template name',
-            'isActive' => 'active status',
+            'is_active' => 'active status',
             'author' => 'template author',
             'license' => 'template license',
             'tags' => 'template tags',
@@ -259,16 +257,16 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
         // Handle checkbox values
         $this->merge([
             'is_default' => $this->has('is_default'),
-            'isActive' => $this->has('isActive'),
+            'is_active' => $this->has('is_active'),
             'syntax_highlighting' => $this->has('syntax_highlighting'),
             'auto_completion' => $this->has('auto_completion'),
             'error_detection' => $this->has('error_detection'),
         ]);
         // Set default values
         $this->merge([
-            'isActive' => $this->isActive ?? true,
-            'indentation_size' => $this->indentationSize ?? 4,
-            'line_ending' => $this->lineEnding ?? 'lf',
+            'is_active' => $this->is_active ?? true,
+            'indentation_size' => $this->indentation_size ?? 4,
+            'line_ending' => $this->line_ending ?? 'lf',
             'encoding' => $this->encoding ?? 'utf-8',
         ]);
     }

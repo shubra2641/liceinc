@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Middleware;
 
 use App\Models\Setting;
@@ -284,16 +282,8 @@ class LicenseProtection
                 }
             };
             $result = $licenseVerifier->verifyLicense(
-                $this->sanitizeInput(
-                    is_string($licenseInfo['license_purchase_code'] ?? null)
-                        ? $licenseInfo['license_purchase_code']
-                        : null
-                ) ?? '',
-                $this->sanitizeInput(
-                    is_string($licenseInfo['licenseDomain'] ?? null)
-                        ? $licenseInfo['licenseDomain']
-                        : null
-                ) ?? '',
+                $this->sanitizeInput(is_string($licenseInfo['license_purchase_code'] ?? null) ? $licenseInfo['license_purchase_code'] : null) ?? '',
+                $this->sanitizeInput(is_string($licenseInfo['license_domain'] ?? null) ? $licenseInfo['license_domain'] : null) ?? '',
             );
             // Update last verification time
             Setting::updateOrCreate(
@@ -303,12 +293,8 @@ class LicenseProtection
             // If license is invalid, log it but don't block the request immediately
             if (! $result['valid']) {
                 Log::warning('License verification failed during periodic check', [
-                    'purchase_code' => $this->maskPurchaseCode(
-                        is_string($licenseInfo['license_purchase_code'])
-                            ? $licenseInfo['license_purchase_code']
-                            : ''
-                    ),
-                    'domain' => $licenseInfo['licenseDomain'],
+                    'purchase_code' => $this->maskPurchaseCode(is_string($licenseInfo['license_purchase_code']) ? $licenseInfo['license_purchase_code'] : ''),
+                    'domain' => $licenseInfo['license_domain'],
                     'message' => $result['message'] ?? 'Unknown error',
                 ]);
             }

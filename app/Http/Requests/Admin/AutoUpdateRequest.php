@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,7 +28,7 @@ class AutoUpdateRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -44,7 +42,7 @@ class AutoUpdateRequest extends FormRequest
         // Install update validation
         if ($isInstall) {
             return [
-                'licenseKey' => [
+                'license_key' => [
                     'required',
                     'string',
                     'max:255',
@@ -73,7 +71,7 @@ class AutoUpdateRequest extends FormRequest
                     'boolean',
                     'accepted',
                 ],
-                'backupBeforeInstall' => [
+                'backup_before_install' => [
                     'boolean',
                 ],
                 'force_install' => [
@@ -82,22 +80,22 @@ class AutoUpdateRequest extends FormRequest
                 'skip_license_check' => [
                     'boolean',
                 ],
-                'installDependencies' => [
+                'install_dependencies' => [
                     'boolean',
                 ],
-                'clearCaches' => [
+                'clear_caches' => [
                     'boolean',
                 ],
                 'restart_services' => [
                     'boolean',
                 ],
-                'notifyUsers' => [
+                'notify_users' => [
                     'boolean',
                 ],
-                'maintenanceMode' => [
+                'maintenance_mode' => [
                     'boolean',
                 ],
-                'rollbackOnError' => [
+                'rollback_on_error' => [
                     'boolean',
                 ],
                 'test_mode' => [
@@ -110,7 +108,7 @@ class AutoUpdateRequest extends FormRequest
         }
         // Check updates validation
         return [
-            'licenseKey' => [
+            'license_key' => [
                 'required',
                 'string',
                 'max:255',
@@ -140,31 +138,31 @@ class AutoUpdateRequest extends FormRequest
             'check_prerelease' => [
                 'boolean',
             ],
-            'includeChangelog' => [
+            'include_changelog' => [
                 'boolean',
             ],
-            'includeDependencies' => [
+            'include_dependencies' => [
                 'boolean',
             ],
-            'includeSecurityUpdates' => [
+            'include_security_updates' => [
                 'boolean',
             ],
-            'includeFeatureUpdates' => [
+            'include_feature_updates' => [
                 'boolean',
             ],
-            'includeBugFixes' => [
+            'include_bug_fixes' => [
                 'boolean',
             ],
             'auto_install' => [
                 'boolean',
             ],
-            'notifyOnAvailable' => [
+            'notify_on_available' => [
                 'boolean',
             ],
             'schedule_check' => [
                 'boolean',
             ],
-            'checkInterval' => [
+            'check_interval' => [
                 'nullable',
                 'integer',
                 'min:1',
@@ -180,8 +178,8 @@ class AutoUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'licenseKey.required' => 'License key is required.',
-            'licenseKey.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
+            'license_key.required' => 'License key is required.',
+            'license_key.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
             'product_slug.required' => 'Product slug is required.',
             'product_slug.regex' => 'Product slug can only contain letters, numbers, hyphens, and underscores.',
             'domain.required' => 'Domain is required.',
@@ -194,29 +192,29 @@ class AutoUpdateRequest extends FormRequest
                 . '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
             'confirm.required' => 'Confirmation is required for this operation.',
             'confirm.accepted' => 'You must confirm this operation to proceed.',
-            'backupBeforeInstall.boolean' => 'Backup before install must be true or false.',
+            'backup_before_install.boolean' => 'Backup before install must be true or false.',
             'force_install.boolean' => 'Force install must be true or false.',
             'skip_license_check.boolean' => 'Skip license check must be true or false.',
-            'installDependencies.boolean' => 'Install dependencies must be true or false.',
-            'clearCaches.boolean' => 'Clear caches must be true or false.',
+            'install_dependencies.boolean' => 'Install dependencies must be true or false.',
+            'clear_caches.boolean' => 'Clear caches must be true or false.',
             'restart_services.boolean' => 'Restart services must be true or false.',
-            'notifyUsers.boolean' => 'Notify users must be true or false.',
-            'maintenanceMode.boolean' => 'Maintenance mode must be true or false.',
-            'rollbackOnError.boolean' => 'Rollback on error must be true or false.',
+            'notify_users.boolean' => 'Notify users must be true or false.',
+            'maintenance_mode.boolean' => 'Maintenance mode must be true or false.',
+            'rollback_on_error.boolean' => 'Rollback on error must be true or false.',
             'test_mode.boolean' => 'Test mode must be true or false.',
             'dry_run.boolean' => 'Dry run must be true or false.',
             'check_beta.boolean' => 'Check beta must be true or false.',
             'check_prerelease.boolean' => 'Check prerelease must be true or false.',
-            'includeChangelog.boolean' => 'Include changelog must be true or false.',
-            'includeDependencies.boolean' => 'Include dependencies must be true or false.',
-            'includeSecurityUpdates.boolean' => 'Include security updates must be true or false.',
-            'includeFeatureUpdates.boolean' => 'Include feature updates must be true or false.',
-            'includeBugFixes.boolean' => 'Include bug fixes must be true or false.',
+            'include_changelog.boolean' => 'Include changelog must be true or false.',
+            'include_dependencies.boolean' => 'Include dependencies must be true or false.',
+            'include_security_updates.boolean' => 'Include security updates must be true or false.',
+            'include_feature_updates.boolean' => 'Include feature updates must be true or false.',
+            'include_bug_fixes.boolean' => 'Include bug fixes must be true or false.',
             'auto_install.boolean' => 'Auto install must be true or false.',
-            'notifyOnAvailable.boolean' => 'Notify on available must be true or false.',
+            'notify_on_available.boolean' => 'Notify on available must be true or false.',
             'schedule_check.boolean' => 'Schedule check must be true or false.',
-            'checkInterval.min' => 'Check interval must be at least 1 hour.',
-            'checkInterval.max' => 'Check interval cannot exceed 168 hours (1 week).',
+            'check_interval.min' => 'Check interval must be at least 1 hour.',
+            'check_interval.max' => 'Check interval cannot exceed 168 hours (1 week).',
         ];
     }
     /**
@@ -227,34 +225,34 @@ class AutoUpdateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'licenseKey' => 'license key',
+            'license_key' => 'license key',
             'product_slug' => 'product slug',
             'domain' => 'domain',
             'version' => 'target version',
             'current_version' => 'current version',
             'confirm' => 'confirmation',
-            'backupBeforeInstall' => 'backup before install',
+            'backup_before_install' => 'backup before install',
             'force_install' => 'force install',
             'skip_license_check' => 'skip license check',
-            'installDependencies' => 'install dependencies',
-            'clearCaches' => 'clear caches',
+            'install_dependencies' => 'install dependencies',
+            'clear_caches' => 'clear caches',
             'restart_services' => 'restart services',
-            'notifyUsers' => 'notify users',
-            'maintenanceMode' => 'maintenance mode',
-            'rollbackOnError' => 'rollback on error',
+            'notify_users' => 'notify users',
+            'maintenance_mode' => 'maintenance mode',
+            'rollback_on_error' => 'rollback on error',
             'test_mode' => 'test mode',
             'dry_run' => 'dry run',
             'check_beta' => 'check beta versions',
             'check_prerelease' => 'check prerelease versions',
-            'includeChangelog' => 'include changelog',
-            'includeDependencies' => 'include dependencies',
-            'includeSecurityUpdates' => 'include security updates',
-            'includeFeatureUpdates' => 'include feature updates',
-            'includeBugFixes' => 'include bug fixes',
+            'include_changelog' => 'include changelog',
+            'include_dependencies' => 'include dependencies',
+            'include_security_updates' => 'include security updates',
+            'include_feature_updates' => 'include feature updates',
+            'include_bug_fixes' => 'include bug fixes',
             'auto_install' => 'auto install',
-            'notifyOnAvailable' => 'notify on available',
+            'notify_on_available' => 'notify on available',
             'schedule_check' => 'schedule check',
-            'checkInterval' => 'check interval',
+            'check_interval' => 'check interval',
         ];
     }
     /**
@@ -264,7 +262,7 @@ class AutoUpdateRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'licenseKey' => $this->sanitizeInput($this->input('licenseKey')),
+            'license_key' => $this->sanitizeInput($this->input('license_key')),
             'product_slug' => $this->sanitizeInput($this->input('product_slug')),
             'domain' => $this->sanitizeInput($this->input('domain')),
             'version' => $this->sanitizeInput($this->input('version')),
@@ -273,43 +271,43 @@ class AutoUpdateRequest extends FormRequest
         // Handle checkbox values
         $this->merge([
             'confirm' => $this->has('confirm'),
-            'backupBeforeInstall' => $this->has('backupBeforeInstall'),
+            'backup_before_install' => $this->has('backup_before_install'),
             'force_install' => $this->has('force_install'),
             'skip_license_check' => $this->has('skip_license_check'),
-            'installDependencies' => $this->has('installDependencies'),
-            'clearCaches' => $this->has('clearCaches'),
+            'install_dependencies' => $this->has('install_dependencies'),
+            'clear_caches' => $this->has('clear_caches'),
             'restart_services' => $this->has('restart_services'),
-            'notifyUsers' => $this->has('notifyUsers'),
-            'maintenanceMode' => $this->has('maintenanceMode'),
-            'rollbackOnError' => $this->has('rollbackOnError'),
+            'notify_users' => $this->has('notify_users'),
+            'maintenance_mode' => $this->has('maintenance_mode'),
+            'rollback_on_error' => $this->has('rollback_on_error'),
             'test_mode' => $this->has('test_mode'),
             'dry_run' => $this->has('dry_run'),
             'check_beta' => $this->has('check_beta'),
             'check_prerelease' => $this->has('check_prerelease'),
-            'includeChangelog' => $this->has('includeChangelog'),
-            'includeDependencies' => $this->has('includeDependencies'),
-            'includeSecurityUpdates' => $this->has('includeSecurityUpdates'),
-            'includeFeatureUpdates' => $this->has('includeFeatureUpdates'),
-            'includeBugFixes' => $this->has('includeBugFixes'),
+            'include_changelog' => $this->has('include_changelog'),
+            'include_dependencies' => $this->has('include_dependencies'),
+            'include_security_updates' => $this->has('include_security_updates'),
+            'include_feature_updates' => $this->has('include_feature_updates'),
+            'include_bug_fixes' => $this->has('include_bug_fixes'),
             'auto_install' => $this->has('auto_install'),
-            'notifyOnAvailable' => $this->has('notifyOnAvailable'),
+            'notify_on_available' => $this->has('notify_on_available'),
             'schedule_check' => $this->has('schedule_check'),
         ]);
         // Set default values
         $this->merge([
-            'backupBeforeInstall' => $this->backupBeforeInstall ?? true,
-            'installDependencies' => $this->installDependencies ?? true,
-            'clearCaches' => $this->clearCaches ?? true,
-            'notifyUsers' => $this->notifyUsers ?? true,
-            'maintenanceMode' => $this->maintenanceMode ?? true,
-            'rollbackOnError' => $this->rollbackOnError ?? true,
-            'includeChangelog' => $this->includeChangelog ?? true,
-            'includeDependencies' => $this->includeDependencies ?? true,
-            'includeSecurityUpdates' => $this->includeSecurityUpdates ?? true,
-            'includeFeatureUpdates' => $this->includeFeatureUpdates ?? true,
-            'includeBugFixes' => $this->includeBugFixes ?? true,
-            'notifyOnAvailable' => $this->notifyOnAvailable ?? true,
-            'checkInterval' => $this->checkInterval ?? 24,
+            'backup_before_install' => $this->backup_before_install ?? true,
+            'install_dependencies' => $this->install_dependencies ?? true,
+            'clear_caches' => $this->clear_caches ?? true,
+            'notify_users' => $this->notify_users ?? true,
+            'maintenance_mode' => $this->maintenance_mode ?? true,
+            'rollback_on_error' => $this->rollback_on_error ?? true,
+            'include_changelog' => $this->include_changelog ?? true,
+            'include_dependencies' => $this->include_dependencies ?? true,
+            'include_security_updates' => $this->include_security_updates ?? true,
+            'include_feature_updates' => $this->include_feature_updates ?? true,
+            'include_bug_fixes' => $this->include_bug_fixes ?? true,
+            'notify_on_available' => $this->notify_on_available ?? true,
+            'check_interval' => $this->check_interval ?? 24,
         ]);
     }
     /**

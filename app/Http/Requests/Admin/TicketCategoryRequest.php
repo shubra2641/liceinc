@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,7 +29,7 @@ class TicketCategoryRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -40,7 +38,7 @@ class TicketCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        $category = $this->route('ticketCategory');
+        $category = $this->route('ticket_category');
         $categoryId = $category && is_object($category) && property_exists($category, 'id') ? $category->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
@@ -71,19 +69,19 @@ class TicketCategoryRequest extends FormRequest
                 'max:100',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
-            'sortOrder' => [
+            'sort_order' => [
                 'nullable',
                 'integer',
                 'min:0',
                 'max:9999',
             ],
-            'isActive' => [
+            'is_active' => [
                 'boolean',
             ],
             'auto_assign' => [
                 'boolean',
             ],
-            'auto_assign_userId' => [
+            'auto_assign_user_id' => [
                 'nullable',
                 'integer',
                 'exists:users,id',
@@ -108,7 +106,7 @@ class TicketCategoryRequest extends FormRequest
             'requires_approval' => [
                 'boolean',
             ],
-            'approval_userId' => [
+            'approval_user_id' => [
                 'nullable',
                 'integer',
                 'exists:users,id',
@@ -119,7 +117,7 @@ class TicketCategoryRequest extends FormRequest
                 'max:255',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
-            'templateContent' => [
+            'template_content' => [
                 'nullable',
                 'string',
                 'max:2000',
@@ -142,17 +140,17 @@ class TicketCategoryRequest extends FormRequest
             'color.required' => 'Category color is required.',
             'color.regex' => 'Color must be a valid hex color code (e.g., #3b82f6).',
             'icon.regex' => 'Icon contains invalid characters.',
-            'sortOrder.min' => 'Sort order must be at least 0.',
-            'sortOrder.max' => 'Sort order must not exceed 9999.',
-            'auto_assign_userId.exists' => 'Selected auto-assign user does not exist.',
+            'sort_order.min' => 'Sort order must be at least 0.',
+            'sort_order.max' => 'Sort order must not exceed 9999.',
+            'auto_assign_user_id.exists' => 'Selected auto-assign user does not exist.',
             'response_time_hours.min' => 'Response time must be at least 1 hour.',
             'response_time_hours.max' => 'Response time cannot exceed 168 hours (1 week).',
             'escalation_hours.min' => 'Escalation time must be at least 1 hour.',
             'escalation_hours.max' => 'Escalation time cannot exceed 720 hours (1 month).',
             'priority.in' => 'Priority must be one of: low, medium, high, urgent.',
-            'approval_userId.exists' => 'Selected approval user does not exist.',
+            'approval_user_id.exists' => 'Selected approval user does not exist.',
             'template_subject.regex' => 'Template subject contains invalid characters.',
-            'templateContent.regex' => 'Template content contains invalid characters.',
+            'template_content.regex' => 'Template content contains invalid characters.',
         ];
     }
     /**
@@ -167,17 +165,17 @@ class TicketCategoryRequest extends FormRequest
             'description' => 'category description',
             'color' => 'category color',
             'icon' => 'category icon',
-            'sortOrder' => 'sort order',
-            'isActive' => 'active status',
+            'sort_order' => 'sort order',
+            'is_active' => 'active status',
             'auto_assign' => 'auto assign',
-            'auto_assign_userId' => 'auto assign user',
+            'auto_assign_user_id' => 'auto assign user',
             'response_time_hours' => 'response time (hours)',
             'escalation_hours' => 'escalation time (hours)',
             'priority' => 'default priority',
             'requires_approval' => 'requires approval',
-            'approval_userId' => 'approval user',
+            'approval_user_id' => 'approval user',
             'template_subject' => 'template subject',
-            'templateContent' => 'template content',
+            'template_content' => 'template content',
         ];
     }
     /**
@@ -188,25 +186,25 @@ class TicketCategoryRequest extends FormRequest
         // Sanitize input to prevent XSS
         $this->merge([
             'name' => $this->sanitizeInput($this->input('name')),
-            'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
-            'icon' => $this->input('icon') ? $this->sanitizeInput($this->input('icon')) : null,
-            'template_subject' => $this->input('template_subject')
-                ? $this->sanitizeInput($this->input('template_subject'))
+            'description' => $this->input('description')
+                ? $this->sanitizeInput($this->input('description'))
                 : null,
-            'templateContent' => $this->input('templateContent')
-                ? $this->sanitizeInput($this->input('templateContent'))
+            'icon' => $this->input('icon')
+                ? $this->sanitizeInput($this->input('icon'))
                 : null,
+            'template_subject' => $this->input('template_subject') ? $this->sanitizeInput($this->input('template_subject')) : null,
+            'template_content' => $this->input('template_content') ? $this->sanitizeInput($this->input('template_content')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
-            'isActive' => $this->has('isActive'),
+            'is_active' => $this->has('is_active'),
             'auto_assign' => $this->has('auto_assign'),
             'requires_approval' => $this->has('requires_approval'),
         ]);
         // Set default values
         $this->merge([
-            'isActive' => $this->isActive ?? true,
-            'sortOrder' => $this->sortOrder ?? 0,
+            'is_active' => $this->is_active ?? true,
+            'sort_order' => $this->sort_order ?? 0,
             'priority' => $this->priority ?? 'medium',
         ]);
     }

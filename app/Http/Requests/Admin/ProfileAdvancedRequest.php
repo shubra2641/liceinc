@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -355,8 +353,8 @@ class ProfileAdvancedRequest extends FormRequest
         $this->merge([
             'timezone' => $this->timezone ?? 'UTC',
             'language' => $this->language ?? 'en',
-            'date_format' => $this->dateFormat ?? 'Y-m-d',
-            'time_format' => $this->timeFormat ?? 'H:i:s',
+            'date_format' => $this->date_format ?? 'Y-m-d',
+            'time_format' => $this->time_format ?? 'H:i:s',
             'currency' => $this->currency ?? 'USD',
         ]);
     }

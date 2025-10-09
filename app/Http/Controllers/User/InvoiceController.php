@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
@@ -70,7 +68,7 @@ class InvoiceController extends Controller
                 throw new Exception('User not authenticated');
             }
             DB::beginTransaction();
-            $query = Invoice::where('userId', $userId)
+            $query = Invoice::where('user_id', $userId)
                 ->with(['product', 'license']);
             // Filter by status with validation
             if ($request->filled('status')) {
@@ -87,7 +85,7 @@ class InvoiceController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load user invoices: ' . $e->getMessage(), [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'request_url' => $request->fullUrl(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -126,12 +124,12 @@ class InvoiceController extends Controller
                 throw new Exception('User not authenticated');
             }
             // Ensure user can only view their own invoices
-            if ($invoice->userId !== $userId) {
+            if ($invoice->user_id !== $userId) {
                 Log::warning('Unauthorized invoice access attempt', [
-                    'userId' => $userId,
+                    'user_id' => $userId,
                     'invoice_id' => $invoice->id,
-                    'invoice_userId' => $invoice->userId,
-                    'ipAddress' => request()->ip(),
+                    'invoice_user_id' => $invoice->user_id,
+                    'ip_address' => request()->ip(),
                 ]);
                 abort(403, 'Unauthorized access to invoice');
             }
@@ -161,7 +159,7 @@ class InvoiceController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to load invoice details: ' . $e->getMessage(), [
-                'userId' => Auth::id(),
+                'user_id' => Auth::id(),
                 'invoice_id' => $invoice->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);

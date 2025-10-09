@@ -43,7 +43,7 @@ use Throwable;
  *     "name": "Getting Started",
  *     "description": "Basic setup and configuration",
  *     "parent_id": null,
- *     "productId": 1
+ *     "product_id": 1
  * }
  */
 class KbCategoryController extends Controller
@@ -98,7 +98,7 @@ class KbCategoryController extends Controller
     {
         try {
             $parents = KbCategory::pluck('name', 'id');
-            $products = Product::where('isActive', true)->get();
+            $products = Product::where('is_active', true)->get();
             return view('admin.kb.categories.create', ['parents' => $parents, 'products' => $products]);
         } catch (Throwable $e) {
             Log::error('Failed to load category creation form', [
@@ -136,7 +136,7 @@ class KbCategoryController extends Controller
                     'slug' => 'nullable|string|max:255|unique:kb_categories,slug',
                     'description' => 'nullable|string',
                     'parent_id' => 'nullable|exists:kb_categories,id',
-                    'productId' => 'nullable|exists:products,id',
+                    'product_id' => 'nullable|exists:products,id',
                     'serial' => 'nullable|string|max:255',
                     'requires_serial' => 'sometimes|boolean',
                     'serial_message' => 'nullable|string',
@@ -145,18 +145,13 @@ class KbCategoryController extends Controller
                     'meta_keywords' => 'nullable|string|max:255',
                     'icon' => 'nullable|string|max:255',
                     'is_featured' => 'sometimes|boolean',
-                    'isActive' => 'sometimes|boolean',
-                    'sortOrder' => 'nullable|integer|min:0',
+                    'is_active' => 'sometimes|boolean',
+                    'sort_order' => 'nullable|integer|min:0',
                 ]);
                 // Sanitize input data
                 $validated = $this->sanitizeCategoryData($validated);
                 // Generate slug if not provided
-                $validated['slug'] = $validated['slug']
-                    ?: Str::slug(
-                        is_string($validated['name'])
-                            ? $validated['name']
-                            : ''
-                    );
+                $validated['slug'] = $validated['slug'] ?: Str::slug(is_string($validated['name']) ? $validated['name'] : '');
                 $category = KbCategory::create($validated);
                 Log::debug('Knowledge base category created successfully', [
                     'category_id' => $category->id,
@@ -200,7 +195,7 @@ class KbCategoryController extends Controller
         try {
             $kbCategory->load(['articles' => function ($query) {
                 if (is_object($query) && method_exists($query, 'where')) {
-                    $query->where('isActive', true);
+                    $query->where('is_active', true);
                     if (method_exists($query, 'latest')) {
                         $query->latest();
                     }
@@ -241,7 +236,7 @@ class KbCategoryController extends Controller
     {
         try {
             $parents = KbCategory::where('id', '!=', $kbCategory->id)->pluck('name', 'id');
-            $products = Product::where('isActive', true)->get();
+            $products = Product::where('is_active', true)->get();
             return view('admin.kb.categories.edit', [
                 'category' => $kbCategory,
                 'parents' => $parents,
@@ -283,7 +278,7 @@ class KbCategoryController extends Controller
                     'slug' => 'required|string|max:255|unique:kb_categories,slug,' . $kbCategory->id,
                     'description' => 'nullable|string',
                     'parent_id' => 'nullable|exists:kb_categories,id',
-                    'productId' => 'nullable|exists:products,id',
+                    'product_id' => 'nullable|exists:products,id',
                     'serial' => 'nullable|string|max:255',
                     'requires_serial' => 'sometimes|boolean',
                     'serial_message' => 'nullable|string',
@@ -292,8 +287,8 @@ class KbCategoryController extends Controller
                     'meta_keywords' => 'nullable|string|max:255',
                     'icon' => 'nullable|string|max:255',
                     'is_featured' => 'sometimes|boolean',
-                    'isActive' => 'sometimes|boolean',
-                    'sortOrder' => 'nullable|integer|min:0',
+                    'is_active' => 'sometimes|boolean',
+                    'sort_order' => 'nullable|integer|min:0',
                 ]);
                 // Sanitize input data
                 $validated = $this->sanitizeCategoryData($validated);
@@ -359,7 +354,7 @@ class KbCategoryController extends Controller
                         ],
                     );
                     $movedArticlesCount = $kbCategory->articles()->count();
-                    $kbCategory->articles()->update(['kbCategory_id' => $uncat->id]);
+                    $kbCategory->articles()->update(['kb_category_id' => $uncat->id]);
                     $kbCategory->delete();
                     Log::debug('Knowledge base category deleted, articles moved to uncategorized', [
                         'category_id' => $kbCategory->id,

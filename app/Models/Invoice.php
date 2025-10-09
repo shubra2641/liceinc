@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,29 +10,28 @@ use Illuminate\Support\Str;
 
 /**
  * @property int $id
- * @property string $invoiceNumber
+ * @property string $invoice_number
  * @property string|null $order_number
  * @property string|null $payment_gateway
- * @property int $userId
- * @property int|null $licenseId
- * @property int|null $productId
+ * @property int $user_id
+ * @property int|null $license_id
+ * @property int|null $product_id
  * @property string $type
  * @property numeric $amount
  * @property string $currency
  * @property string $status
- * @property \Illuminate\Support\Carbon $dueDate
+ * @property \Illuminate\Support\Carbon $due_date
  * @property \Illuminate\Support\Carbon|null $paid_at
  * @property string|null $notes
  * @property array<array-key, mixed>|null $metadata
- * @property \Illuminate\Support\Carbon|null $createdAt
- * @property \Illuminate\Support\Carbon|null $updatedAt
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read mixed $days_until_due
  * @property-read mixed $remaining_amount
  * @property-read \App\Models\License|null $license
  * @property-read \App\Models\Product|null $product
  * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice dueSoon($days = 7)
- * @method static \Database\Factories\InvoiceFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice overdue()
@@ -63,29 +60,24 @@ class Invoice extends Model
     /**
      * @phpstan-ignore-next-line
      */
-    use HasFactory;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    protected static $factory = InvoiceFactory::class;
 
     protected $fillable = [
-        'invoiceNumber',
-        'userId',
-        'licenseId',
-        'productId',
+        'invoice_number',
+        'user_id',
+        'license_id',
+        'product_id',
         'type',
         'amount',
         'currency',
         'status',
-        'dueDate',
+        'due_date',
         'paid_at',
         'notes',
         'metadata',
     ];
     protected $casts = [
-        'dueDate' => 'date',
+        'due_date' => 'date',
         'paid_at' => 'date',
         'amount' => 'decimal:2',
         'metadata' => 'array',
@@ -115,7 +107,6 @@ class Invoice extends Model
     // Scopes
     /**
      * @param Builder<Invoice> $query
-     *
      * @return Builder<Invoice>
      */
     public function scopePending(Builder $query): Builder
@@ -124,7 +115,6 @@ class Invoice extends Model
     }
     /**
      * @param Builder<Invoice> $query
-     *
      * @return Builder<Invoice>
      */
     public function scopePaid(Builder $query): Builder
@@ -133,7 +123,6 @@ class Invoice extends Model
     }
     /**
      * @param Builder<Invoice> $query
-     *
      * @return Builder<Invoice>
      */
     public function scopeOverdue(Builder $query): Builder
@@ -142,12 +131,11 @@ class Invoice extends Model
     }
     /**
      * @param Builder<Invoice> $query
-     *
      * @return Builder<Invoice>
      */
     public function scopeDueSoon(Builder $query, int $days = 7): Builder
     {
-        return $query->where('dueDate', '<=', now()->addDays($days))
+        return $query->where('due_date', '<=', now()->addDays($days))
             ->where('status', 'pending');
     }
     // معالجات
@@ -155,8 +143,8 @@ class Invoice extends Model
     {
         parent::boot();
         static::creating(function ($invoice) {
-            if (is_object($invoice) && property_exists($invoice, 'invoiceNumber') && empty($invoice->invoiceNumber)) {
-                $invoice->invoiceNumber = static::generateInvoiceNumber();
+            if (is_object($invoice) && property_exists($invoice, 'invoice_number') && empty($invoice->invoice_number)) {
+                $invoice->invoice_number = static::generateInvoiceNumber();
             }
         });
     }
@@ -167,7 +155,7 @@ class Invoice extends Model
     {
         do {
             $number = 'INV-' . date('Y') . '-' . strtoupper(Str::random(8));
-        } while (static::where('invoiceNumber', $number)->exists());
+        } while (static::where('invoice_number', $number)->exists());
         return $number;
     }
     /**
@@ -175,7 +163,7 @@ class Invoice extends Model
      */
     public function isOverdue(): bool
     {
-        return $this->status === 'pending' && $this->dueDate->isPast();
+        return $this->status === 'pending' && $this->due_date->isPast();
     }
     /**
      * تحديث حالة الفاتورة إلى مدفوعة.
@@ -213,6 +201,6 @@ class Invoice extends Model
      */
     public function getDaysUntilDueAttribute(): int
     {
-        return (int)now()->diffInDays($this->dueDate, false);
+        return (int)now()->diffInDays($this->due_date, false);
     }
 }

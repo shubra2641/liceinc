@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,7 +29,7 @@ class UserRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -132,10 +130,10 @@ class UserRequest extends FormRequest
             'send_welcome_email' => [
                 'boolean',
             ],
-            'isActive' => [
+            'is_active' => [
                 'boolean',
             ],
-            'emailVerifiedAt' => [
+            'email_verified_at' => [
                 'nullable',
                 'date',
             ],
@@ -170,7 +168,7 @@ class UserRequest extends FormRequest
             'state.regex' => 'State contains invalid characters.',
             'postcode.regex' => 'Postcode contains invalid characters.',
             'country.regex' => 'Country contains invalid characters.',
-            'emailVerifiedAt.date' => 'Email verification date must be a valid date.',
+            'email_verified_at.date' => 'Email verification date must be a valid date.',
         ];
     }
     /**
@@ -197,8 +195,8 @@ class UserRequest extends FormRequest
             'postcode' => 'postal code',
             'country' => 'country',
             'send_welcome_email' => 'send welcome email',
-            'isActive' => 'active status',
-            'emailVerifiedAt' => 'email verification date',
+            'is_active' => 'active status',
+            'email_verified_at' => 'email verification date',
         ];
     }
     /**
@@ -223,12 +221,12 @@ class UserRequest extends FormRequest
         // Handle checkbox values
         $this->merge([
             'send_welcome_email' => $this->has('send_welcome_email'),
-            'isActive' => $this->has('isActive'),
+            'is_active' => $this->has('is_active'),
         ]);
         // Set default values
         $this->merge([
-            'isActive' => $this->isActive ?? true,
-            'emailVerifiedAt' => $this->emailVerifiedAt ?? now(),
+            'is_active' => $this->is_active ?? true,
+            'email_verified_at' => $this->email_verified_at ?? now(),
         ]);
     }
     /**

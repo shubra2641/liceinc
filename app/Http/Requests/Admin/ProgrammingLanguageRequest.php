@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -32,7 +30,7 @@ class ProgrammingLanguageRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return auth()->check() && $user && ($user->isAdmin || $user->hasRole('admin'));
+        return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
     /**
      * Get the validation rules that apply to the request.
@@ -41,7 +39,7 @@ class ProgrammingLanguageRequest extends FormRequest
      */
     public function rules(): array
     {
-        $language = $this->route('programmingLanguage');
+        $language = $this->route('programming_language');
         $languageId = $language && is_object($language) && property_exists($language, 'id') ? $language->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
         return [
@@ -51,8 +49,8 @@ class ProgrammingLanguageRequest extends FormRequest
                 'max:100',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
                 $isUpdate
-                    ? Rule::unique('programmingLanguages', 'name')->ignore($languageId)
-                    : 'unique:programmingLanguages, name',
+                    ? Rule::unique('programming_languages', 'name')->ignore($languageId)
+                    : 'unique:programming_languages, name',
             ],
             'extension' => [
                 'required',
@@ -60,8 +58,8 @@ class ProgrammingLanguageRequest extends FormRequest
                 'max:10',
                 'regex:/^[a-zA-Z0-9]+$/',
                 $isUpdate
-                    ? Rule::unique('programmingLanguages', 'extension')->ignore($languageId)
-                    : 'unique:programmingLanguages, extension',
+                    ? Rule::unique('programming_languages', 'extension')->ignore($languageId)
+                    : 'unique:programming_languages, extension',
             ],
             'mime_type' => [
                 'required',
@@ -81,15 +79,15 @@ class ProgrammingLanguageRequest extends FormRequest
                 'mimes:java,cpp,c,cs,go,rb,swift,kt,scala,rs,html,css,json,xml,yaml,yml,md,txt',
                 'max:10240', // 10MB
             ],
-            'templateContent' => [
+            'template_content' => [
                 'nullable',
                 'string',
                 'max:50000',
             ],
-            'isActive' => [
+            'is_active' => [
                 'boolean',
             ],
-            'sortOrder' => [
+            'sort_order' => [
                 'nullable',
                 'integer',
                 'min:0',
@@ -153,9 +151,9 @@ class ProgrammingLanguageRequest extends FormRequest
             'description.regex' => 'Description contains invalid characters.',
             'template_file.mimes' => 'Template file must be a valid programming language file.',
             'template_file.max' => 'Template file size must not exceed 10MB.',
-            'templateContent.max' => 'Template content must not exceed 50,000 characters.',
-            'sortOrder.min' => 'Sort order must be at least 0.',
-            'sortOrder.max' => 'Sort order must not exceed 9999.',
+            'template_content.max' => 'Template content must not exceed 50,000 characters.',
+            'sort_order.min' => 'Sort order must be at least 0.',
+            'sort_order.max' => 'Sort order must not exceed 9999.',
             'icon.regex' => 'Icon contains invalid characters.',
             'color.regex' => 'Color must be a valid hex color code (e.g., #3b82f6).',
             'version.regex' => 'Version must be in format: x.y or x.y.z (e.g., 1.0 or 1.0.0).',
@@ -176,9 +174,9 @@ class ProgrammingLanguageRequest extends FormRequest
             'mime_type' => 'MIME type',
             'description' => 'language description',
             'template_file' => 'template file',
-            'templateContent' => 'template content',
-            'isActive' => 'active status',
-            'sortOrder' => 'sort order',
+            'template_content' => 'template content',
+            'is_active' => 'active status',
+            'sort_order' => 'sort order',
             'icon' => 'language icon',
             'color' => 'language color',
             'syntax_highlighting' => 'syntax highlighting',
@@ -202,15 +200,15 @@ class ProgrammingLanguageRequest extends FormRequest
         ]);
         // Handle checkbox values
         $this->merge([
-            'isActive' => $this->has('isActive'),
+            'is_active' => $this->has('is_active'),
             'syntax_highlighting' => $this->has('syntax_highlighting'),
             'auto_completion' => $this->has('auto_completion'),
             'error_detection' => $this->has('error_detection'),
         ]);
         // Set default values
         $this->merge([
-            'isActive' => $this->isActive ?? true,
-            'sortOrder' => $this->sortOrder ?? 0,
+            'is_active' => $this->is_active ?? true,
+            'sort_order' => $this->sort_order ?? 0,
         ]);
     }
     /**

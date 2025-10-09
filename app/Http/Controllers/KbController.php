@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers;
 
 use App\Models\KbArticle;
@@ -143,7 +141,7 @@ class KbController extends Controller
         try {
             // Request is validated by type hint
             $validated = $this->validateArticleData($request);
-            $validated['userId'] = auth()->id();
+            $validated['user_id'] = auth()->id();
             DB::beginTransaction();
             KbArticle::create($validated);
             DB::commit();
@@ -152,7 +150,7 @@ class KbController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to create knowledge base article: ' . $e->getMessage(), [
-                'userId' => auth()->id(),
+                'user_id' => auth()->id(),
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -414,7 +412,7 @@ class KbController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:kbArticles, slug',
+            'slug' => 'required|string|max:255|unique:kb_articles, slug',
             'content' => 'required|string',
             'category_id' => 'required|exists:kb_categories, id',
             'status' => 'required|in:draft, published',
@@ -440,7 +438,7 @@ class KbController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:kbArticles, slug, ' . $article->id,
+            'slug' => 'required|string|max:255|unique:kb_articles, slug, ' . $article->id,
             'content' => 'required|string',
             'category_id' => 'required|exists:kb_categories, id',
             'status' => 'required|in:draft, published',

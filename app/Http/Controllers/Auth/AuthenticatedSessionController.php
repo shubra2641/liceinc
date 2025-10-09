@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -177,7 +175,7 @@ class AuthenticatedSessionController extends Controller
                 $request->session()->put('verification_email_sent', true);
             } catch (\Exception $e) {
                 Log::error('Verification email sending failed', [
-                    'userId' => $user->id,
+                    'user_id' => $user->id,
                     'email' => $user->email,
                     'error' => $e->getMessage(),
                     'ip' => $request->ip(),
@@ -229,7 +227,7 @@ class AuthenticatedSessionController extends Controller
         try {
             $data = $request->validate([
                 'event' => 'required|string|max:255',
-                'userId' => 'nullable|integer',
+                'user_id' => 'nullable|integer',
                 'ip' => 'required|ip',
                 'user_agent' => 'required|string|max:500',
             ]);
