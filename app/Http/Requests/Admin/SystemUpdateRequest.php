@@ -150,7 +150,8 @@ class SystemUpdateRequest extends FormRequest
     {
         return [
             'version.required' => 'Version is required.',
-            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix (e.g., 1.0, 1.0.0, 1.0.0-beta).',
+            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix ' .
+                '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
             'confirm.required' => 'Confirmation is required for this operation.',
             'confirm.accepted' => 'You must confirm this operation to proceed.',
             'backup_required.boolean' => 'Backup required must be true or false.',
@@ -215,7 +216,9 @@ class SystemUpdateRequest extends FormRequest
         // Sanitize input to prevent XSS
         $this->merge([
             'version' => $this->sanitizeInput($this->input('version')),
-            'rollback_reason' => $this->input('rollback_reason') ? $this->sanitizeInput($this->input('rollback_reason')) : null,
+            'rollback_reason' => $this->input('rollback_reason')
+                ? $this->sanitizeInput($this->input('rollback_reason'))
+                : null,
             'update_notes' => $this->input('update_notes') ? $this->sanitizeInput($this->input('update_notes')) : null,
         ]);
         // Handle checkbox values

@@ -222,7 +222,9 @@ class ProductFileRequest extends FormRequest
             'changelog' => $this->input('changelog')
                 ? $this->sanitizeInput($this->input('changelog'))
                 : null,
-            'compatibility' => $this->input('compatibility') ? $this->sanitizeInput($this->input('compatibility')) : null,
+            'compatibility' => $this->input('compatibility')
+                ? $this->sanitizeInput($this->input('compatibility'))
+                : null,
             'requirements' => $this->input('requirements') ? $this->sanitizeInput($this->input('requirements')) : null,
             'installation_instructions' => $this->input('installation_instructions')
                 ? $this->sanitizeInput($this->input('installation_instructions'))

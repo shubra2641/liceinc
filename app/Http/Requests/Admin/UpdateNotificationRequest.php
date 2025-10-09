@@ -198,9 +198,15 @@ class UpdateNotificationRequest extends FormRequest
     {
         // Sanitize input to prevent XSS
         $this->merge([
-            'dismiss_type' => $this->input('dismiss_type') ? $this->sanitizeInput($this->input('dismiss_type')) : null,
-            'dismiss_reason' => $this->input('dismiss_reason') ? $this->sanitizeInput($this->input('dismiss_reason')) : null,
-            'notification_type' => $this->input('notification_type') ? $this->sanitizeInput($this->input('notification_type')) : null,
+            'dismiss_type' => $this->input('dismiss_type')
+                ? $this->sanitizeInput($this->input('dismiss_type'))
+                : null,
+            'dismiss_reason' => $this->input('dismiss_reason')
+                ? $this->sanitizeInput($this->input('dismiss_reason'))
+                : null,
+            'notification_type' => $this->input('notification_type')
+                ? $this->sanitizeInput($this->input('notification_type'))
+                : null,
             'message' => $this->input('message') ? $this->sanitizeInput($this->input('message')) : null,
             'priority' => $this->input('priority') ? $this->sanitizeInput($this->input('priority')) : null,
         ]);

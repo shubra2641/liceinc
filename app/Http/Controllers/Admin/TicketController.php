@@ -216,7 +216,9 @@ class TicketController extends Controller
                                 ?: ($duration ?: 30);
                         } else {
                             $metadata['recurrence'] = $billingType;
-                            $metadata['renewal_period_days'] = (is_string($billingType) && array_key_exists($billingType, $map))
+                            $metadata['renewal_period_days'] = (
+                                is_string($billingType) && array_key_exists($billingType, $map)
+                            )
                                 ? $map[$billingType]
                                 : ($product->renewal_period ?? $duration);
                             $metadata['renewal_price'] = $product->renewal_price ?? $amount;

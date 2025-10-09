@@ -114,7 +114,9 @@ class EnvatoController extends Controller
             if ((string)$product->envato_item_id !== $itemId) {
                 DB::rollBack();
                 Log::warning('Purchase code does not match product', [
-                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
+                    'purchase_code' => $this->maskPurchaseCode(
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                    ),
                     'product_id' => $product->id,
                     'expected_item_id' => $product->envato_item_id,
                     'actual_item_id' => $itemId,
@@ -402,7 +404,9 @@ class EnvatoController extends Controller
                 DB::rollBack();
                 Log::warning('AJAX purchase verification failed', [
                     'user_id' => auth()->id(),
-                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
+                    'purchase_code' => $this->maskPurchaseCode(
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                    ),
                     'product_id' => $data['product_id'],
                     'ip' => $request->ip(),
                 ]);
@@ -417,7 +421,9 @@ class EnvatoController extends Controller
                 DB::rollBack();
                 Log::warning('AJAX purchase code does not match product', [
                     'user_id' => auth()->id(),
-                    'purchase_code' => $this->maskPurchaseCode(is_string($data['purchase_code']) ? $data['purchase_code'] : ''),
+                    'purchase_code' => $this->maskPurchaseCode(
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                    ),
                     'product_id' => $product->id,
                     'expected_item_id' => $product->envato_item_id,
                     'actual_item_id' => $itemId,
@@ -448,7 +454,11 @@ class EnvatoController extends Controller
                 'license_type' => 'regular',
                 'status' => 'active',
                 'support_expires_at' => data_get($sale, 'supported_until') ?
-                    Carbon::parse(is_string(data_get($sale, 'supported_until')) ? data_get($sale, 'supported_until') : '')->format('Y-m-d') : null,
+                    Carbon::parse(
+                        is_string(data_get($sale, 'supported_until'))
+                            ? data_get($sale, 'supported_until')
+                            : ''
+                    )->format('Y-m-d') : null,
                 'verified_at' => now(),
             ]);
             DB::commit();

@@ -95,7 +95,11 @@ class ApiTrackingMiddleware
             $responseContent = $response->getContent();
             $responseData = $this->sanitizeResponseData($responseContent !== false ? $responseContent : '');
             // Extract and sanitize license information
-            $licenseKey = $this->sanitizeInput(is_string($requestData['license_key'] ?? null) ? $requestData['license_key'] : null);
+            $licenseKey = $this->sanitizeInput(
+                is_string($requestData['license_key'] ?? null)
+                    ? $requestData['license_key']
+                    : null
+            );
             $domain = $this->sanitizeInput(is_string($requestData['domain'] ?? null) ? $requestData['domain'] : null);
             $serial = $this->sanitizeInput(is_string($requestData['serial'] ?? null) ? $requestData['serial'] : null);
             // Find license by key with security validation

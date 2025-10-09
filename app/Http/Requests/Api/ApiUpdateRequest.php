@@ -407,11 +407,17 @@ class ApiUpdateRequest extends FormRequest
         // Sanitize input to prevent XSS
         $this->merge([
             'license_key' => $this->sanitizeInput($this->input('license_key')),
-            'current_version' => $this->input('current_version') ? $this->sanitizeInput($this->input('current_version')) : null,
+            'current_version' => $this->input('current_version')
+                ? $this->sanitizeInput($this->input('current_version'))
+                : null,
             'domain' => $this->sanitizeInput($this->input('domain')),
             'product_slug' => $this->sanitizeInput($this->input('product_slug')),
-            'version' => $this->input('version') ? $this->sanitizeInput($this->input('version')) : null,
-            'filter_version' => $this->input('filter_version') ? $this->sanitizeInput($this->input('filter_version')) : null,
+            'version' => $this->input('version')
+                ? $this->sanitizeInput($this->input('version'))
+                : null,
+            'filter_version' => $this->input('filter_version')
+                ? $this->sanitizeInput($this->input('filter_version'))
+                : null,
             'sort_order' => $this->input('sort_order') ? $this->sanitizeInput($this->input('sort_order')) : null,
         ]);
         // Handle checkbox values

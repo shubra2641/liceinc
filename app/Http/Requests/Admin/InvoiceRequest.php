@@ -223,7 +223,9 @@ class InvoiceRequest extends FormRequest
         // Sanitize input to prevent XSS
         $this->merge([
             'invoice_number' => $this->sanitizeInput($this->input('invoice_number')),
-            'payment_reference' => $this->input('payment_reference') ? $this->sanitizeInput($this->input('payment_reference')) : null,
+            'payment_reference' => $this->input('payment_reference')
+                ? $this->sanitizeInput($this->input('payment_reference'))
+                : null,
             'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
             'notes' => $this->input('notes') ? $this->sanitizeInput($this->input('notes')) : null,
         ]);

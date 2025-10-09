@@ -284,8 +284,12 @@ class VersionManagementRequest extends FormRequest
             'product_slug' => $this->sanitizeInput($this->input('product_slug')),
             'domain' => $this->sanitizeInput($this->input('domain')),
             'version' => $this->sanitizeInput($this->input('version')),
-            'current_version' => $this->input('current_version') ? $this->sanitizeInput($this->input('current_version')) : null,
-            'filter_version' => $this->input('filter_version') ? $this->sanitizeInput($this->input('filter_version')) : null,
+            'current_version' => $this->input('current_version')
+                ? $this->sanitizeInput($this->input('current_version'))
+                : null,
+            'filter_version' => $this->input('filter_version')
+                ? $this->sanitizeInput($this->input('filter_version'))
+                : null,
             'sort_order' => $this->input('sort_order') ? $this->sanitizeInput($this->input('sort_order')) : null,
         ]);
         // Handle checkbox values

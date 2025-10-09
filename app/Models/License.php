@@ -106,7 +106,8 @@ class License extends Model
         do {
             $code = strtoupper(Str::random(16));
             // Format like XXXX-XXXX-XXXX-XXXX
-            $code = substr($code, 0, 4) . '-' . substr($code, 4, 4) . '-' . substr($code, 8, 4) . '-' . substr($code, 12, 4);
+            $code = substr($code, 0, 4) . '-' . substr($code, 4, 4) . '-' .
+                substr($code, 8, 4) . '-' . substr($code, 12, 4);
         } while (static::where('purchase_code', $code)->exists());
         return $code;
     }
@@ -115,7 +116,8 @@ class License extends Model
         do {
             $key = strtoupper(Str::random(32));
             // Format like XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX
-            $key = substr($key, 0, 8) . '-' . substr($key, 8, 8) . '-' . substr($key, 16, 8) . '-' . substr($key, 24, 8);
+            $key = substr($key, 0, 8) . '-' . substr($key, 8, 8) . '-' .
+                substr($key, 16, 8) . '-' . substr($key, 24, 8);
         } while (static::where('license_key', $key)->exists());
         return $key;
     }

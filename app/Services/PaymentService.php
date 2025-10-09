@@ -554,7 +554,9 @@ class PaymentService
                         ? (float)($orderData['amount'] ?? 0)
                         : 0.0;
                     $userModel = $user instanceof \App\Models\User ? $user : $user->first();
-                    $productModel = $product instanceof \App\Models\Product ? $product : ($product ? $product->first() : null);
+                    $productModel = $product instanceof \App\Models\Product
+                        ? $product
+                        : ($product ? $product->first() : null);
 
                     if (!$userModel || !$productModel) {
                         throw new \Exception('User or Product not found');
@@ -713,7 +715,9 @@ class PaymentService
         if (empty($clientId)) {
             throw new InvalidArgumentException('PayPal client_id is required');
         }
-        $clientSecret = is_string($credentials['client_secret'] ?? '') ? (string)($credentials['client_secret'] ?? '') : '';
+        $clientSecret = is_string($credentials['client_secret'] ?? '')
+            ? (string)($credentials['client_secret'] ?? '')
+            : '';
         if (empty($clientSecret)) {
             throw new InvalidArgumentException('PayPal client_secret is required');
         }

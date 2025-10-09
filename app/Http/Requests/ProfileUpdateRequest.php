@@ -207,7 +207,9 @@ class ProfileUpdateRequest extends FormRequest
             'state' => $this->input('state') ? $this->sanitizeInput($this->input('state')) : null,
             'postcode' => $this->input('postcode') ? $this->sanitizeInput($this->input('postcode')) : null,
             'country' => $this->input('country') ? $this->sanitizeInput($this->input('country')) : null,
-            'envato_username' => $this->input('envato_username') ? $this->sanitizeInput($this->input('envato_username')) : null,
+            'envato_username' => $this->input('envato_username')
+                ? $this->sanitizeInput($this->input('envato_username'))
+                : null,
             'envato_id' => $this->input('envato_id') ? $this->sanitizeInput($this->input('envato_id')) : null,
         ]);
     }

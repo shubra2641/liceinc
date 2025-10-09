@@ -192,8 +192,12 @@ class TicketCategoryRequest extends FormRequest
             'icon' => $this->input('icon')
                 ? $this->sanitizeInput($this->input('icon'))
                 : null,
-            'template_subject' => $this->input('template_subject') ? $this->sanitizeInput($this->input('template_subject')) : null,
-            'template_content' => $this->input('template_content') ? $this->sanitizeInput($this->input('template_content')) : null,
+            'template_subject' => $this->input('template_subject')
+                ? $this->sanitizeInput($this->input('template_subject'))
+                : null,
+            'template_content' => $this->input('template_content')
+                ? $this->sanitizeInput($this->input('template_content'))
+                : null,
         ]);
         // Handle checkbox values
         $this->merge([

@@ -199,7 +199,13 @@ class LayoutComposer
     private function getTicketsSeoDescription(): ?string
     {
         $ticketsSeoDescription = Setting::get('seo_tickets_description', null);
-        return $ticketsSeoDescription ? $this->sanitizeOutput(is_string($ticketsSeoDescription) ? $ticketsSeoDescription : '') : null;
+        return $ticketsSeoDescription
+            ? $this->sanitizeOutput(
+                is_string($ticketsSeoDescription)
+                    ? $ticketsSeoDescription
+                    : ''
+            )
+            : null;
     }
     /**
      * Get available languages with metadata.
