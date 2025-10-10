@@ -315,22 +315,38 @@
 
     const showCopySuccess = (button) => {
         const originalText = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        // Create success message safely
+        button.innerHTML = '';
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-check';
+        const text = document.createElement('span');
+        text.textContent = ' Copied!';
+        button.appendChild(icon);
+        button.appendChild(text);
         button.style.background = '#10b981';
         
         setTimeout(() => {
-            button.innerHTML = originalText;
+            // Restore original text safely
+            button.textContent = originalText;
             button.style.background = '';
         }, 2000);
     };
 
     const showCopyError = (button) => {
         const originalText = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-times"></i> Failed';
+        // Create error message safely
+        button.innerHTML = '';
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-times';
+        const text = document.createElement('span');
+        text.textContent = ' Failed';
+        button.appendChild(icon);
+        button.appendChild(text);
         button.style.background = '#ef4444';
         
         setTimeout(() => {
-            button.innerHTML = originalText;
+            // Restore original text safely
+            button.textContent = originalText;
             button.style.background = '';
         }, 2000);
     };

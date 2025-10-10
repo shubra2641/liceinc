@@ -309,7 +309,17 @@
         if (!resultDiv) return;
 
         resultDiv.className = 'connection-result ' + (success ? 'success' : 'error');
-        resultDiv.innerHTML = '<i class="fas ' + (success ? 'fa-check-circle' : 'fa-times-circle') + '"></i> ' + message;
+        
+        // Create DOM elements safely to prevent XSS
+        resultDiv.innerHTML = '';
+        const icon = document.createElement('i');
+        icon.className = 'fas ' + (success ? 'fa-check-circle' : 'fa-times-circle');
+        const messageSpan = document.createElement('span');
+        messageSpan.textContent = message; // Safe text content
+        
+        resultDiv.appendChild(icon);
+        resultDiv.appendChild(document.createTextNode(' '));
+        resultDiv.appendChild(messageSpan);
         resultDiv.style.display = 'flex';
     }
 
@@ -481,7 +491,8 @@
             button.classList.remove('loading');
             button.disabled = false;
             if (button.dataset.originalText) {
-                button.innerHTML = button.dataset.originalText;
+                // Restore original text safely
+                button.textContent = button.dataset.originalText;
                 delete button.dataset.originalText;
             }
         }

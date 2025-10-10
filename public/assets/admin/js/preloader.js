@@ -119,8 +119,12 @@ class PreloaderManager {
                 crypto.getRandomValues(array);
                 progress += (array[0] / 0xffffffff) * PROGRESS_INCREMENT;
             } else {
-                // Fallback to Math.random for older browsers
-                progress += Math.random() * PROGRESS_INCREMENT;
+                // Fallback to a more secure random method for older browsers
+                // Use Date.now() and performance.now() for better randomness
+                const now = Date.now();
+                const perf = typeof performance !== 'undefined' ? performance.now() : 0;
+                const randomValue = ((now + perf) % 1000) / 1000;
+                progress += randomValue * PROGRESS_INCREMENT;
             }
             if (progress >= PROGRESS_MAX) {
                 progress = PROGRESS_MAX;

@@ -1720,21 +1720,64 @@ document.addEventListener('DOMContentLoaded', function() {
             const logId = e.target.closest('[data-action="view-log-details"]').dataset.logId;
             const modalContent = document.getElementById('logDetailsContent');
             if (modalContent) {
-                modalContent.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Log ID:</strong> ${logId}</p>
-                            <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Status:</strong> <span class="badge bg-success">Success</span></p>
-                            <p><strong>IP Address:</strong> 127.0.0.1</p>
-                        </div>
-                    </div>
-                    <hr>
-                    <h6>Detailed Information</h6>
-                    <p>Detailed log information will be displayed here</p>
-                `;
+                // Clear existing content safely
+                modalContent.innerHTML = '';
+                
+                // Create DOM elements safely to prevent XSS
+                const row = document.createElement('div');
+                row.className = 'row';
+                
+                const col1 = document.createElement('div');
+                col1.className = 'col-md-6';
+                
+                const logIdP = document.createElement('p');
+                logIdP.innerHTML = '<strong>Log ID:</strong> ';
+                const logIdSpan = document.createElement('span');
+                logIdSpan.textContent = logId; // Safe text content
+                logIdP.appendChild(logIdSpan);
+                
+                const dateP = document.createElement('p');
+                dateP.innerHTML = '<strong>Date:</strong> ';
+                const dateSpan = document.createElement('span');
+                dateSpan.textContent = new Date().toLocaleString(); // Safe text content
+                dateP.appendChild(dateSpan);
+                
+                const col2 = document.createElement('div');
+                col2.className = 'col-md-6';
+                
+                const statusP = document.createElement('p');
+                statusP.innerHTML = '<strong>Status:</strong> ';
+                const statusBadge = document.createElement('span');
+                statusBadge.className = 'badge bg-success';
+                statusBadge.textContent = 'Success';
+                statusP.appendChild(statusBadge);
+                
+                const ipP = document.createElement('p');
+                ipP.innerHTML = '<strong>IP Address:</strong> ';
+                const ipSpan = document.createElement('span');
+                ipSpan.textContent = '127.0.0.1';
+                ipP.appendChild(ipSpan);
+                
+                const hr = document.createElement('hr');
+                
+                const h6 = document.createElement('h6');
+                h6.textContent = 'Detailed Information';
+                
+                const detailP = document.createElement('p');
+                detailP.textContent = 'Detailed log information will be displayed here';
+                
+                col1.appendChild(logIdP);
+                col1.appendChild(dateP);
+                col2.appendChild(statusP);
+                col2.appendChild(ipP);
+                
+                row.appendChild(col1);
+                row.appendChild(col2);
+                
+                modalContent.appendChild(row);
+                modalContent.appendChild(hr);
+                modalContent.appendChild(h6);
+                modalContent.appendChild(detailP);
             }
             const modal = new bootstrap.Modal(document.getElementById('logDetailsModal'));
             modal.show();
