@@ -3,13 +3,6 @@
  * Handles update checking, installation, and rollback functionality
  */
 
-// Include common utilities
-if (typeof CommonUtils === 'undefined') {
-  const script = document.createElement('script');
-  script.src = '/assets/js/common-utils.js';
-  document.head.appendChild(script);
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   // Check for updates button
   document
@@ -66,31 +59,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function checkForUpdates() {
   const btn = document.getElementById('check-updates-btn');
-  
-  // Use CommonUtils for button loading state
-  const restoreButton = CommonUtils.setButtonLoading(btn, 'Checking...');
+  const originalText = btn.innerHTML;
 
-  // Use CommonUtils for secure fetch
-  const currentUrl = window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href;
-  CommonUtils.secureFetch(currentUrl, {
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', true, true);
+  } else {
+    btn.textContent = 'Checking...';
+  }
+  btn.disabled = true;
+
+  // eslint-disable-next-line promise/catch-or-return
+  fetch(window.location.href, {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content'),
+    },
   })
-    .then(CommonUtils.handleFetchResponse)
+    .then(response => response.json())
     .then(data => {
       if (data.success) {
         // Reload page to show updated status
         window.location.reload();
       } else {
-        CommonUtils.showAlert('error', data.message || 'Failed to check for updates');
+        showAlert('error', data.message || 'Failed to check for updates');
       }
       return true;
     })
     .catch(error => {
       console.error('Error:', error);
-      CommonUtils.showAlert('error', 'An error occurred while checking for updates');
+      showAlert('error', 'An error occurred while checking for updates');
     })
     .finally(() => {
-      restoreButton();
+      // Use SecurityUtils for safe HTML restoration
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+      } else {
+        btn.textContent = originalText;
+      }
+      btn.disabled = false;
     });
 }
 
@@ -116,9 +126,7 @@ function performUpdate(version) {
   btn.disabled = true;
 
   // eslint-disable-next-line promise/catch-or-return
-  // Use secure location access
-  const currentUrl = window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href;
-  fetch(currentUrl, {
+  fetch(window.location.href, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -388,7 +396,7 @@ document
 // Check for updates function (refresh page to get latest data)
 // eslint-disable-next-line no-unused-vars
 function checkForUpdatesManually() {
-  CommonUtils.showAlert('info', 'Checking for updates...');
+  showAlert('info', 'Checking for updates...');
 
   // Simply reload the page to get fresh data from the server
   setTimeout(() => {
@@ -403,27 +411,16 @@ function displayUpdateInfo(updateData) {
     updateData.update_info.title || 'Update';
   document.getElementById('update-version').textContent =
     updateData.latest_version;
-  // Use textContent for maximum security - never innerHTML
-  const majorElement = document.getElementById('update-major');
-  majorElement.textContent = '';
-  const majorBadge = document.createElement('span');
-  majorBadge.className = updateData.update_info.is_major ? 'badge bg-warning' : 'badge bg-info';
-  majorBadge.textContent = updateData.update_info.is_major ? 'Yes' : 'No';
-  majorElement.appendChild(majorBadge);
-  
-  const requiredElement = document.getElementById('update-required');
-  requiredElement.textContent = '';
-  const requiredBadge = document.createElement('span');
-  requiredBadge.className = updateData.update_info.is_required ? 'badge bg-danger' : 'badge bg-success';
-  requiredBadge.textContent = updateData.update_info.is_required ? 'Yes' : 'No';
-  requiredElement.appendChild(requiredBadge);
-  
-  const statusElement = document.getElementById('update-status');
-  statusElement.textContent = '';
-  const statusBadge = document.createElement('span');
-  statusBadge.className = 'badge bg-success';
-  statusBadge.textContent = 'Available';
-  statusElement.appendChild(statusBadge);
+  document.getElementById('update-major').innerHTML = updateData.update_info
+    .is_major ?
+    '<span class="badge bg-warning">Yes</span>' :
+    '<span class="badge bg-info">No</span>';
+  document.getElementById('update-required').innerHTML = updateData.update_info
+    .is_required ?
+    '<span class="badge bg-danger">Yes</span>' :
+    '<span class="badge bg-success">No</span>';
+  document.getElementById('update-status').innerHTML =
+    '<span class="badge bg-success">Available</span>';
   document.getElementById('update-release-date').textContent =
     updateData.update_info.release_date || 'Not specified';
   document.getElementById('update-file-size').textContent = formatFileSize(
@@ -557,10 +554,7 @@ function showProductUpdateInfo(updateData, productName) {
   } else {
     // Fallback: create element safely
     const tempDiv = document.createElement('div');
-    // Use textContent for maximum security - never innerHTML
-    tempDiv.textContent = '';
-    const sanitizedHtml = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(modalHtml) : modalHtml;
-    tempDiv.textContent = sanitizedHtml;
+    tempDiv.innerHTML = modalHtml;
     while (tempDiv.firstChild) {
       document.body.appendChild(tempDiv.firstChild);
     }
@@ -598,26 +592,31 @@ function checkAutoUpdates() {
   const domain = document.getElementById('auto-domain').value;
   const currentVersion = document.getElementById('auto-current-version').value;
 
-  // Use CommonUtils for validation
-  const validation = CommonUtils.validateRequiredFields({
-    licenseKey,
-    productSlug,
-    currentVersion
-  });
-
-  if (!validation.isValid) {
-    CommonUtils.showAlert('error', 'Please fill all required fields');
+  if (!licenseKey || !productSlug || !currentVersion) {
+    showAlert('error', 'Please fill all required fields');
     return;
   }
 
   const btn = document.getElementById('check-auto-updates-btn');
-  
-  // Use CommonUtils for button loading state
-  const restoreButton = CommonUtils.setButtonLoading(btn, 'Checking...');
+  const originalText = btn.innerHTML;
 
-  // Use CommonUtils for secure fetch
-  CommonUtils.secureFetch('/admin/updates/auto-check', {
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', true, true);
+  } else {
+    btn.textContent = 'Checking...';
+  }
+  btn.disabled = true;
+
+  // eslint-disable-next-line promise/catch-or-return
+  fetch('/admin/updates/auto-check', {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content'),
+    },
     body: JSON.stringify({
       license_key: licenseKey,
       product_slug: productSlug,
@@ -625,7 +624,12 @@ function checkAutoUpdates() {
       current_version: currentVersion,
     }),
   })
-    .then(CommonUtils.handleFetchResponse)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => {
       if (data.success) {
         // Check if auto update was completed
@@ -634,12 +638,12 @@ function checkAutoUpdates() {
           data.message.includes('Auto update completed successfully')
         ) {
           // Auto update was completed
-          CommonUtils.showAlert('success', data.message);
+          showAlert('success', data.message);
 
           // Show additional info if available
           if (data.data && data.data.files_installed) {
             setTimeout(() => {
-              CommonUtils.showAlert(
+              showAlert(
                 'info',
                 `Files installed: ${data.data.files_installed}. Please refresh the page to see the new version.`,
               );
@@ -655,20 +659,26 @@ function checkAutoUpdates() {
           showAutoUpdateInfo(data.data);
         } else {
           // No updates available
-          CommonUtils.showAlert('info', 'No updates available');
+          showAlert('info', 'No updates available');
         }
       } else {
         // Update failed
-        CommonUtils.showAlert('error', data.message || 'Update failed');
+        showAlert('error', data.message || 'Update failed');
       }
       return true;
     })
     .catch(error => {
       console.error('Error:', error);
-      CommonUtils.showAlert('error', `An error occurred during update: ${error.message}`);
+      showAlert('error', `An error occurred during update: ${error.message}`);
     })
     .finally(() => {
-      restoreButton();
+      // Use SecurityUtils for safe HTML restoration
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+      } else {
+        btn.textContent = originalText;
+      }
+      btn.disabled = false;
     });
 }
 
@@ -843,10 +853,7 @@ function showAlert(type, message) {
   } else {
     // Fallback: create element safely
     const tempDiv = document.createElement('div');
-    // Use textContent for maximum security - never innerHTML
-    tempDiv.textContent = '';
-    const sanitizedAlert = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(alertHtml) : alertHtml;
-    tempDiv.textContent = sanitizedAlert;
+    tempDiv.innerHTML = alertHtml;
     while (tempDiv.firstChild) {
       container.insertBefore(tempDiv.firstChild, container.firstChild);
     }

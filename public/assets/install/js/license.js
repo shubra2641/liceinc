@@ -269,27 +269,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loading) {
       verifyBtn.disabled = true;
       verifyBtn.classList.add('loading');
-      // Use textContent for maximum security - never innerHTML
-      verifyBtn.textContent = '';
-      const spinnerIcon = document.createElement('i');
-      spinnerIcon.className = 'fas fa-spinner fa-spin';
-      verifyBtn.appendChild(spinnerIcon);
-      verifyBtn.appendChild(document.createTextNode(' '));
-      const span = document.createElement('span');
-      span.textContent = 'Verifying...';
-      verifyBtn.appendChild(span);
+      verifyBtn.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> <span>Verifying...</span>';
     } else {
       verifyBtn.disabled = false;
       verifyBtn.classList.remove('loading');
-      // Use textContent for maximum security - never innerHTML
-      verifyBtn.textContent = '';
-      const checkIcon = document.createElement('i');
-      checkIcon.className = 'fas fa-check';
-      verifyBtn.appendChild(checkIcon);
-      verifyBtn.appendChild(document.createTextNode(' '));
-      const span = document.createElement('span');
-      span.textContent = 'Verify License';
-      verifyBtn.appendChild(span);
+      verifyBtn.innerHTML =
+        '<i class="fas fa-check"></i> <span>Verify License</span>';
     }
   }
 
@@ -302,17 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       this.style.opacity = '0.7';
       setTimeout(() => {
-        // Use SecurityUtils for safe navigation
-        if (window.SecurityUtils && window.SecurityUtils.safeNavigate) {
-          window.SecurityUtils.safeNavigate(this.href, ['/install', '/requirements', '/database', '/admin', '/finish']);
-        } else {
-          // Fallback with basic validation
-          if (this.href && (this.href.startsWith('/') || this.href.startsWith(window.location.origin))) {
-            window.location.replace(this.href);
-          } else {
-            console.error('Invalid URL: Navigation blocked for security');
-          }
-        }
+        window.location.href = this.href;
       }, 150);
     });
   }

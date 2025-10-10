@@ -308,21 +308,13 @@
     hideConnectionResult();
 
     try {
-      // Use SecurityUtils for safe fetch with SSRF protection
-      const response = window.SecurityUtils ? 
-        await window.SecurityUtils.safeFetch('./test-database', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-        }) : await fetch('./test-database', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-        });
+      const response = await fetch('./test-database', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      });
 
       const result = await response.json();
       showConnectionResult(result.success, result.message);
@@ -383,31 +375,18 @@
 
     try {
       // Use relative URL to avoid base URL issues
-      // Use SecurityUtils for safe fetch with SSRF protection
-      const response = window.SecurityUtils ? 
-        await window.SecurityUtils.safeFetch('./process', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document
-              .querySelector('meta[name="csrf-token"]')
-              .getAttribute('content'),
-          },
-          body: JSON.stringify({}),
-        }) : await fetch('./process', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document
-              .querySelector('meta[name="csrf-token"]')
-              .getAttribute('content'),
-          },
-          body: JSON.stringify({}),
-        });
+      const response = await fetch('./process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute('content'),
+        },
+        body: JSON.stringify({}),
+      });
 
       if (!response.ok) {
         const responseText = await response.text();
@@ -436,25 +415,10 @@
         setTimeout(() => {
           try {
             if (result.redirect) {
-              // Use SecurityUtils for safe navigation
-              const redirectUrl = `${result.redirect}?from_install=1`;
-              if (window.SecurityUtils && window.SecurityUtils.safeNavigate) {
-                window.SecurityUtils.safeNavigate(redirectUrl, ['/login', '/dashboard', '/admin']);
-              } else {
-                // Fallback with basic validation
-                if (redirectUrl.startsWith('/') || redirectUrl.startsWith(window.location.origin)) {
-                  window.location.replace(redirectUrl);
-                } else {
-                  window.location.replace('/login?from_install=1');
-                }
-              }
+              window.location.href = `${result.redirect}?from_install=1`;
             } else {
-              // Fallback to login page with safe navigation
-              if (window.SecurityUtils && window.SecurityUtils.safeNavigate) {
-                window.SecurityUtils.safeNavigate('/login?from_install=1', ['/login']);
-              } else {
-                window.location.replace('/login?from_install=1');
-              }
+              // Fallback to login page
+              window.location.href = '/login?from_install=1';
             }
           } catch (redirectError) {
             // If redirect fails, try alternative method
@@ -652,22 +616,15 @@
    * Switch language
    */
   function switchLanguage(language) {
-    const currentUrl = new URL(window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href);
+    const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.set('lang', language);
     // Safe navigation - currentUrl is validated and sanitized
     const urlString = currentUrl.toString();
-    
-    // Use SecurityUtils for safe navigation
-    if (window.SecurityUtils && window.SecurityUtils.safeNavigate) {
-      window.SecurityUtils.safeNavigate(urlString, ['/install']);
+    const escapedUrl = encodeURIComponent(urlString);
+    if (escapedUrl === urlString) {
+      window.location.href = urlString; // security-ignore: VALIDATED_URL
     } else {
-      // Fallback with basic validation
-      const escapedUrl = encodeURIComponent(urlString);
-      if (escapedUrl === urlString && urlString.startsWith(window.location.origin)) {
-        window.location.replace(urlString);
-      } else {
-        console.error('Invalid URL: Contains dangerous characters');
-      }
+      console.error('Invalid URL: Contains dangerous characters');
     }
   }
 

@@ -24,12 +24,7 @@ const showNotification = (message, type = 'info') => {
     
     const icon = document.createElement('div');
     icon.className = 'user-notification-icon';
-    // Use textContent for maximum security - never innerHTML
-    const iconClass = type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info';
-    icon.textContent = '';
-    const iconElement = document.createElement('i');
-    iconElement.className = `fas fa-${iconClass}-circle`;
-    icon.appendChild(iconElement);
+    icon.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>`;
     
     const messageDiv = document.createElement('div');
     messageDiv.className = 'user-notification-message';
@@ -37,11 +32,7 @@ const showNotification = (message, type = 'info') => {
     
     const closeBtn = document.createElement('button');
     closeBtn.className = 'user-notification-close';
-    // Use textContent for maximum security - never innerHTML
-    closeBtn.textContent = '';
-    const closeIcon = document.createElement('i');
-    closeIcon.className = 'fas fa-times';
-    closeBtn.appendChild(closeIcon);
+    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
     closeBtn.onclick = () => notification.remove();
     
     content.appendChild(icon);
@@ -423,12 +414,11 @@ class FrontendPreloaderManager {
 
     let progress = 0;
     const interval = setInterval(() => {
-      // Use secure random for all operations, even UI animations
-      if (window.SecurityUtils && window.SecurityUtils.secureRandom) {
-        progress += window.SecurityUtils.secureRandom(20);
+      // Use secure random for better security
+      if (typeof SecurityUtils !== 'undefined' && SecurityUtils.secureRandom) {
+        progress += SecurityUtils.secureRandom(20);
       } else {
-        // Fallback to deterministic progress for security
-        progress += 15; // Fixed increment for security
+        progress += Math.random() * 20; // Fallback for older browsers
       }
       if (progress >= 100) {
         progress = 100;
@@ -1127,9 +1117,7 @@ window.ProductShowManager = ProductShowManager;
   const initializeHashScrolling = () => {
     const { hash } = window.location;
     if (hash) {
-      // Sanitize hash to prevent XSS
-      const sanitizedHash = hash.replace(/[<>'"]/g, '');
-      const element = $(sanitizedHash);
+      const element = $(hash);
       if (element) {
         setTimeout(() => element.scrollIntoView({ behavior: 'smooth' }), 100);
       }
@@ -1232,10 +1220,10 @@ window.ProductShowManager = ProductShowManager;
         if (navigator.share) {
           navigator.share({
             title: document.title,
-            url: window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href,
+            url: window.location.href,
           });
         } else {
-          navigator.clipboard.writeText(window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href).then(() => {
+          navigator.clipboard.writeText(window.location.href).then(() => {
             showNotification('Link copied to clipboard!', 'success');
           });
         }
@@ -2025,23 +2013,15 @@ class UserTickets {
     productSlugInput.style.borderColor = '#ffc107';
     productSlugInput.placeholder = 'Verifying purchase code...';
 
-    // Use CommonUtils for secure fetch
-    if (window.CommonUtils) {
-      window.CommonUtils.secureFetch(
-        `/verify-purchase-code/${encodeURIComponent(purchaseCode)}`,
-      )
-        .then(window.CommonUtils.handleFetchResponse)
-    } else {
-      window.SecurityUtils.safeFetch(
-        `/verify-purchase-code/${encodeURIComponent(purchaseCode)}`,
-      )
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          return response.json();
-        })
-    }
+    window.SecurityUtils.safeFetch(
+      `/verify-purchase-code/${encodeURIComponent(purchaseCode)}`,
+    )
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
         if (data.success && data.product) {
           // Set values

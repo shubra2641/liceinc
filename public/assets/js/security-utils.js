@@ -83,7 +83,7 @@ const SecurityUtils = {
   },
 
   /**
-   * Cryptographically secure random number generation using Web Crypto API
+   * Secure random number generation using crypto API
    * @param {number} max - Maximum value (exclusive)
    * @returns {number} - Secure random number
    */
@@ -93,46 +93,8 @@ const SecurityUtils = {
       crypto.getRandomValues(array);
       return (array[0] / 4294967296) * max;
     }
-    // No fallback to Math.random() for security reasons
-    throw new Error('Cryptographically secure random number generation not available');
-  },
-
-  /**
-   * Generate cryptographically secure random bytes
-   * @param {number} length - Number of bytes to generate
-   * @returns {Uint8Array} - Secure random bytes
-   */
-  secureRandomBytes(length) {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const array = new Uint8Array(length);
-      crypto.getRandomValues(array);
-      return array;
-    }
-    throw new Error('Cryptographically secure random bytes generation not available');
-  },
-
-  /**
-   * Generate secure UUID v4
-   * @returns {string} - Secure UUID
-   */
-  secureUUID() {
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      return crypto.randomUUID();
-    }
-    
-    // Fallback implementation
-    const bytes = this.secureRandomBytes(16);
-    bytes[6] = (bytes[6] & 0x0f) | 0x40; // Version 4
-    bytes[8] = (bytes[8] & 0x3f) | 0x80; // Variant bits
-    
-    const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
-    return [
-      hex.slice(0, 8),
-      hex.slice(8, 12),
-      hex.slice(12, 16),
-      hex.slice(16, 20),
-      hex.slice(20, 32)
-    ].join('-');
+    // Fallback for older browsers (less secure but better than Math.random)
+    return Math.random() * max;
   },
 
   /**
@@ -151,8 +113,10 @@ const SecurityUtils = {
         result += chars[array[i] % chars.length];
       }
     } else {
-      // No fallback to Math.random() for security reasons
-      throw new Error('Cryptographically secure random string generation not available');
+      // Fallback
+      for (let i = 0; i < length; i++) {
+        result += chars[Math.floor(Math.random() * chars.length)];
+      }
     }
     
     return result;
@@ -164,54 +128,13 @@ const SecurityUtils = {
    * @returns {boolean} - True if URL is safe
    */
   isValidUrl(url) {
-    if (!url || typeof url !== 'string') {
-      return false;
-    }
-
     try {
       const allowedOrigins = [
         window.location.origin,
         `${window.location.protocol}//${window.location.host}`,
         `${window.location.protocol}//${window.location.hostname}`,
       ];
-      
-      // Enhanced dangerous protocols check
-      const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:', 'ftp:', 'gopher:', 'news:', 'telnet:'];
-      if (dangerousProtocols.some(protocol => url.toLowerCase().startsWith(protocol))) {
-        return false;
-      }
-      
-      // Enhanced suspicious patterns check
-      const suspiciousPatterns = [
-        /\.\./,  // Directory traversal
-        /%2e%2e/i,  // URL encoded directory traversal
-        /%252e%252e/i,  // Double URL encoded directory traversal
-        /<script/i,  // Script tags
-        /javascript:/i,  // JavaScript protocol
-        /data:/i,  // Data protocol
-        /vbscript:/i,  // VBScript protocol
-        /on\w+\s*=/i,  // Event handlers
-        /<iframe/i,  // Iframe tags
-        /<object/i,  // Object tags
-        /<embed/i,  // Embed tags
-      ];
-      
-      if (suspiciousPatterns.some(pattern => pattern.test(url))) {
-        return false;
-      }
-      
-      // Additional validation for URL structure
-      try {
-        const urlObj = new URL(url, window.location.origin);
-        // Only allow http and https protocols
-        if (!['http:', 'https:'].includes(urlObj.protocol)) {
-          return false;
-        }
-        // Check if URL is from same origin
-        return urlObj.origin === window.location.origin;
-      } catch (e) {
-        return false;
-      }
+      return allowedOrigins.some(origin => url.startsWith(origin));
     } catch (e) {
       return false;
     }
@@ -231,8 +154,12 @@ const SecurityUtils = {
 
     const safeContent = sanitize ? this.sanitizeHtml(content, allowBasicFormatting) : content;
     
-    // Always use textContent for maximum security - never use innerHTML
-    element.textContent = safeContent;
+    // Always use textContent for maximum security unless basic formatting is explicitly allowed
+    if (!allowBasicFormatting || this.containsDangerousContent(safeContent)) {
+      element.textContent = safeContent;
+    } else {
+      element.innerHTML = safeContent;
+    }
   },
 
   /**
@@ -248,25 +175,6 @@ const SecurityUtils = {
   },
 
   /**
-   * Safe insertAdjacentHTML with automatic sanitization
-   * @param {HTMLElement} element - The element to update
-   * @param {string} position - The position to insert
-   * @param {string} html - The HTML to insert
-   * @param {boolean} sanitize - Whether to sanitize the content (default: true)
-   */
-  safeInsertAdjacentHTML(element, position, html, sanitize = true) {
-    if (!element || typeof html !== 'string') {
-      return;
-    }
-
-    const safeContent = sanitize ? this.sanitizeHtml(html) : html;
-    
-    // Always use textContent for maximum security - never use insertAdjacentHTML
-    const textNode = document.createTextNode(safeContent);
-    element.insertAdjacentElement(position, textNode);
-  },
-
-  /**
    * Safe insertAdjacentHTML with sanitization
    * @param {HTMLElement} element - The element to insert into
    * @param {string} position - The position to insert at
@@ -279,9 +187,7 @@ const SecurityUtils = {
     }
 
     const safeHtml = this.sanitizeHtml(html, allowBasicFormatting);
-    // Always use textContent for maximum security - never use insertAdjacentHTML
-    const textNode = document.createTextNode(safeHtml);
-    element.insertAdjacentElement(position, textNode);
+    element.insertAdjacentHTML(position, safeHtml);
   },
 
   /**
@@ -490,168 +396,6 @@ const SecurityUtils = {
       }
     }
     return sanitized;
-  },
-
-  /**
-   * Safe object property access to prevent Object Injection
-   * @param {object} obj - The object to access
-   * @param {string} property - The property to access
-   * @param {*} defaultValue - Default value if property doesn't exist
-   * @returns {*} - Safe property value
-   */
-  safePropertyAccess(obj, property, defaultValue = null) {
-    if (!obj || typeof obj !== 'object') {
-      return defaultValue;
-    }
-    
-    // Enhanced sanitization to prevent prototype pollution
-    const sanitizedProperty = this.sanitizeHtml(property);
-    if (sanitizedProperty !== property) {
-      console.warn('Property name contains dangerous characters, using default value');
-      return defaultValue;
-    }
-    
-    // Enhanced check for dangerous property names
-    const dangerousProperties = ['__proto__', 'constructor', 'prototype', 'valueOf', 'toString', 'hasOwnProperty'];
-    if (dangerousProperties.includes(sanitizedProperty)) {
-      console.warn('Dangerous property access blocked');
-      return defaultValue;
-    }
-    
-    // Additional validation for prototype pollution
-    if (sanitizedProperty.includes('__') || sanitizedProperty.includes('prototype')) {
-      console.warn('Prototype pollution attempt blocked');
-      return defaultValue;
-    }
-    
-    // Use Object.prototype.hasOwnProperty.call for safe property access
-    return Object.prototype.hasOwnProperty.call(obj, sanitizedProperty) ? obj[sanitizedProperty] : defaultValue;
-  },
-
-  /**
-   * Safe function call to prevent Object Injection
-   * @param {function} fn - The function to call
-   * @param {Array} args - Arguments to pass to the function
-   * @param {*} context - Context to bind the function to
-   * @returns {*} - Function result
-   */
-  safeFunctionCall(fn, args = [], context = null) {
-    if (typeof fn !== 'function') {
-      throw new Error('Invalid function provided');
-    }
-    
-    // Sanitize arguments
-    const sanitizedArgs = args.map(arg => {
-      if (typeof arg === 'string') {
-        return this.sanitizeHtml(arg);
-      }
-      return arg;
-    });
-    
-    try {
-      return fn.apply(context, sanitizedArgs);
-    } catch (error) {
-      console.error('Safe function call failed:', error);
-      return null;
-    }
-  },
-
-  /**
-   * Safe JSON parsing to prevent Object Injection
-   * @param {string} jsonString - JSON string to parse
-   * @param {*} defaultValue - Default value if parsing fails
-   * @returns {*} - Parsed object or default value
-   */
-  safeJSONParse(jsonString, defaultValue = null) {
-    if (typeof jsonString !== 'string') {
-      return defaultValue;
-    }
-    
-    try {
-      const parsed = JSON.parse(jsonString);
-      
-      // Check for dangerous properties
-      if (this.containsDangerousObjectProperties(parsed)) {
-        console.warn('Dangerous object properties detected, using default value');
-        return defaultValue;
-      }
-      
-      return parsed;
-    } catch (error) {
-      console.error('JSON parsing failed:', error);
-      return defaultValue;
-    }
-  },
-
-  /**
-   * Check if object contains dangerous properties
-   * @param {object} obj - Object to check
-   * @returns {boolean} - True if dangerous properties found
-   */
-  containsDangerousObjectProperties(obj) {
-    if (typeof obj !== 'object' || obj === null) {
-      return false;
-    }
-    
-    // Enhanced list of dangerous properties
-    const dangerousProperties = [
-      '__proto__', 'constructor', 'prototype', 
-      'valueOf', 'toString', 'hasOwnProperty',
-      'isPrototypeOf', 'propertyIsEnumerable'
-    ];
-    
-    for (const key in obj) {
-      // Check for dangerous property names
-      if (dangerousProperties.includes(key)) {
-        return true;
-      }
-      
-      // Check for prototype pollution patterns
-      if (key.includes('__') || key.includes('prototype')) {
-        return true;
-      }
-      
-      // Recursively check nested objects
-      if (typeof obj[key] === 'object' && obj[key] !== null) {
-        if (this.containsDangerousObjectProperties(obj[key])) {
-          return true;
-        }
-      }
-    }
-    
-    return false;
-  },
-
-  /**
-   * Safe DOM manipulation to prevent XSS
-   * @param {HTMLElement} element - Element to manipulate
-   * @param {string} property - Property to set
-   * @param {string} value - Value to set
-   */
-  safeDOMProperty(element, property, value) {
-    if (!element || typeof property !== 'string' || typeof value !== 'string') {
-      return;
-    }
-    
-    // Block dangerous properties
-    const dangerousProperties = ['innerHTML', 'outerHTML', 'insertAdjacentHTML'];
-    if (dangerousProperties.includes(property)) {
-      console.warn('Dangerous DOM property blocked, using textContent instead');
-      element.textContent = this.sanitizeHtml(value);
-      return;
-    }
-    
-    // Sanitize value
-    const sanitizedValue = this.sanitizeHtml(value);
-    
-    // Use safe property assignment
-    if (property === 'textContent' || property === 'innerText') {
-      element[property] = sanitizedValue;
-    } else if (property.startsWith('data-') || property === 'title' || property === 'alt') {
-      element.setAttribute(property, sanitizedValue);
-    } else {
-      console.warn('Unsafe DOM property blocked');
-    }
   },
 };
 

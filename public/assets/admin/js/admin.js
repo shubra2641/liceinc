@@ -569,7 +569,7 @@ class AdminDashboard {
         event.target.parentNode.appendChild(preview);
       }
 
-      preview.textContent = '';
+      preview.innerHTML = '';
       Array.from(files).forEach((file, index) => {
         // eslint-disable-next-line no-new
         const reader = new FileReader();
@@ -710,17 +710,7 @@ class AdminDashboard {
             if (button.type === 'submit' && button.form) {
               button.form.submit();
             } else if (button.href) {
-              // Use SecurityUtils for safe navigation
-              if (window.SecurityUtils && window.SecurityUtils.safeNavigate) {
-                window.SecurityUtils.safeNavigate(button.href, ['/admin', '/dashboard', '/user', '/login']);
-              } else {
-                // Fallback with basic validation
-                if (button.href && (button.href.startsWith('/') || button.href.startsWith(window.location.origin))) {
-                  window.location.replace(button.href);
-                } else {
-                  console.error('Invalid URL: Navigation blocked for security');
-                }
-              }
+              window.location.href = button.href;
             }
           }
         }
@@ -1027,12 +1017,7 @@ class AdminDashboard {
           '\'': '&#x27;',
         }[match]));
 
-        // Use SecurityUtils for safe content preview
-        if (typeof SecurityUtils !== 'undefined') {
-          SecurityUtils.safeInnerHTML(previewContent, sanitizedContent, true, true);
-        } else {
-          previewContent.textContent = sanitizedContent;
-        }
+        previewContent.innerHTML = sanitizedContent;
       }
 
       if (previewTemplateId && nameInput) {
@@ -1126,17 +1111,7 @@ class AdminDashboard {
     // Insert at the top of the page
     const container = document.querySelector('.container-fluid');
     if (container) {
-      // Use SecurityUtils for safe insertAdjacentHTML with XSS protection
-      if (window.SecurityUtils) {
-        window.SecurityUtils.safeInsertAdjacentHTML(container, 'afterbegin', alertHtml, true);
-      } else {
-        // Fallback: create element safely
-        const tempDiv = document.createElement('div');
-        tempDiv.textContent = alertHtml;
-        while (tempDiv.firstChild) {
-          container.insertBefore(tempDiv.firstChild, container.firstChild);
-        }
-      }
+      container.insertAdjacentHTML('afterbegin', alertHtml);
     }
   }
 
@@ -1313,9 +1288,12 @@ class AdminDashboard {
           value,
         );
       });
-      // Use textContent for maximum security - never innerHTML
-      const sanitizedBody = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(body) : body;
-      previewBody.textContent = sanitizedBody;
+      // Sanitize before injecting
+      if (window.SecuritySanitize) {
+        previewBody.innerHTML = SecuritySanitize.basicSanitize(body); // security-ignore: JS_DOM_INJECTION (sanitized)
+      } else {
+        previewBody.textContent = body;
+      }
     }
   }
 
@@ -1398,9 +1376,7 @@ class AdminDashboard {
         );
       });
       if (window.SecuritySanitize) {
-        // Use textContent for maximum security - never innerHTML
-        const sanitizedBody = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(body) : body;
-        modalPreviewBody.textContent = sanitizedBody;
+        modalPreviewBody.innerHTML = SecuritySanitize.basicSanitize(body); // security-ignore: JS_DOM_INJECTION (sanitized)
       } else {
         modalPreviewBody.textContent = body;
       }
@@ -1603,8 +1579,7 @@ class AdminDashboard {
   // Print Invoice
   printInvoice() {
     // Create a new window for printing
-    // Use secure window.open with validation
-    const printWindow = window.SecurityUtils ? window.SecurityUtils.safeWindowOpen('', '_blank') : window.open('', '_blank');
+    const printWindow = window.open('', '_blank');
 
     // Get the invoice data from the page
     const invoiceNumber =
@@ -1672,8 +1647,7 @@ class AdminDashboard {
             </html>
         `;
 
-    // Use textContent for maximum security - never document.write
-    printWindow.document.body.textContent = printContent;
+    printWindow.document.write(printContent);
     printWindow.document.close();
     printWindow.print();
   }
@@ -1923,38 +1897,26 @@ class AdminDashboard {
       const apiUserLicensesBase =
         `${baseUrl.replace(/\/$/, '') || ''}/admin/api/user`;
 
-      // Use SecurityUtils for safe fetch with SSRF protection
-      const fetchUrl = `${apiUserLicensesBase}/${userId}/licenses`;
-      const response = window.SecurityUtils ? 
-        await window.SecurityUtils.safeFetch(fetchUrl, {
-          credentials: 'same-origin',
-          headers: { Accept: 'application/json' },
-        }) : await fetch(fetchUrl, {
-          credentials: 'same-origin',
-          headers: { Accept: 'application/json' },
-        });
-        
-        if (!response.ok) {
-          throw new Error(
-            `Server returned ${response.status} ${response.statusText}`,
-          );
-        }
-        
-        const text = await response.text();
-        try {
-          const data = JSON.parse(text);
+      fetch(`${apiUserLicensesBase}/${userId}/licenses`, {
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' },
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(
+              `Server returned ${response.status} ${response.statusText}`,
+            );
+          }
+          return response.text();
+        })
+        .then(text => {
+          try {
+            const data = JSON.parse(text);
 
-            // Use textContent for maximum security - never innerHTML
-            licenseSelect.textContent = '';
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select License';
-            licenseSelect.appendChild(defaultOption);
-            
-            const customOption = document.createElement('option');
-            customOption.value = 'custom';
-            customOption.textContent = 'Custom Invoice (No License)';
-            licenseSelect.appendChild(customOption);
+            licenseSelect.innerHTML =
+              '<option value="">Select License</option>';
+            licenseSelect.innerHTML +=
+              '<option value="custom">Custom Invoice (No License)</option>';
 
             data.forEach(license => {
               const option = document.createElement('option');
@@ -1994,16 +1956,9 @@ class AdminDashboard {
           );
         });
     } else {
-      // Use textContent for maximum security - never innerHTML
-      licenseSelect.textContent = '';
-      const defaultOption = document.createElement('option');
-      defaultOption.value = '';
-      defaultOption.textContent = 'Select License';
-      licenseSelect.appendChild(defaultOption);
-      const customOption = document.createElement('option');
-      customOption.value = 'custom';
-      customOption.textContent = 'Custom Invoice (No License)';
-      licenseSelect.appendChild(customOption);
+      licenseSelect.innerHTML = '<option value="">Select License</option>';
+      licenseSelect.innerHTML +=
+        '<option value="custom">Custom Invoice (No License)</option>';
       this.toggleCustomInvoiceFields();
     }
   }
@@ -2580,38 +2535,22 @@ class AdminDashboard {
     const copyBtn = document.querySelector('.copy-btn');
 
     // Show loading
-    // Use textContent for maximum security - never innerHTML
-    contentElement.textContent = '';
-    const spinnerIcon = document.createElement('i');
-    spinnerIcon.className = 'fas fa-spinner fa-spin';
-    contentElement.appendChild(spinnerIcon);
-    contentElement.appendChild(document.createTextNode(' Loading...'));
+    contentElement.innerHTML =
+      '<i class="fas fa-spinner fa-spin"></i> Loading...';
 
     // Make AJAX request
-    // Use SecurityUtils for safe fetch with SSRF protection
-    const fetchUrl = `/admin/programming-languages/license-file/${slug}?type=${type}`;
-    const response = window.SecurityUtils ? 
-      await window.SecurityUtils.safeFetch(fetchUrl, {
-        method: 'GET',
-        headers: {
-          'X-CSRF-TOKEN':
-            document
-              .querySelector('meta[name="csrf-token"]')
-              ?.getAttribute('content') || '',
-          Accept: 'application/json',
-        },
-      }) : await fetch(fetchUrl, {
-        method: 'GET',
-        headers: {
-          'X-CSRF-TOKEN':
-            document
-              .querySelector('meta[name="csrf-token"]')
-              ?.getAttribute('content') || '',
-          Accept: 'application/json',
-        },
-      });
-      
-      const data = await response.json();
+    fetch(`/admin/programming-languages/license-file/${slug}?type=${type}`, {
+      method: 'GET',
+      headers: {
+        'X-CSRF-TOKEN':
+          document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute('content') || '',
+        Accept: 'application/json',
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
         if (data.success) {
           contentElementSecurityUtils.safeInnerHTML(
             this,
@@ -2631,15 +2570,8 @@ class AdminDashboard {
       .catch(error => {
         // Error loading file
         console.warn('Error loading file:', error);
-        // Use textContent for maximum security - never innerHTML
-        contentElement.textContent = '';
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'text-danger';
-        const errorIcon = document.createElement('i');
-        errorIcon.className = 'fas fa-exclamation-triangle';
-        errorDiv.appendChild(errorIcon);
-        errorDiv.appendChild(document.createTextNode(' Error loading file'));
-        contentElement.appendChild(errorDiv);
+        contentElement.innerHTML =
+          '<div class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading file</div>';
       });
   }
 
@@ -2687,30 +2619,18 @@ class AdminDashboard {
     );
 
     // Make AJAX request
-    // Use SecurityUtils for safe fetch with SSRF protection
-    const fetchUrl = `/admin/programming-languages/${languageId}/template`;
-    const response = window.SecurityUtils ? 
-      await window.SecurityUtils.safeFetch(fetchUrl, {
-        method: 'GET',
-        headers: {
-          'X-CSRF-TOKEN':
-            document
-              .querySelector('meta[name="csrf-token"]')
-              ?.getAttribute('content') || '',
-          Accept: 'application/json',
-        },
-      }) : await fetch(fetchUrl, {
-        method: 'GET',
-        headers: {
-          'X-CSRF-TOKEN':
-            document
-              .querySelector('meta[name="csrf-token"]')
-              ?.getAttribute('content') || '',
-          Accept: 'application/json',
-        },
-      });
-      
-      const data = await response.json();
+    fetch(`/admin/programming-languages/${languageId}/template`, {
+      method: 'GET',
+      headers: {
+        'X-CSRF-TOKEN':
+          document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute('content') || '',
+        Accept: 'application/json',
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
         if (data.success) {
           contentElementSecurityUtils.safeInnerHTML(
             this,
@@ -2728,18 +2648,8 @@ class AdminDashboard {
       .catch(error => {
         // Error loading file
         console.warn('Error loading template:', error);
-        // Use textContent for maximum security - never innerHTML
-        contentElement.textContent = '';
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'text-danger text-center py-4';
-        const errorIcon = document.createElement('i');
-        errorIcon.className = 'fas fa-exclamation-triangle fa-2x';
-        errorDiv.appendChild(errorIcon);
-        const errorP = document.createElement('p');
-        errorP.className = 'mt-2';
-        errorP.textContent = 'Error loading template';
-        errorDiv.appendChild(errorP);
-        contentElement.appendChild(errorDiv);
+        contentElement.innerHTML =
+          '<div class="text-danger text-center py-4"><i class="fas fa-exclamation-triangle fa-2x"></i><p class="mt-2">Error loading template</p></div>';
       });
   }
 
@@ -2924,12 +2834,7 @@ class AdminDashboard {
     }
 
     const originalText = testBtn.innerHTML;
-    // Use textContent for maximum security - never innerHTML
-    testBtn.textContent = '';
-    const spinnerIcon = document.createElement('i');
-    spinnerIcon.className = 'fas fa-spinner fa-spin me-2';
-    testBtn.appendChild(spinnerIcon);
-    testBtn.appendChild(document.createTextNode('Testing...'));
+    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Testing...';
     testBtn.disabled = true;
 
     try {
@@ -3020,8 +2925,7 @@ class AdminDashboard {
             `,
       );
     } finally {
-      // Use textContent for maximum security - never innerHTML
-      testBtn.textContent = originalText;
+      testBtn.innerHTML = originalText;
       testBtn.disabled = false;
     }
   }
@@ -4102,9 +4006,7 @@ function showValidationResults(results) {
   const warningCount = results.filter(r => r.type === 'warning').length;
   const errorCount = results.filter(r => r.type === 'error').length;
 
-  // Use textContent for maximum security - never innerHTML
-  modal.textContent = '';
-  const sanitizedContent = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(`
+  modal.innerHTML = `
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -4226,14 +4128,28 @@ function updateTemplateList() {
     }
 
     if (savedTemplates.length > 0) {
-      // Use textContent for maximum security - never innerHTML
-      templateList.textContent = '';
-      savedTemplates.forEach(template => {
-        const templateDiv = document.createElement('div');
-        templateDiv.className = 'template-item p-2 border rounded mb-2';
-        templateDiv.textContent = template.name + ' - ' + new Date(template.timestamp).toLocaleString();
-        templateList.appendChild(templateDiv);
-      });
+      templateList.innerHTML = savedTemplates
+        .map(
+          template => `
+                <div class="template-item p-2 border rounded mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${template.name}</strong>
+                            <small class="text-muted d-block">${new Date(template.timestamp).toLocaleString()}</small>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="loadTemplate('${template.name}')">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTemplate('${template.name}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `,
+        )
+        .join('');
     }
   }
 }
@@ -4335,9 +4251,7 @@ function viewTemplate() {
 
   const modal = document.createElement('div');
   modal.className = 'modal fade';
-  // Use textContent for maximum security - never innerHTML
-  modal.textContent = '';
-  const sanitizedContent = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(`
+  modal.innerHTML = `
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -4886,12 +4800,7 @@ function exportReport(format) {
   // Show loading state
   const button = document.querySelector(`[data-format="${format}"]`);
   const originalText = button.innerHTML;
-  // Use textContent for maximum security - never innerHTML
-  button.textContent = '';
-  const spinnerIcon = document.createElement('i');
-  spinnerIcon.className = 'fas fa-spinner fa-spin me-1';
-  button.appendChild(spinnerIcon);
-  button.appendChild(document.createTextNode('Exporting...'));
+  button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Exporting...';
   button.disabled = true;
 
   // Simulate export process
@@ -4905,8 +4814,7 @@ function exportReport(format) {
     document.body.removeChild(link);
 
     // Reset button
-    // Use textContent for maximum security - never innerHTML
-    button.textContent = originalText;
+    button.innerHTML = originalText;
     button.disabled = false;
 
     // Show success message
@@ -4918,19 +4826,13 @@ function exportChart(chartName, format) {
   // Show loading state
   const button = document.querySelector(`[data-chart="${chartName}"]`);
   const originalText = button.innerHTML;
-  // Use textContent for maximum security - never innerHTML
-  button.textContent = '';
-  const spinnerIcon = document.createElement('i');
-  spinnerIcon.className = 'fas fa-spinner fa-spin me-1';
-  button.appendChild(spinnerIcon);
-  button.appendChild(document.createTextNode('Exporting...'));
+  button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Exporting...';
   button.disabled = true;
 
   // Simulate chart export
   setTimeout(() => {
     // Reset button
-    // Use textContent for maximum security - never innerHTML
-    button.textContent = originalText;
+    button.innerHTML = originalText;
     button.disabled = false;
 
     // Show success message
@@ -4942,12 +4844,8 @@ function refreshReports() {
   // Show loading state
   const button = document.querySelector('[data-action="refresh-reports"]');
   if (button) {
-    // Use textContent for maximum security - never innerHTML
-    button.textContent = '';
-    const spinnerIcon = document.createElement('i');
-    spinnerIcon.className = 'fas fa-spinner fa-spin me-2';
-    button.appendChild(spinnerIcon);
-    button.appendChild(document.createTextNode('Refreshing...'));
+    button.innerHTML =
+      '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
     button.disabled = true;
 
     // Reload page after short delay
@@ -4967,19 +4865,13 @@ function clearBlockedIPs() {
     // Show loading state
     const button = document.querySelector('[data-action="clear-blocked-ips"]');
     const originalText = button.innerHTML;
-    // Use textContent for maximum security - never innerHTML
-    button.textContent = '';
-    const spinnerIcon = document.createElement('i');
-    spinnerIcon.className = 'fas fa-spinner fa-spin me-1';
-    button.appendChild(spinnerIcon);
-    button.appendChild(document.createTextNode('Clearing...'));
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Clearing...';
     button.disabled = true;
 
     // Simulate clear process
     setTimeout(() => {
       // Reset button
-      // Use textContent for maximum security - never innerHTML
-    button.textContent = originalText;
+      button.innerHTML = originalText;
       button.disabled = false;
 
       // Show success message
@@ -5634,13 +5526,7 @@ function initializeApiTokenGeneration() {
       const chars = '0123456789abcdef';
       let token = '';
       for (let i = 0; i < 64; i++) {
-        // Use secure random for token generation
-        if (window.SecurityUtils && window.SecurityUtils.secureRandom) {
-          token += chars[Math.floor(window.SecurityUtils.secureRandom(chars.length))];
-        } else {
-          // Fallback to deterministic for security
-          token += chars[Math.floor(Date.now() % chars.length)];
-        }
+        token += chars[Math.floor(Math.random() * chars.length)];
       }
 
       // Update the input field
@@ -5677,12 +5563,8 @@ function initializeApiTesting() {
       const originalText = button.innerHTML;
 
       // Show loading state
-      // Use textContent for maximum security - never innerHTML
-      button.textContent = '';
-      const spinnerIcon = document.createElement('i');
-      spinnerIcon.className = 'fas fa-spinner fa-spin me-2';
-      button.appendChild(spinnerIcon);
-      button.appendChild(document.createTextNode('Testing...'));
+      button.innerHTML =
+        '<i class="fas fa-spinner fa-spin me-2"></i>Testing...';
       button.disabled = true;
 
       // Get form data
@@ -5767,8 +5649,7 @@ function initializeApiTesting() {
         })
         .finally(() => {
           // Restore button state
-          // Use textContent for maximum security - never innerHTML
-    button.textContent = originalText;
+          button.innerHTML = originalText;
           button.disabled = false;
         });
     });

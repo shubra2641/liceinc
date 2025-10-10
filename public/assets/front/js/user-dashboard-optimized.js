@@ -12,9 +12,22 @@
   const showNotification = (message, type = 'info') => {
     const notification = document.createElement('div');
     notification.className = `user-notification user-notification-${type} show`;
-    // Sanitize message to prevent XSS - use textContent for maximum security
-    const sanitizedMessage = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(message) : message;
-    notification.textContent = sanitizedMessage;
+    // Sanitize message to prevent XSS
+    // Message will be sanitized by SecurityUtils
+    window.SecurityUtils.safeInnerHTML(
+      this,
+      `
+            <div class="user-notification-content">
+                <div class="user-notification-icon">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
+                </div>
+                <div class="user-notification-message">${message}</div>
+                <button class="user-notification-close" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `,
+    );
 
     document.body.appendChild(notification);
     setTimeout(() => notification.remove(), 5000);
@@ -343,40 +356,24 @@
 
   const showCopySuccess = button => {
     const originalText = button.innerHTML;
-    // Use SecurityUtils for safe button content
-    if (typeof SecurityUtils !== 'undefined') {
-      SecurityUtils.safeInnerHTML(button, '<i class="fas fa-check"></i> Copied!', true, true);
-    } else {
-      button.textContent = 'Copied!';
-    }
+    // Sanitize original text to prevent XSS
+    // Text will be sanitized by SecurityUtils
+    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
     button.style.background = '#10b981';
 
     setTimeout(() => {
-      if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(button, originalText, true, true);
-      } else {
-        button.textContent = originalText;
-      }
+      button.innerHTML = originalText;
       button.style.background = '';
     }, 2000);
   };
 
   const showCopyError = button => {
     const originalText = button.innerHTML;
-    // Use SecurityUtils for safe button content
-    if (typeof SecurityUtils !== 'undefined') {
-      SecurityUtils.safeInnerHTML(button, '<i class="fas fa-times"></i> Failed', true, true);
-    } else {
-      button.textContent = 'Failed';
-    }
+    button.innerHTML = '<i class="fas fa-times"></i> Failed';
     button.style.background = '#ef4444';
 
     setTimeout(() => {
-      if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(button, originalText, true, true);
-      } else {
-        button.textContent = originalText;
-      }
+      button.innerHTML = originalText;
       button.style.background = '';
     }, 2000);
   };
@@ -518,9 +515,7 @@
   const initializeHashScrolling = () => {
     const { hash } = window.location;
     if (hash) {
-      // Sanitize hash to prevent XSS
-      const sanitizedHash = hash.replace(/[<>'"]/g, '');
-      const element = $(sanitizedHash);
+      const element = $(hash);
       if (element) {
         setTimeout(() => element.scrollIntoView({ behavior: 'smooth' }), 100);
       }
@@ -623,10 +618,10 @@
         if (navigator.share) {
           navigator.share({
             title: document.title,
-            url: window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href,
+            url: window.location.href,
           });
         } else {
-          navigator.clipboard.writeText(window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href).then(() => {
+          navigator.clipboard.writeText(window.location.href).then(() => {
             showNotification('Link copied to clipboard!', 'success');
             return undefined;
           }).catch(() => {
@@ -744,48 +739,30 @@
           '\'': '&#x27;',
         }[match])),
       }));
-      // Use SecurityUtils for safe domain list update
-      if (typeof SecurityUtils !== 'undefined') {
-        const domainsHtml = sanitizedDomains
-          .map(domain => {
-            const safeDomain = SecurityUtils.sanitizeHtml(domain.domain);
-            const safeRegisteredAt = SecurityUtils.sanitizeHtml(domain.registered_at);
-            const safeStatus = SecurityUtils.sanitizeHtml(domain.status);
-            
-            return `
-              <div class="domain-item">
-                <div class="domain-info">
-                  <div class="domain-name">
-                    <i class="fas fa-globe"></i>
-                    ${safeDomain}
-                  </div>
-                  <div class="domain-meta">
-                    <div class="domain-date">
-                      <i class="fas fa-calendar"></i>
-                      ${safeRegisteredAt}
+      domainsList.innerHTML = sanitizedDomains
+        .map(
+          domain => `
+                <div class="domain-item">
+                    <div class="domain-info">
+                        <div class="domain-name">
+                            <i class="fas fa-globe"></i>
+                            ${domain.domain}
+                        </div>
+                        <div class="domain-meta">
+                            <div class="domain-date">
+                                <i class="fas fa-calendar"></i>
+                                ${domain.registered_at}
+                            </div>
+                            <div class="domain-status">
+                                <span class="status-dot ${domain.status}"></span>
+                                <span class="status-text">${domain.status}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="domain-status">
-                      <span class="status-dot ${safeStatus}"></span>
-                      <span class="status-text">${safeStatus}</span>
-                    </div>
-                  </div>
                 </div>
-              </div>
-            `;
-          })
-          .join('');
-        
-        SecurityUtils.safeInnerHTML(domainsList, domainsHtml, true, true);
-      } else {
-        // Fallback: use textContent for maximum security
-        domainsList.textContent = '';
-        sanitizedDomains.forEach(domain => {
-          const domainItem = document.createElement('div');
-          domainItem.className = 'domain-item';
-          domainItem.textContent = `Domain: ${domain.domain} - Status: ${domain.status} - Date: ${domain.registered_at}`;
-          domainsList.appendChild(domainItem);
-        });
-      }
+            `,
+        )
+        .join('');
     };
 
     const updateEnvatoStatus = envatoData => {
@@ -848,12 +825,8 @@
       // Simulate loading license history
       const historyContent = $('.user-history-content');
       if (historyContent) {
-        // Use SecurityUtils for safe loading message
-        if (typeof SecurityUtils !== 'undefined') {
-          SecurityUtils.safeInnerHTML(historyContent, '<div class="text-center p-4">Loading history...</div>', true, true);
-        } else {
-          historyContent.textContent = 'Loading history...';
-        }
+        historyContent.innerHTML =
+          '<div class="text-center p-4">Loading history...</div>';
 
         // Simulate API call
         setTimeout(() => {
@@ -907,45 +880,25 @@
             }[match])),
           }));
 
-          // Use SecurityUtils for safe history content
-          if (typeof SecurityUtils !== 'undefined') {
-            const historyHtml = sanitizedHistory
-              .map(item => {
-                const safeTitle = SecurityUtils.sanitizeHtml(item.title);
-                const safeDescription = SecurityUtils.sanitizeHtml(item.description);
-                const safeDate = SecurityUtils.sanitizeHtml(item.date);
-                const safeIp = SecurityUtils.sanitizeHtml(item.ip);
-                const safeType = SecurityUtils.sanitizeHtml(item.type);
-                
-                return `
-                  <div class="history-item">
-                    <div class="history-item-icon ${safeType}">
-                      <i class="fas fa-${getHistoryIcon(safeType)}"></i>
-                    </div>
-                    <div class="history-item-content">
-                      <div class="history-item-title">${safeTitle}</div>
-                      <div class="history-item-description">${safeDescription}</div>
-                      <div class="history-item-meta">
-                        <span class="history-item-time">${safeDate}</span>
-                        <span class="history-item-ip">IP: ${safeIp}</span>
-                      </div>
-                    </div>
-                  </div>
-                `;
-              })
-              .join('');
-            
-            SecurityUtils.safeInnerHTML(historyContent, historyHtml, true, true);
-          } else {
-            // Fallback: use textContent for maximum security
-            historyContent.textContent = '';
-            sanitizedHistory.forEach(item => {
-              const historyItem = document.createElement('div');
-              historyItem.className = 'history-item';
-              historyItem.textContent = `${item.title} - ${item.description} - ${item.date} - IP: ${item.ip}`;
-              historyContent.appendChild(historyItem);
-            });
-          }
+          historyContent.innerHTML = sanitizedHistory
+            .map(
+              item => `
+                        <div class="history-item">
+                            <div class="history-item-icon ${item.type}">
+                                <i class="fas fa-${getHistoryIcon(item.type)}"></i>
+                            </div>
+                            <div class="history-item-content">
+                                <div class="history-item-title">${item.title}</div>
+                                <div class="history-item-description">${item.description}</div>
+                                <div class="history-item-meta">
+                                    <span class="history-item-time">${item.date}</span>
+                                    <span class="history-item-ip">IP: ${item.ip}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `,
+            )
+            .join('');
         }, 1000);
       }
     };

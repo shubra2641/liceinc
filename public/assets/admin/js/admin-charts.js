@@ -32,42 +32,14 @@ if (typeof window.AdminCharts === 'undefined') {
 
       this.apiFetch = async(path, options = {}) => {
         const primaryUrl = this.buildUrl(path);
-        // Enhanced URL validation to prevent SSRF attacks
         if (!this.isValidUrl(primaryUrl)) {
           throw new Error('Invalid URL: SSRF protection activated');
-        }
-        
-        // Additional validation for dangerous URLs
-        const dangerousPatterns = [
-          /\.\./,  // Directory traversal
-          /%2e%2e/i,  // URL encoded directory traversal
-          /%252e%252e/i,  // Double URL encoded directory traversal
-          /<script/i,  // Script tags
-          /javascript:/i,  // JavaScript protocol
-          /data:/i,  // Data protocol
-          /file:/i,  // File protocol
-          /ftp:/i,  // FTP protocol
-        ];
-        
-        if (dangerousPatterns.some(pattern => pattern.test(primaryUrl))) {
-          throw new Error('Dangerous URL pattern detected: SSRF protection activated');
         }
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         const headers = { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
         if (csrfToken) headers['X-CSRF-TOKEN'] = csrfToken;
-        // Use SecurityUtils for safe object assignment to prevent Object Injection
-        if (window.SecurityUtils) {
-          headers = window.SecurityUtils.sanitizeObject({ ...headers, ...options.headers });
-          const opts = window.SecurityUtils.sanitizeObject({ credentials: 'same-origin', headers, method: options.method || 'GET', ...options });
-        } else {
-          // Fallback with basic validation
-          headers = { ...headers, ...options.headers };
-        }
-        
-        const opts = window.SecurityUtils ? 
-          window.SecurityUtils.sanitizeObject({ credentials: 'same-origin', headers, method: options.method || 'GET', ...options }) :
-          { credentials: 'same-origin', headers, method: options.method || 'GET', ...options };
-        
+        Object.assign(headers, options.headers || {});
+        const opts = Object.assign({ credentials: 'same-origin', headers, method: options.method || 'GET' }, options);
         const tryParseJson = async resp => {
           const ct = resp.headers.get('content-type') || '';
           if (!resp.ok) {
@@ -1699,8 +1671,9 @@ document.addEventListener('DOMContentLoaded', () => {
           '"': '&quot;',
           '\'': '&#x27;',
         }[match]));
-        // Use textContent for maximum security - never innerHTML
-        const logDetails = `
+        window.SecurityUtils.safeInnerHTML(
+          this,
+          `
                     <div class="row">
                         <div class="col-md-6">
                             <p><strong>Log ID:</strong> ${sanitizedLogId}</p>
@@ -1714,9 +1687,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <hr>
                     <h6>Detailed Information</h6>
                     <p>Detailed log information will be displayed here</p>
-                `;
-        // Use textContent for maximum security
-        modalContent.textContent = logDetails;
+                `,
+        );
       }
       const modal = new bootstrap.Modal(
         document.getElementById('logDetailsModal'),

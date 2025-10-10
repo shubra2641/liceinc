@@ -24,12 +24,7 @@ const showNotification = (message, type = 'info') => {
     
     const icon = document.createElement('div');
     icon.className = 'user-notification-icon';
-    // Use SecurityUtils for safe icon creation
-    if (typeof SecurityUtils !== 'undefined') {
-      SecurityUtils.safeInnerHTML(icon, `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>`, true, true);
-    } else {
-      icon.textContent = ''; // Safe fallback
-    }
+    icon.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>`;
     
     const messageDiv = document.createElement('div');
     messageDiv.className = 'user-notification-message';
@@ -37,12 +32,7 @@ const showNotification = (message, type = 'info') => {
     
     const closeBtn = document.createElement('button');
     closeBtn.className = 'user-notification-close';
-    // Use SecurityUtils for safe close button
-    if (typeof SecurityUtils !== 'undefined') {
-      SecurityUtils.safeInnerHTML(closeBtn, '<i class="fas fa-times"></i>', true, true);
-    } else {
-      closeBtn.textContent = '×'; // Safe fallback
-    }
+    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
     closeBtn.onclick = () => notification.remove();
     
     content.appendChild(icon);
@@ -424,12 +414,11 @@ class FrontendPreloaderManager {
 
     let progress = 0;
     const interval = setInterval(() => {
-      // Use secure random for all operations, even UI animations
-      if (window.SecurityUtils && window.SecurityUtils.secureRandom) {
-        progress += window.SecurityUtils.secureRandom(20);
+      // Use secure random for better security
+      if (typeof SecurityUtils !== 'undefined' && SecurityUtils.secureRandom) {
+        progress += SecurityUtils.secureRandom(20);
       } else {
-        // Fallback to deterministic progress for security
-        progress += 15; // Fixed increment for security
+        progress += Math.random() * 20; // Fallback for older browsers
       }
       if (progress >= 100) {
         progress = 100;
@@ -1126,9 +1115,7 @@ window.ProductShowManager = ProductShowManager;
   const initializeHashScrolling = () => {
     const { hash } = window.location;
     if (hash) {
-      // Sanitize hash to prevent XSS
-      const sanitizedHash = hash.replace(/[<>'"]/g, '');
-      const element = $(sanitizedHash);
+      const element = $(hash);
       if (element) {
         setTimeout(() => element.scrollIntoView({ behavior: 'smooth' }), 100);
       }
@@ -1231,10 +1218,10 @@ window.ProductShowManager = ProductShowManager;
         if (navigator.share) {
           navigator.share({
             title: document.title,
-            url: window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href,
+            url: window.location.href,
           });
         } else {
-          navigator.clipboard.writeText(window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href).then(() => {
+          navigator.clipboard.writeText(window.location.href).then(() => {
             showNotification('Link copied to clipboard!', 'success');
           });
         }
@@ -1359,48 +1346,48 @@ window.ProductShowManager = ProductShowManager;
         return;
       }
 
-      // Use SecurityUtils for safe domain list update
-      if (typeof SecurityUtils !== 'undefined') {
-        // Create safe HTML using SecurityUtils
-        const domainsHtml = domains
-          .map(domain => {
-            const safeDomain = SecurityUtils.sanitizeHtml(domain.domain);
-            const safeRegisteredAt = SecurityUtils.sanitizeHtml(domain.registered_at);
-            const safeStatus = SecurityUtils.sanitizeHtml(domain.status);
-            
-            return `
-              <div class="domain-item">
-                <div class="domain-info">
-                  <div class="domain-name">
-                    <i class="fas fa-globe"></i>
-                    ${safeDomain}
-                  </div>
-                  <div class="domain-meta">
-                    <div class="domain-date">
-                      <i class="fas fa-calendar"></i>
-                      ${safeRegisteredAt}
+      // Sanitize domains to prevent XSS
+      const sanitizedDomains = domains.map(domain => ({
+        ...domain,
+        domain: domain.domain.replace(/[<>&"']/g, match => ({
+          '<': '&lt;',
+          '>': '&gt;',
+          '&': '&amp;',
+          '"': '&quot;',
+          '\'': '&#x27;',
+        }[match])),
+      }));
+      // Use SecurityUtils for safe HTML insertion
+      const domainsHtml = sanitizedDomains
+        .map(
+          domain => `
+                <div class="domain-item">
+                    <div class="domain-info">
+                        <div class="domain-name">
+                            <i class="fas fa-globe"></i>
+                            ${domain.domain}
+                        </div>
+                        <div class="domain-meta">
+                            <div class="domain-date">
+                                <i class="fas fa-calendar"></i>
+                                ${domain.registered_at}
+                            </div>
+                            <div class="domain-status">
+                                <span class="status-dot ${domain.status}"></span>
+                                <span class="status-text">${domain.status}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="domain-status">
-                      <span class="status-dot ${safeStatus}"></span>
-                      <span class="status-text">${safeStatus}</span>
-                    </div>
-                  </div>
                 </div>
-              </div>
-            `;
-          })
-          .join('');
-        
+            `,
+        )
+        .join('');
+      
+      if (typeof SecurityUtils !== 'undefined') {
         SecurityUtils.safeInnerHTML(domainsList, domainsHtml, true, true);
       } else {
-        // Fallback: use textContent for maximum security
-        domainsList.textContent = '';
-        domains.forEach(domain => {
-          const domainItem = document.createElement('div');
-          domainItem.className = 'domain-item';
-          domainItem.textContent = `Domain: ${domain.domain} - Status: ${domain.status} - Date: ${domain.registered_at}`;
-          domainsList.appendChild(domainItem);
-        });
+        domainsList.textContent = ''; // Clear and add text content for security
+        domainsList.textContent = 'Domains loaded';
       }
     };
 
@@ -2024,23 +2011,15 @@ class UserTickets {
     productSlugInput.style.borderColor = '#ffc107';
     productSlugInput.placeholder = 'Verifying purchase code...';
 
-    // Use CommonUtils for secure fetch
-    if (window.CommonUtils) {
-      window.CommonUtils.secureFetch(
-        `/verify-purchase-code/${encodeURIComponent(purchaseCode)}`,
-      )
-        .then(window.CommonUtils.handleFetchResponse)
-    } else {
-      window.SecurityUtils.safeFetch(
-        `/verify-purchase-code/${encodeURIComponent(purchaseCode)}`,
-      )
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          return response.json();
-        })
-    }
+    window.SecurityUtils.safeFetch(
+      `/verify-purchase-code/${encodeURIComponent(purchaseCode)}`,
+    )
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
         if (data.success && data.product) {
           // Set values
@@ -2159,12 +2138,11 @@ class MaintenanceManager {
       // Simulate progress updates
       let progress = 0;
       const interval = setInterval(() => {
-        // Use secure random for all operations, even UI animations
-        if (window.SecurityUtils && window.SecurityUtils.secureRandom) {
-          progress += window.SecurityUtils.secureRandom(2);
+        // Use secure random for better security
+        if (typeof SecurityUtils !== 'undefined' && SecurityUtils.secureRandom) {
+          progress += SecurityUtils.secureRandom(2);
         } else {
-          // Fallback to deterministic progress for security
-          progress += 1.5; // Fixed increment for security
+          progress += Math.random() * 2; // Fallback for older browsers
         }
         if (progress >= 75) {
           progress = 75;

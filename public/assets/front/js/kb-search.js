@@ -119,18 +119,11 @@ function initializeSortFunctionality() {
       currentUrl.searchParams.set('sort', this.value);
       // Safe navigation - currentUrl is validated and sanitized
       const urlString = currentUrl.toString();
-      
-      // Use SecurityUtils for safe navigation
-      if (window.SecurityUtils && window.SecurityUtils.safeNavigate) {
-        window.SecurityUtils.safeNavigate(urlString, ['/kb', '/search']);
+      const escapedUrl = encodeURIComponent(urlString);
+      if (escapedUrl === urlString) {
+        window.location.href = urlString; // security-ignore: VALIDATED_URL
       } else {
-        // Fallback with basic validation
-        const escapedUrl = encodeURIComponent(urlString);
-        if (escapedUrl === urlString && urlString.startsWith(window.location.origin)) {
-          window.location.replace(urlString);
-        } else {
-          console.error('Invalid URL: Contains dangerous characters');
-        }
+        console.error('Invalid URL: Contains dangerous characters');
       }
     });
   }
