@@ -3,6 +3,12 @@
  * External JS file for license guide page
  */
 
+// Constants to avoid magic numbers
+const FEEDBACK_DURATION = 2000;
+const TOOLTIP_DURATION = 1000;
+const CODE_BLOCK_MAX_HEIGHT = 300;
+const ARRAY_INDEX_OFFSET = 1;
+
 // Copy to clipboard functionality
 function copyToClipboard(elementId) {
     const element = document.getElementById(elementId);
@@ -30,7 +36,7 @@ function copyToClipboard(elementId) {
         setTimeout(() => {
             button.textContent = originalText;
             button.classList.remove('copy-button-success');
-        }, 2000);
+        }, FEEDBACK_DURATION);
     }
 }
 
@@ -41,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
     copyButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
-            const elementId = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+            const elementId = this.getAttribute('onclick').match(/'([^']+)'/)[ARRAY_INDEX_OFFSET];
             copyToClipboard(elementId);
         });
     });
@@ -51,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
     anchorLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            const targetId = this.getAttribute('href').substring(1);
+            const targetId = this.getAttribute('href').substring(ARRAY_INDEX_OFFSET);
             const targetElement = document.getElementById(targetId);
             
             if (targetElement) {
@@ -97,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.classList.add('copied');
                 setTimeout(() => {
                     this.classList.remove('copied');
-                }, 1000);
+                }, TOOLTIP_DURATION);
             });
         });
     });
@@ -105,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add expand/collapse functionality for long code blocks
     const longCodeBlocks = document.querySelectorAll('.guide-code-content');
     longCodeBlocks.forEach(block => {
-        if (block.scrollHeight > 300) {
+        if (block.scrollHeight > CODE_BLOCK_MAX_HEIGHT) {
             const wrapper = block.closest('.guide-code-block');
             const header = wrapper.querySelector('.guide-code-header');
             
@@ -117,16 +123,16 @@ document.addEventListener('DOMContentLoaded', function() {
             header.appendChild(expandBtn);
             
             // Set initial state
-            block.style.maxHeight = '300px';
+            block.style.maxHeight = `${CODE_BLOCK_MAX_HEIGHT}px`;
             block.style.overflow = 'hidden';
             
             // Toggle functionality
             expandBtn.addEventListener('click', function() {
-                if (block.style.maxHeight === '300px') {
+                if (block.style.maxHeight === `${CODE_BLOCK_MAX_HEIGHT}px`) {
                     block.style.maxHeight = 'none';
                     this.textContent = 'Show Less';
                 } else {
-                    block.style.maxHeight = '300px';
+                    block.style.maxHeight = `${CODE_BLOCK_MAX_HEIGHT}px`;
                     this.textContent = 'Show More';
                 }
             });
