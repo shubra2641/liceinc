@@ -13,7 +13,23 @@ class PreloaderManager {
     }
 
     init() {
-        if (!this.container || !this.settings.enabled) {
+        if (!this.container) {
+            return;
+        }
+
+        // Get settings from data attributes
+        this.settings = {
+            enabled: this.container.dataset.enabled === '1',
+            type: this.container.dataset.type || 'spinner',
+            color: this.container.dataset.color || '#3b82f6',
+            backgroundColor: this.container.dataset.bg || '#ffffff',
+            duration: parseInt(this.container.dataset.duration) || 3000,
+            minDuration: parseInt(this.container.dataset.minDuration) || 1000,
+            text: this.container.dataset.text || 'Loading...'
+        };
+
+        if (!this.settings.enabled) {
+            this.hidePreloader();
             return;
         }
 
@@ -48,7 +64,9 @@ class PreloaderManager {
     setupEventListeners() {
         // Hide preloader when page is fully loaded
         window.addEventListener('load', () => {
-            this.hidePreloader();
+            setTimeout(() => {
+                this.hidePreloader();
+            }, this.settings.minDuration || 500);
         });
 
         // Fallback: Hide preloader after maximum duration
@@ -66,6 +84,13 @@ class PreloaderManager {
                 this.resumeAnimations();
             }
         });
+
+        // Additional fallback for DOM ready
+        if (document.readyState === 'complete') {
+            setTimeout(() => {
+                this.hidePreloader();
+            }, this.settings.minDuration || 500);
+        }
     }
 
     startPreloader() {
@@ -89,6 +114,10 @@ class PreloaderManager {
         }
 
         this.isVisible = false;
+        
+        // Add fade out animation
+        this.container.style.opacity = '0';
+        this.container.style.visibility = 'hidden';
         this.container.classList.add('hidden');
 
         // Remove from DOM after animation
@@ -158,6 +187,21 @@ class PreloaderManager {
 document.addEventListener('DOMContentLoaded', () => {
     new PreloaderManager();
 });
+
+// Fallback: Force hide preloader after 5 seconds
+setTimeout(() => {
+    const preloader = document.getElementById('preloader-container');
+    if (preloader && !preloader.classList.contains('hidden')) {
+        preloader.style.opacity = '0';
+        preloader.style.visibility = 'hidden';
+        preloader.classList.add('hidden');
+        setTimeout(() => {
+            if (preloader.parentNode) {
+                preloader.parentNode.removeChild(preloader);
+            }
+        }, 500);
+    }
+}, 5000);
 
 // Export for global access
 window.PreloaderManager = PreloaderManager;

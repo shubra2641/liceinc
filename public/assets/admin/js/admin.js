@@ -90,7 +90,7 @@ class ToastManager {
         }, window.ADMIN_CONSTANTS.DEBOUNCE_DELAY);
 
         // Auto remove
-        if (duration > 0) {
+        if (duration > window.ADMIN_CONSTANTS.ZERO) {
             setTimeout(() => {
                 this.hide(toast);
             }, duration);
@@ -388,7 +388,7 @@ class AdminDashboard {
             // Initialize all textareas with data-summernote attribute
             const textareas = $('textarea[data-summernote="true"]');
             
-            if (textareas.length === 0) {
+            if (textareas.length === window.ADMIN_CONSTANTS.ZERO) {
                 
                 return;
             }
@@ -569,7 +569,7 @@ class AdminDashboard {
 
     // Handle image preview
     handleImagePreview(event, previewId) {
-        const file = event.target.files[0];
+        const file = event.target.files[window.ADMIN_CONSTANTS.ZERO];
         if (file) {
             const reader = new window.FileReader();
             reader.onload = (e) => {
@@ -589,7 +589,7 @@ class AdminDashboard {
     // Handle gallery preview
     handleGalleryPreview(event, previewId) {
         const files = event.target.files;
-        if (files.length > 0) {
+        if (files.length > window.ADMIN_CONSTANTS.ZERO) {
             let preview = document.getElementById(previewId);
             if (!preview) {
                 preview = document.createElement('div');
@@ -715,8 +715,8 @@ class AdminDashboard {
 
     // Bridge to global confirmation initializer (keeps compatibility)
     initConfirmations() {
-        if (typeof initConfirmationsGlobal === 'function') {
-            initConfirmationsGlobal();
+        if (typeof window.initConfirmationsGlobal === 'function') {
+            window.initConfirmationsGlobal();
         } else {
             // Fallback inline implementation
             document.addEventListener('click', (e) => {
@@ -853,7 +853,7 @@ class AdminDashboard {
             });
         }
 
-        if (roleInputs.length > 0 && previewRole) {
+        if (roleInputs.length > window.ADMIN_CONSTANTS.ZERO && previewRole) {
             roleInputs.forEach(radio => {
                 radio.addEventListener('change', function() {
                     if (this.checked) {
@@ -1828,7 +1828,7 @@ class AdminDashboard {
                         throw new Error('Invalid JSON response from server');
                     }
                 })
-                .catch(error => {
+                .catch(() => {
                     // Error loading licenses
                     this.showNotification('Error loading licenses. Please make sure you are logged in and the server is reachable.', 'error');
                 });
@@ -2385,7 +2385,7 @@ class AdminDashboard {
                 contentElement.innerHTML = `<div class="text-danger"><i class="fas fa-exclamation-triangle"></i> ${data.message || 'Error loading file'}</div>`;
             }
         })
-        .catch(error => {
+        .catch(() => {
             // Error loading file
             contentElement.innerHTML = '<div class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading file</div>';
         });
@@ -2448,7 +2448,7 @@ class AdminDashboard {
                 contentElement.innerHTML = `<div class="text-danger text-center py-4"><i class="fas fa-exclamation-triangle fa-2x"></i><p class="mt-2">${data.message || 'Error loading template'}</p></div>`;
             }
         })
-        .catch(error => {
+        .catch(() => {
             // Error loading file
             contentElement.innerHTML = '<div class="text-danger text-center py-4"><i class="fas fa-exclamation-triangle fa-2x"></i><p class="mt-2">Error loading template</p></div>';
         });
@@ -2459,7 +2459,7 @@ class AdminDashboard {
         if (this.templateContent) {
             navigator.clipboard.writeText(this.templateContent).then(() => {
                 this.showNotification('Template content copied to clipboard', 'success');
-            }).catch(err => {
+            }).catch(() => {
                 // Failed to copy
                 this.showNotification('Failed to copy content', 'error');
             });
@@ -2594,10 +2594,9 @@ class AdminDashboard {
             }
             
             console.log('API Test button found, adding event listener');
-            // const self = this; // Unused variable removed
-            testBtn.addEventListener('click', function() {
+            testBtn.addEventListener('click', () => {
                 console.log('API Test button clicked');
-                self.testEnvatoApi();
+                this.testEnvatoApi();
             });
             
             // Mark as initialized
@@ -3157,7 +3156,7 @@ function initProgrammingLanguagesEditButtons() {
 
 }
 
-function loadTemplate(templateName) {
+function loadTemplate() {
     showNotification('Loading template...', 'info');
     
     // Find the template textarea
@@ -3480,7 +3479,7 @@ function saveTemplate(templateName) {
             
             // Update any template list if exists
             updateTemplateList();
-        } catch {
+        } catch (error) {
             showNotification('Failed to save template: ' + error.message, 'error');
         }
     } else {
@@ -4085,6 +4084,8 @@ function generateLicense() {
     showNotification('Template creator opened!', 'success');
 }
 
+
+// eslint-disable-next-line no-unused-vars
 function saveNewTemplate() {
     const modal = document.querySelector('.modal');
     const name = modal.querySelector('#template-name').value.trim();
@@ -4120,13 +4121,15 @@ function saveNewTemplate() {
         // Close modal
         bootstrap.Modal.getInstance(modal).hide();
         
-    } catch {
+    } catch (error) {
         showNotification('Failed to create template: ' + error.message, 'error');
     }
 }
 
 
 // Helper functions
+
+// eslint-disable-next-line no-unused-vars
 function deleteTemplate(templateName) {
     if (window.confirm && confirm('Are you sure you want to delete this template?')) {
         try {
@@ -4136,12 +4139,14 @@ function deleteTemplate(templateName) {
             // Update template list if exists
             updateTemplateList();
             
-        } catch {
+        } catch (error) {
             showNotification('Failed to delete template: ' + error.message, 'error');
         }
     }
 }
 
+
+// eslint-disable-next-line no-unused-vars
 function copyTemplateToClipboard() {
     const templateTextarea = document.querySelector('textarea[name="license_template"]');
     if (templateTextarea && templateTextarea.value.trim()) {
@@ -4156,6 +4161,8 @@ function copyTemplateToClipboard() {
 }
 
 // Settings Page Tabs Functions
+
+// eslint-disable-next-line no-unused-vars
 function initSettingsTabs() {
     const container = document.querySelector('.admin-settings-page');
     if (!container) return;
@@ -4389,6 +4396,8 @@ function exportReport(format) {
     }, 1000);
 }
 
+
+// eslint-disable-next-line no-unused-vars
 function exportChart(chartName, format) {
     // Show loading state
     const button = document.querySelector(`[data-chart="${chartName}"]`);
@@ -4411,7 +4420,7 @@ function refreshReports() {
     // Show loading state
     const button = document.querySelector('[data-action="refresh-reports"]');
     if (button) {
-        const originalText = button.innerHTML;
+        // const originalText = button.innerHTML; // Unused variable removed
         button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
         button.disabled = true;
 
@@ -4456,7 +4465,8 @@ function initCharts() {
             try {
                 const systemOverviewData = JSON.parse(systemOverviewCanvas.getAttribute('data-chart-data') || '{}');
                 if (systemOverviewData && Object.keys(systemOverviewData).length > 0) {
-                    new Chart(systemOverviewCanvas, {
+                    
+                    const systemOverviewChart = new Chart(systemOverviewCanvas, {
                         type: 'bar',
                         data: systemOverviewData,
                         options: {
@@ -4482,6 +4492,9 @@ function initCharts() {
                             }
                         }
                     });
+                    
+                    // Store chart reference for potential future use
+                    window.systemOverviewChart = systemOverviewChart;
                 } else {
                     showChartFallback(systemOverviewCanvas);
                 }
@@ -4497,7 +4510,9 @@ function initCharts() {
             try {
                 const licenseStatusData = JSON.parse(licenseStatusCanvas.getAttribute('data-chart-data') || '{}');
                 if (licenseStatusData && Object.keys(licenseStatusData).length > 0) {
-                    new Chart(licenseStatusCanvas, {
+                    
+                    
+                    const licenseStatusChart = new Chart(licenseStatusCanvas, {
                         type: 'doughnut',
                         data: licenseStatusData,
                         options: {
@@ -4515,6 +4530,9 @@ function initCharts() {
                             cutout: '60%'
                         }
                     });
+                    
+                    // Store chart reference for potential future use
+                    window.licenseStatusChart = licenseStatusChart;
                 } else {
                     showChartFallback(licenseStatusCanvas);
                 }
@@ -4530,7 +4548,9 @@ function initCharts() {
             try {
                 const licenseTypeData = JSON.parse(licenseTypeCanvas.getAttribute('data-chart-data') || '{}');
                 if (licenseTypeData && Object.keys(licenseTypeData).length > 0) {
-                    new Chart(licenseTypeCanvas, {
+                    
+                    
+                    const licenseTypeChart = new Chart(licenseTypeCanvas, {
                         type: 'doughnut',
                         data: licenseTypeData,
                         options: {
@@ -4548,6 +4568,9 @@ function initCharts() {
                             cutout: '60%'
                         }
                     });
+                    
+                    // Store chart reference for potential future use
+                    window.licenseTypeChart = licenseTypeChart;
                 } else {
                     showChartFallback(licenseTypeCanvas);
                 }
@@ -4563,7 +4586,8 @@ function initCharts() {
             try {
                 const monthlyLicensesData = JSON.parse(monthlyLicensesCanvas.getAttribute('data-chart-data') || '{}');
                 if (monthlyLicensesData && Object.keys(monthlyLicensesData).length > 0) {
-                    new Chart(monthlyLicensesCanvas, {
+                    
+                    const monthlyLicensesChart = new Chart(monthlyLicensesCanvas, {
                         type: 'line',
                         data: monthlyLicensesData,
                         options: {
@@ -4593,6 +4617,9 @@ function initCharts() {
                             }
                         }
                     });
+                    
+                    // Store chart reference for potential future use
+                    window.monthlyLicensesChart = monthlyLicensesChart;
                 } else {
                     showChartFallback(monthlyLicensesCanvas);
                 }
@@ -4608,7 +4635,8 @@ function initCharts() {
             try {
                 const apiStatusData = JSON.parse(apiStatusCanvas.getAttribute('data-chart-data') || '{}');
                 if (apiStatusData && Object.keys(apiStatusData).length > 0) {
-                    new Chart(apiStatusCanvas, {
+                    
+                    const apiStatusChart = new Chart(apiStatusCanvas, {
                         type: 'bar',
                         data: apiStatusData,
                         options: {
@@ -4638,6 +4666,9 @@ function initCharts() {
                             }
                         }
                     });
+                    
+                    // Store chart reference for potential future use
+                    window.apiStatusChart = apiStatusChart;
                 } else {
                     showChartFallback(apiStatusCanvas);
                 }
@@ -4653,7 +4684,8 @@ function initCharts() {
             try {
                 const apiCallsData = JSON.parse(apiCallsCanvas.getAttribute('data-chart-data') || '{}');
                 if (apiCallsData && Object.keys(apiCallsData).length > 0) {
-                    new Chart(apiCallsCanvas, {
+                    
+                    const apiCallsChart = new Chart(apiCallsCanvas, {
                         type: 'line',
                         data: apiCallsData,
                         options: {
@@ -4683,6 +4715,9 @@ function initCharts() {
                             }
                         }
                     });
+                    
+                    // Store chart reference for potential future use
+                    window.apiCallsChart = apiCallsChart;
                 } else {
                     showChartFallback(apiCallsCanvas);
                 }
@@ -4698,7 +4733,8 @@ function initCharts() {
             try {
                 const invoicesMonthlyData = JSON.parse(invoicesMonthlyCanvas.getAttribute('data-chart-data') || '{}');
                 if (invoicesMonthlyData && Object.keys(invoicesMonthlyData).length > 0) {
-                    new Chart(invoicesMonthlyCanvas, {
+                    
+                    const invoicesMonthlyChart = new Chart(invoicesMonthlyCanvas, {
                         type: 'line',
                         data: invoicesMonthlyData,
                         options: {
@@ -4728,6 +4764,9 @@ function initCharts() {
                             }
                         }
                     });
+                    
+                    // Store chart reference for potential future use
+                    window.invoicesMonthlyChart = invoicesMonthlyChart;
                 } else {
                     showChartFallback(invoicesMonthlyCanvas);
                 }
@@ -4743,7 +4782,8 @@ function initCharts() {
             try {
                 const monthlyRevenueData = JSON.parse(monthlyRevenueCanvas.getAttribute('data-chart-data') || '{}');
                 if (monthlyRevenueData && Object.keys(monthlyRevenueData).length > 0) {
-                    new Chart(monthlyRevenueCanvas, {
+                    
+                    const monthlyRevenueChart = new Chart(monthlyRevenueCanvas, {
                         type: 'line',
                         data: monthlyRevenueData,
                         options: {
@@ -4778,6 +4818,9 @@ function initCharts() {
                             }
                         }
                     });
+                    
+                    // Store chart reference for potential future use
+                    window.monthlyRevenueChart = monthlyRevenueChart;
                 } else {
                     showChartFallback(monthlyRevenueCanvas);
                 }
@@ -4793,7 +4836,8 @@ function initCharts() {
             try {
                 const activityTimelineData = JSON.parse(activityTimelineCanvas.getAttribute('data-chart-data') || '{}');
                 if (activityTimelineData && Object.keys(activityTimelineData).length > 0) {
-                    new Chart(activityTimelineCanvas, {
+                    
+                    const activityTimelineChart = new Chart(activityTimelineCanvas, {
                         type: 'line',
                         data: activityTimelineData,
                         options: {
@@ -4823,6 +4867,9 @@ function initCharts() {
                             }
                         }
                     });
+                    
+                    // Store chart reference for potential future use
+                    window.activityTimelineChart = activityTimelineChart;
                 } else {
                     showChartFallback(activityTimelineCanvas);
                 }
@@ -4838,7 +4885,8 @@ function initCharts() {
             try {
                 const userRegistrationsData = JSON.parse(userRegistrationsCanvas.getAttribute('data-chart-data') || '{}');
                 if (userRegistrationsData && Object.keys(userRegistrationsData).length > 0) {
-                    new Chart(userRegistrationsCanvas, {
+                    
+                    const userRegistrationsChart = new Chart(userRegistrationsCanvas, {
                         type: 'line',
                         data: userRegistrationsData,
                         options: {
@@ -4868,6 +4916,9 @@ function initCharts() {
                             }
                         }
                     });
+                    
+                    // Store chart reference for potential future use
+                    window.userRegistrationsChart = userRegistrationsChart;
                 } else {
                     showChartFallback(userRegistrationsCanvas);
                 }

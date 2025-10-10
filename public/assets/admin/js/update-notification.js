@@ -59,6 +59,6 @@ class UpdateNotification {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  // eslint-disable-next-line no-new
+  
   new UpdateNotification();
 });

@@ -183,7 +183,7 @@ function performUpdate(version) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function showVersionDetails(version) {
   fetch(`/admin/updates/version-info/${version}`)
     .then(response => response.json())
@@ -346,7 +346,7 @@ function showVersionDetails(version) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function showRollbackModal(version) {
   document.getElementById('confirm-rollback-btn').dataset.version = version;
   document.getElementById('confirmRollback').checked = false;
@@ -435,7 +435,7 @@ document
   });
 
 // Check for updates function (refresh page to get latest data)
-// eslint-disable-next-line no-unused-vars
+
 function checkForUpdatesManually() {
   showAlert('info', 'Checking for updates...');
 
@@ -446,7 +446,7 @@ function checkForUpdatesManually() {
 }
 
 // Display update information
-// eslint-disable-next-line no-unused-vars
+
 function displayUpdateInfo(updateData) {
   document.getElementById('update-title').textContent =
     updateData.update_info.title || 'Update';
@@ -526,21 +526,21 @@ function displayUpdateInfo(updateData) {
 }
 
 // Show no updates available
-// eslint-disable-next-line no-unused-vars
+
 function showNoUpdatesAvailable() {
   document.getElementById('update-info-section').style.display = 'none';
   document.getElementById('no-updates-section').style.display = 'block';
 }
 
 // Show auto update modal
-// eslint-disable-next-line no-unused-vars
+
 function showAutoUpdateModal() {
   const modal = new bootstrap.Modal(document.getElementById('autoUpdateModal'));
   modal.show();
 }
 
 // Show upload update modal
-// eslint-disable-next-line no-unused-vars
+
 function showUploadUpdateModal() {
   const modal = new bootstrap.Modal(
     document.getElementById('uploadPackageModal'),
@@ -548,7 +548,7 @@ function showUploadUpdateModal() {
   modal.show();
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function showProductUpdateInfo(updateData, productName) {
   const modalHtml = `
         <div class="modal fade" id="productUpdateModal" tabindex="-1">
@@ -629,7 +629,7 @@ function showProductUpdateInfo(updateData, productName) {
   modal.show();
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function installProductUpdate(version, downloadUrl) {
   if (!confirm('Are you sure you want to install this update?')) {
     return;
@@ -647,7 +647,7 @@ function installProductUpdate(version, downloadUrl) {
   }, 3000);
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function checkAutoUpdates() {
   const licenseKey = document.getElementById('auto-license-key').value;
   const productSlug = document.getElementById('auto-product-slug').value;
@@ -744,7 +744,7 @@ function checkAutoUpdates() {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function showAutoUpdateInfo(updateData) {
   const updateInfoDiv = document.getElementById('auto-update-info');
   // Sanitize update data to prevent XSS
@@ -829,7 +829,7 @@ function showAutoUpdateInfo(updateData) {
   updateInfoDiv.style.display = 'block';
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function installAutoUpdate(version) {
   const licenseKey = document.getElementById('auto-license-key').value;
   const productSlug = document.getElementById('auto-product-slug').value;

@@ -142,6 +142,6 @@ class UserTickets {
 
 // Initialize when DOM is ready
 if (typeof document !== 'undefined') {
-    // eslint-disable-next-line no-new
+    
     new UserTickets();
 }
