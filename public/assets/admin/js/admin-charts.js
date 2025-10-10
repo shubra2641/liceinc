@@ -80,7 +80,15 @@ if (typeof window.AdminCharts === 'undefined') {
                 };
 
                 try {
-                    const resp = await fetch(primaryUrl, opts);
+                    // Validate and sanitize the URL to prevent SSRF
+                    const url = new URL(primaryUrl, window.location.origin);
+                    
+                    // Only allow same-origin requests
+                    if (url.origin !== window.location.origin) {
+                        throw new Error('Invalid request URL');
+                    }
+                    
+                    const resp = await fetch(url.toString(), opts);
                     return await tryParseJson(resp);
                 } catch (e) {
                     // Log the error for debugging (only in development)

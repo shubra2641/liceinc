@@ -11,18 +11,34 @@
     const showNotification = (message, type = 'info') => {
         const notification = document.createElement('div');
         notification.className = `user-notification user-notification-${type} show`;
-        notification.innerHTML = `
-            <div class="user-notification-content">
-                <div class="user-notification-icon">
-                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
-                </div>
-                <div class="user-notification-message">${message}</div>
-                <button class="user-notification-close" onclick="this.parentElement.parentElement.remove()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `;
         
+        // Create DOM elements safely to prevent XSS
+        const notificationContent = document.createElement('div');
+        notificationContent.className = 'user-notification-content';
+        
+        const notificationIcon = document.createElement('div');
+        notificationIcon.className = 'user-notification-icon';
+        const icon = document.createElement('i');
+        const iconClass = type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info';
+        icon.className = `fas fa-${iconClass}-circle`;
+        notificationIcon.appendChild(icon);
+        
+        const notificationMessage = document.createElement('div');
+        notificationMessage.className = 'user-notification-message';
+        notificationMessage.textContent = message; // Safe text content
+        
+        const closeButton = document.createElement('button');
+        closeButton.className = 'user-notification-close';
+        closeButton.onclick = () => notification.remove();
+        const closeIcon = document.createElement('i');
+        closeIcon.className = 'fas fa-times';
+        closeButton.appendChild(closeIcon);
+        
+        notificationContent.appendChild(notificationIcon);
+        notificationContent.appendChild(notificationMessage);
+        notificationContent.appendChild(closeButton);
+        
+        notification.appendChild(notificationContent);
         document.body.appendChild(notification);
         setTimeout(() => notification.remove(), 5000);
     };
@@ -627,26 +643,55 @@
             const domainsList = $('.domains-list');
             if (!domainsList) return;
             
-            domainsList.innerHTML = domains.map(domain => `
-                <div class="domain-item">
-                    <div class="domain-info">
-                        <div class="domain-name">
-                            <i class="fas fa-globe"></i>
-                            ${domain.domain}
-                        </div>
-                        <div class="domain-meta">
-                            <div class="domain-date">
-                                <i class="fas fa-calendar"></i>
-                                ${domain.registered_at}
-                            </div>
-                            <div class="domain-status">
-                                <span class="status-dot ${domain.status}"></span>
-                                <span class="status-text">${domain.status}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+            // Clear existing content safely
+            domainsList.innerHTML = '';
+            
+            // Create DOM elements safely to prevent XSS
+            domains.forEach(domain => {
+                const domainItem = document.createElement('div');
+                domainItem.className = 'domain-item';
+                
+                const domainInfo = document.createElement('div');
+                domainInfo.className = 'domain-info';
+                
+                const domainName = document.createElement('div');
+                domainName.className = 'domain-name';
+                domainName.innerHTML = '<i class="fas fa-globe"></i>';
+                
+                const domainSpan = document.createElement('span');
+                domainSpan.textContent = domain.domain; // Safe text content
+                domainName.appendChild(domainSpan);
+                
+                const domainMeta = document.createElement('div');
+                domainMeta.className = 'domain-meta';
+                
+                const domainDate = document.createElement('div');
+                domainDate.className = 'domain-date';
+                domainDate.innerHTML = '<i class="fas fa-calendar"></i>';
+                const dateSpan = document.createElement('span');
+                dateSpan.textContent = domain.registered_at;
+                domainDate.appendChild(dateSpan);
+                
+                const domainStatus = document.createElement('div');
+                domainStatus.className = 'domain-status';
+                const statusDot = document.createElement('span');
+                statusDot.className = `status-dot ${domain.status}`;
+                const statusText = document.createElement('span');
+                statusText.className = 'status-text';
+                statusText.textContent = domain.status;
+                
+                domainStatus.appendChild(statusDot);
+                domainStatus.appendChild(statusText);
+                
+                domainMeta.appendChild(domainDate);
+                domainMeta.appendChild(domainStatus);
+                
+                domainInfo.appendChild(domainName);
+                domainInfo.appendChild(domainMeta);
+                
+                domainItem.appendChild(domainInfo);
+                domainsList.appendChild(domainItem);
+            });
         };
         
         const updateEnvatoStatus = (envatoData) => {
@@ -728,21 +773,54 @@
                         }
                     ];
                     
-                    historyContent.innerHTML = mockHistory.map(item => `
-                        <div class="history-item">
-                            <div class="history-item-icon ${item.type}">
-                                <i class="fas fa-${getHistoryIcon(item.type)}"></i>
-                            </div>
-                            <div class="history-item-content">
-                                <div class="history-item-title">${item.title}</div>
-                                <div class="history-item-description">${item.description}</div>
-                                <div class="history-item-meta">
-                                    <span class="history-item-time">${item.date}</span>
-                                    <span class="history-item-ip">IP: ${item.ip}</span>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
+                    // Clear existing content safely
+                    historyContent.innerHTML = '';
+                    
+                    // Create DOM elements safely to prevent XSS
+                    mockHistory.forEach(item => {
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'history-item';
+                        
+                        const historyIcon = document.createElement('div');
+                        historyIcon.className = `history-item-icon ${item.type}`;
+                        const icon = document.createElement('i');
+                        icon.className = `fas fa-${getHistoryIcon(item.type)}`;
+                        historyIcon.appendChild(icon);
+                        
+                        const historyContent = document.createElement('div');
+                        historyContent.className = 'history-item-content';
+                        
+                        const historyTitle = document.createElement('div');
+                        historyTitle.className = 'history-item-title';
+                        historyTitle.textContent = item.title; // Safe text content
+                        
+                        const historyDescription = document.createElement('div');
+                        historyDescription.className = 'history-item-description';
+                        historyDescription.textContent = item.description; // Safe text content
+                        
+                        const historyMeta = document.createElement('div');
+                        historyMeta.className = 'history-item-meta';
+                        
+                        const historyTime = document.createElement('span');
+                        historyTime.className = 'history-item-time';
+                        historyTime.textContent = item.date; // Safe text content
+                        
+                        const historyIp = document.createElement('span');
+                        historyIp.className = 'history-item-ip';
+                        historyIp.textContent = `IP: ${item.ip}`; // Safe text content
+                        
+                        historyMeta.appendChild(historyTime);
+                        historyMeta.appendChild(historyIp);
+                        
+                        historyContent.appendChild(historyTitle);
+                        historyContent.appendChild(historyDescription);
+                        historyContent.appendChild(historyMeta);
+                        
+                        historyItem.appendChild(historyIcon);
+                        historyItem.appendChild(historyContent);
+                        
+                        historyContent.parentNode.appendChild(historyItem);
+                    });
                 }, 1000);
             }
         };
@@ -871,7 +949,16 @@
                 }
                 
                 try {
-                    const response = await fetch(form.action, {
+                    // Validate and sanitize the form action URL to prevent SSRF
+                    const formAction = form.action;
+                    const url = new URL(formAction, window.location.origin);
+                    
+                    // Only allow same-origin requests
+                    if (url.origin !== window.location.origin) {
+                        throw new Error('Invalid request URL');
+                    }
+                    
+                    const response = await fetch(url.toString(), {
                         method: 'POST',
                         body: formData,
                         headers: {

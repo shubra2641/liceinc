@@ -467,7 +467,16 @@
             button.disabled = true;
             const originalText = button.innerHTML;
             button.dataset.originalText = originalText;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>' + getTranslation('testing') + '</span>';
+            
+            // Create DOM elements safely to prevent XSS
+            button.innerHTML = '';
+            const spinner = document.createElement('i');
+            spinner.className = 'fas fa-spinner fa-spin';
+            const span = document.createElement('span');
+            span.textContent = getTranslation('testing'); // Safe text content
+            button.appendChild(spinner);
+            button.appendChild(document.createTextNode(' '));
+            button.appendChild(span);
         } else {
             button.classList.remove('loading');
             button.disabled = false;
@@ -486,16 +495,26 @@
         const existingNotifications = document.querySelectorAll('.install-notification');
         existingNotifications.forEach(notification => notification.remove());
 
-        // Create notification element
+        // Create notification element safely to prevent XSS
         const notification = document.createElement('div');
         notification.className = `install-notification install-alert-${type}`;
-        notification.innerHTML = `
-            <i class="fas ${getIconForType(type)}"></i>
-            <span>${message}</span>
-            <button class="notification-close" onclick="this.parentElement.remove()">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
+        
+        const icon = document.createElement('i');
+        icon.className = `fas ${getIconForType(type)}`;
+        
+        const messageSpan = document.createElement('span');
+        messageSpan.textContent = message; // Safe text content
+        
+        const closeButton = document.createElement('button');
+        closeButton.className = 'notification-close';
+        closeButton.onclick = () => notification.remove();
+        const closeIcon = document.createElement('i');
+        closeIcon.className = 'fas fa-times';
+        closeButton.appendChild(closeIcon);
+        
+        notification.appendChild(icon);
+        notification.appendChild(messageSpan);
+        notification.appendChild(closeButton);
 
         // Add to page
         const container = document.querySelector('.install-container') || document.body;
