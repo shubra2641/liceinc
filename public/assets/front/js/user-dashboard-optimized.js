@@ -87,7 +87,16 @@
         
         const errorDiv = document.createElement('div');
         errorDiv.className = 'form-error';
-        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+        
+        // Create DOM elements safely to prevent XSS
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-exclamation-circle';
+        const messageSpan = document.createElement('span');
+        messageSpan.textContent = message; // Safe text content
+        
+        errorDiv.appendChild(icon);
+        errorDiv.appendChild(document.createTextNode(' '));
+        errorDiv.appendChild(messageSpan);
         
         inputGroup.appendChild(errorDiv);
         input.classList.add('form-input-error');
