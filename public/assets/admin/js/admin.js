@@ -1303,12 +1303,9 @@ class AdminDashboard {
           value,
         );
       });
-      // Sanitize before injecting
-      if (window.SecuritySanitize) {
-        previewBody.innerHTML = SecuritySanitize.basicSanitize(body); // security-ignore: JS_DOM_INJECTION (sanitized)
-      } else {
-        previewBody.textContent = body;
-      }
+      // Use textContent for maximum security - never innerHTML
+      const sanitizedBody = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(body) : body;
+      previewBody.textContent = sanitizedBody;
     }
   }
 

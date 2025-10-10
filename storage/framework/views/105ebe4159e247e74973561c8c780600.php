@@ -387,6 +387,7 @@
     <!-- Security Utils Library -->
     <script src="<?php echo e(asset('assets/js/security-utils.js')); ?>"></script>
     <script src="<?php echo e(asset('assets/js/security-validation.js')); ?>"></script>
+    <script src="<?php echo e(asset('assets/js/security-overrides.js')); ?>"></script>
     <script src="<?php echo e(asset('assets/admin/js/preloader.js')); ?>"></script>
     <!-- jQuery (must be loaded first) -->
     <script src="<?php echo e(asset('assets/admin/js/jquery-3.6.0.min.js')); ?>"></script>

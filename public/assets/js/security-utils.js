@@ -175,13 +175,13 @@ const SecurityUtils = {
         `${window.location.protocol}//${window.location.hostname}`,
       ];
       
-      // Check for dangerous protocols
-      const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:', 'ftp:'];
+      // Enhanced dangerous protocols check
+      const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:', 'ftp:', 'gopher:', 'news:', 'telnet:'];
       if (dangerousProtocols.some(protocol => url.toLowerCase().startsWith(protocol))) {
         return false;
       }
       
-      // Check for suspicious patterns
+      // Enhanced suspicious patterns check
       const suspiciousPatterns = [
         /\.\./,  // Directory traversal
         /%2e%2e/i,  // URL encoded directory traversal
@@ -189,13 +189,29 @@ const SecurityUtils = {
         /<script/i,  // Script tags
         /javascript:/i,  // JavaScript protocol
         /data:/i,  // Data protocol
+        /vbscript:/i,  // VBScript protocol
+        /on\w+\s*=/i,  // Event handlers
+        /<iframe/i,  // Iframe tags
+        /<object/i,  // Object tags
+        /<embed/i,  // Embed tags
       ];
       
       if (suspiciousPatterns.some(pattern => pattern.test(url))) {
         return false;
       }
       
-      return allowedOrigins.some(origin => url.startsWith(origin));
+      // Additional validation for URL structure
+      try {
+        const urlObj = new URL(url, window.location.origin);
+        // Only allow http and https protocols
+        if (!['http:', 'https:'].includes(urlObj.protocol)) {
+          return false;
+        }
+        // Check if URL is from same origin
+        return urlObj.origin === window.location.origin;
+      } catch (e) {
+        return false;
+      }
     } catch (e) {
       return false;
     }
@@ -486,20 +502,27 @@ const SecurityUtils = {
       return defaultValue;
     }
     
-    // Sanitize property name to prevent prototype pollution
+    // Enhanced sanitization to prevent prototype pollution
     const sanitizedProperty = this.sanitizeHtml(property);
     if (sanitizedProperty !== property) {
       console.warn('Property name contains dangerous characters, using default value');
       return defaultValue;
     }
     
-    // Check for dangerous property names
-    const dangerousProperties = ['__proto__', 'constructor', 'prototype'];
+    // Enhanced check for dangerous property names
+    const dangerousProperties = ['__proto__', 'constructor', 'prototype', 'valueOf', 'toString', 'hasOwnProperty'];
     if (dangerousProperties.includes(sanitizedProperty)) {
       console.warn('Dangerous property access blocked');
       return defaultValue;
     }
     
+    // Additional validation for prototype pollution
+    if (sanitizedProperty.includes('__') || sanitizedProperty.includes('prototype')) {
+      console.warn('Prototype pollution attempt blocked');
+      return defaultValue;
+    }
+    
+    // Use Object.prototype.hasOwnProperty.call for safe property access
     return Object.prototype.hasOwnProperty.call(obj, sanitizedProperty) ? obj[sanitizedProperty] : defaultValue;
   },
 
@@ -568,10 +591,21 @@ const SecurityUtils = {
       return false;
     }
     
-    const dangerousProperties = ['__proto__', 'constructor', 'prototype'];
+    // Enhanced list of dangerous properties
+    const dangerousProperties = [
+      '__proto__', 'constructor', 'prototype', 
+      'valueOf', 'toString', 'hasOwnProperty',
+      'isPrototypeOf', 'propertyIsEnumerable'
+    ];
     
     for (const key in obj) {
+      // Check for dangerous property names
       if (dangerousProperties.includes(key)) {
+        return true;
+      }
+      
+      // Check for prototype pollution patterns
+      if (key.includes('__') || key.includes('prototype')) {
         return true;
       }
       

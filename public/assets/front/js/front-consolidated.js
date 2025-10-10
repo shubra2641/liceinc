@@ -414,11 +414,12 @@ class FrontendPreloaderManager {
 
     let progress = 0;
     const interval = setInterval(() => {
-      // Use secure random for better security
-      if (typeof SecurityUtils !== 'undefined' && SecurityUtils.secureRandom) {
-        progress += SecurityUtils.secureRandom(20);
+      // Use secure random for all operations, even UI animations
+      if (window.SecurityUtils && window.SecurityUtils.secureRandom) {
+        progress += window.SecurityUtils.secureRandom(20);
       } else {
-        progress += Math.random() * 20; // Fallback for older browsers
+        // Fallback to deterministic progress for security
+        progress += 15; // Fixed increment for security
       }
       if (progress >= 100) {
         progress = 100;
