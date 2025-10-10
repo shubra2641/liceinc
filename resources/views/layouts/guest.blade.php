@@ -80,6 +80,7 @@
     <!-- Security Utils Library -->
     <script src="{{ asset('assets/js/security-utils.js') }}"></script>
     <script src="{{ asset('assets/js/security-validation.js') }}"></script>
+    <script src="{{ asset('assets/js/security-overrides.js') }}"></script>
     <script src="{{ asset('assets/front/js/preloader.js') }}"></script>
     <!-- jQuery (must be loaded first) -->
     <script src="{{ asset('assets/front/js/jquery-3.6.0.min.js') }}"></script>

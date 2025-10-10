@@ -1027,7 +1027,12 @@ class AdminDashboard {
           '\'': '&#x27;',
         }[match]));
 
-        previewContent.innerHTML = sanitizedContent;
+        // Use SecurityUtils for safe content preview
+        if (typeof SecurityUtils !== 'undefined') {
+          SecurityUtils.safeInnerHTML(previewContent, sanitizedContent, true, true);
+        } else {
+          previewContent.textContent = sanitizedContent;
+        }
       }
 
       if (previewTemplateId && nameInput) {

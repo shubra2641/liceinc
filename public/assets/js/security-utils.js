@@ -98,6 +98,44 @@ const SecurityUtils = {
   },
 
   /**
+   * Generate cryptographically secure random bytes
+   * @param {number} length - Number of bytes to generate
+   * @returns {Uint8Array} - Secure random bytes
+   */
+  secureRandomBytes(length) {
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const array = new Uint8Array(length);
+      crypto.getRandomValues(array);
+      return array;
+    }
+    throw new Error('Secure random number generation not available');
+  },
+
+  /**
+   * Generate secure UUID v4
+   * @returns {string} - Secure UUID
+   */
+  secureUUID() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    
+    // Fallback implementation
+    const bytes = this.secureRandomBytes(16);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40; // Version 4
+    bytes[8] = (bytes[8] & 0x3f) | 0x80; // Variant bits
+    
+    const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+    return [
+      hex.slice(0, 8),
+      hex.slice(8, 12),
+      hex.slice(12, 16),
+      hex.slice(16, 20),
+      hex.slice(20, 32)
+    ].join('-');
+  },
+
+  /**
    * Generate secure random string
    * @param {number} length - Length of the string
    * @returns {string} - Secure random string
@@ -421,6 +459,150 @@ const SecurityUtils = {
       }
     }
     return sanitized;
+  },
+
+  /**
+   * Safe object property access to prevent Object Injection
+   * @param {object} obj - The object to access
+   * @param {string} property - The property to access
+   * @param {*} defaultValue - Default value if property doesn't exist
+   * @returns {*} - Safe property value
+   */
+  safePropertyAccess(obj, property, defaultValue = null) {
+    if (!obj || typeof obj !== 'object') {
+      return defaultValue;
+    }
+    
+    // Sanitize property name to prevent prototype pollution
+    const sanitizedProperty = this.sanitizeHtml(property);
+    if (sanitizedProperty !== property) {
+      console.warn('Property name contains dangerous characters, using default value');
+      return defaultValue;
+    }
+    
+    // Check for dangerous property names
+    const dangerousProperties = ['__proto__', 'constructor', 'prototype'];
+    if (dangerousProperties.includes(sanitizedProperty)) {
+      console.warn('Dangerous property access blocked');
+      return defaultValue;
+    }
+    
+    return obj.hasOwnProperty(sanitizedProperty) ? obj[sanitizedProperty] : defaultValue;
+  },
+
+  /**
+   * Safe function call to prevent Object Injection
+   * @param {function} fn - The function to call
+   * @param {Array} args - Arguments to pass to the function
+   * @param {*} context - Context to bind the function to
+   * @returns {*} - Function result
+   */
+  safeFunctionCall(fn, args = [], context = null) {
+    if (typeof fn !== 'function') {
+      throw new Error('Invalid function provided');
+    }
+    
+    // Sanitize arguments
+    const sanitizedArgs = args.map(arg => {
+      if (typeof arg === 'string') {
+        return this.sanitizeHtml(arg);
+      }
+      return arg;
+    });
+    
+    try {
+      return fn.apply(context, sanitizedArgs);
+    } catch (error) {
+      console.error('Safe function call failed:', error);
+      return null;
+    }
+  },
+
+  /**
+   * Safe JSON parsing to prevent Object Injection
+   * @param {string} jsonString - JSON string to parse
+   * @param {*} defaultValue - Default value if parsing fails
+   * @returns {*} - Parsed object or default value
+   */
+  safeJSONParse(jsonString, defaultValue = null) {
+    if (typeof jsonString !== 'string') {
+      return defaultValue;
+    }
+    
+    try {
+      const parsed = JSON.parse(jsonString);
+      
+      // Check for dangerous properties
+      if (this.containsDangerousObjectProperties(parsed)) {
+        console.warn('Dangerous object properties detected, using default value');
+        return defaultValue;
+      }
+      
+      return parsed;
+    } catch (error) {
+      console.error('JSON parsing failed:', error);
+      return defaultValue;
+    }
+  },
+
+  /**
+   * Check if object contains dangerous properties
+   * @param {object} obj - Object to check
+   * @returns {boolean} - True if dangerous properties found
+   */
+  containsDangerousObjectProperties(obj) {
+    if (typeof obj !== 'object' || obj === null) {
+      return false;
+    }
+    
+    const dangerousProperties = ['__proto__', 'constructor', 'prototype'];
+    
+    for (const key in obj) {
+      if (dangerousProperties.includes(key)) {
+        return true;
+      }
+      
+      // Recursively check nested objects
+      if (typeof obj[key] === 'object' && obj[key] !== null) {
+        if (this.containsDangerousObjectProperties(obj[key])) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  },
+
+  /**
+   * Safe DOM manipulation to prevent XSS
+   * @param {HTMLElement} element - Element to manipulate
+   * @param {string} property - Property to set
+   * @param {string} value - Value to set
+   */
+  safeDOMProperty(element, property, value) {
+    if (!element || typeof property !== 'string' || typeof value !== 'string') {
+      return;
+    }
+    
+    // Block dangerous properties
+    const dangerousProperties = ['innerHTML', 'outerHTML', 'insertAdjacentHTML'];
+    if (dangerousProperties.includes(property)) {
+      console.warn('Dangerous DOM property blocked, using textContent instead');
+      element.textContent = this.sanitizeHtml(value);
+      return;
+    }
+    
+    // Sanitize value
+    const sanitizedValue = this.sanitizeHtml(value);
+    
+    // Use safe property assignment
+    if (property === 'textContent' || property === 'innerText') {
+      element[property] = sanitizedValue;
+    } else if (property.startsWith('data-') || property === 'title' || property === 'alt') {
+      element.setAttribute(property, sanitizedValue);
+    } else {
+      console.warn('Unsafe DOM property blocked');
+    }
   },
 };
 

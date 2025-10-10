@@ -24,7 +24,12 @@ const showNotification = (message, type = 'info') => {
     
     const icon = document.createElement('div');
     icon.className = 'user-notification-icon';
-    icon.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>`;
+    // Use SecurityUtils for safe icon creation
+    if (typeof SecurityUtils !== 'undefined') {
+      SecurityUtils.safeInnerHTML(icon, `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>`, true, true);
+    } else {
+      icon.textContent = ''; // Safe fallback
+    }
     
     const messageDiv = document.createElement('div');
     messageDiv.className = 'user-notification-message';
@@ -32,7 +37,12 @@ const showNotification = (message, type = 'info') => {
     
     const closeBtn = document.createElement('button');
     closeBtn.className = 'user-notification-close';
-    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    // Use SecurityUtils for safe close button
+    if (typeof SecurityUtils !== 'undefined') {
+      SecurityUtils.safeInnerHTML(closeBtn, '<i class="fas fa-times"></i>', true, true);
+    } else {
+      closeBtn.textContent = '×'; // Safe fallback
+    }
     closeBtn.onclick = () => notification.remove();
     
     content.appendChild(icon);
@@ -1348,48 +1358,48 @@ window.ProductShowManager = ProductShowManager;
         return;
       }
 
-      // Sanitize domains to prevent XSS
-      const sanitizedDomains = domains.map(domain => ({
-        ...domain,
-        domain: domain.domain.replace(/[<>&"']/g, match => ({
-          '<': '&lt;',
-          '>': '&gt;',
-          '&': '&amp;',
-          '"': '&quot;',
-          '\'': '&#x27;',
-        }[match])),
-      }));
-      // Use SecurityUtils for safe HTML insertion
-      const domainsHtml = sanitizedDomains
-        .map(
-          domain => `
-                <div class="domain-item">
-                    <div class="domain-info">
-                        <div class="domain-name">
-                            <i class="fas fa-globe"></i>
-                            ${domain.domain}
-                        </div>
-                        <div class="domain-meta">
-                            <div class="domain-date">
-                                <i class="fas fa-calendar"></i>
-                                ${domain.registered_at}
-                            </div>
-                            <div class="domain-status">
-                                <span class="status-dot ${domain.status}"></span>
-                                <span class="status-text">${domain.status}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `,
-        )
-        .join('');
-      
+      // Use SecurityUtils for safe domain list update
       if (typeof SecurityUtils !== 'undefined') {
+        // Create safe HTML using SecurityUtils
+        const domainsHtml = domains
+          .map(domain => {
+            const safeDomain = SecurityUtils.sanitizeHtml(domain.domain);
+            const safeRegisteredAt = SecurityUtils.sanitizeHtml(domain.registered_at);
+            const safeStatus = SecurityUtils.sanitizeHtml(domain.status);
+            
+            return `
+              <div class="domain-item">
+                <div class="domain-info">
+                  <div class="domain-name">
+                    <i class="fas fa-globe"></i>
+                    ${safeDomain}
+                  </div>
+                  <div class="domain-meta">
+                    <div class="domain-date">
+                      <i class="fas fa-calendar"></i>
+                      ${safeRegisteredAt}
+                    </div>
+                    <div class="domain-status">
+                      <span class="status-dot ${safeStatus}"></span>
+                      <span class="status-text">${safeStatus}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+        
         SecurityUtils.safeInnerHTML(domainsList, domainsHtml, true, true);
       } else {
-        domainsList.textContent = ''; // Clear and add text content for security
-        domainsList.textContent = 'Domains loaded';
+        // Fallback: use textContent for maximum security
+        domainsList.textContent = '';
+        domains.forEach(domain => {
+          const domainItem = document.createElement('div');
+          domainItem.className = 'domain-item';
+          domainItem.textContent = `Domain: ${domain.domain} - Status: ${domain.status} - Date: ${domain.registered_at}`;
+          domainsList.appendChild(domainItem);
+        });
       }
     };
 
