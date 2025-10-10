@@ -17,10 +17,10 @@ class UpdateService
     /**
      * Get update info for product.
      */
-    public function getUpdateInfo(Product $product, string $currentVersion): array
+    public function getUpdateInfo(Product $product, string $currentVersion): array<string, mixed>
     {
         $latestVersion = $this->getLatestVersion($product);
-        
+
         if (!$latestVersion) {
             return [
                 'update_available' => false,

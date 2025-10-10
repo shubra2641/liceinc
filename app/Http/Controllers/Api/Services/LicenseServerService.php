@@ -47,12 +47,12 @@ class LicenseServerService
     private function verifyDomain(License $license, string $domain): bool
     {
         $allowedDomains = $license->allowed_domains ?? [];
-        
+
         if (empty($allowedDomains)) {
             return true; // No domain restrictions
         }
 
-        return in_array($domain, $allowedDomains);
+        return in_array($domain, (array) $allowedDomains);
     }
 
     /**
@@ -69,7 +69,7 @@ class LicenseServerService
     /**
      * Get version history for product.
      */
-    public function getVersionHistory(Product $product, int $limit = 10): array
+    public function getVersionHistory(Product $product, int $limit = 10): array<string, mixed>
     {
         return ProductUpdate::where('product_id', $product->id)
             ->where('status', 'published')
@@ -85,7 +85,7 @@ class LicenseServerService
     public function isUpdateAvailable(Product $product, string $currentVersion): bool
     {
         $latestVersion = $this->getLatestVersion($product);
-        
+
         if (!$latestVersion) {
             return false;
         }

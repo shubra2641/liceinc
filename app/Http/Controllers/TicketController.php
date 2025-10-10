@@ -18,15 +18,16 @@ class TicketController extends Controller
 {
     public function __construct(
         private TicketService $ticketService
-    ) {}
+    ) {
+    }
 
     /**
      * Display user tickets.
      */
     public function index(Request $request): View
     {
-        $tickets = $this->ticketService->getUserTickets(Auth::id());
-        
+        $tickets = $this->ticketService->getUserTickets((int) Auth::id());
+
         return view('user.tickets.index', compact('tickets'));
     }
 
@@ -36,7 +37,7 @@ class TicketController extends Controller
     public function create(): View
     {
         $products = Product::where('status', 'active')->get();
-        
+
         return view('user.tickets.create', compact('products'));
     }
 
@@ -56,7 +57,7 @@ class TicketController extends Controller
 
         try {
             $ticket = $this->ticketService->createTicket($request->all());
-            
+
             return redirect()
                 ->route('user.tickets.show', $ticket->id)
                 ->with('success', 'Ticket created successfully');
@@ -73,8 +74,8 @@ class TicketController extends Controller
      */
     public function show(int $id): View
     {
-        $ticket = $this->ticketService->getTicket($id, Auth::id());
-        
+        $ticket = $this->ticketService->getTicket($id, (int) Auth::id());
+
         if (!$ticket) {
             abort(404);
         }
@@ -87,8 +88,8 @@ class TicketController extends Controller
      */
     public function update(Request $request, int $id): RedirectResponse
     {
-        $ticket = $this->ticketService->getTicket($id, Auth::id());
-        
+        $ticket = $this->ticketService->getTicket($id, (int) Auth::id());
+
         if (!$ticket) {
             abort(404);
         }
@@ -97,7 +98,7 @@ class TicketController extends Controller
             'status' => 'in:open,in_progress,closed,resolved'
         ]);
 
-        $this->ticketService->updateTicketStatus($ticket, $request->status);
+        $this->ticketService->updateTicketStatus($ticket, (string) $request->status);
 
         return redirect()
             ->route('user.tickets.show', $ticket->id)
@@ -109,8 +110,8 @@ class TicketController extends Controller
      */
     public function reply(Request $request, int $id): RedirectResponse
     {
-        $ticket = $this->ticketService->getTicket($id, Auth::id());
-        
+        $ticket = $this->ticketService->getTicket($id, (int) Auth::id());
+
         if (!$ticket) {
             abort(404);
         }
@@ -119,7 +120,7 @@ class TicketController extends Controller
             'message' => 'required|string'
         ]);
 
-        $this->ticketService->addReply($ticket, $request->message);
+        $this->ticketService->addReply($ticket, (string) $request->message);
 
         return redirect()
             ->route('user.tickets.show', $ticket->id)
@@ -131,13 +132,13 @@ class TicketController extends Controller
      */
     public function destroy(int $id): RedirectResponse
     {
-        $ticket = $this->ticketService->getTicket($id, Auth::id());
-        
+        $ticket = $this->ticketService->getTicket($id, (int) Auth::id());
+
         if (!$ticket) {
             abort(404);
         }
 
-        $this->ticketService->deleteTicket($ticket, Auth::id());
+        $this->ticketService->deleteTicket($ticket, (int) Auth::id());
 
         return redirect()
             ->route('user.tickets.index')

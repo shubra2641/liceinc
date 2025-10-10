@@ -28,7 +28,8 @@ class LicenseServerController extends Controller
     public function __construct(
         private LicenseServerService $licenseService,
         private UpdateService $updateService
-    ) {}
+    ) {
+    }
 
     /**
      * Check for updates.
@@ -36,7 +37,7 @@ class LicenseServerController extends Controller
     public function checkUpdates(CheckUpdatesRequest $request): JsonResponse
     {
         $rateLimitKey = 'check-updates:' . $request->ip();
-        
+
         if (RateLimiter::tooManyAttempts($rateLimitKey, 10)) {
             return response()->json(['error' => 'Too many requests'], 429);
         }
@@ -45,15 +46,15 @@ class LicenseServerController extends Controller
 
         try {
             $product = $this->licenseService->verifyLicenseAndGetProduct(
-                $request->license_key,
-                $request->domain
+                (string) $request->license_key,
+                (string) $request->domain
             );
 
             if (!$product) {
                 return response()->json(['error' => 'Invalid license or domain'], 403);
             }
 
-            $updateInfo = $this->updateService->getUpdateInfo($product, $request->current_version);
+            $updateInfo = $this->updateService->getUpdateInfo($product, (string) $request->current_version);
 
             return response()->json($updateInfo);
         } catch (\Exception $e) {
@@ -68,7 +69,7 @@ class LicenseServerController extends Controller
     public function getLatestVersion(GetLatestVersionRequest $request): JsonResponse
     {
         $rateLimitKey = 'latest-version:' . $request->ip();
-        
+
         if (RateLimiter::tooManyAttempts($rateLimitKey, 10)) {
             return response()->json(['error' => 'Too many requests'], 429);
         }
@@ -77,8 +78,8 @@ class LicenseServerController extends Controller
 
         try {
             $product = $this->licenseService->verifyLicenseAndGetProduct(
-                $request->license_key,
-                $request->domain
+                (string) $request->license_key,
+                (string) $request->domain
             );
 
             if (!$product) {
@@ -111,7 +112,7 @@ class LicenseServerController extends Controller
     public function getVersionHistory(GetVersionHistoryRequest $request): JsonResponse
     {
         $rateLimitKey = 'version-history:' . $request->ip();
-        
+
         if (RateLimiter::tooManyAttempts($rateLimitKey, 10)) {
             return response()->json(['error' => 'Too many requests'], 429);
         }
@@ -120,15 +121,15 @@ class LicenseServerController extends Controller
 
         try {
             $product = $this->licenseService->verifyLicenseAndGetProduct(
-                $request->license_key,
-                $request->domain
+                (string) $request->license_key,
+                (string) $request->domain
             );
 
             if (!$product) {
                 return response()->json(['error' => 'Invalid license or domain'], 403);
             }
 
-            $history = $this->licenseService->getVersionHistory($product, $request->limit);
+            $history = $this->licenseService->getVersionHistory($product, (int) $request->limit);
 
             return response()->json(['versions' => $history]);
         } catch (\Exception $e) {
@@ -143,7 +144,7 @@ class LicenseServerController extends Controller
     public function downloadUpdate(Request $request, int $id): Response
     {
         $rateLimitKey = 'download-update:' . $request->ip();
-        
+
         if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
             abort(429, 'Too many requests');
         }
@@ -152,18 +153,18 @@ class LicenseServerController extends Controller
 
         try {
             $update = ProductUpdate::findOrFail($id);
-            
+
             if ($update->download_token !== $request->token) {
                 abort(403, 'Invalid download token');
             }
 
             $filePath = $this->updateService->downloadUpdate($update);
-            
+
             if (!$filePath) {
                 abort(404, 'Update file not found');
             }
 
-            return response()->download($filePath, $update->filename);
+            return response()->download($filePath, (string) $update->filename);
         } catch (\Exception $e) {
             Log::error('Download update failed: ' . $e->getMessage());
             abort(500, 'Internal server error');

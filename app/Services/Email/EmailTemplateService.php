@@ -15,7 +15,8 @@ class EmailTemplateService
 {
     public function __construct(
         private EmailValidator $validator
-    ) {}
+    ) {
+    }
 
     /**
      * Get template by name.
@@ -34,7 +35,7 @@ class EmailTemplateService
     /**
      * Prepare common variables.
      */
-    public function prepareCommonVariables(array $data = []): array
+    public function prepareCommonVariables(array<string, mixed> $data = []): array<string, mixed>
     {
         return array_merge($data, [
             'site_name' => config('app.name'),
@@ -46,7 +47,7 @@ class EmailTemplateService
     /**
      * Prepare user-specific variables.
      */
-    public function prepareUserVariables(User $user, array $data = []): array
+    public function prepareUserVariables(User $user, array<string, mixed> $data = []): array<string, mixed>
     {
         $userData = [
             'user_name' => $this->validator->sanitizeString($user->name),
@@ -63,6 +64,6 @@ class EmailTemplateService
      */
     public function getAdminEmail(): string
     {
-        return config('mail.admin_email', config('mail.from.address'));
+        return (string) config('mail.admin_email', config('mail.from.address'));
     }
 }

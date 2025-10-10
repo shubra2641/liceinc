@@ -19,32 +19,33 @@ class TicketService
 {
     public function __construct(
         private LicenseAutoRegistrationService $licenseService
-    ) {}
+    ) {
+    }
 
     /**
      * Create a new ticket.
      */
-    public function createTicket(array $data): Ticket
+    public function createTicket(array<string, mixed> $data): Ticket
     {
         return DB::transaction(function () use ($data) {
             // Auto-register license if provided
             if (!empty($data['license_key'])) {
                 $this->licenseService->autoRegisterLicense(
-                    $data['license_key'],
-                    $data['domain'] ?? '',
+                    (string) $data['license_key'],
+                    (string) ($data['domain'] ?? ''),
                     Auth::id()
                 );
             }
 
             return Ticket::create([
                 'user_id' => Auth::id(),
-                'subject' => $data['subject'],
-                'description' => $data['description'],
-                'priority' => $data['priority'] ?? 'medium',
+                'subject' => (string) $data['subject'],
+                'description' => (string) $data['description'],
+                'priority' => (string) ($data['priority'] ?? 'medium'),
                 'status' => 'open',
-                'product_id' => $data['product_id'] ?? null,
-                'license_key' => $data['license_key'] ?? null,
-                'domain' => $data['domain'] ?? null,
+                'product_id' => isset($data['product_id']) ? (int) $data['product_id'] : null,
+                'license_key' => isset($data['license_key']) ? (string) $data['license_key'] : null,
+                'domain' => isset($data['domain']) ? (string) $data['domain'] : null,
             ]);
         });
     }
@@ -55,7 +56,7 @@ class TicketService
     public function updateTicketStatus(Ticket $ticket, string $status): bool
     {
         $validStatuses = ['open', 'in_progress', 'closed', 'resolved'];
-        
+
         if (!in_array($status, $validStatuses)) {
             return false;
         }
@@ -90,7 +91,7 @@ class TicketService
     public function getUserTickets(int $userId, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return Ticket::where('user_id', $userId)
-            ->with(['product', 'replies'])
+            ->with(['replies'])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
     }
@@ -102,7 +103,7 @@ class TicketService
     {
         return Ticket::where('id', $ticketId)
             ->where('user_id', $userId)
-            ->with(['product', 'replies.user'])
+            ->with(['replies.user'])
             ->first();
     }
 
@@ -115,6 +116,6 @@ class TicketService
             return false;
         }
 
-        return $ticket->delete();
+        return (bool) $ticket->delete();
     }
 }

@@ -22,7 +22,7 @@ class EmailValidator
 
         // Remove any potentially dangerous characters
         $templateName = preg_replace('/[^a-zA-Z0-9_-]/', '', $templateName);
-        
+
         if (empty($templateName)) {
             throw new InvalidArgumentException('Invalid template name');
         }
@@ -61,10 +61,10 @@ class EmailValidator
     /**
      * Sanitize data array.
      */
-    public function sanitizeData(array $data): array
+    public function sanitizeData(array<string, mixed> $data): array<string, mixed>
     {
         $sanitized = [];
-        
+
         foreach ($data as $key => $value) {
             if (is_string($value)) {
                 $sanitized[$key] = $this->sanitizeString($value);
