@@ -370,7 +370,8 @@
    HIGH CONTRAST MODE SUPPORT
    =========================================== */
 
-@media (prefers-contrast: more) {
+/* stylelint-disable media-feature-name-value-no-unknown */
+@media (prefers-contrast: high) {
     .preloader-spinner {
         border-color: #000;
         border-left-color: #000;
@@ -390,6 +391,7 @@
         color: #000;
     }
 }
+/* stylelint-enable media-feature-name-value-no-unknown */
 
 /* ===========================================
    PRINT STYLES
@@ -421,3 +423,7 @@
 /* ===========================================
    NOSCRIPT FALLBACK
    =========================================== */
+
+noscript .preloader-container {
+    display: none !important;
+}

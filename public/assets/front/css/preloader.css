@@ -7,7 +7,7 @@
 /* CSS Variables for Dynamic Theming */
 :root {
     --preloader-color: #3b82f6;
-    --preloader-bg: #ffffff;
+    --preloader-bg: #fff;
     --preloader-text-color: #3b82f6;
 }
 
@@ -23,56 +23,34 @@
     position: fixed;
     top: 0;
     left: 0;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     height: 100%;
-    background-color: var(--preloader-bg, #ffffff);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    opacity: 1;
+    background-color: var(--preloader-bg, #fff);
     visibility: visible;
+    opacity: 1;
     transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
     animation: preloaderFadeOut 2s ease-out forwards;
 }
 
-/* Auto-hide animation as fallback */
-@keyframes preloaderFadeOut {
-    0% {
-        opacity: 1;
-        visibility: visible;
-    }
-    70% {
-        opacity: 1;
-        visibility: visible;
-    }
-    100% {
-        opacity: 0;
-        visibility: hidden;
-        display: none;
-    }
-}
-
-/* Force hide after 5 seconds as ultimate fallback */
-.preloader-container {
-    animation: preloaderFadeOut 5s ease-out forwards;
-}
-
 /* Override animation when JavaScript successfully hides it */
 .preloader-container.hidden {
-    animation: none;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
     display: none !important;
+    visibility: hidden;
+    opacity: 0;
+    animation: none;
+    pointer-events: none;
 }
 
 /* Preloader Content */
 .preloader-content {
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     text-align: center;
 }
 
@@ -93,10 +71,10 @@
 
 /* Preloader Text */
 .preloader-text {
+    margin-bottom: 2rem;
+    color: var(--preloader-text-color, #6b7280);
     font-size: 1.125rem;
     font-weight: 500;
-    color: var(--preloader-text-color, #6b7280);
-    margin-bottom: 2rem;
     opacity: 0;
     animation: fadeInUp 0.8s ease-out 0.6s forwards;
 }
@@ -108,11 +86,11 @@
 .preloader-spinner {
     width: 60px;
     height: 60px;
-    border: 4px solid rgba(59, 130, 246, 0.1);
+    margin-bottom: 1rem;
+    border: 4px solid rgb(59 130 246 / 10%);
     border-left: 4px solid var(--preloader-color, #3b82f6);
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin-bottom: 1rem;
 }
 
 .preloader-spinner.large {
@@ -140,8 +118,8 @@
 .preloader-dot {
     width: 12px;
     height: 12px;
-    background-color: var(--preloader-color, #3b82f6);
     border-radius: 50%;
+    background-color: var(--preloader-color, #3b82f6);
     animation: dotPulse 1.4s ease-in-out infinite both;
 }
 
@@ -155,16 +133,16 @@
 
 .preloader-bars {
     display: flex;
+    align-items: end;
     gap: 4px;
     margin-bottom: 1rem;
-    align-items: end;
 }
 
 .preloader-bar {
     width: 8px;
     height: 40px;
-    background-color: var(--preloader-color, #3b82f6);
     border-radius: 4px;
+    background-color: var(--preloader-color, #3b82f6);
     animation: barWave 1.2s ease-in-out infinite;
 }
 
@@ -181,10 +159,10 @@
 .preloader-pulse {
     width: 60px;
     height: 60px;
-    background-color: var(--preloader-color, #3b82f6);
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
     margin-bottom: 1rem;
+    border-radius: 50%;
+    background-color: var(--preloader-color, #3b82f6);
+    animation: pulse 2s ease-in-out infinite;
 }
 
 .preloader-pulse.large {
@@ -212,17 +190,17 @@
 .preloader-progress {
     width: 200px;
     height: 4px;
-    background-color: rgba(59, 130, 246, 0.1);
-    border-radius: 2px;
-    overflow: hidden;
     margin-bottom: 1rem;
+    border-radius: 2px;
+    background-color: rgb(59 130 246 / 10%);
+    overflow: hidden;
 }
 
 .preloader-progress-bar {
-    height: 100%;
-    background-color: var(--preloader-color, #3b82f6);
-    border-radius: 2px;
     width: 0%;
+    height: 100%;
+    border-radius: 2px;
+    background-color: var(--preloader-color, #3b82f6);
     animation: progressLoad 2s ease-out forwards;
 }
 
@@ -235,21 +213,23 @@
     100% { transform: rotate(360deg); }
 }
 
-@keyframes dotPulse {
+@keyframes dot-pulse {
     0%, 80%, 100% {
-        transform: scale(0);
         opacity: 0.5;
+        transform: scale(0);
     }
+
     40% {
-        transform: scale(1);
         opacity: 1;
+        transform: scale(1);
     }
 }
 
-@keyframes barWave {
+@keyframes bar-wave {
     0%, 40%, 100% {
         transform: scaleY(0.4);
     }
+
     20% {
         transform: scaleY(1);
     }
@@ -257,31 +237,34 @@
 
 @keyframes pulse {
     0% {
-        transform: scale(0.95);
         opacity: 0.7;
+        transform: scale(0.95);
     }
+
     70% {
-        transform: scale(1);
         opacity: 1;
+        transform: scale(1);
     }
+
     100% {
-        transform: scale(0.95);
         opacity: 0.7;
+        transform: scale(0.95);
     }
 }
 
-@keyframes fadeInUp {
+@keyframes fade-in-up {
     0% {
         opacity: 0;
         transform: translateY(20px);
     }
+
     100% {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-@keyframes progressLoad {
+@keyframes progress-load {
     0% { width: 0%; }
     50% { width: 60%; }
     100% { width: 100%; }
@@ -301,11 +284,11 @@
     }
     
     .preloader-spinner {
-        border-color: rgba(59, 130, 246, 0.2);
+        border-color: rgb(59 130 246 / 20%);
     }
     
     .preloader-progress {
-        background-color: rgba(59, 130, 246, 0.2);
+        background-color: rgb(59 130 246 / 20%);
     }
 }
 
@@ -313,7 +296,7 @@
    RESPONSIVE DESIGN
    =========================================== */
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .preloader-logo {
         max-width: 150px;
         max-height: 60px;
@@ -321,8 +304,8 @@
     }
     
     .preloader-text {
-        font-size: 1rem;
         margin-bottom: 1.5rem;
+        font-size: 1rem;
     }
     
     .preloader-spinner {
@@ -340,7 +323,7 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
     .preloader-logo {
         max-width: 120px;
         max-height: 50px;
@@ -348,8 +331,8 @@
     }
     
     .preloader-text {
-        font-size: 0.875rem;
         margin-bottom: 1rem;
+        font-size: 0.875rem;
     }
     
     .preloader-spinner {
@@ -405,24 +388,24 @@
    HIGH CONTRAST MODE SUPPORT
    =========================================== */
 
-@media (prefers-contrast: high) {
+@media (forced-colors: active) {
     .preloader-spinner {
-        border-color: #000000;
-        border-left-color: #000000;
+        border-color: #000;
+        border-left-color: #000;
     }
     
     .preloader-dot,
     .preloader-bar,
     .preloader-pulse {
-        background-color: #000000;
+        background-color: #000;
     }
     
     .preloader-progress-bar {
-        background-color: #000000;
+        background-color: #000;
     }
     
     .preloader-text {
-        color: #000000;
+        color: #000;
     }
 }
 
