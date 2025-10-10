@@ -1,0 +1,9 @@
+/* ===========================================
+   PRELOADER NOSCRIPT FALLBACK
+   Fallback styles for users without JavaScript
+   =========================================== */
+
+/* Hide preloader when JavaScript is disabled */
+.preloader-container {
+    display: none !important;
+}
