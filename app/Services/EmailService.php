@@ -61,14 +61,16 @@ class EmailService
             if ($user instanceof User) {
                 $success = $this->sendToUser($user, $templateName, $data);
             } else {
-                $success = $this->sendEmail($templateName, (string)$user, $data);
+                $userEmail = (string) $user;
+                $success = $this->sendEmail($templateName, $userEmail, $data);
             }
 
             if ($success) {
                 $results['success']++;
             } else {
                 $results['failed']++;
-                $results['errors'][] = 'Failed to send to: ' . ($user instanceof User ? $user->email : (string)$user);
+                $userInfo = $user instanceof User ? $user->email : (string) $user;
+                $results['errors'][] = 'Failed to send to: ' . $userInfo;
             }
         }
 

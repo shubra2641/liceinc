@@ -317,7 +317,7 @@ class RegisteredUserController extends Controller
     private function sendAdminNotification(User $user): void
     {
         try {
-            $this->emailService->sendNewUserNotification($user);
+            $this->emailService->sendNewUserNotification(['user' => $user]);
         } catch (\Exception $e) {
             // Silently handle email errors to not fail registration
             \Log::error('Admin notification email failed: ' . $e->getMessage());

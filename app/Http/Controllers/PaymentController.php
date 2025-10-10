@@ -360,8 +360,8 @@ class PaymentController extends Controller
                     DB::commit();
                     // Send emails for custom invoice
                     try {
-                        $this->emailService->sendCustomInvoicePaymentConfirmation($existingInvoice);
-                        $this->emailService->sendAdminCustomInvoicePaymentNotification($existingInvoice);
+                        $this->emailService->sendCustomInvoicePaymentConfirmation($existingInvoice->user, ['invoice' => $existingInvoice]);
+                        $this->emailService->sendAdminCustomInvoicePaymentNotification(['invoice' => $existingInvoice]);
                     } catch (\Exception $e) {
                         Log::error('Failed to send custom invoice payment emails', [
                             'error' => $e->getMessage(),
@@ -433,12 +433,11 @@ class PaymentController extends Controller
                                 $result['license'] instanceof \App\Models\License
                                 && $result['invoice'] instanceof \App\Models\Invoice
                             ) {
-                                $this->emailService->sendPaymentConfirmation($result['license'], $result['invoice']);
-                                $this->emailService->sendLicenseCreated($result['license']);
-                                $this->emailService->sendAdminPaymentNotification(
-                                    $result['license'],
-                                    $result['invoice']
-                                );
+                                if ($result['license']->user) {
+                                    $this->emailService->sendPaymentConfirmation($result['license']->user, ['license' => $result['license'], 'invoice' => $result['invoice']]);
+                                    $this->emailService->sendLicenseCreated($result['license']->user, ['license' => $result['license']]);
+                                }
+                                $this->emailService->sendAdminPaymentNotification(['license' => $result['license'], 'invoice' => $result['invoice']]);
                             }
                         } catch (\Exception $e) {
                             Log::error('Failed to send payment emails', [

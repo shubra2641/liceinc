@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Ticket;
 use App\Models\TicketReply;
 use App\Services\LicenseAutoRegistrationService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -30,22 +31,23 @@ class TicketService
         return DB::transaction(function () use ($data) {
             // Auto-register license if provided
             if (!empty($data['license_key'])) {
+                $licenseKey = $data['license_key'];
+                $domain = $data['domain'] ?? '';
                 $this->licenseService->autoRegisterLicense(
-                    (string) $data['license_key'],
-                    (string) ($data['domain'] ?? ''),
-                    Auth::id()
+                    $licenseKey,
+                    $domain
                 );
             }
 
             return Ticket::create([
                 'user_id' => Auth::id(),
-                'subject' => (string) $data['subject'],
-                'description' => (string) $data['description'],
-                'priority' => (string) ($data['priority'] ?? 'medium'),
+                'subject' => $data['subject'],
+                'description' => $data['description'],
+                'priority' => $data['priority'] ?? 'medium',
                 'status' => 'open',
-                'product_id' => isset($data['product_id']) ? (int) $data['product_id'] : null,
-                'license_key' => isset($data['license_key']) ? (string) $data['license_key'] : null,
-                'domain' => isset($data['domain']) ? (string) $data['domain'] : null,
+                'product_id' => $data['product_id'] ?? null,
+                'license_key' => $data['license_key'] ?? null,
+                'domain' => $data['domain'] ?? null,
             ]);
         });
     }

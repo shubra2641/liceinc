@@ -64,6 +64,6 @@ class EmailTemplateService
      */
     public function getAdminEmail(): string
     {
-        return (string) config('mail.admin_email', config('mail.from.address'));
+        return config('mail.admin_email', config('mail.from.address'));
     }
 }

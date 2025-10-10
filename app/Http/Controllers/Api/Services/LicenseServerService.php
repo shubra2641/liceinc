@@ -47,12 +47,15 @@ class LicenseServerService
     private function verifyDomain(License $license, string $domain): bool
     {
         $allowedDomains = $license->allowed_domains ?? [];
+        if (!is_array($allowedDomains)) {
+            $allowedDomains = [];
+        }
 
         if (empty($allowedDomains)) {
             return true; // No domain restrictions
         }
 
-        return in_array($domain, (array) $allowedDomains);
+        return in_array($domain, $allowedDomains);
     }
 
     /**

@@ -98,7 +98,9 @@ class TicketController extends Controller
             'status' => 'in:open,in_progress,closed,resolved'
         ]);
 
-        $this->ticketService->updateTicketStatus($ticket, (string) $request->status);
+        $validated = $request->validated();
+        $status = $validated['status'] ?? '';
+        $this->ticketService->updateTicketStatus($ticket, (string) $status);
 
         return redirect()
             ->route('user.tickets.show', $ticket->id)
@@ -120,7 +122,9 @@ class TicketController extends Controller
             'message' => 'required|string'
         ]);
 
-        $this->ticketService->addReply($ticket, (string) $request->message);
+        $validated = $request->validated();
+        $message = $validated['message'] ?? '';
+        $this->ticketService->addReply($ticket, (string) $message);
 
         return redirect()
             ->route('user.tickets.show', $ticket->id)

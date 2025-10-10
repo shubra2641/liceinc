@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Simplified License Server Controller.
@@ -45,16 +46,21 @@ class LicenseServerController extends Controller
         RateLimiter::hit($rateLimitKey, 60);
 
         try {
+            $validated = $request->validated();
+            $licenseKey = $validated['license_key'] ?? '';
+            $domain = $validated['domain'] ?? '';
             $product = $this->licenseService->verifyLicenseAndGetProduct(
-                (string) $request->license_key,
-                (string) $request->domain
+                (string) $licenseKey,
+                (string) $domain
             );
 
             if (!$product) {
                 return response()->json(['error' => 'Invalid license or domain'], 403);
             }
 
-            $updateInfo = $this->updateService->getUpdateInfo($product, (string) $request->current_version);
+            $validated = $request->validated();
+            $currentVersion = $validated['current_version'] ?? '';
+            $updateInfo = $this->updateService->getUpdateInfo($product, (string) $currentVersion);
 
             return response()->json($updateInfo);
         } catch (\Exception $e) {
@@ -77,9 +83,12 @@ class LicenseServerController extends Controller
         RateLimiter::hit($rateLimitKey, 60);
 
         try {
+            $validated = $request->validated();
+            $licenseKey = $validated['license_key'] ?? '';
+            $domain = $validated['domain'] ?? '';
             $product = $this->licenseService->verifyLicenseAndGetProduct(
-                (string) $request->license_key,
-                (string) $request->domain
+                (string) $licenseKey,
+                (string) $domain
             );
 
             if (!$product) {
@@ -120,16 +129,21 @@ class LicenseServerController extends Controller
         RateLimiter::hit($rateLimitKey, 60);
 
         try {
+            $validated = $request->validated();
+            $licenseKey = $validated['license_key'] ?? '';
+            $domain = $validated['domain'] ?? '';
             $product = $this->licenseService->verifyLicenseAndGetProduct(
-                (string) $request->license_key,
-                (string) $request->domain
+                (string) $licenseKey,
+                (string) $domain
             );
 
             if (!$product) {
                 return response()->json(['error' => 'Invalid license or domain'], 403);
             }
 
-            $history = $this->licenseService->getVersionHistory($product, (int) $request->limit);
+            $validated = $request->validated();
+            $limit = $validated['limit'] ?? 10;
+            $history = $this->licenseService->getVersionHistory($product, (int) $limit);
 
             return response()->json(['versions' => $history]);
         } catch (\Exception $e) {
@@ -141,7 +155,7 @@ class LicenseServerController extends Controller
     /**
      * Download update file.
      */
-    public function downloadUpdate(Request $request, int $id): Response
+    public function downloadUpdate(Request $request, int $id): BinaryFileResponse
     {
         $rateLimitKey = 'download-update:' . $request->ip();
 
@@ -164,7 +178,8 @@ class LicenseServerController extends Controller
                 abort(404, 'Update file not found');
             }
 
-            return response()->download($filePath, (string) $update->filename);
+            $filename = $update->filename ?? 'update.zip';
+            return response()->download($filePath, (string) $filename);
         } catch (\Exception $e) {
             Log::error('Download update failed: ' . $e->getMessage());
             abort(500, 'Internal server error');

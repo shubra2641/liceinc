@@ -163,7 +163,7 @@ class LicenseController extends Controller
             try {
                 // Send notification to user
                 if ($license->user) {
-                    $this->emailService->sendLicenseCreated($license, $license->user);
+                    $this->emailService->sendLicenseCreated($license->user, ['license' => $license]);
                 }
                 // Send notification to admin
                 $this->emailService->sendAdminLicenseCreated([
