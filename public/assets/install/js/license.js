@@ -112,10 +112,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.success) {
             showSuccess();
             showContinueButton();
-            // Optionally redirect after a delay
+            // Optionally redirect after a delay with URL validation
             setTimeout(() => {
                 if (data.redirect) {
-                    window.location.href = data.redirect;
+                    // Validate redirect URL to prevent open redirect attacks
+                    try {
+                        const redirectUrl = new URL(data.redirect, window.location.origin);
+                        // Only allow same-origin redirects
+                        if (redirectUrl.origin === window.location.origin) {
+                            window.location.href = redirectUrl.toString();
+                        } else {
+                            console.warn('Invalid redirect URL blocked:', data.redirect);
+                        }
+                    } catch (e) {
+                        console.warn('Invalid redirect URL format:', data.redirect);
+                    }
                 }
             }, 2000);
         } else {
@@ -200,10 +211,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const existingErrors = document.querySelectorAll('.license-error');
         existingErrors.forEach(error => error.remove());
 
-        // Create new error message
+        // Create new error message safely to prevent XSS
         const errorDiv = document.createElement('div');
         errorDiv.className = 'license-error';
-    errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + message;
+        
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-exclamation-circle';
+        const messageSpan = document.createElement('span');
+        messageSpan.textContent = message; // Safe text content
+        
+        errorDiv.appendChild(icon);
+        errorDiv.appendChild(document.createTextNode(' '));
+        errorDiv.appendChild(messageSpan);
         
         // Insert after the input field
         const inputGroup = purchaseCodeInput.closest('.license-form-group');

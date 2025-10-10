@@ -94,7 +94,8 @@ document.addEventListener('DOMContentLoaded', function() {
         content = content.replace(/(\/\/.*$|\/\*[\s\S]*?\*\/)/gm, 
             '<span class="syntax-comment">$1</span>');
         
-        block.innerHTML = content;
+        // Set content safely to prevent XSS
+        block.textContent = content;
     });
     
     // Add tooltips for API methods

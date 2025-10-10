@@ -79,13 +79,29 @@ class ProductShowManager {
     showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `alert alert-${type} alert-dismissible fade show`;
-        notification.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
-                <span>${message}</span>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
+        
+        // Create DOM elements safely to prevent XSS
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'd-flex align-items-center';
+        
+        const icon = document.createElement('i');
+        const iconClass = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle';
+        icon.className = `fas fa-${iconClass} me-2`;
+        
+        const messageSpan = document.createElement('span');
+        messageSpan.textContent = message; // Safe text content
+        
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'btn-close';
+        closeButton.setAttribute('data-bs-dismiss', 'alert');
+        closeButton.setAttribute('aria-label', 'Close');
+        
+        contentDiv.appendChild(icon);
+        contentDiv.appendChild(messageSpan);
+        
+        notification.appendChild(contentDiv);
+        notification.appendChild(closeButton);
         
         // Insert at the top of the page
         const container = document.querySelector('.user-dashboard-container') || document.body;
