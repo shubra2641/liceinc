@@ -1126,7 +1126,17 @@ class AdminDashboard {
     // Insert at the top of the page
     const container = document.querySelector('.container-fluid');
     if (container) {
-      container.insertAdjacentHTML('afterbegin', alertHtml);
+      // Use SecurityUtils for safe insertAdjacentHTML with XSS protection
+      if (window.SecurityUtils) {
+        window.SecurityUtils.safeInsertAdjacentHTML(container, 'afterbegin', alertHtml, true);
+      } else {
+        // Fallback: create element safely
+        const tempDiv = document.createElement('div');
+        tempDiv.textContent = alertHtml;
+        while (tempDiv.firstChild) {
+          container.insertBefore(tempDiv.firstChild, container.firstChild);
+        }
+      }
     }
   }
 
@@ -1913,21 +1923,26 @@ class AdminDashboard {
       const apiUserLicensesBase =
         `${baseUrl.replace(/\/$/, '') || ''}/admin/api/user`;
 
-      fetch(`${apiUserLicensesBase}/${userId}/licenses`, {
-        credentials: 'same-origin',
-        headers: { Accept: 'application/json' },
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(
-              `Server returned ${response.status} ${response.statusText}`,
-            );
-          }
-          return response.text();
-        })
-        .then(text => {
-          try {
-            const data = JSON.parse(text);
+      // Use SecurityUtils for safe fetch with SSRF protection
+      const fetchUrl = `${apiUserLicensesBase}/${userId}/licenses`;
+      const response = window.SecurityUtils ? 
+        await window.SecurityUtils.safeFetch(fetchUrl, {
+          credentials: 'same-origin',
+          headers: { Accept: 'application/json' },
+        }) : await fetch(fetchUrl, {
+          credentials: 'same-origin',
+          headers: { Accept: 'application/json' },
+        });
+        
+        if (!response.ok) {
+          throw new Error(
+            `Server returned ${response.status} ${response.statusText}`,
+          );
+        }
+        
+        const text = await response.text();
+        try {
+          const data = JSON.parse(text);
 
             // Use textContent for maximum security - never innerHTML
             licenseSelect.textContent = '';
@@ -2573,18 +2588,30 @@ class AdminDashboard {
     contentElement.appendChild(document.createTextNode(' Loading...'));
 
     // Make AJAX request
-    fetch(`/admin/programming-languages/license-file/${slug}?type=${type}`, {
-      method: 'GET',
-      headers: {
-        'X-CSRF-TOKEN':
-          document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute('content') || '',
-        Accept: 'application/json',
-      },
-    })
-      .then(response => response.json())
-      .then(data => {
+    // Use SecurityUtils for safe fetch with SSRF protection
+    const fetchUrl = `/admin/programming-languages/license-file/${slug}?type=${type}`;
+    const response = window.SecurityUtils ? 
+      await window.SecurityUtils.safeFetch(fetchUrl, {
+        method: 'GET',
+        headers: {
+          'X-CSRF-TOKEN':
+            document
+              .querySelector('meta[name="csrf-token"]')
+              ?.getAttribute('content') || '',
+          Accept: 'application/json',
+        },
+      }) : await fetch(fetchUrl, {
+        method: 'GET',
+        headers: {
+          'X-CSRF-TOKEN':
+            document
+              .querySelector('meta[name="csrf-token"]')
+              ?.getAttribute('content') || '',
+          Accept: 'application/json',
+        },
+      });
+      
+      const data = await response.json();
         if (data.success) {
           contentElementSecurityUtils.safeInnerHTML(
             this,
@@ -2660,18 +2687,30 @@ class AdminDashboard {
     );
 
     // Make AJAX request
-    fetch(`/admin/programming-languages/${languageId}/template`, {
-      method: 'GET',
-      headers: {
-        'X-CSRF-TOKEN':
-          document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute('content') || '',
-        Accept: 'application/json',
-      },
-    })
-      .then(response => response.json())
-      .then(data => {
+    // Use SecurityUtils for safe fetch with SSRF protection
+    const fetchUrl = `/admin/programming-languages/${languageId}/template`;
+    const response = window.SecurityUtils ? 
+      await window.SecurityUtils.safeFetch(fetchUrl, {
+        method: 'GET',
+        headers: {
+          'X-CSRF-TOKEN':
+            document
+              .querySelector('meta[name="csrf-token"]')
+              ?.getAttribute('content') || '',
+          Accept: 'application/json',
+        },
+      }) : await fetch(fetchUrl, {
+        method: 'GET',
+        headers: {
+          'X-CSRF-TOKEN':
+            document
+              .querySelector('meta[name="csrf-token"]')
+              ?.getAttribute('content') || '',
+          Accept: 'application/json',
+        },
+      });
+      
+      const data = await response.json();
         if (data.success) {
           contentElementSecurityUtils.safeInnerHTML(
             this,

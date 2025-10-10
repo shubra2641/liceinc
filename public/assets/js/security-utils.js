@@ -279,7 +279,9 @@ const SecurityUtils = {
     }
 
     const safeHtml = this.sanitizeHtml(html, allowBasicFormatting);
-    element.insertAdjacentHTML(position, safeHtml);
+    // Always use textContent for maximum security - never use insertAdjacentHTML
+    const textNode = document.createTextNode(safeHtml);
+    element.insertAdjacentElement(position, textNode);
   },
 
   /**

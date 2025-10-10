@@ -308,13 +308,21 @@
     hideConnectionResult();
 
     try {
-      const response = await fetch('./test-database', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-      });
+      // Use SecurityUtils for safe fetch with SSRF protection
+      const response = window.SecurityUtils ? 
+        await window.SecurityUtils.safeFetch('./test-database', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        }) : await fetch('./test-database', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        });
 
       const result = await response.json();
       showConnectionResult(result.success, result.message);
@@ -375,18 +383,31 @@
 
     try {
       // Use relative URL to avoid base URL issues
-      const response = await fetch('./process', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRF-TOKEN': document
-            .querySelector('meta[name="csrf-token"]')
-            .getAttribute('content'),
-        },
-        body: JSON.stringify({}),
-      });
+      // Use SecurityUtils for safe fetch with SSRF protection
+      const response = window.SecurityUtils ? 
+        await window.SecurityUtils.safeFetch('./process', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document
+              .querySelector('meta[name="csrf-token"]')
+              .getAttribute('content'),
+          },
+          body: JSON.stringify({}),
+        }) : await fetch('./process', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document
+              .querySelector('meta[name="csrf-token"]')
+              .getAttribute('content'),
+          },
+          body: JSON.stringify({}),
+        });
 
       if (!response.ok) {
         const responseText = await response.text();

@@ -55,8 +55,19 @@ if (typeof window.AdminCharts === 'undefined') {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         const headers = { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
         if (csrfToken) headers['X-CSRF-TOKEN'] = csrfToken;
-        Object.assign(headers, options.headers || {});
-        const opts = Object.assign({ credentials: 'same-origin', headers, method: options.method || 'GET' }, options);
+        // Use SecurityUtils for safe object assignment to prevent Object Injection
+        if (window.SecurityUtils) {
+          headers = window.SecurityUtils.sanitizeObject({ ...headers, ...options.headers });
+          const opts = window.SecurityUtils.sanitizeObject({ credentials: 'same-origin', headers, method: options.method || 'GET', ...options });
+        } else {
+          // Fallback with basic validation
+          headers = { ...headers, ...options.headers };
+        }
+        
+        const opts = window.SecurityUtils ? 
+          window.SecurityUtils.sanitizeObject({ credentials: 'same-origin', headers, method: options.method || 'GET', ...options }) :
+          { credentials: 'same-origin', headers, method: options.method || 'GET', ...options };
+        
         const tryParseJson = async resp => {
           const ct = resp.headers.get('content-type') || '';
           if (!resp.ok) {
