@@ -7,7 +7,7 @@
 const FEEDBACK_DURATION = 2000;
 const TOOLTIP_DURATION = 1000;
 const CODE_BLOCK_MAX_HEIGHT = 300;
-const ARRAY_INDEX_OFFSET = 1;
+// Array index constants (removed - using direct index access for security)
 
 // Copy to clipboard functionality
 function copyToClipboard(elementId) {
@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const onclickAttr = this.getAttribute('onclick');
             const match = onclickAttr.match(/'([^']+)'/);
-            if (match && match.length > ARRAY_INDEX_OFFSET) {
-                const elementId = match[ARRAY_INDEX_OFFSET];
+            if (match && match.length > 1) {
+                const elementId = match[1];
                 // Validate elementId to prevent injection
                 if (elementId && /^[a-zA-Z0-9_-]+$/.test(elementId)) {
                     copyToClipboard(elementId);
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     anchorLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            const targetId = this.getAttribute('href').substring(ARRAY_INDEX_OFFSET);
+            const targetId = this.getAttribute('href').substring(1);
             const targetElement = document.getElementById(targetId);
             
             if (targetElement) {
