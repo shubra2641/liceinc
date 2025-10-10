@@ -9,18 +9,18 @@
 }
 
 .guide-section-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
 .guide-text {
+    margin-bottom: 1.5rem;
     color: var(--text-secondary);
     line-height: 1.6;
-    margin-bottom: 1.5rem;
 }
 
 .guide-features {
@@ -35,37 +35,37 @@
     align-items: flex-start;
     gap: 1rem;
     padding: 1.5rem;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-secondary);
 }
 
 .guide-feature-icon {
-    font-size: 1.5rem;
-    color: var(--primary-color);
     margin-top: 0.25rem;
+    color: var(--primary-color);
+    font-size: 1.5rem;
 }
 
 .guide-feature-content h4 {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
 }
 
 .guide-feature-content p {
+    margin: 0;
     color: var(--text-secondary);
     font-size: 0.9rem;
-    margin: 0;
 }
 
 /* Code Blocks */
 .code-block {
-    background: var(--bg-darker);
-    border-radius: var(--radius-lg);
     margin: 1.5rem 0;
-    overflow: hidden;
     border: 1px solid var(--border-dark);
+    border-radius: var(--radius-lg);
+    background: var(--bg-darker);
+    overflow: hidden;
 }
 
 .code-block-header {
@@ -73,23 +73,23 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1rem;
-    background: var(--bg-dark);
     border-bottom: 1px solid var(--border-dark);
+    background: var(--bg-dark);
 }
 
 .code-block-title {
+    color: var(--text-white);
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--text-white);
 }
 
 .code-block-copy {
-    background: none;
+    padding: 0.25rem 0.5rem;
     border: none;
+    border-radius: var(--radius-sm);
+    background: none;
     color: var(--text-muted);
     cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
     transition: all var(--transition-normal);
 }
 
@@ -99,44 +99,44 @@
 }
 
 .code-block-content {
-    padding: 1rem;
     margin: 0;
-    overflow-x: auto;
+    padding: 1rem;
     background: var(--bg-darker);
+    overflow-x: auto;
 }
 
 .code-block-content code {
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: none !important;
     color: var(--text-white);
     font-family: 'Courier New', monospace;
     font-size: 0.875rem;
     line-height: 1.5;
     white-space: pre;
-    background: none !important;
-    padding: 0 !important;
-    border: none !important;
-    border-radius: 0 !important;
 }
 
 /* API Methods */
 .api-method {
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-secondary);
 }
 
 .api-method-title {
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+    font-family: 'Courier New', monospace;
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
-    font-family: 'Courier New', monospace;
 }
 
 .api-method-description {
-    color: var(--text-secondary);
     margin-bottom: 1rem;
+    color: var(--text-secondary);
 }
 
 .api-parameters,
@@ -146,10 +146,10 @@
 
 .api-parameters h5,
 .api-return h5 {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
 }
 
 .api-parameters ul {
@@ -158,14 +158,14 @@
 }
 
 .api-parameters li {
-    color: var(--text-secondary);
     margin-bottom: 0.25rem;
+    color: var(--text-secondary);
 }
 
 .api-parameters code {
-    background: var(--bg-tertiary);
     padding: 0.125rem 0.375rem;
     border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
     font-family: 'Courier New', monospace;
     font-size: 0.875rem;
 }
@@ -182,9 +182,9 @@
     align-items: flex-start;
     gap: 1rem;
     padding: 1rem;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-secondary);
 }
 
 .error-code {
@@ -193,25 +193,25 @@
 
 .error-code-name {
     display: inline-block;
-    background: var(--error-color);
-    color: var(--text-white);
     padding: 0.25rem 0.75rem;
     border-radius: var(--radius-sm);
+    background: var(--error-color);
+    color: var(--text-white);
     font-family: 'Courier New', monospace;
     font-size: 0.875rem;
     font-weight: 600;
 }
 
 .error-code-description strong {
-    color: var(--text-primary);
-    font-size: 1rem;
     display: block;
     margin-bottom: 0.25rem;
+    color: var(--text-primary);
+    font-size: 1rem;
 }
 
 .error-code-description p {
-    color: var(--text-secondary);
     margin: 0;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
@@ -227,22 +227,22 @@
     align-items: flex-start;
     gap: 1rem;
     padding: 1.5rem;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-secondary);
 }
 
 .best-practice-icon {
-    font-size: 1.5rem;
-    color: var(--success-color);
     margin-top: 0.25rem;
+    color: var(--success-color);
+    font-size: 1.5rem;
 }
 
 .best-practice-content h4 {
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.75rem;
 }
 
 .best-practice-content ul {
@@ -251,8 +251,8 @@
 }
 
 .best-practice-content li {
-    color: var(--text-secondary);
     margin-bottom: 0.5rem;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
@@ -264,41 +264,41 @@
 }
 
 .support-resource {
-    text-align: center;
     padding: 2rem 1.5rem;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-secondary);
+    text-align: center;
     transition: all var(--transition-normal);
 }
 
 .support-resource:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
     border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
 .support-resource-icon {
-    font-size: 2.5rem;
-    color: var(--primary-color);
     margin-bottom: 1rem;
+    color: var(--primary-color);
+    font-size: 2.5rem;
 }
 
 .support-resource-content h4 {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
 }
 
 .support-resource-content p {
+    margin-bottom: 1rem;
     color: var(--text-secondary);
     font-size: 0.9rem;
-    margin-bottom: 1rem;
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .guide-features {
         grid-template-columns: 1fr;
     }
@@ -338,8 +338,8 @@
     }
 
     .guide-feature {
-        background: #374151;
         border-color: #4b5563;
+        background: #374151;
     }
 
     .guide-feature-content h4 {
@@ -351,8 +351,8 @@
     }
 
     .guide-code-block {
-        background: #1f2937;
         border-color: #4b5563;
+        background: #1f2937;
     }
 
     .guide-code-header {
@@ -366,8 +366,8 @@
     }
 
     .guide-best-practice {
-        background: #374151;
         border-color: #4b5563;
+        background: #374151;
     }
 
     .guide-best-practice h4 {
@@ -379,8 +379,8 @@
     }
 
     .guide-support-resource {
-        background: #374151;
         border-color: #4b5563;
+        background: #374151;
     }
 
     .guide-support-resource h4 {
@@ -392,14 +392,14 @@
     }
 
     .guide-error-code-item {
-        background: #374151;
         border-color: #4b5563;
+        background: #374151;
     }
 
     .guide-error-code {
+        border-color: #4b5563;
         background: #1f2937;
         color: #f9fafb;
-        border-color: #4b5563;
     }
 
     .guide-error-description {
@@ -407,8 +407,8 @@
     }
 
     .guide-api-method {
-        background: #374151;
         border-color: #4b5563;
+        background: #374151;
         color: #f9fafb;
     }
 
@@ -422,9 +422,9 @@
     }
 
     .guide-copy-button {
+        border-color: #6b7280;
         background: #4b5563;
         color: #f9fafb;
-        border-color: #6b7280;
     }
 
     .guide-copy-button:hover {
@@ -448,8 +448,8 @@
 }
 
 .dark .guide-feature {
-    background: #374151;
     border-color: #4b5563;
+    background: #374151;
 }
 
 .dark .guide-feature-content h4 {
@@ -461,8 +461,8 @@
 }
 
 .dark .guide-code-block {
-    background: #1f2937;
     border-color: #4b5563;
+    background: #1f2937;
 }
 
 .dark .guide-code-header {
@@ -476,8 +476,8 @@
 }
 
 .dark .guide-best-practice {
-    background: #374151;
     border-color: #4b5563;
+    background: #374151;
 }
 
 .dark .guide-best-practice h4 {
@@ -489,8 +489,8 @@
 }
 
 .dark .guide-support-resource {
-    background: #374151;
     border-color: #4b5563;
+    background: #374151;
 }
 
 .dark .guide-support-resource h4 {
@@ -502,14 +502,14 @@
 }
 
 .dark .guide-error-code-item {
-    background: #374151;
     border-color: #4b5563;
+    background: #374151;
 }
 
 .dark .guide-error-code {
+    border-color: #4b5563;
     background: #1f2937;
     color: #f9fafb;
-    border-color: #4b5563;
 }
 
 .dark .guide-error-description {
@@ -517,8 +517,8 @@
 }
 
 .dark .guide-api-method {
-    background: #374151;
     border-color: #4b5563;
+    background: #374151;
     color: #f9fafb;
 }
 
@@ -532,9 +532,9 @@
 }
 
 .dark .guide-copy-button {
+    border-color: #6b7280;
     background: #4b5563;
     color: #f9fafb;
-    border-color: #6b7280;
 }
 
 .dark .guide-copy-button:hover {
