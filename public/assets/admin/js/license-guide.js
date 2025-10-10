@@ -47,8 +47,15 @@ document.addEventListener('DOMContentLoaded', function() {
     copyButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
-            const elementId = this.getAttribute('onclick').match(/'([^']+)'/)[ARRAY_INDEX_OFFSET];
-            copyToClipboard(elementId);
+            const onclickAttr = this.getAttribute('onclick');
+            const match = onclickAttr.match(/'([^']+)'/);
+            if (match && match.length > ARRAY_INDEX_OFFSET) {
+                const elementId = match[ARRAY_INDEX_OFFSET];
+                // Validate elementId to prevent injection
+                if (elementId && /^[a-zA-Z0-9_-]+$/.test(elementId)) {
+                    copyToClipboard(elementId);
+                }
+            }
         });
     });
     
