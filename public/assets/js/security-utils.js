@@ -487,7 +487,7 @@ const SecurityUtils = {
       return defaultValue;
     }
     
-    return obj.hasOwnProperty(sanitizedProperty) ? obj[sanitizedProperty] : defaultValue;
+    return Object.prototype.hasOwnProperty.call(obj, sanitizedProperty) ? obj[sanitizedProperty] : defaultValue;
   },
 
   /**
