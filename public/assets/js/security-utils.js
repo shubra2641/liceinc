@@ -169,23 +169,25 @@ const SecurityUtils = {
     }
 
     try {
-      const allowedOrigins = [
-        window.location.origin,
-        `${window.location.protocol}//${window.location.host}`,
-        `${window.location.protocol}//${window.location.hostname}`,
+      // Enhanced dangerous protocols check - more comprehensive
+      const dangerousProtocols = [
+        'javascript:', 'data:', 'vbscript:', 'file:', 'ftp:', 'gopher:', 'news:', 'telnet:',
+        'ws:', 'wss:', 'blob:', 'chrome:', 'chrome-extension:', 'moz-extension:',
+        'ms-appx:', 'ms-appx-web:', 'res:', 'about:', 'chrome-devtools:'
       ];
       
-      // Enhanced dangerous protocols check
-      const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:', 'ftp:', 'gopher:', 'news:', 'telnet:'];
-      if (dangerousProtocols.some(protocol => url.toLowerCase().startsWith(protocol))) {
+      const lowerUrl = url.toLowerCase().trim();
+      if (dangerousProtocols.some(protocol => lowerUrl.startsWith(protocol))) {
         return false;
       }
       
-      // Enhanced suspicious patterns check
+      // Enhanced suspicious patterns check - more comprehensive
       const suspiciousPatterns = [
         /\.\./,  // Directory traversal
         /%2e%2e/i,  // URL encoded directory traversal
         /%252e%252e/i,  // Double URL encoded directory traversal
+        /%2f%2f/i,  // URL encoded path separator
+        /%5c/i,  // Backslash encoding
         /<script/i,  // Script tags
         /javascript:/i,  // JavaScript protocol
         /data:/i,  // Data protocol
@@ -194,6 +196,20 @@ const SecurityUtils = {
         /<iframe/i,  // Iframe tags
         /<object/i,  // Object tags
         /<embed/i,  // Embed tags
+        /<form/i,  // Form tags
+        /<input/i,  // Input tags
+        /<textarea/i,  // Textarea tags
+        /<select/i,  // Select tags
+        /<button/i,  // Button tags
+        /<link/i,  // Link tags
+        /<meta/i,  // Meta tags
+        /<style/i,  // Style tags
+        /\x00/,  // Null bytes
+        /\x01-\x08/,  // Control characters
+        /\x0b/,  // Vertical tab
+        /\x0c/,  // Form feed
+        /\x0e-\x1f/,  // Control characters
+        /\x7f-\x9f/,  // Extended control characters
       ];
       
       if (suspiciousPatterns.some(pattern => pattern.test(url))) {
@@ -203,12 +219,31 @@ const SecurityUtils = {
       // Additional validation for URL structure
       try {
         const urlObj = new URL(url, window.location.origin);
+        
         // Only allow http and https protocols
         if (!['http:', 'https:'].includes(urlObj.protocol)) {
           return false;
         }
-        // Check if URL is from same origin
-        return urlObj.origin === window.location.origin;
+        
+        // Check if URL is from same origin - more strict
+        if (urlObj.origin !== window.location.origin) {
+          return false;
+        }
+        
+        // Additional checks for path traversal
+        if (urlObj.pathname.includes('..') || urlObj.pathname.includes('//')) {
+          return false;
+        }
+        
+        // Check for dangerous query parameters
+        const dangerousParams = ['javascript', 'data', 'vbscript', 'onload', 'onerror', 'onclick'];
+        for (const [key, value] of urlObj.searchParams) {
+          if (dangerousParams.some(param => key.toLowerCase().includes(param) || value.toLowerCase().includes(param))) {
+            return false;
+          }
+        }
+        
+        return true;
       } catch (e) {
         return false;
       }
@@ -652,6 +687,55 @@ const SecurityUtils = {
     } else {
       console.warn('Unsafe DOM property blocked');
     }
+  },
+
+  /**
+   * Enhanced object sanitization to prevent prototype pollution
+   * @param {object} obj - The object to sanitize
+   * @returns {object} - Sanitized object
+   */
+  sanitizeObject(obj) {
+    if (!obj || typeof obj !== 'object') {
+      return {};
+    }
+
+    const sanitized = {};
+    
+    for (const [key, value] of Object.entries(obj)) {
+      // Skip dangerous property names
+      if (this.isDangerousPropertyName(key)) {
+        console.warn('Dangerous property name blocked:', key);
+        continue;
+      }
+      
+      // Recursively sanitize nested objects
+      if (typeof value === 'object' && value !== null) {
+        sanitized[key] = this.sanitizeObject(value);
+      } else {
+        sanitized[key] = value;
+      }
+    }
+    
+    return sanitized;
+  },
+
+  /**
+   * Check if property name is dangerous
+   * @param {string} propName - The property name to check
+   * @returns {boolean} - True if dangerous
+   */
+  isDangerousPropertyName(propName) {
+    const dangerousProps = [
+      '__proto__', 'constructor', 'prototype', 
+      'valueOf', 'toString', 'hasOwnProperty',
+      'isPrototypeOf', 'propertyIsEnumerable',
+      '__defineGetter__', '__defineSetter__',
+      '__lookupGetter__', '__lookupSetter__'
+    ];
+    
+    return dangerousProps.includes(propName) || 
+           propName.includes('__') || 
+           propName.includes('prototype');
   },
 };
 

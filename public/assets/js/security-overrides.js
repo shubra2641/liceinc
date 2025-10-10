@@ -310,13 +310,31 @@
     }
   };
 
-  // Protect against prototype pollution
+  // Enhanced protection against prototype pollution
   const originalObjectDefineProperty = Object.defineProperty;
   Object.defineProperty = function(obj, prop, descriptor) {
-    if (prop === '__proto__' || prop === 'constructor' || prop === 'prototype') {
-      console.warn('Prototype pollution attempt blocked');
+    // Enhanced check for dangerous property names
+    const dangerousProps = [
+      '__proto__', 'constructor', 'prototype',
+      'valueOf', 'toString', 'hasOwnProperty',
+      'isPrototypeOf', 'propertyIsEnumerable'
+    ];
+    
+    if (dangerousProps.includes(prop) || prop.includes('__') || prop.includes('prototype')) {
+      console.warn('Prototype pollution attempt blocked:', prop);
       return obj;
     }
+    
+    // Check descriptor for dangerous properties
+    if (descriptor && typeof descriptor === 'object') {
+      for (const key in descriptor) {
+        if (dangerousProps.includes(key) || key.includes('__') || key.includes('prototype')) {
+          console.warn('Dangerous descriptor property blocked:', key);
+          return obj;
+        }
+      }
+    }
+    
     return originalObjectDefineProperty.call(this, obj, prop, descriptor);
   };
 
@@ -335,13 +353,26 @@
   JSON.parse = function(text, reviver) {
     const parsed = originalJSONParse.call(this, text, reviver);
     
-    // Check for dangerous properties
+    // Enhanced check for dangerous properties
     if (typeof parsed === 'object' && parsed !== null) {
-      const dangerousProps = ['__proto__', 'constructor', 'prototype'];
+      const dangerousProps = [
+        '__proto__', 'constructor', 'prototype',
+        'valueOf', 'toString', 'hasOwnProperty',
+        'isPrototypeOf', 'propertyIsEnumerable'
+      ];
+      
       for (const prop of dangerousProps) {
         if (prop in parsed) {
-          console.warn('Dangerous JSON property detected and removed');
+          console.warn('Dangerous JSON property detected and removed:', prop);
           delete parsed[prop];
+        }
+      }
+      
+      // Check for prototype pollution patterns
+      for (const key in parsed) {
+        if (key.includes('__') || key.includes('prototype')) {
+          console.warn('Prototype pollution pattern detected and removed:', key);
+          delete parsed[key];
         }
       }
     }
