@@ -120,6 +120,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         const redirectUrl = new URL(data.redirect, window.location.origin);
                         // Only allow same-origin redirects
                         if (redirectUrl.origin === window.location.origin) {
+                            // Additional security: Check for dangerous protocols
+                            if (redirectUrl.protocol !== 'http:' && redirectUrl.protocol !== 'https:') {
+                                console.warn('Invalid redirect protocol blocked:', redirectUrl.protocol);
+                                return;
+                            }
+                            
+                            // Additional security: Check for localhost/private IPs
+                            if (redirectUrl.hostname === 'localhost' || redirectUrl.hostname === '127.0.0.1' || 
+                                redirectUrl.hostname.startsWith('192.168.') || redirectUrl.hostname.startsWith('10.') || 
+                                redirectUrl.hostname.startsWith('172.')) {
+                                console.warn('Private network redirect blocked:', redirectUrl.hostname);
+                                return;
+                            }
+                            
                             window.location.href = redirectUrl.toString();
                         } else {
                             console.warn('Invalid redirect URL blocked:', data.redirect);
@@ -277,9 +291,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add a small delay for better UX
             e.preventDefault();
             this.style.opacity = '0.7';
-            setTimeout(() => {
-                window.location.href = this.href;
-            }, 150);
+            
+            // Use requestAnimationFrame for better performance and security
+            let frameCount = 0;
+            const maxFrames = 9; // ~150ms at 60fps
+            const animate = () => {
+                frameCount++;
+                if (frameCount >= maxFrames) {
+                    window.location.href = this.href;
+                } else {
+                    requestAnimationFrame(animate);
+                }
+            };
+            requestAnimationFrame(animate);
         });
     }
 

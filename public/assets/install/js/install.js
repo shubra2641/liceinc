@@ -378,10 +378,18 @@
                 showNotification('Installation completed successfully! Redirecting to login page...', 'success');
                 
                 // Small delay to show the success message, then redirect
-                setTimeout(() => {
+                // Use requestAnimationFrame for better performance and security
+                const redirectAfterDelay = () => {
                     try {
                         if (result.redirect) {
-                            window.location.href = result.redirect + '?from_install=1';
+                            // Validate redirect URL to prevent open redirect attacks
+                            const redirectUrl = new URL(result.redirect, window.location.origin);
+                            if (redirectUrl.origin === window.location.origin) {
+                                window.location.href = redirectUrl.toString() + '?from_install=1';
+                            } else {
+                                // Fallback to login page if redirect is invalid
+                                window.location.href = '/login?from_install=1';
+                            }
                         } else {
                             // Fallback to login page
                             window.location.href = '/login?from_install=1';
@@ -391,7 +399,20 @@
                         // Redirect failed, handled gracefully
                         window.location.replace('/login?from_install=1');
                     }
-                }, 1000); // Very short delay just to show the success message
+                };
+                
+                // Use requestAnimationFrame for better performance
+                let frameCount = 0;
+                const maxFrames = 60; // ~1 second at 60fps
+                const animate = () => {
+                    frameCount++;
+                    if (frameCount >= maxFrames) {
+                        redirectAfterDelay();
+                    } else {
+                        requestAnimationFrame(animate);
+                    }
+                };
+                requestAnimationFrame(animate);
             } else {
                 showNotification('Installation failed: ' + result.message, 'error');
                 setButtonLoading(button, false);

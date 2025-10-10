@@ -88,6 +88,18 @@ if (typeof window.AdminCharts === 'undefined') {
                         throw new Error('Invalid request URL');
                     }
                     
+                    // Additional security: Check for dangerous protocols
+                    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+                        throw new Error('Invalid protocol');
+                    }
+                    
+                    // Additional security: Check for localhost/private IPs
+                    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || 
+                        url.hostname.startsWith('192.168.') || url.hostname.startsWith('10.') || 
+                        url.hostname.startsWith('172.')) {
+                        throw new Error('Private network access not allowed');
+                    }
+                    
                     const resp = await fetch(url.toString(), opts);
                     return await tryParseJson(resp);
                 } catch (e) {
