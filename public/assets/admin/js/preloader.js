@@ -4,6 +4,12 @@
  * Envato-compliant JavaScript with validation and best practices
  */
 
+// Constants to avoid magic numbers
+const ANIMATION_DURATION = 500;
+const PROGRESS_INCREMENT = 15;
+const PROGRESS_MAX = 100;
+const PROGRESS_INTERVAL = 100;
+
 class PreloaderManager {
     constructor() {
         this.container = document.getElementById('preloader-container');
@@ -13,23 +19,7 @@ class PreloaderManager {
     }
 
     init() {
-        if (!this.container) {
-            return;
-        }
-
-        // Get settings from data attributes
-        this.settings = {
-            enabled: this.container.dataset.enabled === '1',
-            type: this.container.dataset.type || 'spinner',
-            color: this.container.dataset.color || '#3b82f6',
-            backgroundColor: this.container.dataset.bg || '#ffffff',
-            duration: parseInt(this.container.dataset.duration) || 3000,
-            minDuration: parseInt(this.container.dataset.minDuration) || 1000,
-            text: this.container.dataset.text || 'Loading...'
-        };
-
-        if (!this.settings.enabled) {
-            this.hidePreloader();
+        if (!this.container || !this.settings.enabled) {
             return;
         }
 
@@ -64,9 +54,7 @@ class PreloaderManager {
     setupEventListeners() {
         // Hide preloader when page is fully loaded
         window.addEventListener('load', () => {
-            setTimeout(() => {
-                this.hidePreloader();
-            }, this.settings.minDuration || 500);
+            this.hidePreloader();
         });
 
         // Fallback: Hide preloader after maximum duration
@@ -84,13 +72,6 @@ class PreloaderManager {
                 this.resumeAnimations();
             }
         });
-
-        // Additional fallback for DOM ready
-        if (document.readyState === 'complete') {
-            setTimeout(() => {
-                this.hidePreloader();
-            }, this.settings.minDuration || 500);
-        }
     }
 
     startPreloader() {
@@ -114,10 +95,6 @@ class PreloaderManager {
         }
 
         this.isVisible = false;
-        
-        // Add fade out animation
-        this.container.style.opacity = '0';
-        this.container.style.visibility = 'hidden';
         this.container.classList.add('hidden');
 
         // Remove from DOM after animation
@@ -125,7 +102,7 @@ class PreloaderManager {
             if (this.container && this.container.parentNode) {
                 this.container.parentNode.removeChild(this.container);
             }
-        }, 500);
+        }, ANIMATION_DURATION);
     }
 
     animateProgress() {
@@ -136,13 +113,13 @@ class PreloaderManager {
 
         let progress = 0;
         const interval = setInterval(() => {
-            progress += Math.random() * 15;
-            if (progress >= 100) {
-                progress = 100;
+            progress += Math.random() * PROGRESS_INCREMENT;
+            if (progress >= PROGRESS_MAX) {
+                progress = PROGRESS_MAX;
                 clearInterval(interval);
             }
             progressBar.style.width = progress + '%';
-        }, 100);
+        }, PROGRESS_INTERVAL);
     }
 
     pauseAnimations() {
@@ -168,7 +145,7 @@ class PreloaderManager {
                 if (preloader.parentNode) {
                     preloader.parentNode.removeChild(preloader);
                 }
-            }, 500);
+            }, ANIMATION_DURATION);
         }
     }
 
@@ -185,23 +162,10 @@ class PreloaderManager {
 
 // Initialize preloader when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    new PreloaderManager();
+    const preloaderManager = new PreloaderManager();
+    // Store instance for potential future use
+    window.preloaderManagerInstance = preloaderManager;
 });
-
-// Fallback: Force hide preloader after 5 seconds
-setTimeout(() => {
-    const preloader = document.getElementById('preloader-container');
-    if (preloader && !preloader.classList.contains('hidden')) {
-        preloader.style.opacity = '0';
-        preloader.style.visibility = 'hidden';
-        preloader.classList.add('hidden');
-        setTimeout(() => {
-            if (preloader.parentNode) {
-                preloader.parentNode.removeChild(preloader);
-            }
-        }, 500);
-    }
-}, 5000);
 
 // Export for global access
 window.PreloaderManager = PreloaderManager;
