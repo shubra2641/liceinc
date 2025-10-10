@@ -53,7 +53,6 @@ module.exports = [
       'no-dupe-args': 'error',
       'no-duplicate-case': 'error',
       'no-empty': 'warn',
-      'no-extra-semi': 'error',
       'no-func-assign': 'error',
       'no-import-assign': 'error',
       'no-invalid-regexp': 'error',
@@ -73,7 +72,6 @@ module.exports = [
       'no-eq-null': 'error',
       'no-extra-bind': 'error',
       'no-extra-label': 'error',
-      'no-floating-decimal': 'error',
       'no-implicit-coercion': 'error',
       'no-implicit-globals': 'error',
       'no-iterator': 'error',
@@ -81,7 +79,6 @@ module.exports = [
       'no-lone-blocks': 'error',
       'no-loop-func': 'error',
       'no-magic-numbers': 'warn',
-      'no-multi-spaces': 'error',
       'no-multi-str': 'error',
       'no-new': 'error',
       'no-new-wrappers': 'error',
@@ -101,7 +98,6 @@ module.exports = [
       'no-void': 'error',
       'no-with': 'error',
       'radix': 'error',
-      'wrap-iife': 'error',
       'yoda': 'error'
     }
   }

@@ -5,24 +5,26 @@
  * including license type inheritance, domain count, and expiry dates.
  */
 
-// Constants for magic numbers - using window object to avoid conflicts
-window.LICENSE_CONSTANTS = {
-  SINGLE_DOMAINS: 1,
-  MULTI_DOMAINS: 5,
-  DEVELOPER_DOMAINS: 10,
-  EXTENDED_DOMAINS: 20,
-  HOURS_PER_DAY: 24,
-  MINUTES_PER_HOUR: 60,
-  SECONDS_PER_MINUTE: 60,
-  MILLISECONDS_PER_SECOND: 1000,
-  ZERO: 0
+// Constants to avoid magic numbers
+const HOURS_PER_DAY = 24;
+const MINUTES_PER_HOUR = 60;
+const SECONDS_PER_MINUTE = 60;
+const MILLISECONDS_PER_SECOND = 1000;
+const MILLISECONDS_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
+
+// License type domain limits
+const LICENSE_DOMAIN_LIMITS = {
+    single: 1,
+    multi: 5,
+    developer: 10,
+    extended: 20,
+    default: 1
 };
 
+// Array index constants
+const ARRAY_INDEX_OFFSET = 0;
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Log in development only
-    if (typeof window !== 'undefined' && window.console && window.console.log) {
-        window.console.log('License form calculations script loaded');
-    }
     
     // Check if we're on a license form page
     const productSelect = document.getElementById('product_id');
@@ -31,23 +33,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const licenseExpiresAtInput = document.getElementById('license_expires_at');
     const supportExpiresAtInput = document.getElementById('support_expires_at');
     
-    // Log in development only
-    if (typeof window !== 'undefined' && window.console && window.console.log) {
-        window.console.log('Elements found:', {
-            productSelect: Boolean(productSelect),
-            licenseTypeSelect: Boolean(licenseTypeSelect),
-            maxDomainsInput: Boolean(maxDomainsInput),
-            licenseExpiresAtInput: Boolean(licenseExpiresAtInput),
-            supportExpiresAtInput: Boolean(supportExpiresAtInput)
-        });
-    }
+    // Debug logging (removed for production)
+    // console.log('Elements found:', {
+    //     productSelect: Boolean(productSelect),
+    //     licenseTypeSelect: Boolean(licenseTypeSelect),
+    //     maxDomainsInput: Boolean(maxDomainsInput),
+    //     licenseExpiresAtInput: Boolean(licenseExpiresAtInput),
+    //     supportExpiresAtInput: Boolean(supportExpiresAtInput)
+    // });
     
     // If elements don't exist, exit early
-    if (!Boolean(productSelect) || !Boolean(licenseTypeSelect) || !Boolean(maxDomainsInput)) {
-        // Log in development only
-        if (typeof window !== 'undefined' && window.console && window.console.log) {
-            window.console.log('Required elements not found, exiting');
-        }
+    if (!productSelect || !licenseTypeSelect || !maxDomainsInput) {
+        // console.log('Required elements not found, exiting');
         return;
     }
     
@@ -82,11 +79,9 @@ document.addEventListener('DOMContentLoaded', function() {
             productData[productId] = data;
             applyProductData(data);
         })
-        .catch(error => {
-            // Log in development only
-            if (typeof window !== 'undefined' && window.console && window.console.error) {
-                window.console.error('Error loading product data:', error);
-            }
+        .catch(() => {
+            // console.error('Error loading product data:', error);
+            // Handle error silently or show user-friendly message
         });
     }
     
@@ -94,18 +89,12 @@ document.addEventListener('DOMContentLoaded', function() {
      * Apply product data to form fields
      */
     function applyProductData(data) {
-        // Log in development only
-        if (typeof window !== 'undefined' && window.console && window.console.log) {
-            window.console.log('Applying product data:', data);
-        }
+        // console.log('Applying product data:', data);
         
         // Set license type
         if (data.license_type) {
             licenseTypeSelect.value = data.license_type;
-            // Log in development only
-            if (typeof window !== 'undefined' && window.console && window.console.log) {
-                window.console.log('Set license type to:', data.license_type);
-            }
+            // console.log('Set license type to:', data.license_type);
         }
         
         // Calculate max domains based on license type
@@ -119,25 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
      * Calculate max domains based on license type
      */
     function calculateMaxDomains(licenseType) {
-        let maxDomains = window.LICENSE_CONSTANTS.SINGLE_DOMAINS;
-        
-        switch (licenseType) {
-            case 'single':
-                maxDomains = window.LICENSE_CONSTANTS.SINGLE_DOMAINS;
-                break;
-            case 'multi':
-                maxDomains = window.LICENSE_CONSTANTS.MULTI_DOMAINS;
-                break;
-            case 'developer':
-                maxDomains = window.LICENSE_CONSTANTS.DEVELOPER_DOMAINS;
-                break;
-            case 'extended':
-                maxDomains = window.LICENSE_CONSTANTS.EXTENDED_DOMAINS;
-                break;
-            default:
-                maxDomains = window.LICENSE_CONSTANTS.SINGLE_DOMAINS;
-        }
-        
+        const maxDomains = LICENSE_DOMAIN_LIMITS[licenseType] || LICENSE_DOMAIN_LIMITS.default;
         maxDomainsInput.value = maxDomains;
     }
     
@@ -149,14 +120,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Calculate license expiry date
         if (data.duration_days && licenseExpiresAtInput) {
-            const licenseExpiry = new Date(today.getTime() + (data.duration_days * window.LICENSE_CONSTANTS.HOURS_PER_DAY * window.LICENSE_CONSTANTS.MINUTES_PER_HOUR * window.LICENSE_CONSTANTS.SECONDS_PER_MINUTE * window.LICENSE_CONSTANTS.MILLISECONDS_PER_SECOND));
-            licenseExpiresAtInput.value = licenseExpiry.toISOString().split('T')[window.LICENSE_CONSTANTS.ZERO];
+            const licenseExpiry = new Date(today.getTime() + (data.duration_days * MILLISECONDS_PER_DAY));
+            licenseExpiresAtInput.value = licenseExpiry.toISOString().split('T')[ARRAY_INDEX_OFFSET];
         }
         
         // Calculate support expiry date
         if (data.support_days && supportExpiresAtInput) {
-            const supportExpiry = new Date(today.getTime() + (data.support_days * window.LICENSE_CONSTANTS.HOURS_PER_DAY * window.LICENSE_CONSTANTS.MINUTES_PER_HOUR * window.LICENSE_CONSTANTS.SECONDS_PER_MINUTE * window.LICENSE_CONSTANTS.MILLISECONDS_PER_SECOND));
-            supportExpiresAtInput.value = supportExpiry.toISOString().split('T')[window.LICENSE_CONSTANTS.ZERO];
+            const supportExpiry = new Date(today.getTime() + (data.support_days * MILLISECONDS_PER_DAY));
+            supportExpiresAtInput.value = supportExpiry.toISOString().split('T')[ARRAY_INDEX_OFFSET];
         }
     }
     
@@ -165,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function clearCalculations() {
         licenseTypeSelect.value = '';
-        maxDomainsInput.value = window.LICENSE_CONSTANTS.SINGLE_DOMAINS;
+        maxDomainsInput.value = LICENSE_DOMAIN_LIMITS.default;
         if (licenseExpiresAtInput) licenseExpiresAtInput.value = '';
         if (supportExpiresAtInput) supportExpiresAtInput.value = '';
     }
@@ -186,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (userSelect && userSelect.value) {
             const selectedOption = userSelect.options[userSelect.selectedIndex];
-            const userName = selectedOption.text.split(' (')[window.LICENSE_CONSTANTS.ZERO];
+            const userName = selectedOption.text.split(' (')[ARRAY_INDEX_OFFSET];
             document.getElementById('preview-user').textContent = userName;
         }
         
@@ -223,10 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Event listeners
     productSelect.addEventListener('change', function() {
-        // Log in development only
-        if (typeof window !== 'undefined' && window.console && window.console.log) {
-            window.console.log('Product changed to:', this.value);
-        }
+        // console.log('Product changed to:', this.value);
         loadProductData(this.value);
         updatePreview();
     });
