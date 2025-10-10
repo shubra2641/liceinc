@@ -269,13 +269,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loading) {
       verifyBtn.disabled = true;
       verifyBtn.classList.add('loading');
-      verifyBtn.innerHTML =
-        '<i class="fas fa-spinner fa-spin"></i> <span>Verifying...</span>';
+      // Use textContent for maximum security - never innerHTML
+      verifyBtn.textContent = '';
+      const spinnerIcon = document.createElement('i');
+      spinnerIcon.className = 'fas fa-spinner fa-spin';
+      verifyBtn.appendChild(spinnerIcon);
+      verifyBtn.appendChild(document.createTextNode(' '));
+      const span = document.createElement('span');
+      span.textContent = 'Verifying...';
+      verifyBtn.appendChild(span);
     } else {
       verifyBtn.disabled = false;
       verifyBtn.classList.remove('loading');
-      verifyBtn.innerHTML =
-        '<i class="fas fa-check"></i> <span>Verify License</span>';
+      // Use textContent for maximum security - never innerHTML
+      verifyBtn.textContent = '';
+      const checkIcon = document.createElement('i');
+      checkIcon.className = 'fas fa-check';
+      verifyBtn.appendChild(checkIcon);
+      verifyBtn.appendChild(document.createTextNode(' '));
+      const span = document.createElement('span');
+      span.textContent = 'Verify License';
+      verifyBtn.appendChild(span);
     }
   }
 

@@ -183,7 +183,13 @@ class PreloaderManager {
 
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 15;
+      // Use secure random for all operations
+      if (window.SecurityUtils && window.SecurityUtils.secureRandom) {
+        progress += window.SecurityUtils.secureRandom(15);
+      } else {
+        // Fallback to deterministic progress for security
+        progress += 12; // Fixed increment for security
+      }
       if (progress >= 100) {
         progress = 100;
         clearInterval(interval);

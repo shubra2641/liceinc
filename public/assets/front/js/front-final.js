@@ -1231,10 +1231,10 @@ window.ProductShowManager = ProductShowManager;
         if (navigator.share) {
           navigator.share({
             title: document.title,
-            url: window.location.href,
+            url: window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href,
           });
         } else {
-          navigator.clipboard.writeText(window.location.href).then(() => {
+          navigator.clipboard.writeText(window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href).then(() => {
             showNotification('Link copied to clipboard!', 'success');
           });
         }

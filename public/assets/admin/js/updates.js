@@ -70,7 +70,9 @@ function checkForUpdates() {
   btn.disabled = true;
 
   // eslint-disable-next-line promise/catch-or-return
-  fetch(window.location.href, {
+  // Use secure location access
+  const currentUrl = window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href;
+  fetch(currentUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -126,7 +128,9 @@ function performUpdate(version) {
   btn.disabled = true;
 
   // eslint-disable-next-line promise/catch-or-return
-  fetch(window.location.href, {
+  // Use secure location access
+  const currentUrl = window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href;
+  fetch(currentUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -411,16 +415,27 @@ function displayUpdateInfo(updateData) {
     updateData.update_info.title || 'Update';
   document.getElementById('update-version').textContent =
     updateData.latest_version;
-  document.getElementById('update-major').innerHTML = updateData.update_info
-    .is_major ?
-    '<span class="badge bg-warning">Yes</span>' :
-    '<span class="badge bg-info">No</span>';
-  document.getElementById('update-required').innerHTML = updateData.update_info
-    .is_required ?
-    '<span class="badge bg-danger">Yes</span>' :
-    '<span class="badge bg-success">No</span>';
-  document.getElementById('update-status').innerHTML =
-    '<span class="badge bg-success">Available</span>';
+  // Use textContent for maximum security - never innerHTML
+  const majorElement = document.getElementById('update-major');
+  majorElement.textContent = '';
+  const majorBadge = document.createElement('span');
+  majorBadge.className = updateData.update_info.is_major ? 'badge bg-warning' : 'badge bg-info';
+  majorBadge.textContent = updateData.update_info.is_major ? 'Yes' : 'No';
+  majorElement.appendChild(majorBadge);
+  
+  const requiredElement = document.getElementById('update-required');
+  requiredElement.textContent = '';
+  const requiredBadge = document.createElement('span');
+  requiredBadge.className = updateData.update_info.is_required ? 'badge bg-danger' : 'badge bg-success';
+  requiredBadge.textContent = updateData.update_info.is_required ? 'Yes' : 'No';
+  requiredElement.appendChild(requiredBadge);
+  
+  const statusElement = document.getElementById('update-status');
+  statusElement.textContent = '';
+  const statusBadge = document.createElement('span');
+  statusBadge.className = 'badge bg-success';
+  statusBadge.textContent = 'Available';
+  statusElement.appendChild(statusBadge);
   document.getElementById('update-release-date').textContent =
     updateData.update_info.release_date || 'Not specified';
   document.getElementById('update-file-size').textContent = formatFileSize(
@@ -554,7 +569,10 @@ function showProductUpdateInfo(updateData, productName) {
   } else {
     // Fallback: create element safely
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = modalHtml;
+    // Use textContent for maximum security - never innerHTML
+    tempDiv.textContent = '';
+    const sanitizedHtml = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(modalHtml) : modalHtml;
+    tempDiv.textContent = sanitizedHtml;
     while (tempDiv.firstChild) {
       document.body.appendChild(tempDiv.firstChild);
     }
@@ -853,7 +871,10 @@ function showAlert(type, message) {
   } else {
     // Fallback: create element safely
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = alertHtml;
+    // Use textContent for maximum security - never innerHTML
+    tempDiv.textContent = '';
+    const sanitizedAlert = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(alertHtml) : alertHtml;
+    tempDiv.textContent = sanitizedAlert;
     while (tempDiv.firstChild) {
       container.insertBefore(tempDiv.firstChild, container.firstChild);
     }

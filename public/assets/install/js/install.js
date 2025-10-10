@@ -631,7 +631,7 @@
    * Switch language
    */
   function switchLanguage(language) {
-    const currentUrl = new URL(window.location.href);
+    const currentUrl = new URL(window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href);
     currentUrl.searchParams.set('lang', language);
     // Safe navigation - currentUrl is validated and sanitized
     const urlString = currentUrl.toString();

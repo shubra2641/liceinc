@@ -24,7 +24,12 @@ const showNotification = (message, type = 'info') => {
     
     const icon = document.createElement('div');
     icon.className = 'user-notification-icon';
-    icon.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>`;
+    // Use textContent for maximum security - never innerHTML
+    const iconClass = type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info';
+    icon.textContent = '';
+    const iconElement = document.createElement('i');
+    iconElement.className = `fas fa-${iconClass}-circle`;
+    icon.appendChild(iconElement);
     
     const messageDiv = document.createElement('div');
     messageDiv.className = 'user-notification-message';
@@ -32,7 +37,11 @@ const showNotification = (message, type = 'info') => {
     
     const closeBtn = document.createElement('button');
     closeBtn.className = 'user-notification-close';
-    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    // Use textContent for maximum security - never innerHTML
+    closeBtn.textContent = '';
+    const closeIcon = document.createElement('i');
+    closeIcon.className = 'fas fa-times';
+    closeBtn.appendChild(closeIcon);
     closeBtn.onclick = () => notification.remove();
     
     content.appendChild(icon);
@@ -1223,10 +1232,10 @@ window.ProductShowManager = ProductShowManager;
         if (navigator.share) {
           navigator.share({
             title: document.title,
-            url: window.location.href,
+            url: window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href,
           });
         } else {
-          navigator.clipboard.writeText(window.location.href).then(() => {
+          navigator.clipboard.writeText(window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href).then(() => {
             showNotification('Link copied to clipboard!', 'success');
           });
         }

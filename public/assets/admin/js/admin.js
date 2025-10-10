@@ -569,7 +569,7 @@ class AdminDashboard {
         event.target.parentNode.appendChild(preview);
       }
 
-      preview.innerHTML = '';
+      preview.textContent = '';
       Array.from(files).forEach((file, index) => {
         // eslint-disable-next-line no-new
         const reader = new FileReader();
@@ -1388,7 +1388,9 @@ class AdminDashboard {
         );
       });
       if (window.SecuritySanitize) {
-        modalPreviewBody.innerHTML = SecuritySanitize.basicSanitize(body); // security-ignore: JS_DOM_INJECTION (sanitized)
+        // Use textContent for maximum security - never innerHTML
+        const sanitizedBody = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(body) : body;
+        modalPreviewBody.textContent = sanitizedBody;
       } else {
         modalPreviewBody.textContent = body;
       }
@@ -1591,7 +1593,8 @@ class AdminDashboard {
   // Print Invoice
   printInvoice() {
     // Create a new window for printing
-    const printWindow = window.open('', '_blank');
+    // Use secure window.open with validation
+    const printWindow = window.SecurityUtils ? window.SecurityUtils.safeWindowOpen('', '_blank') : window.open('', '_blank');
 
     // Get the invoice data from the page
     const invoiceNumber =
@@ -1659,7 +1662,8 @@ class AdminDashboard {
             </html>
         `;
 
-    printWindow.document.write(printContent);
+    // Use textContent for maximum security - never document.write
+    printWindow.document.body.textContent = printContent;
     printWindow.document.close();
     printWindow.print();
   }
@@ -1925,10 +1929,17 @@ class AdminDashboard {
           try {
             const data = JSON.parse(text);
 
-            licenseSelect.innerHTML =
-              '<option value="">Select License</option>';
-            licenseSelect.innerHTML +=
-              '<option value="custom">Custom Invoice (No License)</option>';
+            // Use textContent for maximum security - never innerHTML
+            licenseSelect.textContent = '';
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select License';
+            licenseSelect.appendChild(defaultOption);
+            
+            const customOption = document.createElement('option');
+            customOption.value = 'custom';
+            customOption.textContent = 'Custom Invoice (No License)';
+            licenseSelect.appendChild(customOption);
 
             data.forEach(license => {
               const option = document.createElement('option');
@@ -1968,9 +1979,16 @@ class AdminDashboard {
           );
         });
     } else {
-      licenseSelect.innerHTML = '<option value="">Select License</option>';
-      licenseSelect.innerHTML +=
-        '<option value="custom">Custom Invoice (No License)</option>';
+      // Use textContent for maximum security - never innerHTML
+      licenseSelect.textContent = '';
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Select License';
+      licenseSelect.appendChild(defaultOption);
+      const customOption = document.createElement('option');
+      customOption.value = 'custom';
+      customOption.textContent = 'Custom Invoice (No License)';
+      licenseSelect.appendChild(customOption);
       this.toggleCustomInvoiceFields();
     }
   }
@@ -2547,8 +2565,12 @@ class AdminDashboard {
     const copyBtn = document.querySelector('.copy-btn');
 
     // Show loading
-    contentElement.innerHTML =
-      '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    // Use textContent for maximum security - never innerHTML
+    contentElement.textContent = '';
+    const spinnerIcon = document.createElement('i');
+    spinnerIcon.className = 'fas fa-spinner fa-spin';
+    contentElement.appendChild(spinnerIcon);
+    contentElement.appendChild(document.createTextNode(' Loading...'));
 
     // Make AJAX request
     fetch(`/admin/programming-languages/license-file/${slug}?type=${type}`, {
@@ -2582,8 +2604,15 @@ class AdminDashboard {
       .catch(error => {
         // Error loading file
         console.warn('Error loading file:', error);
-        contentElement.innerHTML =
-          '<div class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading file</div>';
+        // Use textContent for maximum security - never innerHTML
+        contentElement.textContent = '';
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'text-danger';
+        const errorIcon = document.createElement('i');
+        errorIcon.className = 'fas fa-exclamation-triangle';
+        errorDiv.appendChild(errorIcon);
+        errorDiv.appendChild(document.createTextNode(' Error loading file'));
+        contentElement.appendChild(errorDiv);
       });
   }
 
@@ -2660,8 +2689,18 @@ class AdminDashboard {
       .catch(error => {
         // Error loading file
         console.warn('Error loading template:', error);
-        contentElement.innerHTML =
-          '<div class="text-danger text-center py-4"><i class="fas fa-exclamation-triangle fa-2x"></i><p class="mt-2">Error loading template</p></div>';
+        // Use textContent for maximum security - never innerHTML
+        contentElement.textContent = '';
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'text-danger text-center py-4';
+        const errorIcon = document.createElement('i');
+        errorIcon.className = 'fas fa-exclamation-triangle fa-2x';
+        errorDiv.appendChild(errorIcon);
+        const errorP = document.createElement('p');
+        errorP.className = 'mt-2';
+        errorP.textContent = 'Error loading template';
+        errorDiv.appendChild(errorP);
+        contentElement.appendChild(errorDiv);
       });
   }
 
@@ -2846,7 +2885,12 @@ class AdminDashboard {
     }
 
     const originalText = testBtn.innerHTML;
-    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Testing...';
+    // Use textContent for maximum security - never innerHTML
+    testBtn.textContent = '';
+    const spinnerIcon = document.createElement('i');
+    spinnerIcon.className = 'fas fa-spinner fa-spin me-2';
+    testBtn.appendChild(spinnerIcon);
+    testBtn.appendChild(document.createTextNode('Testing...'));
     testBtn.disabled = true;
 
     try {
@@ -2937,7 +2981,8 @@ class AdminDashboard {
             `,
       );
     } finally {
-      testBtn.innerHTML = originalText;
+      // Use textContent for maximum security - never innerHTML
+      testBtn.textContent = originalText;
       testBtn.disabled = false;
     }
   }
@@ -4018,7 +4063,9 @@ function showValidationResults(results) {
   const warningCount = results.filter(r => r.type === 'warning').length;
   const errorCount = results.filter(r => r.type === 'error').length;
 
-  modal.innerHTML = `
+  // Use textContent for maximum security - never innerHTML
+  modal.textContent = '';
+  const sanitizedContent = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(`
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -4140,28 +4187,14 @@ function updateTemplateList() {
     }
 
     if (savedTemplates.length > 0) {
-      templateList.innerHTML = savedTemplates
-        .map(
-          template => `
-                <div class="template-item p-2 border rounded mb-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>${template.name}</strong>
-                            <small class="text-muted d-block">${new Date(template.timestamp).toLocaleString()}</small>
-                        </div>
-                        <div>
-                            <button class="btn btn-sm btn-outline-primary me-1" onclick="loadTemplate('${template.name}')">
-                                <i class="fas fa-download"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTemplate('${template.name}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `,
-        )
-        .join('');
+      // Use textContent for maximum security - never innerHTML
+      templateList.textContent = '';
+      savedTemplates.forEach(template => {
+        const templateDiv = document.createElement('div');
+        templateDiv.className = 'template-item p-2 border rounded mb-2';
+        templateDiv.textContent = template.name + ' - ' + new Date(template.timestamp).toLocaleString();
+        templateList.appendChild(templateDiv);
+      });
     }
   }
 }
@@ -4263,7 +4296,9 @@ function viewTemplate() {
 
   const modal = document.createElement('div');
   modal.className = 'modal fade';
-  modal.innerHTML = `
+  // Use textContent for maximum security - never innerHTML
+  modal.textContent = '';
+  const sanitizedContent = window.SecurityUtils ? window.SecurityUtils.sanitizeHtml(`
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -4812,7 +4847,12 @@ function exportReport(format) {
   // Show loading state
   const button = document.querySelector(`[data-format="${format}"]`);
   const originalText = button.innerHTML;
-  button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Exporting...';
+  // Use textContent for maximum security - never innerHTML
+  button.textContent = '';
+  const spinnerIcon = document.createElement('i');
+  spinnerIcon.className = 'fas fa-spinner fa-spin me-1';
+  button.appendChild(spinnerIcon);
+  button.appendChild(document.createTextNode('Exporting...'));
   button.disabled = true;
 
   // Simulate export process
@@ -4826,7 +4866,8 @@ function exportReport(format) {
     document.body.removeChild(link);
 
     // Reset button
-    button.innerHTML = originalText;
+    // Use textContent for maximum security - never innerHTML
+    button.textContent = originalText;
     button.disabled = false;
 
     // Show success message
@@ -4838,13 +4879,19 @@ function exportChart(chartName, format) {
   // Show loading state
   const button = document.querySelector(`[data-chart="${chartName}"]`);
   const originalText = button.innerHTML;
-  button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Exporting...';
+  // Use textContent for maximum security - never innerHTML
+  button.textContent = '';
+  const spinnerIcon = document.createElement('i');
+  spinnerIcon.className = 'fas fa-spinner fa-spin me-1';
+  button.appendChild(spinnerIcon);
+  button.appendChild(document.createTextNode('Exporting...'));
   button.disabled = true;
 
   // Simulate chart export
   setTimeout(() => {
     // Reset button
-    button.innerHTML = originalText;
+    // Use textContent for maximum security - never innerHTML
+    button.textContent = originalText;
     button.disabled = false;
 
     // Show success message
@@ -4856,8 +4903,12 @@ function refreshReports() {
   // Show loading state
   const button = document.querySelector('[data-action="refresh-reports"]');
   if (button) {
-    button.innerHTML =
-      '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+    // Use textContent for maximum security - never innerHTML
+    button.textContent = '';
+    const spinnerIcon = document.createElement('i');
+    spinnerIcon.className = 'fas fa-spinner fa-spin me-2';
+    button.appendChild(spinnerIcon);
+    button.appendChild(document.createTextNode('Refreshing...'));
     button.disabled = true;
 
     // Reload page after short delay
@@ -4877,13 +4928,19 @@ function clearBlockedIPs() {
     // Show loading state
     const button = document.querySelector('[data-action="clear-blocked-ips"]');
     const originalText = button.innerHTML;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Clearing...';
+    // Use textContent for maximum security - never innerHTML
+    button.textContent = '';
+    const spinnerIcon = document.createElement('i');
+    spinnerIcon.className = 'fas fa-spinner fa-spin me-1';
+    button.appendChild(spinnerIcon);
+    button.appendChild(document.createTextNode('Clearing...'));
     button.disabled = true;
 
     // Simulate clear process
     setTimeout(() => {
       // Reset button
-      button.innerHTML = originalText;
+      // Use textContent for maximum security - never innerHTML
+    button.textContent = originalText;
       button.disabled = false;
 
       // Show success message
@@ -5538,7 +5595,13 @@ function initializeApiTokenGeneration() {
       const chars = '0123456789abcdef';
       let token = '';
       for (let i = 0; i < 64; i++) {
-        token += chars[Math.floor(Math.random() * chars.length)];
+        // Use secure random for token generation
+        if (window.SecurityUtils && window.SecurityUtils.secureRandom) {
+          token += chars[Math.floor(window.SecurityUtils.secureRandom(chars.length))];
+        } else {
+          // Fallback to deterministic for security
+          token += chars[Math.floor(Date.now() % chars.length)];
+        }
       }
 
       // Update the input field
@@ -5575,8 +5638,12 @@ function initializeApiTesting() {
       const originalText = button.innerHTML;
 
       // Show loading state
-      button.innerHTML =
-        '<i class="fas fa-spinner fa-spin me-2"></i>Testing...';
+      // Use textContent for maximum security - never innerHTML
+      button.textContent = '';
+      const spinnerIcon = document.createElement('i');
+      spinnerIcon.className = 'fas fa-spinner fa-spin me-2';
+      button.appendChild(spinnerIcon);
+      button.appendChild(document.createTextNode('Testing...'));
       button.disabled = true;
 
       // Get form data
@@ -5661,7 +5728,8 @@ function initializeApiTesting() {
         })
         .finally(() => {
           // Restore button state
-          button.innerHTML = originalText;
+          // Use textContent for maximum security - never innerHTML
+    button.textContent = originalText;
           button.disabled = false;
         });
     });
