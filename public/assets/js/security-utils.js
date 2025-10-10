@@ -83,7 +83,7 @@ const SecurityUtils = {
   },
 
   /**
-   * Secure random number generation using crypto API
+   * Cryptographically secure random number generation using Web Crypto API
    * @param {number} max - Maximum value (exclusive)
    * @returns {number} - Secure random number
    */
@@ -93,8 +93,8 @@ const SecurityUtils = {
       crypto.getRandomValues(array);
       return (array[0] / 4294967296) * max;
     }
-    // Fallback for older browsers (less secure but better than Math.random)
-    return Math.random() * max;
+    // No fallback to Math.random() for security reasons
+    throw new Error('Cryptographically secure random number generation not available');
   },
 
   /**
@@ -108,7 +108,7 @@ const SecurityUtils = {
       crypto.getRandomValues(array);
       return array;
     }
-    throw new Error('Secure random number generation not available');
+    throw new Error('Cryptographically secure random bytes generation not available');
   },
 
   /**
@@ -151,10 +151,8 @@ const SecurityUtils = {
         result += chars[array[i] % chars.length];
       }
     } else {
-      // Fallback
-      for (let i = 0; i < length; i++) {
-        result += chars[Math.floor(Math.random() * chars.length)];
-      }
+      // No fallback to Math.random() for security reasons
+      throw new Error('Cryptographically secure random string generation not available');
     }
     
     return result;
@@ -217,12 +215,8 @@ const SecurityUtils = {
 
     const safeContent = sanitize ? this.sanitizeHtml(content, allowBasicFormatting) : content;
     
-    // Always use textContent for maximum security unless basic formatting is explicitly allowed
-    if (!allowBasicFormatting || this.containsDangerousContent(safeContent)) {
-      element.textContent = safeContent;
-    } else {
-      element.innerHTML = safeContent;
-    }
+    // Always use textContent for maximum security - never use innerHTML
+    element.textContent = safeContent;
   },
 
   /**
@@ -235,6 +229,25 @@ const SecurityUtils = {
       return;
     }
     element.textContent = this.sanitizeHtml(content);
+  },
+
+  /**
+   * Safe insertAdjacentHTML with automatic sanitization
+   * @param {HTMLElement} element - The element to update
+   * @param {string} position - The position to insert
+   * @param {string} html - The HTML to insert
+   * @param {boolean} sanitize - Whether to sanitize the content (default: true)
+   */
+  safeInsertAdjacentHTML(element, position, html, sanitize = true) {
+    if (!element || typeof html !== 'string') {
+      return;
+    }
+
+    const safeContent = sanitize ? this.sanitizeHtml(html) : html;
+    
+    // Always use textContent for maximum security - never use insertAdjacentHTML
+    const textNode = document.createTextNode(safeContent);
+    element.insertAdjacentElement(position, textNode);
   },
 
   /**

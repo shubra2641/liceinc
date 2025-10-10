@@ -400,12 +400,8 @@ class EnhancedSecurityService
                 'error' => $e->getMessage(),
                 'length' => $length,
             ]);
-            // Fallback to less secure but functional method
-            return substr(
-                str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 10)),
-                0,
-                $length,
-            );
+            // No fallback to insecure methods for security reasons
+            throw new \RuntimeException('Cryptographically secure token generation failed: ' . $e->getMessage());
         }
     }
     /**
