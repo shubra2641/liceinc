@@ -142,16 +142,26 @@ class UserTickets {
     productSlugInput.style.borderColor = '#ffc107';
     productSlugInput.placeholder = 'Verifying purchase code...';
 
-    window.SecurityUtils.safeFetch(
-      `/verify-purchase-code/${encodeURIComponent(purchaseCode)}`,
-    )
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
+    // Use CommonUtils for secure fetch
+    let fetchPromise;
+    if (window.CommonUtils) {
+      fetchPromise = window.CommonUtils.secureFetch(
+        `/verify-purchase-code/${encodeURIComponent(purchaseCode)}`,
+      )
+        .then(window.CommonUtils.handleFetchResponse);
+    } else {
+      fetchPromise = window.SecurityUtils.safeFetch(
+        `/verify-purchase-code/${encodeURIComponent(purchaseCode)}`,
+      )
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        });
+    }
+    
+    fetchPromise.then(data => {
         if (data.success && data.product) {
           // Set values
           productSlugInput.value = data.product.slug;

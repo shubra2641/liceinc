@@ -3,6 +3,13 @@
  * Handles update checking, installation, and rollback functionality
  */
 
+// Include common utilities
+if (typeof CommonUtils === 'undefined') {
+  const script = document.createElement('script');
+  script.src = '/assets/js/common-utils.js';
+  document.head.appendChild(script);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Check for updates button
   document
@@ -59,50 +66,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function checkForUpdates() {
   const btn = document.getElementById('check-updates-btn');
-  const originalText = btn.innerHTML;
+  
+  // Use CommonUtils for button loading state
+  const restoreButton = CommonUtils.setButtonLoading(btn, 'Checking...');
 
-  // Use SecurityUtils for safe HTML insertion
-  if (typeof SecurityUtils !== 'undefined') {
-    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', true, true);
-  } else {
-    btn.textContent = 'Checking...';
-  }
-  btn.disabled = true;
-
-  // eslint-disable-next-line promise/catch-or-return
-  // Use secure location access
+  // Use CommonUtils for secure fetch
   const currentUrl = window.SecurityUtils ? window.SecurityUtils.safeLocationHref() : window.location.href;
-  fetch(currentUrl, {
+  CommonUtils.secureFetch(currentUrl, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document
-        .querySelector('meta[name="csrf-token"]')
-        .getAttribute('content'),
-    },
   })
-    .then(response => response.json())
+    .then(CommonUtils.handleFetchResponse)
     .then(data => {
       if (data.success) {
         // Reload page to show updated status
         window.location.reload();
       } else {
-        showAlert('error', data.message || 'Failed to check for updates');
+        CommonUtils.showAlert('error', data.message || 'Failed to check for updates');
       }
       return true;
     })
     .catch(error => {
       console.error('Error:', error);
-      showAlert('error', 'An error occurred while checking for updates');
+      CommonUtils.showAlert('error', 'An error occurred while checking for updates');
     })
     .finally(() => {
-      // Use SecurityUtils for safe HTML restoration
-      if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
-      } else {
-        btn.textContent = originalText;
-      }
-      btn.disabled = false;
+      restoreButton();
     });
 }
 
@@ -400,7 +388,7 @@ document
 // Check for updates function (refresh page to get latest data)
 // eslint-disable-next-line no-unused-vars
 function checkForUpdatesManually() {
-  showAlert('info', 'Checking for updates...');
+  CommonUtils.showAlert('info', 'Checking for updates...');
 
   // Simply reload the page to get fresh data from the server
   setTimeout(() => {
@@ -610,31 +598,26 @@ function checkAutoUpdates() {
   const domain = document.getElementById('auto-domain').value;
   const currentVersion = document.getElementById('auto-current-version').value;
 
-  if (!licenseKey || !productSlug || !currentVersion) {
-    showAlert('error', 'Please fill all required fields');
+  // Use CommonUtils for validation
+  const validation = CommonUtils.validateRequiredFields({
+    licenseKey,
+    productSlug,
+    currentVersion
+  });
+
+  if (!validation.isValid) {
+    CommonUtils.showAlert('error', 'Please fill all required fields');
     return;
   }
 
   const btn = document.getElementById('check-auto-updates-btn');
-  const originalText = btn.innerHTML;
+  
+  // Use CommonUtils for button loading state
+  const restoreButton = CommonUtils.setButtonLoading(btn, 'Checking...');
 
-  // Use SecurityUtils for safe HTML insertion
-  if (typeof SecurityUtils !== 'undefined') {
-    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', true, true);
-  } else {
-    btn.textContent = 'Checking...';
-  }
-  btn.disabled = true;
-
-  // eslint-disable-next-line promise/catch-or-return
-  fetch('/admin/updates/auto-check', {
+  // Use CommonUtils for secure fetch
+  CommonUtils.secureFetch('/admin/updates/auto-check', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document
-        .querySelector('meta[name="csrf-token"]')
-        .getAttribute('content'),
-    },
     body: JSON.stringify({
       license_key: licenseKey,
       product_slug: productSlug,
@@ -642,12 +625,7 @@ function checkAutoUpdates() {
       current_version: currentVersion,
     }),
   })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
+    .then(CommonUtils.handleFetchResponse)
     .then(data => {
       if (data.success) {
         // Check if auto update was completed
@@ -656,12 +634,12 @@ function checkAutoUpdates() {
           data.message.includes('Auto update completed successfully')
         ) {
           // Auto update was completed
-          showAlert('success', data.message);
+          CommonUtils.showAlert('success', data.message);
 
           // Show additional info if available
           if (data.data && data.data.files_installed) {
             setTimeout(() => {
-              showAlert(
+              CommonUtils.showAlert(
                 'info',
                 `Files installed: ${data.data.files_installed}. Please refresh the page to see the new version.`,
               );
@@ -677,26 +655,20 @@ function checkAutoUpdates() {
           showAutoUpdateInfo(data.data);
         } else {
           // No updates available
-          showAlert('info', 'No updates available');
+          CommonUtils.showAlert('info', 'No updates available');
         }
       } else {
         // Update failed
-        showAlert('error', data.message || 'Update failed');
+        CommonUtils.showAlert('error', data.message || 'Update failed');
       }
       return true;
     })
     .catch(error => {
       console.error('Error:', error);
-      showAlert('error', `An error occurred during update: ${error.message}`);
+      CommonUtils.showAlert('error', `An error occurred during update: ${error.message}`);
     })
     .finally(() => {
-      // Use SecurityUtils for safe HTML restoration
-      if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
-      } else {
-        btn.textContent = originalText;
-      }
-      btn.disabled = false;
+      restoreButton();
     });
 }
 
