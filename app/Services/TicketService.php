@@ -25,7 +25,7 @@ class TicketService
     /**
      * Create a new ticket.
      */
-    public function createTicket(array<string, mixed> $data): Ticket
+    public function createTicket(array $data): Ticket
     {
         return DB::transaction(function () use ($data) {
             // Auto-register license if provided

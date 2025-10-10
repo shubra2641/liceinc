@@ -61,7 +61,7 @@ class EmailValidator
     /**
      * Sanitize data array.
      */
-    public function sanitizeData(array<string, mixed> $data): array<string, mixed>
+    public function sanitizeData(array $data): array
     {
         $sanitized = [];
 

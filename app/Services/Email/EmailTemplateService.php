@@ -35,7 +35,7 @@ class EmailTemplateService
     /**
      * Prepare common variables.
      */
-    public function prepareCommonVariables(array<string, mixed> $data = []): array<string, mixed>
+    public function prepareCommonVariables(array $data = []): array
     {
         return array_merge($data, [
             'site_name' => config('app.name'),
@@ -47,7 +47,7 @@ class EmailTemplateService
     /**
      * Prepare user-specific variables.
      */
-    public function prepareUserVariables(User $user, array<string, mixed> $data = []): array<string, mixed>
+    public function prepareUserVariables(User $user, array $data = []): array
     {
         $userData = [
             'user_name' => $this->validator->sanitizeString($user->name),

@@ -17,7 +17,7 @@ class UpdateService
     /**
      * Get update info for product.
      */
-    public function getUpdateInfo(Product $product, string $currentVersion): array<string, mixed>
+    public function getUpdateInfo(Product $product, string $currentVersion): array
     {
         $latestVersion = $this->getLatestVersion($product);
 

@@ -27,7 +27,7 @@ class EmailSender
     public function sendEmail(
         string $templateName,
         string $recipientEmail,
-        array<string, mixed> $data = [],
+        array $data = [],
         ?string $recipientName = null
     ): bool {
         try {
@@ -65,7 +65,7 @@ class EmailSender
     /**
      * Send email to user.
      */
-    public function sendToUser(User $user, string $templateName, array<string, mixed> $data = []): bool
+    public function sendToUser(User $user, string $templateName, array $data = []): bool
     {
         if (!$user->email) {
             Log::error('Invalid user provided for email sending');
@@ -79,7 +79,7 @@ class EmailSender
     /**
      * Send email to admin.
      */
-    public function sendToAdmin(string $templateName, array<string, mixed> $data = []): bool
+    public function sendToAdmin(string $templateName, array $data = []): bool
     {
         $adminEmail = $this->templateService->getAdminEmail();
         return $this->sendEmail($templateName, $adminEmail, $data, 'Admin');

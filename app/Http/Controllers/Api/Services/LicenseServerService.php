@@ -69,7 +69,7 @@ class LicenseServerService
     /**
      * Get version history for product.
      */
-    public function getVersionHistory(Product $product, int $limit = 10): array<string, mixed>
+    public function getVersionHistory(Product $product, int $limit = 10): array
     {
         return ProductUpdate::where('product_id', $product->id)
             ->where('status', 'published')
