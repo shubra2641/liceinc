@@ -53,12 +53,12 @@ if (typeof window.AdminCharts === 'undefined') {
           throw new Error('Dangerous URL pattern detected: SSRF protection activated');
         }
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-        let headers = { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
+        const headers = { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
         if (csrfToken) headers['X-CSRF-TOKEN'] = csrfToken;
-        
         // Use SecurityUtils for safe object assignment to prevent Object Injection
         if (window.SecurityUtils) {
           headers = window.SecurityUtils.sanitizeObject({ ...headers, ...options.headers });
+          const opts = window.SecurityUtils.sanitizeObject({ credentials: 'same-origin', headers, method: options.method || 'GET', ...options });
         } else {
           // Fallback with basic validation
           headers = { ...headers, ...options.headers };
