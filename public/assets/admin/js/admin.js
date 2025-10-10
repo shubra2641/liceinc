@@ -8,11 +8,22 @@ function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show`;
     
-    notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
+    // Create DOM elements safely to prevent XSS
+    const icon = document.createElement('i');
+    const iconClass = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+    icon.className = `fas fa-${iconClass} me-2`;
+    
+    const messageSpan = document.createElement('span');
+    messageSpan.textContent = message; // Safe text content
+    
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'btn-close';
+    closeButton.setAttribute('data-bs-dismiss', 'alert');
+    
+    notification.appendChild(icon);
+    notification.appendChild(messageSpan);
+    notification.appendChild(closeButton);
     
     notification.style.cssText = `
         position: fixed;
@@ -88,18 +99,35 @@ class ToastManager {
             info: title || 'Information'
         };
 
-        toast.innerHTML = `
-            <div class="toast-header">
-                <i class="${icons[type]} toast-icon"></i>
-                <h6 class="toast-title">${titles[type]}</h6>
-                <button type="button" class="toast-close" onclick="window.toastManager.hide(this.closest('.toast'))">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="toast-body">
-                ${message}
-            </div>
-        `;
+        // Create DOM elements safely to prevent XSS
+        const header = document.createElement('div');
+        header.className = 'toast-header';
+        
+        const icon = document.createElement('i');
+        icon.className = `${icons[type]} toast-icon`;
+        
+        const title = document.createElement('h6');
+        title.className = 'toast-title';
+        title.textContent = titles[type]; // Safe text content
+        
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'toast-close';
+        closeButton.onclick = () => window.toastManager.hide(toast);
+        const closeIcon = document.createElement('i');
+        closeIcon.className = 'fas fa-times';
+        closeButton.appendChild(closeIcon);
+        
+        const body = document.createElement('div');
+        body.className = 'toast-body';
+        body.textContent = message; // Safe text content
+        
+        header.appendChild(icon);
+        header.appendChild(title);
+        header.appendChild(closeButton);
+        
+        toast.appendChild(header);
+        toast.appendChild(body);
 
         return toast;
     }
@@ -542,7 +570,11 @@ class AdminDashboard {
                     preview.className = 'image-preview mt-2';
                     event.target.parentNode.appendChild(preview);
                 }
-                preview.innerHTML = `<img src="${e.target.result}" class="img-thumbnail image-preview">`;
+                // Create image element safely to prevent XSS
+                const img = document.createElement('img');
+                img.src = e.target.result; // Safe - comes from FileReader
+                img.className = 'img-thumbnail image-preview';
+                preview.appendChild(img);
             };
             reader.readAsDataURL(file);
         }
@@ -720,7 +752,11 @@ class AdminDashboard {
         if (iconInput && iconPreview) {
             iconInput.addEventListener('input', function() {
                 const iconClass = this.value || 'fas fa-ticket-alt';
-                iconPreview.innerHTML = `<i class="${iconClass}"></i>`;
+                // Create icon element safely to prevent XSS
+                iconPreview.innerHTML = '';
+                const icon = document.createElement('i');
+                icon.className = iconClass; // Safe - comes from input value
+                iconPreview.appendChild(icon);
             });
         }
     }
@@ -1108,12 +1144,21 @@ class AdminDashboard {
             '<i class="fas fa-check-circle"></i>' :
             '<i class="fas fa-times-circle"></i>';
         
-        notification.innerHTML = `
-            <div class="admin-notification-content">
-                <div class="admin-notification-icon">${icon}</div>
-                <div class="admin-notification-message">${message}</div>
-            </div>
-        `;
+        // Create DOM elements safely to prevent XSS
+        const content = document.createElement('div');
+        content.className = 'admin-notification-content';
+        
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'admin-notification-icon';
+        iconDiv.innerHTML = icon; // Safe - predefined icon HTML
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'admin-notification-message';
+        messageDiv.textContent = message; // Safe text content
+        
+        content.appendChild(iconDiv);
+        content.appendChild(messageDiv);
+        notification.appendChild(content);
         
         notification.style.cssText = `
             position: fixed;
