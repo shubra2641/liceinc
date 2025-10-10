@@ -42,7 +42,7 @@
     line-height: 1.6;
     font-size: 0.95rem;
     white-space: pre-wrap;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 /* Ticket Closed Message */
