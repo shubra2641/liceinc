@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Page Titles
     'title' => 'लाइसेंस सत्यापन लॉग',

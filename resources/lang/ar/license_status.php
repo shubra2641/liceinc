@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'page_title' => 'حالة الترخيص',
     'page_subtitle' => 'عرض حالة التراخيص الخاصة بك',

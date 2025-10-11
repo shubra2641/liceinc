@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     '1 hour ago' => '1 منذ ساعة',
     '2 hours ago' => 'منذ ساعتين',

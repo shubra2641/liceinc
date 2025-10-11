@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 return [
     '1 hour ago' => '1 Hour Ago',
     '2 hours ago' => '2 Hours Ago',

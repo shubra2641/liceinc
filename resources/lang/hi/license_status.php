@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'page_title' => 'लाइसेंस स्थिति',
     'page_subtitle' => 'लाइसेंस स्थिति देखें',

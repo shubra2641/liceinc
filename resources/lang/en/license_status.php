@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'page_title' => 'License Status',
     'page_subtitle' => 'View the status of your licenses',

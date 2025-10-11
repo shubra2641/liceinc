@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Page Title and Header
     'title' => 'लाइसेंस सत्यापन गाइड - डेवलपर्स के लिए',
