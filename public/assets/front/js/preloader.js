@@ -127,7 +127,7 @@ class FrontendPreloaderManager {
 
     // Minimum display time (if user wants preloader to show for at least some time)
     const minDisplayTime = this.container.dataset.minDuration ?
-      parseInt(this.container.dataset.minDuration) :
+      parseInt(this.container.dataset.minDuration, 10) :
       0;
 
     if (minDisplayTime > 0) {
