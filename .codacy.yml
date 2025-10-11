@@ -1,28 +1,6 @@
 # Codacy Configuration File
 # This file configures which patterns to ignore in your repository
 
-# Ignore camelCase format checking
+# Ignore only camelCase format checking
 ignore:
-  - name: "Camel case function name"
-    pattern_id: "PSR1.Methods.CamelCapsMethodName"
-    tool: "phpcs"
-  
-  - name: "Camel case variable name"
-    pattern_id: "PSR1.Classes.ClassDeclaration"
-    tool: "phpcs"
-  
-  - name: "Camel case property name"
-    pattern_id: "PSR1.Properties.ClassDeclaration"
-    tool: "phpcs"
-
-# Alternative: You can also use the pattern IDs directly
-# ignore:
-#   - "PSR1.Methods.CamelCapsMethodName"
-#   - "PSR1.Classes.ClassDeclaration" 
-#   - "PSR1.Properties.ClassDeclaration"
-
-# You can also ignore specific files or directories
-# exclude:
-#   - "vendor/**"
-#   - "storage/**"
-#   - "bootstrap/cache/**"
+  - "PSR1.Methods.CamelCapsMethodName"

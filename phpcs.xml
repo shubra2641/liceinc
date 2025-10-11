@@ -78,17 +78,9 @@
     <rule ref="Squiz.NamingConventions.ValidVariableName"/>
     <rule ref="Squiz.NamingConventions.ValidFunctionName"/>
     
-    <!-- Disable camelCase format checking -->
+    <!-- Disable only camelCase format checking -->
     <rule ref="PSR1.Methods.CamelCapsMethodName">
         <exclude name="PSR1.Methods.CamelCapsMethodName"/>
-    </rule>
-    
-    <rule ref="PSR1.Classes.ClassDeclaration">
-        <exclude name="PSR1.Classes.ClassDeclaration"/>
-    </rule>
-    
-    <rule ref="PSR1.Properties.ClassDeclaration">
-        <exclude name="PSR1.Properties.ClassDeclaration"/>
     </rule>
     
     <!-- Disable rules that might conflict with PHPStan -->
