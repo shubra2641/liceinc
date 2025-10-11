@@ -97,9 +97,11 @@ return [
     'update_db_restored' => 'Database restored from backup.',
     'update_db_restore_failed' => 'Failed to restore database from backup.',
     'Updater Backups' => 'Updater Backups',
-    'backups_list_help' => 'Manage previously created backups. You can restore a backup to roll back files and optionally the database.',
+    'backups_list_help' => 'Manage previously created backups. ' .
+        'You can restore a backup to roll back files and optionally the database.',
     'no_backups_found' => 'No backups found.',
-    'confirm_restore_backup' => 'Are you sure you want to restore this backup? This will replace current application files.',
+    'confirm_restore_backup' => 'Are you sure you want to restore this backup? ' .
+        'This will replace current application files.',
     'Restore' => 'Restore',
     'File' => 'File',
     'Size' => 'Size',
@@ -312,9 +314,12 @@ return [
     'Category will be visible to users' => 'Category Will Be Visible To Users',
     'Change Featured Image' => 'Change Featured Image',
     'Change Password' => 'Change Password',
-    'Change the status to pending to add a reply' => 'Change The Status To Pending To Add A Reply',
-    'Change your password to keep your account secure' => 'Change Your Password To Keep Your Account Secure',
-    'Chart period selection requires JavaScript to be enabled' => 'Chart Period Selection Requires JavaScript To Be Enabled',
+    'Change the status to pending to add a reply' =>
+        'Change The Status To Pending To Add A Reply',
+    'Change your password to keep your account secure' =>
+        'Change Your Password To Keep Your Account Secure',
+    'Chart period selection requires JavaScript to be enabled' =>
+        'Chart Period Selection Requires JavaScript To Be Enabled',
     'Check Another License' => 'Check Another License',
     'Check Email' => 'Check Email',
     'Check Envato API status' => 'Check Envato API Status',
@@ -838,21 +843,31 @@ return [
     'Manage and customize email templates' => 'Manage And Customize Email Templates',
     'Manage and monitor all system invoices' => 'Manage And Monitor All System Invoices',
     'Manage and monitor license usage' => 'Manage And Monitor License Usage',
-    'Manage and monitor license usage across your platform' => 'Manage And Monitor License Usage Across Your Platform',
-    'Manage and organize knowledge base articles' => 'Manage And Organize Knowledge Base Articles',
-    'Manage email templates for the system' => 'Manage Email Templates For The System',
-    'Manage licenses and generate license keys' => 'Manage Licenses And Generate License Keys',
-    'Manage system invoices and payments' => 'Manage System Invoices And Payments',
-    'Manage system users and their permissions' => 'Manage System Users And Their Permissions',
-    'Manage your Envato account connection' => 'Manage Your Envato Account Connection',
+    'Manage and monitor license usage across your platform' =>
+        'Manage And Monitor License Usage Across Your Platform',
+    'Manage and organize knowledge base articles' =>
+        'Manage And Organize Knowledge Base Articles',
+    'Manage email templates for the system' =>
+        'Manage Email Templates For The System',
+    'Manage licenses and generate license keys' =>
+        'Manage Licenses And Generate License Keys',
+    'Manage system invoices and payments' =>
+        'Manage System Invoices And Payments',
+    'Manage system users and their permissions' =>
+        'Manage System Users And Their Permissions',
+    'Manage your Envato account connection' =>
+        'Manage Your Envato Account Connection',
     'Manage your account' => 'Manage Your Account',
-    'Manage your account information and settings' => 'Manage Your Account Information And Settings',
-    'Manage your account settings and preferences' => 'Manage Your Account Settings And Preferences',
+    'Manage your account information and settings' =>
+        'Manage Your Account Information And Settings',
+    'Manage your account settings and preferences' =>
+        'Manage Your Account Settings And Preferences',
     'Manage your invoices and payments' => 'Manage Your Invoices And Payments',
     'Manage your license and registered domains' => 'Manage Your License And Registered Domains',
     'Manage your licenses' => 'Manage Your Licenses',
     'Manage your licenses and products' => 'Manage Your Licenses And Products',
-    'Manage your licenses, track downloads, and access support from your personal dashboard' => 'Manage Your Licenses, Track Downloads, And Access Support From Your Personal Dashboard',
+    'Manage your licenses, track downloads, and access support from your personal dashboard' =>
+        'Manage Your Licenses, Track Downloads, And Access Support From Your Personal Dashboard',
     'Manage your product catalog' => 'Manage Your Product Catalog',
     'Manage your product categories' => 'Manage Your Product Categories',
     'Manage your products catalog' => 'Manage Your Products Catalog',
