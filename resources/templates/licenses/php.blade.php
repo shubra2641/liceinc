@@ -1,4 +1,5 @@
 <?php
+
 /**
  * License Verification System
  * Product: {{product}}
@@ -11,10 +12,10 @@ namespace App\License;
 
 class LicenseVerifier
 {
-    private $_apiUrl = '{{license_api_url}}';
-    private $_productSlug = '{{product_slug}}';
-    private $_verificationKey = '{{verification_key}}';
-    private $_apiToken = '{{api_token}}';
+    private $apiUrl = '{{license_api_url}}';
+    private $productSlug = '{{product_slug}}';
+    private $verificationKey = '{{verification_key}}';
+    private $apiToken = '{{api_token}}';
 
     /**
      * Verify license with purchase code
@@ -43,20 +44,20 @@ class LicenseVerifier
     {
         $postData = [
             'purchase_code' => $purchaseCode,
-            'product_slug' => $this->_productSlug,
+            'product_slug' => $this->productSlug,
             'domain' => $domain,
-            'verification_key' => $this->_verificationKey
+            'verification_key' => $this->verificationKey
         ];
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->_apiUrl); // security-ignore: CURL_OPTIONS (Template code)
+        curl_setopt($ch, CURLOPT_URL, $this->apiUrl); // security-ignore: CURL_OPTIONS (Template code)
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/x-www-form-urlencoded',
             'User-Agent: LicenseVerifier/1.0',
-            'Authorization: Bearer ' . $this->_apiToken
+            'Authorization: Bearer ' . $this->apiToken
         ]);
 
         $response = curl_exec($ch);
@@ -90,7 +91,7 @@ class LicenseVerifier
             'message' => $message,
             'data' => $data,
             'verified_at' => date('Y-m-d H:i:s'),
-            'product' => $this->_productSlug
+            'product' => $this->productSlug
         ];
     }
 }
