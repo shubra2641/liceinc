@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -182,7 +184,9 @@ class ProductController extends Controller
     private function getIntegrationCodeTemplate(Product $product, string $apiUrl): string
     {
         // Return a minimal placeholder integration file to avoid complex embedded templates here.
-        return "<?php\n// Integration placeholder for {$product->slug}\n// API: {$apiUrl}\n";
+        return "<?php
+
+declare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// API: {$apiUrl}\n";
     }
 
     /**

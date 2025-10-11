@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -153,6 +155,7 @@ class ProductFile extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductFile> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductFile>
      */
     public function scopeActive($query)
@@ -165,6 +168,7 @@ class ProductFile extends Model
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductFile> $query
      * @param int $productId
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductFile>
      */
     public function scopeForProduct($query, $productId)

@@ -49,6 +49,7 @@ class SecurityService
     /**
      * @param array<mixed> $data
      * @param array<mixed> $rules
+     *
      * @return array<mixed>
      */
     public function validateAndSanitizeInput(array $data, array $rules = []): array
@@ -446,6 +447,7 @@ class SecurityService
      */
     /**
      * @param mixed $file
+     *
      * @return array<string, mixed>
      */
     public function validateFileUpload($file): array

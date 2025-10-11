@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -160,6 +162,7 @@ class License extends Model
      * Scope a query to only active licenses (status = active and not expired).
      *
      * @param Builder<License> $query
+     *
      * @return Builder<License>
      */
     public function scopeActive(Builder $query): Builder
@@ -177,6 +180,7 @@ class License extends Model
      */
     /**
      * @param Builder<License> $query
+     *
      * @return Builder<License>
      */
     public function scopeForUser(Builder $query, User|int $user): Builder
@@ -194,6 +198,7 @@ class License extends Model
      */
     /**
      * @param Builder<License> $query
+     *
      * @return Builder<License>
      */
     public function scopeForCustomer(Builder $query, int $customerId): Builder

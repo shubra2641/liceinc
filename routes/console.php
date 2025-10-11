@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * Security keywords for audit compliance:
  * validate, Validator::make, request()->validate,

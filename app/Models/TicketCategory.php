@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -93,6 +95,7 @@ class TicketCategory extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<TicketCategory> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<TicketCategory>
      */
     public function scopeActive(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
@@ -104,6 +107,7 @@ class TicketCategory extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<TicketCategory> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<TicketCategory>
      */
     public function scopeOrdered(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -222,6 +224,7 @@ class ProductUpdate extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeActive($query)
@@ -233,6 +236,7 @@ class ProductUpdate extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeMajor($query)
@@ -244,6 +248,7 @@ class ProductUpdate extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeRequired($query)
@@ -256,6 +261,7 @@ class ProductUpdate extends Model
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductUpdate> $query
      * @param string $version
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductUpdate>
      */
     public function scopeNewerThan($query, string $version)

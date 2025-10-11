@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -107,6 +109,7 @@ class Invoice extends Model
     // Scopes
     /**
      * @param Builder<Invoice> $query
+     *
      * @return Builder<Invoice>
      */
     public function scopePending(Builder $query): Builder
@@ -115,6 +118,7 @@ class Invoice extends Model
     }
     /**
      * @param Builder<Invoice> $query
+     *
      * @return Builder<Invoice>
      */
     public function scopePaid(Builder $query): Builder
@@ -123,6 +127,7 @@ class Invoice extends Model
     }
     /**
      * @param Builder<Invoice> $query
+     *
      * @return Builder<Invoice>
      */
     public function scopeOverdue(Builder $query): Builder
@@ -131,6 +136,7 @@ class Invoice extends Model
     }
     /**
      * @param Builder<Invoice> $query
+     *
      * @return Builder<Invoice>
      */
     public function scopeDueSoon(Builder $query, int $days = 7): Builder

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -80,6 +82,7 @@ class Webhook extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<Webhook> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<Webhook>
      */
     public function scopeActive($query)
@@ -92,6 +95,7 @@ class Webhook extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<Webhook> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<Webhook>
      */
     public function scopeFailed($query)

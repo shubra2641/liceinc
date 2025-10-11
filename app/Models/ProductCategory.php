@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -124,6 +126,7 @@ class ProductCategory extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeRoots($query)
@@ -135,6 +138,7 @@ class ProductCategory extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeActive($query)
@@ -146,6 +150,7 @@ class ProductCategory extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeMenuVisible($query)
@@ -157,6 +162,7 @@ class ProductCategory extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<ProductCategory> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<ProductCategory>
      */
     public function scopeFeatured($query)

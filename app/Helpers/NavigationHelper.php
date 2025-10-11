@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Navigation Helper Functions with enhanced security.
  *

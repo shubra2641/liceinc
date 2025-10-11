@@ -136,6 +136,7 @@ class AdvancedWebhookService
      */
     /**
      * @param array<string, mixed> $payload
+     *
      * @return array<string, mixed>
      */
     private function prepareWebhookData(Webhook $webhook, string $eventType, array $payload): array

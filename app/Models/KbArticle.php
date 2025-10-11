@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -91,6 +93,7 @@ class KbArticle extends Model
     }
     /**
      * @param Builder<KbArticle> $query
+     *
      * @return Builder<KbArticle>
      */
     public function scopePublished(Builder $query): Builder

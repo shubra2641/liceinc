@@ -59,6 +59,7 @@ class PaymentService
      */
     /**
      * @param array<string, mixed> $orderData
+     *
      * @return array<string, mixed>
      */
     public function processPayment(array $orderData, string $gateway): array
@@ -99,6 +100,7 @@ class PaymentService
      */
     /**
      * @param array<string, mixed> $orderData
+     *
      * @return array<string, mixed>
      */
     protected function processPayPalPayment(array $orderData): array
@@ -199,6 +201,7 @@ class PaymentService
      */
     /**
      * @param array<string, mixed> $orderData
+     *
      * @return array<string, mixed>
      */
     protected function processStripePayment(array $orderData): array
@@ -466,6 +469,7 @@ class PaymentService
      */
     /**
      * @param array<string, mixed> $orderData
+     *
      * @return array<string, mixed>
      */
     public function createLicenseAndInvoice(array $orderData, string $gateway, ?string $transactionId = null): array
@@ -598,6 +602,7 @@ class PaymentService
      *
      * @param Request $request The webhook request
      * @param string $gateway The payment gateway name
+     *
      * @return array<string, mixed> Webhook processing result
      */
     public function handleWebhook(ServiceRequest $request, string $gateway): array

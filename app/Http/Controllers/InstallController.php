@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
@@ -759,6 +761,7 @@ class InstallController extends Controller
      */
     /**
      * @param mixed $config
+     *
      * @return array<string, mixed>
      */
     private function testDatabaseConnection($config)

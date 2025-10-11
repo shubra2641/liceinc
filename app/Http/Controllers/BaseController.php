@@ -58,6 +58,7 @@ abstract class BaseController extends Controller
     /**
      * @param array<string, string> $rules
      * @param array<string, string> $messages
+     *
      * @return array<string, mixed>
      */
     protected function validateRequest(Request $request, array $rules, array $messages = []): array
@@ -220,6 +221,7 @@ abstract class BaseController extends Controller
      */
     /**
      * @param array<mixed, mixed> $data
+     *
      * @return array<string, mixed>
      */
     protected function sanitizeLogData(array $data): array
@@ -353,6 +355,7 @@ abstract class BaseController extends Controller
      */
     /**
      * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, mixed> $paginator
+     *
      * @return array<string, mixed>
      */
     protected function getPaginationMeta(\Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator): array

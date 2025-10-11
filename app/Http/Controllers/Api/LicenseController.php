@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -404,7 +406,9 @@ class LicenseController extends Controller
      * // Response:
      * {
      *     "product": {"name": "My Product", "slug": "my-product"},
-     *     "integration_file": "<?php\nclass LicenseManager...",
+     *     "integration_file": "<?php
+
+declare(strict_types=1);\nclass LicenseManager...",
      *     "filename": "license_integration_my-product.php"
      * }
      */
@@ -488,6 +492,8 @@ class LicenseController extends Controller
         $apiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
 
         return "<?php
+
+declare(strict_types=1);
 /**
  * License Integration for {$product->name}
  * Generated on " . now()->format('Y-m-d H:i:s') . "
@@ -505,6 +511,7 @@ class LicenseManager
      *
      * @param string \$license_key Purchase code or license key
      * @param string \$domain Domain to verify against
+     *
      * @return array Verification result
      */
     public function verifyLicense(\$license_key, \$domain = null)

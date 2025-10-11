@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -79,6 +81,7 @@ class WebhookLog extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<WebhookLog> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<WebhookLog>
      */
     public function scopeSuccessful($query)
@@ -91,6 +94,7 @@ class WebhookLog extends Model
      */
     /**
      * @param \Illuminate\Database\Eloquent\Builder<WebhookLog> $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder<WebhookLog>
      */
     public function scopeFailed($query)
@@ -104,6 +108,7 @@ class WebhookLog extends Model
     /**
      * @param \Illuminate\Database\Eloquent\Builder<WebhookLog> $query
      * @param string $eventType
+     *
      * @return \Illuminate\Database\Eloquent\Builder<WebhookLog>
      */
     public function scopeEventType($query, string $eventType)
