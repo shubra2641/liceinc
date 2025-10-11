@@ -9,24 +9,29 @@ return [
     '30-Day Money Back Guarantee' => 'ضمان استرداد الأموال لمدة 30 يومًا',
     'A new verification link has been sent to the email address you provided during registration.' =>
         'تم إرسال رابط تحقق جديد إلى عنوان البريد الإلكتروني الذي قدمته أثناء التسجيل.',
-    'Please verify your email address before accessing your account.' => 'يرجى التحقق من عنوان بريدك الإلكتروني قبل الوصول إلى حسابك.',
+    'Please verify your email address before accessing your account.' =>
+        'يرجى التحقق من عنوان بريدك الإلكتروني قبل الوصول إلى حسابك.',
     'Please verify your email address. A verification link has been sent to your email.' =>
         'يرجى التحقق من عنوان بريدك الإلكتروني. تم إرسال رابط التحقق إلى بريدك الإلكتروني.',
     'Test Email Warning' => 'تحذير البريد التجريبي',
     'Test Email Detected' => 'تم اكتشاف بريد تجريبي',
     'You are using a test email address' => 'أنت تستخدم عنوان بريد تجريبي',
-    'Test email addresses cannot receive verification emails' => 'عناوين البريد التجريبية لا تستطيع استقبال رسائل التحقق',
+    'Test email addresses cannot receive verification emails' =>
+        'عناوين البريد التجريبية لا تستطيع استقبال رسائل التحقق',
     'You are using a test email address that cannot receive verification emails' =>
         'أنت تستخدم عنوان بريد تجريبي لا يستطيع استقبال رسائل التحقق',
     'Test Email Address' => 'عنوان بريد تجريبي',
     'You are currently using a test email address ({{email}}) that cannot receive verification emails. ' .
-        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com are not real email addresses and cannot receive emails.' =>
+        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com ' .
+        'are not real email addresses and cannot receive emails.' =>
         'أنت تستخدم حالياً عنوان بريد تجريبي ({{email}}) لا يستطيع استقبال رسائل التحقق. ' .
         'عناوين البريد التجريبية مثل @example.com و @test.com و @localhost و @demo.com ليست عناوين بريد حقيقية ولا تستطيع استقبال الرسائل.',
     'You are currently using a test email address' => 'أنت تستخدم حالياً عنوان بريد تجريبي',
-    'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com are not real email addresses and cannot receive emails.' =>
+    'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com ' .
+        'are not real email addresses and cannot receive emails.' =>
         'لا يستطيع استقبال رسائل التحقق. عناوين البريد التجريبية مثل @example.com و @test.com و @localhost و @demo.com ليست عناوين بريد حقيقية ولا تستطيع استقبال الرسائل.',
-    'To use the system normally, please register with a real email address that can receive verification emails.' => 'لاستخدام النظام بشكل طبيعي، يرجى التسجيل بعنوان بريد حقيقي يستطيع استقبال رسائل التحقق.',
+    'To use the system normally, please register with a real email address that can receive verification emails.' =>
+        'لاستخدام النظام بشكل طبيعي، يرجى التسجيل بعنوان بريد حقيقي يستطيع استقبال رسائل التحقق.',
     'Continue to Dashboard' => 'المتابعة للوحة التحكم',
     'About Test Emails' => 'حول البريد التجريبي',
     'Test Email Domains' => 'نطاقات البريد التجريبي',
