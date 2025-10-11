@@ -11,7 +11,8 @@ return [
 
     // Overview Section
     'overview' => 'Overview',
-    'overview_description' => 'This guide explains how to implement license verification in your applications using our secure license verification system. The system provides real-time verification against our license server to ensure only valid licenses can use your software.',
+    'overview_description' =>
+     'This guide explains how to implement license verification in your applications using our secure license verification system. The system provides real-time verification against our license server to ensure only valid licenses can use your software.',
 
     'secure_verification' => 'Secure Verification',
     'secure_verification_desc' => 'Real-time verification against our secure license server',

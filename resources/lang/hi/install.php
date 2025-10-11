@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 return [
     // Welcome Page
     'welcome_title' => 'नमस्ते लाइसेंस प्रबंधन सिस्टम में',
@@ -38,7 +40,8 @@ return [
     // Database Page
     'database_title' => 'डाटाबेस कॉन्फ़िगरेशन',
     'database_subtitle' => 'आपके डाटाबेस कनेक्शन विवरण दर्ज करें',
-    'database_description' => 'Make sure your database server is running and the database exists. The installer will create the necessary tables.',
+    'database_description' =>
+     'Make sure your database server is running and the database exists. The installer will create the necessary tables.',
     'database_host' => 'डाटाबेस होस्ट',
     'database_port' => 'डाटाबेस पोर्ट',
     'database_name' => 'डाटाबेस नाम',
@@ -102,9 +105,12 @@ return [
     'fix_requirements' => 'आवश्यकताएं पहले ठीक करें',
     'password_hint' => 'पासवर्ड कम से कम 8 अक्षरों का होना चाहिए',
     'admin_email_hint' => 'इसका उपयोग सिस्टम अधिसूचनाओं के लिए किया जाएगा',
-    'javascript_required_for_email_settings' => 'डायनामिक ईमेल सेटिंग्स के लिए JavaScript आवश्यक है। कृपया JavaScript सक्षम करें या मैन्युअल रूप से ईमेल सेटिंग्स कॉन्फ़िगर करें।',
-    'javascript_required_for_language_switching' => 'डायनामिक भाषा स्विचिंग के लिए JavaScript आवश्यक है। कृपया JavaScript सक्षम करें या भाषा बदलने के बाद पेज रिफ्रेश करें।',
-    'javascript_required_for_password_validation' => 'रियल-टाइम पासवर्ड सत्यापन के लिए JavaScript आवश्यक है। बेहतर उपयोगकर्ता अनुभव के लिए कृपया JavaScript सक्षम करें।',
+    'javascript_required_for_email_settings' =>
+     'डायनामिक ईमेल सेटिंग्स के लिए JavaScript आवश्यक है। कृपया JavaScript सक्षम करें या मैन्युअल रूप से ईमेल सेटिंग्स कॉन्फ़िगर करें।',
+    'javascript_required_for_language_switching' =>
+     'डायनामिक भाषा स्विचिंग के लिए JavaScript आवश्यक है। कृपया JavaScript सक्षम करें या भाषा बदलने के बाद पेज रिफ्रेश करें।',
+    'javascript_required_for_password_validation' =>
+     'रियल-टाइम पासवर्ड सत्यापन के लिए JavaScript आवश्यक है। बेहतर उपयोगकर्ता अनुभव के लिए कृपया JavaScript सक्षम करें।',
 
     // Success Messages
     'installation_complete' => 'स्थापना पूरी है!',

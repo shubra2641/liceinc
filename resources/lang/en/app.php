@@ -1,23 +1,33 @@
 <?php
+
 declare(strict_types=1);
+
 return [
     '1 hour ago' => '1 Hour Ago',
     '2 hours ago' => '2 Hours Ago',
     '24/7 Support' => '24/7 Support',
     '30-Day Money Back Guarantee' => '30-Day Money Back Guarantee',
-    'A new verification link has been sent to the email address you provided during registration.' => 'A New Verification Link Has Been Sent To The Email Address You Provided During Registration.',
+    'A new verification link has been sent to the email address you provided during registration.' =>
+        'A New Verification Link Has Been Sent To The Email Address You Provided During Registration.',
     'Please verify your email address before accessing your account.' => 'Please verify your email address before accessing your account.',
-    'Please verify your email address. A verification link has been sent to your email.' => 'Please verify your email address. A verification link has been sent to your email.',
+    'Please verify your email address. A verification link has been sent to your email.' =>
+        'Please verify your email address. A verification link has been sent to your email.',
     'Test Email Warning' => 'Test Email Warning',
     'Test Email Detected' => 'Test Email Detected',
     'You are using a test email address' => 'You are using a test email address',
     'Test email addresses cannot receive verification emails' => 'Test email addresses cannot receive verification emails',
-    'You are using a test email address that cannot receive verification emails' => 'You are using a test email address that cannot receive verification emails',
+    'You are using a test email address that cannot receive verification emails' =>
+        'You are using a test email address that cannot receive verification emails',
     'Test Email Address' => 'Test Email Address',
-    'You are currently using a test email address ({{email}}) that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com are not real email addresses and cannot receive emails.' => 'You are currently using a test email address ({{email}}) that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com are not real email addresses and cannot receive emails.',
+    'You are currently using a test email address ({{email}}) that cannot receive verification emails. ' .
+        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com are not real email addresses and cannot receive emails.' =>
+        'You are currently using a test email address ({{email}}) that cannot receive verification emails. ' .
+        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com are not real email addresses and cannot receive emails.',
     'You are currently using a test email address' => 'You are currently using a test email address',
-    'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com are not real email addresses and cannot receive emails.' => 'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com are not real email addresses and cannot receive emails.',
-    'To use the system normally, please register with a real email address that can receive verification emails.' => 'To use the system normally, please register with a real email address that can receive verification emails.',
+    'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com are not real email addresses and cannot receive emails.' =>
+        'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com are not real email addresses and cannot receive emails.',
+    'To use the system normally, please register with a real email address that can receive verification emails.' =>
+        'To use the system normally, please register with a real email address that can receive verification emails.',
     'Continue to Dashboard' => 'Continue to Dashboard',
     'About Test Emails' => 'About Test Emails',
     'Test Email Domains' => 'Test Email Domains',
@@ -2708,6 +2718,5 @@ return [
     'Stripe secret key is required' => 'Stripe secret key is required',
     'PayPal connection error: :error' => 'PayPal connection error: :error',
     'Stripe connection error: :error' => 'Stripe connection error: :error',
-
     'You don\'t have any invoices yet' =>    'You don\'t have any invoices yet',
 ];

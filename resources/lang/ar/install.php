@@ -1,10 +1,13 @@
 <?php
+
 declare(strict_types=1);
+
 return [
     // Welcome Page
     'welcome_title' => 'مرحباً بك في نظام إدارة التراخيص',
     'welcome_subtitle' => 'دعنا ننشئ نظامك في خطوات قليلة',
-    'welcome_description' => 'سيرشدك معالج التثبيت خلال إعداد نظام إدارة التراخيص الخاص بك. العملية تستغرق حوالي 5-10 دقائق.',
+    'welcome_description' => 'سيرشدك معالج التثبيت خلال إعداد نظام إدارة التراخيص الخاص بك. ' .
+        'العملية تستغرق حوالي 5-10 دقائق.',
     'get_started' => 'ابدأ الآن',
     'what_we_will_setup' => 'ما سنقوم بإعداده:',
     'select_language' => 'اختر اللغة',
@@ -38,7 +41,8 @@ return [
     // Database Page
     'database_title' => 'إعداد قاعدة البيانات',
     'database_subtitle' => 'أدخل تفاصيل اتصال قاعدة البيانات',
-    'database_description' => 'تأكد من أن خادم قاعدة البيانات يعمل وأن قاعدة البيانات موجودة. سيقوم المثبت بإنشاء الجداول اللازمة.',
+    'database_description' =>
+    'تأكد من أن خادم قاعدة البيانات يعمل وأن قاعدة البيانات موجودة. سيقوم المثبت بإنشاء الجداول اللازمة.',
     'database_host' => 'مضيف قاعدة البيانات',
     'database_port' => 'منفذ قاعدة البيانات',
     'database_name' => 'اسم قاعدة البيانات',
@@ -102,9 +106,15 @@ return [
     'fix_requirements' => 'أصلح المتطلبات أولاً',
     'password_hint' => 'يجب أن تكون كلمة المرور 8 أحرف على الأقل',
     'admin_email_hint' => 'سيتم استخدام هذا للإشعارات النظام',
-    'javascript_required_for_email_settings' => 'JavaScript مطلوب لإعدادات البريد الإلكتروني الديناميكية. يرجى تفعيل JavaScript أو تكوين إعدادات البريد الإلكتروني يدوياً.',
-    'javascript_required_for_language_switching' => 'JavaScript مطلوب لتبديل اللغة الديناميكي. يرجى تفعيل JavaScript أو تحديث الصفحة بعد تغيير اللغة.',
-    'javascript_required_for_password_validation' => 'JavaScript مطلوب للتحقق من كلمة المرور في الوقت الفعلي. يرجى تفعيل JavaScript للحصول على تجربة مستخدم أفضل.',
+    'javascript_required_for_email_settings' =>
+        'JavaScript مطلوب لإعدادات البريد الإلكتروني الديناميكية. ' .
+        'يرجى تفعيل JavaScript أو تكوين إعدادات البريد الإلكتروني يدوياً.',
+    'javascript_required_for_language_switching' =>
+        'JavaScript مطلوب لتبديل اللغة الديناميكي. ' .
+        'يرجى تفعيل JavaScript أو تحديث الصفحة بعد تغيير اللغة.',
+    'javascript_required_for_password_validation' =>
+        'JavaScript مطلوب للتحقق من كلمة المرور في الوقت الفعلي. ' .
+        'يرجى تفعيل JavaScript للحصول على تجربة مستخدم أفضل.',
 
     // Success Messages
     'installation_complete' => 'تم التثبيت بنجاح!',
