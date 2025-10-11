@@ -28,10 +28,10 @@ use Illuminate\Support\Str;
  * @property string|null $notes
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property mixed $expires_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LicenseDomain> $domains
  * @property-read int|null $domains_count
  * @property-read int $active_domains_count
- * @property mixed $expires_at
  * @property-read int $remaining_domains
  * @property-read mixed $support_active
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
