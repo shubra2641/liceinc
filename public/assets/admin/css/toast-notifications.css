@@ -1,0 +1,243 @@
+/* Toast Notifications CSS - نظام الإشعارات المنبثقة */
+
+/* Toast Container */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    max-width: 400px;
+}
+
+/* RTL Support for Toast Container */
+[dir="rtl"] .toast-container {
+    right: auto;
+    left: 20px;
+}
+
+/* Toast Base Styles */
+.toast {
+    min-width: 300px;
+    max-width: 100%;
+    margin-bottom: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+    opacity: 0;
+    box-shadow: 0 10px 25px rgb(0 0 0 / 10%);
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+}
+
+/* RTL Support for Toast */
+[dir="rtl"] .toast {
+    transform: translateX(-100%);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+    animation: toast-slide-in 0.3s ease;
+}
+
+/* Toast Header */
+.toast-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid #e5e7eb;
+    border-radius: 8px 8px 0 0;
+    background: #f9fafb;
+}
+
+.toast-icon {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+[dir="rtl"] .toast-icon {
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+.toast-title {
+    flex: 1;
+    margin: 0;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.toast-close {
+    margin-left: 8px;
+    padding: 4px;
+    border: none;
+    border-radius: 4px;
+    background: none;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+[dir="rtl"] .toast-close {
+    margin-right: 8px;
+    margin-left: 0;
+}
+
+.toast-close:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Toast Body */
+.toast-body {
+    padding: 12px 16px;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Toast Types */
+.toast-success {
+    border-left: 4px solid #10b981;
+}
+
+[dir="rtl"] .toast-success {
+    border-right: 4px solid #10b981;
+    border-left: none;
+}
+
+.toast-success .toast-icon {
+    color: #10b981;
+}
+
+.toast-error {
+    border-left: 4px solid #ef4444;
+}
+
+[dir="rtl"] .toast-error {
+    border-right: 4px solid #ef4444;
+    border-left: none;
+}
+
+.toast-error .toast-icon {
+    color: #ef4444;
+}
+
+.toast-warning {
+    border-left: 4px solid #f59e0b;
+}
+
+[dir="rtl"] .toast-warning {
+    border-right: 4px solid #f59e0b;
+    border-left: none;
+}
+
+.toast-warning .toast-icon {
+    color: #f59e0b;
+}
+
+.toast-info {
+    border-left: 4px solid #3b82f6;
+}
+
+[dir="rtl"] .toast-info {
+    border-right: 4px solid #3b82f6;
+    border-left: none;
+}
+
+.toast-info .toast-icon {
+    color: #3b82f6;
+}
+
+/* Dark Mode Support */
+.dark .toast {
+    border-color: #374151;
+    background: #1f2937;
+    color: #f9fafb;
+}
+
+.dark .toast-header {
+    background: #374151;
+    border-bottom-color: #4b5563;
+}
+
+.dark .toast-title {
+    color: #e5e7eb;
+}
+
+.dark .toast-body {
+    color: #d1d5db;
+}
+
+.dark .toast-close {
+    color: #9ca3af;
+}
+
+.dark .toast-close:hover {
+    background: #4b5563;
+    color: #e5e7eb;
+}
+
+/* Mobile Responsive */
+@media (width <= 768px) {
+    .toast-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    [dir="rtl"] .toast-container {
+        right: 10px;
+        left: 10px;
+    }
+    
+    .toast {
+        min-width: auto;
+        margin-bottom: 0.75rem;
+    }
+    
+    .toast-header {
+        padding: 0.75rem 1rem 0.5rem;
+    }
+    
+    .toast-body {
+        padding: 0.5rem 1rem 0.75rem;
+    }
+}
+
+/* Animation Keyframes */
+@keyframes toast-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toast-slide-in-rtl {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+[dir="rtl"] .toast.show {
+    animation: toast-slide-in-rtl 0.3s ease;
+}
+
+/* Flash Message Hidden */
+.flash-message-hidden {
+    display: none !important;
+}
+

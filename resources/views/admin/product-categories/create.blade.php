@@ -1,0 +1,374 @@
+@extends('layouts.admin')
+
+@section('admin-content')
+<div class="container-fluid products-form">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-1 text-dark">
+                                <i class="fas fa-plus-circle text-primary me-2"></i>
+                                {{ trans('app.Create Product Category') }}
+                            </h1>
+                            <p class="text-muted mb-0">{{ trans('app.Add New Product Category') }}</p>
+        </div>
+                        <div>
+                            <a href="{{ route('admin.product-categories.index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                {{ trans('app.Back to Categories') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+
+@if($errors->any())
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-danger">
+                <h5 class="alert-heading">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {{ trans('app.Validation Errors') }}
+                </h5>
+                <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+</div>
+@endif
+
+    <form method="post" action="{{ route('admin.product-categories.store') }}" enctype="multipart/form-data" class="needs-validation" novalidate>
+        @csrf
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Basic Information -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            {{ trans('app.Basic Information') }}
+                            <span class="badge bg-light text-primary ms-2">{{ trans('app.Required') }}</span>
+                        </h5>
+            </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">
+                                    <i class="fas fa-tag text-primary me-1"></i>
+                                    {{ trans('app.Category Name') }} <span class="text-danger">*</span>
+                        </label>
+                                <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                                       id="name" name="name" value="{{ old('name') }}" 
+                                       placeholder="{{ trans('app.Enter Category Name') }}" required>
+                                @error('name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="slug" class="form-label">
+                                    <i class="fas fa-link text-purple me-1"></i>
+                                    {{ trans('app.Slug') }}
+                        </label>
+                                <input type="text" class="form-control @error('slug') is-invalid @enderror" 
+                                       id="slug" name="slug" value="{{ old('slug') }}" 
+                                       placeholder="{{ trans('app.Auto Generated from Name') }}">
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {{ trans('app.Leave empty to auto generate') }}
+                                </div>
+                                @error('slug')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">
+                                <i class="fas fa-align-left text-success me-1"></i>
+                                {{ trans('app.Description') }}
+                    </label>
+                            <textarea class="form-control @error('description') is-invalid @enderror" 
+                                      id="description" name="description" rows="4"
+                                      data-summernote="true" data-toolbar="basic"
+                                      data-placeholder="{{ trans('app.Enter Category Description') }}"
+                                      placeholder="{{ trans('app.Enter Category Description') }}">{{ old('description') }}</textarea>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                {{ trans('app.Use the rich text editor to format your category description.') }}
+                            </div>
+                            @error('description')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        <!-- Media & Settings -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-image me-2"></i>
+                            {{ trans('app.Media & Settings') }}
+                            <span class="badge bg-light text-warning ms-2">{{ trans('app.Optional') }}</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="image" class="form-label">
+                                    <i class="fas fa-camera text-orange me-1"></i>
+                                    {{ trans('app.Category Image') }}
+                                </label>
+                                <input type="file" class="form-control @error('image') is-invalid @enderror" 
+                                       id="image" name="image" accept="image/*">
+                                <div class="form-text">{{ trans('app.Recommended Size: 400x300px') }}</div>
+                                @error('image')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="sort_order" class="form-label">
+                                    <i class="fas fa-sort-numeric-up text-indigo me-1"></i>
+                                    {{ trans('app.Sort Order') }}
+                                </label>
+                                <input type="number" class="form-control @error('sort_order') is-invalid @enderror" 
+                                       id="sort_order" name="sort_order" value="{{ old('sort_order', 0) }}" 
+                                       min="0" placeholder="0">
+                                <div class="form-text">{{ trans('app.Lower numbers appear first') }}</div>
+                                @error('sort_order')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1"
+                                   {{ old('is_active', true) ? 'checked' : '' }}>
+                            <label class="form-check-label" for="is_active">
+                                <i class="fas fa-toggle-on text-success me-1"></i>
+                                {{ trans('app.Active') }}
+                            </label>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                {{ trans('app.Category will be visible publicly') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEO Optimization -->
+                <div class="card mb-4">
+                    <div class="card-header bg-indigo text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-search me-2"></i>
+                            {{ trans('app.SEO Optimization') }}
+                            <span class="badge bg-light text-indigo ms-2">{{ trans('app.Optional') }}</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="meta_title" class="form-label">
+                                    <i class="fas fa-heading text-primary me-1"></i>
+                                    {{ trans('app.Meta Title') }}
+                                </label>
+                                <input type="text" class="form-control @error('meta_title') is-invalid @enderror" 
+                                       id="meta_title" name="meta_title" value="{{ old('meta_title') }}" 
+                                       maxlength="255" placeholder="{{ trans('app.SEO Title Placeholder') }}">
+                                @error('meta_title')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="meta_keywords" class="form-label">
+                                    <i class="fas fa-tags text-warning me-1"></i>
+                                    {{ trans('app.Meta Keywords') }}
+                                </label>
+                                <input type="text" class="form-control @error('meta_keywords') is-invalid @enderror" 
+                                       id="meta_keywords" name="meta_keywords" value="{{ old('meta_keywords') }}" 
+                                       placeholder="{{ trans('app.Keywords Comma Separated') }}">
+                                @error('meta_keywords')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="meta_description" class="form-label">
+                                <i class="fas fa-file-alt text-success me-1"></i>
+                                {{ trans('app.Meta Description') }}
+                            </label>
+                            <textarea class="form-control @error('meta_description') is-invalid @enderror" 
+                                      id="meta_description" name="meta_description" rows="3"
+                                      maxlength="500" placeholder="{{ trans('app.SEO Description Placeholder') }}">{{ old('meta_description') }}</textarea>
+                            @error('meta_description')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Category Settings -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-cog me-2"></i>
+                            {{ trans('app.Category Settings') }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="show_in_menu" name="show_in_menu" value="1"
+                                   {{ old('show_in_menu', true) ? 'checked' : '' }}>
+                            <label class="form-check-label" for="show_in_menu">
+                                <i class="fas fa-list text-primary me-1"></i>
+                                {{ trans('app.Show in Menu') }}
+                            </label>
+                        </div>
+
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="is_featured" name="is_featured" value="1"
+                                   {{ old('is_featured') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="is_featured">
+                                <i class="fas fa-star text-warning me-1"></i>
+                                {{ trans('app.Featured Category') }}
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            {{ trans('app.Quick Stats') }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <div class="stats-card">
+                                    <h4 class="text-primary">0</h4>
+                                    <p class="text-muted small mb-0">{{ trans('app.Products') }}</p>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="stats-card">
+                                    <h4 class="text-success">0</h4>
+                                    <p class="text-muted small mb-0">{{ trans('app.Subcategories') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Color Settings -->
+                <div class="card mb-4">
+                    <div class="card-header bg-purple text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-palette me-2"></i>
+                            {{ trans('app.Color Settings') }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="color" class="form-label">
+                                <i class="fas fa-paint-brush text-primary me-1"></i>
+                                {{ trans('app.Category Color') }}
+                        </label>
+                            <input type="color" class="form-control form-control-color @error('color') is-invalid @enderror" 
+                                   id="color" name="color" value="{{ old('color', '#007bff') }}">
+                            @error('color')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                        <div class="mb-3">
+                            <label for="text_color" class="form-label">
+                                <i class="fas fa-font text-secondary me-1"></i>
+                                {{ trans('app.Text Color') }}
+                        </label>
+                            <input type="color" class="form-control form-control-color @error('text_color') is-invalid @enderror" 
+                                   id="text_color" name="text_color" value="{{ old('text_color', '#ffffff') }}">
+                            @error('text_color')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Icon Settings -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-icons me-2"></i>
+                            {{ trans('app.Icon Settings') }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="icon" class="form-label">
+                                <i class="fas fa-star text-warning me-1"></i>
+                                {{ trans('app.Category Icon') }}
+                            </label>
+                            <input type="text" class="form-control @error('icon') is-invalid @enderror" 
+                                   id="icon" name="icon" value="{{ old('icon', 'fas fa-folder') }}" 
+                                   placeholder="fas fa-folder">
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                {{ trans('app.Use Font Awesome icon classes') }}
+                            </div>
+                            @error('icon')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="text-center">
+                            <div id="icon-preview" class="fs-1 text-primary">
+                                <i class="fas fa-folder"></i>
+                            </div>
+                            <p class="text-muted small mt-2">{{ trans('app.Icon Preview') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ route('admin.product-categories.index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>{{ trans('app.Cancel') }}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>{{ trans('app.Create Category') }}
+                    </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+@endsection

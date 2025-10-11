@@ -1,0 +1,54 @@
+/**
+ * License Error Page Styles
+ * External CSS file for license error page
+ */
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.license-error-card {
+    width: 100%;
+    max-width: 500px;
+    padding: 3rem;
+    border-radius: 15px;
+    background: white;
+    text-align: center;
+    box-shadow: 0 20px 40px rgb(0 0 0 / 10%);
+}
+
+.license-error-icon {
+    margin-bottom: 1.5rem;
+    color: #dc3545;
+    font-size: 4rem;
+}
+
+.license-error-title {
+    margin-bottom: 1rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.license-error-message {
+    margin-bottom: 2rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+.btn-primary {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 10px 20px rgb(0 0 0 / 10%);
+    transform: translateY(-2px);
+}

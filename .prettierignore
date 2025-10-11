@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+public/build/
+storage/framework/
+storage/logs/
+
+# Laravel specific
+bootstrap/cache/
+
+# Minified files
+*.min.js
+*.min.css
+
+# Lock files
+package-lock.json
+composer.lock

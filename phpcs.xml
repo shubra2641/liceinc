@@ -1,0 +1,236 @@
+<?xml version="1.0"?>
+<ruleset name="My Logos PHP CodeSniffer Configuration">
+    <description>PHP CodeSniffer configuration for My Logos project with PHPStan Level 10 compatibility</description>
+    
+    <!-- Files to check -->
+    <file>app</file>
+    <file>config</file>
+    <file>database</file>
+    <file>routes</file>
+    
+    <!-- Exclude patterns -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/storage/*</exclude-pattern>
+    <exclude-pattern>*/bootstrap/cache/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/public/*</exclude-pattern>
+    <exclude-pattern>*/tests/*</exclude-pattern>
+    <exclude-pattern>*/database/migrations/*</exclude-pattern>
+    <exclude-pattern>*/stubs/*</exclude-pattern>
+    
+    <!-- Basic standards -->
+    <rule ref="PSR12"/>
+    <rule ref="PSR1"/>
+    
+    <!-- PHP 8+ compatibility -->
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
+    <rule ref="Generic.PHP.DisallowShortOpenTag"/>
+    
+    <!-- Array formatting -->
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
+    
+    <!-- Import statements -->
+    <rule ref="PSR12.Files.FileHeader"/>
+    <rule ref="Generic.Files.LineEndings"/>
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="140"/>
+        </properties>
+    </rule>
+    
+    <!-- Disable rules that conflict with PHPStan Level 10 -->
+    <rule ref="Generic.Commenting.DocComment">
+        <exclude name="Generic.Commenting.DocComment.MissingShort"/>
+        <exclude name="Generic.Commenting.DocComment.SpacingBeforeShort"/>
+        <exclude name="Generic.Commenting.DocComment.SpacingAfterShort"/>
+    </rule>
+    
+    <!-- Allow mixed types for PHPStan Level 10 compatibility -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingParamComment">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamComment"/>
+    </rule>
+    
+    <!-- Allow array type hints -->
+    <rule ref="Generic.Commenting.DocComment.TagValueIndent">
+        <exclude name="Generic.Commenting.DocComment.TagValueIndent"/>
+    </rule>
+    
+    <!-- PHP 8.1+ features -->
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
+    <rule ref="Generic.PHP.DisallowShortOpenTag"/>
+    
+    <!-- Performance optimizations -->
+    <rule ref="Generic.PHP.NoSilencedErrors"/>
+    <rule ref="Generic.PHP.DisallowAlternativePHPTags"/>
+    
+    <!-- Security -->
+    <rule ref="Generic.PHP.ForbiddenFunctions"/>
+    <rule ref="Generic.PHP.DeprecatedFunctions"/>
+    
+    <!-- Code quality -->
+    <rule ref="Generic.CodeAnalysis.EmptyStatement"/>
+    <rule ref="Generic.CodeAnalysis.UnconditionalIfStatement"/>
+    <rule ref="Generic.CodeAnalysis.UselessOverridingMethod"/>
+    
+    <!-- Naming conventions -->
+    <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
+    <rule ref="Squiz.NamingConventions.ValidVariableName"/>
+    <rule ref="Squiz.NamingConventions.ValidFunctionName"/>
+    
+    <!-- Disable rules that might conflict with PHPStan -->
+    <rule ref="Generic.Commenting.DocComment.MissingParamTag">
+        <exclude name="Generic.Commenting.DocComment.MissingParamTag"/>
+    </rule>
+    
+    <rule ref="Generic.Commenting.DocComment.MissingReturn">
+        <exclude name="Generic.Commenting.DocComment.MissingReturn"/>
+    </rule>
+    
+    <!-- Allow mixed return types for PHPStan Level 10 -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingReturn">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturn"/>
+    </rule>
+    
+    <!-- Allow array type hints without full specification -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamTag"/>
+    </rule>
+    
+    <!-- PHP 8.1+ union types support -->
+    <rule ref="Generic.Commenting.DocComment.TagValueIndent">
+        <exclude name="Generic.Commenting.DocComment.TagValueIndent"/>
+    </rule>
+    
+    <!-- Allow mixed types in PHPDoc -->
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidReturn">
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidReturn"/>
+    </rule>
+    
+    <!-- Allow array type hints -->
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidParamComment">
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidParamComment"/>
+    </rule>
+    
+    <!-- Disable member variable naming for Laravel compatibility -->
+    <rule ref="Squiz.NamingConventions.ValidVariableName">
+        <exclude name="Squiz.NamingConventions.ValidVariableName.MemberVar"/>
+    </rule>
+    
+    <!-- Disable private method naming for Laravel compatibility -->
+    <rule ref="Squiz.NamingConventions.ValidFunctionName">
+        <exclude name="Squiz.NamingConventions.ValidFunctionName.PrivateNoUnderscore"/>
+    </rule>
+    
+    <!-- Disable type hint requirements for PHPStan Level 10 compatibility -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingParamComment">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamComment"/>
+    </rule>
+    
+    <!-- Disable parameter type requirements -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamTag"/>
+    </rule>
+    
+    <!-- Disable return type requirements -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingReturn">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturn"/>
+    </rule>
+    
+    <!-- Disable doc comment formatting for PHPStan compatibility -->
+    <rule ref="Squiz.Commenting.FunctionComment.SpacingAfterParamType">
+        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamType"/>
+    </rule>
+    
+    <rule ref="Squiz.Commenting.FunctionComment.SpacingAfterParamName">
+        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamName"/>
+    </rule>
+    
+    <rule ref="Squiz.Commenting.FunctionComment.ParamCommentNotCapital">
+        <exclude name="Squiz.Commenting.FunctionComment.ParamCommentNotCapital"/>
+    </rule>
+    
+    <rule ref="Squiz.Commenting.FunctionComment.ThrowsNotCapital">
+        <exclude name="Squiz.Commenting.FunctionComment.ThrowsNotCapital"/>
+    </rule>
+    
+    <!-- Disable additional blank lines for PHPStan compatibility -->
+    <rule ref="Squiz.Commenting.FunctionComment.SpacingAfter">
+        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfter"/>
+    </rule>
+    
+    <!-- Disable tag grouping for PHPStan compatibility -->
+    <rule ref="Squiz.Commenting.FunctionComment.TagOrder">
+        <exclude name="Squiz.Commenting.FunctionComment.TagOrder"/>
+    </rule>
+    
+    <!-- Disable type hint requirements -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingParamType">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamType"/>
+    </rule>
+    
+    <!-- Disable return type requirements -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingReturnType">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType"/>
+    </rule>
+    
+    <!-- Disable type hint validation -->
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidParamType">
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidParamType"/>
+    </rule>
+    
+    <!-- Disable return type validation -->
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidReturnType">
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidReturnType"/>
+    </rule>
+    
+    <!-- Disable parameter name validation -->
+    <rule ref="Squiz.Commenting.FunctionComment.ParamNameNoMatch">
+        <exclude name="Squiz.Commenting.FunctionComment.ParamNameNoMatch"/>
+    </rule>
+    
+    <!-- Disable return type validation -->
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidReturn">
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidReturn"/>
+    </rule>
+    
+    <!-- Disable parameter comment validation -->
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidParamComment">
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidParamComment"/>
+    </rule>
+    
+    <!-- Disable type hint requirements -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingParamType">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamType"/>
+    </rule>
+    
+    <!-- Disable return type requirements -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingReturnType">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType"/>
+    </rule>
+    
+    <!-- Disable type hint validation -->
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidParamType">
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidParamType"/>
+    </rule>
+    
+    <!-- Disable return type validation -->
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidReturnType">
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidReturnType"/>
+    </rule>
+    
+    <!-- Disable parameter name validation -->
+    <rule ref="Squiz.Commenting.FunctionComment.ParamNameNoMatch">
+        <exclude name="Squiz.Commenting.FunctionComment.ParamNameNoMatch"/>
+    </rule>
+    
+    <!-- Disable return type validation -->
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidReturn">
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidReturn"/>
+    </rule>
+    
+    <!-- Disable parameter comment validation -->
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidParamComment">
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidParamComment"/>
+    </rule>
+</ruleset>
