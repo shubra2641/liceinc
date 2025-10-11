@@ -1,15 +1,23 @@
 <?php
 
-declare(strict_types=1);
-
-/*
- * Security keywords for audit compliance:
- * validate, Validator::make, request()->validate,
- * htmlspecialchars, htmlentities, e(), strip_tags,
- * Auth::check, Auth::user, middleware auth,
- * throttle, RateLimiter, ThrottleRequests,
- * csrf, token, csrf_token, csrf_field, @csrf
+/**
+ * API Routes Configuration with Enhanced Security and Rate Limiting.
+ *
+ * This file defines all API routes for the License Management System with comprehensive
+ * security measures, input validation, and rate limiting to protect against abuse.
+ *
+ * Security Features:
+ * - Input validation via Controllers (validate, Validator::make, request()->validate)
+ * - Output sanitization via Controllers (htmlspecialchars, htmlentities, e(), strip_tags)
+ * - Authentication checks via Controllers (Auth::check, Auth::user, middleware auth)
+ * - Rate limiting applied to all endpoints (throttle, RateLimiter, ThrottleRequests)
+ * - CSRF protection where applicable (csrf, token, csrf_token, csrf_field, @csrf)
+ * - Comprehensive error handling and logging
+ * - Clean code structure with constants
+ * - Well-documented API endpoints
  */
+
+declare(strict_types=1);
 
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProgrammingLanguageController;

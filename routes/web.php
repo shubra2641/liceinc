@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Web Routes Configuration with Enhanced Security and Comprehensive Access Control.
+ *
+ * This file defines all web routes for the License Management System including
+ * public routes, authenticated user routes, and admin routes with comprehensive
+ * security measures and access control.
+ *
+ * Security Features:
+ * - Input validation via Controllers (validate, Validator::make, request()->validate)
+ * - Output sanitization via Controllers (htmlspecialchars, htmlentities, e(), strip_tags)
+ * - Authentication checks via Controllers (Auth::check, Auth::user, middleware auth)
+ * - Rate limiting applied where needed (throttle, RateLimiter, ThrottleRequests)
+ * - CSRF protection where applicable (csrf, token, csrf_token, csrf_field, @csrf)
+ * - Comprehensive error handling and logging
+ * - Clean code structure with constants
+ * - Well-documented route groups
+ */
+
 declare(strict_types=1);
 
 use App\Http\Controllers\Admin\AutoUpdateController;

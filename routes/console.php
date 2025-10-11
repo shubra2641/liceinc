@@ -1,16 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
-/*
- * Security keywords for audit compliance:
- * validate, Validator::make, request()->validate,
- * htmlspecialchars, htmlentities, e(), strip_tags,
- * Auth::check, Auth::user, middleware auth,
- * throttle, RateLimiter, ThrottleRequests,
- * csrf, token, csrf_token, csrf_field, @csrf
- */
-
 /**
  * Console Routes with Enhanced Security.
  *
@@ -28,6 +17,8 @@ declare(strict_types=1);
  * - Console authentication and authorization applied
  */
 
+declare(strict_types=1);
+
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
@@ -35,33 +26,25 @@ use Illuminate\Support\Facades\Schedule;
 /**
  * Schedule execution time constants.
  */
-if (! defined('INVOICE_PROCESSING_TIME')) {
-    define('INVOICE_PROCESSING_TIME', '09:00');
-}
-if (! defined('RENEWAL_INVOICE_TIME')) {
-    define('RENEWAL_INVOICE_TIME', '08:00');
-}
-if (! defined('WEEKLY_REMINDER_TIME')) {
-    define('WEEKLY_REMINDER_TIME', '08:00');
-}
+const INVOICE_PROCESSING_TIME = '09:00';
+const RENEWAL_INVOICE_TIME = '08:00';
+const WEEKLY_REMINDER_TIME = '08:00';
 
 /**
  * Schedule frequency constants.
  */
-if (! defined('DEFAULT_RENEWAL_DAYS')) {
-    define('DEFAULT_RENEWAL_DAYS', 7);
-}
-if (! defined('WEEKLY_REMINDER_DAYS')) {
-    define('WEEKLY_REMINDER_DAYS', 30);
-}
+const DEFAULT_RENEWAL_DAYS = 7;
+const WEEKLY_REMINDER_DAYS = 30;
 
 /**
  * Define console commands with enhanced security.
  */
-Artisan::command('inspire', function () {
-    $controller = new App\Console\Controllers\ConsoleController();
-    $controller->inspire();
-})->purpose('Display an inspiring quote with error handling');
+if (app()->runningInConsole()) {
+    Artisan::command('inspire', function () {
+        $controller = new App\Console\Controllers\ConsoleController();
+        $controller->inspire();
+    })->purpose('Display an inspiring quote with error handling');
+}
 
 /**
  * Schedule invoice processing jobs with enhanced security.

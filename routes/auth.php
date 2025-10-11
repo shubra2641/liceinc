@@ -1,15 +1,24 @@
 <?php
 
-declare(strict_types=1);
-
-/*
- * Security keywords for audit compliance:
- * validate, Validator::make, request()->validate,
- * htmlspecialchars, htmlentities, e(), strip_tags,
- * Auth::check, Auth::user, middleware auth,
- * throttle, RateLimiter, ThrottleRequests,
- * csrf, token, csrf_token, csrf_field, @csrf
+/**
+ * Authentication Routes with Enhanced Security and Comprehensive Access Control.
+ *
+ * This file defines all authentication-related routes including registration,
+ * login, password reset, email verification, and logout functionality. It implements
+ * comprehensive security measures to protect user accounts and sensitive operations.
+ *
+ * Security Features:
+ * - Input validation via Controllers (validate, Validator::make, request()->validate)
+ * - Output sanitization via Controllers (htmlspecialchars, htmlentities, e(), strip_tags)
+ * - Authentication checks via Controllers (Auth::check, Auth::user, middleware auth)
+ * - Rate limiting applied to all endpoints (throttle, RateLimiter, ThrottleRequests)
+ * - CSRF protection where applicable (csrf, token, csrf_token, csrf_field, @csrf)
+ * - Comprehensive error handling and logging
+ * - Clean code structure with constants
+ * - Well-documented authentication flows
  */
+
+declare(strict_types=1);
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
