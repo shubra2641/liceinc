@@ -7,7 +7,8 @@ return [
     'welcome_title' => 'Welcome to License Management System',
     'welcome_subtitle' => 'Let\'s get your system up and running in just a few steps',
     'welcome_description' =>
-     'This installation wizard will guide you through setting up your License Management System. The process should take about 5-10 minutes.',
+        'This installation wizard will guide you through setting up your License Management System. ' .
+        'The process should take about 5-10 minutes.',
     'get_started' => 'Get Started',
     'what_we_will_setup' => 'What we\'ll set up:',
     'select_language' => 'Select Language',
@@ -42,7 +43,8 @@ return [
     'database_title' => 'Database Configuration',
     'database_subtitle' => 'Enter your database connection details',
     'database_description' =>
-     'Make sure your database server is running and the database exists. The installer will create the necessary tables.',
+        'Make sure your database server is running and the database exists. ' .
+        'The installer will create the necessary tables.',
     'database_host' => 'Database Host',
     'database_port' => 'Database Port',
     'database_name' => 'Database Name',
@@ -107,11 +109,14 @@ return [
     'fix_requirements' => 'Fix Requirements First',
     'password_hint' => 'Password must be at least 8 characters long',
     'javascript_required_for_email_settings' =>
-     'JavaScript is required for dynamic email settings. Please enable JavaScript or manually configure email settings.',
+        'JavaScript is required for dynamic email settings. ' .
+        'Please enable JavaScript or manually configure email settings.',
     'javascript_required_for_language_switching' =>
-     'JavaScript is required for dynamic language switching. Please enable JavaScript or refresh the page after changing language.',
+        'JavaScript is required for dynamic language switching. ' .
+        'Please enable JavaScript or refresh the page after changing language.',
     'javascript_required_for_password_validation' =>
-     'JavaScript is required for real-time password validation. Please enable JavaScript for better user experience.',
+        'JavaScript is required for real-time password validation. ' .
+        'Please enable JavaScript for better user experience.',
     'admin_email_hint' => 'This will be used for system notifications',
 
     // Success Messages
@@ -157,31 +162,37 @@ return [
     'completion_title' => 'Installation Completed',
     'completion_subtitle' => 'Your system has been successfully installed and configured',
     'installation_completed' => 'Installation Completed Successfully!',
-    'installation_success_message' => 'Congratulations! Your License Management System has been installed and configured successfully.',
+    'installation_success_message' => 'Congratulations! Your License Management System has been installed ' .
+        'and configured successfully.',
     'admin_account_created' => 'Administrator Account Created',
     'account_status' => 'Status',
     'email_verified' => 'Email Verified',
     'system_information' => 'System Information',
     'database_connected' => 'Database',
     'important_notice' => 'Important Security Notice',
-    'delete_install_folder_warning' => 'For security reasons, please delete the install folder after completing the installation process.',
+    'delete_install_folder_warning' => 'For security reasons, please delete the install folder ' .
+        'after completing the installation process.',
     'next_steps' => 'Next Steps',
     'delete_install_folder' => 'Delete Install Folder',
-    'delete_install_folder_description' => 'Remove the install directory to prevent unauthorized access to the installation wizard.',
+    'delete_install_folder_description' => 'Remove the install directory to prevent unauthorized access ' .
+        'to the installation wizard.',
     'configure_system' => 'Configure System',
-    'configure_system_description' => 'Access the admin panel to configure your system settings and preferences.',
+    'configure_system_description' => 'Access the admin panel to configure your system settings ' .
+        'and preferences.',
     'secure_system' => 'Secure Your System',
     'secure_system_description' => 'Review security settings and configure additional security measures.',
     'go_to_admin_panel' => 'Go to Admin Panel',
     'go_to_frontend' => 'Go to Frontend',
-    'completion_note' => 'You can always access the admin panel from the frontend by logging in with your administrator account.',
+    'completion_note' => 'You can always access the admin panel from the frontend ' .
+        'by logging in with your administrator account.',
     'database_created' => 'Database Created',
     'system_configured' => 'System Configured',
     // Email Configuration
     'email_configuration' => 'Email Configuration',
     'email_configuration_subtitle' => 'Configure email settings for notifications and system emails (optional)',
     'enable_email_notifications' => 'Enable Email Notifications',
-    'enable_email_hint' => 'Check this to configure email settings. You can skip this and configure later from admin panel.',
+    'enable_email_hint' => 'Check this to configure email settings. ' .
+        'You can skip this and configure later from admin panel.',
     'mail_mailer' => 'Mail Driver',
     'mail_host' => 'SMTP Host',
     'mail_port' => 'SMTP Port',

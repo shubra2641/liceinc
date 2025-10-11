@@ -44,7 +44,8 @@ return [
     'failure' => 'فشل',
     'no_history' => 'لا يوجد سجل متاح',
     'no_domains' => 'لا توجد نطاقات مسجلة',
-    'envato_verification_failed' => 'تحذير: فشل التحقق مع Envato. الترخيص صالح محليًا ولكن قد تكون هناك مشكلة مع Envato.',
+    'envato_verification_failed' => 'تحذير: فشل التحقق مع Envato. الترخيص صالح محليًا ' .
+        'ولكن قد تكون هناك مشكلة مع Envato.',
     'envato_support_expired' => 'تحذير: انتهت صلاحية دعم Envato لهذا الترخيص.',
     'envato_verification_success' => 'تم التحقق من Envato بنجاح.',
     'envato' => 'Envato',
