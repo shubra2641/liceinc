@@ -43,8 +43,6 @@
     <!-- Toast Notifications CSS -->
     <link rel="stylesheet" href="{{ asset('assets/admin/css/toast-notifications.css') }}">
 
-    <!-- Laravel Mix Compiled Assets -->
-    <link rel="stylesheet" href="{{ mix('assets/admin/css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/preloader.css') }}">
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -394,8 +392,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous"></script>
     <script src="{{ asset('assets/admin/js/chart-check.js') }}" defer></script>
     <script src="{{ asset('assets/admin/js/admin.js') }}"></script>
-    <!-- Laravel Mix Compiled JavaScript -->
-    <script src="{{ mix('assets/admin/js/app.js') }}"></script>
     <!-- Admin Dashboard JavaScript -->
     @if(request()->routeIs('admin.dashboard*') || request()->routeIs('admin.reports*') ||
     request()->routeIs('admin.products.logs'))

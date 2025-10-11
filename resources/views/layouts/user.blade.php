@@ -68,8 +68,7 @@
 
     <link rel="stylesheet" href="{{ asset('assets/front/css/preloader.css') }}">
     
-    <!-- Laravel Mix Compiled Assets -->
-    <link rel="stylesheet" href="{{ asset('assets/front/css/app.css') }}?v={{ filemtime(public_path('assets/front/css/app.css')) }}">
+
     @yield('styles')
 
 
@@ -398,9 +397,7 @@
     <script src="{{ asset('assets/front/js/layouts.js') }}"></script>
     <script src="{{ asset('assets/front/js/admin-actions.js') }}"></script>
     
-    <!-- Laravel Mix Compiled JavaScript -->
-    <script src="{{ mix('assets/front/js/app.js') }}" defer></script>
-    
+
     <!-- Knowledge Base Search JavaScript -->
     @if(request()->routeIs('kb.search*'))
     <script src="{{ asset('assets/front/js/kb-search.js') }}"></script>

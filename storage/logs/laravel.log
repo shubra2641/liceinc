@@ -305,3 +305,9 @@
 #29 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
 #30 {main}
 "} 
+[2025-10-11 20:42:14] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-11 20:42:14"} 
+[2025-10-11 20:42:17] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-11 20:42:17"} 
+[2025-10-11 20:42:19] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-11 20:42:19"} 
+[2025-10-11 20:42:40] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-11 20:42:40"} 
+[2025-10-11 20:42:47] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-11 20:42:47"} 
+[2025-10-11 20:43:16] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-11 20:43:16"} 

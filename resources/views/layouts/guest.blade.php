@@ -45,8 +45,6 @@
     <link rel="stylesheet" href="{{ asset('assets/front/css/maintenance.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/user-dashboard.css') }}">
     
-    <!-- Laravel Mix Compiled Assets -->
-    <link rel="stylesheet" href="{{ mix('assets/front/css/app.css') }}">
     @yield('styles')
 
 </head>
@@ -93,8 +91,6 @@
     <!-- DataTables JS -->
     <script src="{{ asset('vendor/assets/datatables/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('vendor/assets/datatables/dataTables.bootstrap5.min.js') }}"></script>
-    <!-- Laravel Mix Compiled JavaScript -->
-    <script src="{{ mix('assets/front/js/app.js') }}"></script>
 
     @yield('scripts')
 </body>
