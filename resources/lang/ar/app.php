@@ -25,13 +25,16 @@ return [
         'Test email addresses like @example.com, @test.com, @localhost, and @demo.com ' .
         'are not real email addresses and cannot receive emails.' =>
         'أنت تستخدم حالياً عنوان بريد تجريبي ({{email}}) لا يستطيع استقبال رسائل التحقق. ' .
-        'عناوين البريد التجريبية مثل @example.com و @test.com و @localhost و @demo.com ليست عناوين بريد حقيقية ولا تستطيع استقبال الرسائل.',
+        'عناوين البريد التجريبية مثل @example.com و @test.com و @localhost و @demo.com ' .
+        'ليست عناوين بريد حقيقية ولا تستطيع استقبال الرسائل.',
     'You are currently using a test email address' => 'أنت تستخدم حالياً عنوان بريد تجريبي',
     'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com ' .
         'are not real email addresses and cannot receive emails.' =>
-        'لا يستطيع استقبال رسائل التحقق. عناوين البريد التجريبية مثل @example.com و @test.com و @localhost و @demo.com ليست عناوين بريد حقيقية ولا تستطيع استقبال الرسائل.',
+        'لا يستطيع استقبال رسائل التحقق. عناوين البريد التجريبية مثل @example.com و @test.com و @localhost و @demo.com ' .
+        'ليست عناوين بريد حقيقية ولا تستطيع استقبال الرسائل.',
     'To use the system normally, please register with a real email address that can receive verification emails.' =>
-        'لاستخدام النظام بشكل طبيعي، يرجى التسجيل بعنوان بريد حقيقي يستطيع استقبال رسائل التحقق.',
+        'لاستخدام النظام بشكل طبيعي، يرجى التسجيل بعنوان بريد حقيقي ' .
+        'يستطيع استقبال رسائل التحقق.',
     'Continue to Dashboard' => 'المتابعة للوحة التحكم',
     'About Test Emails' => 'حول البريد التجريبي',
     'Test Email Domains' => 'نطاقات البريد التجريبي',
@@ -47,13 +50,16 @@ return [
     'Are you sure you want to disconnect from Envato?' => 'هل أنت متأكد من أنك تريد قطع الاتصال مع Envato؟',
     'Disconnect Envato Account' => 'قطع الاتصال مع حساب Envato',
     'Envato API Configured' => 'تم تكوين Envato API',
-    'Envato API is configured and ready to connect your account.' => 'تم تكوين Envato API وهو جاهز لربط حسابك.',
+    'Envato API is configured and ready to connect your account.' =>
+        'تم تكوين Envato API وهو جاهز لربط حسابك.',
     'Connect Envato Account' => 'ربط حساب Envato',
     'Envato API Not Configured' => 'لم يتم تكوين Envato API',
-    'Please configure Envato API settings first to connect your account.' => 'يرجى تكوين إعدادات Envato API أولاً لربط حسابك.',
+    'Please configure Envato API settings first to connect your account.' =>
+        'يرجى تكوين إعدادات Envato API أولاً لربط حسابك.',
     'Configure Envato API' => 'تكوين Envato API',
     'API Token Configured' => 'تم تكوين رمز API',
-    'You can now connect your admin account to Envato in your profile.' => 'يمكنك الآن ربط حساب الإدارة الخاص بك بـ Envato في ملفك الشخصي.',
+    'You can now connect your admin account to Envato in your profile.' =>
+        'يمكنك الآن ربط حساب الإدارة الخاص بك بـ Envato في ملفك الشخصي.',
     'Profile Updated' => 'تم تحديث الملف الشخصي',
     'Your profile has been updated successfully.' => 'تم تحديث ملفك الشخصي بنجاح.',
     'Envato Account Unlinked' => 'تم قطع الاتصال مع حساب Envato',
@@ -85,15 +91,19 @@ return [
     'update_backup_created' => 'تم إنشاء نسخة احتياطية للملفات: :path',
     'update_backup_failed_files' => 'فشل في إنشاء النسخة الاحتياطية للملفات.',
     'update_db_backup_created' => 'تم إنشاء نسخة احتياطية لقاعدة البيانات: :path',
-    'update_db_backup_skipped' => 'تخطى أو فشل إنشاء نسخة قاعدة البيانات (mysqldump غير متاح أو حدث خطأ).',
-    'update_validation_failed' => 'فشل التحقق من حزمة التحديث (الهيكل المتوقع مفقود).',
+    'update_db_backup_skipped' => 'تخطى أو فشل إنشاء نسخة قاعدة البيانات ' .
+        '(mysqldump غير متاح أو حدث خطأ).',
+    'update_validation_failed' => 'فشل التحقق من حزمة التحديث ' .
+        '(الهيكل المتوقع مفقود).',
     'update_swap_failed' => 'فشل استبدال الملفات الجديدة في مكانها.',
     'update_db_restored' => 'تم استعادة قاعدة البيانات من النسخة الاحتياطية.',
     'update_db_restore_failed' => 'فشل استعادة قاعدة البيانات من النسخة الاحتياطية.',
     'Updater Backups' => 'نسخ التحديث الاحتياطية',
-    'backups_list_help' => 'إدارة النسخ الاحتياطية المنشأة سابقًا. يمكنك استعادة نسخة احتياطية لاسترجاع الملفات وقاعدة البيانات إن وجدت.',
+    'backups_list_help' => 'إدارة النسخ الاحتياطية المنشأة سابقًا. ' .
+        'يمكنك استعادة نسخة احتياطية لاسترجاع الملفات وقاعدة البيانات إن وجدت.',
     'no_backups_found' => 'لا توجد نسخ احتياطية.',
-    'confirm_restore_backup' => 'هل أنت متأكد أنك تريد استعادة هذه النسخة الاحتياطية؟ سيؤدي ذلك إلى استبدال ملفات التطبيق الحالية.',
+    'confirm_restore_backup' => 'هل أنت متأكد أنك تريد استعادة هذه النسخة الاحتياطية؟ ' .
+        'سيؤدي ذلك إلى استبدال ملفات التطبيق الحالية.',
     'Restore' => 'استعادة',
     'File' => 'الملف',
     'Size' => 'الحجم',
@@ -307,8 +317,10 @@ return [
     'Change Featured Image' => 'تغيير الصورة المميزة',
     'Change Password' => 'تغيير كلمة المرور',
     'Change the status to pending to add a reply' => 'غير الحالة إلى معلق لإضافة رد',
-    'Change your password to keep your account secure' => 'قم بتغيير كلمة المرور الخاصة بك للحفاظ على أمان حسابك',
-    'Chart period selection requires JavaScript to be enabled' => 'يتطلب تحديد فترة الرسم البياني تمكين JavaScript',
+    'Change your password to keep your account secure' =>
+        'قم بتغيير كلمة المرور الخاصة بك للحفاظ على أمان حسابك',
+    'Chart period selection requires JavaScript to be enabled' =>
+        'يتطلب تحديد فترة الرسم البياني تمكين JavaScript',
     'Check Another License' => 'تحقق من ترخيص آخر',
     'Check Email' => 'تحقق من البريد الإلكتروني',
     'Check Envato API status' => 'تحقق من حالة واجهة برمجة تطبيقات Envato',
@@ -540,11 +552,13 @@ return [
     'Enable 2FA' => 'تمكين 2FA',
     'Enable Compact Mode' => 'تمكين الوضع المدمج',
     'Enable Dark Mode' => 'تمكين الوضع المظلم',
-    'Enable caching for API responses' => 'تمكين التخزين المؤقت لاستجابات واجهة برمجة التطبيقات',
+    'Enable caching for API responses' =>
+        'تمكين التخزين المؤقت لاستجابات واجهة برمجة التطبيقات',
     'Encourage Customer Support' => 'تشجيع دعم العملاء',
     'English' => 'الإنجليزية',
     'Enhance Your Security' => 'عزز أمنك',
-    'Ensure API has proper permissions' => 'تأكد من أن واجهة برمجة التطبيقات لديها الأذونات المناسبة',
+    'Ensure API has proper permissions' =>
+        'تأكد من أن واجهة برمجة التطبيقات لديها الأذونات المناسبة',
     'Enter Article Content' => 'أدخل محتوى المقالة',
     'Enter Article Title' => 'أدخل عنوان المقالة',
     'Enter Category Description' => 'أدخل وصف القسم',
@@ -574,7 +588,8 @@ return [
     'Enter postal code' => 'أدخل الرمز البريدي',
     'Enter product or service description' => 'أدخل وصف المنتج أو الخدمة',
     'Enter product slug' => 'أدخل شريحة المنتج',
-    'Enter product slug to associate license (optional)' => 'أدخل شريحة المنتج لربط الترخيص (اختياري)',
+    'Enter product slug to associate license (optional)' =>
+        'أدخل شريحة المنتج لربط الترخيص (اختياري)',
     'Enter purchase code' => 'أدخل رمز الشراء',
     'Enter state or province' => 'أدخل الولاية أو المقاطعة',
     'Enter ticket content' => 'أدخل محتوى التذكرة',
@@ -832,21 +847,32 @@ return [
     'Manage and customize email templates' => 'إدارة وتخصيص قوالب البريد الإلكتروني',
     'Manage and monitor all system invoices' => 'إدارة ومراقبة جميع فواتير النظام',
     'Manage and monitor license usage' => 'إدارة ومراقبة استخدام الرخص',
-    'Manage and monitor license usage across your platform' => 'إدارة ومراقبة استخدام الرخص عبر منصتك',
-    'Manage and organize knowledge base articles' => 'إدارة وتنظيم مقالات قاعدة المعرفة',
-    'Manage email templates for the system' => 'إدارة قوالب البريد الإلكتروني للنظام',
-    'Manage licenses and generate license keys' => 'إدارة الرخص وتوليد مفاتيح الرخص',
-    'Manage system invoices and payments' => 'إدارة فواتير النظام والمدفوعات',
-    'Manage system users and their permissions' => 'إدارة مستخدمي النظام وأذوناتهم',
-    'Manage your Envato account connection' => 'إدارة اتصال حساب Envato الخاص بك',
+    'Manage and monitor license usage across your platform' =>
+        'إدارة ومراقبة استخدام الرخص عبر منصتك',
+    'Manage and organize knowledge base articles' =>
+        'إدارة وتنظيم مقالات قاعدة المعرفة',
+    'Manage email templates for the system' =>
+        'إدارة قوالب البريد الإلكتروني للنظام',
+    'Manage licenses and generate license keys' =>
+        'إدارة الرخص وتوليد مفاتيح الرخص',
+    'Manage system invoices and payments' =>
+        'إدارة فواتير النظام والمدفوعات',
+    'Manage system users and their permissions' =>
+        'إدارة مستخدمي النظام وأذوناتهم',
+    'Manage your Envato account connection' =>
+        'إدارة اتصال حساب Envato الخاص بك',
     'Manage your account' => 'إدارة حسابك',
-    'Manage your account information and settings' => 'إدارة معلومات حسابك وإعداداته',
-    'Manage your account settings and preferences' => 'إدارة إعدادات حسابك وتفضيلاتك',
+    'Manage your account information and settings' =>
+        'إدارة معلومات حسابك وإعداداته',
+    'Manage your account settings and preferences' =>
+        'إدارة إعدادات حسابك وتفضيلاتك',
     'Manage your invoices and payments' => 'إدارة فواتيرك ومدفوعاتك',
-    'Manage your license and registered domains' => 'إدارة الترخيص الخاص بك والمجالات المسجلة',
+    'Manage your license and registered domains' =>
+        'إدارة الترخيص الخاص بك والمجالات المسجلة',
     'Manage your licenses' => 'إدارة التراخيص الخاصة بك',
     'Manage your licenses and products' => 'إدارة رخصك ومنتجاتك',
-    'Manage your licenses, track downloads, and access support from your personal dashboard' => 'إدارة رخصك، تتبع التنزيلات، والوصول إلى الدعم من لوحة التحكم الشخصية الخاصة بك',
+    'Manage your licenses, track downloads, and access support from your personal dashboard' =>
+        'إدارة رخصك، تتبع التنزيلات، والوصول إلى الدعم من لوحة التحكم الشخصية الخاصة بك',
     'Manage your product catalog' => 'إدارة كتالوج منتجاتك',
     'Manage your product categories' => 'إدارة فئات منتجاتك',
     'Manage your products catalog' => 'إدارة كتالوج منتجاتك',
@@ -1312,7 +1338,8 @@ return [
     'Send Reset Link' => 'إرسال رابط إعادة تعيين',
     'Send Test Email' => 'إرسال بريد إلكتروني تجريبي',
     'Send Welcome Email' => 'إرسال بريد إلكتروني ترحيبي',
-    'Send welcome email to the new user' => 'إرسال بريد إلكتروني ترحيبي للمستخدم الجديد',
+    'Send welcome email to the new user' =>
+        'إرسال بريد إلكتروني ترحيبي للمستخدم الجديد',
     'Serial Code' => 'كود السيريال',
     'Serial Message' => 'رسالة السيريال',
     'Serial Protection' => 'حماية السيريال',
@@ -1512,11 +1539,16 @@ return [
     'Use the rich text editor to create comprehensive articles with headings, lists, links, images, and more' => 'استخدم محرر النص الغني لإنشاء مقالات شاملة مع العناوين والقوائم والروابط والصور والمزيد',
     'Use the rich text editor to format your category description' => 'استخدم محرر النص الغني لتنسيق وصف الفئة الخاصة بك',
     'Use the rich text editor to format your category description.' => 'استخدم محرر النص الغني لتنسيق وصف الفئة الخاصة بك.',
-    'Use the rich text editor to format your content' => 'استخدم محرر النص الغني لتنسيق المحتوى الخاص بك',
-    'Use the rich text editor to format your product description with headings, lists, links, and more.' => 'استخدم محرر النص الغني لتنسيق وصف المنتج الخاص بك مع العناوين والقوائم والروابط والمزيد.',
-    'Use the rich text editor to format your reply' => 'استخدم محرر النص الغني لتنسيق ردك',
-    'Use the rich text editor to format your reply with headings, lists, links, and more.' => 'استخدم محرر النص الغني لتنسيق ردك مع العناوين والقوائم والروابط والمزيد.',
-    'Use variables like {{app_name}}, {{user_name}}, etc.' => 'استخدم متغيرات مثل {{app_name}} و {{user_name}} وما إلى ذلك.',
+    'Use the rich text editor to format your content' =>
+        'استخدم محرر النص الغني لتنسيق المحتوى الخاص بك',
+    'Use the rich text editor to format your product description with headings, lists, links, and more.' =>
+        'استخدم محرر النص الغني لتنسيق وصف المنتج الخاص بك مع العناوين والقوائم والروابط والمزيد.',
+    'Use the rich text editor to format your reply' =>
+        'استخدم محرر النص الغني لتنسيق ردك',
+    'Use the rich text editor to format your reply with headings, lists, links, and more.' =>
+        'استخدم محرر النص الغني لتنسيق ردك مع العناوين والقوائم والروابط والمزيد.',
+    'Use variables like {{app_name}}, {{user_name}}, etc.' =>
+        'استخدم متغيرات مثل {{app_name}} و {{user_name}} وما إلى ذلك.',
     'Used Domains' => 'النطاقات المستخدمة',
     'User' => 'المستخدم',
     'User (Owner)' => 'المستخدم (المالك)',
@@ -1665,7 +1697,8 @@ return [
     'basic_details' => 'التفاصيل الأساسية',
     'blocked' => 'محظور',
     'blocked_ips' => 'عناوين IP المحظورة',
-    'blocked_ips_due_to_rate_limiting' => 'عناوين IP المحظورة بسبب تحديد المعدل',
+    'blocked_ips_due_to_rate_limiting' =>
+        'عناوين IP المحظورة بسبب تحديد المعدل',
     'blocked_until' => 'محظور حتى',
     'brief_description_language' => 'وصف موجز للغة',
     'brief_description_of_your_application' => 'وصف موجز لتطبيقك',
@@ -1846,7 +1879,8 @@ return [
     'languages' => 'اللغات',
     'languages_overview' => 'نظرة عامة على اللغات',
     'last_modified' => 'آخر تعديل',
-    'learn_how_to_create_and_configure_your_envato_oauth_application' => 'تعلم كيفية إنشاء وتكوين تطبيق Envato OAuth الخاص بك',
+    'learn_how_to_create_and_configure_your_envato_oauth_application' =>
+        'تعلم كيفية إنشاء وتكوين تطبيق Envato OAuth الخاص بك',
     'leave_empty_auto_generate' => 'اتركه فارغًا للتوليد التلقائي',
     'leave_empty_use_default' => 'اتركه فارغًا لاستخدام الإعدادات الافتراضية',
     'license_activated' => 'تم تفعيل الترخيص',
