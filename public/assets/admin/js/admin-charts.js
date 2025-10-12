@@ -3,7 +3,7 @@
  * Unified chart system with complete elimination of code duplication
  */
 
-if (typeof window.AdminCharts === 'undefined') {
+if (typeof window.AdminCharts === 'undefined' && typeof Chart !== 'undefined') {
   class AdminCharts {
     constructor() {
       this.charts = {};
@@ -886,6 +886,10 @@ function initReportsCharts() {
     }
 
     try {
+      if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded');
+        return;
+      }
       new Chart(canvas, {
         type: chartType,
         data: chartData,
@@ -1080,6 +1084,11 @@ try {
   // Silently ignore if module export not permitted
 }
 
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && typeof Chart !== 'undefined') {
   window.AdminCharts = AdminCharts;
+} else {
+  // Fallback for environments where window is not available
+  if (typeof global !== 'undefined' && typeof Chart !== 'undefined') {
+    global.AdminCharts = AdminCharts;
+  }
 }
