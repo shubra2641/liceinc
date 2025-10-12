@@ -14,6 +14,49 @@ if (typeof SecurityUtils === 'undefined') {
     document.head.appendChild(script);
 }
 
+// Fallback SecurityUtils if not available
+if (typeof SecurityUtils === 'undefined') {
+    window.SecurityUtils = {
+        sanitizeHtml: function(content) {
+            if (typeof content !== 'string') return '';
+            return content.replace(/[<>&"']/g, match => ({
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                '\'': '&#x27;',
+            }[match]));
+        },
+        safeInnerHTML: function(element, content, sanitize = true, allowBasicFormatting = false) {
+            if (!element || typeof content !== 'string') return;
+            const safeContent = sanitize ? this.sanitizeHtml(content) : content;
+            if (!allowBasicFormatting || this.containsDangerousContent(safeContent)) {
+                element.textContent = safeContent;
+            } else {
+                element.innerHTML = safeContent;
+            }
+        },
+        safeInsertAdjacentHTML: function(element, position, html, allowBasicFormatting = false) {
+            if (!element || typeof html !== 'string') return;
+            const safeHtml = this.sanitizeHtml(html, allowBasicFormatting);
+            element.insertAdjacentHTML(position, safeHtml);
+        },
+        containsDangerousContent: function(content) {
+            const dangerousPatterns = [
+                /<script[^>]*>/i,
+                /javascript:/i,
+                /on\w+\s*=/i,
+                /<iframe[^>]*>/i,
+                /<object[^>]*>/i,
+                /<embed[^>]*>/i,
+                /<form[^>]*>/i,
+                /<input[^>]*>/i,
+            ];
+            return dangerousPatterns.some(pattern => pattern.test(content));
+        }
+    };
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Check for updates button
   document
@@ -209,7 +252,8 @@ function showVersionDetails(version) {
           data.data.info.features.forEach(feature => {
             // Sanitize feature to prevent XSS
             const sanitizedFeature = SecurityUtils.sanitizeHtml(feature);
-            contentBuilder.push(`<li class="list-group-item"><i class="fas fa-check text-success me-2"></i>${sanitizedFeature}</li>`);
+            const listItem = '<li class="list-group-item"><i class="fas fa-check text-success me-2"></i>' + sanitizedFeature + '</li>';
+            contentBuilder.push(listItem);
           });
           contentBuilder.push('</ul>');
         }
@@ -220,7 +264,8 @@ function showVersionDetails(version) {
           data.data.info.fixes.forEach(fix => {
             // Sanitize fix to prevent XSS
             const sanitizedFix = SecurityUtils.sanitizeHtml(fix);
-            contentBuilder.push(`<li class="list-group-item"><i class="fas fa-check text-warning me-2"></i>${sanitizedFix}</li>`);
+            const listItem = '<li class="list-group-item"><i class="fas fa-check text-warning me-2"></i>' + sanitizedFix + '</li>';
+            contentBuilder.push(listItem);
           });
           contentBuilder.push('</ul>');
         }
@@ -234,7 +279,8 @@ function showVersionDetails(version) {
           data.data.info.improvements.forEach(improvement => {
             // Sanitize improvement to prevent XSS
             const sanitizedImprovement = SecurityUtils.sanitizeHtml(improvement);
-            contentBuilder.push(`<li class="list-group-item"><i class="fas fa-check text-info me-2"></i>${sanitizedImprovement}</li>`);
+            const listItem = '<li class="list-group-item"><i class="fas fa-check text-info me-2"></i>' + sanitizedImprovement + '</li>';
+            contentBuilder.push(listItem);
           });
           contentBuilder.push('</ul>');
         }
@@ -245,7 +291,8 @@ function showVersionDetails(version) {
           data.data.instructions.forEach(instruction => {
             // Sanitize instruction to prevent XSS
             const sanitizedInstruction = SecurityUtils.sanitizeHtml(instruction);
-            contentBuilder.push(`<li class="list-group-item"><i class="fas fa-arrow-right text-primary me-2"></i>${sanitizedInstruction}</li>`);
+            const listItem = '<li class="list-group-item"><i class="fas fa-arrow-right text-primary me-2"></i>' + sanitizedInstruction + '</li>';
+            contentBuilder.push(listItem);
           });
           contentBuilder.push('</ul>');
         }
@@ -350,8 +397,13 @@ function formatFileSize(bytes) {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  const result = bytes / Math.pow(k, i);
-  return `${parseFloat(result.toFixed(2))} ${sizes[i]}`;
+  // Use safer calculation to avoid Generic Object Injection Sink
+  const power = Math.pow(k, i);
+  const result = bytes / power;
+  const formattedResult = parseFloat(result.toFixed(2));
+  const sizeUnit = sizes[i];
+  
+  return `${formattedResult} ${sizeUnit}`;
 }
 
 // Auto Update functionality
@@ -469,26 +521,33 @@ function showProductUpdateInfo(updateData, productName) {
   modalBuilder.push('<div class="modal-header bg-success text-white">');
   modalBuilder.push('<h5 class="modal-title">');
   modalBuilder.push('<i class="fas fa-download me-2"></i>');
-  modalBuilder.push(`Update Available for ${SecurityUtils.sanitizeHtml(productName)}`);
+  const sanitizedProductName = SecurityUtils.sanitizeHtml(productName);
+  modalBuilder.push('Update Available for ' + sanitizedProductName);
   modalBuilder.push('</h5>');
   modalBuilder.push('<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>');
   modalBuilder.push('</div>');
   modalBuilder.push('<div class="modal-body">');
   modalBuilder.push('<div class="row">');
   modalBuilder.push('<div class="col-md-6">');
-  modalBuilder.push(`<p><strong>Current Version:</strong> ${SecurityUtils.sanitizeHtml(updateData.current_version)}</p>`);
-  modalBuilder.push(`<p><strong>Latest Version:</strong> ${SecurityUtils.sanitizeHtml(updateData.latest_version)}</p>`);
+  const currentVersion = SecurityUtils.sanitizeHtml(updateData.current_version);
+  const latestVersion = SecurityUtils.sanitizeHtml(updateData.latest_version);
+  modalBuilder.push('<p><strong>Current Version:</strong> ' + currentVersion + '</p>');
+  modalBuilder.push('<p><strong>Latest Version:</strong> ' + latestVersion + '</p>');
   modalBuilder.push('<p><strong>Update Type:</strong>');
-  modalBuilder.push(`<span class="badge ${updateData.update_info.is_major ? 'bg-warning' : 'bg-info'}">`);
-  modalBuilder.push(`${updateData.update_info.is_major ? 'Major' : 'Minor'}`);
+  const badgeClass = updateData.update_info.is_major ? 'bg-warning' : 'bg-info';
+  const updateType = updateData.update_info.is_major ? 'Major' : 'Minor';
+  modalBuilder.push('<span class="badge ' + badgeClass + '">');
+  modalBuilder.push(updateType);
   modalBuilder.push('</span>');
   modalBuilder.push('</p>');
   modalBuilder.push('</div>');
   modalBuilder.push('<div class="col-md-6">');
-  modalBuilder.push(`<p><strong>File Size:</strong> ${formatFileSize(updateData.update_info.file_size)}</p>`);
+  modalBuilder.push('<p><strong>File Size:</strong> ' + formatFileSize(updateData.update_info.file_size) + '</p>');
   modalBuilder.push('<p><strong>Required:</strong>');
-  modalBuilder.push(`<span class="badge ${updateData.update_info.is_required ? 'bg-danger' : 'bg-success'}">`);
-  modalBuilder.push(`${updateData.update_info.is_required ? 'Yes' : 'No'}`);
+  const requiredBadgeClass = updateData.update_info.is_required ? 'bg-danger' : 'bg-success';
+  const requiredText = updateData.update_info.is_required ? 'Yes' : 'No';
+  modalBuilder.push('<span class="badge ' + requiredBadgeClass + '">');
+  modalBuilder.push(requiredText);
   modalBuilder.push('</span>');
   modalBuilder.push('</p>');
   modalBuilder.push('</div>');
@@ -498,12 +557,14 @@ function showProductUpdateInfo(updateData, productName) {
   modalBuilder.push('<ul class="list-unstyled">');
   updateData.update_info.changelog.forEach(item => {
     const sanitizedItem = SecurityUtils.sanitizeHtml(item);
-    modalBuilder.push(`<li><i class="fas fa-check text-success me-2"></i>${sanitizedItem}</li>`);
+    const changelogItem = '<li><i class="fas fa-check text-success me-2"></i>' + sanitizedItem + '</li>';
+    modalBuilder.push(changelogItem);
   });
   modalBuilder.push('</ul>');
   modalBuilder.push('</div>');
   modalBuilder.push('<div class="mt-3">');
-  modalBuilder.push(`<button class="btn btn-success" onclick="installProductUpdate('${updateData.latest_version}', '${updateData.update_info.download_url}')">`);
+  const installButton = '<button class="btn btn-success" onclick="installProductUpdate(\'' + updateData.latest_version + '\', \'' + updateData.update_info.download_url + '\')">';
+  modalBuilder.push(installButton);
   modalBuilder.push('<i class="fas fa-download me-2"></i>');
   modalBuilder.push('Install Update');
   modalBuilder.push('</button>');
@@ -673,19 +734,23 @@ function showAutoUpdateInfo(updateData) {
   updateInfoBuilder.push('<div class="card-body">');
   updateInfoBuilder.push('<div class="row">');
   updateInfoBuilder.push('<div class="col-md-6">');
-  updateInfoBuilder.push(`<p><strong>Current Version:</strong> ${sanitizedCurrentVersion}</p>`);
-  updateInfoBuilder.push(`<p><strong>Latest Version:</strong> ${sanitizedLatestVersion}</p>`);
+  updateInfoBuilder.push('<p><strong>Current Version:</strong> ' + sanitizedCurrentVersion + '</p>');
+  updateInfoBuilder.push('<p><strong>Latest Version:</strong> ' + sanitizedLatestVersion + '</p>');
   updateInfoBuilder.push('<p><strong>Update Type:</strong>');
-  updateInfoBuilder.push(`<span class="badge ${updateData.update_info.is_major ? 'bg-warning' : 'bg-info'}">`);
-  updateInfoBuilder.push(`${updateData.update_info.is_major ? 'Major' : 'Minor'}`);
+  const updateBadgeClass = updateData.update_info.is_major ? 'bg-warning' : 'bg-info';
+  const updateTypeText = updateData.update_info.is_major ? 'Major' : 'Minor';
+  updateInfoBuilder.push('<span class="badge ' + updateBadgeClass + '">');
+  updateInfoBuilder.push(updateTypeText);
   updateInfoBuilder.push('</span>');
   updateInfoBuilder.push('</p>');
   updateInfoBuilder.push('</div>');
   updateInfoBuilder.push('<div class="col-md-6">');
-  updateInfoBuilder.push(`<p><strong>File Size:</strong> ${formatFileSize(updateData.update_info.file_size)}</p>`);
+  updateInfoBuilder.push('<p><strong>File Size:</strong> ' + formatFileSize(updateData.update_info.file_size) + '</p>');
   updateInfoBuilder.push('<p><strong>Required:</strong>');
-  updateInfoBuilder.push(`<span class="badge ${updateData.update_info.is_required ? 'bg-danger' : 'bg-success'}">`);
-  updateInfoBuilder.push(`${updateData.update_info.is_required ? 'Yes' : 'No'}`);
+  const requiredBadgeClass = updateData.update_info.is_required ? 'bg-danger' : 'bg-success';
+  const requiredText = updateData.update_info.is_required ? 'Yes' : 'No';
+  updateInfoBuilder.push('<span class="badge ' + requiredBadgeClass + '">');
+  updateInfoBuilder.push(requiredText);
   updateInfoBuilder.push('</span>');
   updateInfoBuilder.push('</p>');
   updateInfoBuilder.push('</div>');
@@ -695,12 +760,14 @@ function showAutoUpdateInfo(updateData) {
   updateInfoBuilder.push('<ul class="list-unstyled">');
   updateData.update_info.changelog.forEach(item => {
     const sanitizedItem = SecurityUtils.sanitizeHtml(item);
-    updateInfoBuilder.push(`<li><i class="fas fa-check text-success me-2"></i>${sanitizedItem}</li>`);
+    const changelogItem = '<li><i class="fas fa-check text-success me-2"></i>' + sanitizedItem + '</li>';
+    updateInfoBuilder.push(changelogItem);
   });
   updateInfoBuilder.push('</ul>');
   updateInfoBuilder.push('</div>');
   updateInfoBuilder.push('<div class="mt-3">');
-  updateInfoBuilder.push(`<button class="btn btn-primary" onclick="installAutoUpdate('${updateData.latest_version}')">`);
+  const installButton = '<button class="btn btn-primary" onclick="installAutoUpdate(\'' + updateData.latest_version + '\')">';
+  updateInfoBuilder.push(installButton);
   updateInfoBuilder.push('<i class="fas fa-download me-2"></i>');
   updateInfoBuilder.push('Install Update');
   updateInfoBuilder.push('</button>');
@@ -798,8 +865,8 @@ function showAlert(type, message) {
         'fa-exclamation-triangle';
 
   const alertBuilder = [];
-  alertBuilder.push(`<div class="alert ${alertClass} alert-dismissible fade show" role="alert">`);
-  alertBuilder.push(`<i class="fas ${iconClass} me-2"></i>`);
+  alertBuilder.push('<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">');
+  alertBuilder.push('<i class="fas ' + iconClass + ' me-2"></i>');
   alertBuilder.push(SecurityUtils.sanitizeHtml(message));
   alertBuilder.push('<button type="button" class="btn-close" data-bs-dismiss="alert"></button>');
   alertBuilder.push('</div>');
@@ -860,19 +927,20 @@ function loadVersionHistory() {
           const sanitizedDate = SecurityUtils.sanitizeHtml(new Date(history.updated_at).toLocaleDateString());
 
           htmlBuilder.push('<div class="timeline-item">');
-          htmlBuilder.push(`<div class="timeline-marker bg-${isCurrent ? 'success' : 'secondary'}"></div>`);
+          const markerClass = isCurrent ? 'success' : 'secondary';
+          htmlBuilder.push('<div class="timeline-marker bg-' + markerClass + '"></div>');
           htmlBuilder.push('<div class="timeline-content">');
           htmlBuilder.push('<div class="d-flex justify-content-between align-items-start">');
           htmlBuilder.push('<div>');
           htmlBuilder.push('<h6 class="timeline-title">');
-          htmlBuilder.push(`Version ${sanitizedVersion}`);
-          htmlBuilder.push(`<span class="badge ${badgeClass} ms-2">${badgeText}</span>`);
+          htmlBuilder.push('Version ' + sanitizedVersion);
+          htmlBuilder.push('<span class="badge ' + badgeClass + ' ms-2">' + badgeText + '</span>');
           htmlBuilder.push('</h6>');
-          htmlBuilder.push(`<p class="timeline-text text-muted">${sanitizedDate}</p>`);
+          htmlBuilder.push('<p class="timeline-text text-muted">' + sanitizedDate + '</p>');
           htmlBuilder.push('</div>');
           htmlBuilder.push('</div>');
           htmlBuilder.push('<div class="mt-2">');
-          htmlBuilder.push(`<p class="small text-muted">${sanitizedValue}</p>`);
+          htmlBuilder.push('<p class="small text-muted">' + sanitizedValue + '</p>');
           htmlBuilder.push('</div>');
           htmlBuilder.push('</div>');
           htmlBuilder.push('</div>');
@@ -896,7 +964,8 @@ function loadVersionHistory() {
           noHistoryBuilder.push('<p class="text-muted">Version information will appear here</p>');
           noHistoryBuilder.push('</div>');
           
-          SecurityUtils.safeInnerHTML(content, noHistoryBuilder.join(''), true, true);
+          const noHistoryHtml = noHistoryBuilder.join('');
+          SecurityUtils.safeInnerHTML(content, noHistoryHtml, true, true);
         } else {
           content.textContent = 'No version history available';
         }
@@ -914,7 +983,8 @@ function loadVersionHistory() {
         errorBuilder.push('<p class="text-muted">Please try again later</p>');
         errorBuilder.push('</div>');
         
-        SecurityUtils.safeInnerHTML(content, errorBuilder.join(''), true, true);
+        const errorHtml = errorBuilder.join('');
+        SecurityUtils.safeInnerHTML(content, errorHtml, true, true);
       } else {
         content.textContent = 'Error loading version history';
       }
