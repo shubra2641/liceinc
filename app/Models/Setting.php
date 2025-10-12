@@ -301,6 +301,7 @@ class Setting extends Model
     protected static $factory = SettingFactory::class;
 
     protected $fillable = [
+        // Basic settings
         'site_name',
         'site_logo',
         'support_email',
@@ -308,19 +309,24 @@ class Setting extends Model
         'support_phone',
         'timezone',
         'maintenance_mode',
+        'avg_response_time',
+        'version',
+        'last_updated_at',
+        
+        // Envato settings
         'envato_personal_token',
         'envato_api_key',
         'envato_auth_enabled',
         'envato_username',
-        'auto_generate_license',
-        'default_license_length',
         'envato_client_id',
         'envato_client_secret',
         'envato_redirect_uri',
         'envato_oauth_enabled',
+        'auto_generate_license',
+        'default_license_length',
         'license_api_token',
-        'license_max_attempts',
-        'license_lockout_minutes',
+        
+        // License settings
         'license_verify_envato',
         'license_fallback_internal',
         'license_cache_verification',
@@ -366,6 +372,8 @@ class Setting extends Model
         'license_bypass_testing',
         'license_mock_envato',
         'license_generate_fake_data',
+        
+        // SEO settings
         'seo_site_title',
         'seo_site_description',
         'seo_og_image',
@@ -373,13 +381,8 @@ class Setting extends Model
         'seo_kb_description',
         'seo_tickets_title',
         'seo_tickets_description',
-        'preloader_enabled',
-        'preloader_type',
-        'preloader_color',
-        'preloader_background_color',
-        'preloader_duration',
-        'preloader_min_duration',
-        'preloader_custom_css',
+        
+        // Logo settings
         'site_logo_dark',
         'logo_width',
         'logo_height',
@@ -387,13 +390,23 @@ class Setting extends Model
         'logo_text',
         'logo_text_color',
         'logo_text_font_size',
-        'avg_response_time',
+        
+        // Preloader settings
+        'preloader_enabled',
+        'preloader_type',
+        'preloader_color',
+        'preloader_background_color',
+        'preloader_duration',
+        'preloader_custom_css',
+        
+        // Anti-spam settings
         'enable_captcha',
         'captcha_site_key',
         'captcha_secret_key',
         'enable_human_question',
         'human_questions',
-        'version',
+        
+        // Additional fields from latest migration
         'site_keywords',
         'maintenance_message',
         'license_verification_enabled',
@@ -425,6 +438,11 @@ class Setting extends Model
         'contact_state',
         'contact_country',
         'contact_postal_code',
+        
+        // Key-value fields
+        'key',
+        'value',
+        'type',
     ];
     protected $casts = [
         'envato_auth_enabled' => 'boolean',

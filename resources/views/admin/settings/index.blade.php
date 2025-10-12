@@ -67,6 +67,10 @@
                     <i class="fas fa-shield-alt me-2"></i>
                     {{ trans('app.security_antispam') ?? 'Security / Anti-Spam' }}
                 </button>
+                <button type="button" class="admin-tab-btn" data-action="show-tab" data-tab="contact-tab" role="tab" aria-selected="false" aria-controls="contact-tab" tabindex="-1">
+                    <i class="fas fa-address-book me-2"></i>
+                    {{ trans('app.contact_information') ?? 'Contact Information' }}
+                </button>
             </div>
         </div>
     </div>
@@ -718,7 +722,7 @@
                                 </label>
                                 <div class="admin-switch">
                                     <input type="checkbox" name="preloader_enabled" value="1"
-                                           {{ $settings->preloader_enabled ? 'checked' : '' }}
+                                           {{ old('preloader_enabled', $settingsArray['preloader_enabled'] ?? false) ? 'checked' : '' }}
                                            class="admin-switch-input" id="preloader_enabled">
                                     <label for="preloader_enabled" class="admin-switch-label">
                                         <span class="admin-switch-inner"></span>
@@ -737,22 +741,22 @@
                                     {{ trans('app.preloader_type') }}
                                 </label>
                                 <select name="preloader_type" class="admin-form-input">
-                                    <option value="spinner" {{ $settings->preloader_type === 'spinner' ? 'selected' : '' }}>
+                                    <option value="spinner" {{ old('preloader_type', $settingsArray['preloader_type'] ?? 'spinner') === 'spinner' ? 'selected' : '' }}>
                                         {{ trans('app.spinner') }}
                                     </option>
-                                    <option value="dots" {{ $settings->preloader_type === 'dots' ? 'selected' : '' }}>
+                                    <option value="dots" {{ old('preloader_type', $settingsArray['preloader_type'] ?? 'spinner') === 'dots' ? 'selected' : '' }}>
                                         {{ trans('app.dots') }}
                                     </option>
-                                    <option value="bars" {{ $settings->preloader_type === 'bars' ? 'selected' : '' }}>
+                                    <option value="bars" {{ old('preloader_type', $settingsArray['preloader_type'] ?? 'spinner') === 'bars' ? 'selected' : '' }}>
                                         {{ trans('app.bars') }}
                                     </option>
-                                    <option value="pulse" {{ $settings->preloader_type === 'pulse' ? 'selected' : '' }}>
+                                    <option value="pulse" {{ old('preloader_type', $settingsArray['preloader_type'] ?? 'spinner') === 'pulse' ? 'selected' : '' }}>
                                         {{ trans('app.pulse') }}
                                     </option>
-                                    <option value="progress" {{ $settings->preloader_type === 'progress' ? 'selected' : '' }}>
+                                    <option value="progress" {{ old('preloader_type', $settingsArray['preloader_type'] ?? 'spinner') === 'progress' ? 'selected' : '' }}>
                                         {{ trans('app.progress_bar') }}
                                     </option>
-                                    <option value="custom" {{ $settings->preloader_type === 'custom' ? 'selected' : '' }}>
+                                    <option value="custom" {{ old('preloader_type', $settingsArray['preloader_type'] ?? 'spinner') === 'custom' ? 'selected' : '' }}>
                                         {{ trans('app.custom') }}
                                     </option>
                                 </select>
@@ -769,10 +773,10 @@
                                 </label>
                                 <div class="d-flex align-items-center gap-3">
                                     <input type="color" name="preloader_color"
-                                           value="{{ $settings->preloader_color ?? '#3b82f6' }}"
+                                           value="{{ old('preloader_color', $settingsArray['preloader_color'] ?? '#3b82f6') }}"
                                            class="admin-form-color">
                                     <input type="text" name="preloader_color_text"
-                                           value="{{ $settings->preloader_color ?? '#3b82f6' }}"
+                                           value="{{ old('preloader_color', $settingsArray['preloader_color'] ?? '#3b82f6') }}"
                                            class="admin-form-input" placeholder="#3b82f6">
                                 </div>
                                 <p class="admin-form-help">{{ trans('app.primary_color_for_preloader_animation') }}</p>
@@ -788,10 +792,10 @@
                                 </label>
                                 <div class="d-flex align-items-center gap-3">
                                     <input type="color" name="preloader_background_color"
-                                           value="{{ $settings->preloader_background_color ?? '#ffffff' }}"
+                                           value="{{ old('preloader_background_color', $settingsArray['preloader_background_color'] ?? '#ffffff') }}"
                                            class="admin-form-color">
                                     <input type="text" name="preloader_background_color_text"
-                                           value="{{ $settings->preloader_background_color ?? '#ffffff' }}"
+                                           value="{{ old('preloader_background_color', $settingsArray['preloader_background_color'] ?? '#ffffff') }}"
                                            class="admin-form-input" placeholder="#ffffff">
                                 </div>
                                 <p class="admin-form-help">{{ trans('app.background_color_for_preloader') }}</p>
@@ -806,7 +810,7 @@
                                     {{ trans('app.duration_milliseconds') }}
                                 </label>
                                 <input type="number" name="preloader_duration"
-                                       value="{{ $settings->preloader_duration ?? 2000 }}"
+                                       value="{{ old('preloader_duration', $settingsArray['preloader_duration'] ?? 2000) }}"
                                        class="admin-form-input" min="500" max="10000" step="100">
                                 <p class="admin-form-help">{{ trans('app.how_long_to_show_preloader') }}</p>
                             </div>
@@ -821,7 +825,7 @@
                                 </label>
                                 <textarea name="preloader_custom_css" rows="6"
                                           class="admin-form-textarea"
-                                          placeholder="{{ trans('app.enter_custom_css_for_preloader') }}">{{ $settings->preloader_custom_css ?? '' }}</textarea>
+                                          placeholder="{{ trans('app.enter_custom_css_for_preloader') }}">{{ old('preloader_custom_css', $settingsArray['preloader_custom_css'] ?? '') }}</textarea>
                                 <p class="admin-form-help">{{ trans('app.add_custom_styles_for_preloader') }}</p>
                             </div>
                         </div>
@@ -870,9 +874,9 @@
                                         {{ trans('app.choose_logo_file') }}
                                     </label>
                                 </div>
-                                @if($settings->site_logo)
+                                @if(!empty($settingsArray['site_logo']))
                                     <div class="mt-3">
-                                        <img src="{{ asset('storage/' . $settings->site_logo) }}"
+                                        <img src="{{ asset('storage/' . $settingsArray['site_logo']) }}"
                                              alt="{{ trans('app.current_logo') }}"
                                              class="admin-image-preview">
                                         <p class="text-muted mt-1">{{ trans('app.current_logo') }}</p>
@@ -896,9 +900,9 @@
                                         {{ trans('app.choose_dark_logo_file') }}
                                     </label>
                                 </div>
-                                @if($settings->site_logo_dark)
+                                @if(!empty($settingsArray['site_logo_dark']))
                                     <div class="mt-3">
-                                        <img src="{{ asset('storage/' . $settings->site_logo_dark) }}"
+                                        <img src="{{ asset('storage/' . $settingsArray['site_logo_dark']) }}"
                                              alt="{{ trans('app.current_dark_logo') }}"
                                              class="admin-image-preview">
                                         <p class="text-muted mt-1">{{ trans('app.current_dark_logo') }}</p>
@@ -916,7 +920,7 @@
                                     {{ trans('app.logo_width') }}
                                 </label>
                                 <input type="number" name="logo_width"
-                                       value="{{ $settings->logo_width ?? 150 }}"
+                                       value="{{ old('logo_width', $settingsArray['logo_width'] ?? 150) }}"
                                        class="admin-form-input" min="50" max="500">
                                 <p class="admin-form-help">{{ trans('app.logo_width_in_pixels') }}</p>
                             </div>
@@ -929,7 +933,7 @@
                                     {{ trans('app.logo_height') }}
                                 </label>
                                 <input type="number" name="logo_height"
-                                       value="{{ $settings->logo_height ?? 50 }}"
+                                       value="{{ old('logo_height', $settingsArray['logo_height'] ?? 50) }}"
                                        class="admin-form-input" min="20" max="200">
                                 <p class="admin-form-help">{{ trans('app.logo_height_in_pixels') }}</p>
                             </div>
@@ -944,7 +948,7 @@
                                 </label>
                                 <div class="admin-switch">
                                     <input type="checkbox" name="logo_show_text" value="1"
-                                           {{ $settings->logo_show_text ? 'checked' : '' }}
+                                           {{ old('logo_show_text', $settingsArray['logo_show_text'] ?? false) ? 'checked' : '' }}
                                            class="admin-switch-input" id="logo_show_text">
                                     <label for="logo_show_text" class="admin-switch-label">
                                         <span class="admin-switch-inner"></span>
@@ -962,7 +966,7 @@
                                     {{ trans('app.logo_text') }}
                                 </label>
                                 <input type="text" name="logo_text"
-                                       value="{{ $settings->logo_text ?? config('app.name') }}"
+                                       value="{{ old('logo_text', $settingsArray['logo_text'] ?? config('app.name')) }}"
                                        class="admin-form-input" placeholder="{{ config('app.name') }}">
                                 <p class="admin-form-help">{{ trans('app.text_to_display_with_logo') }}</p>
                             </div>
@@ -976,10 +980,10 @@
                                 </label>
                                 <div class="d-flex align-items-center gap-3">
                                     <input type="color" name="logo_text_color"
-                                           value="{{ $settings->logo_text_color ?? '#1f2937' }}"
+                                           value="{{ old('logo_text_color', $settingsArray['logo_text_color'] ?? '#1f2937') }}"
                                            class="admin-form-color">
                                     <input type="text" name="logo_text_color_text"
-                                           value="{{ $settings->logo_text_color ?? '#1f2937' }}"
+                                           value="{{ old('logo_text_color', $settingsArray['logo_text_color'] ?? '#1f2937') }}"
                                            class="admin-form-input" placeholder="#1f2937">
                                 </div>
                                 <p class="admin-form-help">{{ trans('app.color_for_logo_text') }}</p>
@@ -993,7 +997,7 @@
                                     {{ trans('app.logo_text_font_size') }}
                                 </label>
                                 <input type="text" name="logo_text_font_size"
-                                       value="{{ $settings->logo_text_font_size ?? '24px' }}"
+                                       value="{{ old('logo_text_font_size', $settingsArray['logo_text_font_size'] ?? '24px') }}"
                                        class="admin-form-input" placeholder="24px">
                                 <p class="admin-form-help">{{ trans('app.font_size_for_logo_text') }}</p>
                             </div>
@@ -1008,18 +1012,18 @@
                         <div class="admin-card-content">
                             <div class="text-center p-4 bg-light rounded">
                                 <div id="logo-preview" class="admin-logo-preview" 
-                                     data-logo-width="{{ $settings->logo_width ?? 150 }}"
-                                     data-logo-height="{{ $settings->logo_height ?? 50 }}"
-                                     data-logo-text-color="{{ $settings->logo_text_color ?? '#1f2937' }}"
-                                     data-logo-text-font-size="{{ $settings->logo_text_font_size ?? '24px' }}">
-                                    @if($settings->site_logo)
-                                        <img src="{{ asset('storage/' . $settings->site_logo) }}"
-                                             alt="{{ $settings->logo_text ?? config('app.name') }}"
+                                     data-logo-width="{{ $settingsArray['logo_width'] ?? 150 }}"
+                                     data-logo-height="{{ $settingsArray['logo_height'] ?? 50 }}"
+                                     data-logo-text-color="{{ $settingsArray['logo_text_color'] ?? '#1f2937' }}"
+                                     data-logo-text-font-size="{{ $settingsArray['logo_text_font_size'] ?? '24px' }}">
+                                    @if(!empty($settingsArray['site_logo']))
+                                        <img src="{{ asset('storage/' . $settingsArray['site_logo']) }}"
+                                             alt="{{ $settingsArray['logo_text'] ?? config('app.name') }}"
                                              class="admin-logo-preview-image">
                                     @endif
-                                    @if($settings->logo_show_text)
+                                    @if($settingsArray['logo_show_text'] ?? false)
                                         <span class="admin-logo-preview-text">
-                                            {{ $settings->logo_text ?? config('app.name') }}
+                                            {{ $settingsArray['logo_text'] ?? config('app.name') }}
                                         </span>
                                     @endif
                                 </div>
@@ -1295,6 +1299,99 @@
             </div>
         </div>
 
+        <!-- Contact Information Tab -->
+        <div class="admin-tab-panel admin-tab-panel-hidden" id="contact-tab" role="tabpanel" aria-labelledby="contact-tab">
+            <div class="admin-card mb-4">
+                <div class="admin-section-content">
+                    <h3 class="admin-card-title">
+                        <i class="fas fa-address-book text-blue-500 me-2"></i>{{ trans('app.contact_information') }}
+                    </h3>
+                    <span class="admin-badge admin-badge-info">{{ trans('app.Optional') }}</span>
+                </div>
+                <div class="admin-card-content">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label class="admin-form-label" for="contact_phone">
+                                    <i class="fas fa-phone text-green-500 me-1"></i>{{ trans('app.contact_phone') }}
+                                </label>
+                                <input type="text" id="contact_phone" name="contact_phone" class="admin-form-input"
+                                    value="{{ old('contact_phone', $settingsArray['contact_phone'] ?? '') }}"
+                                    placeholder="{{ trans('app.enter_contact_phone') }}">
+                                @error('contact_phone')
+                                <div class="admin-form-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label class="admin-form-label" for="contact_city">
+                                    <i class="fas fa-city text-purple-500 me-1"></i>{{ trans('app.contact_city') }}
+                                </label>
+                                <input type="text" id="contact_city" name="contact_city" class="admin-form-input"
+                                    value="{{ old('contact_city', $settingsArray['contact_city'] ?? '') }}"
+                                    placeholder="{{ trans('app.enter_contact_city') }}">
+                                @error('contact_city')
+                                <div class="admin-form-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="admin-form-group">
+                                <label class="admin-form-label" for="contact_address">
+                                    <i class="fas fa-map-marker-alt text-red-500 me-1"></i>{{ trans('app.contact_address') }}
+                                </label>
+                                <textarea id="contact_address" name="contact_address" class="admin-form-input" rows="3"
+                                    placeholder="{{ trans('app.enter_contact_address') }}">{{ old('contact_address', $settingsArray['contact_address'] ?? '') }}</textarea>
+                                @error('contact_address')
+                                <div class="admin-form-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="admin-form-group">
+                                <label class="admin-form-label" for="contact_state">
+                                    <i class="fas fa-map text-orange-500 me-1"></i>{{ trans('app.contact_state') }}
+                                </label>
+                                <input type="text" id="contact_state" name="contact_state" class="admin-form-input"
+                                    value="{{ old('contact_state', $settingsArray['contact_state'] ?? '') }}"
+                                    placeholder="{{ trans('app.enter_contact_state') }}">
+                                @error('contact_state')
+                                <div class="admin-form-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="admin-form-group">
+                                <label class="admin-form-label" for="contact_country">
+                                    <i class="fas fa-flag text-blue-500 me-1"></i>{{ trans('app.contact_country') }}
+                                </label>
+                                <input type="text" id="contact_country" name="contact_country" class="admin-form-input"
+                                    value="{{ old('contact_country', $settingsArray['contact_country'] ?? '') }}"
+                                    placeholder="{{ trans('app.enter_contact_country') }}">
+                                @error('contact_country')
+                                <div class="admin-form-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="admin-form-group">
+                                <label class="admin-form-label" for="contact_postal_code">
+                                    <i class="fas fa-mail-bulk text-green-500 me-1"></i>{{ trans('app.contact_postal_code') }}
+                                </label>
+                                <input type="text" id="contact_postal_code" name="contact_postal_code" class="admin-form-input"
+                                    value="{{ old('contact_postal_code', $settingsArray['contact_postal_code'] ?? '') }}"
+                                    placeholder="{{ trans('app.enter_contact_postal_code') }}">
+                                @error('contact_postal_code')
+                                <div class="admin-form-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Form Actions -->
         <div class="admin-card">
             <div class="admin-card-content">
@@ -1314,5 +1411,50 @@
 </div>
 </div>
 
+<style>
+.admin-preloader-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+}
+
+.admin-preloader-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-preloader-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.admin-preloader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
 
 @endsection

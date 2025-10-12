@@ -338,7 +338,6 @@ class AdminDashboard {
     debugLog('Test API button check:', testApiBtn);
 
     if (settingsPage || testApiBtn) {
-      console.log('Settings page detected, initializing settings functions');
       this.initSettingsFunctions();
     } else {
   debugLog('Settings page not detected');
@@ -2693,11 +2692,9 @@ class AdminDashboard {
 
   // Initialize Settings Functions
   initSettingsFunctions() {
-    console.log('initSettingsFunctions called');
 
     // Check if already initialized
     if (document.body.dataset.settingsFunctionsInitialized === 'true') {
-      console.log('Settings functions already initialized');
       return;
     }
 
@@ -2793,39 +2790,30 @@ class AdminDashboard {
 
   // Initialize API Test
   initApiTest() {
-    console.log('initApiTest called');
     const testBtn = document.getElementById('test-api-btn');
     if (testBtn) {
       // Check if event listener already added
       if (testBtn.dataset.apiTestInitialized === 'true') {
-        console.log('API Test button already initialized');
         return;
       }
 
-      console.log('API Test button found, adding event listener');
       const self = this;
       testBtn.addEventListener('click', () => {
-        console.log('API Test button clicked');
         self.testEnvatoApi();
       });
 
       // Mark as initialized
       testBtn.dataset.apiTestInitialized = 'true';
     } else {
-      console.log('API Test button not found');
     }
   }
 
   // Test Envato API
   async testEnvatoApi() {
-    console.log('testEnvatoApi function called');
     const testBtn = document.getElementById('test-api-btn');
     const resultDiv = document.getElementById('api-test-result');
 
     if (!testBtn || !resultDiv) {
-      console.log('testBtn or resultDiv not found');
-      console.log('testBtn:', testBtn);
-      console.log('resultDiv:', resultDiv);
       return;
     }
 
@@ -3088,9 +3076,7 @@ class AdminDashboard {
       // Create a modal or overlay to show preloader preview
       const modal = document.createElement('div');
       modal.className = 'admin-preloader-modal';
-      modalSecurityUtils.safeInnerHTML(
-        this,
-        `
+      modal.innerHTML = `
                 <div class="admin-preloader-overlay">
                     <div class="admin-preloader-content">
                         <div class="admin-preloader-spinner"></div>
@@ -3100,8 +3086,7 @@ class AdminDashboard {
                         </button>
                     </div>
                 </div>
-            `,
-      );
+            `;
 
       document.body.appendChild(modal);
 
@@ -3286,7 +3271,6 @@ setInterval(() => {
 // Debug: Log all clicks on the page
 document.addEventListener('click', e => {
   if (e.target && e.target.id === 'test-api-btn') {
-    console.log('Click detected on test-api-btn');
   }
 });
 
@@ -5559,95 +5543,73 @@ function initializeApiTesting() {
       const originalText = button.innerHTML;
 
       // Show loading state
-      button.innerHTML =
-        '<i class="fas fa-spinner fa-spin me-2"></i>Testing...';
+      button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Testing...';
       button.disabled = true;
+      apiTestResult.innerHTML = '';
 
-      // Get form data
-      const formData = new FormData(document.querySelector('form'));
-      formData.append(
-        '_token',
-        document
-          .querySelector('meta[name="csrf-token"]')
-          .getAttribute('content'),
-      );
-      formData.append('action', 'test-envato-api');
+      // Get token value
+      const token = document.getElementById('envato_personal_token').value;
+      
+      // Create form data
+      const formData = new FormData();
+      formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+      formData.append('token', token);
 
-  // Make AJAX request
+      // Make API request
       fetch('/admin/settings/test-api', {
         method: 'POST',
         body: formData,
         headers: {
           'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRF-TOKEN': document
-            .querySelector('meta[name="csrf-token"]')
-            .getAttribute('content'),
-        },
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
       })
-        .catch(error => {
-          console.warn('Fetch request failed:', error);
-          throw error;
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            apiTestResultSecurityUtils.safeInnerHTML(
-              this,
-              `
-                        <div class="admin-alert admin-alert-success">
-                            <div class="admin-alert-content">
-                                <i class="fas fa-check-circle admin-alert-icon"></i>
-                                <div class="admin-alert-text">
-                                    <h4>Connection Successful!</h4>
-                                    <p>${data.message}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `,
-            );
-          } else {
-            apiTestResultSecurityUtils.safeInnerHTML(
-              this,
-              `
-                        <div class="admin-alert admin-alert-danger">
-                            <div class="admin-alert-content">
-                                <i class="fas fa-exclamation-triangle admin-alert-icon"></i>
-                                <div class="admin-alert-text">
-                                    <h4>Connection Failed!</h4>
-                                    <p>${data.message}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `,
-            );
-          }
-          return true;
-        })
-        .catch(error => {
-          console.warn('API test error:', error);
-          apiTestResultSecurityUtils.safeInnerHTML(
-            this,
-            `
-                    <div class="admin-alert admin-alert-danger">
-                        <div class="admin-alert-content">
-                            <i class="fas fa-exclamation-triangle admin-alert-icon"></i>
-                            <div class="admin-alert-text">
-                                <h4>Connection Error!</h4>
-                                <p>An error occurred while testing the connection.</p>
-                            </div>
-                        </div>
-                    </div>
-                `,
-          );
-        })
-        .catch(error => {
-          console.warn('API test request failed:', error);
-        })
-        .finally(() => {
-          // Restore button state
-          button.innerHTML = originalText;
-          button.disabled = false;
-        });
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          apiTestResult.innerHTML = `
+            <div class="admin-alert admin-alert-success">
+              <div class="admin-alert-content">
+                <i class="fas fa-check-circle admin-alert-icon"></i>
+                <div class="admin-alert-text">
+                  <h4>Connection Successful!</h4>
+                  <p>${data.message}</p>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          apiTestResult.innerHTML = `
+            <div class="admin-alert admin-alert-danger">
+              <div class="admin-alert-content">
+                <i class="fas fa-times-circle admin-alert-icon"></i>
+                <div class="admin-alert-text">
+                  <h4>Connection Failed!</h4>
+                  <p>${data.message}</p>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      })
+      .catch(error => {
+        apiTestResult.innerHTML = `
+          <div class="admin-alert admin-alert-danger">
+            <div class="admin-alert-content">
+              <i class="fas fa-times-circle admin-alert-icon"></i>
+              <div class="admin-alert-text">
+                <h4>Connection Error!</h4>
+                <p>An error occurred while testing the connection.</p>
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .finally(() => {
+        // Restore button state
+        button.innerHTML = originalText;
+        button.disabled = false;
+      });
     });
   }
 }
@@ -6018,7 +5980,6 @@ function dismissUpdateNotification() {
       return response.json();
     })
     .then(data => {
-      console.log('Notification dismissed successfully');
       return true;
     })
     .catch(error => {
@@ -6064,7 +6025,6 @@ function dismissUpdateNotificationPermanently() {
       return response.json();
     })
     .then(data => {
-      console.log('Notification dismissed permanently successfully');
       return true;
     })
     .catch(error => {

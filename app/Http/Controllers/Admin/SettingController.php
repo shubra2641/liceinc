@@ -12,7 +12,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -71,21 +70,7 @@ class SettingController extends Controller
     public function index(): View
     {
         try {
-            // Rate limiting for security
-            $key = 'settings-index:' . request()->ip() . ':' . Auth::id();
-            if (RateLimiter::tooManyAttempts($key, 10)) {
-                Log::warning('Rate limit exceeded for settings page access', [
-                    'ip' => request()->ip(),
-                    'user_id' => Auth::id(),
-                    'attempts' => RateLimiter::attempts($key),
-                ]);
-
-                return view('admin.settings.index', [
-                    'error' => 'Too many requests. Please try again later.',
-                    'rate_limited' => true,
-                ]);
-            }
-            RateLimiter::hit($key, 300); // 5 minutes window
+            // No rate limiting for admin users
             // Validate user permissions
             $user = Auth::user();
             if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
@@ -99,6 +84,10 @@ class SettingController extends Controller
                 return view('admin.settings.index', [
                     'error' => 'Access denied. Admin privileges required.',
                     'unauthorized' => true,
+                    'currentTimezone' => 'UTC',
+                    'existingQuestions' => [],
+                    'settingsArray' => [],
+                    'settings' => null,
                 ]);
             }
             DB::beginTransaction();
@@ -182,6 +171,10 @@ class SettingController extends Controller
             return view('admin.settings.index', [
                 'error' => 'Unable to load settings. Please try again later.',
                 'fallback' => true,
+                'currentTimezone' => 'UTC',
+                'existingQuestions' => [],
+                'settingsArray' => [],
+                'settings' => null,
             ]);
         }
     }
@@ -212,20 +205,7 @@ class SettingController extends Controller
     public function update(SettingRequest $request): RedirectResponse
     {
         try {
-            // Rate limiting for security
-            $key = sprintf('settings-update:%s:%s', $request->ip(), Auth::id()); // security-ignore: SQL_STRING_CONCAT
-            if (RateLimiter::tooManyAttempts($key, 3)) {
-                Log::warning('Rate limit exceeded for settings update', [
-                    'ip' => $request->ip(),
-                    'user_id' => Auth::id(),
-                    'attempts' => RateLimiter::attempts($key),
-                ]);
-
-                return back()
-                    ->withInput()
-                    ->with('error', 'Too many requests. Please try again later.');
-            }
-            RateLimiter::hit($key, 300); // 5 minutes window
+            // No rate limiting for admin users
             // Validate user permissions
             $user = Auth::user();
             if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
@@ -373,21 +353,7 @@ class SettingController extends Controller
     public function testApi(SettingRequest $request): JsonResponse
     {
         try {
-            // Rate limiting for security
-            $key = 'settings-test-api:' . $request->ip() . ':' . Auth::id();
-            if (RateLimiter::tooManyAttempts($key, 5)) {
-                Log::warning('Rate limit exceeded for API testing', [
-                    'ip' => $request->ip(),
-                    'user_id' => Auth::id(),
-                    'attempts' => RateLimiter::attempts($key),
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Too many requests. Please try again later.',
-                ], 429);
-            }
-            RateLimiter::hit($key, 300); // 5 minutes window
+            // No rate limiting for admin users
             // Validate user permissions
             $user = Auth::user();
             if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
@@ -479,21 +445,7 @@ class SettingController extends Controller
     public function envatoGuide(): View
     {
         try {
-            // Rate limiting for security
-            $key = 'settings-envato-guide:' . request()->ip() . ':' . Auth::id();
-            if (RateLimiter::tooManyAttempts($key, 10)) {
-                Log::warning('Rate limit exceeded for Envato guide access', [
-                    'ip' => request()->ip(),
-                    'user_id' => Auth::id(),
-                    'attempts' => RateLimiter::attempts($key),
-                ]);
-
-                return view('admin.settings.envato-guide', [
-                    'error' => 'Too many requests. Please try again later.',
-                    'rate_limited' => true,
-                ]);
-            }
-            RateLimiter::hit($key, 300); // 5 minutes window
+            // No rate limiting for admin users
             // Validate user permissions
             $user = Auth::user();
             if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {

@@ -43,7 +43,6 @@
 
     <link rel="stylesheet" href="{{ asset('assets/front/css/preloader.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/maintenance.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/front/css/user-dashboard.css') }}">
     
     @yield('styles')
 
@@ -52,21 +51,7 @@
     {{-- Preloader Component --}}
     @include('components.preloader')
     
-    <!-- Header with Logo -->
-    <header class="guest-header">
-        <div class="guest-header-container">
-            <a href="#" class="guest-logo">
-                @if($siteLogo)
-                    <img src="{{ Storage::url($siteLogo) }}" alt="{{ $siteName }}" class="guest-logo-icon" />
-                @else
-                    <div class="guest-logo-icon">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                @endif
-                <span class="guest-logo-text">{{ $siteName ?? config('app.name') }}</span>
-            </a>
-        </div>
-    </header>
+
     
     <!-- Page Content -->
     <main class="admin-main-content px-4 py-6 lg:px-8 lg:py-8 max-w-full overflow-x-auto">
@@ -93,22 +78,9 @@
             logoShowText: {{ $preloaderSettings['logoShowText'] ? 'true' : 'false' }}
         };
     </script>
-    
-    <script src="{{ asset('assets/front/js/preloader.js') }}"></script>
-    <!-- jQuery (must be loaded first) -->
-    <script src="{{ asset('assets/front/js/jquery-3.6.0.min.js') }}"></script>
-    <!-- Bootstrap JS (required by Summernote BS5) -->
-    <script src="{{ asset('vendor/assets/bootstrap/bootstrap.bundle.min.js') }}"></script>
-    <!-- Select2 JS -->
-    <script src="{{ asset('vendor/assets/select2/select2.min.js') }}"></script>
-    <!-- Summernote BS5 JS -->
-    <script src="{{ asset('vendor/assets/summernote/summernote-bs5.min.js') }}"></script>
-    <!-- Chart.js -->
-    <script src="{{ asset('vendor/assets/chartjs/chart.min.js') }}"></script>
-    <!-- DataTables JS -->
-    <script src="{{ asset('vendor/assets/datatables/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('vendor/assets/datatables/dataTables.bootstrap5.min.js') }}"></script>
 
+        <!-- Preloader JavaScript -->
+        <script src="{{ asset('assets/admin/js/preloader.js') }}"></script>
     @yield('scripts')
 </body>
 </html>

@@ -2273,5 +2273,18 @@ return [
     'Custom Service' => 'कस्टम सेवा',
     'Buy Again' => 'फिर से खरीदें',
     'You don\'t have any invoices yet' => 'आपके पास अभी तक कोई चालान नहीं है',
+    'contact_information' => 'संपर्क जानकारी',
+    'contact_phone' => 'संपर्क फोन',
+    'enter_contact_phone' => 'संपर्क फोन नंबर दर्ज करें',
+    'contact_city' => 'संपर्क शहर',
+    'enter_contact_city' => 'संपर्क शहर दर्ज करें',
+    'contact_address' => 'संपर्क पता',
+    'enter_contact_address' => 'संपर्क पता दर्ज करें',
+    'contact_state' => 'संपर्क राज्य',
+    'enter_contact_state' => 'संपर्क राज्य दर्ज करें',
+    'contact_country' => 'संपर्क देश',
+    'enter_contact_country' => 'संपर्क देश दर्ज करें',
+    'contact_postal_code' => 'डाक कोड',
+    'enter_contact_postal_code' => 'डाक कोड दर्ज करें',
 
 ];

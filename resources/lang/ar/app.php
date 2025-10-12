@@ -2684,5 +2684,18 @@ return [
     'PayPal connection error: :error' => 'خطأ في الاتصال بـ PayPal: :error',
     'Stripe connection error: :error' => 'خطأ في الاتصال بـ Stripe: :error',
     'You don\'t have any invoices yet' => 'ليس لديك أي فواتير بعد',
+    'contact_information' => 'معلومات الاتصال',
+    'contact_phone' => 'هاتف الاتصال',
+    'enter_contact_phone' => 'أدخل رقم هاتف الاتصال',
+    'contact_city' => 'مدينة الاتصال',
+    'enter_contact_city' => 'أدخل مدينة الاتصال',
+    'contact_address' => 'عنوان الاتصال',
+    'enter_contact_address' => 'أدخل عنوان الاتصال',
+    'contact_state' => 'ولاية الاتصال',
+    'enter_contact_state' => 'أدخل ولاية الاتصال',
+    'contact_country' => 'دولة الاتصال',
+    'enter_contact_country' => 'أدخل دولة الاتصال',
+    'contact_postal_code' => 'الرمز البريدي',
+    'enter_contact_postal_code' => 'أدخل الرمز البريدي',
 
 ];

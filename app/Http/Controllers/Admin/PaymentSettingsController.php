@@ -61,6 +61,28 @@ class PaymentSettingsController extends Controller
             $paypalSettings = PaymentSetting::getByGateway('paypal');
             $stripeSettings = PaymentSetting::getByGateway('stripe');
             DB::commit();
+            
+            // Create default settings if not found
+            if (!$paypalSettings) {
+                $paypalSettings = new PaymentSetting([
+                    'gateway' => 'paypal',
+                    'is_enabled' => false,
+                    'is_sandbox' => true,
+                    'credentials' => ['client_id' => '', 'client_secret' => ''],
+                    'webhook_url' => ''
+                ]);
+            }
+            
+            if (!$stripeSettings) {
+                $stripeSettings = new PaymentSetting([
+                    'gateway' => 'stripe',
+                    'is_enabled' => false,
+                    'is_sandbox' => true,
+                    'credentials' => ['publishable_key' => '', 'secret_key' => '', 'webhook_secret' => ''],
+                    'webhook_url' => ''
+                ]);
+            }
+            
             return view('admin.payment-settings.index', [
                 'paypalSettings' => $paypalSettings,
                 'stripeSettings' => $stripeSettings
@@ -71,10 +93,27 @@ class PaymentSettingsController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            // Return empty settings on error
+            
+            // Return default settings on error
+            $paypalSettings = new PaymentSetting([
+                'gateway' => 'paypal',
+                'is_enabled' => false,
+                'is_sandbox' => true,
+                'credentials' => ['client_id' => '', 'client_secret' => ''],
+                'webhook_url' => ''
+            ]);
+            
+            $stripeSettings = new PaymentSetting([
+                'gateway' => 'stripe',
+                'is_enabled' => false,
+                'is_sandbox' => true,
+                'credentials' => ['publishable_key' => '', 'secret_key' => '', 'webhook_secret' => ''],
+                'webhook_url' => ''
+            ]);
+            
             return view('admin.payment-settings.index', [
-                'paypalSettings' => null,
-                'stripeSettings' => null,
+                'paypalSettings' => $paypalSettings,
+                'stripeSettings' => $stripeSettings
             ]);
         }
     }
