@@ -9,7 +9,7 @@ use App\Http\Requests\Admin\LicenseRequest;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\User;
-use App\Services\Email\Facades\Email;
+use App\Services\Email\EmailFacade;
 use App\Services\InvoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -38,15 +38,15 @@ use App\Helpers\SecureFileHelper;
  */
 class LicenseController extends Controller
 {
-    protected Email $emailService;
+    protected EmailFacade $emailService;
     /**
      * Create a new controller instance.
      *
-     * @param  Email  $emailService  The email service for notifications
+     * @param  EmailFacade  $emailService  The email service for notifications
      *
      * @version 1.0.6
      */
-    public function __construct(Email $emailService)
+    public function __construct(EmailFacade $emailService)
     {
         $this->emailService = $emailService;
     }

@@ -176,8 +176,7 @@ class InstallController extends Controller
     private function handleSuccessfulVerification(
         \Illuminate\Http\Request $request,
         array $result
-    ): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
-    {
+    ): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse {
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
@@ -200,8 +199,7 @@ class InstallController extends Controller
     private function handleFailedVerification(
         \Illuminate\Http\Request $request,
         array $result
-    ): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
-    {
+    ): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse {
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => false,
@@ -224,8 +222,7 @@ class InstallController extends Controller
     private function handleVerificationException(
         \Illuminate\Http\Request $request,
         \Exception $e
-    ): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
-    {
+    ): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse {
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => false,
@@ -339,7 +336,11 @@ class InstallController extends Controller
     public function databaseStore(Request $request): RedirectResponse
     {
         // Validate database configuration
-        $validationResult = $this->validateDatabaseInput($request->all());
+        /**
+ * @var array<string, mixed> $requestData
+*/
+        $requestData = $request->all();
+        $validationResult = $this->validateDatabaseInput($requestData);
         if (!$validationResult['valid']) {
             $errors = $validationResult['errors'] ?? [];
             return redirect()->back()
@@ -555,20 +556,27 @@ class InstallController extends Controller
      */
     private function runInstallationSteps(array $configs): void
     {
-        /** @var array<string, mixed> $databaseConfig */
+        /**
+ * @var array<string, mixed> $databaseConfig
+*/
         $databaseConfig = is_array($configs['database']) ? $configs['database'] : [];
-        /** @var array<string, mixed> $settingsConfig */
+        /**
+         * @var array<string, mixed> $settingsConfig
+         */
         $settingsConfig = is_array($configs['settings']) ? $configs['settings'] : [];
         $this->updateEnvFile($databaseConfig, $settingsConfig);
 
         Artisan::call('migrate:fresh', ['--force' => true]);
         $this->createRolesAndPermissions();
         $this->installationService->runSeeders();
-        /** @var array<string, mixed> $adminData */
+        /**
+         * @var array<string, mixed> $adminData
+         */
         $adminData = is_array($configs['admin']) ? $configs['admin'] : [];
-        /** @var array<string, mixed> $licenseConfig */
+        /**
+         * @var array<string, mixed> $licenseConfig
+         */
         $licenseConfig = is_array($configs['license']) ? $configs['license'] : [];
-        
         $this->userService->createAdminUser($adminData);
         $this->createDefaultSettings($settingsConfig);
         $this->installationService->storeLicenseInformation($licenseConfig);
@@ -577,8 +585,11 @@ class InstallController extends Controller
         $this->installationService->createInstalledFile();
     }
 
-    protected function successResponse(mixed $data = null, string $message = 'Success', int $statusCode = 200): JsonResponse
-    {
+    protected function successResponse(
+        mixed $data = null,
+        string $message = 'Success',
+        int $statusCode = 200
+    ): JsonResponse {
         return response()->json([
             'success' => true,
             'message' => 'Installation completed successfully!',
@@ -586,8 +597,11 @@ class InstallController extends Controller
         ], 200, [], JSON_UNESCAPED_SLASHES);
     }
 
-    protected function errorResponse(string $message, mixed $errors = null, int $statusCode = 400): JsonResponse
-    {
+    protected function errorResponse(
+        string $message = 'Error',
+        mixed $errors = null,
+        int $statusCode = 400
+    ): JsonResponse {
         return response()->json([
             'success' => false,
             'message' => $message,

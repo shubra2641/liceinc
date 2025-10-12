@@ -424,3 +424,88 @@
 [2025-10-12 17:59:09] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/admin/logos/pCmRKtzmP3Q0ndeuS8ErH092n1vFtBr90rBJwLqJ.png","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-12 17:59:09"} 
 [2025-10-12 18:00:20] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/logos/pCmRKtzmP3Q0ndeuS8ErH092n1vFtBr90rBJwLqJ.png","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-12 18:00:20"} 
 [2025-10-12 18:00:20] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/logos/pCmRKtzmP3Q0ndeuS8ErH092n1vFtBr90rBJwLqJ.png","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-12 18:00:20"} 
+[2025-10-12 19:26:27] local.ERROR: Target class [App\Services\Email\Facades\Email] does not exist. {"exception":"[object] (Illuminate\\Contracts\\Container\\BindingResolutionException(code: 0): Target class [App\\Services\\Email\\Facades\\Email] does not exist. at D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php:1163)
+[stacktrace]
+#0 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(972): Illuminate\\Container\\Container->build('App\\\\Services\\\\Em...')
+#1 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1078): Illuminate\\Container\\Container->resolve('App\\\\Services\\\\Em...', Array, true)
+#2 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(903): Illuminate\\Foundation\\Application->resolve('App\\\\Services\\\\Em...', Array)
+#3 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1058): Illuminate\\Container\\Container->make('App\\\\Services\\\\Em...', Array)
+#4 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1379): Illuminate\\Foundation\\Application->make('App\\\\Services\\\\Em...')
+#5 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1278): Illuminate\\Container\\Container->resolveClass(Object(ReflectionParameter))
+#6 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1201): Illuminate\\Container\\Container->resolveDependencies(Array)
+#7 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(972): Illuminate\\Container\\Container->build('App\\\\Console\\\\Com...')
+#8 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1078): Illuminate\\Container\\Container->resolve('App\\\\Console\\\\Com...', Array, true)
+#9 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(903): Illuminate\\Foundation\\Application->resolve('App\\\\Console\\\\Com...', Array)
+#10 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1058): Illuminate\\Container\\Container->make('App\\\\Console\\\\Com...', Array)
+#11 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(279): Illuminate\\Foundation\\Application->make('App\\\\Console\\\\Com...')
+#12 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(375): Illuminate\\Console\\Application->resolve('App\\\\Console\\\\Com...')
+#13 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(133): Illuminate\\Foundation\\Console\\Kernel->Illuminate\\Foundation\\Console\\{closure}(Object(Illuminate\\Console\\Application))
+#14 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(80): Illuminate\\Console\\Application->bootstrap()
+#15 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(539): Illuminate\\Console\\Application->__construct(Object(Illuminate\\Foundation\\Application), Object(Illuminate\\Events\\Dispatcher), '12.31.1')
+#16 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(197): Illuminate\\Foundation\\Console\\Kernel->getArtisan()
+#17 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#18 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#19 {main}
+
+[previous exception] [object] (ReflectionException(code: -1): Class \"App\\Services\\Email\\Facades\\Email\" does not exist at D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php:1161)
+[stacktrace]
+#0 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1161): ReflectionClass->__construct('App\\\\Services\\\\Em...')
+#1 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(972): Illuminate\\Container\\Container->build('App\\\\Services\\\\Em...')
+#2 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1078): Illuminate\\Container\\Container->resolve('App\\\\Services\\\\Em...', Array, true)
+#3 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(903): Illuminate\\Foundation\\Application->resolve('App\\\\Services\\\\Em...', Array)
+#4 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1058): Illuminate\\Container\\Container->make('App\\\\Services\\\\Em...', Array)
+#5 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1379): Illuminate\\Foundation\\Application->make('App\\\\Services\\\\Em...')
+#6 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1278): Illuminate\\Container\\Container->resolveClass(Object(ReflectionParameter))
+#7 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1201): Illuminate\\Container\\Container->resolveDependencies(Array)
+#8 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(972): Illuminate\\Container\\Container->build('App\\\\Console\\\\Com...')
+#9 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1078): Illuminate\\Container\\Container->resolve('App\\\\Console\\\\Com...', Array, true)
+#10 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(903): Illuminate\\Foundation\\Application->resolve('App\\\\Console\\\\Com...', Array)
+#11 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1058): Illuminate\\Container\\Container->make('App\\\\Console\\\\Com...', Array)
+#12 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(279): Illuminate\\Foundation\\Application->make('App\\\\Console\\\\Com...')
+#13 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(375): Illuminate\\Console\\Application->resolve('App\\\\Console\\\\Com...')
+#14 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(133): Illuminate\\Foundation\\Console\\Kernel->Illuminate\\Foundation\\Console\\{closure}(Object(Illuminate\\Console\\Application))
+#15 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(80): Illuminate\\Console\\Application->bootstrap()
+#16 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(539): Illuminate\\Console\\Application->__construct(Object(Illuminate\\Foundation\\Application), Object(Illuminate\\Events\\Dispatcher), '12.31.1')
+#17 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(197): Illuminate\\Foundation\\Console\\Kernel->getArtisan()
+#18 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#19 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#20 {main}
+"} 
+[2025-10-12 19:26:46] local.ERROR: App\Console\Commands\GenerateRenewalInvoices::__construct(): Argument #2 ($emailService) must be of type App\Services\Email\Facades\Email, App\Services\Email\EmailFacade given {"exception":"[object] (TypeError(code: 0): App\\Console\\Commands\\GenerateRenewalInvoices::__construct(): Argument #2 ($emailService) must be of type App\\Services\\Email\\Facades\\Email, App\\Services\\Email\\EmailFacade given at D:\\xampp1\\htdocs\\my-logos\\app\\Console\\Commands\\GenerateRenewalInvoices.php:61)
+[stacktrace]
+#0 [internal function]: App\\Console\\Commands\\GenerateRenewalInvoices->__construct(Object(App\\Services\\InvoiceService), Object(App\\Services\\Email\\EmailFacade))
+#1 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1211): ReflectionClass->newInstanceArgs(Array)
+#2 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(972): Illuminate\\Container\\Container->build('App\\\\Console\\\\Com...')
+#3 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1078): Illuminate\\Container\\Container->resolve('App\\\\Console\\\\Com...', Array, true)
+#4 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(903): Illuminate\\Foundation\\Application->resolve('App\\\\Console\\\\Com...', Array)
+#5 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1058): Illuminate\\Container\\Container->make('App\\\\Console\\\\Com...', Array)
+#6 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(279): Illuminate\\Foundation\\Application->make('App\\\\Console\\\\Com...')
+#7 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(375): Illuminate\\Console\\Application->resolve('App\\\\Console\\\\Com...')
+#8 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(133): Illuminate\\Foundation\\Console\\Kernel->Illuminate\\Foundation\\Console\\{closure}(Object(Illuminate\\Console\\Application))
+#9 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(80): Illuminate\\Console\\Application->bootstrap()
+#10 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(539): Illuminate\\Console\\Application->__construct(Object(Illuminate\\Foundation\\Application), Object(Illuminate\\Events\\Dispatcher), '12.31.1')
+#11 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(197): Illuminate\\Foundation\\Console\\Kernel->getArtisan()
+#12 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#13 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#14 {main}
+"} 
+[2025-10-12 19:27:04] local.ERROR: Cannot assign App\Services\Email\EmailFacade to property App\Console\Commands\GenerateRenewalInvoices::$emailService of type App\Console\Commands\Email {"exception":"[object] (TypeError(code: 0): Cannot assign App\\Services\\Email\\EmailFacade to property App\\Console\\Commands\\GenerateRenewalInvoices::$emailService of type App\\Console\\Commands\\Email at D:\\xampp1\\htdocs\\my-logos\\app\\Console\\Commands\\GenerateRenewalInvoices.php:65)
+[stacktrace]
+#0 [internal function]: App\\Console\\Commands\\GenerateRenewalInvoices->__construct(Object(App\\Services\\InvoiceService), Object(App\\Services\\Email\\EmailFacade))
+#1 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1211): ReflectionClass->newInstanceArgs(Array)
+#2 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(972): Illuminate\\Container\\Container->build('App\\\\Console\\\\Com...')
+#3 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1078): Illuminate\\Container\\Container->resolve('App\\\\Console\\\\Com...', Array, true)
+#4 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(903): Illuminate\\Foundation\\Application->resolve('App\\\\Console\\\\Com...', Array)
+#5 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1058): Illuminate\\Container\\Container->make('App\\\\Console\\\\Com...', Array)
+#6 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(279): Illuminate\\Foundation\\Application->make('App\\\\Console\\\\Com...')
+#7 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(375): Illuminate\\Console\\Application->resolve('App\\\\Console\\\\Com...')
+#8 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(133): Illuminate\\Foundation\\Console\\Kernel->Illuminate\\Foundation\\Console\\{closure}(Object(Illuminate\\Console\\Application))
+#9 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(80): Illuminate\\Console\\Application->bootstrap()
+#10 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(539): Illuminate\\Console\\Application->__construct(Object(Illuminate\\Foundation\\Application), Object(Illuminate\\Events\\Dispatcher), '12.31.1')
+#11 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(197): Illuminate\\Foundation\\Console\\Kernel->getArtisan()
+#12 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#13 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#14 {main}
+"} 
+[2025-10-12 19:59:06] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/logos/pCmRKtzmP3Q0ndeuS8ErH092n1vFtBr90rBJwLqJ.png","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-12 19:59:06"} 
+[2025-10-12 19:59:06] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/logos/pCmRKtzmP3Q0ndeuS8ErH092n1vFtBr90rBJwLqJ.png","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-12 19:59:06"} 

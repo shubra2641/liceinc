@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\EmailTemplateRequest;
 use App\Models\EmailTemplate;
-use App\Services\Email\Facades\Email;
+use App\Services\Email\EmailFacade;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -33,16 +33,16 @@ use Illuminate\View\View;
  */
 class EmailTemplateController extends Controller
 {
-    protected Email $emailService;
+    protected EmailFacade $emailService;
 
     /**
      * Create a new controller instance.
      *
-     * @param  Email  $emailService  The email service for sending emails
+     * @param  EmailFacade  $emailService  The email service for sending emails
      *
      * @version 1.0.6
      */
-    public function __construct(Email $emailService)
+    public function __construct(EmailFacade $emailService)
     {
         $this->middleware('auth');
         $this->middleware('admin');
@@ -539,7 +539,7 @@ class EmailTemplateController extends Controller
             DB::beginTransaction();
             $validated = $request->validated();
             $testData = $this->prepareTestData($validated);
-            $emailService = app(Email::class);
+            $emailService = app(EmailFacade::class);
             $success = $emailService->sendEmail(
                 $email_template->name,
                 is_string($validated['test_email']) ? $validated['test_email'] : '',

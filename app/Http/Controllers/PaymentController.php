@@ -8,7 +8,7 @@ use App\Models\Invoice;
 use App\Models\License;
 use App\Models\PaymentSetting;
 use App\Models\Product;
-use App\Services\Email\Facades\Email;
+use App\Services\Email\EmailFacade;
 use App\Services\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -39,18 +39,18 @@ use Illuminate\View\View;
 class PaymentController extends Controller
 {
     protected PaymentService $paymentService;
-    protected Email $emailService;
+    protected EmailFacade $emailService;
     /**
      * Create a new controller instance.
      *
      * @param  PaymentService  $paymentService  The payment service instance
-     * @param  Email  $emailService  The email service instance
+     * @param  EmailFacade  $emailService  The email service instance
      *
      * @return void
      */
     public function __construct(
         PaymentService $paymentService,
-        Email $emailService,
+        EmailFacade $emailService,
     ) {
         $this->paymentService = $paymentService;
         $this->emailService = $emailService;

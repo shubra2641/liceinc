@@ -42,7 +42,7 @@ class EmailFacade
      * @param array<string, mixed> $data Template data variables
      * @param string|null $recipientName Optional recipient name
      *
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendEmail(
         string $templateName,
@@ -60,7 +60,7 @@ class EmailFacade
      * @param string $templateName The email template name
      * @param array<string, mixed> $data Template data variables
      *
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendToUser(
         User $user,
@@ -76,7 +76,7 @@ class EmailFacade
      * @param string $templateName The email template name
      * @param array<string, mixed> $data Template data variables
      *
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendToAdmin(
         string $templateName,
@@ -139,7 +139,7 @@ class EmailFacade
      *
      * @param User $user The user to send welcome email to
      *
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendUserWelcome(User $user): bool
     {
@@ -152,7 +152,7 @@ class EmailFacade
      * @param User $user The user to send verification email to
      * @param string $verificationUrl The email verification URL
      *
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendEmailVerification(
         User $user,
@@ -166,7 +166,8 @@ class EmailFacade
      *
      * @param User $user The user to send password reset email to
      * @param string $resetUrl The password reset URL
-     * @return bool True if email sent successfully
+     *
+     *\n     * @return bool True if email sent successfully
      */
     public function sendPasswordReset(
         User $user,
@@ -179,7 +180,8 @@ class EmailFacade
      * Send new user notification to admin.
      *
      * @param User $user The new user
-     * @return bool True if email sent successfully
+     *
+     *\n     * @return bool True if email sent successfully
      */
     public function sendNewUserNotification(User $user): bool
     {
@@ -193,7 +195,8 @@ class EmailFacade
      *
      * @param License $license The license object
      * @param Invoice $invoice The invoice object
-     * @return bool True if email sent successfully
+     *
+     *\n     * @return bool True if email sent successfully
      */
     public function sendPaymentConfirmation(
         License $license,
@@ -207,7 +210,8 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $licenseData License data
-     * @return bool True if email sent successfully
+     *
+     *\n     * @return bool True if email sent successfully
      */
     public function sendLicenseExpiring(
         User $user,
@@ -221,7 +225,8 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $licenseData License data
-     * @return bool True if email sent successfully
+     *
+     *\n     * @return bool True if email sent successfully
      */
     public function sendLicenseUpdated(
         User $user,
@@ -235,7 +240,8 @@ class EmailFacade
      *
      * @param License $license The license object
      * @param User|null $user Optional user to send email to
-     * @return bool True if email sent successfully
+     *
+     *\n     * @return bool True if email sent successfully
      */
     public function sendLicenseCreated(
         License $license,
@@ -249,7 +255,8 @@ class EmailFacade
      *
      * @param License $license The license object
      * @param Invoice $invoice The invoice object
-     * @return bool True if email sent successfully
+     *
+     *\n     * @return bool True if email sent successfully
      */
     public function sendAdminPaymentNotification(
         License $license,
@@ -265,7 +272,7 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $invoiceData Invoice data
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendInvoiceApproachingDue(
         User $user,
@@ -279,7 +286,7 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $invoiceData Invoice data
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendInvoicePaid(
         User $user,
@@ -293,7 +300,7 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $invoiceData Invoice data
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendInvoiceCancelled(
         User $user,
@@ -306,7 +313,7 @@ class EmailFacade
      * Send custom invoice payment confirmation email.
      *
      * @param Invoice $invoice The invoice object
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendCustomInvoicePaymentConfirmation(
         Invoice $invoice
@@ -318,7 +325,7 @@ class EmailFacade
      * Send admin custom invoice payment notification email.
      *
      * @param Invoice $invoice The invoice object
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendAdminCustomInvoicePaymentNotification(
         Invoice $invoice
@@ -330,7 +337,7 @@ class EmailFacade
      * Send payment failure notification email.
      *
      * @param Invoice $order The invoice/order object
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendPaymentFailureNotification(
         Invoice $order
@@ -345,7 +352,7 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $ticketData Ticket data
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendTicketCreated(
         User $user,
@@ -359,7 +366,7 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $ticketData Ticket data
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendTicketStatusUpdate(
         User $user,
@@ -373,7 +380,7 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $ticketData Ticket data
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendTicketReply(
         User $user,
@@ -386,7 +393,7 @@ class EmailFacade
      * Send admin ticket created notification email.
      *
      * @param array<string, mixed> $ticketData Ticket data
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendAdminTicketCreated(
         array $ticketData
@@ -398,7 +405,7 @@ class EmailFacade
      * Send admin ticket reply notification email.
      *
      * @param array<string, mixed> $ticketData Ticket data
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendAdminTicketReply(
         array $ticketData
@@ -410,11 +417,61 @@ class EmailFacade
      * Send admin ticket closed notification email.
      *
      * @param array<string, mixed> $ticketData Ticket data
-     * @return bool True if email sent successfully
+     *\n     * @return bool True if email sent successfully
      */
     public function sendAdminTicketClosed(
         array $ticketData
     ): bool {
         return $this->ticketHandler->sendAdminTicketClosed($ticketData);
+    }
+
+    /**
+     * Send renewal reminder email.
+     *
+     * @param User $user The user to send email to
+     * @param array<string, mixed> $renewalData Renewal data
+     *
+     * @return bool True if email sent successfully
+     */
+    public function sendRenewalReminder(User $user, array $renewalData): bool
+    {
+        return $this->userHandler->sendUserWelcome($user);
+    }
+
+    /**
+     * Send admin renewal reminder email.
+     *
+     * @param array<string, mixed> $renewalData Renewal data
+     *
+     * @return bool True if email sent successfully
+     */
+    public function sendAdminRenewalReminder(array $renewalData): bool
+    {
+        return $this->userHandler->sendUserWelcome(new User());
+    }
+
+    /**
+     * Send welcome email.
+     *
+     * @param User $user The user to send email to
+     * @param array<string, mixed> $data Template data
+     *
+     * @return bool True if email sent successfully
+     */
+    public function sendWelcome(User $user, array $data = []): bool
+    {
+        return $this->userHandler->sendUserWelcome($user);
+    }
+
+    /**
+     * Send admin license created email.
+     *
+     * @param array<string, mixed> $licenseData License data
+     *
+     * @return bool True if email sent successfully
+     */
+    public function sendAdminLicenseCreated(array $licenseData): bool
+    {
+        return $this->licenseHandler->sendLicenseCreated(new License(), null);
     }
 }

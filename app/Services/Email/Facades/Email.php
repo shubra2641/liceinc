@@ -14,10 +14,12 @@ use Illuminate\Support\Facades\Facade;
  *
  * Provides a simplified interface to all email services.
  *
- * @method static bool sendEmail(string $templateName, string $recipientEmail, array<string, mixed> $data = [], ?string $recipientName = null)
+ * @method static bool sendEmail(string $templateName, string $recipientEmail,
+ *     array<string, mixed> $data = [], ?string $recipientName = null)
  * @method static bool sendToUser(User $user, string $templateName, array<string, mixed> $data = [])
  * @method static bool sendToAdmin(string $templateName, array<string, mixed> $data = [])
- * @method static array<string, mixed> sendBulkEmail(array<string, mixed> $users, string $templateName, array<string, mixed> $data = [])
+ * @method static array<string, mixed> sendBulkEmail(array<string, mixed> $users,
+ *     string $templateName, array<string, mixed> $data = [])
  * @method static Collection<int, \App\Models\EmailTemplate> getTemplates(string $type, ?string $category = null)
  * @method static array<string, mixed> testTemplate(string $templateName, array<string, mixed> $data = [])
  * @method static bool sendUserWelcome(User $user)

@@ -11,7 +11,7 @@ use App\Models\Product;
 use App\Models\Ticket;
 use App\Models\TicketCategory;
 use App\Models\TicketReply;
-use App\Services\Email\Facades\Email;
+use App\Services\Email\EmailFacade;
 use App\Services\EnvatoService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -57,13 +57,13 @@ class TicketController extends Controller
     /**
      * The email service instance.
      */
-    protected Email $emailService;
+    protected EmailFacade $emailService;
     /**
      * Create a new controller instance.
      *
-     * @param  Email  $emailService  The email service instance
+     * @param  EmailFacade  $emailService  The email service instance
      */
-    public function __construct(Email $emailService)
+    public function __construct(EmailFacade $emailService)
     {
         $this->emailService = $emailService;
     }

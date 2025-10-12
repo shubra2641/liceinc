@@ -50,7 +50,7 @@ class EmailService
      * @param string $templateName
      * @param array<string, mixed> $data
      *
-     * @return bool
+     *\n     * @return bool
      */
     public function sendToUser(User $user, string $templateName, array $data = []): bool
     {
@@ -111,7 +111,7 @@ class EmailService
      *
      * @param User $user
      *
-     * @return bool
+     *\n     * @return bool
      */
     public function sendUserWelcome(User $user): bool
     {
@@ -124,7 +124,7 @@ class EmailService
      * @param User $user
      * @param array<string, mixed> $data
      *
-     * @return bool
+     *\n     * @return bool
      */
     public function sendWelcome(User $user, array $data = []): bool
     {
@@ -137,7 +137,7 @@ class EmailService
      * @param User $user
      * @param string $verificationUrl
      *
-     * @return bool
+     *\n     * @return bool
      */
     public function sendEmailVerification(User $user, string $verificationUrl): bool
     {
@@ -149,7 +149,7 @@ class EmailService
      *
      * @param User $user
      *
-     * @return bool
+     *\n     * @return bool
      */
     public function sendNewUserNotification(User $user): bool
     {
@@ -162,7 +162,7 @@ class EmailService
      * @param User $user
      * @param string $resetUrl
      *
-     * @return bool
+     *\n     * @return bool
      */
     public function sendPasswordReset(User $user, string $resetUrl): bool
     {
@@ -175,7 +175,7 @@ class EmailService
      *
      * @param License $license
      * @param Invoice $invoice
-     * @return bool
+     *\n     * @return bool
      */
     public function sendPaymentConfirmation(License $license, Invoice $invoice): bool
     {
@@ -187,7 +187,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $licenseData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendLicenseExpiring(User $user, array $licenseData): bool
     {
@@ -199,7 +199,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $licenseData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendLicenseUpdated(User $user, array $licenseData): bool
     {
@@ -211,7 +211,7 @@ class EmailService
      *
      * @param License $license
      * @param User|null $user
-     * @return bool
+     *\n     * @return bool
      */
     public function sendLicenseCreated(License $license, ?User $user = null): bool
     {
@@ -223,7 +223,7 @@ class EmailService
      *
      * @param License $license
      * @param Invoice $invoice
-     * @return bool
+     *\n     * @return bool
      */
     public function sendAdminPaymentNotification(License $license, Invoice $invoice): bool
     {
@@ -236,7 +236,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $invoiceData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendInvoiceApproachingDue(User $user, array $invoiceData): bool
     {
@@ -248,7 +248,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $invoiceData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendInvoicePaid(User $user, array $invoiceData): bool
     {
@@ -260,7 +260,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $invoiceData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendInvoiceCancelled(User $user, array $invoiceData): bool
     {
@@ -271,7 +271,7 @@ class EmailService
      * Send custom invoice payment confirmation.
      *
      * @param Invoice $invoice
-     * @return bool
+     *\n     * @return bool
      */
     public function sendCustomInvoicePaymentConfirmation(Invoice $invoice): bool
     {
@@ -282,7 +282,7 @@ class EmailService
      * Send admin custom invoice payment notification.
      *
      * @param Invoice $invoice
-     * @return bool
+     *\n     * @return bool
      */
     public function sendAdminCustomInvoicePaymentNotification(Invoice $invoice): bool
     {
@@ -293,7 +293,7 @@ class EmailService
      * Send payment failure notification.
      *
      * @param Invoice $order
-     * @return bool
+     *\n     * @return bool
      */
     public function sendPaymentFailureNotification(Invoice $order): bool
     {
@@ -306,7 +306,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $ticketData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendTicketCreated(User $user, array $ticketData): bool
     {
@@ -318,7 +318,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $ticketData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendTicketStatusUpdate(User $user, array $ticketData): bool
     {
@@ -330,7 +330,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $ticketData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendTicketReply(User $user, array $ticketData): bool
     {
@@ -341,7 +341,7 @@ class EmailService
      * Send admin ticket created email.
      *
      * @param array<string, mixed> $ticketData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendAdminTicketCreated(array $ticketData): bool
     {
@@ -352,7 +352,7 @@ class EmailService
      * Send admin ticket reply email.
      *
      * @param array<string, mixed> $ticketData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendAdminTicketReply(array $ticketData): bool
     {
@@ -363,7 +363,7 @@ class EmailService
      * Send admin ticket closed email.
      *
      * @param array<string, mixed> $ticketData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendAdminTicketClosed(array $ticketData): bool
     {
@@ -390,7 +390,7 @@ class EmailService
      * Send admin license created email.
      *
      * @param array<string, mixed> $licenseData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendAdminLicenseCreated(array $licenseData): bool
     {
@@ -401,7 +401,7 @@ class EmailService
      * Send admin license expiring email.
      *
      * @param array<string, mixed> $licenseData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendAdminLicenseExpiring(array $licenseData): bool
     {
@@ -412,7 +412,7 @@ class EmailService
      * Send admin license renewed email.
      *
      * @param array<string, mixed> $licenseData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendAdminLicenseRenewed(array $licenseData): bool
     {
@@ -424,7 +424,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $renewalData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendRenewalReminder(\App\Models\User $user, array $renewalData): bool
     {
@@ -435,7 +435,7 @@ class EmailService
      * Send admin renewal reminder email.
      *
      * @param array<string, mixed> $renewalData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendAdminRenewalReminder(array $renewalData): bool
     {
@@ -447,7 +447,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $productData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendProductVersionUpdate(\App\Models\User $user, array $productData): bool
     {
@@ -458,7 +458,7 @@ class EmailService
      * Send admin invoice approaching due email.
      *
      * @param array<string, mixed> $invoiceData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendAdminInvoiceApproachingDue(array $invoiceData): bool
     {
@@ -469,7 +469,7 @@ class EmailService
      * Send admin invoice cancelled email.
      *
      * @param array<string, mixed> $invoiceData
-     * @return bool
+     *\n     * @return bool
      */
     public function sendAdminInvoiceCancelled(array $invoiceData): bool
     {

@@ -12,7 +12,7 @@ use App\Models\Ticket;
 use App\Models\TicketCategory;
 use App\Models\TicketReply;
 use App\Models\User;
-use App\Services\Email\Facades\Email;
+use App\Services\Email\EmailFacade;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -38,9 +38,14 @@ use Illuminate\View\View;
  */
 class TicketController extends Controller
 {
-    protected Email $emailService;
+    protected EmailFacade $emailService;
 
-    public function __construct(Email $emailService)
+    /**
+     * Create a new controller instance.
+     *
+     * @param  EmailFacade  $emailService  The email service instance
+     */
+    public function __construct(EmailFacade $emailService)
     {
         $this->emailService = $emailService;
     }
