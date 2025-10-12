@@ -187,7 +187,7 @@
                                 @error('subject')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <div class="form-text">{{ trans('app.Use variables like @{{app_name}}, @{{user_name}}, etc.') }}</div>
+                                <div class="form-text">Use variables like @{{app_name}}, @{{user_name}}, etc.</div>
                             </div>
 
                             <div class="col-12 mb-3">
@@ -203,7 +203,7 @@
                                 @error('body')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <div class="form-text">{{ trans('app.HTML is supported. Use variables like @{{app_name}}, @{{user_name}}, etc.') }}</div>
+                                <div class="form-text">HTML is supported. Use variables like @{{app_name}}, @{{user_name}}, etc.</div>
                             </div>
 
                             <div class="col-12 mb-3">
@@ -411,4 +411,73 @@
         </div>
     </form>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const subjectInput = document.getElementById('subject');
+    const bodyTextarea = document.getElementById('body');
+    const previewSubject = document.getElementById('preview-subject');
+    const previewContent = document.getElementById('preview-content');
+    const refreshButton = document.getElementById('refresh-preview');
+
+    // Function to update preview
+    function updatePreview() {
+        if (subjectInput && previewSubject) {
+            previewSubject.textContent = subjectInput.value || '-';
+        }
+
+        if (bodyTextarea && previewContent) {
+            let bodyContent = bodyTextarea.value || '';
+            
+            // Replace variables with sample data
+            const sampleData = {
+                'app_name': 'My Logos',
+                'user_name': 'John Doe',
+                'user_email': 'john@example.com',
+                'app_url': 'https://localhost/my-logos',
+                'site_name': 'My Logos',
+                'admin_name': 'Admin',
+                'license_key': 'LIC-123456789',
+                'product_name': 'Premium Logo Pack',
+                'order_id': 'ORD-001',
+                'amount': '$99.00',
+                'date': new Date().toLocaleDateString(),
+                'support_email': 'support@example.com'
+            };
+
+            // Replace variables in content
+            Object.keys(sampleData).forEach(key => {
+                const regex = new RegExp(`@{{${key}}}`, 'g');
+                bodyContent = bodyContent.replace(regex, sampleData[key]);
+            });
+
+            // Render HTML content properly
+            if (bodyContent.trim()) {
+                previewContent.innerHTML = bodyContent;
+            } else {
+                previewContent.innerHTML = '<p class="text-muted">No content to preview</p>';
+            }
+        }
+    }
+
+    // Update preview when inputs change
+    if (subjectInput) {
+        subjectInput.addEventListener('input', updatePreview);
+    }
+
+    if (bodyTextarea) {
+        bodyTextarea.addEventListener('input', updatePreview);
+    }
+
+    // Refresh button
+    if (refreshButton) {
+        refreshButton.addEventListener('click', updatePreview);
+    }
+
+    // Initial preview update
+    updatePreview();
+});
+</script>
+@endpush
 @endsection
