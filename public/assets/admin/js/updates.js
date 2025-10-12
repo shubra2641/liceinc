@@ -20,10 +20,10 @@ const SecurityUtils = {
     },
     safeInnerHTML: function(element, content, sanitize) {
         if (!element || typeof content !== 'string') return;
-        if (sanitize !== false) {
-            element.textContent = this.sanitizeHtml(content);
-        } else {
+        if (sanitize === false) {
             element.innerHTML = content;
+        } else {
+            element.textContent = this.sanitizeHtml(content);
         }
     },
     safeInsertAdjacentHTML: function(element, position, html) {
@@ -412,6 +412,62 @@ function formatFileSize(bytes) {
   const power = Math.pow(k, i);
   const result = bytes / power;
   return parseFloat(result.toFixed(2)) + ' ' + sizes[i];
+}
+
+function uploadUpdatePackage() {
+  const fileInput = document.getElementById('update-package-file');
+  const btn = document.getElementById('confirm-upload-btn');
+  const originalText = btn.textContent;
+
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    showAlert('error', 'Please select a file to upload');
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const formData = new FormData();
+  formData.append('update_package', file);
+
+  // Use SecurityUtils for safe HTML insertion
+  SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Uploading...', false);
+  btn.disabled = true;
+
+  fetch('/admin/updates/upload', {
+    method: 'POST',
+    headers: {
+      'X-CSRF-TOKEN': document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content'),
+    },
+    body: formData,
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showAlert('success', data.message || 'Package uploaded successfully');
+        // Close modal
+        const modal = window.bootstrap.Modal.getInstance(document.getElementById('uploadPackageModal'));
+        if (modal) {
+          modal.hide();
+        }
+        // Reload page to show updated status
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        showAlert('error', data.message || 'Upload failed');
+      }
+      return true;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', 'An error occurred during upload');
+    })
+    .finally(() => {
+      // Use SecurityUtils for safe HTML restoration
+      SecurityUtils.safeInnerHTML(btn, originalText, false);
+      btn.disabled = false;
+    });
 }
 
 // Auto Update functionality
