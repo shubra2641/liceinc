@@ -76,6 +76,64 @@ if (typeof window.AdminCharts === 'undefined') {
       this.init();
     }
 
+    // Common utility methods to reduce duplication
+    getCommonColors() {
+      return {
+        primary: 'rgba(59, 130, 246, 0.8)',
+        success: 'rgba(16, 185, 129, 0.8)',
+        warning: 'rgba(245, 158, 11, 0.8)',
+        danger: 'rgba(239, 68, 68, 0.8)',
+        purple: 'rgba(139, 92, 246, 0.8)',
+        primarySolid: 'rgb(59, 130, 246)',
+        successSolid: 'rgb(16, 185, 129)',
+        warningSolid: 'rgb(245, 158, 11)',
+        dangerSolid: 'rgb(239, 68, 68)',
+        purpleSolid: 'rgb(139, 92, 246)'
+      };
+    }
+
+    getCommonTooltipConfig() {
+      return {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        cornerRadius: 8
+      };
+    }
+
+    getCommonScaleConfig() {
+      return {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0, 0, 0, 0.1)' },
+          ticks: { font: { size: 12, weight: '500' } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 12, weight: '500' } }
+        }
+      };
+    }
+
+    getCommonAnimationConfig(duration = 1200) {
+      return {
+        duration,
+        easing: 'easeInOutQuart'
+      };
+    }
+
+    createOrReplaceChart(chartId, ctx, config) {
+      if (this.charts[chartId]) {
+        this.charts[chartId].destroy();
+      }
+      this.charts[chartId] = new Chart(ctx, config);
+    }
+
+    handleChartError(chartId, error, fallbackData) {
+      console.warn(`${chartId} API failed:`, error);
+      return fallbackData;
+    }
+
     createSystemOverviewChart() {
       const ctx = document.getElementById('systemOverviewChart');
       if (!ctx) return;
@@ -83,6 +141,7 @@ if (typeof window.AdminCharts === 'undefined') {
       this._loadingCharts.systemOverview = true;
 
       const debugLog = (typeof window !== 'undefined' && window.debugLog) ? window.debugLog : function() {};
+      const colors = this.getCommonColors();
 
       const buildConfig = (labels, datasetValues) => ({
         type: 'doughnut',
@@ -91,18 +150,8 @@ if (typeof window.AdminCharts === 'undefined') {
           datasets: [
             {
               data: datasetValues,
-              backgroundColor: [
-                'rgba(59, 130, 246, 0.8)',
-                'rgba(239, 68, 68, 0.8)',
-                'rgba(245, 158, 11, 0.8)',
-                'rgba(16, 185, 129, 0.8)',
-              ],
-              borderColor: [
-                'rgb(59, 130, 246)',
-                'rgb(239, 68, 68)',
-                'rgb(245, 158, 11)',
-                'rgb(16, 185, 129)',
-              ],
+              backgroundColor: [colors.primary, colors.danger, colors.warning, colors.success],
+              borderColor: [colors.primarySolid, colors.dangerSolid, colors.warningSolid, colors.successSolid],
               borderWidth: 2,
               hoverOffset: 8,
             },
@@ -117,10 +166,7 @@ if (typeof window.AdminCharts === 'undefined') {
               labels: { usePointStyle: true, padding: 20, font: { size: 12, weight: '500' } },
             },
             tooltip: {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              titleColor: '#fff',
-              bodyColor: '#fff',
-              cornerRadius: 8,
+              ...this.getCommonTooltipConfig(),
               callbacks: {
                 label: function(context) {
                   const label = context.label || '';
@@ -130,7 +176,7 @@ if (typeof window.AdminCharts === 'undefined') {
               },
             },
           },
-          animation: { duration: 1200, easing: 'easeInOutQuart' },
+          animation: this.getCommonAnimationConfig(),
           cutout: '60%',
         },
       });
@@ -150,196 +196,64 @@ if (typeof window.AdminCharts === 'undefined') {
 
     createLicenseDistributionChart() {
       const ctx = document.getElementById('licenseDistributionChart');
-      if (!ctx) {
-        return;
-      }
+      if (!ctx) return;
 
-      const existing = Chart.getChart(ctx);
+      const colors = this.getCommonColors();
+      const buildConfig = (labels, data) => ({
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'License Count',
+            data,
+            backgroundColor: [colors.primary, colors.success, colors.warning, colors.purple],
+            borderColor: [colors.primarySolid, colors.successSolid, colors.warningSolid, colors.purpleSolid],
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: this.getCommonScaleConfig(),
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              ...this.getCommonTooltipConfig(),
+              callbacks: {
+                label: function(context) {
+                  return `Count: ${context.parsed.y}`;
+                },
+              },
+            },
+          },
+          animation: {
+            ...this.getCommonAnimationConfig(2000),
+            delay: function(context) {
+              return context.dataIndex * 200;
+            },
+          },
+          onHover: (event, activeElements) => {
+            event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+          },
+        },
+      });
 
       this.apiFetch('/admin/dashboard/license-distribution')
         .then(apiData => {
-          const data = {
-            labels: apiData.labels,
-            datasets: [
-              {
-                label: 'License Count',
-                data: apiData.data,
-                backgroundColor: [
-                  'rgba(59, 130, 246, 0.6)',
-                  'rgba(16, 185, 129, 0.6)',
-                  'rgba(245, 158, 11, 0.6)',
-                  'rgba(139, 92, 246, 0.6)',
-                ],
-                borderColor: [
-                  'rgb(59, 130, 246)',
-                  'rgb(16, 185, 129)',
-                  'rgb(245, 158, 11)',
-                  'rgb(139, 92, 246)',
-                ],
-                borderWidth: 2,
-                borderRadius: 8,
-                borderSkipped: false,
-              },
-            ],
-          };
-
-          const config = {
-            type: 'bar',
-            data,
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  grid: {
-                    color: 'rgba(0, 0, 0, 0.1)',
-                  },
-                  ticks: {
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-                x: {
-                  grid: {
-                    display: false,
-                  },
-                  ticks: {
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-              },
-              plugins: {
-                legend: {
-                  display: false,
-                },
-                tooltip: {
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                  titleColor: '#fff',
-                  bodyColor: '#fff',
-                  cornerRadius: 8,
-                  callbacks: {
-                    label: function(context) {
-                      return `Count: ${context.parsed.y}`;
-                    },
-                  },
-                },
-              },
-              animation: {
-                duration: 2000,
-                easing: 'easeInOutQuart',
-                delay: function(context) {
-                  return context.dataIndex * 200;
-                },
-              },
-              onHover: (event, activeElements) => {
-                event.native.target.style.cursor =
-                  activeElements.length > 0 ? 'pointer' : 'default';
-              },
-            },
-          };
-
-          this.charts.licenseDistribution = new Chart(ctx, config);
+          this.createOrReplaceChart('licenseDistribution', ctx, buildConfig(apiData.labels, apiData.data));
           return true;
         })
         .catch(error => {
-          console.warn('License distribution API failed:', error);
-          // Use fallback data when API fails
-          const fallbackData = {
-            labels: ['Regular', 'Extended'],
-            data: [0, 0],
-          };
-
-          const data = {
-            labels: fallbackData.labels,
-            datasets: [
-              {
-                label: 'License Count',
-                data: fallbackData.data,
-                backgroundColor: [
-                  'rgba(59, 130, 246, 0.6)',
-                  'rgba(16, 185, 129, 0.6)',
-                ],
-                borderColor: ['rgb(59, 130, 246)', 'rgb(16, 185, 129)'],
-                borderWidth: 2,
-                borderRadius: 8,
-                borderSkipped: false,
-              },
-            ],
-          };
-
-          const config = {
-            type: 'bar',
-            data,
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  grid: {
-                    color: 'rgba(0, 0, 0, 0.1)',
-                  },
-                  ticks: {
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-                x: {
-                  grid: {
-                    display: false,
-                  },
-                  ticks: {
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-              },
-              plugins: {
-                legend: {
-                  display: false,
-                },
-                tooltip: {
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                  titleColor: '#fff',
-                  bodyColor: '#fff',
-                  cornerRadius: 8,
-                  callbacks: {
-                    label: function(context) {
-                      return `Count: ${context.parsed.y}`;
-                    },
-                  },
-                },
-              },
-              animation: {
-                duration: 1000,
-                easing: 'easeInOutQuart',
-              },
-            },
-          };
-
-          this.charts.licenseDistribution = new Chart(ctx, config);
+          this.handleChartError('License distribution', error);
+          const fallbackData = { labels: ['Regular', 'Extended'], data: [0, 0] };
+          this.createOrReplaceChart('licenseDistribution', ctx, buildConfig(fallbackData.labels, fallbackData.data));
 
           // Show user-friendly message only in development
-          if (
-            window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1'
-          ) {
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             if (window.adminDashboard && window.adminDashboard.showToast) {
-              window.adminDashboard.showToast(
-                'Using fallback data for License Distribution chart',
-                'info',
-                3000,
-              );
+              window.adminDashboard.showToast('Using fallback data for License Distribution chart', 'info', 3000);
             }
           }
           return true;
@@ -348,9 +262,7 @@ if (typeof window.AdminCharts === 'undefined') {
 
     createRevenueChart() {
       const ctx = document.getElementById('revenueChart');
-      if (!ctx) {
-        return;
-      }
+      if (!ctx) return;
 
       // Check if chart already exists and destroy it
       if (Chart.getChart(ctx)) {
@@ -365,276 +277,136 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     fetchRevenueData(period = 'monthly') {
-      this.apiFetch(
-        `/admin/dashboard/revenue?period=${encodeURIComponent(period)}`,
-      )
-        .then(apiData => {
-          const data = {
-            labels: apiData.labels,
-            datasets: [
-              {
-                label: 'Revenue ($)',
-                data: apiData.data,
-                borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: 'rgb(59, 130, 246)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 6,
-                pointHoverRadius: 8,
-                pointHoverBackgroundColor: 'rgb(59, 130, 246)',
-                pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 3,
-              },
-            ],
-          };
-
-          const config = {
-            type: 'line',
-            data,
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  grid: {
-                    color: 'rgba(0, 0, 0, 0.1)',
-                  },
-                  ticks: {
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                    callback: function(value) {
-                      return `$${value.toLocaleString()}`;
-                    },
-                  },
-                },
-                x: {
-                  grid: {
-                    display: false,
-                  },
-                  ticks: {
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-              },
-              plugins: {
-                legend: {
-                  display: false,
-                },
-                tooltip: {
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                  titleColor: '#fff',
-                  bodyColor: '#fff',
-                  cornerRadius: 8,
-                  callbacks: {
-                    label: function(context) {
-                      return `Revenue: $${context.parsed.y.toLocaleString()}`;
-                    },
-                  },
-                },
-              },
-              interaction: {
-                intersect: false,
-                mode: 'index',
-              },
-              animation: {
-                duration: 2000,
-                easing: 'easeInOutQuart',
-              },
-            },
-          };
-
-          // Destroy existing chart if it exists
-          // Check if canvas still exists
-          if (
-            !this.revenueChartCtx ||
-            !document.contains(this.revenueChartCtx)
-          ) {
-            return;
-          }
-
-          if (this.charts.revenue) {
-            this.charts.revenue.destroy();
-          }
-
-          this.charts.revenue = new Chart(this.revenueChartCtx, config);
-          // eslint-disable-next-line consistent-return
-          return true;
-        })
-        .catch(error => {
-          console.warn('Revenue API failed:', error);
-          // Use fallback data when API fails
-          const fallbackData = {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            data: [0, 0, 0, 0, 0, 0],
-          };
-
-          const data = {
-            labels: fallbackData.labels,
-            datasets: [
-              {
-                label: 'Revenue ($)',
-                data: fallbackData.data,
-                borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: 'rgb(59, 130, 246)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 6,
-                pointHoverRadius: 8,
-              },
-            ],
-          };
-
-          const config = {
-            type: 'line',
-            data,
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  grid: {
-                    color: 'rgba(0, 0, 0, 0.1)',
-                  },
-                  ticks: {
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                    callback: function(value) {
-                      return `$${value.toLocaleString()}`;
-                    },
-                  },
-                },
-                x: {
-                  grid: {
-                    display: false,
-                  },
-                  ticks: {
-                    font: {
-                      size: 12,
-                      weight: '500',
-                    },
-                  },
-                },
-              },
-              plugins: {
-                legend: {
-                  display: false,
-                },
-                tooltip: {
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                  titleColor: '#fff',
-                  bodyColor: '#fff',
-                  cornerRadius: 8,
-                  callbacks: {
-                    label: function(context) {
-                      return `Revenue: $${context.parsed.y.toLocaleString()}`;
-                    },
-                  },
-                },
-              },
-              interaction: {
-                intersect: false,
-                mode: 'index',
-              },
-              animation: {
-                duration: 1000,
-                easing: 'easeInOutQuart',
-              },
-            },
-          };
-
-          // Check if canvas still exists
-          if (
-            !this.revenueChartCtx ||
-            !document.contains(this.revenueChartCtx)
-          ) {
-            return;
-          }
-
-          if (this.charts.revenue) {
-            this.charts.revenue.destroy();
-          }
-
-          this.charts.revenue = new Chart(this.revenueChartCtx, config);
-        });
-    }
-
-    createActivityTimelineChart() {
-      const ctx = document.getElementById('activityTimelineChart');
-      if (!ctx) {
-        return;
-      }
-      if (this._loadingCharts.activityTimeline) return;
-      this._loadingCharts.activityTimeline = true;
-      const debugLog = (typeof window !== 'undefined' && window.debugLog) ? window.debugLog : function() {};
-
-      const buildConfig = (labels, datasetValues) => ({
+      const colors = this.getCommonColors();
+      
+      const buildConfig = (labels, data) => ({
         type: 'line',
         data: {
           labels,
-          datasets: [
-            {
-              label: 'Active Users',
-              data: datasetValues,
-              borderColor: 'rgb(16, 185, 129)',
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
-              borderWidth: 3,
-              fill: true,
-              tension: 0.4,
-              pointBackgroundColor: 'rgb(16, 185, 129)',
-              pointBorderColor: '#fff',
-              pointBorderWidth: 2,
-              pointRadius: 6,
-              pointHoverRadius: 8,
-            },
-          ],
+          datasets: [{
+            label: 'Revenue ($)',
+            data,
+            borderColor: colors.primarySolid,
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: colors.primarySolid,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            pointHoverBackgroundColor: colors.primarySolid,
+            pointHoverBorderColor: '#fff',
+            pointHoverBorderWidth: 3,
+          }],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
+            ...this.getCommonScaleConfig(),
             y: {
-              beginAtZero: true,
-              grid: { color: 'rgba(0, 0, 0, 0.1)' },
-              ticks: { font: { size: 12, weight: '500' } },
-            },
-            x: {
-              grid: { display: false },
-              ticks: { font: { size: 12, weight: '500' } },
+              ...this.getCommonScaleConfig().y,
+              ticks: {
+                ...this.getCommonScaleConfig().y.ticks,
+                callback: function(value) {
+                  return `$${value.toLocaleString()}`;
+                },
+              },
             },
           },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              ...this.getCommonTooltipConfig(),
+              callbacks: {
+                label: function(context) {
+                  return `Revenue: $${context.parsed.y.toLocaleString()}`;
+                },
+              },
+            },
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index',
+          },
+          animation: this.getCommonAnimationConfig(2000),
+        },
+      });
+
+      this.apiFetch(`/admin/dashboard/revenue?period=${encodeURIComponent(period)}`)
+        .then(apiData => {
+          // Check if canvas still exists
+          if (!this.revenueChartCtx || !document.contains(this.revenueChartCtx)) {
+            return;
+          }
+
+          this.createOrReplaceChart('revenue', this.revenueChartCtx, buildConfig(apiData.labels, apiData.data));
+          return true;
+        })
+        .catch(error => {
+          this.handleChartError('Revenue', error);
+          
+          // Check if canvas still exists
+          if (!this.revenueChartCtx || !document.contains(this.revenueChartCtx)) {
+            return;
+          }
+
+          const fallbackData = {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            data: [0, 0, 0, 0, 0, 0],
+          };
+
+          this.createOrReplaceChart('revenue', this.revenueChartCtx, buildConfig(fallbackData.labels, fallbackData.data));
+        });
+    }
+
+    createActivityTimelineChart() {
+      const ctx = document.getElementById('activityTimelineChart');
+      if (!ctx) return;
+      if (this._loadingCharts.activityTimeline) return;
+      this._loadingCharts.activityTimeline = true;
+      
+      const debugLog = (typeof window !== 'undefined' && window.debugLog) ? window.debugLog : function() {};
+      const colors = this.getCommonColors();
+
+      const buildConfig = (labels, datasetValues) => ({
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Active Users',
+            data: datasetValues,
+            borderColor: colors.successSolid,
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: colors.successSolid,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: this.getCommonScaleConfig(),
           plugins: {
             legend: {
               position: 'top',
               labels: { usePointStyle: true, padding: 20, font: { size: 12, weight: '500' } },
             },
             tooltip: {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              titleColor: '#fff',
-              bodyColor: '#fff',
-              cornerRadius: 8,
+              ...this.getCommonTooltipConfig(),
               mode: 'index',
               intersect: false,
             },
           },
           interaction: { intersect: false, mode: 'index' },
-          animation: { duration: 1200, easing: 'easeInOutQuart' },
+          animation: this.getCommonAnimationConfig(),
         },
       });
 
@@ -799,9 +571,7 @@ if (typeof window.AdminCharts === 'undefined') {
 
     createInvoicesMonthlyChart() {
       const ctxNode = document.getElementById('invoicesMonthlyChart');
-      if (!ctxNode) {
-        return;
-      }
+      if (!ctxNode) return;
 
       // Check if chart already exists and destroy it
       if (Chart.getChart(ctxNode)) {
@@ -818,20 +588,20 @@ if (typeof window.AdminCharts === 'undefined') {
       }
 
       const ctx = ctxNode.getContext('2d');
+      const colors = this.getCommonColors();
+      
       const data = {
         labels: chartData.labels || [],
-        datasets: [
-          {
-            label: 'Invoices ($)',
-            data: chartData.data || [],
-            borderColor: 'rgb(59, 130, 246)',
-            backgroundColor: 'rgba(59, 130, 246, 0.08)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.3,
-            pointBackgroundColor: 'rgb(59, 130, 246)',
-          },
-        ],
+        datasets: [{
+          label: 'Invoices ($)',
+          data: chartData.data || [],
+          borderColor: colors.primarySolid,
+          backgroundColor: 'rgba(59, 130, 246, 0.08)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointBackgroundColor: colors.primarySolid,
+        }],
       };
 
       const config = {
@@ -854,6 +624,7 @@ if (typeof window.AdminCharts === 'undefined') {
           plugins: {
             legend: { display: false },
             tooltip: {
+              ...this.getCommonTooltipConfig(),
               callbacks: {
                 label: function(context) {
                   return `Amount: $${context.parsed.y.toLocaleString()}`;
@@ -864,12 +635,7 @@ if (typeof window.AdminCharts === 'undefined') {
         },
       };
 
-      // Destroy existing if present
-      if (this.charts.invoicesMonthly) {
-        this.charts.invoicesMonthly.destroy();
-      }
-
-      this.charts.invoicesMonthly = new Chart(ctx, config);
+      this.createOrReplaceChart('invoicesMonthly', ctx, config);
     }
 
     setupChartInteractions() {
@@ -1029,67 +795,51 @@ if (typeof window.AdminCharts === 'undefined') {
     // Dashboard-specific chart methods
     createApiRequestsChart() {
       const ctx = document.getElementById('apiRequestsChart');
-      if (!ctx) {
-        return;
-      }
+      if (!ctx) return;
 
       // Check if chart already exists and destroy it
       if (Chart.getChart(ctx)) {
         Chart.getChart(ctx).destroy();
       }
 
-      const apiRequestsChart = new Chart(ctx, {
+      const colors = this.getCommonColors();
+      const config = {
         type: 'line',
-        data: {
-          labels: [],
-          datasets: [],
-        },
+        data: { labels: [], datasets: [] },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              position: 'top',
-            },
-            title: {
-              display: true,
-              text: 'API Requests Over Time',
-            },
+            legend: { position: 'top' },
+            title: { display: true, text: 'API Requests Over Time' },
           },
-          scales: {
-            y: {
-              beginAtZero: true,
-            },
-          },
+          scales: { y: { beginAtZero: true } },
         },
-      });
+      };
 
-      // Store chart reference
-      this.charts.apiRequests = apiRequestsChart;
+      this.createOrReplaceChart('apiRequests', ctx, config);
 
       // Load API requests data
       const loadApiRequestsData = (period = 'daily') => {
         this.apiFetch(`/admin/dashboard/api-requests?period=${period}`)
           .then(data => {
-            apiRequestsChart.data.labels = data.labels;
-            apiRequestsChart.data.datasets = data.datasets;
-            apiRequestsChart.update();
+            this.charts.apiRequests.data.labels = data.labels;
+            this.charts.apiRequests.data.datasets = data.datasets;
+            this.charts.apiRequests.update();
             return true;
           })
           .catch(error => {
-            console.error('Error loading API requests data:', error);
+            this.handleChartError('API requests', error);
             // Use fallback data
-            apiRequestsChart.data.labels = ['No Data'];
-            apiRequestsChart.data.datasets = [
-              {
-                label: 'API Requests',
-                data: [0],
-                borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.1,
-              },
-            ];
-            apiRequestsChart.update();
+            this.charts.apiRequests.data.labels = ['No Data'];
+            this.charts.apiRequests.data.datasets = [{
+              label: 'API Requests',
+              data: [0],
+              borderColor: colors.primarySolid,
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              tension: 0.1,
+            }];
+            this.charts.apiRequests.update();
             return true;
           });
       };
@@ -1107,16 +857,15 @@ if (typeof window.AdminCharts === 'undefined') {
 
     createApiPerformanceChart() {
       const ctx = document.getElementById('apiPerformanceChart');
-      if (!ctx) {
-        return;
-      }
+      if (!ctx) return;
 
       // Check if chart already exists and destroy it
       if (Chart.getChart(ctx)) {
         Chart.getChart(ctx).destroy();
       }
 
-      const apiPerformanceChart = new Chart(ctx, {
+      const colors = this.getCommonColors();
+      const config = {
         type: 'bar',
         data: {
           labels: ['Today', 'Yesterday'],
@@ -1124,15 +873,15 @@ if (typeof window.AdminCharts === 'undefined') {
             {
               label: 'Successful',
               data: [0, 0],
-              backgroundColor: 'rgba(16, 185, 129, 0.8)',
-              borderColor: 'rgba(16, 185, 129, 1)',
+              backgroundColor: colors.success,
+              borderColor: colors.successSolid,
               borderWidth: 1,
             },
             {
               label: 'Failed',
               data: [0, 0],
-              backgroundColor: 'rgba(239, 68, 68, 0.8)',
-              borderColor: 'rgba(239, 68, 68, 1)',
+              backgroundColor: colors.danger,
+              borderColor: colors.dangerSolid,
               borderWidth: 1,
             },
           ],
@@ -1141,41 +890,25 @@ if (typeof window.AdminCharts === 'undefined') {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              position: 'top',
-            },
-            title: {
-              display: true,
-              text: 'API Performance Comparison',
-            },
+            legend: { position: 'top' },
+            title: { display: true, text: 'API Performance Comparison' },
           },
-          scales: {
-            y: {
-              beginAtZero: true,
-            },
-          },
+          scales: { y: { beginAtZero: true } },
         },
-      });
+      };
 
-      // Store chart reference
-      this.charts.apiPerformance = apiPerformanceChart;
+      this.createOrReplaceChart('apiPerformance', ctx, config);
 
       // Load API performance data
       this.apiFetch('/admin/dashboard/api-performance')
         .then(data => {
-          apiPerformanceChart.data.datasets[0].data = [
-            data.today.success,
-            data.yesterday.success,
-          ];
-          apiPerformanceChart.data.datasets[1].data = [
-            data.today.failed,
-            data.yesterday.failed,
-          ];
-          apiPerformanceChart.update();
+          this.charts.apiPerformance.data.datasets[0].data = [data.today.success, data.yesterday.success];
+          this.charts.apiPerformance.data.datasets[1].data = [data.today.failed, data.yesterday.failed];
+          this.charts.apiPerformance.update();
           return true;
         })
         .catch(error => {
-          console.error('Error loading API performance data:', error);
+          this.handleChartError('API performance', error);
           // Keep default data (0, 0) for both datasets
         });
     }
@@ -1283,76 +1016,52 @@ if (typeof window !== 'undefined') {
 function initReportsCharts() {
   // Check if Chart.js is available
   if (typeof Chart === 'undefined') {
-    // Chart.js is not loaded. Charts will not be initialized.
     return;
   }
+
+  // Common chart configuration
+  const getCommonReportConfig = (title, yTitle, yCallback) => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, position: 'top' },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: ${yCallback ? yCallback(context.parsed.y) : context.parsed.y.toLocaleString()}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: { title: { display: true, text: 'Last 3 Months' } },
+      y: {
+        beginAtZero: true,
+        title: { display: true, text: yTitle },
+        ticks: { callback: yCallback },
+      },
+    },
+  });
 
   // Initialize Monthly Revenue Chart
   const monthlyRevenueCanvas = document.getElementById('monthlyRevenueChart');
   if (monthlyRevenueCanvas) {
-    // Check if chart already exists
     if (Chart.getChart(monthlyRevenueCanvas)) {
       Chart.getChart(monthlyRevenueCanvas).destroy();
     }
 
-    const chartData = JSON.parse(
-      monthlyRevenueCanvas.getAttribute('data-chart-data') || '{}',
-    );
+    const chartData = JSON.parse(monthlyRevenueCanvas.getAttribute('data-chart-data') || '{}');
     if (chartData.labels && chartData.datasets) {
       try {
-        // eslint-disable-next-line no-new
         new Chart(monthlyRevenueCanvas, {
           type: 'line',
           data: chartData,
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: true,
-                position: 'top',
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return (
-                      `${context.dataset.label
-                      }: $${
-                        context.parsed.y.toLocaleString()}`
-                    );
-                  },
-                },
-              },
-            },
-            scales: {
-              x: {
-                title: {
-                  display: true,
-                  text: 'Last 3 Months',
-                },
-              },
-              y: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'Revenue ($)',
-                },
-                ticks: {
-                  callback: function(value) {
-                    return `$${value.toLocaleString()}`;
-                  },
-                },
-              },
-            },
-          },
+          options: getCommonReportConfig('Monthly Revenue', 'Revenue ($)', value => `$${value.toLocaleString()}`),
         });
-        // Monthly Revenue Chart initialized successfully
       } catch (error) {
-        // Error initializing Monthly Revenue Chart handled gracefully
         monthlyRevenueCanvas.parentElement.classList.add('error');
       }
     } else {
-      // Monthly Revenue Chart: No data available
       monthlyRevenueCanvas.parentElement.classList.add('error');
     }
   }
@@ -1360,130 +1069,45 @@ function initReportsCharts() {
   // Initialize Monthly Licenses Chart
   const monthlyLicensesCanvas = document.getElementById('monthlyLicensesChart');
   if (monthlyLicensesCanvas) {
-    // Check if chart already exists
     if (Chart.getChart(monthlyLicensesCanvas)) {
       Chart.getChart(monthlyLicensesCanvas).destroy();
     }
 
-    const chartData = JSON.parse(
-      monthlyLicensesCanvas.getAttribute('data-chart-data') || '{}',
-    );
+    const chartData = JSON.parse(monthlyLicensesCanvas.getAttribute('data-chart-data') || '{}');
     if (chartData.labels && chartData.datasets) {
       try {
-        // eslint-disable-next-line no-new
         new Chart(monthlyLicensesCanvas, {
           type: 'line',
           data: chartData,
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: true,
-                position: 'top',
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return (
-                      `${context.dataset.label
-                      }: ${
-                        context.parsed.y
-                      } licenses`
-                    );
-                  },
-                },
-              },
-            },
-            scales: {
-              x: {
-                title: {
-                  display: true,
-                  text: 'Last 3 Months',
-                },
-              },
-              y: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'Number of Licenses',
-                },
-              },
-            },
-          },
+          options: getCommonReportConfig('Monthly Licenses', 'Number of Licenses', value => `${value} licenses`),
         });
-        // Monthly Licenses Chart initialized successfully
       } catch (error) {
-        // Error initializing Monthly Licenses Chart handled gracefully
         monthlyLicensesCanvas.parentElement.classList.add('error');
       }
     } else {
-      // Monthly Licenses Chart: No data available
       monthlyLicensesCanvas.parentElement.classList.add('error');
     }
   }
 
   // Initialize User Registrations Chart
-  const userRegistrationsCanvas = document.getElementById(
-    'userRegistrationsChart',
-  );
+  const userRegistrationsCanvas = document.getElementById('userRegistrationsChart');
   if (userRegistrationsCanvas) {
-    // Check if chart already exists
     if (Chart.getChart(userRegistrationsCanvas)) {
       Chart.getChart(userRegistrationsCanvas).destroy();
     }
 
-    const chartData = JSON.parse(
-      userRegistrationsCanvas.getAttribute('data-chart-data') || '{}',
-    );
+    const chartData = JSON.parse(userRegistrationsCanvas.getAttribute('data-chart-data') || '{}');
     if (chartData.labels && chartData.datasets) {
       try {
-        // eslint-disable-next-line no-new
         new Chart(userRegistrationsCanvas, {
           type: 'line',
           data: chartData,
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: true,
-                position: 'top',
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return (
-                      `${context.dataset.label}: ${context.parsed.y} users`
-                    );
-                  },
-                },
-              },
-            },
-            scales: {
-              x: {
-                title: {
-                  display: true,
-                  text: 'Last 3 Months',
-                },
-              },
-              y: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'Number of Users',
-                },
-              },
-            },
-          },
+          options: getCommonReportConfig('User Registrations', 'Number of Users', value => `${value} users`),
         });
-        // User Registrations Chart initialized successfully
       } catch (error) {
-        // Error initializing User Registrations Chart handled gracefully
         userRegistrationsCanvas.parentElement.classList.add('error');
       }
     } else {
-      // User Registrations Chart: No data available
       userRegistrationsCanvas.parentElement.classList.add('error');
     }
   }
@@ -1491,38 +1115,26 @@ function initReportsCharts() {
   // Initialize System Overview Chart
   const systemOverviewCanvas = document.getElementById('systemOverviewChart');
   if (systemOverviewCanvas) {
-    // Check if chart already exists
     if (Chart.getChart(systemOverviewCanvas)) {
       Chart.getChart(systemOverviewCanvas).destroy();
     }
 
-    const chartData = JSON.parse(
-      systemOverviewCanvas.getAttribute('data-chart-data') || '{}',
-    );
+    const chartData = JSON.parse(systemOverviewCanvas.getAttribute('data-chart-data') || '{}');
     if (chartData.labels && chartData.datasets) {
       try {
-        // eslint-disable-next-line no-new
         new Chart(systemOverviewCanvas, {
           type: 'doughnut',
           data: chartData,
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: true,
-                position: 'bottom',
-              },
-            },
+            plugins: { legend: { display: true, position: 'bottom' } },
           },
         });
-        // System Overview Chart initialized successfully
       } catch (error) {
-        // Error initializing System Overview Chart handled gracefully
         systemOverviewCanvas.parentElement.classList.add('error');
       }
     } else {
-      // System Overview Chart: No data available
       systemOverviewCanvas.parentElement.classList.add('error');
     }
   }
@@ -1530,55 +1142,33 @@ function initReportsCharts() {
   // Initialize License Type Chart
   const licenseTypeCanvas = document.getElementById('licenseTypeChart');
   if (licenseTypeCanvas) {
-    const chartData = JSON.parse(
-      licenseTypeCanvas.getAttribute('data-chart-data') || '{}',
-    );
+    const chartData = JSON.parse(licenseTypeCanvas.getAttribute('data-chart-data') || '{}');
     if (chartData.labels && chartData.datasets) {
-      // eslint-disable-next-line no-new
       new Chart(licenseTypeCanvas, {
         type: 'pie',
         data: chartData,
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true,
-              position: 'bottom',
-            },
-          },
+          plugins: { legend: { display: true, position: 'bottom' } },
         },
       });
     }
   }
 
   // Initialize Activity Timeline Chart
-  const activityTimelineCanvas = document.getElementById(
-    'activityTimelineChart',
-  );
+  const activityTimelineCanvas = document.getElementById('activityTimelineChart');
   if (activityTimelineCanvas) {
-    const chartData = JSON.parse(
-      activityTimelineCanvas.getAttribute('data-chart-data') || '{}',
-    );
+    const chartData = JSON.parse(activityTimelineCanvas.getAttribute('data-chart-data') || '{}');
     if (chartData.labels && chartData.datasets) {
-      // eslint-disable-next-line no-new
       new Chart(activityTimelineCanvas, {
         type: 'bar',
         data: chartData,
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top',
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-            },
-          },
+          plugins: { legend: { display: true, position: 'top' } },
+          scales: { y: { beginAtZero: true } },
         },
       });
     }
@@ -1587,69 +1177,22 @@ function initReportsCharts() {
   // Initialize Invoices Monthly Chart
   const invoicesMonthlyCanvas = document.getElementById('invoicesMonthlyChart');
   if (invoicesMonthlyCanvas) {
-    // Check if chart already exists
     if (Chart.getChart(invoicesMonthlyCanvas)) {
       Chart.getChart(invoicesMonthlyCanvas).destroy();
     }
 
-    const chartData = JSON.parse(
-      invoicesMonthlyCanvas.getAttribute('data-chart-data') || '{}',
-    );
+    const chartData = JSON.parse(invoicesMonthlyCanvas.getAttribute('data-chart-data') || '{}');
     if (chartData.labels && chartData.datasets) {
       try {
-        // eslint-disable-next-line no-new
         new Chart(invoicesMonthlyCanvas, {
           type: 'line',
           data: chartData,
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: true,
-                position: 'top',
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return (
-                      `${context.dataset.label
-                      }: $${
-                        context.parsed.y.toLocaleString()}`
-                    );
-                  },
-                },
-              },
-            },
-            scales: {
-              x: {
-                title: {
-                  display: true,
-                  text: 'Last 3 Months',
-                },
-              },
-              y: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'Invoice Amount ($)',
-                },
-                ticks: {
-                  callback: function(value) {
-                    return `$${value.toLocaleString()}`;
-                  },
-                },
-              },
-            },
-          },
+          options: getCommonReportConfig('Invoices Monthly', 'Invoice Amount ($)', value => `$${value.toLocaleString()}`),
         });
-        // Invoices Monthly Chart initialized successfully
       } catch (error) {
-        // Error initializing Invoices Monthly Chart handled gracefully
         invoicesMonthlyCanvas.parentElement.classList.add('error');
       }
     } else {
-      // Invoices Monthly Chart: No data available
       invoicesMonthlyCanvas.parentElement.classList.add('error');
     }
   }
