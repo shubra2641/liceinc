@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * License Validation Service
- * 
+ *
  * Handles license validation operations to reduce controller complexity.
  */
 class LicenseValidationService
@@ -74,7 +74,10 @@ class LicenseValidationService
     /**
      * Handle validation error.
      */
-    public function handleValidationError(Request $request, string $message): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    public function handleValidationError(
+        Request $request, 
+        string $message
+    ): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
     {
         if ($request->expectsJson()) {
             return response()->json([

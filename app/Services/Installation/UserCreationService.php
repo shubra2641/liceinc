@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * User Creation Service
- * 
+ *
  * Handles user creation operations to reduce controller complexity.
  */
 class UserCreationService

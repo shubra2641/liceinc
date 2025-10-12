@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * Installation Service
- * 
+ *
  * Handles complex installation operations to reduce controller complexity.
  */
 class InstallationService
@@ -109,13 +109,21 @@ class InstallationService
             
             if (File::exists($configPath)) {
                 $sessionConfig = File::get($configPath);
-                $sessionConfig = str_replace("'driver' => env('SESSION_DRIVER', 'file')", "'driver' => env('SESSION_DRIVER', 'database')", $sessionConfig);
+                $sessionConfig = str_replace(
+                    "'driver' => env('SESSION_DRIVER', 'file')",
+                    "'driver' => env('SESSION_DRIVER', 'database')",
+                    $sessionConfig
+                );
                 File::put($configPath, $sessionConfig);
             }
 
             if (File::exists($cachePath)) {
                 $cacheConfig = File::get($cachePath);
-                $cacheConfig = str_replace("'default' => env('CACHE_DRIVER', 'file')", "'default' => env('CACHE_DRIVER', 'database')", $cacheConfig);
+                $cacheConfig = str_replace(
+                    "'default' => env('CACHE_DRIVER', 'file')",
+                    "'default' => env('CACHE_DRIVER', 'database')",
+                    $cacheConfig
+                );
                 File::put($cachePath, $cacheConfig);
             }
 

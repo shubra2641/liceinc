@@ -141,7 +141,10 @@ class InstallController extends Controller
             $validationResult = $this->validationService->validateLicenseInput($request);
             if (!$validationResult['valid']) {
                 $message = $validationResult['message'] ?? 'Validation failed';
-                return $this->validationService->handleValidationError($request, is_string($message) ? $message : 'Validation failed');
+                return $this->validationService->handleValidationError(
+                    $request, 
+                    is_string($message) ? $message : 'Validation failed'
+                );
             }
 
             // Verify license
