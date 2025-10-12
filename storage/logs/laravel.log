@@ -350,3 +350,7 @@
 [2025-10-12 11:31:13] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
 [2025-10-12 11:32:43] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
 [2025-10-12 11:32:44] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 15:31:06] local.WARNING: Authentication route not found {"url":"http://localhost/my-logos","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-12 15:31:06"} 
+[2025-10-12 15:31:13] local.WARNING: Authentication route not found {"url":"http://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-12 15:31:13"} 
+[2025-10-12 15:31:14] local.WARNING: Authentication route not found {"url":"http://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-12 15:31:14"} 
+[2025-10-12 15:31:34] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-12 15:31:34"} 

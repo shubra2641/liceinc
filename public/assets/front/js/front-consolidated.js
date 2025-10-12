@@ -492,7 +492,328 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// ===== USER DASHBOARD UTILITIES =====
+const UserDashboardUtils = {
+  // Button loading states
+  setButtonLoading(button, isLoading) {
+    const text = button.querySelector('.button-text, .user-btn-text');
+    const spinner = button.querySelector('.button-loading, .user-btn-spinner');
+
+    if (isLoading) {
+      button.disabled = true;
+      if (text) text.style.opacity = '0';
+      if (spinner) spinner.style.display = 'inline-block';
+    } else {
+      button.disabled = false;
+      if (text) text.style.opacity = '1';
+      if (spinner) spinner.style.display = 'none';
+    }
+  },
+
+  // Input validation
+  validateInput(input) {
+    const value = input.value.trim();
+    const { type } = input;
+    const required = input.hasAttribute('required');
+
+    if (required && !value) {
+      return 'This field is required';
+    }
+
+    if (type === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      return 'Please enter a valid email address';
+    }
+
+    if (type === 'password' && value && value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+
+    return null;
+  },
+
+  // Show input error
+  showInputError(input, message) {
+    const inputGroup = input.closest('.form-field-group, .form-group');
+    if (!inputGroup) return;
+
+    const existingError = inputGroup.querySelector('.form-error, .user-form-error');
+    if (existingError) existingError.remove();
+
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'form-error';
+    FrontendUtils.SecurityUtils.safeInnerHTML(
+      errorDiv,
+      `<i class="fas fa-exclamation-circle"></i> ${message}`
+    );
+
+    inputGroup.appendChild(errorDiv);
+    input.classList.add('form-input-error');
+  },
+
+  // Clear input error
+  clearInputError(input) {
+    const inputGroup = input.closest('.form-field-group, .form-group');
+    if (!inputGroup) return;
+
+    const existingError = inputGroup.querySelector('.form-error, .user-form-error');
+    if (existingError) existingError.remove();
+
+    input.classList.remove('form-input-error');
+  },
+
+  // Toggle password visibility
+  togglePasswordVisibility(input, showIcon, hideIcon) {
+    if (input.type === 'password') {
+      input.type = 'text';
+      showIcon.style.display = 'none';
+      hideIcon.style.display = 'inline';
+    } else {
+      input.type = 'password';
+      showIcon.style.display = 'inline';
+      hideIcon.style.display = 'none';
+    }
+  }
+};
+
+// ===== USER DASHBOARD MANAGER =====
+class UserDashboardManager {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    this.initializeDashboard();
+    this.initializeAuth();
+    this.initializeTables();
+    this.initializeForms();
+    this.initializeTabs();
+    this.initializeCopyButtons();
+    this.initializeFilters();
+    this.initializeMobileMenu();
+    this.initializeProfileTabs();
+    this.initializeLicenseStatus();
+    this.initializeHashScrolling();
+    this.initializeTableOfContents();
+    this.initializeArticleFeatures();
+  }
+
+  initializeDashboard() {
+    // Dashboard initialization logic
+    this.initializeTables();
+    this.initializeForms();
+    this.initializeTabs();
+  }
+
+  initializeAuth() {
+    this.initializePasswordToggles();
+    this.initializeFormValidation();
+    this.initializeFormLoading();
+    this.initializeFormAnimations();
+  }
+
+  initializePasswordToggles() {
+    const toggles = FrontendUtils.DOM.$$('[data-password-toggle]');
+    toggles.forEach(toggle => {
+      const input = FrontendUtils.DOM.$(toggle.dataset.passwordToggle);
+      const showIcon = FrontendUtils.DOM.$(toggle.dataset.showIcon);
+      const hideIcon = FrontendUtils.DOM.$(toggle.dataset.hideIcon);
+
+      if (input && showIcon && hideIcon) {
+        toggle.addEventListener('click', () =>
+          UserDashboardUtils.togglePasswordVisibility(input, showIcon, hideIcon)
+        );
+      }
+    });
+  }
+
+  initializeFormValidation() {
+    const forms = FrontendUtils.DOM.$$('.user-form, .register-form, .login-form');
+    forms.forEach(form => {
+      const inputs = FrontendUtils.DOM.$$('input, textarea, select', form);
+      inputs.forEach(input => {
+        input.addEventListener('blur', () => {
+          const error = UserDashboardUtils.validateInput(input);
+          if (error) {
+            UserDashboardUtils.showInputError(input, error);
+          } else {
+            UserDashboardUtils.clearInputError(input);
+          }
+        });
+
+        input.addEventListener('input', () => {
+          if (input.classList.contains('form-input-error')) {
+            const error = UserDashboardUtils.validateInput(input);
+            if (!error) {
+              UserDashboardUtils.clearInputError(input);
+            }
+          }
+        });
+      });
+
+      form.addEventListener('submit', e => {
+        const inputs = FrontendUtils.DOM.$$('input, textarea, select', form);
+        let hasErrors = false;
+
+        inputs.forEach(input => {
+          const error = UserDashboardUtils.validateInput(input);
+          if (error) {
+            UserDashboardUtils.showInputError(input, error);
+            hasErrors = true;
+          }
+        });
+
+        if (hasErrors) {
+          e.preventDefault();
+        }
+      });
+    });
+  }
+
+  initializeFormLoading() {
+    const forms = FrontendUtils.DOM.$$('.user-form, .register-form, .login-form');
+    forms.forEach(form => {
+      form.addEventListener('submit', () => {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          UserDashboardUtils.setButtonLoading(submitBtn, true);
+        }
+      });
+    });
+  }
+
+  initializeFormAnimations() {
+    const forms = FrontendUtils.DOM.$$('.user-form, .register-form, .login-form');
+    forms.forEach(form => {
+      const inputs = FrontendUtils.DOM.$$('input, textarea, select', form);
+      inputs.forEach(input => {
+        input.addEventListener('focus', () => {
+          input.classList.add('focused');
+        });
+
+        input.addEventListener('blur', () => {
+          if (!input.value) {
+            input.classList.remove('focused');
+          }
+        });
+      });
+    });
+  }
+
+  initializeTables() {
+    // Table initialization logic
+    const tables = FrontendUtils.DOM.$$('.user-table, .data-table');
+    tables.forEach(table => {
+      // Add table functionality
+    });
+  }
+
+  initializeForms() {
+    // Form initialization logic
+  }
+
+  initializeTabs() {
+    // Tab initialization logic
+  }
+
+  initializeCopyButtons() {
+    // Copy button initialization logic
+  }
+
+  initializeFilters() {
+    // Filter initialization logic
+  }
+
+  initializeMobileMenu() {
+    // Mobile menu initialization logic
+  }
+
+  initializeProfileTabs() {
+    // Profile tab initialization logic
+  }
+
+  initializeLicenseStatus() {
+    // License status initialization logic
+  }
+
+  initializeHashScrolling() {
+    // Hash scrolling initialization logic
+  }
+
+  initializeTableOfContents() {
+    // Table of contents initialization logic
+  }
+
+  initializeArticleFeatures() {
+    // Article features initialization logic
+  }
+}
+
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize all managers
+  new PreloaderManager();
+  new ProductShowManager();
+  new UserTicketsManager();
+  new MaintenanceManager();
+  new UserDashboardManager();
+
+  // Setup global event listeners
+  FrontendUtils.DOM.addEventListeners('[data-action="reload"]', 'click', () => {
+    location.reload();
+  });
+
+  FrontendUtils.DOM.addEventListeners('[data-action="purchase"]', 'click', EventHandlers.purchaseProduct);
+  FrontendUtils.DOM.addEventListeners('[data-action="download"]', 'click', EventHandlers.downloadProduct);
+  FrontendUtils.DOM.addEventListeners('[data-action="wishlist"]', 'click', EventHandlers.addToWishlist);
+  FrontendUtils.DOM.addEventListeners('[data-payment]', 'click', function() {
+    const paymentMethod = this.getAttribute('data-payment');
+    EventHandlers.processPayment(paymentMethod);
+  });
+  FrontendUtils.DOM.addEventListeners('[data-action="print"]', 'click', () => {
+    window.print();
+  });
+  FrontendUtils.DOM.addEventListeners('[data-copy-target]', 'click', function() {
+    const targetId = this.getAttribute('data-copy-target');
+    EventHandlers.copyToClipboard(targetId);
+  });
+  FrontendUtils.DOM.addEventListeners('[data-action="generate-preview"]', 'click', EventHandlers.generateLicenseKeyPreview);
+  FrontendUtils.DOM.addEventListeners('[data-confirm]', 'submit', function(e) {
+    const confirmType = this.getAttribute('data-confirm');
+    if (!EventHandlers.confirmDelete(confirmType)) {
+      e.preventDefault();
+    }
+  });
+  FrontendUtils.DOM.addEventListeners('[data-action="show-tab"], [data-tab]', 'click', function() {
+    const tabId = this.getAttribute('data-tab');
+    EventHandlers.showTab(tabId);
+  });
+
+  // Flash message handling
+  const flashSuccess = FrontendUtils.DOM.$('.flash-success');
+  const flashError = FrontendUtils.DOM.$('.flash-error');
+  const flashWarning = FrontendUtils.DOM.$('.flash-warning');
+  const flashInfo = FrontendUtils.DOM.$('.flash-info');
+
+  if (flashSuccess) {
+    FrontendUtils.Notification.show(flashSuccess.content, 'success');
+  }
+  if (flashError) {
+    FrontendUtils.Notification.show(flashError.content, 'error');
+  }
+  if (flashWarning) {
+    FrontendUtils.Notification.show(flashWarning.content, 'warning');
+  }
+  if (flashInfo) {
+    FrontendUtils.Notification.show(flashInfo.content, 'info');
+  }
+});
+
 // ===== GLOBAL EXPORTS =====
 window.FrontendUtils = FrontendUtils;
 window.EventHandlers = EventHandlers;
+window.UserDashboardUtils = UserDashboardUtils;
 window.showNotification = FrontendUtils.Notification.show;
+window.setButtonLoading = UserDashboardUtils.setButtonLoading;
+window.togglePasswordVisibility = UserDashboardUtils.togglePasswordVisibility;
+window.showTab = EventHandlers.showTab;
+window.copyToClipboard = EventHandlers.copyToClipboard;
