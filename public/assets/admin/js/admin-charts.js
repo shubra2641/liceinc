@@ -156,6 +156,14 @@ if (typeof window.AdminCharts === 'undefined') {
         if (!this._isValidUrl(primaryUrl)) {
           throw new Error('Invalid URL: SSRF protection activated');
         }
+        
+        // Additional SSRF protection - only allow same-origin requests
+        const urlObj = new URL(primaryUrl);
+        const currentOrigin = window.location.origin;
+        if (urlObj.origin !== currentOrigin) {
+          throw new Error('Cross-origin requests not allowed: SSRF protection');
+        }
+        
         const resp = await fetch(primaryUrl, opts);
         return await this._parseResponse(resp);
       } catch (e) {
