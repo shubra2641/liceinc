@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Installation;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 
@@ -77,7 +79,7 @@ class LicenseValidationService
     public function handleValidationError(
         Request $request, 
         string $message
-    ): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    ): RedirectResponse|JsonResponse
     {
         if ($request->expectsJson()) {
             return response()->json([

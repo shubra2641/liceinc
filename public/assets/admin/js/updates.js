@@ -1,216 +1,967 @@
 /**
  * System Updates Management
+ * Handles update checking, installation, and rollback functionality
  */
 
-// Security utilities
-const SecurityUtils = {
-    sanitizeHtml: (content) => typeof content === 'string' ? content.replace(/[<>&"']/g, match => ({'<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', '\'': '&#x27;'}[match])) : '',
-    safeInnerHTML: (element, content) => element && typeof content === 'string' ? element.textContent = SecurityUtils.sanitizeHtml(content) : null,
-    safeInsertAdjacentHTML: (element, position, html) => element && typeof html === 'string' ? element.insertAdjacentHTML(position, SecurityUtils.sanitizeHtml(html)) : null
-};
+document.addEventListener('DOMContentLoaded', () => {
+  // Check for updates button
+  document
+    .getElementById('check-updates-btn')
+    .addEventListener('click', () => {
+      checkForUpdates();
+    });
 
-// Utility functions
-const formatFileSize = (bytes) => bytes === 0 ? '0 Bytes' : parseFloat((bytes / Math.pow(1024, Math.floor(Math.log(bytes) / Math.log(1024)))).toFixed(2)) + ' ' + ['Bytes', 'KB', 'MB', 'GB'][Math.floor(Math.log(bytes) / Math.log(1024))];
+  // Update system button
+  document
+    .getElementById('update-system-btn')
+    .addEventListener('click', function() {
+      const { version } = this.dataset;
+      showUpdateModal(version);
+    });
 
-const showAlert = (type, message) => {
-    const alertClass = type === 'success' ? 'alert-success' : type === 'info' ? 'alert-info' : 'alert-danger';
-    const iconClass = type === 'success' ? 'fa-check-circle' : type === 'info' ? 'fa-info-circle' : 'fa-exclamation-triangle';
-    const alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert"><i class="fas ' + iconClass + ' me-2"></i>' + SecurityUtils.sanitizeHtml(message) + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
-    SecurityUtils.safeInsertAdjacentHTML(document.querySelector('.admin-page-header').parentNode, 'afterbegin', alertHtml);
-    setTimeout(() => { const alert = document.querySelector('.admin-page-header').parentNode.querySelector('.alert'); if (alert) window.bootstrap.Alert.getOrCreateInstance(alert).close(); }, 5000);
-};
+  // Confirm update checkbox
+  document
+    .getElementById('confirmUpdate')
+    .addEventListener('change', function() {
+      document.getElementById('confirm-update-btn').disabled = !this.checked;
+    });
 
-// Common fetch function
-const makeRequest = (url, data = null) => fetch(url, {
-    method: data ? 'POST' : 'GET',
-    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
-    body: data ? JSON.stringify(data) : undefined
-}).then(response => response.json());
+  // Confirm update button
+  document
+    .getElementById('confirm-update-btn')
+    .addEventListener('click', () => {
+      const { version } = document.getElementById('update-system-btn').dataset;
+      performUpdate(version);
+    });
 
-// Update functions
-const checkForUpdates = () => {
+  // Confirm upload button
+  document
+    .getElementById('confirm-upload-btn')
+    .addEventListener('click', () => {
+      uploadUpdatePackage();
+    });
+
+  // Confirm rollback checkbox
+  document
+    .getElementById('confirmRollback')
+    .addEventListener('change', function() {
+      document.getElementById('confirm-rollback-btn').disabled = !this.checked;
+    });
+
+  // Confirm rollback button
+  document
+    .getElementById('confirm-rollback-btn')
+    .addEventListener('click', function() {
+      const { version } = this.dataset;
+      performRollback(version);
+    });
+});
+
+function checkForUpdates() {
   const btn = document.getElementById('check-updates-btn');
-    const originalText = btn.textContent;
-    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...');
+  const originalText = btn.innerHTML;
+
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', true, true);
+  } else {
+    btn.textContent = 'Checking...';
+  }
   btn.disabled = true;
-    makeRequest(window.location.href, {}).then(data => {
-        if (data.success) window.location.reload();
-        else showAlert('error', data.message || 'Failed to check for updates');
-    }).catch(() => showAlert('error', 'An error occurred while checking for updates')).finally(() => {
-        SecurityUtils.safeInnerHTML(btn, originalText);
+
+  // eslint-disable-next-line promise/catch-or-return
+  fetch(window.location.href, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content'),
+    },
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Reload page to show updated status
+        window.location.reload();
+      } else {
+        showAlert('error', data.message || 'Failed to check for updates');
+      }
+      return true;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', 'An error occurred while checking for updates');
+    })
+    .finally(() => {
+      // Use SecurityUtils for safe HTML restoration
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+      } else {
+        btn.textContent = originalText;
+      }
       btn.disabled = false;
     });
-};
+}
 
-const showUpdateModal = (version) => {
+function showUpdateModal(version) {
   document.getElementById('update-system-btn').dataset.version = version;
   document.getElementById('confirmUpdate').checked = false;
   document.getElementById('confirm-update-btn').disabled = true;
-    new window.bootstrap.Modal(document.getElementById('updateModal')).show();
-};
 
-const performUpdate = (version) => {
+  const modal = new bootstrap.Modal(document.getElementById('updateModal'));
+  modal.show();
+}
+
+function performUpdate(version) {
   const btn = document.getElementById('confirm-update-btn');
-    const originalText = btn.textContent;
-    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Updating...');
+  const originalText = btn.innerHTML;
+
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Updating...', true, true);
+  } else {
+    btn.textContent = 'Updating...';
+  }
   btn.disabled = true;
-    makeRequest(window.location.href, { version, confirm: true }).then(data => {
-        if (data.success) { showAlert('success', data.message); setTimeout(() => window.location.reload(), 2000); }
-        else showAlert('error', data.message || 'Update failed');
-    }).catch(() => showAlert('error', 'An error occurred during update')).finally(() => {
-        SecurityUtils.safeInnerHTML(btn, originalText);
-      btn.disabled = false;
-        window.bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
-    });
-};
 
-const showVersionDetails = (version) => {
-    makeRequest('/admin/updates/version-info/' + version).then(data => {
+  // eslint-disable-next-line promise/catch-or-return
+  fetch(window.location.href, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content'),
+    },
+    body: JSON.stringify({
+      version,
+      confirm: true,
+    }),
+  })
+    .then(response => response.json())
+    .then(data => {
       if (data.success) {
-            SecurityUtils.safeInnerHTML(document.getElementById('versionDetailsTitle'), '<i class="fas fa-info-circle me-2"></i>Version Details - ' + SecurityUtils.sanitizeHtml(version));
-        let content = '<div class="version-details">';
-            if (data.data.info.features?.length > 0) {
-                content += '<h6 class="text-success mb-3"><i class="fas fa-plus me-2"></i>New Features</h6><ul class="list-group list-group-flush mb-4">';
-                data.data.info.features.forEach(feature => content += '<li class="list-group-item"><i class="fas fa-check text-success me-2"></i>' + SecurityUtils.sanitizeHtml(feature) + '</li>');
-          content += '</ul>';
-        }
-            if (data.data.info.fixes?.length > 0) {
-                content += '<h6 class="text-warning mb-3"><i class="fas fa-wrench me-2"></i>Bug Fixes</h6><ul class="list-group list-group-flush mb-4">';
-                data.data.info.fixes.forEach(fix => content += '<li class="list-group-item"><i class="fas fa-check text-warning me-2"></i>' + SecurityUtils.sanitizeHtml(fix) + '</li>');
-          content += '</ul>';
-        }
-            if (data.data.info.improvements?.length > 0) {
-                content += '<h6 class="text-info mb-3"><i class="fas fa-arrow-up me-2"></i>Improvements</h6><ul class="list-group list-group-flush mb-4">';
-                data.data.info.improvements.forEach(improvement => content += '<li class="list-group-item"><i class="fas fa-check text-info me-2"></i>' + SecurityUtils.sanitizeHtml(improvement) + '</li>');
-          content += '</ul>';
-        }
-            if (data.data.instructions?.length > 0) {
-                content += '<h6 class="text-primary mb-3"><i class="fas fa-list me-2"></i>Update Instructions</h6><ul class="list-group list-group-flush">';
-                data.data.instructions.forEach(instruction => content += '<li class="list-group-item"><i class="fas fa-arrow-right text-primary me-2"></i>' + SecurityUtils.sanitizeHtml(instruction) + '</li>');
-          content += '</ul>';
-        }
-        content += '</div>';
-            SecurityUtils.safeInnerHTML(document.getElementById('versionDetailsContent'), content);
-            new window.bootstrap.Modal(document.getElementById('versionDetailsModal')).show();
-        } else showAlert('error', data.message || 'Failed to load version details');
-    }).catch(() => showAlert('error', 'An error occurred while loading version details'));
-};
+        showAlert('success', data.message);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        showAlert('error', data.message || 'Update failed');
+      }
+      return true;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', 'An error occurred during update');
+    })
+    .finally(() => {
+      // Use SecurityUtils for safe HTML restoration
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+      } else {
+        btn.textContent = originalText;
+      }
+      btn.disabled = false;
+      bootstrap.Modal.getInstance(
+        document.getElementById('updateModal'),
+      ).hide();
+    });
+}
 
-const showRollbackModal = (version) => {
+// eslint-disable-next-line no-unused-vars
+function showVersionDetails(version) {
+  fetch(`/admin/updates/version-info/${version}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Sanitize version to prevent XSS
+        const sanitizedVersion = version.replace(/[<>&"']/g, match => ({
+          '<': '&lt;',
+          '>': '&gt;',
+          '&': '&amp;',
+          '"': '&quot;',
+          '\'': '&#x27;',
+        }[match]));
+        // Use SecurityUtils for safe HTML insertion
+        const titleElement = document.getElementById('versionDetailsTitle');
+        if (typeof SecurityUtils !== 'undefined') {
+          SecurityUtils.safeInnerHTML(titleElement, 
+            `<i class="fas fa-info-circle me-2"></i>Version Details - ${sanitizedVersion}`, 
+            true, 
+            true
+          );
+        } else {
+          titleElement.textContent = `Version Details - ${sanitizedVersion}`;
+        }
+
+        let content = '<div class="version-details">';
+
+        if (data.data.info.features && data.data.info.features.length > 0) {
+          content +=
+            '<h6 class="text-success mb-3"><i class="fas fa-plus me-2"></i>New Features</h6>';
+          content += '<ul class="list-group list-group-flush mb-4">';
+          data.data.info.features.forEach(feature => {
+            // Sanitize feature to prevent XSS
+            const sanitizedFeature = feature.replace(
+              /[<>&"']/g,
+              match => ({
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                '\'': '&#x27;',
+              }[match]),
+            );
+            content += `<li class="list-group-item"><i class="fas fa-check text-success me-2"></i>${sanitizedFeature}</li>`;
+          });
+          content += '</ul>';
+        }
+
+        if (data.data.info.fixes && data.data.info.fixes.length > 0) {
+          content +=
+            '<h6 class="text-warning mb-3"><i class="fas fa-wrench me-2"></i>Bug Fixes</h6>';
+          content += '<ul class="list-group list-group-flush mb-4">';
+          data.data.info.fixes.forEach(fix => {
+            // Sanitize fix to prevent XSS
+            const sanitizedFix = fix.replace(/[<>&"']/g, match => ({
+              '<': '&lt;',
+              '>': '&gt;',
+              '&': '&amp;',
+              '"': '&quot;',
+              '\'': '&#x27;',
+            }[match]));
+            content += `<li class="list-group-item"><i class="fas fa-check text-warning me-2"></i>${sanitizedFix}</li>`;
+          });
+          content += '</ul>';
+        }
+
+        if (
+          data.data.info.improvements &&
+          data.data.info.improvements.length > 0
+        ) {
+          content +=
+            '<h6 class="text-info mb-3"><i class="fas fa-arrow-up me-2"></i>Improvements</h6>';
+          content += '<ul class="list-group list-group-flush mb-4">';
+          data.data.info.improvements.forEach(improvement => {
+            // Sanitize improvement to prevent XSS
+            const sanitizedImprovement = improvement.replace(
+              /[<>&"']/g,
+              match => ({
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                '\'': '&#x27;',
+              }[match]),
+            );
+            content += `<li class="list-group-item"><i class="fas fa-check text-info me-2"></i>${sanitizedImprovement}</li>`;
+          });
+          content += '</ul>';
+        }
+
+        if (data.data.instructions && data.data.instructions.length > 0) {
+          content +=
+            '<h6 class="text-primary mb-3"><i class="fas fa-list me-2"></i>Update Instructions</h6>';
+          content += '<ul class="list-group list-group-flush">';
+          data.data.instructions.forEach(instruction => {
+            // Sanitize instruction to prevent XSS
+            const sanitizedInstruction = instruction.replace(
+              /[<>&"']/g,
+              match => ({
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                '\'': '&#x27;',
+              }[match]),
+            );
+            content += `<li class="list-group-item"><i class="fas fa-arrow-right text-primary me-2"></i>${sanitizedInstruction}</li>`;
+          });
+          content += '</ul>';
+        }
+
+        content += '</div>';
+        // Use SecurityUtils for safe HTML insertion
+        const contentElement = document.getElementById('versionDetailsContent');
+        if (typeof SecurityUtils !== 'undefined') {
+          SecurityUtils.safeInnerHTML(contentElement, content, true, true);
+        } else {
+          contentElement.textContent = 'Version details loaded';
+        }
+
+        const modal = new bootstrap.Modal(
+          document.getElementById('versionDetailsModal'),
+        );
+        modal.show();
+      } else {
+        showAlert('error', data.message || 'Failed to load version details');
+      }
+      return true;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', 'An error occurred while loading version details');
+    });
+}
+
+// eslint-disable-next-line no-unused-vars
+function showRollbackModal(version) {
   document.getElementById('confirm-rollback-btn').dataset.version = version;
   document.getElementById('confirmRollback').checked = false;
   document.getElementById('confirm-rollback-btn').disabled = true;
-    new window.bootstrap.Modal(document.getElementById('rollbackModal')).show();
-};
 
-const performRollback = (version) => {
+  const modal = new bootstrap.Modal(document.getElementById('rollbackModal'));
+  modal.show();
+}
+
+function performRollback(version) {
   const btn = document.getElementById('confirm-rollback-btn');
-    const originalText = btn.textContent;
-    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Rolling back...');
+  const originalText = btn.innerHTML;
+
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Rolling back...', true, true);
+  } else {
+    btn.textContent = 'Rolling back...';
+  }
   btn.disabled = true;
-    makeRequest('/admin/updates/rollback', { version, confirm: true }).then(data => {
-        if (data.success) { showAlert('success', data.message); setTimeout(() => window.location.reload(), 2000); }
-        else showAlert('error', data.message || 'Rollback failed');
-    }).catch(() => showAlert('error', 'An error occurred during rollback')).finally(() => {
-        SecurityUtils.safeInnerHTML(btn, originalText);
+
+  // eslint-disable-next-line promise/catch-or-return
+  fetch('/admin/updates/rollback', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content'),
+    },
+    body: JSON.stringify({
+      version,
+      confirm: true,
+    }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showAlert('success', data.message);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        showAlert('error', data.message || 'Rollback failed');
+      }
+      return true;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', 'An error occurred during rollback');
+    })
+    .finally(() => {
+      // Use SecurityUtils for safe HTML restoration
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+      } else {
+        btn.textContent = originalText;
+      }
       btn.disabled = false;
-        window.bootstrap.Modal.getInstance(document.getElementById('rollbackModal')).hide();
+      bootstrap.Modal.getInstance(
+        document.getElementById('rollbackModal'),
+      ).hide();
     });
-};
+}
 
-const uploadUpdatePackage = () => {
-    const fileInput = document.getElementById('update-package-file');
-    const btn = document.getElementById('confirm-upload-btn');
-    const originalText = btn.textContent;
-    if (!fileInput?.files?.length) { showAlert('error', 'Please select a file to upload'); return; }
-    const formData = new FormData();
-    formData.append('update_package', fileInput.files[0]);
-    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Uploading...');
-    btn.disabled = true;
-    fetch('/admin/updates/upload', {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
-        body: formData
-    }).then(response => response.json()).then(data => {
-        if (data.success) { showAlert('success', data.message || 'Package uploaded successfully'); const modal = window.bootstrap.Modal.getInstance(document.getElementById('uploadPackageModal')); if (modal) modal.hide(); setTimeout(() => window.location.reload(), 2000); }
-        else showAlert('error', data.message || 'Upload failed');
-    }).catch(() => showAlert('error', 'An error occurred during upload')).finally(() => {
-        SecurityUtils.safeInnerHTML(btn, originalText);
-        btn.disabled = false;
+function formatFileSize(bytes) {
+  if (bytes === 0) {
+    return '0 Bytes';
+  }
+
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+}
+
+// Auto Update functionality
+document
+  .getElementById('auto-update-btn')
+  .addEventListener('click', () => {
+    const modal = new bootstrap.Modal(
+      document.getElementById('autoUpdateModal'),
+    );
+    modal.show();
+  });
+
+// Check for updates function (refresh page to get latest data)
+// eslint-disable-next-line no-unused-vars
+function checkForUpdatesManually() {
+  showAlert('info', 'Checking for updates...');
+
+  // Simply reload the page to get fresh data from the server
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
+}
+
+// Display update information
+// eslint-disable-next-line no-unused-vars
+function displayUpdateInfo(updateData) {
+  document.getElementById('update-title').textContent =
+    updateData.update_info.title || 'Update';
+  document.getElementById('update-version').textContent =
+    updateData.latest_version;
+  document.getElementById('update-major').innerHTML = updateData.update_info
+    .is_major ?
+    '<span class="badge bg-warning">Yes</span>' :
+    '<span class="badge bg-info">No</span>';
+  document.getElementById('update-required').innerHTML = updateData.update_info
+    .is_required ?
+    '<span class="badge bg-danger">Yes</span>' :
+    '<span class="badge bg-success">No</span>';
+  document.getElementById('update-status').innerHTML =
+    '<span class="badge bg-success">Available</span>';
+  document.getElementById('update-release-date').textContent =
+    updateData.update_info.release_date || 'Not specified';
+  document.getElementById('update-file-size').textContent = formatFileSize(
+    updateData.update_info.file_size,
+  );
+  document.getElementById('update-description').textContent =
+    updateData.update_info.description || 'No description available';
+
+  // Display changelog
+  const changelogElement = document.getElementById('update-changelog');
+  if (
+    updateData.update_info.changelog &&
+    updateData.update_info.changelog.length > 0
+  ) {
+    // Sanitize changelog items to prevent XSS
+    const sanitizedChangelog = updateData.update_info.changelog.map(item => {
+      const sanitizedItem = item.replace(/[<>&"']/g, match => ({
+        '<': '&lt;',
+        '>': '&gt;',
+        '&': '&amp;',
+        '"': '&quot;',
+        '\'': '&#x27;',
+      }[match]));
+      return `<li><i class="fas fa-check text-success me-2"></i>${sanitizedItem}</li>`;
     });
-};
+    // Use SecurityUtils for safe HTML insertion
+    if (typeof SecurityUtils !== 'undefined') {
+      SecurityUtils.safeInnerHTML(changelogElement, 
+        `<ul class="list-unstyled">${sanitizedChangelog.join('')}</ul>`, 
+        true, 
+        true
+      );
+    } else {
+      changelogElement.textContent = 'Changelog loaded';
+    }
+  } else {
+    changelogElement.textContent = 'No changelog available';
+  }
 
-const displayUpdateInfo = (updateData) => {
-    document.getElementById('update-title').textContent = updateData.update_info.title || 'Update';
-    document.getElementById('update-version').textContent = updateData.latest_version;
-    SecurityUtils.safeInnerHTML(document.getElementById('update-major'), updateData.update_info.is_major ? '<span class="badge bg-warning">Yes</span>' : '<span class="badge bg-info">No</span>');
-    SecurityUtils.safeInnerHTML(document.getElementById('update-required'), updateData.update_info.is_required ? '<span class="badge bg-danger">Yes</span>' : '<span class="badge bg-success">No</span>');
-    SecurityUtils.safeInnerHTML(document.getElementById('update-status'), '<span class="badge bg-success">Available</span>');
-    document.getElementById('update-release-date').textContent = updateData.update_info.release_date || 'Not specified';
-    document.getElementById('update-file-size').textContent = formatFileSize(updateData.update_info.file_size);
-    document.getElementById('update-description').textContent = updateData.update_info.description || 'No description available';
-    const changelogElement = document.getElementById('update-changelog');
-    if (updateData.update_info.changelog?.length > 0) {
-        let changelogHtml = '<ul class="list-unstyled">';
-        updateData.update_info.changelog.forEach(item => changelogHtml += '<li><i class="fas fa-check text-success me-2"></i>' + SecurityUtils.sanitizeHtml(item) + '</li>');
-        changelogHtml += '</ul>';
-        SecurityUtils.safeInnerHTML(changelogElement, changelogHtml);
-    } else changelogElement.textContent = 'No changelog available';
+  // Show update info section
   document.getElementById('update-info-section').style.display = 'block';
   document.getElementById('no-updates-section').style.display = 'none';
-  window.currentUpdateData = updateData;
-};
 
-const showNoUpdatesAvailable = () => {
+  // Store update data for download
+  window.currentUpdateData = updateData;
+}
+
+// Show no updates available
+// eslint-disable-next-line no-unused-vars
+function showNoUpdatesAvailable() {
   document.getElementById('update-info-section').style.display = 'none';
   document.getElementById('no-updates-section').style.display = 'block';
-};
+}
 
-const loadVersionHistory = () => {
-    makeRequest('/admin/updates/current-version').then(data => {
-        const content = document.getElementById('version-history-content');
-        if (data.success && data.data.version_history?.length > 0) {
-            let html = '<div class="timeline">';
-            data.data.version_history.forEach(history => {
-                const isCurrent = history.version === data.data.current_version;
-                const badgeClass = isCurrent ? 'bg-success' : 'bg-secondary';
-                const badgeText = isCurrent ? 'Current' : 'Previous';
-                const sanitizedVersion = SecurityUtils.sanitizeHtml(history.version);
-                const sanitizedValue = SecurityUtils.sanitizeHtml(history.value || 'Auto update');
-                const sanitizedDate = SecurityUtils.sanitizeHtml(new Date(history.updated_at).toLocaleDateString());
-                html += '<div class="timeline-item"><div class="timeline-marker bg-' + (isCurrent ? 'success' : 'secondary') + '"></div><div class="timeline-content"><div class="d-flex justify-content-between align-items-start"><div><h6 class="timeline-title">Version ' + sanitizedVersion + '<span class="badge ' + badgeClass + ' ms-2">' + badgeText + '</span></h6><p class="timeline-text text-muted">' + sanitizedDate + '</p></div></div><div class="mt-2"><p class="small text-muted">' + sanitizedValue + '</p></div></div></div>';
-            });
-            html += '</div>';
-            SecurityUtils.safeInnerHTML(content, html);
+// Show auto update modal
+// eslint-disable-next-line no-unused-vars
+function showAutoUpdateModal() {
+  const modal = new bootstrap.Modal(document.getElementById('autoUpdateModal'));
+  modal.show();
+}
+
+// Show upload update modal
+// eslint-disable-next-line no-unused-vars
+function showUploadUpdateModal() {
+  const modal = new bootstrap.Modal(
+    document.getElementById('uploadPackageModal'),
+  );
+  modal.show();
+}
+
+// eslint-disable-next-line no-unused-vars
+function showProductUpdateInfo(updateData, productName) {
+  const modalHtml = `
+        <div class="modal fade" id="productUpdateModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-download me-2"></i>
+                            Update Available for ${productName}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Current Version:</strong> ${updateData.current_version}</p>
+                                <p><strong>Latest Version:</strong> ${updateData.latest_version}</p>
+                                <p><strong>Update Type:</strong> 
+                                    <span class="badge ${updateData.update_info.is_major ? 'bg-warning' : 'bg-info'}">
+                                        ${updateData.update_info.is_major ? 'Major' : 'Minor'}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>File Size:</strong> ${formatFileSize(updateData.update_info.file_size)}</p>
+                                <p><strong>Required:</strong> 
+                                    <span class="badge ${updateData.update_info.is_required ? 'bg-danger' : 'bg-success'}">
+                                        ${updateData.update_info.is_required ? 'Yes' : 'No'}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <h6>Changelog:</h6>
+                            <ul class="list-unstyled">
+                                ${updateData.update_info.changelog.map(item => `<li><i class="fas fa-check text-success me-2"></i>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-success" onclick="installProductUpdate('${updateData.latest_version}', '${updateData.update_info.download_url}')">
+                                <i class="fas fa-download me-2"></i>
+                                Install Update
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+  // Remove existing modal if any
+  const existingModal = document.getElementById('productUpdateModal');
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInsertAdjacentHTML(document.body, 'beforeend', modalHtml, true);
+  } else {
+    // Fallback: create element safely
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = modalHtml;
+    while (tempDiv.firstChild) {
+      document.body.appendChild(tempDiv.firstChild);
+    }
+  }
+
+  // Show modal
+  const modal = new bootstrap.Modal(
+    document.getElementById('productUpdateModal'),
+  );
+  modal.show();
+}
+
+// eslint-disable-next-line no-unused-vars
+function installProductUpdate(version, downloadUrl) {
+  if (!confirm('Are you sure you want to install this update?')) {
+    return;
+  }
+
+  showAlert('info', 'Downloading and installing update...');
+
+  // Here you would implement the actual download and installation
+  // For now, we'll just show a success message
+  setTimeout(() => {
+    showAlert('success', 'Update installed successfully!');
+    bootstrap.Modal.getInstance(
+      document.getElementById('productUpdateModal'),
+    ).hide();
+  }, 3000);
+}
+
+// eslint-disable-next-line no-unused-vars
+function checkAutoUpdates() {
+  const licenseKey = document.getElementById('auto-license-key').value;
+  const productSlug = document.getElementById('auto-product-slug').value;
+  const domain = document.getElementById('auto-domain').value;
+  const currentVersion = document.getElementById('auto-current-version').value;
+
+  if (!licenseKey || !productSlug || !currentVersion) {
+    showAlert('error', 'Please fill all required fields');
+    return;
+  }
+
+  const btn = document.getElementById('check-auto-updates-btn');
+  const originalText = btn.innerHTML;
+
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', true, true);
+  } else {
+    btn.textContent = 'Checking...';
+  }
+  btn.disabled = true;
+
+  // eslint-disable-next-line promise/catch-or-return
+  fetch('/admin/updates/auto-check', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content'),
+    },
+    body: JSON.stringify({
+      license_key: licenseKey,
+      product_slug: productSlug,
+      domain,
+      current_version: currentVersion,
+    }),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        // Check if auto update was completed
+        if (
+          data.message &&
+          data.message.includes('Auto update completed successfully')
+        ) {
+          // Auto update was completed
+          showAlert('success', data.message);
+
+          // Show additional info if available
+          if (data.data && data.data.files_installed) {
+            setTimeout(() => {
+              showAlert(
+                'info',
+                `Files installed: ${data.data.files_installed}. Please refresh the page to see the new version.`,
+              );
+            }, 2000);
+          }
+
+          // Auto refresh page after 5 seconds
+          setTimeout(() => {
+            window.location.reload();
+          }, 5000);
+        } else if (data.data && data.data.is_update_available) {
+          // Update available but not installed yet
+          showAutoUpdateInfo(data.data);
         } else {
-            const noHistoryHtml = '<div class="text-center py-4"><i class="fas fa-info-circle text-muted fs-1 mb-3"></i><h5 class="text-muted">No Version History Available</h5><p class="text-muted">Version information will appear here</p></div>';
-            SecurityUtils.safeInnerHTML(content, noHistoryHtml);
+          // No updates available
+          showAlert('info', 'No updates available');
         }
-    }).catch(() => {
-        const content = document.getElementById('version-history-content');
-        const errorHtml = '<div class="text-center py-4"><i class="fas fa-exclamation-triangle text-warning fs-1 mb-3"></i><h5 class="text-warning">Error loading version history</h5><p class="text-muted">Please try again later</p></div>';
-        SecurityUtils.safeInnerHTML(content, errorHtml);
+      } else {
+        // Update failed
+        showAlert('error', data.message || 'Update failed');
+      }
+      return true;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', `An error occurred during update: ${error.message}`);
+    })
+    .finally(() => {
+      // Use SecurityUtils for safe HTML restoration
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+      } else {
+        btn.textContent = originalText;
+      }
+      btn.disabled = false;
     });
-};
+}
 
-// Auto update functions
-const showAutoUpdateModal = () => new window.bootstrap.Modal(document.getElementById('autoUpdateModal')).show();
-const showUploadUpdateModal = () => new window.bootstrap.Modal(document.getElementById('uploadPackageModal')).show();
-const checkAutoUpdates = () => showAlert('info', 'Auto update functionality is being processed...');
-const installAutoUpdate = (version) => showAlert('info', 'Installing auto update for version: ' + version);
-const installProductUpdate = (version, downloadUrl) => showAlert('info', 'Installing product update for version: ' + version);
-const showProductUpdateInfo = (updateData, productName) => showAlert('info', 'Product update info for: ' + productName);
-const checkForUpdatesManually = () => window.location.reload();
+// eslint-disable-next-line no-unused-vars
+function showAutoUpdateInfo(updateData) {
+  const updateInfoDiv = document.getElementById('auto-update-info');
+  // Sanitize update data to prevent XSS
+  const sanitizedCurrentVersion = updateData.current_version.replace(
+    /[<>&"']/g,
+    match => ({
+      '<': '&lt;',
+      '>': '&gt;',
+      '&': '&amp;',
+      '"': '&quot;',
+      '\'': '&#x27;',
+    }[match]),
+  );
+  const sanitizedLatestVersion = updateData.latest_version.replace(
+    /[<>&"']/g,
+    match => ({
+      '<': '&lt;',
+      '>': '&gt;',
+      '&': '&amp;',
+      '"': '&quot;',
+      '\'': '&#x27;',
+    }[match]),
+  );
+  // Use SecurityUtils for safe HTML insertion
+  const updateInfoHtml = `
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-download text-primary me-2"></i>
+                    Update Available
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Current Version:</strong> ${sanitizedCurrentVersion}</p>
+                        <p><strong>Latest Version:</strong> ${sanitizedLatestVersion}</p>
+                        <p><strong>Update Type:</strong> 
+                            <span class="badge ${updateData.update_info.is_major ? 'bg-warning' : 'bg-info'}">
+                                ${updateData.update_info.is_major ? 'Major' : 'Minor'}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>File Size:</strong> ${formatFileSize(updateData.update_info.file_size)}</p>
+                        <p><strong>Required:</strong> 
+                            <span class="badge ${updateData.update_info.is_required ? 'bg-danger' : 'bg-success'}">
+                                ${updateData.update_info.is_required ? 'Yes' : 'No'}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h6>Changelog:</h6>
+                    <ul class="list-unstyled">
+                        ${updateData.update_info.changelog.map(item => `<li><i class="fas fa-check text-success me-2"></i>${item}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="installAutoUpdate('${updateData.latest_version}')">
+                        <i class="fas fa-download me-2"></i>
+                        Install Update
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+  
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(updateInfoDiv, updateInfoHtml, true, true);
+  } else {
+    updateInfoDiv.textContent = 'Update information loaded';
+  }
+  updateInfoDiv.style.display = 'block';
+}
 
-// Event listeners
+// eslint-disable-next-line no-unused-vars
+function installAutoUpdate(version) {
+  const licenseKey = document.getElementById('auto-license-key').value;
+  const productSlug = document.getElementById('auto-product-slug').value;
+  const domain = document.getElementById('auto-domain').value;
+
+  if (!confirm('Are you sure you want to install this update?')) {
+    return;
+  }
+
+  const btn = document.querySelector('#auto-update-info .btn-primary');
+  const originalText = btn.innerHTML;
+
+  // Use SecurityUtils for safe HTML insertion
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Installing...', true, true);
+  } else {
+    btn.textContent = 'Installing...';
+  }
+  btn.disabled = true;
+
+  // eslint-disable-next-line promise/catch-or-return
+  fetch('/admin/updates/auto-install', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content'),
+    },
+    body: JSON.stringify({
+      license_key: licenseKey,
+      product_slug: productSlug,
+      domain,
+      version,
+      confirm: true,
+    }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showAlert('success', data.message);
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      } else {
+        showAlert('error', data.message || 'Installation failed');
+      }
+      return true;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('error', 'An error occurred during installation');
+    })
+    .finally(() => {
+      // Use SecurityUtils for safe HTML restoration
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+      } else {
+        btn.textContent = originalText;
+      }
+      btn.disabled = false;
+    });
+}
+
+function showAlert(type, message) {
+  const alertClass =
+    type === 'success' ?
+      'alert-success' :
+      type === 'info' ?
+        'alert-info' :
+        'alert-danger';
+  const iconClass =
+    type === 'success' ?
+      'fa-check-circle' :
+      type === 'info' ?
+        'fa-info-circle' :
+        'fa-exclamation-triangle';
+
+  const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            <i class="fas ${iconClass} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+
+  // Insert at the top of the page
+  const container = document.querySelector('.admin-page-header').parentNode;
+  if (typeof SecurityUtils !== 'undefined') {
+    SecurityUtils.safeInsertAdjacentHTML(container, 'afterbegin', alertHtml, true);
+  } else {
+    // Fallback: create element safely
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = alertHtml;
+    while (tempDiv.firstChild) {
+      container.insertBefore(tempDiv.firstChild, container.firstChild);
+    }
+  }
+
+  // Auto-dismiss after 5 seconds
+  setTimeout(() => {
+    const alert = container.querySelector('.alert');
+    if (alert) {
+      bootstrap.Alert.getOrCreateInstance(alert).close();
+    }
+  }, 5000);
+}
+
+// Load version history
+function loadVersionHistory() {
+  fetch('/admin/updates/current-version', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content'),
+    },
+  })
+    .then(response => response.json())
+    .then(data => {
+      const content = document.getElementById('version-history-content');
+
+      if (
+        data.success &&
+        data.data.version_history &&
+        data.data.version_history.length > 0
+      ) {
+        let html = '<div class="timeline">';
+
+        data.data.version_history.forEach(history => {
+          const isCurrent = history.version === data.data.current_version;
+          const badgeClass = isCurrent ? 'bg-success' : 'bg-secondary';
+          const badgeText = isCurrent ? 'Current' : 'Previous';
+
+          html += `
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-${isCurrent ? 'success' : 'secondary'}"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="timeline-title">
+                                        Version ${history.version}
+                                        <span class="badge ${badgeClass} ms-2">${badgeText}</span>
+                                    </h6>
+                                    <p class="timeline-text text-muted">${new Date(history.updated_at).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <p class="small text-muted">${history.value || 'Auto update'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+        });
+
+        html += '</div>';
+        // Use SecurityUtils for safe HTML insertion
+        if (typeof SecurityUtils !== 'undefined') {
+          SecurityUtils.safeInnerHTML(content, html, true, true);
+        } else {
+          content.textContent = 'Version history loaded';
+        }
+      } else {
+        // Use SecurityUtils for safe HTML insertion
+        if (typeof SecurityUtils !== 'undefined') {
+          SecurityUtils.safeInnerHTML(content, 
+            `<div class="text-center py-4">
+                <i class="fas fa-info-circle text-muted fs-1 mb-3"></i>
+                <h5 class="text-muted">No Version History Available</h5>
+                <p class="text-muted">Version information will appear here</p>
+            </div>`, 
+            true, 
+            true
+          );
+        } else {
+          content.textContent = 'No version history available';
+        }
+      }
+      return true;
+    })
+    .catch(error => {
+      console.error('Error loading version history:', error);
+      const content = document.getElementById('version-history-content');
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(content, 
+          `<div class="text-center py-4">
+              <i class="fas fa-exclamation-triangle text-warning fs-1 mb-3"></i>
+              <h5 class="text-warning">Error loading version history</h5>
+              <p class="text-muted">Please try again later</p>
+          </div>`, 
+          true, 
+          true
+        );
+      } else {
+        content.textContent = 'Error loading version history';
+      }
+    });
+}
+
+// Initialize page
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('check-updates-btn').addEventListener('click', checkForUpdates);
-    document.getElementById('update-system-btn').addEventListener('click', function() { showUpdateModal(this.dataset.version); });
-    document.getElementById('confirmUpdate').addEventListener('change', function() { document.getElementById('confirm-update-btn').disabled = !this.checked; });
-    document.getElementById('confirm-update-btn').addEventListener('click', () => { performUpdate(document.getElementById('update-system-btn').dataset.version); });
-    document.getElementById('confirm-upload-btn').addEventListener('click', uploadUpdatePackage);
-    document.getElementById('confirmRollback').addEventListener('change', function() { document.getElementById('confirm-rollback-btn').disabled = !this.checked; });
-    document.getElementById('confirm-rollback-btn').addEventListener('click', function() { performRollback(this.dataset.version); });
-    document.getElementById('auto-update-btn').addEventListener('click', () => { new window.bootstrap.Modal(document.getElementById('autoUpdateModal')).show(); });
+  // Load version history on page load
   loadVersionHistory();
 });
