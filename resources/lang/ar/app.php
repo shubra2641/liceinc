@@ -708,7 +708,7 @@ return [
     'Getting Started' => 'البدء',
     'Getting Started Tips' => 'نصائح للبدء',
     'Guides' => 'أدلة',
-    'HTML is supported. Use variables like {{app_name}}, {{user_name}}, etc.' => 'يدعم HTML. استخدم متغيرات مثل {{app_name}} و {{user_name}} وما إلى ذلك.',
+    'HTML is supported. Use variables like @{{app_name}}, @{{user_name}}, etc.' => 'يدعم HTML. استخدم متغيرات مثل @{{app_name}} و @{{user_name}} وما إلى ذلك.',
     'Handle Customer Support Tickets' => 'إدارة تذاكر دعم العملاء',
     'Having trouble creating your account?' => 'هل تواجه مشكلة في إنشاء حسابك؟',
     'Help' => 'مساعدة',
@@ -1547,8 +1547,8 @@ return [
         'استخدم محرر النص الغني لتنسيق ردك',
     'Use the rich text editor to format your reply with headings, lists, links, and more.' =>
         'استخدم محرر النص الغني لتنسيق ردك مع العناوين والقوائم والروابط والمزيد.',
-    'Use variables like {{app_name}}, {{user_name}}, etc.' =>
-        'استخدم متغيرات مثل {{app_name}} و {{user_name}} وما إلى ذلك.',
+    'Use variables like @{{app_name}}, @{{user_name}}, etc.' =>
+        'استخدم متغيرات مثل @{{app_name}} و @{{user_name}} وما إلى ذلك.',
     'Used Domains' => 'النطاقات المستخدمة',
     'User' => 'المستخدم',
     'User (Owner)' => 'المستخدم (المالك)',
