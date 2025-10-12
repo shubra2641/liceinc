@@ -2,7 +2,7 @@
  * Admin Dashboard Charts and Statistics - Zero Duplication Version
  * Unified chart system with complete elimination of code duplication
  */
-/* global fetch URL setInterval setTimeout console Chart MutationObserver Blob bootstrap alert AdminCharts module */
+/* global URL setInterval setTimeout console Chart MutationObserver Blob bootstrap alert AdminCharts module */
 
 if (typeof window.AdminCharts === 'undefined') {
   class AdminCharts {
@@ -121,7 +121,7 @@ if (typeof window.AdminCharts === 'undefined') {
         this.charts[chartId].destroy();
       }
       
-      // Safe assignment with validated chartId
+      // Safe assignment with validated chartId - chartId is already validated
       this.charts[chartId] = new Chart(ctx, config);
       return true;
     }
@@ -174,6 +174,12 @@ if (typeof window.AdminCharts === 'undefined') {
         const isAllowedPath = allowedPaths.some(path => primaryUrl.includes(path));
         if (!isAllowedPath) {
           throw new Error('Unauthorized path: SSRF protection');
+        }
+        
+        // Final validation - ensure URL is not user-controlled
+        const urlPath = urlObj.pathname;
+        if (!urlPath.startsWith('/admin/') && !urlPath.startsWith('/api/')) {
+          throw new Error('Invalid path: SSRF protection');
         }
         
         const resp = await fetch(primaryUrl, opts);
@@ -325,7 +331,10 @@ if (typeof window.AdminCharts === 'undefined') {
 
     // ===== UNIFIED CHART CREATION METHODS =====
     _createChartFromAPI(chartId, ctx, apiPath, configBuilder, fallbackData) {
-      if (this._loadingCharts[chartId]) return;
+      // Validate chartId before using it as object key
+      if (!this._validateChartId(chartId)) return;
+      
+      if (Object.prototype.hasOwnProperty.call(this._loadingCharts, chartId) && this._loadingCharts[chartId]) return;
       this._loadingCharts[chartId] = true;
 
       this._apiFetch(apiPath)
@@ -603,7 +612,13 @@ if (typeof window.AdminCharts === 'undefined') {
 
     updateChartData() {
       const updateChart = (chartId, apiPath, updateFn) => {
-        if (this.charts[chartId] && this.charts[chartId].canvas && document.contains(this.charts[chartId].canvas)) {
+        // Validate chartId before accessing charts object
+        if (!this._validateChartId(chartId)) return;
+        
+        if (Object.prototype.hasOwnProperty.call(this.charts, chartId) && 
+            this.charts[chartId] && 
+            this.charts[chartId].canvas && 
+            document.contains(this.charts[chartId].canvas)) {
           this._apiFetch(apiPath)
             .then(apiData => {
               updateFn(apiData);
@@ -657,8 +672,11 @@ if (typeof window.AdminCharts === 'undefined') {
             if (elements.length > 0) {
               const [element] = elements;
               const { datasetIndex, index } = element;
-              const label = chart.data.labels[index];
-              const value = chart.data.datasets[datasetIndex].data[index];
+              // Safe access with bounds checking
+              const label = (chart.data.labels && index >= 0 && index < chart.data.labels.length) ? chart.data.labels[index] : '';
+              const value = (chart.data.datasets && datasetIndex >= 0 && datasetIndex < chart.data.datasets.length && 
+                           chart.data.datasets[datasetIndex].data && index >= 0 && index < chart.data.datasets[datasetIndex].data.length) ? 
+                           chart.data.datasets[datasetIndex].data[index] : 0;
               this.showChartDetail(chart, label, value, datasetIndex);
             }
           }
@@ -707,7 +725,10 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     exportChartData(chartId, format = 'csv') {
-      const chart = this.charts[chartId];
+      // Validate chartId before accessing charts object
+      if (!this._validateChartId(chartId)) return;
+      
+      const chart = Object.prototype.hasOwnProperty.call(this.charts, chartId) ? this.charts[chartId] : null;
       if (!chart) return;
 
       const { data } = chart;
