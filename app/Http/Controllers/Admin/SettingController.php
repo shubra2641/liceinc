@@ -134,6 +134,7 @@ class SettingController extends Controller
                     'preloader_color' => '#3b82f6',
                     'preloader_background_color' => '#ffffff',
                     'preloader_duration' => 800,
+                    'preloader_min_duration' => 0,
                     'preloader_custom_css' => null,
                     // Logo defaults
                     'site_logo_dark' => null,

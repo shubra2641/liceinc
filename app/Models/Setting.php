@@ -113,6 +113,7 @@ use Illuminate\Support\Facades\Cache;
  * @property string $preloader_color
  * @property string $preloader_background_color
  * @property int $preloader_duration
+ * @property int $preloader_min_duration
  * @property string|null $preloader_custom_css
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -247,6 +248,7 @@ use Illuminate\Support\Facades\Cache;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting wherePreloaderColor($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting wherePreloaderCustomCss($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting wherePreloaderDuration($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting wherePreloaderMinDuration($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting wherePreloaderEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting wherePreloaderType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereRenewalReminderDays($value)
@@ -376,6 +378,7 @@ class Setting extends Model
         'preloader_color',
         'preloader_background_color',
         'preloader_duration',
+        'preloader_min_duration',
         'preloader_custom_css',
         'site_logo_dark',
         'logo_width',
@@ -431,6 +434,7 @@ class Setting extends Model
         'preloader_enabled' => 'boolean',
         'logo_show_text' => 'boolean',
         'preloader_duration' => 'integer',
+        'preloader_min_duration' => 'integer',
         'logo_width' => 'integer',
         'logo_height' => 'integer',
         'avg_response_time' => 'integer',

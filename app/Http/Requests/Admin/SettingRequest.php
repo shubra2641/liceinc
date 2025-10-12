@@ -252,6 +252,15 @@ class SettingRequest extends FormRequest
             ],
             'preloader_duration' => [
                 'nullable',
+                'integer',
+                'min:100',
+                'max:10000',
+            ],
+            'preloader_min_duration' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:5000',
             ],
             'preloader_custom_css' => [
                 'nullable',
@@ -741,6 +750,8 @@ class SettingRequest extends FormRequest
             'license_verification_enabled' => $this->has('license_verification_enabled'),
             'license_auto_verification' => $this->has('license_auto_verification'),
             'auto_renewal_enabled' => $this->has('auto_renewal_enabled'),
+            'preloader_enabled' => $this->has('preloader_enabled'),
+            'logo_show_text' => $this->has('logo_show_text'),
         ]);
         // Set default values
         $this->merge([
