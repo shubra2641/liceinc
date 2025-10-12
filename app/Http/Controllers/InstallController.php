@@ -20,7 +20,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use App\Helpers\SecureFileHelper;
 use LicenseProtection\LicenseVerifier;
-
 /**
  * Installation Controller with enhanced security and comprehensive setup.
  *
@@ -37,11 +36,9 @@ use LicenseProtection\LicenseVerifier;
  * - System settings configuration and storage
  * - Comprehensive error handling and logging
  * - Security validation for all installation steps
- *
  * @example
  * // Start installation process
  * GET /install
- *
  * // Verify license
  * POST /install/license
  */
@@ -53,8 +50,7 @@ class InstallController extends Controller
         protected SystemRequirementsService $requirementsService
     ) {
     }
-    /**
-     * Show installation welcome page with language support.
+    /*** Show installation welcome page with language support.
      *
      * Displays the initial installation welcome page with language switching
      * functionality and proper validation for supported locales.
@@ -492,7 +488,6 @@ class InstallController extends Controller
 
         $steps = $this->stepService->getInstallationStepsWithStatus(6);
         $timezones = $this->stepService->getTimezones();
-        
         return view('install.settings', [
             'step' => 6,
             'progressWidth' => 100,
