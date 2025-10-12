@@ -110,6 +110,7 @@ class EmailService
      * Send user welcome email.
      *
      * @param User $user
+     *
      * @return bool
      */
     public function sendUserWelcome(User $user): bool

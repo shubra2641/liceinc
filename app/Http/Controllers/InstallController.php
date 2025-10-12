@@ -187,6 +187,7 @@ class InstallController extends Controller
      *
      * @param Request $request
      * @param string $message
+     *
      * @return RedirectResponse|JsonResponse
      */
     private function handleValidationError(Request $request, string $message): RedirectResponse|JsonResponse
@@ -378,6 +379,7 @@ class InstallController extends Controller
      * Validate database input.
      *
      * @param Request $request
+     *
      * @return array<string, mixed>
      */
     private function validateDatabaseInput(Request $request): array

@@ -59,6 +59,7 @@ class EmailFacade
      * @param User $user The user to send email to
      * @param string $templateName The email template name
      * @param array<string, mixed> $data Template data variables
+     *
      * @return bool True if email sent successfully
      */
     public function sendToUser(
