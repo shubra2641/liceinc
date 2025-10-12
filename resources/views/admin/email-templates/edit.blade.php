@@ -412,7 +412,6 @@
     </form>
 </div>
 
-@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const subjectInput = document.getElementById('subject');
@@ -421,17 +420,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewContent = document.getElementById('preview-content');
     const refreshButton = document.getElementById('refresh-preview');
 
-    // Function to update preview
     function updatePreview() {
+        // Update subject
         if (subjectInput && previewSubject) {
             previewSubject.textContent = subjectInput.value || '-';
         }
 
+        // Update body content
         if (bodyTextarea && previewContent) {
-            let bodyContent = bodyTextarea.value || '';
+            let content = bodyTextarea.value || '';
             
             // Replace variables with sample data
-            const sampleData = {
+            const variables = {
                 'app_name': 'My Logos',
                 'user_name': 'John Doe',
                 'user_email': 'john@example.com',
@@ -446,15 +446,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 'support_email': 'support@example.com'
             };
 
-            // Replace variables in content
-            Object.keys(sampleData).forEach(key => {
+            // Replace @{{variable}} with actual values
+            Object.keys(variables).forEach(key => {
                 const regex = new RegExp(`@{{${key}}}`, 'g');
-                bodyContent = bodyContent.replace(regex, sampleData[key]);
+                content = content.replace(regex, variables[key]);
             });
 
             // Render HTML content properly
-            if (bodyContent.trim()) {
-                previewContent.innerHTML = bodyContent;
+            if (content.trim()) {
+                previewContent.innerHTML = content;
             } else {
                 previewContent.innerHTML = '<p class="text-muted">No content to preview</p>';
             }
@@ -470,14 +470,12 @@ document.addEventListener('DOMContentLoaded', function() {
         bodyTextarea.addEventListener('input', updatePreview);
     }
 
-    // Refresh button
     if (refreshButton) {
         refreshButton.addEventListener('click', updatePreview);
     }
 
-    // Initial preview update
+    // Initial preview
     updatePreview();
 });
 </script>
-@endpush
 @endsection
