@@ -78,12 +78,16 @@ if (typeof window.AdminCharts === 'undefined') {
       return 'rgba(0, 0, 0, 0.8)';
     }
 
+    _getBackgroundColor(rgb, alpha = 0.1) {
+      return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+    }
+
     _getPrimaryBackgroundColor() {
-      return 'rgba(59, 130, 246, 0.1)';
+      return this._getBackgroundColor([59, 130, 246]);
     }
 
     _getSuccessBackgroundColor() {
-      return 'rgba(16, 185, 129, 0.1)';
+      return this._getBackgroundColor([16, 185, 129]);
     }
 
     _getCommonOptions() {
@@ -97,7 +101,7 @@ if (typeof window.AdminCharts === 'undefined') {
         scales: {
           y: {
             beginAtZero: true,
-            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+            grid: { color: this._getBackgroundColor([0, 0, 0]) },
             ticks: { font: this._getCommonFont() }
           },
           x: {
@@ -127,7 +131,8 @@ if (typeof window.AdminCharts === 'undefined') {
       }
       
       // Safe assignment with validated chartId - chartId is already validated
-      this.charts[chartId] = new Chart(ctx, config);
+      const newChart = new Chart(ctx, config);
+      this.charts[chartId] = newChart;
       return true;
     }
 
@@ -227,7 +232,7 @@ if (typeof window.AdminCharts === 'undefined') {
 
     // ===== UNIFIED ERROR HANDLING =====
     _handleChartError(chartId, error, fallbackData) {
-      console.warn(`${chartId} API failed:`, error);
+      this._logWarning(`${chartId} API failed:`, error);
       return fallbackData;
     }
 
@@ -734,7 +739,7 @@ if (typeof window.AdminCharts === 'undefined') {
 
     updateChartTheme(isDark) {
       const textColor = isDark ? '#f9fafb' : '#374151';
-      const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+      const gridColor = isDark ? this._getBackgroundColor([255, 255, 255]) : this._getBackgroundColor([0, 0, 0]);
 
       Object.values(this.charts).forEach(chart => {
         if (chart.options.scales) {
