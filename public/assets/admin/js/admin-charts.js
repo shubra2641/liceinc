@@ -53,7 +53,7 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     _getCommonColors() {
-      return {
+      const colors = {
         primary: 'rgba(59, 130, 246, 0.8)',
         success: 'rgba(16, 185, 129, 0.8)',
         warning: 'rgba(245, 158, 11, 0.8)',
@@ -65,10 +65,12 @@ if (typeof window.AdminCharts === 'undefined') {
         dangerSolid: 'rgb(239, 68, 68)',
         purpleSolid: 'rgb(139, 92, 246)'
       };
+      return colors;
     }
 
     _getCommonFont() {
-      return { size: 12, weight: '500' };
+      const font = { size: 12, weight: '500' };
+      return font;
     }
 
     _getCommonBackgroundColor() {
@@ -84,7 +86,7 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     _getCommonOptions() {
-      return {
+      const options = {
         tooltip: {
           backgroundColor: this._getCommonBackgroundColor(),
           titleColor: '#fff',
@@ -107,6 +109,7 @@ if (typeof window.AdminCharts === 'undefined') {
           easing: 'easeInOutQuart'
         }
       };
+      return options;
     }
 
     // ===== UNIFIED CHART CREATION =====
