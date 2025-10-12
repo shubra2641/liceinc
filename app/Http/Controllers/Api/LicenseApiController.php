@@ -530,6 +530,7 @@ class LicenseApiController extends Controller
         }
         if ($success) {
             // No logging for successful operations per Envato compliance rules
+            // This is intentional to comply with Envato's logging requirements
         } else {
             Log::warning('License verification attempt failed', $logData);
         }

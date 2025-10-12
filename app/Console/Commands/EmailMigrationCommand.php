@@ -59,7 +59,7 @@ class EmailMigrationCommand extends Command
 
         $this->info('Email Migration Helper');
         $this->line('Use --help to see available options');
-        
+
         return 0;
     }
 
@@ -71,15 +71,15 @@ class EmailMigrationCommand extends Command
     protected function analyzeProject(): int
     {
         $this->info('Analyzing project for EmailService usage...');
-        
+
         $analysis = MigrationHelper::analyzeProject();
-        
+
         $filesAnalyzed = $analysis['files_analyzed'] ?? 0;
         $filesWithEmailService = $analysis['files_with_email_service'] ?? [];
         $summary = $analysis['summary'] ?? [];
-        $totalRecommendations = is_array($summary) && isset($summary['total_recommendations']) 
+        $totalRecommendations = is_array($summary) && isset($summary['total_recommendations'])
             ? $summary['total_recommendations'] : 0;
-        
+
         $this->table(
             ['Metric', 'Value'],
             [
@@ -106,9 +106,9 @@ class EmailMigrationCommand extends Command
     protected function checkConfiguration(): int
     {
         $this->info('Checking new email system configuration...');
-        
+
         $status = MigrationHelper::checkConfiguration();
-        
+
         $this->table(
             ['Component', 'Status'],
             [
@@ -142,13 +142,13 @@ class EmailMigrationCommand extends Command
     protected function showStatistics(): int
     {
         $this->info('EmailService Usage Statistics');
-        
+
         $stats = MigrationHelper::getUsageStatistics();
-        
+
         $totalFiles = $stats['total_files'] ?? 0;
         $filesWithEmailService = $stats['files_with_email_service'] ?? 0;
         $importStatements = $stats['import_statements'] ?? 0;
-        
+
         $this->table(
             ['Metric', 'Value'],
             [
@@ -159,7 +159,7 @@ class EmailMigrationCommand extends Command
         );
 
         $methodUsage = $stats['method_usage'] ?? [];
-        
+
         if (!empty($methodUsage) && is_array($methodUsage)) {
             $this->info('Most Used Methods:');
             arsort($methodUsage);
@@ -182,16 +182,16 @@ class EmailMigrationCommand extends Command
     protected function analyzeFile(): int
     {
         $filePath = $this->option('file');
-        
+
         if (!$filePath) {
             $this->error('Please specify a file with --file=path/to/file.php');
             return 1;
         }
 
         $this->info("Analyzing file: {$filePath}");
-        
+
         $analysis = MigrationHelper::analyzeFile($filePath);
-        
+
         if (isset($analysis['error'])) {
             $errorMessage = is_string($analysis['error']) ? $analysis['error'] : 'Unknown error';
             $this->error($errorMessage);
@@ -199,7 +199,7 @@ class EmailMigrationCommand extends Command
         }
 
         $recommendations = $analysis['recommendations'] ?? [];
-        
+
         if (!empty($recommendations) && is_array($recommendations)) {
             $this->table(
                 ['Type', 'Message', 'Suggestion'],
@@ -227,31 +227,31 @@ class EmailMigrationCommand extends Command
     protected function generateScript(): int
     {
         $filePath = $this->option('file');
-        
+
         if (!$filePath) {
             $this->error('Please specify a file with --file=path/to/file.php');
             return 1;
         }
 
         $this->info("Generating migration script for: {$filePath}");
-        
+
         $script = MigrationHelper::generateMigrationScript($filePath);
-        
+
         if (empty($script)) {
             $this->error('Failed to generate migration script');
             return 1;
         }
-        
+
         $outputFile = base_path('email_migration_' . date('Y-m-d_H-i-s') . '.php');
         $result = file_put_contents($outputFile, $script);
-        
+
         if ($result === false) {
             $this->error('Failed to write migration script to file');
             return 1;
         }
-        
+
         $this->info("Migration script generated: {$outputFile}");
-        
+
         return 0;
     }
 }

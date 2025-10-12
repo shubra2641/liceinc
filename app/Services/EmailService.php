@@ -123,6 +123,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $data
+     *
      * @return bool
      */
     public function sendWelcome(User $user, array $data = []): bool
@@ -135,6 +136,7 @@ class EmailService
      *
      * @param User $user
      * @param string $verificationUrl
+     *
      * @return bool
      */
     public function sendEmailVerification(User $user, string $verificationUrl): bool
@@ -146,6 +148,7 @@ class EmailService
      * Send new user notification.
      *
      * @param User $user
+     *
      * @return bool
      */
     public function sendNewUserNotification(User $user): bool
@@ -158,6 +161,7 @@ class EmailService
      *
      * @param User $user
      * @param string $resetUrl
+     *
      * @return bool
      */
     public function sendPasswordReset(User $user, string $resetUrl): bool

@@ -18,6 +18,8 @@ class UserCreationService
 {
     /**
      * Create admin user.
+     *
+     * @param array<string, mixed> $adminData
      */
     public function createAdminUser(array $adminData): bool
     {
@@ -27,7 +29,7 @@ class UserCreationService
             $user = User::create([
                 'name' => $adminData['name'],
                 'email' => $adminData['email'],
-                'password' => Hash::make($adminData['password']),
+                'password' => Hash::make(is_string($adminData['password'] ?? null) ? $adminData['password'] : ''),
                 'is_admin' => true,
                 'email_verified_at' => now(),
             ]);

@@ -46,7 +46,7 @@ class AppServiceProvider extends ServiceProvider
         try {
             // Register Email Service Provider
             $this->app->register(EmailServiceProvider::class);
-            
+
             // Register Envato Socialite Provider with validation
             if (! class_exists(EnvatoSocialiteProvider::class)) {
                 throw new \InvalidArgumentException(

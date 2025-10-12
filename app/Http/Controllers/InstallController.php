@@ -166,34 +166,130 @@ class InstallController extends Controller
     }
 
     /**
-     * Validate license input.
+     * Handle successful verification.
      *
-     * @param Request $request
+     * @param \Illuminate\Http\Request $request
+     * @param array<string, mixed> $result
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
+    private function handleSuccessfulVerification(
+        \Illuminate\Http\Request $request,
+        array $result
+    ): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'License verified successfully',
+                'data' => $result,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'License verified successfully');
+    }
+
+    /**
+     * Handle failed verification.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param array<string, mixed> $result
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
+    private function handleFailedVerification(
+        \Illuminate\Http\Request $request,
+        array $result
+    ): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'License verification failed',
+                'errors' => $result['errors'] ?? [],
+            ], 422);
+        }
+
+        return redirect()->back()->withErrors(is_array($result['errors'] ?? null) ? $result['errors'] : []);
+    }
+
+    /**
+     * Handle verification exception.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \Exception $e
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
+    private function handleVerificationException(
+        \Illuminate\Http\Request $request,
+        \Exception $e
+    ): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred during verification',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+
+        return redirect()->back()->withErrors(['general' => 'An error occurred during verification']);
+    }
+
+
+    /**
+     * Check all requirements passed.
+     *
+     * @return bool
+     */
+    private function checkAllRequirementsPassed(): bool
+    {
+        $requirements = $this->requirementsService->checkRequirements();
+        return (bool) ($requirements['passed'] ?? false);
+    }
+
+    /**
+     * Validate database input.
+     *
+     * @param array<string, mixed> $data
      *
      * @return array<string, mixed>
      */
-    private function validateLicenseInput(Request $request): array
+    private function validateDatabaseInput(array $data): array
     {
-        $validator = Validator::make($request->all(), [
-            'purchase_code' => 'required|string|min:5|max:100',
-        ], [
-            'purchase_code.required' => 'Purchase code is required',
-            'purchase_code.min' => 'Purchase code must be at least 5 characters long.',
-            'purchase_code.max' => 'Purchase code must not exceed 100 characters.',
+        $validator = Validator::make($data, [
+            'host' => 'required|string|max:255',
+            'port' => 'required|integer|min:1|max:65535',
+            'database' => 'required|string|max:255',
+            'username' => 'required|string|max:255',
+            'password' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
             return [
                 'valid' => false,
-                'message' => $validator->errors()->first('purchase_code'),
+                'errors' => $validator->errors()->toArray(),
             ];
         }
 
         return ['valid' => true];
     }
 
-
-
+    /**
+     * Check if database is configured.
+     *
+     * @return bool
+     */
+    private function isDatabaseConfigured(): bool
+    {
+        try {
+            \DB::connection()->getPdo();
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 
     /**
      * Show system requirements check.
@@ -207,7 +303,7 @@ class InstallController extends Controller
         }
 
         $requirements = $this->requirementsService->checkRequirements();
-        $allPassed = $this->checkAllRequirementsPassed($requirements);
+        $allPassed = $this->checkAllRequirementsPassed();
         $steps = $this->stepService->getInstallationStepsWithStatus(3);
 
         return view('install.requirements', [
@@ -243,7 +339,7 @@ class InstallController extends Controller
     public function databaseStore(Request $request): RedirectResponse
     {
         // Validate database configuration
-        $validationResult = $this->validateDatabaseInput($request);
+        $validationResult = $this->validateDatabaseInput($request->all());
         if (!$validationResult['valid']) {
             $errors = $validationResult['errors'] ?? [];
             return redirect()->back()
@@ -354,6 +450,9 @@ class InstallController extends Controller
         return Validator::make($request->all(), $this->getSettingsValidationRules());
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getSettingsValidationRules(): array
     {
         return [
@@ -436,6 +535,9 @@ class InstallController extends Controller
         }
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     private function getInstallationConfigs(): ?array
     {
         $configs = [
@@ -448,25 +550,34 @@ class InstallController extends Controller
         return array_filter($configs) === $configs ? $configs : null;
     }
 
+    /**
+     * @param array<string, mixed> $configs
+     */
     private function runInstallationSteps(array $configs): void
     {
-        $this->updateEnvFile(
-            is_array($configs['database']) ? $configs['database'] : [],
-            is_array($configs['settings']) ? $configs['settings'] : []
-        );
-        
+        /** @var array<string, mixed> $databaseConfig */
+        $databaseConfig = is_array($configs['database']) ? $configs['database'] : [];
+        /** @var array<string, mixed> $settingsConfig */
+        $settingsConfig = is_array($configs['settings']) ? $configs['settings'] : [];
+        $this->updateEnvFile($databaseConfig, $settingsConfig);
+
         Artisan::call('migrate:fresh', ['--force' => true]);
         $this->createRolesAndPermissions();
         $this->installationService->runSeeders();
-        $this->userService->createAdminUser(is_array($configs['admin']) ? $configs['admin'] : []);
-        $this->createDefaultSettings(is_array($configs['settings']) ? $configs['settings'] : []);
-        $this->installationService->storeLicenseInformation(is_array($configs['license']) ? $configs['license'] : []);
+        /** @var array<string, mixed> $adminData */
+        $adminData = is_array($configs['admin']) ? $configs['admin'] : [];
+        /** @var array<string, mixed> $licenseConfig */
+        $licenseConfig = is_array($configs['license']) ? $configs['license'] : [];
+        
+        $this->userService->createAdminUser($adminData);
+        $this->createDefaultSettings($settingsConfig);
+        $this->installationService->storeLicenseInformation($licenseConfig);
         $this->installationService->updateSessionDrivers();
         $this->installationService->createStorageLink();
         $this->installationService->createInstalledFile();
     }
 
-    private function successResponse(): JsonResponse
+    protected function successResponse(mixed $data = null, string $message = 'Success', int $statusCode = 200): JsonResponse
     {
         return response()->json([
             'success' => true,
@@ -475,12 +586,12 @@ class InstallController extends Controller
         ], 200, [], JSON_UNESCAPED_SLASHES);
     }
 
-    private function errorResponse(string $message, int $status): JsonResponse
+    protected function errorResponse(string $message, mixed $errors = null, int $statusCode = 400): JsonResponse
     {
         return response()->json([
             'success' => false,
             'message' => $message,
-        ], $status);
+        ], $statusCode);
     }
     /**
      * Show installation completion page.
@@ -548,6 +659,10 @@ class InstallController extends Controller
     /**
      * Update .env file.
      *
+     * @param array<string, mixed> $databaseConfig
+     * @param array<string, mixed> $settingsConfig
+     */
+    /**
      * @param array<string, mixed> $databaseConfig
      * @param array<string, mixed> $settingsConfig
      */
@@ -696,19 +811,6 @@ class InstallController extends Controller
         File::put($envPath, $envContent);
     }
     /**
-     * Update session and cache drivers to database after migrations.
-     */
-    private function updateSessionDrivers(): void
-    {
-        $envPath = base_path('.env');
-        $envContent = File::get($envPath);
-        // Update session and cache drivers to database after migrations are complete
-        $envContent = preg_replace('/SESSION_DRIVER=.*/', 'SESSION_DRIVER=database', $envContent) ?? $envContent;
-        $envContent = preg_replace('/CACHE_STORE=.*/', 'CACHE_STORE=database', $envContent) ?? $envContent;
-        $envContent = preg_replace('/QUEUE_CONNECTION=.*/', 'QUEUE_CONNECTION=database', $envContent) ?? $envContent;
-        File::put($envPath, $envContent);
-    }
-    /**
      * Create roles and permissions.
      */
     private function createRolesAndPermissions(): void
@@ -731,29 +833,6 @@ class InstallController extends Controller
             // Roles and permissions created successfully
         } catch (\Exception $e) {
             // Failed to create roles and permissions
-            throw $e;
-        }
-    }
-    /**
-     * Create admin user.
-     *
-     * @param array<string, mixed> $adminConfig
-     */
-    private function createAdminUser(array $adminConfig): void
-    {
-        try {
-            $user = User::create([
-                'name' => $adminConfig['name'],
-                'email' => $adminConfig['email'],
-                'password' => Hash::make(is_string($adminConfig['password'] ?? null) ? $adminConfig['password'] : ''),
-                'email_verified_at' => now(),
-                'status' => 'active',
-                'email_verified' => true,
-            ]);
-            $user->assignRole('admin');
-            // Admin user created successfully
-        } catch (\Exception $e) {
-            // Failed to create admin user
             throw $e;
         }
     }

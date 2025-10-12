@@ -106,7 +106,7 @@ class InstallationService
         try {
             $configPath = config_path('session.php');
             $cachePath = config_path('cache.php');
-            
+
             if (File::exists($configPath)) {
                 $sessionConfig = File::get($configPath);
                 $sessionConfig = str_replace(
@@ -137,6 +137,8 @@ class InstallationService
 
     /**
      * Store license information in database.
+     *
+     * @param array<string, mixed> $licenseConfig
      */
     public function storeLicenseInformation(array $licenseConfig): bool
     {

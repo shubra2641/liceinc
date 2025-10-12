@@ -38,7 +38,7 @@ class SystemRequirementsService
         $required = '8.1.0';
         $current = PHP_VERSION;
         $satisfied = version_compare($current, $required, '>=');
-        
+
         return [
             'required' => $required,
             'current' => $current,
@@ -65,7 +65,7 @@ class SystemRequirementsService
             'fileinfo',
             'curl',
         ];
-        
+
         $results = [];
         foreach ($required as $extension) {
             $results[$extension] = [
@@ -73,7 +73,7 @@ class SystemRequirementsService
                 'loaded' => extension_loaded($extension),
             ];
         }
-        
+
         return $results;
     }
 
@@ -89,7 +89,7 @@ class SystemRequirementsService
             base_path('bootstrap/cache'),
             public_path('storage'),
         ];
-        
+
         $results = [];
         foreach ($directories as $directory) {
             $results[$directory] = [
@@ -97,7 +97,7 @@ class SystemRequirementsService
                 'writable' => is_writable($directory),
             ];
         }
-        
+
         return $results;
     }
 

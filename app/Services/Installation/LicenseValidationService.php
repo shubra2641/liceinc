@@ -19,6 +19,8 @@ class LicenseValidationService
 {
     /**
      * Validate license input.
+     *
+     * @return array<string, mixed>
      */
     public function validateLicenseInput(Request $request): array
     {
@@ -38,6 +40,8 @@ class LicenseValidationService
 
     /**
      * Validate admin input.
+     *
+     * @return array<string, mixed>
      */
     public function validateAdminInput(Request $request): array
     {
@@ -77,17 +81,16 @@ class LicenseValidationService
      * Handle validation error.
      */
     public function handleValidationError(
-        Request $request, 
+        Request $request,
         string $message
-    ): RedirectResponse|JsonResponse
-    {
+    ): RedirectResponse|JsonResponse {
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => false,
                 'message' => $message,
             ], 422);
         }
-        
+
         return redirect()->back()->withErrors(['purchase_code' => $message])->withInput();
     }
 }

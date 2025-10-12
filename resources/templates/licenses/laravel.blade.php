@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * License Verification System for Laravel
  * Product: {{product}}

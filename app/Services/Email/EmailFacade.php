@@ -75,6 +75,7 @@ class EmailFacade
      *
      * @param string $templateName The email template name
      * @param array<string, mixed> $data Template data variables
+     *
      * @return bool True if email sent successfully
      */
     public function sendToAdmin(
@@ -137,6 +138,7 @@ class EmailFacade
      * Send welcome email to new user.
      *
      * @param User $user The user to send welcome email to
+     *
      * @return bool True if email sent successfully
      */
     public function sendUserWelcome(User $user): bool
@@ -149,6 +151,7 @@ class EmailFacade
      *
      * @param User $user The user to send verification email to
      * @param string $verificationUrl The email verification URL
+     *
      * @return bool True if email sent successfully
      */
     public function sendEmailVerification(

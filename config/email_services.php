@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Email Services Configuration.
  *
@@ -9,6 +7,9 @@ declare(strict_types=1);
  *
  * @version 1.0.0
  */
+
+declare(strict_types=1);
+
 return [
     /*
     |--------------------------------------------------------------------------
