@@ -403,70 +403,119 @@ class InstallController extends Controller
      */
     public function installProcess(Request $request): JsonResponse
     {
-        // Installation process started
         try {
-            // Get configuration from session
-            $licenseConfig = session('install.license');
-            $databaseConfig = session('install.database');
-            $adminConfig = session('install.admin');
-            $settingsConfig = session('install.settings');
-            if (! $licenseConfig || ! $databaseConfig || ! $adminConfig || ! $settingsConfig) {
-                // Installation configuration missing
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Installation configuration missing. Please start over.',
-                ], 400);
+            $configs = $this->getInstallationConfigs();
+            if (!$configs) {
+                return $this->createErrorResponse('Installation configuration missing. Please start over.', 400);
             }
-            // Starting installation steps...
-            // Step 1: Update .env file
-            /**
- * @var array<string, mixed> $databaseConfigTyped
-*/
-            $databaseConfigTyped = is_array($databaseConfig) ? $databaseConfig : [];
-            /**
- * @var array<string, mixed> $settingsConfigTyped
-*/
-            $settingsConfigTyped = is_array($settingsConfig) ? $settingsConfig : [];
-            $this->updateEnvFile($databaseConfigTyped, $settingsConfigTyped);
-            // Step 2: Run migrations
-            Artisan::call('migrate:fresh', ['--force' => true]);
-            // Step 3: Create roles and permissions first
-            $this->createRolesAndPermissions();
-            // Step 4: Run database seeders
-            $this->installationService->runSeeders();
-            // Step 5: Create admin user
-            /**
- * @var array<string, mixed> $adminConfigTyped
-*/
-            $adminConfigTyped = is_array($adminConfig) ? $adminConfig : [];
-            $this->userService->createAdminUser($adminConfigTyped);
-            // Step 6: Create default settings
-            $this->createDefaultSettings($settingsConfigTyped);
-            // Step 7: Store license information
-            /**
- * @var array<string, mixed> $licenseConfigTyped
-*/
-            $licenseConfigTyped = is_array($licenseConfig) ? $licenseConfig : [];
-            $this->installationService->storeLicenseInformation($licenseConfigTyped);
-            // Step 8: Update session and cache drivers to database
-            $this->installationService->updateSessionDrivers();
-            // Step 9: Create storage link
-            $this->installationService->createStorageLink();
-            // Step 10: Create installed file
-            $this->installationService->createInstalledFile();
-            // Installation completed successfully
-            return response()->json([
-                'success' => true,
-                'message' => 'Installation completed successfully!',
-                'redirect' => route('login'),
-            ], 200, [], JSON_UNESCAPED_SLASHES);
+
+            $this->executeInstallationSteps($configs);
+            
+            return $this->createSuccessResponse();
         } catch (\Exception $e) {
-            // Installation failed
-            return response()->json([
-                'success' => false,
-                'message' => 'Installation failed: ' . $e->getMessage(),
-            ], 500);
+            return $this->createErrorResponse('Installation failed: ' . $e->getMessage(), 500);
         }
+    }
+
+    private function getInstallationConfigs(): ?array
+    {
+        $configs = [
+            'license' => session('install.license'),
+            'database' => session('install.database'),
+            'admin' => session('install.admin'),
+            'settings' => session('install.settings'),
+        ];
+
+        foreach ($configs as $config) {
+            if (!$config) {
+                return null;
+            }
+        }
+
+        return $configs;
+    }
+
+    private function executeInstallationSteps(array $configs): void
+    {
+        $this->updateEnvironmentFiles($configs);
+        $this->runDatabaseMigrations();
+        $this->setupRolesAndPermissions();
+        $this->runDatabaseSeeders();
+        $this->createAdminUser($configs['admin']);
+        $this->setupDefaultSettings($configs['settings']);
+        $this->storeLicenseInformation($configs['license']);
+        $this->updateSystemDrivers();
+        $this->createStorageLink();
+        $this->createInstalledFile();
+    }
+
+    private function updateEnvironmentFiles(array $configs): void
+    {
+        $databaseConfig = is_array($configs['database']) ? $configs['database'] : [];
+        $settingsConfig = is_array($configs['settings']) ? $configs['settings'] : [];
+        $this->updateEnvFile($databaseConfig, $settingsConfig);
+    }
+
+    private function runDatabaseMigrations(): void
+    {
+        Artisan::call('migrate:fresh', ['--force' => true]);
+    }
+
+    private function setupRolesAndPermissions(): void
+    {
+        $this->createRolesAndPermissions();
+    }
+
+    private function runDatabaseSeeders(): void
+    {
+        $this->installationService->runSeeders();
+    }
+
+    private function createAdminUser(array $adminConfig): void
+    {
+        $this->userService->createAdminUser($adminConfig);
+    }
+
+    private function setupDefaultSettings(array $settingsConfig): void
+    {
+        $this->createDefaultSettings($settingsConfig);
+    }
+
+    private function storeLicenseInformation(array $licenseConfig): void
+    {
+        $this->installationService->storeLicenseInformation($licenseConfig);
+    }
+
+    private function updateSystemDrivers(): void
+    {
+        $this->installationService->updateSessionDrivers();
+    }
+
+    private function createStorageLink(): void
+    {
+        $this->installationService->createStorageLink();
+    }
+
+    private function createInstalledFile(): void
+    {
+        $this->installationService->createInstalledFile();
+    }
+
+    private function createSuccessResponse(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Installation completed successfully!',
+            'redirect' => route('login'),
+        ], 200, [], JSON_UNESCAPED_SLASHES);
+    }
+
+    private function createErrorResponse(string $message, int $status): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+        ], $status);
     }
     /**
      * Show installation completion page.
@@ -780,6 +829,17 @@ class InstallController extends Controller
      */
     public function testDatabase(Request $request): JsonResponse
     {
+        $validationResult = $this->validateDatabaseRequest($request);
+        if (!$validationResult['valid']) {
+            return $this->createValidationErrorResponse($validationResult['errors']);
+        }
+
+        $connectionResult = $this->testDatabaseConnection($request->all());
+        return response()->json($connectionResult);
+    }
+
+    private function validateDatabaseRequest(Request $request): array
+    {
         $validator = Validator::make($request->all(), [
             'db_host' => 'required|string',
             'db_port' => 'required|integer|min:1|max:65535',
@@ -787,14 +847,23 @@ class InstallController extends Controller
             'db_username' => 'required|string',
             'db_password' => 'nullable|string',
         ]);
+
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
+            return [
+                'valid' => false,
                 'errors' => $validator->errors(),
-            ], 422);
+            ];
         }
-        $connection = $this->testDatabaseConnection($request->all());
-        return response()->json($connection);
+
+        return ['valid' => true];
+    }
+
+    private function createValidationErrorResponse($errors): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation failed',
+            'errors' => $errors,
+        ], 422);
     }
 }
