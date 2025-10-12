@@ -2,7 +2,7 @@
  * Admin Dashboard Charts and Statistics - Zero Duplication Version
  * Unified chart system with complete elimination of code duplication
  */
-/* global document fetch URL setInterval setTimeout console Chart MutationObserver Blob bootstrap alert AdminCharts module */
+/* global window document fetch URL setInterval setTimeout console Chart MutationObserver Blob bootstrap alert AdminCharts module */
 
 if (typeof window.AdminCharts === 'undefined') {
   class AdminCharts {
@@ -111,30 +111,22 @@ if (typeof window.AdminCharts === 'undefined') {
 
     // ===== UNIFIED CHART CREATION =====
     _createChart(chartId, ctx, config) {
-      const sanitizedId = this._sanitizeChartId(chartId);
-      if (!sanitizedId) return false;
+      if (!this._validateChartId(chartId)) return false;
       
-      if (this.charts[sanitizedId]) {
-        this.charts[sanitizedId].destroy();
+      if (this.charts[chartId]) {
+        this.charts[chartId].destroy();
       }
-
-      this.charts[sanitizedId] = new Chart(ctx, config);
+      
+      this.charts[chartId] = new Chart(ctx, config);
       return true;
     }
 
     _validateChartId(chartId) {
-      if (!chartId || typeof chartId !== 'string' || !/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(chartId)) {
+      if (!chartId || typeof chartId !== 'string' || !/^[a-zA-Z][a-zA-Z0-9]*$/.test(chartId)) {
         console.error('Invalid chartId:', chartId);
         return false;
       }
       return true;
-    }
-
-    _sanitizeChartId(chartId) {
-      if (!this._validateChartId(chartId)) {
-        return null;
-      }
-      return chartId.replace(/[^a-zA-Z0-9_-]/g, '');
     }
 
     // ===== UNIFIED API HANDLING =====
@@ -309,26 +301,23 @@ if (typeof window.AdminCharts === 'undefined') {
 
     // ===== UNIFIED CHART CREATION METHODS =====
     _createChartFromAPI(chartId, ctx, apiPath, configBuilder, fallbackData) {
-      const sanitizedId = this._sanitizeChartId(chartId);
-      if (!sanitizedId) return;
-      
-      if (this._loadingCharts[sanitizedId]) return;
-      this._loadingCharts[sanitizedId] = true;
+      if (this._loadingCharts[chartId]) return;
+      this._loadingCharts[chartId] = true;
 
       this._apiFetch(apiPath)
         .then(apiData => {
           const config = configBuilder(apiData.labels, apiData.data);
-          this._createChart(sanitizedId, ctx, config);
+          this._createChart(chartId, ctx, config);
           return true;
         })
         .catch(err => {
-          console.warn(`${sanitizedId} API failed:`, err);
+          console.warn(`${chartId} API failed:`, err);
           const config = configBuilder(fallbackData.labels, fallbackData.data);
-          this._createChart(sanitizedId, ctx, config);
+          this._createChart(chartId, ctx, config);
           return false;
         })
         .finally(() => {
-          this._loadingCharts[sanitizedId] = false;
+          this._loadingCharts[chartId] = false;
         });
     }
 
@@ -590,17 +579,14 @@ if (typeof window.AdminCharts === 'undefined') {
 
     updateChartData() {
       const updateChart = (chartId, apiPath, updateFn) => {
-        const sanitizedId = this._sanitizeChartId(chartId);
-        if (!sanitizedId) return;
-        
-        if (this.charts[sanitizedId] && this.charts[sanitizedId].canvas && document.contains(this.charts[sanitizedId].canvas)) {
+        if (this.charts[chartId] && this.charts[chartId].canvas && document.contains(this.charts[chartId].canvas)) {
           this._apiFetch(apiPath)
             .then(apiData => {
               updateFn(apiData);
-              this.charts[sanitizedId].update('active');
+              this.charts[chartId].update('active');
             })
             .catch(err => {
-              console.warn(`${sanitizedId} refresh failed:`, err);
+              console.warn(`${chartId} refresh failed:`, err);
             });
         }
       };
@@ -697,10 +683,7 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     exportChartData(chartId, format = 'csv') {
-      const sanitizedId = this._sanitizeChartId(chartId);
-      if (!sanitizedId) return;
-      
-      const chart = this.charts[sanitizedId];
+      const chart = this.charts[chartId];
       if (!chart) return;
 
       const { data } = chart;
@@ -927,49 +910,21 @@ document.addEventListener('DOMContentLoaded', () => {
           '\'': '&#x27;',
         }[match]));
         
-        // Create safe DOM elements instead of using innerHTML
-        modalContent.innerHTML = '';
-        
-        const row1 = document.createElement('div');
-        row1.className = 'row';
-        
-        const col1 = document.createElement('div');
-        col1.className = 'col-md-6';
-        
-        const logIdP = document.createElement('p');
-        logIdP.innerHTML = `<strong>Log ID:</strong> ${sanitizedLogId}`;
-        col1.appendChild(logIdP);
-        
-        const dateP = document.createElement('p');
-        dateP.innerHTML = `<strong>Date:</strong> ${new Date().toLocaleString()}`;
-        col1.appendChild(dateP);
-        
-        const col2 = document.createElement('div');
-        col2.className = 'col-md-6';
-        
-        const statusP = document.createElement('p');
-        statusP.innerHTML = '<strong>Status:</strong> <span class="badge bg-success">Success</span>';
-        col2.appendChild(statusP);
-        
-        const ipP = document.createElement('p');
-        ipP.innerHTML = '<strong>IP Address:</strong> 127.0.0.1';
-        col2.appendChild(ipP);
-        
-        row1.appendChild(col1);
-        row1.appendChild(col2);
-        
-        const hr = document.createElement('hr');
-        
-        const h6 = document.createElement('h6');
-        h6.textContent = 'Detailed Information';
-        
-        const p = document.createElement('p');
-        p.textContent = 'Detailed log information will be displayed here';
-        
-        modalContent.appendChild(row1);
-        modalContent.appendChild(hr);
-        modalContent.appendChild(h6);
-        modalContent.appendChild(p);
+        modalContent.innerHTML = `
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Log ID:</strong> ${sanitizedLogId}</p>
+              <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Status:</strong> <span class="badge bg-success">Success</span></p>
+              <p><strong>IP Address:</strong> 127.0.0.1</p>
+            </div>
+          </div>
+          <hr>
+          <h6>Detailed Information</h6>
+          <p>Detailed log information will be displayed here</p>
+        `;
       }
       
       const modal = new bootstrap.Modal(document.getElementById('logDetailsModal'));
