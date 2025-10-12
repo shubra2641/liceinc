@@ -37,7 +37,7 @@ interface EmailValidatorInterface
     /**
      * Sanitize string input with XSS protection.
      */
-    public function sanitizeString(?string $input): ?string;
+    public function sanitizeString(mixed $input): ?string;
 
     /**
      * Sanitize array data with XSS protection.

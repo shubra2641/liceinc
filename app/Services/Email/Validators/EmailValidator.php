@@ -82,6 +82,10 @@ class EmailValidator implements EmailValidatorInterface
             return null;
         }
 
+        if (!is_string($input) && !is_scalar($input)) {
+            return null;
+        }
+
         $stringValue = is_string($input) ? $input : (string) $input;
         return htmlspecialchars(trim($stringValue), ENT_QUOTES, 'UTF-8');
     }
@@ -98,14 +102,16 @@ class EmailValidator implements EmailValidatorInterface
      */
     public function sanitizeData(array $data): array
     {
+        /** @var array<string, mixed> $sanitized */
         $sanitized = [];
         foreach ($data as $key => $value) {
+            $stringKey = is_string($key) ? $key : (string) $key;
             if (is_array($value)) {
-                $sanitized[$key] = $this->sanitizeData($value);
+                $sanitized[$stringKey] = $this->sanitizeData($value);
             } elseif (is_string($value)) {
-                $sanitized[$key] = $this->sanitizeString($value) ?? '';
+                $sanitized[$stringKey] = $this->sanitizeString($value) ?? '';
             } else {
-                $sanitized[$key] = is_scalar($value) ? (string) $value : '';
+                $sanitized[$stringKey] = is_scalar($value) ? (string) $value : '';
             }
         }
 

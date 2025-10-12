@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Invoice;
+use App\Models\License;
+use App\Models\User;
 use App\Services\Email\EmailFacade;
 use App\Services\Email\Contracts\EmailServiceInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Email Service - Legacy Compatibility Layer.
@@ -42,9 +46,12 @@ class EmailService
     /**
      * Send email to user using template.
      *
+     * @param User $user
+     * @param string $templateName
      * @param array<string, mixed> $data
+     * @return bool
      */
-    public function sendToUser($user, string $templateName, array $data = []): bool
+    public function sendToUser(User $user, string $templateName, array $data = []): bool
     {
         return $this->emailFacade->sendToUser($user, $templateName, $data);
     }
@@ -74,8 +81,12 @@ class EmailService
 
     /**
      * Get available templates by type and category.
+     *
+     * @param string $type
+     * @param string|null $category
+     * @return Collection<int, \App\Models\EmailTemplate>
      */
-    public function getTemplates(string $type, ?string $category = null)
+    public function getTemplates(string $type, ?string $category = null): Collection
     {
         return $this->emailFacade->getTemplates($type, $category);
     }
@@ -93,121 +104,273 @@ class EmailService
     }
 
     // User email methods
-    public function sendUserWelcome($user): bool
+    /**
+     * Send user welcome email.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function sendUserWelcome(User $user): bool
     {
         return $this->emailFacade->sendUserWelcome($user);
     }
 
-    public function sendWelcome($user, array $data = []): bool
+    /**
+     * Send welcome email.
+     *
+     * @param User $user
+     * @param array<string, mixed> $data
+     * @return bool
+     */
+    public function sendWelcome(User $user, array $data = []): bool
     {
         return $this->emailFacade->sendToUser($user, 'user_welcome', $data);
     }
 
-    public function sendEmailVerification($user, string $verificationUrl): bool
+    /**
+     * Send email verification.
+     *
+     * @param User $user
+     * @param string $verificationUrl
+     * @return bool
+     */
+    public function sendEmailVerification(User $user, string $verificationUrl): bool
     {
         return $this->emailFacade->sendEmailVerification($user, $verificationUrl);
     }
 
-    public function sendNewUserNotification($user): bool
+    /**
+     * Send new user notification.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function sendNewUserNotification(User $user): bool
     {
         return $this->emailFacade->sendNewUserNotification($user);
     }
 
-    public function sendPasswordReset($user, string $resetUrl): bool
+    /**
+     * Send password reset email.
+     *
+     * @param User $user
+     * @param string $resetUrl
+     * @return bool
+     */
+    public function sendPasswordReset(User $user, string $resetUrl): bool
     {
         return $this->emailFacade->sendPasswordReset($user, $resetUrl);
     }
 
     // License email methods
-    public function sendPaymentConfirmation($license, $invoice): bool
+    /**
+     * Send payment confirmation email.
+     *
+     * @param License $license
+     * @param Invoice $invoice
+     * @return bool
+     */
+    public function sendPaymentConfirmation(License $license, Invoice $invoice): bool
     {
         return $this->emailFacade->sendPaymentConfirmation($license, $invoice);
     }
 
-    public function sendLicenseExpiring($user, array $licenseData): bool
+    /**
+     * Send license expiring email.
+     *
+     * @param User $user
+     * @param array<string, mixed> $licenseData
+     * @return bool
+     */
+    public function sendLicenseExpiring(User $user, array $licenseData): bool
     {
         return $this->emailFacade->sendLicenseExpiring($user, $licenseData);
     }
 
-    public function sendLicenseUpdated($user, array $licenseData): bool
+    /**
+     * Send license updated email.
+     *
+     * @param User $user
+     * @param array<string, mixed> $licenseData
+     * @return bool
+     */
+    public function sendLicenseUpdated(User $user, array $licenseData): bool
     {
         return $this->emailFacade->sendLicenseUpdated($user, $licenseData);
     }
 
-    public function sendLicenseCreated($license, $user = null): bool
+    /**
+     * Send license created email.
+     *
+     * @param License $license
+     * @param User|null $user
+     * @return bool
+     */
+    public function sendLicenseCreated(License $license, ?User $user = null): bool
     {
         return $this->emailFacade->sendLicenseCreated($license, $user);
     }
 
-    public function sendAdminPaymentNotification($license, $invoice): bool
+    /**
+     * Send admin payment notification.
+     *
+     * @param License $license
+     * @param Invoice $invoice
+     * @return bool
+     */
+    public function sendAdminPaymentNotification(License $license, Invoice $invoice): bool
     {
         return $this->emailFacade->sendAdminPaymentNotification($license, $invoice);
     }
 
     // Invoice email methods
-    public function sendInvoiceApproachingDue($user, array $invoiceData): bool
+    /**
+     * Send invoice approaching due email.
+     *
+     * @param User $user
+     * @param array<string, mixed> $invoiceData
+     * @return bool
+     */
+    public function sendInvoiceApproachingDue(User $user, array $invoiceData): bool
     {
         return $this->emailFacade->sendInvoiceApproachingDue($user, $invoiceData);
     }
 
-    public function sendInvoicePaid($user, array $invoiceData): bool
+    /**
+     * Send invoice paid email.
+     *
+     * @param User $user
+     * @param array<string, mixed> $invoiceData
+     * @return bool
+     */
+    public function sendInvoicePaid(User $user, array $invoiceData): bool
     {
         return $this->emailFacade->sendInvoicePaid($user, $invoiceData);
     }
 
-    public function sendInvoiceCancelled($user, array $invoiceData): bool
+    /**
+     * Send invoice cancelled email.
+     *
+     * @param User $user
+     * @param array<string, mixed> $invoiceData
+     * @return bool
+     */
+    public function sendInvoiceCancelled(User $user, array $invoiceData): bool
     {
         return $this->emailFacade->sendInvoiceCancelled($user, $invoiceData);
     }
 
-    public function sendCustomInvoicePaymentConfirmation($invoice): bool
+    /**
+     * Send custom invoice payment confirmation.
+     *
+     * @param Invoice $invoice
+     * @return bool
+     */
+    public function sendCustomInvoicePaymentConfirmation(Invoice $invoice): bool
     {
         return $this->emailFacade->sendCustomInvoicePaymentConfirmation($invoice);
     }
 
-    public function sendAdminCustomInvoicePaymentNotification($invoice): bool
+    /**
+     * Send admin custom invoice payment notification.
+     *
+     * @param Invoice $invoice
+     * @return bool
+     */
+    public function sendAdminCustomInvoicePaymentNotification(Invoice $invoice): bool
     {
         return $this->emailFacade->sendAdminCustomInvoicePaymentNotification($invoice);
     }
 
-    public function sendPaymentFailureNotification($order): bool
+    /**
+     * Send payment failure notification.
+     *
+     * @param Invoice $order
+     * @return bool
+     */
+    public function sendPaymentFailureNotification(Invoice $order): bool
     {
         return $this->emailFacade->sendPaymentFailureNotification($order);
     }
 
     // Ticket email methods
-    public function sendTicketCreated($user, array $ticketData): bool
+    /**
+     * Send ticket created email.
+     *
+     * @param User $user
+     * @param array<string, mixed> $ticketData
+     * @return bool
+     */
+    public function sendTicketCreated(User $user, array $ticketData): bool
     {
         return $this->emailFacade->sendTicketCreated($user, $ticketData);
     }
 
-    public function sendTicketStatusUpdate($user, array $ticketData): bool
+    /**
+     * Send ticket status update email.
+     *
+     * @param User $user
+     * @param array<string, mixed> $ticketData
+     * @return bool
+     */
+    public function sendTicketStatusUpdate(User $user, array $ticketData): bool
     {
         return $this->emailFacade->sendTicketStatusUpdate($user, $ticketData);
     }
 
-    public function sendTicketReply($user, array $ticketData): bool
+    /**
+     * Send ticket reply email.
+     *
+     * @param User $user
+     * @param array<string, mixed> $ticketData
+     * @return bool
+     */
+    public function sendTicketReply(User $user, array $ticketData): bool
     {
         return $this->emailFacade->sendTicketReply($user, $ticketData);
     }
 
+    /**
+     * Send admin ticket created email.
+     *
+     * @param array<string, mixed> $ticketData
+     * @return bool
+     */
     public function sendAdminTicketCreated(array $ticketData): bool
     {
         return $this->emailFacade->sendAdminTicketCreated($ticketData);
     }
 
+    /**
+     * Send admin ticket reply email.
+     *
+     * @param array<string, mixed> $ticketData
+     * @return bool
+     */
     public function sendAdminTicketReply(array $ticketData): bool
     {
         return $this->emailFacade->sendAdminTicketReply($ticketData);
     }
 
+    /**
+     * Send admin ticket closed email.
+     *
+     * @param array<string, mixed> $ticketData
+     * @return bool
+     */
     public function sendAdminTicketClosed(array $ticketData): bool
     {
         return $this->emailFacade->sendAdminTicketClosed($ticketData);
     }
 
     // Additional methods for backward compatibility
-    public function createOrUpdateTemplate(array $templateData)
+    /**
+     * Create or update email template.
+     *
+     * @param array<string, mixed> $templateData
+     * @return array<string, mixed>
+     */
+    public function createOrUpdateTemplate(array $templateData): array
     {
         // This method would need to be implemented based on your EmailTemplate model
         // For now, we'll throw an exception to indicate it needs implementation
@@ -215,41 +378,91 @@ class EmailService
     }
 
     // Admin notification methods
+    /**
+     * Send admin license created email.
+     *
+     * @param array<string, mixed> $licenseData
+     * @return bool
+     */
     public function sendAdminLicenseCreated(array $licenseData): bool
     {
         return $this->emailFacade->sendToAdmin('admin_license_created', $licenseData);
     }
 
+    /**
+     * Send admin license expiring email.
+     *
+     * @param array<string, mixed> $licenseData
+     * @return bool
+     */
     public function sendAdminLicenseExpiring(array $licenseData): bool
     {
         return $this->emailFacade->sendToAdmin('admin_license_expiring', $licenseData);
     }
 
+    /**
+     * Send admin license renewed email.
+     *
+     * @param array<string, mixed> $licenseData
+     * @return bool
+     */
     public function sendAdminLicenseRenewed(array $licenseData): bool
     {
         return $this->emailFacade->sendToAdmin('admin_license_renewed', $licenseData);
     }
 
-    public function sendRenewalReminder($user, array $renewalData): bool
+    /**
+     * Send renewal reminder email.
+     *
+     * @param User $user
+     * @param array<string, mixed> $renewalData
+     * @return bool
+     */
+    public function sendRenewalReminder(\App\Models\User $user, array $renewalData): bool
     {
         return $this->emailFacade->sendToUser($user, 'user_renewal_reminder', $renewalData);
     }
 
+    /**
+     * Send admin renewal reminder email.
+     *
+     * @param array<string, mixed> $renewalData
+     * @return bool
+     */
     public function sendAdminRenewalReminder(array $renewalData): bool
     {
         return $this->emailFacade->sendToAdmin('admin_renewal_reminder', $renewalData);
     }
 
-    public function sendProductVersionUpdate($user, array $productData): bool
+    /**
+     * Send product version update email.
+     *
+     * @param User $user
+     * @param array<string, mixed> $productData
+     * @return bool
+     */
+    public function sendProductVersionUpdate(\App\Models\User $user, array $productData): bool
     {
         return $this->emailFacade->sendToUser($user, 'user_product_version_update', $productData);
     }
 
+    /**
+     * Send admin invoice approaching due email.
+     *
+     * @param array<string, mixed> $invoiceData
+     * @return bool
+     */
     public function sendAdminInvoiceApproachingDue(array $invoiceData): bool
     {
         return $this->emailFacade->sendToAdmin('admin_invoice_approaching_due', $invoiceData);
     }
 
+    /**
+     * Send admin invoice cancelled email.
+     *
+     * @param array<string, mixed> $invoiceData
+     * @return bool
+     */
     public function sendAdminInvoiceCancelled(array $invoiceData): bool
     {
         return $this->emailFacade->sendToAdmin('admin_invoice_cancelled', $invoiceData);

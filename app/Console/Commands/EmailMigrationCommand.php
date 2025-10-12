@@ -65,6 +65,8 @@ class EmailMigrationCommand extends Command
 
     /**
      * Analyze the project for EmailService usage.
+     *
+     * @return int
      */
     protected function analyzeProject(): int
     {
@@ -72,19 +74,26 @@ class EmailMigrationCommand extends Command
         
         $analysis = MigrationHelper::analyzeProject();
         
+        $filesAnalyzed = $analysis['files_analyzed'] ?? 0;
+        $filesWithEmailService = $analysis['files_with_email_service'] ?? [];
+        $summary = $analysis['summary'] ?? [];
+        $totalRecommendations = is_array($summary) && isset($summary['total_recommendations']) 
+            ? $summary['total_recommendations'] : 0;
+        
         $this->table(
             ['Metric', 'Value'],
             [
-                ['Files Analyzed', $analysis['files_analyzed']],
-                ['Files with EmailService', count($analysis['files_with_email_service'])],
-                ['Total Recommendations', $analysis['summary']['total_recommendations']],
+                ['Files Analyzed', $filesAnalyzed],
+                ['Files with EmailService', is_array($filesWithEmailService) ? count($filesWithEmailService) : 0],
+                ['Total Recommendations', $totalRecommendations],
             ]
         );
 
-        if (!empty($analysis['files_with_email_service'])) {
+        if (!empty($filesWithEmailService) && is_array($filesWithEmailService)) {
             $this->warn('Files that use EmailService:');
-            foreach ($analysis['files_with_email_service'] as $file) {
-                $this->line('- ' . str_replace(base_path(), '', $file));
+            foreach ($filesWithEmailService as $file) {
+                $filePath = is_string($file) ? $file : '';
+                $this->line('- ' . str_replace(base_path(), '', $filePath));
             }
         }
 
@@ -127,6 +136,8 @@ class EmailMigrationCommand extends Command
 
     /**
      * Show usage statistics.
+     *
+     * @return int
      */
     protected function showStatistics(): int
     {
@@ -134,20 +145,29 @@ class EmailMigrationCommand extends Command
         
         $stats = MigrationHelper::getUsageStatistics();
         
+        $totalFiles = $stats['total_files'] ?? 0;
+        $filesWithEmailService = $stats['files_with_email_service'] ?? 0;
+        $importStatements = $stats['import_statements'] ?? 0;
+        
         $this->table(
             ['Metric', 'Value'],
             [
-                ['Total PHP Files', $stats['total_files']],
-                ['Files with EmailService', $stats['files_with_email_service']],
-                ['Import Statements', $stats['import_statements']],
+                ['Total PHP Files', $totalFiles],
+                ['Files with EmailService', $filesWithEmailService],
+                ['Import Statements', $importStatements],
             ]
         );
 
-        if (!empty($stats['method_usage'])) {
+        $methodUsage = $stats['method_usage'] ?? [];
+        
+        if (!empty($methodUsage) && is_array($methodUsage)) {
             $this->info('Most Used Methods:');
-            arsort($stats['method_usage']);
-            foreach (array_slice($stats['method_usage'], 0, 5, true) as $method => $count) {
-                $this->line("- {$method}: {$count} times");
+            arsort($methodUsage);
+            $topMethods = array_slice($methodUsage, 0, 5, true);
+            foreach ($topMethods as $method => $count) {
+                $methodName = is_string($method) ? $method : 'unknown';
+                $countValue = is_numeric($count) ? $count : 0;
+                $this->line("- {$methodName}: {$countValue} times");
             }
         }
 
@@ -156,6 +176,8 @@ class EmailMigrationCommand extends Command
 
     /**
      * Analyze a specific file.
+     *
+     * @return int
      */
     protected function analyzeFile(): int
     {
@@ -171,26 +193,36 @@ class EmailMigrationCommand extends Command
         $analysis = MigrationHelper::analyzeFile($filePath);
         
         if (isset($analysis['error'])) {
-            $this->error($analysis['error']);
+            $errorMessage = is_string($analysis['error']) ? $analysis['error'] : 'Unknown error';
+            $this->error($errorMessage);
             return 1;
         }
 
-        $this->table(
-            ['Type', 'Message', 'Suggestion'],
-            array_map(function ($rec) {
-                return [
-                    $rec['type'],
-                    $rec['message'],
-                    $rec['suggestion']
-                ];
-            }, $analysis['recommendations'])
-        );
+        $recommendations = $analysis['recommendations'] ?? [];
+        
+        if (!empty($recommendations) && is_array($recommendations)) {
+            $this->table(
+                ['Type', 'Message', 'Suggestion'],
+                array_map(function ($rec) {
+                    if (!is_array($rec)) {
+                        return ['Unknown', 'Invalid recommendation', 'N/A'];
+                    }
+                    return [
+                        $rec['type'] ?? 'Unknown',
+                        $rec['message'] ?? 'No message',
+                        $rec['suggestion'] ?? 'No suggestion'
+                    ];
+                }, $recommendations)
+            );
+        }
 
         return 0;
     }
 
     /**
      * Generate migration script for a file.
+     *
+     * @return int
      */
     protected function generateScript(): int
     {
@@ -205,8 +237,18 @@ class EmailMigrationCommand extends Command
         
         $script = MigrationHelper::generateMigrationScript($filePath);
         
+        if (empty($script)) {
+            $this->error('Failed to generate migration script');
+            return 1;
+        }
+        
         $outputFile = base_path('email_migration_' . date('Y-m-d_H-i-s') . '.php');
-        file_put_contents($outputFile, $script);
+        $result = file_put_contents($outputFile, $script);
+        
+        if ($result === false) {
+            $this->error('Failed to write migration script to file');
+            return 1;
+        }
         
         $this->info("Migration script generated: {$outputFile}");
         

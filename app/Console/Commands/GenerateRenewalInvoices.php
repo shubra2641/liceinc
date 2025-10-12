@@ -6,7 +6,7 @@ namespace App\Console\Commands;
 
 use App\Models\License;
 use App\Models\Product;
-use App\Services\EmailService;
+use App\Services\Email\Facades\Email;
 use App\Services\InvoiceService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -51,14 +51,14 @@ class GenerateRenewalInvoices extends Command
     /**
      * The email service instance.
      */
-    protected EmailService $emailService;
+    protected Email $emailService;
     /**
      * Create a new command instance with enhanced security.
      *
      * @param  InvoiceService  $invoiceService  The invoice service instance
-     * @param  EmailService  $emailService  The email service instance
+     * @param  Email  $emailService  The email service instance
      */
-    public function __construct(InvoiceService $invoiceService, EmailService $emailService)
+    public function __construct(InvoiceService $invoiceService, Email $emailService)
     {
         parent::__construct();
         $this->invoiceService = $invoiceService;

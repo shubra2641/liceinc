@@ -41,6 +41,10 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool sendAdminTicketCreated(array<string, mixed> $ticketData)
  * @method static bool sendAdminTicketReply(array<string, mixed> $ticketData)
  * @method static bool sendAdminTicketClosed(array<string, mixed> $ticketData)
+ * @method static bool sendRenewalReminder(User $user, array<string, mixed> $renewalData)
+ * @method static bool sendAdminRenewalReminder(array<string, mixed> $renewalData)
+ * @method static bool sendAdminLicenseCreated(array<string, mixed> $licenseData)
+ * @method static bool sendWelcome(User $user, array<string, mixed> $data = [])
  *
  * @version 1.0.0
  */

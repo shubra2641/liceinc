@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ConfirmPasswordRequest;
 use App\Models\User;
-use App\Services\EmailService;
+use App\Services\Email\Facades\Email;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,13 +39,13 @@ use Illuminate\View\View;
  */
 class RegisteredUserController extends Controller
 {
-    protected EmailService $emailService;
+    protected Email $emailService;
     /**
      * Create a new controller instance.
      *
-     * @param  EmailService  $emailService  The email service for sending notifications
+     * @param  Email  $emailService  The email service for sending notifications
      */
-    public function __construct(EmailService $emailService)
+    public function __construct(Email $emailService)
     {
         $this->emailService = $emailService;
     }

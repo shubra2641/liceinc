@@ -31,7 +31,7 @@ class MigrationHelper
         $recommendations = [];
 
         // Check for EmailService usage
-        if (strpos($content, 'EmailService') !== false) {
+        if (is_string($content) && strpos($content, 'EmailService') !== false) {
             $recommendations[] = [
                 'type' => 'class_usage',
                 'message' => 'Consider using EmailFacade instead of EmailService',
@@ -55,7 +55,7 @@ class MigrationHelper
         ];
 
         foreach ($methods as $method => $suggestion) {
-            if (strpos($content, $method) !== false) {
+            if (is_string($content) && strpos($content, $method) !== false) {
                 $recommendations[] = [
                     'type' => 'method_usage',
                     'message' => "Method {$method} can be called directly on Email facade",
@@ -92,11 +92,11 @@ class MigrationHelper
         );
 
         foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
+            if ($file instanceof \SplFileInfo && $file->isFile() && $file->getExtension() === 'php') {
                 $filePath = $file->getPathname();
                 $content = file_get_contents($filePath);
 
-                if (strpos($content, 'EmailService') !== false) {
+                if (is_string($content) && strpos($content, 'EmailService') !== false) {
                     $files[] = $filePath;
                     $recommendations[] = self::analyzeFile($filePath);
                 }
@@ -126,7 +126,7 @@ class MigrationHelper
     {
         $analysis = self::analyzeFile($filePath);
 
-        if (isset($analysis['error'])) {
+        if (isset($analysis['error']) && is_string($analysis['error'])) {
             return "// Error: {$analysis['error']}\n";
         }
 
@@ -134,11 +134,34 @@ class MigrationHelper
         $script .= "// Migration script for: {$filePath}\n";
         $script .= "// Generated on: " . date('Y-m-d H:i:s') . "\n\n";
 
-        foreach ($analysis['recommendations'] as $recommendation) {
-            $script .= "// {$recommendation['message']}\n";
-            $script .= "// {$recommendation['suggestion']}\n";
-            $script .= "// Old: {$recommendation['example']['old']}\n";
-            $script .= "// New: {$recommendation['example']['new']}\n\n";
+        if (isset($analysis['recommendations']) && is_array($analysis['recommendations'])) {
+            foreach ($analysis['recommendations'] as $recommendation) {
+                if (is_array($recommendation)) {
+                    $message = isset($recommendation['message']) && is_string($recommendation['message'])
+                        ? $recommendation['message']
+                        : '';
+                    $suggestion = isset($recommendation['suggestion']) && is_string($recommendation['suggestion'])
+                        ? $recommendation['suggestion']
+                        : '';
+                    $oldExample = '';
+                    $newExample = '';
+                    if (isset($recommendation['example']) && is_array($recommendation['example'])) {
+                        $oldExample = isset($recommendation['example']['old'])
+                            && is_string($recommendation['example']['old'])
+                            ? $recommendation['example']['old']
+                            : '';
+                        $newExample = isset($recommendation['example']['new'])
+                            && is_string($recommendation['example']['new'])
+                            ? $recommendation['example']['new']
+                            : '';
+                    }
+
+                    $script .= "// {$message}\n";
+                    $script .= "// {$suggestion}\n";
+                    $script .= "// Old: {$oldExample}\n";
+                    $script .= "// New: {$newExample}\n\n";
+                }
+            }
         }
 
         return $script;
@@ -160,7 +183,7 @@ class MigrationHelper
 
         // Check if service provider is registered
         $providers = config('app.providers', []);
-        $status['service_provider_registered'] = in_array(
+        $status['service_provider_registered'] = is_array($providers) && in_array(
             \App\Services\Email\EmailServiceProvider::class,
             $providers
         );
@@ -197,11 +220,12 @@ class MigrationHelper
         );
 
         foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
+            if ($file instanceof \SplFileInfo && $file->isFile() && $file->getExtension() === 'php') {
                 $stats['total_files']++;
-                $content = file_get_contents($file->getPathname());
+                $filePath = $file->getPathname();
+                $content = file_get_contents($filePath);
 
-                if (strpos($content, 'EmailService') !== false) {
+                if (is_string($content) && strpos($content, 'EmailService') !== false) {
                     $stats['files_with_email_service']++;
 
                     // Count import statements

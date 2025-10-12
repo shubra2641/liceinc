@@ -9,8 +9,11 @@ use App\Models\User;
 use App\Services\Installation\InstallationStepService;
 use App\Services\Installation\LicenseVerificationService;
 use App\Services\Installation\SystemRequirementsService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\View\View;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -50,7 +53,8 @@ class InstallController extends Controller
         protected SystemRequirementsService $requirementsService
     ) {
     }
-    /*** Show installation welcome page with language support.
+    /**
+     * Show installation welcome page with language support.
      *
      * Displays the initial installation welcome page with language switching
      * functionality and proper validation for supported locales.
@@ -66,7 +70,7 @@ class InstallController extends Controller
      * // Switch language
      * GET /install?lang=ar
      */
-    public function welcome(Request $request)
+    public function welcome(Request $request): View
     {
         try {
             // Handle language switching with validation
@@ -117,20 +121,26 @@ class InstallController extends Controller
     }
     /**
      * Process license verification with comprehensive security validation.
+     *
+     * @param Request $request
+     * @return RedirectResponse|JsonResponse
      */
-    public function licenseStore(Request $request)
+    public function licenseStore(Request $request): RedirectResponse|JsonResponse
     {
         try {
             // Validate input
             $validationResult = $this->validateLicenseInput($request);
             if (!$validationResult['valid']) {
-                return $this->handleValidationError($request, $validationResult['message']);
+                $message = $validationResult['message'] ?? 'Validation failed';
+            return $this->handleValidationError($request, is_string($message) ? $message : 'Validation failed');
             }
 
             // Verify license
+            $purchaseCode = $this->sanitizeInput($request->purchase_code);
+            $domain = $this->sanitizeInput($request->getHost());
             $result = $this->licenseService->verifyLicense(
-                $this->sanitizeInput($request->purchase_code),
-                $this->sanitizeInput($request->getHost())
+                is_string($purchaseCode) ? $purchaseCode : '',
+                is_string($domain) ? $domain : ''
             );
 
             if ($result['valid']) {
@@ -145,6 +155,9 @@ class InstallController extends Controller
 
     /**
      * Validate license input.
+     *
+     * @param Request $request
+     * @return array<string, mixed>
      */
     private function validateLicenseInput(Request $request): array
     {
@@ -168,8 +181,12 @@ class InstallController extends Controller
 
     /**
      * Handle validation error response.
+     *
+     * @param Request $request
+     * @param string $message
+     * @return RedirectResponse|JsonResponse
      */
-    private function handleValidationError(Request $request, string $message)
+    private function handleValidationError(Request $request, string $message): RedirectResponse|JsonResponse
     {
         if ($request->ajax()) {
             return response()->json([
@@ -182,8 +199,12 @@ class InstallController extends Controller
 
     /**
      * Handle successful license verification.
+     *
+     * @param Request $request
+     * @param array<string, mixed> $result
+     * @return RedirectResponse|JsonResponse
      */
-    private function handleSuccessfulVerification(Request $request, array $result)
+    private function handleSuccessfulVerification(Request $request, array $result): RedirectResponse|JsonResponse
     {
         // Store license information in session
         session(['install.license' => [
@@ -205,8 +226,12 @@ class InstallController extends Controller
 
     /**
      * Handle failed license verification.
+     *
+     * @param Request $request
+     * @param array<string, mixed> $result
+     * @return RedirectResponse|JsonResponse
      */
-    private function handleFailedVerification(Request $request, array $result)
+    private function handleFailedVerification(Request $request, array $result): RedirectResponse|JsonResponse
     {
         $message = $result['message'] ?? 'License verification failed.';
         $errorCode = $result['error_code'] ?? 'VERIFICATION_FAILED';
@@ -223,11 +248,16 @@ class InstallController extends Controller
 
     /**
      * Handle license verification exception.
+     *
+     * @param Request $request
+     * @param \Exception $e
+     * @return RedirectResponse|JsonResponse
      */
-    private function handleVerificationException(Request $request, \Exception $e)
+    private function handleVerificationException(Request $request, \Exception $e): RedirectResponse|JsonResponse
     {
+        $purchaseCode = $request->purchase_code ?? '';
         Log::error('License verification failed', [
-            'purchase_code_length' => strlen($request->purchase_code ?? ''),
+            'purchase_code_length' => strlen(is_string($purchaseCode) ? $purchaseCode : ''),
             'domain' => $request->getHost(),
             'error' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),
@@ -244,54 +274,9 @@ class InstallController extends Controller
         return redirect()->back()->withErrors(['license' => $message])->withInput();
     }
     /**
-     * Attempt to extract an UPPER_SNAKE_CASE code from a message with security validation.
-     *
-     * Extracts error codes from license verification messages with proper
-     * validation and security measures to prevent code injection.
-     *
-     * @param  string  $message  The message to extract code from
-     *
-     * @return string The extracted or default error code
-     */
-    private function extractCodeFromMessage(string $message): string
-    {
-        try {
-            // Sanitize input message
-            $message = $this->sanitizeInput($message);
-            // Common known fragments mapping to codes
-            $map = [
-                'suspended' => 'LICENSE_SUSPENDED',
-                'invalid purchase code' => 'INVALID_PURCHASE_CODE',
-                'not found' => 'LICENSE_NOT_FOUND',
-                'expired' => 'LICENSE_EXPIRED',
-                'domain' => 'DOMAIN_UNAUTHORIZED',
-                'too many' => 'RATE_LIMIT',
-                'unauthorized' => 'UNAUTHORIZED',
-            ];
-            $lower = strtolower(is_string($message) ? $message : '');
-            foreach ($map as $frag => $code) {
-                if (str_contains($lower, $frag)) {
-                    return $code;
-                }
-            }
-            // If message already resembles a code
-            if (preg_match('/[A-Z0-9_]{6, }/', is_string($message) ? $message : '', $m)) {
-                return $m[0];
-            }
-            return 'LICENSE_VERIFICATION_FAILED';
-        } catch (\Exception $e) {
-            Log::error('Error extracting code from message', [
-                'message' => $message,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return 'LICENSE_VERIFICATION_FAILED';
-        }
-    }
-    /**
      * Show system requirements check.
      */
-    public function requirements(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+    public function requirements(): View|RedirectResponse
     {
         // Check if license is verified
         if (!$this->isLicenseVerified()) {
@@ -321,8 +306,10 @@ class InstallController extends Controller
 
     /**
      * Redirect to license verification.
+     *
+     * @return RedirectResponse
      */
-    private function redirectToLicense()
+    private function redirectToLicense(): RedirectResponse
     {
         return redirect()->route('install.license')
             ->with('error', 'Please verify your license first.');
@@ -330,6 +317,9 @@ class InstallController extends Controller
 
     /**
      * Check if all requirements are passed.
+     *
+     * @param array<string, mixed> $requirements
+     * @return bool
      */
     private function checkAllRequirementsPassed(array $requirements): bool
     {
@@ -340,7 +330,7 @@ class InstallController extends Controller
     /**
      * Show database configuration form.
      */
-    public function database(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+    public function database(): View|RedirectResponse
     {
         if (!$this->isLicenseVerified()) {
             return $this->redirectToLicense();
@@ -356,13 +346,14 @@ class InstallController extends Controller
     /**
      * Process database configuration.
      */
-    public function databaseStore(Request $request): \Illuminate\Http\RedirectResponse
+    public function databaseStore(Request $request): RedirectResponse
     {
         // Validate database configuration
         $validationResult = $this->validateDatabaseInput($request);
         if (!$validationResult['valid']) {
+            $errors = $validationResult['errors'] ?? [];
             return redirect()->back()
-                ->withErrors($validationResult['errors'])
+                ->withErrors(is_array($errors) ? $errors : [])
                 ->withInput();
         }
 
@@ -381,6 +372,9 @@ class InstallController extends Controller
 
     /**
      * Validate database input.
+     *
+     * @param Request $request
+     * @return array<string, mixed>
      */
     private function validateDatabaseInput(Request $request): array
     {
@@ -404,7 +398,7 @@ class InstallController extends Controller
     /**
      * Show admin account creation form.
      */
-    public function admin(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+    public function admin(): View|RedirectResponse
     {
         if (!$this->isLicenseVerified()) {
             return $this->redirectToLicense();
@@ -433,12 +427,13 @@ class InstallController extends Controller
     /**
      * Process admin account creation.
      */
-    public function adminStore(Request $request): \Illuminate\Http\RedirectResponse
+    public function adminStore(Request $request): RedirectResponse
     {
         $validationResult = $this->validateAdminInput($request);
         if (!$validationResult['valid']) {
+            $errors = $validationResult['errors'] ?? [];
             return redirect()->back()
-                ->withErrors($validationResult['errors'])
+                ->withErrors(is_array($errors) ? $errors : [])
                 ->withInput();
         }
 
@@ -449,6 +444,9 @@ class InstallController extends Controller
 
     /**
      * Validate admin input.
+     *
+     * @param Request $request
+     * @return array<string, mixed>
      */
     private function validateAdminInput(Request $request): array
     {
@@ -470,7 +468,7 @@ class InstallController extends Controller
     /**
      * Show system settings form.
      */
-    public function settings(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+    public function settings(): View|RedirectResponse
     {
         if (!$this->isLicenseVerified()) {
             return $this->redirectToLicense();
@@ -506,7 +504,7 @@ class InstallController extends Controller
     /**
      * Process system settings.
      */
-    public function settingsStore(Request $request): \Illuminate\Http\RedirectResponse
+    public function settingsStore(Request $request): RedirectResponse
     {
         $validator = Validator::make($request->all(), [
             'site_name' => 'required|string|max:255',
@@ -536,7 +534,7 @@ class InstallController extends Controller
     /**
      * Show installation progress.
      */
-    public function install(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+    public function install(): View|RedirectResponse
     {
         // Check if all required configuration is available
         $licenseConfig = session('install.license');
@@ -559,7 +557,7 @@ class InstallController extends Controller
             return redirect()->route('install.settings')
                 ->with('error', 'Please configure system settings first.');
         }
-        $steps = $this->getInstallationStepsWithStatus(7);
+        $steps = $this->stepService->getInstallationStepsWithStatus(7);
         return view('install.install', [
             'step' => 7,
             'progressWidth' => 100,
@@ -569,7 +567,7 @@ class InstallController extends Controller
     /**
      * Process installation.
      */
-    public function installProcess(Request $request): \Illuminate\Http\JsonResponse
+    public function installProcess(Request $request): JsonResponse
     {
         // Installation process started
         try {
@@ -643,7 +641,7 @@ class InstallController extends Controller
     /**
      * Show installation completion page.
      */
-    public function completion(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+    public function completion(): View|RedirectResponse
     {
         // Check if system is installed
         $installedFile = storage_path('.installed');
@@ -659,7 +657,7 @@ class InstallController extends Controller
             return redirect()->route('install.welcome');
         }
         // Pass session data to view before clearing
-        $steps = $this->getInstallationStepsWithStatus(7);
+        $steps = $this->stepService->getInstallationStepsWithStatus(7);
         $viewData = [
             'step' => 7,
             'progressWidth' => 100,
@@ -1051,7 +1049,7 @@ class InstallController extends Controller
     /**
      * Test database connection.
      */
-    public function testDatabase(Request $request): \Illuminate\Http\JsonResponse
+    public function testDatabase(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'db_host' => 'required|string',
