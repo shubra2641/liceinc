@@ -2021,3 +2021,138 @@ class UserTickets {
 if (typeof document !== 'undefined') {
   new UserTickets();
 }
+
+// ===== MAINTENANCE MANAGER =====
+class MaintenanceManager {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    this.bindEvents();
+    this.initializeComponents();
+  }
+
+  bindEvents() {
+    // Refresh page button
+    document.addEventListener('click', e => {
+      if (
+        e.target.matches('[data-action="reload"]') ||
+        e.target.closest('[data-action="reload"]')
+      ) {
+        this.handleRefresh();
+      }
+    });
+
+    // Auto-refresh progress bar
+    this.startProgressAnimation();
+  }
+
+  initializeComponents() {
+    // Initialize maintenance components
+    this.initProgressBar();
+    this.initStatusUpdates();
+  }
+
+  /**
+   * Handle page refresh
+   */
+  handleRefresh() {
+    // Show loading state
+    const refreshBtn = document.querySelector('[data-action="reload"]');
+    if (refreshBtn) {
+      const originalText = refreshBtn.innerHTML;
+      // Use SecurityUtils for safe HTML insertion
+      if (typeof SecurityUtils !== 'undefined') {
+        SecurityUtils.safeInnerHTML(refreshBtn, 
+          '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...', 
+          true, 
+          true
+        );
+      } else {
+        refreshBtn.textContent = 'Refreshing...';
+      }
+      refreshBtn.disabled = true;
+
+      // Reload page after short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
+  }
+
+  /**
+   * Initialize progress bar animation
+   */
+  initProgressBar() {
+    const progressFill = document.querySelector('.progress-fill');
+    if (progressFill) {
+      // Animate progress bar on load
+      setTimeout(() => {
+        progressFill.style.width = '75%';
+      }, 500);
+    }
+  }
+
+  /**
+   * Start progress animation
+   */
+  startProgressAnimation() {
+    const progressFill = document.querySelector('.progress-fill');
+    if (progressFill) {
+      // Simulate progress updates
+      let progress = 0;
+      const interval = setInterval(() => {
+        // Use secure random for better security
+        if (typeof SecurityUtils !== 'undefined' && SecurityUtils.secureRandom) {
+          progress += SecurityUtils.secureRandom(2);
+        } else {
+          progress += Math.random() * 2; // Fallback for older browsers
+        }
+        if (progress >= 75) {
+          progress = 75;
+          clearInterval(interval);
+        }
+        progressFill.style.width = `${progress}%`;
+      }, 2000);
+    }
+  }
+
+  /**
+   * Initialize status updates
+   */
+  initStatusUpdates() {
+    // Add real-time timestamp updates
+    this.updateTimestamps();
+    setInterval(() => {
+      this.updateTimestamps();
+    }, 60000); // Update every minute
+  }
+
+  /**
+   * Update timestamps
+   */
+  updateTimestamps() {
+    const lastUpdated = document.querySelector('.footer-text');
+    if (lastUpdated && lastUpdated.textContent.includes('Last updated')) {
+      const now = new Date();
+      const timeString = now.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      });
+      // Use global security utility for safe HTML assignment
+      window.SecurityUtils.safeInnerHTML(
+        lastUpdated,
+        `<i class="fas fa-clock me-2"></i>Last updated: ${timeString}`,
+      );
+    }
+  }
+}
+
+// Initialize MaintenanceManager when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  new MaintenanceManager();
+});
