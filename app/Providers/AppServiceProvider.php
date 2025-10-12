@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Http\ViewComposers\LayoutComposer;
+use App\Services\Email\EmailServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\RateLimiter;
@@ -43,6 +44,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         try {
+            // Register Email Service Provider
+            $this->app->register(EmailServiceProvider::class);
+            
             // Register Envato Socialite Provider with validation
             if (! class_exists(EnvatoSocialiteProvider::class)) {
                 throw new \InvalidArgumentException(
@@ -53,7 +57,7 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Exception $e) {
             // Log error but don't break the application
             if (app()->bound('log')) {
-                app('log')->error('Failed to register EnvatoSocialiteProvider: ' . $e->getMessage());
+                app('log')->error('Failed to register service providers: ' . $e->getMessage());
             }
             // Re-throw if it's a critical error
             if ($e instanceof \InvalidArgumentException) {

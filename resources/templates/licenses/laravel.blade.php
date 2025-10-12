@@ -1,4 +1,5 @@
 <?php
+
 /**
  * License Verification System for Laravel
  * Product: {{product}}
@@ -27,13 +28,12 @@ class LaravelLicenseVerifier
         try {
             // Send single request to our system
             $result = $this->verifyWithOurSystem($purchaseCode, $domain);
-            
+
             if ($result['valid']) {
                 return $this->createLicenseResponse(true, $result['message'], $result['data']);
             } else {
                 return $this->createLicenseResponse(false, $result['message']);
             }
-
         } catch (\Exception $e) {
             return $this->createLicenseResponse(false, 'Verification failed: ' . $e->getMessage());
         }
@@ -135,4 +135,3 @@ if ($result['valid']) {
     return response()->json(['app.Status' => 'error', 'message' => $result['message']], 403);
 }
 */
-?>

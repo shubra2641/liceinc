@@ -409,7 +409,6 @@ class ConfigHelper
             try {
                 $base64String = str_replace('|COMPRESSED', '', $value);
                 $compressed = base64_decode($base64String, true);
-                
                 if ($compressed === false || $compressed === '') {
                     Log::warning('Failed to decode compressed config value');
 
