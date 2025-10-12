@@ -123,6 +123,12 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     createOrReplaceChart(chartId, ctx, config) {
+      // Validate chartId to prevent injection
+      if (!chartId || typeof chartId !== 'string' || !/^[a-zA-Z][a-zA-Z0-9]*$/.test(chartId)) {
+        console.error('Invalid chartId:', chartId);
+        return;
+      }
+      
       if (this.charts[chartId]) {
         this.charts[chartId].destroy();
       }
@@ -339,7 +345,7 @@ if (typeof window.AdminCharts === 'undefined') {
         .then(apiData => {
           // Check if canvas still exists
           if (!this.revenueChartCtx || !document.contains(this.revenueChartCtx)) {
-            return;
+            return false;
           }
 
           this.createOrReplaceChart('revenue', this.revenueChartCtx, buildConfig(apiData.labels, apiData.data));
@@ -350,7 +356,7 @@ if (typeof window.AdminCharts === 'undefined') {
           
           // Check if canvas still exists
           if (!this.revenueChartCtx || !document.contains(this.revenueChartCtx)) {
-            return;
+            return false;
           }
 
           const fallbackData = {
@@ -359,6 +365,7 @@ if (typeof window.AdminCharts === 'undefined') {
           };
 
           this.createOrReplaceChart('revenue', this.revenueChartCtx, buildConfig(fallbackData.labels, fallbackData.data));
+          return false;
         });
     }
 
