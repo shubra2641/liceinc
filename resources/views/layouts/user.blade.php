@@ -382,8 +382,6 @@
     <script src="{{ asset('vendor/assets/alpinejs/alpine.min.js') }}" defer></script>
     <!-- User Dashboard JavaScript -->
     <script src="{{ asset('assets/front/js/user-dashboard.js') }}" defer></script>
-    <!-- Admin JavaScript for Toast Notifications -->
-    <script src="{{ asset('assets/admin/js/admin.js') }}"></script>
     <!-- Preloader JavaScript -->
     <script src="{{ asset('assets/admin/js/preloader.js') }}"></script>
     <!-- User Tickets JavaScript -->

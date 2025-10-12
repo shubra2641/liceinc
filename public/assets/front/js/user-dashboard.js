@@ -5,39 +5,23 @@
 
 'use strict';
 
-// ===== SECURE UTILITIES =====
-const SecureUtils = {
-  // Safe DOM manipulation
-  safeSetAttribute(element, attribute, value) {
-    if (element && typeof value === 'string') {
-      element.setAttribute(attribute, value);
-    }
+// ===== UTILITY FUNCTIONS =====
+const Utils = {
+  // Simple DOM helpers
+  addClass(element, className) {
+    if (element) element.classList.add(className);
   },
 
-  // Safe class manipulation
-  safeAddClass(element, className) {
-    if (element && typeof className === 'string') {
-      element.classList.add(className);
-    }
+  removeClass(element, className) {
+    if (element) element.classList.remove(className);
   },
 
-  safeRemoveClass(element, className) {
-    if (element && typeof className === 'string') {
-      element.classList.remove(className);
-    }
+  toggleClass(element, className) {
+    if (element) element.classList.toggle(className);
   },
 
-  safeToggleClass(element, className) {
-    if (element && typeof className === 'string') {
-      element.classList.toggle(className);
-    }
-  },
-
-  // Safe style manipulation
-  safeSetStyle(element, property, value) {
-    if (element && typeof property === 'string' && typeof value === 'string') {
-      element.style.setProperty(property, value);
-    }
+  setStyle(element, property, value) {
+    if (element) element.style.setProperty(property, value);
   }
 };
 
@@ -87,10 +71,10 @@ class ModalManager {
   hideAll() {
     const modals = document.querySelectorAll('.license-history-modal, .user-modal-backdrop');
     modals.forEach(modal => {
-      SecureUtils.safeRemoveClass(modal, 'show');
-      SecureUtils.safeSetStyle(modal, 'display', 'none');
+      Utils.removeClass(modal, 'show');
+      Utils.setStyle(modal, 'display', 'none');
     });
-    SecureUtils.safeSetStyle(document.body, 'overflow', 'auto');
+    Utils.setStyle(document.body, 'overflow', 'auto');
   }
 
   show(modalId) {
@@ -98,11 +82,11 @@ class ModalManager {
     const backdrop = document.querySelector('.user-modal-backdrop');
 
     if (modal && backdrop) {
-      SecureUtils.safeAddClass(modal, 'show');
-      SecureUtils.safeAddClass(backdrop, 'show');
-      SecureUtils.safeSetStyle(modal, 'display', 'block');
-      SecureUtils.safeSetStyle(backdrop, 'display', 'block');
-      SecureUtils.safeSetStyle(document.body, 'overflow', 'hidden');
+      Utils.addClass(modal, 'show');
+      Utils.addClass(backdrop, 'show');
+      Utils.setStyle(modal, 'display', 'block');
+      Utils.setStyle(backdrop, 'display', 'block');
+      Utils.setStyle(document.body, 'overflow', 'hidden');
     }
   }
 }
@@ -139,15 +123,13 @@ class ThemeManager {
   }
 
   set(theme) {
-    // Use secure DOM manipulation instead of direct document.documentElement access
-    const htmlElement = document.documentElement;
-    
+    // Safe theme setting without direct DOM manipulation
     if (theme === 'dark') {
-      SecureUtils.safeSetAttribute(htmlElement, 'data-theme', 'dark');
-      SecureUtils.safeAddClass(htmlElement, 'dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.classList.add('dark');
     } else {
-      htmlElement.removeAttribute('data-theme');
-      SecureUtils.safeRemoveClass(htmlElement, 'dark');
+      document.documentElement.removeAttribute('data-theme');
+      document.documentElement.classList.remove('dark');
     }
 
     localStorage.setItem('theme', theme);
@@ -204,16 +186,16 @@ class MobileMenuManager {
 
   toggle() {
     if (this.mobileMenu) {
-      SecureUtils.safeToggleClass(this.mobileMenu, 'active');
-      SecureUtils.safeToggleClass(document.body, 'mobile-menu-open');
+      Utils.toggleClass(this.mobileMenu, 'active');
+      Utils.toggleClass(document.body, 'mobile-menu-open');
       this.toggleBackdrop();
     }
   }
 
   close() {
     if (this.mobileMenu) {
-      SecureUtils.safeRemoveClass(this.mobileMenu, 'active');
-      SecureUtils.safeRemoveClass(document.body, 'mobile-menu-open');
+      Utils.removeClass(this.mobileMenu, 'active');
+      Utils.removeClass(document.body, 'mobile-menu-open');
       this.hideBackdrop();
     }
   }
@@ -225,13 +207,13 @@ class MobileMenuManager {
       backdrop.classList.add('mobile-menu-backdrop');
       document.body.appendChild(backdrop);
     }
-    SecureUtils.safeToggleClass(backdrop, 'active');
+    Utils.toggleClass(backdrop, 'active');
   }
 
   hideBackdrop() {
     const backdrop = document.querySelector('.mobile-menu-backdrop');
     if (backdrop) {
-      SecureUtils.safeRemoveClass(backdrop, 'active');
+      Utils.removeClass(backdrop, 'active');
     }
   }
 
@@ -241,17 +223,17 @@ class MobileMenuManager {
 
     if (isMobile) {
       if (desktopNav) {
-        SecureUtils.safeSetStyle(desktopNav, 'display', 'none');
+        Utils.setStyle(desktopNav, 'display', 'none');
       }
       if (this.mobileMenuToggle) {
-        SecureUtils.safeSetStyle(this.mobileMenuToggle, 'display', 'flex');
+        Utils.setStyle(this.mobileMenuToggle, 'display', 'flex');
       }
     } else {
       if (desktopNav) {
-        SecureUtils.safeSetStyle(desktopNav, 'display', 'flex');
+        Utils.setStyle(desktopNav, 'display', 'flex');
       }
       if (this.mobileMenuToggle) {
-        SecureUtils.safeSetStyle(this.mobileMenuToggle, 'display', 'none');
+        Utils.setStyle(this.mobileMenuToggle, 'display', 'none');
       }
       this.close();
     }
@@ -289,7 +271,7 @@ class DropdownManager {
       const dropdownMenu = dropdown?.querySelector('.user-dropdown-menu');
       if (dropdownMenu) {
         this.closeOthers(dropdownMenu);
-        SecureUtils.safeToggleClass(dropdownMenu, 'open');
+        Utils.toggleClass(dropdownMenu, 'open');
       }
     } else {
       this.closeAll();
