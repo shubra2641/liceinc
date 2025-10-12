@@ -152,6 +152,17 @@ if (typeof window.AdminCharts === 'undefined') {
       console.warn(message, data);
     }
 
+    _destroyChartIfExists(ctx) {
+      const existingChart = Chart.getChart(ctx);
+      if (existingChart) {
+        existingChart.destroy();
+      }
+    }
+
+    _isChartLoading(chartId) {
+      return Object.prototype.hasOwnProperty.call(this._loadingCharts, chartId) && this._loadingCharts[chartId];
+    }
+
     // ===== UNIFIED API HANDLING =====
     async _apiFetch(path, options = {}) {
       const primaryUrl = this._buildUrl(path);
@@ -211,23 +222,33 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     async _parseResponse(resp) {
-      const ct = resp.headers.get('content-type') || '';
+      this._validateResponseStatus(resp);
+      this._validateContentType(resp);
+      return resp.json();
+    }
+
+    _validateResponseStatus(resp) {
       if (!resp.ok) {
-        if (resp.status === 401) {
-          throw new Error('Authentication required. Please refresh the page and log in again.');
-        } else if (resp.status === 403) {
-          throw new Error('Access denied. You do not have permission to access this data.');
-        } else if (resp.status === 404) {
-          throw new Error('Data endpoint not found.');
+        const errorMessages = {
+          401: 'Authentication required. Please refresh the page and log in again.',
+          403: 'Access denied. You do not have permission to access this data.',
+          404: 'Data endpoint not found.',
+        };
+        
+        if (resp.status in errorMessages) {
+          throw new Error(errorMessages[resp.status]);
         } else if (resp.status >= 500) {
           throw new Error('Server error occurred while fetching data.');
         }
         throw new Error(`HTTP ${resp.status}`);
       }
+    }
+
+    _validateContentType(resp) {
+      const ct = resp.headers.get('content-type') || '';
       if (!ct.includes('application/json')) {
         throw new Error(`Unexpected content-type: ${ct || 'unknown'}`);
       }
-      return resp.json();
     }
 
     // ===== UNIFIED ERROR HANDLING =====
@@ -352,7 +373,7 @@ if (typeof window.AdminCharts === 'undefined') {
       // Validate chartId before using it as object key
       if (!this._validateChartId(chartId)) return;
       
-      if (Object.prototype.hasOwnProperty.call(this._loadingCharts, chartId) && this._loadingCharts[chartId]) return;
+      if (this._isChartLoading(chartId)) return;
       this._loadingCharts[chartId] = true;
 
       this._apiFetch(apiPath)
@@ -425,9 +446,7 @@ if (typeof window.AdminCharts === 'undefined') {
       const ctx = document.getElementById('revenueChart');
       if (!ctx) return;
 
-      if (Chart.getChart(ctx)) {
-        Chart.getChart(ctx).destroy();
-      }
+      this._destroyChartIfExists(ctx);
 
       this.revenueChartCtx = ctx;
       this.fetchRevenueData('monthly');
@@ -495,9 +514,7 @@ if (typeof window.AdminCharts === 'undefined') {
       const ctxNode = document.getElementById('invoicesMonthlyChart');
       if (!ctxNode) return;
 
-      if (Chart.getChart(ctxNode)) {
-        Chart.getChart(ctxNode).destroy();
-      }
+      this._destroyChartIfExists(ctxNode);
 
       let chartData = { labels: [], data: [] };
       try {
@@ -526,9 +543,7 @@ if (typeof window.AdminCharts === 'undefined') {
       const ctx = document.getElementById('apiRequestsChart');
       if (!ctx) return;
 
-      if (Chart.getChart(ctx)) {
-        Chart.getChart(ctx).destroy();
-      }
+      this._destroyChartIfExists(ctx);
 
       const config = this._getChartConfig('line', {
         labels: [],
@@ -577,9 +592,7 @@ if (typeof window.AdminCharts === 'undefined') {
       const ctx = document.getElementById('apiPerformanceChart');
       if (!ctx) return;
 
-      if (Chart.getChart(ctx)) {
-        Chart.getChart(ctx).destroy();
-      }
+      this._destroyChartIfExists(ctx);
 
       const colors = this._getCommonColors();
       const config = this._getChartConfig('bar', {
@@ -848,8 +861,9 @@ function initReportsCharts() {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
 
-    if (Chart.getChart(canvas)) {
-      Chart.getChart(canvas).destroy();
+    const existingChart = Chart.getChart(canvas);
+    if (existingChart) {
+      existingChart.destroy();
     }
 
     const chartData = JSON.parse(canvas.getAttribute('data-chart-data') || '{}');
