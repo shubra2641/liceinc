@@ -2,7 +2,7 @@
  * Admin Dashboard Charts and Statistics - Zero Duplication Version
  * Unified chart system with complete elimination of code duplication
  */
-/* global window document fetch URL setInterval setTimeout console Chart MutationObserver Blob bootstrap alert AdminCharts module */
+/* global document fetch URL setInterval setTimeout console Chart MutationObserver Blob bootstrap alert AdminCharts module */
 
 if (typeof window.AdminCharts === 'undefined') {
   class AdminCharts {
@@ -116,7 +116,8 @@ if (typeof window.AdminCharts === 'undefined') {
     _createChart(chartId, ctx, config) {
       if (!this._validateChartId(chartId)) return false;
       
-      if (this.charts[chartId]) {
+      // Use hasOwnProperty to safely check and access chart
+      if (this.charts.hasOwnProperty(chartId)) {
         this.charts[chartId].destroy();
       }
       
