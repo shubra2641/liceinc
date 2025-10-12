@@ -82,6 +82,24 @@
     <!-- Preloader JavaScript -->
     <!-- Security Utils Library -->
     <script src="<?php echo e(asset('assets/js/security-utils.js')); ?>"></script>
+    
+    <!-- Preloader Settings -->
+    <script>
+        window.preloaderSettings = {
+            enabled: <?php echo e($preloaderSettings['preloaderEnabled'] ? 'true' : 'false'); ?>,
+            type: '<?php echo e($preloaderSettings['preloaderType']); ?>',
+            color: '<?php echo e($preloaderSettings['preloaderColor']); ?>',
+            backgroundColor: '<?php echo e($preloaderSettings['preloaderBgColor']); ?>',
+            duration: <?php echo e($preloaderSettings['preloaderDuration']); ?>,
+            minDuration: <?php echo e($preloaderSettings['preloaderMinDuration'] ?? 0); ?>,
+            text: '<?php echo e($preloaderSettings['preloaderText']); ?>',
+            logo: '<?php echo e($preloaderSettings['siteLogo']); ?>',
+            logoText: '<?php echo e($preloaderSettings['logoText']); ?>',
+            logoShowText: <?php echo e($preloaderSettings['logoShowText'] ? 'true' : 'false'); ?>
+
+        };
+    </script>
+    
     <script src="<?php echo e(asset('assets/front/js/preloader.js')); ?>"></script>
     <!-- jQuery (must be loaded first) -->
     <script src="<?php echo e(asset('assets/front/js/jquery-3.6.0.min.js')); ?>"></script>

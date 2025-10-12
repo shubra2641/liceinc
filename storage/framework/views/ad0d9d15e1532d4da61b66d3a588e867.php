@@ -7,7 +7,8 @@
     data-type="<?php echo e($preloaderSettings['preloaderType']); ?>" data-color="<?php echo e($preloaderSettings['preloaderColor']); ?>"
     data-bg="<?php echo e($preloaderSettings['preloaderBgColor']); ?>" data-duration="<?php echo e($preloaderSettings['preloaderDuration']); ?>"
     data-min-duration="<?php echo e($preloaderSettings['preloaderMinDuration'] ?? 0); ?>"
-    data-text="<?php echo e($preloaderSettings['preloaderText']); ?>" data-logo="<?php echo e($preloaderSettings['siteLogo']); ?>">
+    data-text="<?php echo e($preloaderSettings['preloaderText']); ?>" data-logo="<?php echo e($preloaderSettings['siteLogo']); ?>"
+    data-logo-text="<?php echo e($preloaderSettings['logoText']); ?>" data-logo-show-text="<?php echo e($preloaderSettings['logoShowText'] ? '1' : '0'); ?>">
     <div class="preloader-content">
         
         <?php if($preloaderSettings['siteLogo'] || $preloaderSettings['logoShowText']): ?>

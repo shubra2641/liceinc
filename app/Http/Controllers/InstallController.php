@@ -9,6 +9,9 @@ use App\Models\User;
 use App\Services\Installation\InstallationStepService;
 use App\Services\Installation\LicenseVerificationService;
 use App\Services\Installation\SystemRequirementsService;
+use App\Services\Installation\InstallationService;
+use App\Services\Installation\LicenseValidationService;
+use App\Services\Installation\UserCreationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,7 +55,10 @@ class InstallController extends Controller
     public function __construct(
         protected InstallationStepService $stepService,
         protected LicenseVerificationService $licenseService,
-        protected SystemRequirementsService $requirementsService
+        protected SystemRequirementsService $requirementsService,
+        protected InstallationService $installationService,
+        protected LicenseValidationService $validationService,
+        protected UserCreationService $userService
     ) {
     }
     /**
@@ -132,15 +138,15 @@ class InstallController extends Controller
     {
         try {
             // Validate input
-            $validationResult = $this->validateLicenseInput($request);
+            $validationResult = $this->validationService->validateLicenseInput($request);
             if (!$validationResult['valid']) {
                 $message = $validationResult['message'] ?? 'Validation failed';
-                return $this->handleValidationError($request, is_string($message) ? $message : 'Validation failed');
+                return $this->validationService->handleValidationError($request, is_string($message) ? $message : 'Validation failed');
             }
 
             // Verify license
-            $purchaseCode = $this->sanitizeInput($request->purchase_code);
-            $domain = $this->sanitizeInput($request->getHost());
+            $purchaseCode = $this->validationService->sanitizeInput($request->purchase_code);
+            $domain = $this->validationService->sanitizeInput($request->getHost());
             $result = $this->licenseService->verifyLicense(
                 is_string($purchaseCode) ? $purchaseCode : '',
                 is_string($domain) ? $domain : ''
@@ -183,110 +189,18 @@ class InstallController extends Controller
         return ['valid' => true];
     }
 
-    /**
-     * Handle validation error response.
-     *
-     * @param Request $request
-     * @param string $message
-     *
-     * @return RedirectResponse|JsonResponse
-     */
-    private function handleValidationError(Request $request, string $message): RedirectResponse|JsonResponse
-    {
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => false,
-                'message' => $message,
-            ], 422);
-        }
-        return redirect()->back()->withErrors(['purchase_code' => $message])->withInput();
-    }
 
-    /**
-     * Handle successful license verification.
-     *
-     * @param Request $request
-     * @param array<string, mixed> $result
-     *
-     * @return RedirectResponse|JsonResponse
-     */
-    private function handleSuccessfulVerification(Request $request, array $result): RedirectResponse|JsonResponse
-    {
-        // Store license information in session
-        session(['install.license' => [
-            'purchase_code' => $this->sanitizeInput($request->purchase_code),
-            'domain' => $this->sanitizeInput($request->getHost()),
-            'verified_at' => $result['verified_at'] ?? now()->toDateTimeString(),
-            'product' => $result['product'] ?? 'License Management System',
-        ]]);
 
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'License verified successfully!',
-                'redirect' => route('install.requirements'),
-            ]);
-        }
-        return redirect()->route('install.requirements')->with('success', 'License verified successfully!');
-    }
 
-    /**
-     * Handle failed license verification.
-     *
-     * @param Request $request
-     * @param array<string, mixed> $result
-     * @return RedirectResponse|JsonResponse
-     */
-    private function handleFailedVerification(Request $request, array $result): RedirectResponse|JsonResponse
-    {
-        $message = $result['message'] ?? 'License verification failed.';
-        $errorCode = $result['error_code'] ?? 'VERIFICATION_FAILED';
-
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => false,
-                'error_code' => $errorCode,
-                'message' => $message,
-            ], 400);
-        }
-        return redirect()->back()->withErrors(['license' => $message])->withInput();
-    }
-
-    /**
-     * Handle license verification exception.
-     *
-     * @param Request $request
-     * @param \Exception $e
-     * @return RedirectResponse|JsonResponse
-     */
-    private function handleVerificationException(Request $request, \Exception $e): RedirectResponse|JsonResponse
-    {
-        $purchaseCode = $request->purchase_code ?? '';
-        Log::error('License verification failed', [
-            'purchase_code_length' => strlen(is_string($purchaseCode) ? $purchaseCode : ''),
-            'domain' => $request->getHost(),
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ]);
-
-        $message = 'License verification failed: ' . $e->getMessage();
-
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => false,
-                'message' => $message,
-            ], 500);
-        }
-        return redirect()->back()->withErrors(['license' => $message])->withInput();
-    }
     /**
      * Show system requirements check.
      */
     public function requirements(): View|RedirectResponse
     {
         // Check if license is verified
-        if (!$this->isLicenseVerified()) {
-            return $this->redirectToLicense();
+        if (!session('install.license')) {
+            return redirect()->route('install.license')
+                ->with('error', 'Please verify your license first.');
         }
 
         $requirements = $this->requirementsService->checkRequirements();
@@ -302,45 +216,15 @@ class InstallController extends Controller
         ]);
     }
 
-    /**
-     * Check if license is verified.
-     */
-    private function isLicenseVerified(): bool
-    {
-        return session('install.license') !== null;
-    }
 
-    /**
-     * Redirect to license verification.
-     *
-     * @return RedirectResponse
-     */
-    private function redirectToLicense(): RedirectResponse
-    {
-        return redirect()->route('install.license')
-            ->with('error', 'Please verify your license first.');
-    }
-
-    /**
-     * Check if all requirements are passed.
-     *
-     * @param array<string, mixed> $requirements
-     *
-     * @return bool
-     */
-    private function checkAllRequirementsPassed(array $requirements): bool
-    {
-        return collect($requirements)->every(
-            fn ($req) => is_array($req) && isset($req['passed']) ? $req['passed'] : false
-        );
-    }
     /**
      * Show database configuration form.
      */
     public function database(): View|RedirectResponse
     {
-        if (!$this->isLicenseVerified()) {
-            return $this->redirectToLicense();
+        if (!session('install.license')) {
+            return redirect()->route('install.license')
+                ->with('error', 'Please verify your license first.');
         }
 
         $steps = $this->stepService->getInstallationStepsWithStatus(4);
@@ -378,38 +262,13 @@ class InstallController extends Controller
     }
 
     /**
-     * Validate database input.
-     *
-     * @param Request $request
-     *
-     * @return array<string, mixed>
-     */
-    private function validateDatabaseInput(Request $request): array
-    {
-        $validator = Validator::make($request->all(), [
-            'db_host' => 'required|string',
-            'db_port' => 'required|integer|min:1|max:65535',
-            'db_name' => 'required|string',
-            'db_username' => 'required|string',
-            'db_password' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return [
-                'valid' => false,
-                'errors' => $validator->errors(),
-            ];
-        }
-
-        return ['valid' => true];
-    }
-    /**
      * Show admin account creation form.
      */
     public function admin(): View|RedirectResponse
     {
-        if (!$this->isLicenseVerified()) {
-            return $this->redirectToLicense();
+        if (!session('install.license')) {
+            return redirect()->route('install.license')
+                ->with('error', 'Please verify your license first.');
         }
 
         if (!$this->isDatabaseConfigured()) {
@@ -426,18 +285,11 @@ class InstallController extends Controller
     }
 
     /**
-     * Check if database is configured.
-     */
-    private function isDatabaseConfigured(): bool
-    {
-        return session('install.database') !== null;
-    }
-    /**
      * Process admin account creation.
      */
     public function adminStore(Request $request): RedirectResponse
     {
-        $validationResult = $this->validateAdminInput($request);
+        $validationResult = $this->validationService->validateAdminInput($request);
         if (!$validationResult['valid']) {
             $errors = $validationResult['errors'] ?? [];
             return redirect()->back()
@@ -451,44 +303,21 @@ class InstallController extends Controller
     }
 
     /**
-     * Validate admin input.
-     *
-     * @param Request $request
-     *
-     * @return array<string, mixed>
-     */
-    private function validateAdminInput(Request $request): array
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        if ($validator->fails()) {
-            return [
-                'valid' => false,
-                'errors' => $validator->errors(),
-            ];
-        }
-
-        return ['valid' => true];
-    }
-    /**
      * Show system settings form.
      */
     public function settings(): View|RedirectResponse
     {
-        if (!$this->isLicenseVerified()) {
-            return $this->redirectToLicense();
+        if (!session('install.license')) {
+            return redirect()->route('install.license')
+                ->with('error', 'Please verify your license first.');
         }
 
-        if (!$this->isDatabaseConfigured()) {
+        if (!session('install.database')) {
             return redirect()->route('install.database')
                 ->with('error', 'Please configure database settings first.');
         }
 
-        if (!$this->isAdminConfigured()) {
+        if (!session('install.admin')) {
             return redirect()->route('install.admin')
                 ->with('error', 'Please create admin account first.');
         }
@@ -503,13 +332,6 @@ class InstallController extends Controller
         ]);
     }
 
-    /**
-     * Check if admin is configured.
-     */
-    private function isAdminConfigured(): bool
-    {
-        return session('install.admin') !== null;
-    }
     /**
      * Process system settings.
      */
@@ -608,13 +430,13 @@ class InstallController extends Controller
             // Step 3: Create roles and permissions first
             $this->createRolesAndPermissions();
             // Step 4: Run database seeders
-            $this->runDatabaseSeeders();
+            $this->installationService->runSeeders();
             // Step 5: Create admin user
             /**
  * @var array<string, mixed> $adminConfigTyped
 */
             $adminConfigTyped = is_array($adminConfig) ? $adminConfig : [];
-            $this->createAdminUser($adminConfigTyped);
+            $this->userService->createAdminUser($adminConfigTyped);
             // Step 6: Create default settings
             $this->createDefaultSettings($settingsConfigTyped);
             // Step 7: Store license information
@@ -622,18 +444,13 @@ class InstallController extends Controller
  * @var array<string, mixed> $licenseConfigTyped
 */
             $licenseConfigTyped = is_array($licenseConfig) ? $licenseConfig : [];
-            $this->storeLicenseInformation($licenseConfigTyped);
+            $this->installationService->storeLicenseInformation($licenseConfigTyped);
             // Step 8: Update session and cache drivers to database
-            $this->updateSessionDrivers();
+            $this->installationService->updateSessionDrivers();
             // Step 9: Create storage link
-            try {
-                Artisan::call('storage:link');
-            } catch (\Exception $e) {
-                // Storage link might already exist or fail, continue anyway
-                Log::info('Storage link creation skipped', ['error' => $e->getMessage()]);
-            }
+            $this->installationService->createStorageLink();
             // Step 10: Create installed file
-            File::put(storage_path('.installed'), now()->toDateTimeString());
+            $this->installationService->createInstalledFile();
             // Installation completed successfully
             return response()->json([
                 'success' => true,
@@ -680,107 +497,6 @@ class InstallController extends Controller
         // Clear session data after passing to view
         session()->forget(['install.license', 'install.database', 'install.admin', 'install.settings']);
         return view('install.completion', $viewData);
-    }
-    /**
-     * Check system requirements.
-     */
-    /**
-     * @return array<string, mixed>
-     */
-    public function checkRequirements()
-    {
-        return [
-            'php_version' => [
-                'name' => 'PHP Version >= 8.2',
-                'required' => '8.2',
-                'current' => PHP_VERSION,
-                'passed' => version_compare(PHP_VERSION, '8.2.0', '>='),
-            ],
-            'bcmath' => [
-                'name' => 'BCMath Extension',
-                'required' => 'Required',
-                'current' => extension_loaded('bcmath') ? 'Loaded' : 'Not Loaded',
-                'passed' => extension_loaded('bcmath'),
-            ],
-            'ctype' => [
-                'name' => 'Ctype Extension',
-                'required' => 'Required',
-                'current' => extension_loaded('ctype') ? 'Loaded' : 'Not Loaded',
-                'passed' => extension_loaded('ctype'),
-            ],
-            'curl' => [
-                'name' => 'cURL Extension',
-                'required' => 'Required',
-                'current' => extension_loaded('curl') ? 'Loaded' : 'Not Loaded',
-                'passed' => extension_loaded('curl'),
-            ],
-            'dom' => [
-                'name' => 'DOM Extension',
-                'required' => 'Required',
-                'current' => extension_loaded('dom') ? 'Loaded' : 'Not Loaded',
-                'passed' => extension_loaded('dom'),
-            ],
-            'fileinfo' => [
-                'name' => 'Fileinfo Extension',
-                'required' => 'Required',
-                'current' => extension_loaded('fileinfo') ? 'Loaded' : 'Not Loaded',
-                'passed' => extension_loaded('fileinfo'),
-            ],
-            'json' => [
-                'name' => 'JSON Extension',
-                'required' => 'Required',
-                'current' => extension_loaded('json') ? 'Loaded' : 'Not Loaded',
-                'passed' => extension_loaded('json'),
-            ],
-            'mbstring' => [
-                'name' => 'Mbstring Extension',
-                'required' => 'Required',
-                'current' => extension_loaded('mbstring') ? 'Loaded' : 'Not Loaded',
-                'passed' => extension_loaded('mbstring'),
-            ],
-            'openssl' => [
-                'name' => 'OpenSSL Extension',
-                'required' => 'Required',
-                'current' => extension_loaded('openssl') ? 'Loaded' : 'Not Loaded',
-                'passed' => extension_loaded('openssl'),
-            ],
-            'pcre' => [
-                'name' => 'PCRE Extension',
-                'required' => 'Required',
-                'current' => extension_loaded('pcre') ? 'Loaded' : 'Not Loaded',
-                'passed' => extension_loaded('pcre'),
-            ],
-            'pdo' => [
-                'name' => 'PDO Extension',
-                'required' => 'Required',
-                'current' => extension_loaded('pdo') ? 'Loaded' : 'Not Loaded',
-                'passed' => extension_loaded('pdo'),
-            ],
-            'tokenizer' => [
-                'name' => 'Tokenizer Extension',
-                'required' => 'Required',
-                'current' => extension_loaded('tokenizer') ? 'Loaded' : 'Not Loaded',
-                'passed' => extension_loaded('tokenizer'),
-            ],
-            'xml' => [
-                'name' => 'XML Extension',
-                'required' => 'Required',
-                'current' => extension_loaded('xml') ? 'Loaded' : 'Not Loaded',
-                'passed' => extension_loaded('xml'),
-            ],
-            'storage_writable' => [
-                'name' => 'Storage Directory Writable',
-                'required' => 'Writable',
-                'current' => SecureFileHelper::isWritable(storage_path()) ? 'Writable' : 'Not Writable',
-                'passed' => SecureFileHelper::isWritable(storage_path()),
-            ],
-            'bootstrap_writable' => [
-                'name' => 'Bootstrap Cache Directory Writable',
-                'required' => 'Writable',
-                'current' => SecureFileHelper::isWritable(base_path('bootstrap/cache')) ? 'Writable' : 'Not Writable',
-                'passed' => SecureFileHelper::isWritable(base_path('bootstrap/cache')),
-            ],
-        ];
     }
     /**
      * Test database connection.
@@ -1077,96 +793,5 @@ class InstallController extends Controller
         }
         $connection = $this->testDatabaseConnection($request->all());
         return response()->json($connection);
-    }
-    /**
-     * Run specific database seeders.
-     */
-    private function runDatabaseSeeders(): void
-    {
-        // Run only the required seeders
-        $seeders = [
-            'Database\\Seeders\\TicketCategorySeeder',
-            'Database\\Seeders\\ProgrammingLanguageSeeder',
-            'Database\\Seeders\\EmailTemplateSeeder',
-        ];
-        foreach ($seeders as $seeder) {
-            try {
-                Artisan::call('db:seed', [
-                    '--class' => $seeder,
-                    '--force' => true,
-                ]);
-                // Seeder executed successfully
-            } catch (\Exception $seederError) {
-                // Failed to run seeder
-                // Continue with other seeders even if one fails
-                Log::warning('Seeder execution failed', [
-                    'seeder' => $seeder,
-                    'error' => $seederError->getMessage()
-                ]);
-            }
-        }
-        // Required database seeders execution completed
-    }
-    /**
-     * Store license information in database.
-     *
-     * @param array<string, mixed> $licenseConfig
-     */
-    private function storeLicenseInformation(array $licenseConfig): void
-    {
-        try {
-            // Store license information in settings table
-            Setting::create([
-                'key' => 'license_purchase_code',
-                'value' => $licenseConfig['purchase_code'],
-                'type' => 'license',
-            ]);
-            Setting::create([
-                'key' => 'license_domain',
-                'value' => $licenseConfig['domain'],
-                'type' => 'license',
-            ]);
-            Setting::create([
-                'key' => 'license_verified_at',
-                'value' => $licenseConfig['verified_at'],
-                'type' => 'license',
-            ]);
-            Setting::create([
-                'key' => 'license_product',
-                'value' => $licenseConfig['product'],
-                'type' => 'license',
-            ]);
-            // License information stored successfully
-        } catch (\Exception $e) {
-            // Failed to store license information
-            throw $e;
-        }
-    }
-    /**
-     * Sanitize input data for security.
-     *
-     * Sanitizes input data to prevent XSS attacks and other security issues
-     * by removing or encoding potentially dangerous characters.
-     */
-    protected function sanitizeInput(mixed $input): mixed
-    {
-        if (is_array($input)) {
-            return array_map([$this, 'sanitizeInput'], $input);
-        }
-        if (is_object($input)) {
-            return $input;
-        }
-        if (! is_string($input)) {
-            return $input;
-        }
-        // Remove null bytes
-        $input = str_replace(SecureFileHelper::getCharacter(0), '', $input);
-        // Trim whitespace
-        $input = trim($input);
-        // Remove potentially dangerous characters
-        $input = preg_replace('/[<>"\']/', '', $input);
-        // Limit length to prevent buffer overflow attacks
-        $input = substr($input ?? '', 0, 1000);
-        return $input;
     }
 }

@@ -408,13 +408,29 @@
     <!-- jQuery (must be loaded first) -->
     <!-- Security Utils Library -->
     <script src="<?php echo e(asset('assets/js/security-utils.js')); ?>"></script>
+    
+    <!-- Preloader Settings -->
+    <script>
+        window.preloaderSettings = {
+            enabled: <?php echo e($preloaderSettings['preloaderEnabled'] ? 'true' : 'false'); ?>,
+            type: '<?php echo e($preloaderSettings['preloaderType']); ?>',
+            color: '<?php echo e($preloaderSettings['preloaderColor']); ?>',
+            backgroundColor: '<?php echo e($preloaderSettings['preloaderBgColor']); ?>',
+            duration: <?php echo e($preloaderSettings['preloaderDuration']); ?>,
+            minDuration: <?php echo e($preloaderSettings['preloaderMinDuration'] ?? 0); ?>,
+            text: '<?php echo e($preloaderSettings['preloaderText']); ?>',
+            logo: '<?php echo e($preloaderSettings['siteLogo']); ?>',
+            logoText: '<?php echo e($preloaderSettings['logoText']); ?>',
+            logoShowText: <?php echo e($preloaderSettings['logoShowText'] ? 'true' : 'false'); ?>
+
+        };
+    </script>
+    
     <script src="<?php echo e(asset('assets/admin/js/jquery-3.6.0.min.js')); ?>"></script>
     <!-- Alpine.js for Interactive Components (Local) -->
     <script src="<?php echo e(asset('vendor/assets/alpinejs/alpine.min.js')); ?>" defer></script>
     <!-- User Dashboard JavaScript -->
     <script src="<?php echo e(asset('assets/front/js/user-dashboard.js')); ?>" defer></script>
-    <!-- Admin JavaScript for Toast Notifications -->
-    <script src="<?php echo e(asset('assets/admin/js/admin.js')); ?>"></script>
     <!-- Preloader JavaScript -->
     <script src="<?php echo e(asset('assets/admin/js/preloader.js')); ?>"></script>
     <!-- User Tickets JavaScript -->
