@@ -43,7 +43,7 @@ class EmailServiceProvider extends ServiceProvider
 
         // Register facade
         $this->app->singleton(EmailFacade::class);
-        Facade::alias(Email::class, 'Email');
+        $this->app->alias(Email::class, 'Email');
     }
 
     /**

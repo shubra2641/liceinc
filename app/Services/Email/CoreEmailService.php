@@ -62,7 +62,7 @@ class CoreEmailService implements EmailServiceInterface
             // Add common variables with sanitization
             $data = array_merge($data, [
                 'recipient_email' => $recipientEmail,
-                'recipient_name' => $recipientName ?? 'User',
+                'recipient_name' => $recipientName ?: 'User',
                 'site_name' => config('app.name'),
                 'site_url' => config('app.url'),
                 'current_year' => date('Y'),

@@ -30,6 +30,8 @@ class SystemRequirementsService
 
     /**
      * Check PHP version requirement.
+     *
+     * @return array<string, mixed>
      */
     private function checkPhpVersion(): array
     {
@@ -46,6 +48,8 @@ class SystemRequirementsService
 
     /**
      * Check required PHP extensions.
+     *
+     * @return array<string, array<string, mixed>>
      */
     private function checkExtensions(): array
     {
@@ -75,6 +79,8 @@ class SystemRequirementsService
 
     /**
      * Check file permissions.
+     *
+     * @return array<string, array<string, mixed>>
      */
     private function checkPermissions(): array
     {
@@ -97,6 +103,8 @@ class SystemRequirementsService
 
     /**
      * Check database connection.
+     *
+     * @return array<string, mixed>
      */
     private function checkDatabaseConnection(): array
     {

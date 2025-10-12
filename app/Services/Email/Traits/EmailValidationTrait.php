@@ -57,10 +57,11 @@ trait EmailValidationTrait
     /**
      * Sanitize string using validator.
      */
-    protected function sanitizeString(?string $input): ?string
+    protected function sanitizeString(mixed $input): string
     {
         $this->initializeValidator();
-        return $this->validator->sanitizeString($input);
+        $result = $this->validator->sanitizeString($input);
+        return $result ?? '';
     }
 
     /**

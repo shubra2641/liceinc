@@ -98,7 +98,7 @@ class LicenseVerificationService
             return 'Invalid or expired license. Please check your purchase code.';
         }
         
-        if (str_contains($message, 'domain') || str_contains($message, 'domain')) {
+        if (str_contains($message, 'domain')) {
             return 'License is not valid for this domain. Please contact support.';
         }
         

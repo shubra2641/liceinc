@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\License;
 use App\Models\User;
 use App\Services\Email\Contracts\EmailServiceInterface;
+use App\Services\Email\Contracts\EmailValidatorInterface;
 use App\Services\Email\Traits\EmailLoggingTrait;
 use App\Services\Email\Traits\EmailValidationTrait;
 
@@ -24,7 +25,8 @@ class LicenseEmailHandler
     use EmailLoggingTrait;
 
     public function __construct(
-        protected EmailServiceInterface $emailService
+        protected EmailServiceInterface $emailService,
+        protected EmailValidatorInterface $validator
     ) {
     }
 
@@ -45,11 +47,14 @@ class LicenseEmailHandler
     /**
      * Build payment confirmation email data.
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function buildPaymentConfirmationData(License $license, Invoice $invoice): array
     {
         return [
-            'customer_name' => $this->sanitizeString($license->user->name),
-            'customer_email' => $this->sanitizeString($license->user->email),
+            'customer_name' => $this->sanitizeString($license->user?->name),
+            'customer_email' => $this->sanitizeString($license->user?->email),
             'product_name' => $this->sanitizeString($license->product->name ?? ''),
             'order_number' => $this->sanitizeString($invoice->invoice_number),
             'license_key' => $this->sanitizeString($license->license_key),
@@ -69,7 +74,8 @@ class LicenseEmailHandler
     {
         $gateway = $invoice->metadata['gateway'] ?? null;
         $method = is_string($gateway) ? $gateway : 'Unknown';
-        return $this->sanitizeString(ucfirst($method));
+        $result = $this->sanitizeString(ucfirst($method));
+        return $result ?: 'Unknown';
     }
 
     /**
@@ -113,7 +119,7 @@ class LicenseEmailHandler
         $sanitized['product_name'] = $this->sanitizeString($licenseData['product_name'] ?? '');
         $sanitized['expires_at'] = $this->sanitizeString($licenseData['expires_at'] ?? '');
         $sanitized['days_remaining'] = $this->sanitizeDaysRemaining($licenseData['days_remaining'] ?? 0);
-        
+
         return $sanitized;
     }
 
@@ -156,6 +162,9 @@ class LicenseEmailHandler
 
     /**
      * Build license created email data.
+     */
+    /**
+     * @return array<string, mixed>
      */
     private function buildLicenseCreatedData(License $license): array
     {
@@ -208,6 +217,9 @@ class LicenseEmailHandler
     /**
      * Build admin payment notification data.
      */
+    /**
+     * @return array<string, mixed>
+     */
     private function buildAdminPaymentData(License $license, Invoice $invoice): array
     {
         return [
@@ -231,6 +243,7 @@ class LicenseEmailHandler
      */
     private function getTransactionId(Invoice $invoice): string
     {
-        return $invoice->metadata['transaction_id'] ?? 'N/A';
+        $transactionId = $invoice->metadata['transaction_id'] ?? 'N/A';
+        return is_string($transactionId) ? $transactionId : 'N/A';
     }
 }

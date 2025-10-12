@@ -29,8 +29,12 @@ trait EmailLoggingTrait
     /**
      * Log email error.
      */
-    protected function logEmailError(string $template, string $recipient, string $message, ?\Throwable $exception = null): void
-    {
+    protected function logEmailError(
+        string $template,
+        string $recipient,
+        string $message,
+        ?\Throwable $exception = null
+    ): void {
         Log::error('Failed to send email: ' . $message, [
             'template' => $template,
             'recipient' => $recipient,

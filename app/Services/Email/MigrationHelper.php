@@ -95,7 +95,7 @@ class MigrationHelper
             if ($file->isFile() && $file->getExtension() === 'php') {
                 $filePath = $file->getPathname();
                 $content = file_get_contents($filePath);
-                
+
                 if (strpos($content, 'EmailService') !== false) {
                     $files[] = $filePath;
                     $recommendations[] = self::analyzeFile($filePath);
@@ -125,7 +125,7 @@ class MigrationHelper
     public static function generateMigrationScript(string $filePath): string
     {
         $analysis = self::analyzeFile($filePath);
-        
+
         if (isset($analysis['error'])) {
             return "// Error: {$analysis['error']}\n";
         }
@@ -200,22 +200,22 @@ class MigrationHelper
             if ($file->isFile() && $file->getExtension() === 'php') {
                 $stats['total_files']++;
                 $content = file_get_contents($file->getPathname());
-                
+
                 if (strpos($content, 'EmailService') !== false) {
                     $stats['files_with_email_service']++;
-                    
+
                     // Count import statements
                     if (strpos($content, 'use App\Services\EmailService') !== false) {
                         $stats['import_statements']++;
                     }
-                    
+
                     // Count method usage
                     $methods = [
                         'sendEmail', 'sendToUser', 'sendToAdmin', 'sendBulkEmail',
                         'sendUserWelcome', 'sendEmailVerification', 'sendPasswordReset',
                         'sendNewUserNotification', 'sendPaymentConfirmation'
                     ];
-                    
+
                     foreach ($methods as $method) {
                         $count = substr_count($content, $method);
                         if ($count > 0) {

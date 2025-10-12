@@ -76,13 +76,14 @@ class EmailValidator implements EmailValidatorInterface
     /**
      * Sanitize string input with XSS protection.
      */
-    public function sanitizeString(?string $input): ?string
+    public function sanitizeString(mixed $input): ?string
     {
         if ($input === null) {
             return null;
         }
 
-        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+        $stringValue = is_string($input) ? $input : (string) $input;
+        return htmlspecialchars(trim($stringValue), ENT_QUOTES, 'UTF-8');
     }
 
     /**
@@ -92,6 +93,9 @@ class EmailValidator implements EmailValidatorInterface
      *
      * @return array<string, mixed>
      */
+    /**
+     * @return array<string, mixed>
+     */
     public function sanitizeData(array $data): array
     {
         $sanitized = [];
@@ -99,9 +103,9 @@ class EmailValidator implements EmailValidatorInterface
             if (is_array($value)) {
                 $sanitized[$key] = $this->sanitizeData($value);
             } elseif (is_string($value)) {
-                $sanitized[$key] = $this->sanitizeString($value);
+                $sanitized[$key] = $this->sanitizeString($value) ?? '';
             } else {
-                $sanitized[$key] = $value;
+                $sanitized[$key] = is_scalar($value) ? (string) $value : '';
             }
         }
 

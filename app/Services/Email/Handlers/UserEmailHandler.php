@@ -7,6 +7,7 @@ namespace App\Services\Email\Handlers;
 use App\Models\User;
 use App\Services\Email\Contracts\EmailHandlerInterface;
 use App\Services\Email\Contracts\EmailServiceInterface;
+use App\Services\Email\Contracts\EmailValidatorInterface;
 use App\Services\Email\Traits\EmailLoggingTrait;
 use App\Services\Email\Traits\EmailValidationTrait;
 
@@ -23,7 +24,8 @@ class UserEmailHandler implements EmailHandlerInterface
     use EmailLoggingTrait;
 
     public function __construct(
-        protected EmailServiceInterface $emailService
+        protected EmailServiceInterface $emailService,
+        protected EmailValidatorInterface $validator
     ) {
     }
 
