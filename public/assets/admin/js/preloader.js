@@ -32,8 +32,31 @@ class PreloaderManager {
       logoShowText: this.container.dataset.logoShowText === '1'
     } : {};
 
-    // Merge settings with window settings taking precedence
+    // Default settings for enhanced functionality
+    const defaultSettings = {
+      enabled: true,
+      type: 'progress',
+      color: '#3b82f6',
+      backgroundColor: '#ffffff',
+      duration: 2000,
+      minDuration: 0,
+      text: 'Loading...',
+      logo: null,
+      logoText: '',
+      logoShowText: false,
+      showProgress: true,
+      progressText: true,
+      fadeOutDuration: 500,
+      animationSpeed: 'normal', // slow, normal, fast
+      responsive: true,
+      accessibility: true,
+      keyboardNavigation: true,
+      reducedMotion: false
+    };
+
+    // Merge settings with precedence: window > data > defaults
     return {
+      ...defaultSettings,
       ...dataSettings,
       ...windowSettings
     };
@@ -57,12 +80,29 @@ class PreloaderManager {
       return;
     }
 
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.settings.reducedMotion = prefersReducedMotion;
+
     const style = document.createElement('style');
+    style.id = 'preloader-dynamic-styles';
+    
+    // Animation speed mapping
+    const animationSpeeds = {
+      slow: '2s',
+      normal: '1s',
+      fast: '0.5s'
+    };
+
+    const animationDuration = animationSpeeds[this.settings.animationSpeed] || '1s';
+
     style.textContent = `
             :root {
                 --preloader-color: ${this.settings.color};
                 --preloader-bg: ${this.settings.backgroundColor};
                 --preloader-text-color: ${this.settings.color};
+                --preloader-fade-duration: ${this.settings.fadeOutDuration}ms;
+                --preloader-animation-speed: ${animationDuration};
             }
             
             @media (prefers-color-scheme: dark) {
@@ -70,6 +110,44 @@ class PreloaderManager {
                     --preloader-bg-dark: ${this.settings.backgroundColor === '#ffffff' ? '#1f2937' : this.settings.backgroundColor};
                     --preloader-text-color-dark: ${this.settings.color === '#3b82f6' ? '#d1d5db' : this.settings.color};
                 }
+            }
+
+            ${prefersReducedMotion ? `
+            .preloader-spinner,
+            .preloader-dot,
+            .preloader-bar,
+            .preloader-pulse {
+                animation: none !important;
+            }
+            .preloader-spinner {
+                border-left-color: var(--preloader-color);
+            }
+            .preloader-dot,
+            .preloader-bar,
+            .preloader-pulse {
+                opacity: 0.8;
+            }
+            ` : ''}
+
+            .preloader-container {
+                transition: opacity var(--preloader-fade-duration) ease-out, 
+                           visibility var(--preloader-fade-duration) ease-out;
+            }
+
+            .preloader-spinner {
+                animation-duration: var(--preloader-animation-speed);
+            }
+
+            .preloader-dot {
+                animation-duration: var(--preloader-animation-speed);
+            }
+
+            .preloader-bar {
+                animation-duration: var(--preloader-animation-speed);
+            }
+
+            .preloader-pulse {
+                animation-duration: var(--preloader-animation-speed);
             }
         `;
     document.head.appendChild(style);
@@ -207,6 +285,9 @@ class PreloaderManager {
       return;
     }
 
+    // Record start time
+    this.startTime = Date.now();
+
     // Update content based on settings
     this.updatePreloaderContent();
 
@@ -214,10 +295,26 @@ class PreloaderManager {
     this.container.style.opacity = '1';
     this.container.style.visibility = 'visible';
 
+    // Add accessibility attributes
+    if (this.settings.accessibility) {
+      this.container.setAttribute('role', 'status');
+      this.container.setAttribute('aria-live', 'polite');
+      this.container.setAttribute('aria-label', 'Loading content');
+    }
+
     // Start progress animation if it's a progress type
     if (this.settings.type === 'progress') {
       this.animateProgress();
     }
+
+    // Dispatch custom event
+    const event = new CustomEvent('preloader:shown', {
+      detail: {
+        settings: this.settings,
+        type: this.settings.type
+      }
+    });
+    document.dispatchEvent(event);
   }
 
   hidePreloader() {
@@ -227,16 +324,28 @@ class PreloaderManager {
 
     this.isVisible = false;
 
-    // Force hide immediately with CSS
+    // Add fade out animation
+    this.container.style.transition = `opacity ${this.settings.fadeOutDuration}ms ease-out, visibility ${this.settings.fadeOutDuration}ms ease-out`;
     this.container.style.opacity = '0';
     this.container.style.visibility = 'hidden';
-    this.container.style.display = 'none';
-    this.container.classList.add('hidden');
 
-    // Remove from DOM immediately
-    if (this.container && this.container.parentNode) {
-      this.container.parentNode.removeChild(this.container);
-    }
+    // Remove from DOM after animation
+    setTimeout(() => {
+      if (this.container && this.container.parentNode) {
+        this.container.style.display = 'none';
+        this.container.classList.add('hidden');
+        this.container.parentNode.removeChild(this.container);
+      }
+    }, this.settings.fadeOutDuration);
+
+    // Dispatch custom event
+    const event = new CustomEvent('preloader:hidden', {
+      detail: {
+        settings: this.settings,
+        duration: Date.now() - this.startTime
+      }
+    });
+    document.dispatchEvent(event);
   }
 
   animateProgress() {
@@ -257,6 +366,14 @@ class PreloaderManager {
         clearInterval(interval);
       }
       progressBar.style.width = `${progress}%`;
+      
+      // Update progress text if enabled
+      if (this.settings.progressText) {
+        const progressText = this.container.querySelector('.preloader-progress-text');
+        if (progressText) {
+          progressText.textContent = `${Math.round(progress)}%`;
+        }
+      }
     }, 100);
   }
 
@@ -318,3 +435,31 @@ setTimeout(() => {
 
 // Export for global access
 window.PreloaderManager = PreloaderManager;
+
+// Global preloader control methods
+window.PreloaderControl = {
+  hide: () => PreloaderManager.hide(),
+  show: () => PreloaderManager.show(),
+  isVisible: () => {
+    const preloader = document.getElementById('preloader-container');
+    return preloader && preloader.style.display !== 'none';
+  },
+  updateSettings: (newSettings) => {
+    if (window.preloaderManager) {
+      window.preloaderManager.settings = { ...window.preloaderManager.settings, ...newSettings };
+      window.preloaderManager.setupDynamicStyles();
+    }
+  },
+  getSettings: () => {
+    return window.preloaderManager ? window.preloaderManager.settings : null;
+  }
+};
+
+// Event listeners for preloader events
+document.addEventListener('preloader:shown', (e) => {
+  console.log('Preloader shown:', e.detail);
+});
+
+document.addEventListener('preloader:hidden', (e) => {
+  console.log('Preloader hidden:', e.detail);
+});
