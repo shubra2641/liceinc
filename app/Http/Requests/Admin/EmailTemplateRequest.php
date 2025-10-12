@@ -71,14 +71,12 @@ class EmailTemplateRequest extends FormRequest
                 'max:255',
                 $isUpdate ?
                     Rule::unique('email_templates', 'name')->ignore($templateId) :
-                    'unique:email_templates, name',
-                'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
+                    'unique:email_templates,name',
             ],
             'subject' => [
                 'required',
                 'string',
                 'max:255',
-                'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
             'body' => [
                 'required',
@@ -114,7 +112,6 @@ class EmailTemplateRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:500',
-                'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
             'priority' => [
                 'nullable',
@@ -143,9 +140,7 @@ class EmailTemplateRequest extends FormRequest
         return [
             'name.required' => 'Template name is required.',
             'name.unique' => 'A template with this name already exists.',
-            'name.regex' => 'Template name contains invalid characters.',
             'subject.required' => 'Email subject is required.',
-            'subject.regex' => 'Email subject contains invalid characters.',
             'body.required' => 'Email body is required.',
             'body.max' => 'Email body must not exceed 50, 000 characters.',
             'type.required' => 'Template type is required.',
@@ -156,7 +151,6 @@ class EmailTemplateRequest extends FormRequest
                 'license, ticket, invoice, update, notification, marketing, support.',
             'variables.*.regex' => 'Variable names can only contain letters, numbers, spaces, '
                 . 'hyphens, and underscores.',
-            'description.regex' => 'Description contains invalid characters.',
             'priority.min' => 'Priority must be at least 1.',
             'priority.max' => 'Priority must not exceed 10.',
             'delay_minutes.min' => 'Delay must be at least 0 minutes.',
@@ -200,9 +194,9 @@ class EmailTemplateRequest extends FormRequest
             'subject' => $this->sanitizeInput($this->input('subject')),
             'description' => $this->input('description') ? $this->sanitizeInput($this->input('description')) : null,
         ]);
-        // Handle checkbox values
+        // Handle radio button values for is_active
         $this->merge([
-            'is_active' => $this->has('is_active'),
+            'is_active' => $this->input('is_active') === '1' || $this->input('is_active') === 1,
             'send_immediately' => $this->has('send_immediately'),
         ]);
         // Set default values

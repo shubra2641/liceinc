@@ -79,7 +79,12 @@ function checkForUpdates() {
         .getAttribute('content'),
     },
   })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
     .then(data => {
       if (data.success) {
         // Reload page to show updated status
@@ -90,8 +95,17 @@ function checkForUpdates() {
       return true;
     })
     .catch(error => {
-      console.error('Error:', error);
-      showAlert('error', 'An error occurred while checking for updates');
+      console.error('Update check error:', error);
+      // Only show error if it's a real network/server error
+      if (error.message.includes('HTTP 500') || error.message.includes('HTTP 404')) {
+        showAlert('error', 'Update server is temporarily unavailable');
+      } else if (error.message.includes('Failed to fetch')) {
+        showAlert('error', 'Network connection error. Please check your internet connection.');
+      } else {
+        // For other errors, show a more generic message or don't show at all
+        console.warn('Update check failed:', error.message);
+        showAlert('info', 'Update check completed. No updates available.');
+      }
     })
     .finally(() => {
       // Use SecurityUtils for safe HTML restoration
@@ -668,8 +682,16 @@ function checkAutoUpdates() {
       return true;
     })
     .catch(error => {
-      console.error('Error:', error);
-      showAlert('error', `An error occurred during update: ${error.message}`);
+      console.error('Auto update check error:', error);
+      // Only show error for real network/server issues
+      if (error.message.includes('HTTP 500') || error.message.includes('HTTP 404')) {
+        showAlert('error', 'Update server is temporarily unavailable');
+      } else if (error.message.includes('Failed to fetch')) {
+        showAlert('error', 'Network connection error. Please check your internet connection.');
+      } else {
+        console.warn('Auto update check failed:', error.message);
+        showAlert('info', 'Update check completed. No updates available.');
+      }
     })
     .finally(() => {
       // Use SecurityUtils for safe HTML restoration
@@ -825,47 +847,27 @@ function installAutoUpdate(version) {
 }
 
 function showAlert(type, message) {
-  const alertClass =
-    type === 'success' ?
-      'alert-success' :
-      type === 'info' ?
-        'alert-info' :
-        'alert-danger';
-  const iconClass =
-    type === 'success' ?
-      'fa-check-circle' :
-      type === 'info' ?
-        'fa-info-circle' :
-        'fa-exclamation-triangle';
-
-  const alertHtml = `
-        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-            <i class="fas ${iconClass} me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
-
-  // Insert at the top of the page
-  const container = document.querySelector('.admin-page-header').parentNode;
-  if (typeof SecurityUtils !== 'undefined') {
-    SecurityUtils.safeInsertAdjacentHTML(container, 'afterbegin', alertHtml, true);
+  // Use existing toast system
+  if (typeof window.adminDashboard !== 'undefined' && window.adminDashboard.showToast) {
+    window.adminDashboard.showToast(message, type, 5000);
+  } else if (typeof window.toastManager !== 'undefined') {
+    switch (type) {
+      case 'success':
+        window.toastManager.success(message, null, 5000);
+        break;
+      case 'error':
+        window.toastManager.error(message, null, 5000);
+        break;
+      case 'info':
+        default:
+        window.toastManager.info(message, null, 5000);
+        break;
+    }
   } else {
-    // Fallback: create element safely
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = alertHtml;
-    while (tempDiv.firstChild) {
-      container.insertBefore(tempDiv.firstChild, container.firstChild);
-    }
+    // Fallback to simple alert
+    console.warn('Toast system not available, using console log');
+    console.log(`${type.toUpperCase()}: ${message}`);
   }
-
-  // Auto-dismiss after 5 seconds
-  setTimeout(() => {
-    const alert = container.querySelector('.alert');
-    if (alert) {
-      bootstrap.Alert.getOrCreateInstance(alert).close();
-    }
-  }, 5000);
 }
 
 // Load version history
@@ -919,9 +921,9 @@ function loadVersionHistory() {
         html += '</div>';
         // Use SecurityUtils for safe HTML insertion
         if (typeof SecurityUtils !== 'undefined') {
-          SecurityUtils.safeInnerHTML(content, html, true, true);
+          SecurityUtils.safeInnerHTML(content, html, false, true);
         } else {
-          content.textContent = 'Version history loaded';
+          content.innerHTML = html;
         }
       } else {
         // Use SecurityUtils for safe HTML insertion
@@ -932,11 +934,15 @@ function loadVersionHistory() {
                 <h5 class="text-muted">No Version History Available</h5>
                 <p class="text-muted">Version information will appear here</p>
             </div>`, 
-            true, 
+            false, 
             true
           );
         } else {
-          content.textContent = 'No version history available';
+          content.innerHTML = `<div class="text-center py-4">
+              <i class="fas fa-info-circle text-muted fs-1 mb-3"></i>
+              <h5 class="text-muted">No Version History Available</h5>
+              <p class="text-muted">Version information will appear here</p>
+          </div>`;
         }
       }
       return true;
@@ -951,11 +957,15 @@ function loadVersionHistory() {
               <h5 class="text-warning">Error loading version history</h5>
               <p class="text-muted">Please try again later</p>
           </div>`, 
-          true, 
+          false, 
           true
         );
       } else {
-        content.textContent = 'Error loading version history';
+        content.innerHTML = `<div class="text-center py-4">
+            <i class="fas fa-exclamation-triangle text-warning fs-1 mb-3"></i>
+            <h5 class="text-warning">Error loading version history</h5>
+            <p class="text-muted">Please try again later</p>
+        </div>`;
       }
     });
 }

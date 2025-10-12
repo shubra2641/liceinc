@@ -172,8 +172,8 @@
                                 @error('subject')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <div class="form-text">{{ trans('app.Use variables like {{app_name}}, {{user_name}},
-                                    etc.') }}</div>
+                                <div class="form-text">Use variables like app_name, user_name,
+                                    etc.</div>
                             </div>
 
                             <div class="col-12 mb-3">
@@ -189,8 +189,8 @@
                                 @error('body')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <div class="form-text">{{ trans('app.HTML is supported. Use variables like {{app_name}},
-                                    {{user_name}}, etc.') }}</div>
+                                <div class="form-text">HTML is supported. Use variables like app_name,
+                                    user_name, etc.</div>
                             </div>
 
                             <div class="col-12 mb-3">
