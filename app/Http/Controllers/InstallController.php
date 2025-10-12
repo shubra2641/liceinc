@@ -6,6 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\Installation\InstallationStepService;
+use App\Services\Installation\LicenseVerificationService;
+use App\Services\Installation\SystemRequirementsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
@@ -13,10 +16,10 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-// use LicenseProtection\LicenseVerifier;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use App\Helpers\SecureFileHelper;
+use LicenseProtection\LicenseVerifier;
 
 /**
  * Installation Controller with enhanced security and comprehensive setup.
@@ -44,82 +47,11 @@ use App\Helpers\SecureFileHelper;
  */
 class InstallController extends Controller
 {
-    /**
-     * Get installation steps configuration.
-     *
-     * Returns the installation steps array with proper localization
-     * and route information for the installation wizard.
-     *
-     * @return array<int, array<string, string>> The installation steps configuration
-     */
-    private function getInstallationSteps()
-    {
-        return [
-            ['name' => trans('install.step_welcome'), 'route' => 'install.welcome'],          // 1
-            ['name' => 'License Verification', 'route' => 'install.license'],                 // 2
-            ['name' => trans('install.step_requirements'), 'route' => 'install.requirements'], // 3
-            ['name' => trans('install.step_database'), 'route' => 'install.database'],        // 4
-            ['name' => trans('install.step_admin'), 'route' => 'install.admin'],              // 5
-            ['name' => trans('install.step_settings'), 'route' => 'install.settings'],        // 6
-            ['name' => trans('install.step_install'), 'route' => 'install.install'],           // 7
-        ];
-    }
-    /**
-     * Get timezones configuration.
-     *
-     * Returns the timezones array with proper labels for the settings form.
-     *
-     * @return array<string, mixed> The timezones configuration
-     */
-    private function getTimezones()
-    {
-        return [
-            'UTC' => 'UTC',
-            'America/New_York' => 'Eastern Time (US & Canada)',
-            'America/Chicago' => 'Central Time (US & Canada)',
-            'America/Denver' => 'Mountain Time (US & Canada)',
-            'America/Los_Angeles' => 'Pacific Time (US & Canada)',
-            'Europe/London' => 'London',
-            'Europe/Paris' => 'Paris',
-            'Europe/Berlin' => 'Berlin',
-            'Asia/Dubai' => 'Dubai',
-            'Asia/Riyadh' => 'Riyadh',
-            'Asia/Kuwait' => 'Kuwait',
-            'Asia/Qatar' => 'Qatar',
-            'Asia/Bahrain' => 'Bahrain',
-            'Africa/Cairo' => 'Cairo',
-            'Asia/Tokyo' => 'Tokyo',
-            'Australia/Sydney' => 'Sydney',
-        ];
-    }
-    /**
-     * Get installation steps with status information.
-     *
-     * Returns the installation steps array with status information
-     * for each step (completed, current, pending).
-     *
-     * @param  int  $currentStep  The current step number
-     *
-     * @return array<int, array<string, mixed>> The installation steps with status information
-     */
-    private function getInstallationStepsWithStatus($currentStep = 1)
-    {
-        $steps = $this->getInstallationSteps();
-        return array_map(function ($index, $stepData) use ($currentStep) {
-            $stepNumber = (int) $index + 1;
-            $isCompleted = $stepNumber < $currentStep;
-            $isCurrent = $stepNumber == $currentStep;
-            $isPending = $stepNumber > $currentStep;
-            return [
-                'name' => $stepData['name'],
-                'route' => $stepData['route'],
-                'number' => $stepNumber,
-                'isCompleted' => $isCompleted,
-                'isCurrent' => $isCurrent,
-                'isPending' => $isPending,
-                'status' => $isCompleted ? 'completed' : ($isCurrent ? 'current' : 'pending'),
-            ];
-        }, array_keys($steps), $steps);
+    public function __construct(
+        protected InstallationStepService $stepService,
+        protected LicenseVerificationService $licenseService,
+        protected SystemRequirementsService $requirementsService
+    ) {
     }
     /**
      * Show installation welcome page with language support.
@@ -149,7 +81,7 @@ class InstallController extends Controller
                     session(['locale' => $locale]);
                 }
             }
-            $steps = $this->getInstallationStepsWithStatus(1);
+            $steps = $this->stepService->getInstallationStepsWithStatus(1);
             return view('install.welcome', ['step' => 1, 'progressWidth' => 20, 'steps' => $steps]);
         } catch (\Exception $e) {
             Log::error('Error in installation welcome page', [
@@ -157,7 +89,7 @@ class InstallController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
             // Return welcome page even if language switching fails
-            $steps = $this->getInstallationStepsWithStatus(1);
+            $steps = $this->stepService->getInstallationStepsWithStatus(1);
             return view('install.welcome', ['step' => 1, 'progressWidth' => 20, 'steps' => $steps]);
         }
     }
@@ -176,126 +108,144 @@ class InstallController extends Controller
     public function license()
     {
         try {
-            $steps = $this->getInstallationStepsWithStatus(2);
+            $steps = $this->stepService->getInstallationStepsWithStatus(2);
             return view('install.license', ['step' => 2, 'progressWidth' => 40, 'steps' => $steps]);
         } catch (\Exception $e) {
             Log::error('Error showing license verification form', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $steps = $this->getInstallationStepsWithStatus(2);
+            $steps = $this->stepService->getInstallationStepsWithStatus(2);
             return view('install.license', ['step' => 2, 'progressWidth' => 40, 'steps' => $steps]);
         }
     }
     /**
      * Process license verification with comprehensive security validation.
-     *
-     * Handles license verification with proper input validation, sanitization,
-     * and security measures to ensure only valid licenses are accepted.
-     *
-     * @param  Request  $request  The HTTP request containing license data
-     *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse The response
-     *
-     * @throws \Exception When license verification fails
-     *
-     * @example
-     * // Verify license via AJAX
-     * POST /install/license
-     * {
-     *     "purchase_code": "ABC123DEF456"
-     * }
      */
     public function licenseStore(Request $request)
     {
         try {
-            // Validate and sanitize input
-            $validator = Validator::make($request->all(), [
-                'purchase_code' => 'required|string|min:5|max:100',
-            ], [
-                'purchase_code.required' => 'Purchase code is required',
-                'purchase_code.min' => 'Purchase code must be at least 5 characters long.',
-                'purchase_code.max' => 'Purchase code must not exceed 100 characters.',
-            ]);
-            if ($validator->fails()) {
-                if ($request->ajax()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => $validator->errors()->first('purchase_code'),
-                    ], 422);
-                }
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
+            // Validate input
+            $validationResult = $this->validateLicenseInput($request);
+            if (!$validationResult['valid']) {
+                return $this->handleValidationError($request, $validationResult['message']);
             }
-            // Sanitize purchase code
-            $purchaseCode = $this->sanitizeInput($request->purchase_code);
-            $domain = $this->sanitizeInput($request->getHost());
-             $licenseVerifier = new class {
-                /**
-                 * @return array<string, mixed>
-                 */
-                public function verifyLicense(string $purchaseCode, string $domain): array
-                {
-                    // Mock implementation for development
-                    return ['valid' => true, 'message' => 'License verified'];
-                }
-             };
-            $result = $licenseVerifier->verifyLicense(
-                is_string($purchaseCode) ? $purchaseCode : '',
-                is_string($domain) ? $domain : ''
+
+            // Verify license
+            $result = $this->licenseService->verifyLicense(
+                $this->sanitizeInput($request->purchase_code),
+                $this->sanitizeInput($request->getHost())
             );
+
             if ($result['valid']) {
-                // Store license information in session with validation
-                session(['install.license' => [
-                    'purchase_code' => $purchaseCode,
-                    'domain' => $domain,
-                    'verified_at' => $result['verified_at'] ?? now()->toDateTimeString(),
-                    'product' => $result['product'] ?? 'Unknown Product',
-                ]]);
-                if ($request->ajax()) {
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'License verified successfully!',
-                        'redirect' => route('install.requirements'),
-                    ]);
-                }
-                return redirect()->route('install.requirements')
-                    ->with('success', 'License verified successfully!');
+                return $this->handleSuccessfulVerification($request, $result);
             } else {
-                // Handle license verification failure
-                $humanMessage = $result['message'] ?? 'License verification failed.';
-                $errorCode = $result['error_code'] ?? $this->extractCodeFromMessage(
-                    is_string($humanMessage) ? $humanMessage : ''
-                );
-                if ($request->ajax()) {
-                    return response()->json([
-                        'success' => false,
-                        'error_code' => $errorCode,
-                        'message' => $humanMessage,
-                    ], 400);
-                }
-                return redirect()->back()
-                    ->withErrors(['license' => $humanMessage])
-                    ->withInput();
+                return $this->handleFailedVerification($request, $result);
             }
         } catch (\Exception $e) {
-            Log::error('License verification failed', [
-                'purchase_code_length' => strlen(is_string($request->purchase_code) ? $request->purchase_code : ''),
-                'domain' => $request->getHost(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'License verification failed: ' . $e->getMessage(),
-                ], 500);
-            }
-            return redirect()->back()
-                ->withErrors(['license' => 'License verification failed: ' . $e->getMessage()])
-                ->withInput();
+            return $this->handleVerificationException($request, $e);
         }
+    }
+
+    /**
+     * Validate license input.
+     */
+    private function validateLicenseInput(Request $request): array
+    {
+        $validator = Validator::make($request->all(), [
+            'purchase_code' => 'required|string|min:5|max:100',
+        ], [
+            'purchase_code.required' => 'Purchase code is required',
+            'purchase_code.min' => 'Purchase code must be at least 5 characters long.',
+            'purchase_code.max' => 'Purchase code must not exceed 100 characters.',
+        ]);
+
+        if ($validator->fails()) {
+            return [
+                'valid' => false,
+                'message' => $validator->errors()->first('purchase_code'),
+            ];
+        }
+
+        return ['valid' => true];
+    }
+
+    /**
+     * Handle validation error response.
+     */
+    private function handleValidationError(Request $request, string $message)
+    {
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+            ], 422);
+        }
+        return redirect()->back()->withErrors(['purchase_code' => $message])->withInput();
+    }
+
+    /**
+     * Handle successful license verification.
+     */
+    private function handleSuccessfulVerification(Request $request, array $result)
+    {
+        // Store license information in session
+        session(['install.license' => [
+            'purchase_code' => $this->sanitizeInput($request->purchase_code),
+            'domain' => $this->sanitizeInput($request->getHost()),
+            'verified_at' => $result['verified_at'] ?? now()->toDateTimeString(),
+            'product' => $result['product'] ?? 'License Management System',
+        ]]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'License verified successfully!',
+                'redirect' => route('install.requirements'),
+            ]);
+        }
+        return redirect()->route('install.requirements')->with('success', 'License verified successfully!');
+    }
+
+    /**
+     * Handle failed license verification.
+     */
+    private function handleFailedVerification(Request $request, array $result)
+    {
+        $message = $result['message'] ?? 'License verification failed.';
+        $errorCode = $result['error_code'] ?? 'VERIFICATION_FAILED';
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'error_code' => $errorCode,
+                'message' => $message,
+            ], 400);
+        }
+        return redirect()->back()->withErrors(['license' => $message])->withInput();
+    }
+
+    /**
+     * Handle license verification exception.
+     */
+    private function handleVerificationException(Request $request, \Exception $e)
+    {
+        Log::error('License verification failed', [
+            'purchase_code_length' => strlen($request->purchase_code ?? ''),
+            'domain' => $request->getHost(),
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        $message = 'License verification failed: ' . $e->getMessage();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+            ], 500);
+        }
+        return redirect()->back()->withErrors(['license' => $message])->withInput();
     }
     /**
      * Attempt to extract an UPPER_SNAKE_CASE code from a message with security validation.
@@ -348,25 +298,47 @@ class InstallController extends Controller
     public function requirements(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // Check if license is verified
-        $licenseConfig = session('install.license');
-        if (! $licenseConfig) {
-            return redirect()->route('install.license')
-                ->with('error', 'Please verify your license first.');
+        if (!$this->isLicenseVerified()) {
+            return $this->redirectToLicense();
         }
-        $requirements = $this->checkRequirements();
-        $allPassed = collect($requirements)->every(
+
+        $requirements = $this->requirementsService->checkRequirements();
+        $allPassed = $this->checkAllRequirementsPassed($requirements);
+        $steps = $this->stepService->getInstallationStepsWithStatus(3);
+
+        return view('install.requirements', [
+            'requirements' => $requirements,
+            'allPassed' => $allPassed,
+            'steps' => $steps,
+            'step' => 3,
+            'progressWidth' => 60
+        ]);
+    }
+
+    /**
+     * Check if license is verified.
+     */
+    private function isLicenseVerified(): bool
+    {
+        return session('install.license') !== null;
+    }
+
+    /**
+     * Redirect to license verification.
+     */
+    private function redirectToLicense()
+    {
+        return redirect()->route('install.license')
+            ->with('error', 'Please verify your license first.');
+    }
+
+    /**
+     * Check if all requirements are passed.
+     */
+    private function checkAllRequirementsPassed(array $requirements): bool
+    {
+        return collect($requirements)->every(
             fn ($req) => is_array($req) && isset($req['passed']) ? $req['passed'] : false
-        );
-        $steps = $this->getInstallationStepsWithStatus(3);
-        return view(
-            'install.requirements',
-            [
-                'requirements' => $requirements,
-                'allPassed' => $allPassed,
-                'steps' => $steps,
-                'step' => 3,
-                'progressWidth' => 60
-            ],
         );
     }
     /**
@@ -374,19 +346,47 @@ class InstallController extends Controller
      */
     public function database(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
-        // Check if license is verified
-        $licenseConfig = session('install.license');
-        if (! $licenseConfig) {
-            return redirect()->route('install.license')
-                ->with('error', 'Please verify your license first.');
+        if (!$this->isLicenseVerified()) {
+            return $this->redirectToLicense();
         }
-        $steps = $this->getInstallationStepsWithStatus(4);
-        return view('install.database', ['step' => 4, 'progressWidth' => 80, 'steps' => $steps]);
+
+        $steps = $this->stepService->getInstallationStepsWithStatus(4);
+        return view('install.database', [
+            'step' => 4,
+            'progressWidth' => 80,
+            'steps' => $steps
+        ]);
     }
     /**
      * Process database configuration.
      */
     public function databaseStore(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        // Validate database configuration
+        $validationResult = $this->validateDatabaseInput($request);
+        if (!$validationResult['valid']) {
+            return redirect()->back()
+                ->withErrors($validationResult['errors'])
+                ->withInput();
+        }
+
+        // Test database connection
+        $connectionResult = $this->testDatabaseConnection($request->all());
+        if (!$connectionResult['success']) {
+            return redirect()->back()
+                ->withErrors(['database' => $connectionResult['message']])
+                ->withInput();
+        }
+
+        // Store database configuration
+        session(['install.database' => $request->all()]);
+        return redirect()->route('install.admin');
+    }
+
+    /**
+     * Validate database input.
+     */
+    private function validateDatabaseInput(Request $request): array
     {
         $validator = Validator::make($request->all(), [
             'db_host' => 'required|string',
@@ -395,95 +395,118 @@ class InstallController extends Controller
             'db_username' => 'required|string',
             'db_password' => 'nullable|string',
         ]);
+
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return [
+                'valid' => false,
+                'errors' => $validator->errors(),
+            ];
         }
-        // Test database connection
-        try {
-            $connection = $this->testDatabaseConnection($request->all());
-            if ($connection['success'] === false) {
-                return redirect()->back()
-                    ->withErrors(['database' => $connection['message']])
-                    ->withInput();
-            }
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->withErrors(['database' => 'Database connection failed: ' . $e->getMessage()])
-                ->withInput();
-        }
-        // Store database configuration
-        session(['install.database' => $request->all()]);
-        return redirect()->route('install.admin');
+
+        return ['valid' => true];
     }
     /**
      * Show admin account creation form.
      */
     public function admin(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
-        // Check if license is verified
-        $licenseConfig = session('install.license');
-        if (! $licenseConfig) {
-            return redirect()->route('install.license')
-                ->with('error', 'Please verify your license first.');
+        if (!$this->isLicenseVerified()) {
+            return $this->redirectToLicense();
         }
-        $databaseConfig = session('install.database');
-        if (! $databaseConfig) {
+
+        if (!$this->isDatabaseConfigured()) {
             return redirect()->route('install.database')
                 ->with('error', 'Please configure database settings first.');
         }
-        $steps = $this->getInstallationStepsWithStatus(5);
-        return view('install.admin', ['step' => 5, 'progressWidth' => 100, 'steps' => $steps]);
+
+        $steps = $this->stepService->getInstallationStepsWithStatus(5);
+        return view('install.admin', [
+            'step' => 5,
+            'progressWidth' => 100,
+            'steps' => $steps
+        ]);
+    }
+
+    /**
+     * Check if database is configured.
+     */
+    private function isDatabaseConfigured(): bool
+    {
+        return session('install.database') !== null;
     }
     /**
      * Process admin account creation.
      */
     public function adminStore(Request $request): \Illuminate\Http\RedirectResponse
     {
+        $validationResult = $this->validateAdminInput($request);
+        if (!$validationResult['valid']) {
+            return redirect()->back()
+                ->withErrors($validationResult['errors'])
+                ->withInput();
+        }
+
+        // Store admin configuration
+        session(['install.admin' => $request->all()]);
+        return redirect()->route('install.settings');
+    }
+
+    /**
+     * Validate admin input.
+     */
+    private function validateAdminInput(Request $request): array
+    {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:8|confirmed',
         ]);
+
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return [
+                'valid' => false,
+                'errors' => $validator->errors(),
+            ];
         }
-        // Store admin configuration
-        session(['install.admin' => $request->all()]);
-        return redirect()->route('install.settings');
+
+        return ['valid' => true];
     }
     /**
      * Show system settings form.
      */
     public function settings(): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
-        // Check if license is verified
-        $licenseConfig = session('install.license');
-        if (! $licenseConfig) {
-            return redirect()->route('install.license')
-                ->with('error', 'Please verify your license first.');
+        if (!$this->isLicenseVerified()) {
+            return $this->redirectToLicense();
         }
-        $databaseConfig = session('install.database');
-        $adminConfig = session('install.admin');
-        if (! $databaseConfig) {
+
+        if (!$this->isDatabaseConfigured()) {
             return redirect()->route('install.database')
                 ->with('error', 'Please configure database settings first.');
         }
-        if (! $adminConfig) {
+
+        if (!$this->isAdminConfigured()) {
             return redirect()->route('install.admin')
                 ->with('error', 'Please create admin account first.');
         }
-        $steps = $this->getInstallationStepsWithStatus(6);
-        $timezones = $this->getTimezones();
+
+        $steps = $this->stepService->getInstallationStepsWithStatus(6);
+        $timezones = $this->stepService->getTimezones();
+        
         return view('install.settings', [
             'step' => 6,
             'progressWidth' => 100,
             'steps' => $steps,
             'timezones' => $timezones
         ]);
+    }
+
+    /**
+     * Check if admin is configured.
+     */
+    private function isAdminConfigured(): bool
+    {
+        return session('install.admin') !== null;
     }
     /**
      * Process system settings.

@@ -311,3 +311,21 @@
 [2025-10-11 20:42:40] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-11 20:42:40"} 
 [2025-10-11 20:42:47] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-11 20:42:47"} 
 [2025-10-11 20:43:16] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-11 20:43:16"} 
+[2025-10-12 10:57:33] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:57:34] local.WARNING: Authentication route not found {"url":"http://localhost/my-logos/public","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-12 10:57:34"} 
+[2025-10-12 10:57:34] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:57:34] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:57:35] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:57:44] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:57:46] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:57:47] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:57:55] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:57:56] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:58:05] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:58:05] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:58:14] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:58:16] local.INFO: Email sent successfully {"template":"admin_invoice_approaching_due","recipient":"Aboutsystem2@gmail.com"} 
+[2025-10-12 10:58:16] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 10:58:16] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 11:02:16] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
+[2025-10-12 11:02:16] local.ERROR: Failed to register service providers: Facade does not implement getFacadeAccessor method.  
