@@ -23,6 +23,7 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use App\Helpers\SecureFileHelper;
 use LicenseProtection\LicenseVerifier;
+
 /**
  * Installation Controller with enhanced security and comprehensive setup.
  *
@@ -134,7 +135,7 @@ class InstallController extends Controller
             $validationResult = $this->validateLicenseInput($request);
             if (!$validationResult['valid']) {
                 $message = $validationResult['message'] ?? 'Validation failed';
-            return $this->handleValidationError($request, is_string($message) ? $message : 'Validation failed');
+                return $this->handleValidationError($request, is_string($message) ? $message : 'Validation failed');
             }
 
             // Verify license
@@ -206,6 +207,7 @@ class InstallController extends Controller
      *
      * @param Request $request
      * @param array<string, mixed> $result
+     *
      * @return RedirectResponse|JsonResponse
      */
     private function handleSuccessfulVerification(Request $request, array $result): RedirectResponse|JsonResponse
@@ -452,6 +454,7 @@ class InstallController extends Controller
      * Validate admin input.
      *
      * @param Request $request
+     *
      * @return array<string, mixed>
      */
     private function validateAdminInput(Request $request): array
@@ -627,6 +630,7 @@ class InstallController extends Controller
                 Artisan::call('storage:link');
             } catch (\Exception $e) {
                 // Storage link might already exist or fail, continue anyway
+                Log::info('Storage link creation skipped', ['error' => $e->getMessage()]);
             }
             // Step 10: Create installed file
             File::put(storage_path('.installed'), now()->toDateTimeString());
@@ -1095,6 +1099,10 @@ class InstallController extends Controller
             } catch (\Exception $seederError) {
                 // Failed to run seeder
                 // Continue with other seeders even if one fails
+                Log::warning('Seeder execution failed', [
+                    'seeder' => $seeder,
+                    'error' => $seederError->getMessage()
+                ]);
             }
         }
         // Required database seeders execution completed
