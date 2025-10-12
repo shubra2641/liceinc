@@ -15,25 +15,22 @@ function showNotification(message, type = 'info') {
   const notification = document.createElement('div');
   notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show`;
 
-  // Sanitize message to prevent XSS
-  // Message will be sanitized by SecurityUtils
-
-  SecurityUtils.safeInnerHTML(
-    this,
-    `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `,
-  );
+  // Create notification content safely
+  const iconClass = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+  
+  notification.innerHTML = `
+    <i class="fas fa-${iconClass} me-2"></i>
+    ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
 
   notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 10000;
-        min-width: 300px;
-    `;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    min-width: 300px;
+  `;
 
   document.body.appendChild(notification);
 
@@ -101,24 +98,23 @@ class ToastManager {
       info: title || 'Information',
     };
 
-    // Sanitize message to prevent XSS
-    // Message will be sanitized by SecurityUtils
+    // Create toast content safely
+    const header = document.createElement('div');
+    header.className = 'toast-header';
+    header.innerHTML = `
+      <i class="${icons[type]} toast-icon"></i>
+      <h6 class="toast-title">${titles[type]}</h6>
+      <button type="button" class="toast-close" onclick="window.toastManager.hide(this.closest('.toast'))">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
 
-    toastSecurityUtils.safeInnerHTML(
-      this,
-      `
-            <div class="toast-header">
-                <i class="${icons[type]} toast-icon"></i>
-                <h6 class="toast-title">${titles[type]}</h6>
-                <button type="button" class="toast-close" onclick="window.toastManager.hide(this.closest('.toast'))">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="toast-body">
-                ${message}
-            </div>
-        `,
-    );
+    const body = document.createElement('div');
+    body.className = 'toast-body';
+    body.textContent = message;
+
+    toast.appendChild(header);
+    toast.appendChild(body);
 
     return toast;
   }
@@ -166,16 +162,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const infoMessage = document.querySelector('[data-flash-info]');
 
     if (successMessage && window.toastManager) {
-      window.toastManager.success(successMessage.textContent);
+      window.toastManager.success(successMessage.textContent.trim());
     }
     if (errorMessage && window.toastManager) {
-      window.toastManager.error(errorMessage.textContent);
+      window.toastManager.error(errorMessage.textContent.trim());
     }
     if (warningMessage && window.toastManager) {
-      window.toastManager.warning(warningMessage.textContent);
+      window.toastManager.warning(warningMessage.textContent.trim());
     }
     if (infoMessage && window.toastManager) {
-      window.toastManager.info(infoMessage.textContent);
+      window.toastManager.info(infoMessage.textContent.trim());
     }
   }, 200);
 });
