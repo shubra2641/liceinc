@@ -152,6 +152,10 @@ if (typeof window.AdminCharts === 'undefined') {
       }, options);
       
       try {
+        // Validate URL before fetch to prevent SSRF
+        if (!this._isValidUrl(primaryUrl)) {
+          throw new Error('Invalid URL: SSRF protection activated');
+        }
         const resp = await fetch(primaryUrl, opts);
         return await this._parseResponse(resp);
       } catch (e) {
@@ -910,21 +914,49 @@ document.addEventListener('DOMContentLoaded', () => {
           '\'': '&#x27;',
         }[match]));
         
-        modalContent.innerHTML = `
-          <div class="row">
-            <div class="col-md-6">
-              <p><strong>Log ID:</strong> ${sanitizedLogId}</p>
-              <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
-            </div>
-            <div class="col-md-6">
-              <p><strong>Status:</strong> <span class="badge bg-success">Success</span></p>
-              <p><strong>IP Address:</strong> 127.0.0.1</p>
-            </div>
-          </div>
-          <hr>
-          <h6>Detailed Information</h6>
-          <p>Detailed log information will be displayed here</p>
-        `;
+        // Use textContent for safe data display
+        modalContent.innerHTML = '';
+        
+        const row = document.createElement('div');
+        row.className = 'row';
+        
+        const col1 = document.createElement('div');
+        col1.className = 'col-md-6';
+        
+        const logIdP = document.createElement('p');
+        logIdP.innerHTML = '<strong>Log ID:</strong> ';
+        logIdP.appendChild(document.createTextNode(sanitizedLogId));
+        col1.appendChild(logIdP);
+        
+        const dateP = document.createElement('p');
+        dateP.innerHTML = '<strong>Date:</strong> ';
+        dateP.appendChild(document.createTextNode(new Date().toLocaleString()));
+        col1.appendChild(dateP);
+        
+        const col2 = document.createElement('div');
+        col2.className = 'col-md-6';
+        
+        const statusP = document.createElement('p');
+        statusP.innerHTML = '<strong>Status:</strong> <span class="badge bg-success">Success</span>';
+        col2.appendChild(statusP);
+        
+        const ipP = document.createElement('p');
+        ipP.innerHTML = '<strong>IP Address:</strong> 127.0.0.1';
+        col2.appendChild(ipP);
+        
+        row.appendChild(col1);
+        row.appendChild(col2);
+        
+        const hr = document.createElement('hr');
+        const h6 = document.createElement('h6');
+        h6.textContent = 'Detailed Information';
+        const p = document.createElement('p');
+        p.textContent = 'Detailed log information will be displayed here';
+        
+        modalContent.appendChild(row);
+        modalContent.appendChild(hr);
+        modalContent.appendChild(h6);
+        modalContent.appendChild(p);
       }
       
       const modal = new bootstrap.Modal(document.getElementById('logDetailsModal'));
