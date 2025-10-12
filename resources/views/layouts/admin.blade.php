@@ -376,6 +376,23 @@
     <!-- Preloader JavaScript -->
     <!-- Security Utils Library -->
     <script src="{{ asset('assets/js/security-utils.js') }}"></script>
+    
+    <!-- Preloader Settings -->
+    <script>
+        window.preloaderSettings = {
+            enabled: {{ $preloaderSettings['preloaderEnabled'] ? 'true' : 'false' }},
+            type: '{{ $preloaderSettings['preloaderType'] }}',
+            color: '{{ $preloaderSettings['preloaderColor'] }}',
+            backgroundColor: '{{ $preloaderSettings['preloaderBgColor'] }}',
+            duration: {{ $preloaderSettings['preloaderDuration'] }},
+            minDuration: {{ $preloaderSettings['preloaderMinDuration'] ?? 0 }},
+            text: '{{ $preloaderSettings['preloaderText'] }}',
+            logo: '{{ $preloaderSettings['siteLogo'] }}',
+            logoText: '{{ $preloaderSettings['logoText'] }}',
+            logoShowText: {{ $preloaderSettings['logoShowText'] ? 'true' : 'false' }}
+        };
+    </script>
+    
     <script src="{{ asset('assets/admin/js/preloader.js') }}"></script>
     <!-- jQuery (must be loaded first) -->
     <script src="{{ asset('assets/admin/js/jquery-3.6.0.min.js') }}"></script>

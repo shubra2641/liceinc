@@ -7,7 +7,8 @@
     data-type="{{ $preloaderSettings['preloaderType'] }}" data-color="{{ $preloaderSettings['preloaderColor'] }}"
     data-bg="{{ $preloaderSettings['preloaderBgColor'] }}" data-duration="{{ $preloaderSettings['preloaderDuration'] }}"
     data-min-duration="{{ $preloaderSettings['preloaderMinDuration'] ?? 0 }}"
-    data-text="{{ $preloaderSettings['preloaderText'] }}" data-logo="{{ $preloaderSettings['siteLogo'] }}">
+    data-text="{{ $preloaderSettings['preloaderText'] }}" data-logo="{{ $preloaderSettings['siteLogo'] }}"
+    data-logo-text="{{ $preloaderSettings['logoText'] }}" data-logo-show-text="{{ $preloaderSettings['logoShowText'] ? '1' : '0' }}">
     <div class="preloader-content">
         {{-- Logo Section --}}
         @if($preloaderSettings['siteLogo'] || $preloaderSettings['logoShowText'])

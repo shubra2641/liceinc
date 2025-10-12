@@ -10,16 +10,42 @@
 class PreloaderManager {
   constructor() {
     this.container = document.getElementById('preloader-container');
-    this.settings = window.preloaderSettings || {};
+    this.settings = this.getSettings();
     this.isVisible = true;
     this.pageReadyChecked = false;
     this.init();
+  }
+
+  getSettings() {
+    // Get settings from window object first, then fallback to data attributes
+    const windowSettings = window.preloaderSettings || {};
+    const dataSettings = this.container ? {
+      enabled: this.container.dataset.enabled === '1',
+      type: this.container.dataset.type,
+      color: this.container.dataset.color,
+      backgroundColor: this.container.dataset.bg,
+      duration: parseInt(this.container.dataset.duration) || 2000,
+      minDuration: parseInt(this.container.dataset.minDuration) || 0,
+      text: this.container.dataset.text,
+      logo: this.container.dataset.logo,
+      logoText: this.container.dataset.logoText,
+      logoShowText: this.container.dataset.logoShowText === '1'
+    } : {};
+
+    // Merge settings with window settings taking precedence
+    return {
+      ...dataSettings,
+      ...windowSettings
+    };
   }
 
   init() {
     if (!this.container || !this.settings.enabled) {
       return;
     }
+
+    // Debug: Log settings to console for troubleshooting
+    console.log('Preloader Settings:', this.settings);
 
     this.setupDynamicStyles();
     this.setupEventListeners();
@@ -47,6 +73,41 @@ class PreloaderManager {
             }
         `;
     document.head.appendChild(style);
+  }
+
+  updatePreloaderContent() {
+    if (!this.container) return;
+
+    // Update logo
+    const logoSection = this.container.querySelector('.preloader-logo');
+    if (logoSection) {
+      if (this.settings.logo) {
+        const logoImg = logoSection.querySelector('.preloader-logo-img');
+        if (logoImg) {
+          logoImg.src = this.settings.logo;
+          logoImg.alt = this.settings.logoText || 'Logo';
+        }
+      } else if (this.settings.logoShowText && this.settings.logoText) {
+        const logoText = logoSection.querySelector('.preloader-logo-text');
+        if (logoText) {
+          logoText.textContent = this.settings.logoText;
+        }
+      }
+    }
+
+    // Update text
+    const textElement = this.container.querySelector('.preloader-text');
+    if (textElement && this.settings.text) {
+      textElement.textContent = this.settings.text;
+    }
+
+    // Apply custom styles based on settings
+    if (this.settings.color) {
+      this.container.style.setProperty('--preloader-color', this.settings.color);
+    }
+    if (this.settings.backgroundColor) {
+      this.container.style.setProperty('--preloader-bg', this.settings.backgroundColor);
+    }
   }
 
   checkPageReadiness() {
@@ -145,6 +206,9 @@ class PreloaderManager {
     if (!this.container) {
       return;
     }
+
+    // Update content based on settings
+    this.updatePreloaderContent();
 
     // Add entrance animation
     this.container.style.opacity = '1';
