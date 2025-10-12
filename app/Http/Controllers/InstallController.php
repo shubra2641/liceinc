@@ -39,6 +39,7 @@ use LicenseProtection\LicenseVerifier;
  * - System settings configuration and storage
  * - Comprehensive error handling and logging
  * - Security validation for all installation steps
+ *
  * @example
  * // Start installation process
  * GET /install
@@ -123,6 +124,7 @@ class InstallController extends Controller
      * Process license verification with comprehensive security validation.
      *
      * @param Request $request
+     *
      * @return RedirectResponse|JsonResponse
      */
     public function licenseStore(Request $request): RedirectResponse|JsonResponse
@@ -157,6 +159,7 @@ class InstallController extends Controller
      * Validate license input.
      *
      * @param Request $request
+     *
      * @return array<string, mixed>
      */
     private function validateLicenseInput(Request $request): array
@@ -319,6 +322,7 @@ class InstallController extends Controller
      * Check if all requirements are passed.
      *
      * @param array<string, mixed> $requirements
+     *
      * @return bool
      */
     private function checkAllRequirementsPassed(array $requirements): bool

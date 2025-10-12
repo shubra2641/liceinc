@@ -102,7 +102,9 @@ class EmailValidator implements EmailValidatorInterface
      */
     public function sanitizeData(array $data): array
     {
-        /** @var array<string, mixed> $sanitized */
+        /**
+         * @var array<string, mixed> $sanitized
+         */
         $sanitized = [];
         foreach ($data as $key => $value) {
             $stringKey = is_string($key) ? $key : (string) $key;

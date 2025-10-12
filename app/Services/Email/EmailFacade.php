@@ -41,6 +41,7 @@ class EmailFacade
      * @param string $recipientEmail The recipient email address
      * @param array<string, mixed> $data Template data variables
      * @param string|null $recipientName Optional recipient name
+     *
      * @return bool True if email sent successfully
      */
     public function sendEmail(
@@ -88,6 +89,7 @@ class EmailFacade
      * @param array<string, mixed> $users Array of users to send emails to
      * @param string $templateName The email template name
      * @param array<string, mixed> $data Template data variables
+     *
      * @return array<string, mixed> Results of bulk email sending
      */
     public function sendBulkEmail(
@@ -103,6 +105,7 @@ class EmailFacade
      *
      * @param string $type Template type
      * @param string|null $category Optional template category
+     *
      * @return Collection<int, \App\Models\EmailTemplate> Collection of email templates
      */
     public function getTemplates(
@@ -117,6 +120,7 @@ class EmailFacade
      *
      * @param string $templateName The email template name
      * @param array<string, mixed> $data Template data variables
+     *
      * @return array<string, mixed> Test results
      */
     public function testTemplate(

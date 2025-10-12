@@ -49,6 +49,7 @@ class EmailService
      * @param User $user
      * @param string $templateName
      * @param array<string, mixed> $data
+     *
      * @return bool
      */
     public function sendToUser(User $user, string $templateName, array $data = []): bool
@@ -84,6 +85,7 @@ class EmailService
      *
      * @param string $type
      * @param string|null $category
+     *
      * @return Collection<int, \App\Models\EmailTemplate>
      */
     public function getTemplates(string $type, ?string $category = null): Collection
@@ -368,6 +370,7 @@ class EmailService
      * Create or update email template.
      *
      * @param array<string, mixed> $templateData
+     *
      * @return array<string, mixed>
      */
     public function createOrUpdateTemplate(array $templateData): array
