@@ -168,30 +168,39 @@ const showNoUpdatesAvailable = () => {
 
 const loadVersionHistory = () => {
     makeRequest('/admin/updates/current-version').then(data => {
-      const content = document.getElementById('version-history-content');
+        const content = document.getElementById('version-history-content');
         if (data.success && data.data.version_history?.length > 0) {
-        let html = '<div class="timeline">';
-        data.data.version_history.forEach(history => {
-          const isCurrent = history.version === data.data.current_version;
-          const badgeClass = isCurrent ? 'bg-success' : 'bg-secondary';
-          const badgeText = isCurrent ? 'Current' : 'Previous';
+            let html = '<div class="timeline">';
+            data.data.version_history.forEach(history => {
+                const isCurrent = history.version === data.data.current_version;
+                const badgeClass = isCurrent ? 'bg-success' : 'bg-secondary';
+                const badgeText = isCurrent ? 'Current' : 'Previous';
                 const sanitizedVersion = SecurityUtils.sanitizeHtml(history.version);
                 const sanitizedValue = SecurityUtils.sanitizeHtml(history.value || 'Auto update');
                 const sanitizedDate = SecurityUtils.sanitizeHtml(new Date(history.updated_at).toLocaleDateString());
                 html += '<div class="timeline-item"><div class="timeline-marker bg-' + (isCurrent ? 'success' : 'secondary') + '"></div><div class="timeline-content"><div class="d-flex justify-content-between align-items-start"><div><h6 class="timeline-title">Version ' + sanitizedVersion + '<span class="badge ' + badgeClass + ' ms-2">' + badgeText + '</span></h6><p class="timeline-text text-muted">' + sanitizedDate + '</p></div></div><div class="mt-2"><p class="small text-muted">' + sanitizedValue + '</p></div></div></div>';
             });
-        html += '</div>';
+            html += '</div>';
             SecurityUtils.safeInnerHTML(content, html);
         } else {
             const noHistoryHtml = '<div class="text-center py-4"><i class="fas fa-info-circle text-muted fs-1 mb-3"></i><h5 class="text-muted">No Version History Available</h5><p class="text-muted">Version information will appear here</p></div>';
             SecurityUtils.safeInnerHTML(content, noHistoryHtml);
         }
     }).catch(() => {
-      const content = document.getElementById('version-history-content');
+        const content = document.getElementById('version-history-content');
         const errorHtml = '<div class="text-center py-4"><i class="fas fa-exclamation-triangle text-warning fs-1 mb-3"></i><h5 class="text-warning">Error loading version history</h5><p class="text-muted">Please try again later</p></div>';
         SecurityUtils.safeInnerHTML(content, errorHtml);
     });
 };
+
+// Auto update functions
+const showAutoUpdateModal = () => new window.bootstrap.Modal(document.getElementById('autoUpdateModal')).show();
+const showUploadUpdateModal = () => new window.bootstrap.Modal(document.getElementById('uploadPackageModal')).show();
+const checkAutoUpdates = () => showAlert('info', 'Auto update functionality is being processed...');
+const installAutoUpdate = (version) => showAlert('info', 'Installing auto update for version: ' + version);
+const installProductUpdate = (version, downloadUrl) => showAlert('info', 'Installing product update for version: ' + version);
+const showProductUpdateInfo = (updateData, productName) => showAlert('info', 'Product update info for: ' + productName);
+const checkForUpdatesManually = () => window.location.reload();
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
