@@ -52,18 +52,20 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     _getCommonColors() {
-      const colors = {
-        primary: 'rgba(59, 130, 246, 0.8)',
-        success: 'rgba(16, 185, 129, 0.8)',
-        warning: 'rgba(245, 158, 11, 0.8)',
-        danger: 'rgba(239, 68, 68, 0.8)',
-        purple: 'rgba(139, 92, 246, 0.8)',
-        primarySolid: 'rgb(59, 130, 246)',
-        successSolid: 'rgb(16, 185, 129)',
-        warningSolid: 'rgb(245, 158, 11)',
-        dangerSolid: 'rgb(239, 68, 68)',
-        purpleSolid: 'rgb(139, 92, 246)'
+      const baseColors = {
+        primary: [59, 130, 246],
+        success: [16, 185, 129],
+        warning: [245, 158, 11],
+        danger: [239, 68, 68],
+        purple: [139, 92, 246]
       };
+      
+      const colors = {};
+      Object.entries(baseColors).forEach(([key, rgb]) => {
+        colors[key] = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.8)`;
+        colors[`${key}Solid`] = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+      });
+      
       return colors;
     }
 
@@ -131,10 +133,18 @@ if (typeof window.AdminCharts === 'undefined') {
 
     _validateChartId(chartId) {
       if (!chartId || typeof chartId !== 'string' || !/^[a-zA-Z][a-zA-Z0-9]*$/.test(chartId)) {
-        console.error('Invalid chartId:', chartId);
+        this._logError('Invalid chartId:', chartId);
         return false;
       }
       return true;
+    }
+
+    _logError(message, data) {
+      console.error(message, data);
+    }
+
+    _logWarning(message, data) {
+      console.warn(message, data);
     }
 
     // ===== UNIFIED API HANDLING =====
@@ -347,7 +357,7 @@ if (typeof window.AdminCharts === 'undefined') {
           return true;
         })
         .catch(err => {
-          console.warn(`${chartId} API failed:`, err);
+          this._logWarning(`${chartId} API failed:`, err);
           const config = configBuilder(fallbackData.labels, fallbackData.data);
           this._createChart(chartId, ctx, config);
           return false;
@@ -614,44 +624,57 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     updateChartData() {
-      const updateChart = (chartId, apiPath, updateFn) => {
-        // Validate chartId before accessing charts object
-        if (!this._validateChartId(chartId)) return;
-        
-        if (Object.prototype.hasOwnProperty.call(this.charts, chartId) && 
-            this.charts[chartId] && 
-            this.charts[chartId].canvas && 
-            document.contains(this.charts[chartId].canvas)) {
-          this._apiFetch(apiPath)
-            .then(apiData => {
-              updateFn(apiData);
-              this.charts[chartId].update('active');
-            })
-            .catch(err => {
-              console.warn(`${chartId} refresh failed:`, err);
-            });
-        }
-      };
+      this._updateSystemOverview();
+      this._updateLicenseDistribution();
+      this._updateActivityTimeline();
+      this._updateRevenueData();
+    }
 
-      updateChart('systemOverview', '/admin/dashboard/system-overview', (apiData) => {
+    _updateSystemOverview() {
+      this._updateChart('systemOverview', '/admin/dashboard/system-overview', (apiData) => {
         this.charts.systemOverview.data.labels = apiData.labels;
         this.charts.systemOverview.data.datasets[0].data = apiData.data;
       });
+    }
 
-      updateChart('licenseDistribution', '/admin/dashboard/license-distribution', (apiData) => {
+    _updateLicenseDistribution() {
+      this._updateChart('licenseDistribution', '/admin/dashboard/license-distribution', (apiData) => {
         this.charts.licenseDistribution.data.labels = apiData.labels;
         this.charts.licenseDistribution.data.datasets[0].data = apiData.data;
       });
+    }
 
-      updateChart('activityTimeline', '/admin/dashboard/activity-timeline', (apiData) => {
+    _updateActivityTimeline() {
+      this._updateChart('activityTimeline', '/admin/dashboard/activity-timeline', (apiData) => {
         this.charts.activityTimeline.data.labels = apiData.labels;
         this.charts.activityTimeline.data.datasets[0].data = apiData.data;
       });
+    }
 
+    _updateRevenueData() {
       const periodSelector = document.querySelector('[data-action="change-chart-period"]');
       const period = periodSelector ? periodSelector.value : 'monthly';
       if (this.fetchRevenueData) {
         this.fetchRevenueData(period);
+      }
+    }
+
+    _updateChart(chartId, apiPath, updateFn) {
+      // Validate chartId before accessing charts object
+      if (!this._validateChartId(chartId)) return;
+      
+      if (Object.prototype.hasOwnProperty.call(this.charts, chartId)) {
+        const chart = this.charts[chartId];
+        if (chart && chart.canvas && document.contains(chart.canvas)) {
+          this._apiFetch(apiPath)
+            .then(apiData => {
+              updateFn(apiData);
+              chart.update('active');
+            })
+            .catch(err => {
+              this._logWarning(`${chartId} refresh failed:`, err);
+            });
+        }
       }
     }
 
@@ -802,7 +825,7 @@ document.addEventListener('DOMContentLoaded', () => {
         attributeFilter: ['class'],
       });
     } catch (e) {
-      console.warn('AdminCharts initialization failed:', e);
+      this._logWarning('AdminCharts initialization failed:', e);
     }
   }
 
