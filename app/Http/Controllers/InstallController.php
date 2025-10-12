@@ -142,7 +142,7 @@ class InstallController extends Controller
             if (!$validationResult['valid']) {
                 $message = $validationResult['message'] ?? 'Validation failed';
                 return $this->validationService->handleValidationError(
-                    $request, 
+                    $request,
                     is_string($message) ? $message : 'Validation failed'
                 );
             }
@@ -340,7 +340,23 @@ class InstallController extends Controller
      */
     public function settingsStore(Request $request): RedirectResponse
     {
-        $validator = Validator::make($request->all(), [
+        $validator = $this->createSettingsValidator($request);
+        if ($validator->fails()) {
+            return $this->handleValidationFailure($validator);
+        }
+
+        $this->storeSettings($request);
+        return redirect()->route('install.install');
+    }
+
+    private function createSettingsValidator(Request $request): \Illuminate\Contracts\Validation\Validator
+    {
+        return Validator::make($request->all(), $this->getSettingsValidationRules());
+    }
+
+    private function getSettingsValidationRules(): array
+    {
+        return [
             'site_name' => 'required|string|max:255',
             'site_description' => 'nullable|string|max:500',
             'admin_email' => 'required_if:enable_email, 1|nullable|string|email|max:255',
@@ -355,15 +371,19 @@ class InstallController extends Controller
             'mail_password' => 'required_if:enable_email, 1|nullable|string|max:255',
             'mail_from_address' => 'required_if:enable_email, 1|nullable|email|max:255',
             'mail_from_name' => 'required_if:enable_email, 1|nullable|string|max:255',
-        ]);
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-        // Store system settings
+        ];
+    }
+
+    private function handleValidationFailure(\Illuminate\Contracts\Validation\Validator $validator): RedirectResponse
+    {
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
+    }
+
+    private function storeSettings(Request $request): void
+    {
         session(['install.settings' => $request->all()]);
-        return redirect()->route('install.install');
     }
     /**
      * Show installation progress.
@@ -410,7 +430,6 @@ class InstallController extends Controller
             }
 
             $this->runInstallationSteps($configs);
-            
             return $this->successResponse();
         } catch (\Exception $e) {
             return $this->errorResponse('Installation failed: ' . $e->getMessage(), 500);
