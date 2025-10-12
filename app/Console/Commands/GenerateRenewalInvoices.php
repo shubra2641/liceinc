@@ -131,18 +131,7 @@ class GenerateRenewalInvoices extends Command
                 } catch (\Exception $e) {
                     DB::rollBack();
                     $errorCount++;
-                    Log::error(
-                        'Failed to generate renewal invoice',
-                        [
-                            'licenseKey' => ($license->license_key ?? 'unknown'),
-                            'error'      => $e->getMessage(),
-                            'trace'      => $e->getTraceAsString(),
-                        ]
-                    );
-                    $this->error(
-                        'Failed to generate renewal invoice for license ' . 
-                        $license->license_key . ': ' . $e->getMessage()
-                    );
+                    $this->handleLicenseError($license, $e);
                 }//end try
             }//end foreach
 
@@ -416,142 +405,147 @@ class GenerateRenewalInvoices extends Command
      */
     protected function sendRenewalNotifications(License $license, \App\Models\Invoice $invoice): bool
     {
-        try {
-            $notificationsSent  = 0;
-            $totalNotifications = 0;
-            // Send email to customer.
-            if ($license->user !== null) {
-                $totalNotifications++;
-                try {
-                    // Sanitize data to prevent XSS.
-                    $expiresAt = 'Unknown';
-                    if ($license->license_expires_at !== null) {
-                        $expiresAt = $license->license_expires_at->format('Y-m-d');
-                    }
+        $notificationsSent = 0;
+        $totalNotifications = 0;
 
-                    $customerData = [
-                        'license_key'      => htmlspecialchars(
-                            ($license->license_key ?? ''),
-                            ENT_QUOTES,
-                            'UTF-8',
-                        ),
-                        'product_name'     => htmlspecialchars(
-                            ($license->product->name ?? ''),
-                            ENT_QUOTES,
-                            'UTF-8',
-                        ),
-                        'expires_at'       => $expiresAt,
-                        'invoice_amount'   => $invoice->amount,
-                        'invoice_due_date' => $invoice->due_date->format('Y-m-d'),
-                        'invoice_id'       => $invoice->id,
-                    ];
-                    /*
-                     * @var \App\Models\User $user
-                     */
-                    $user = $license->user;
-                    $this->emailService->sendRenewalReminder($user, $customerData);
-                    $notificationsSent++;
-                } catch (\Exception $e) {
-                    Log::error(
-                        'Failed to send customer renewal notification',
-                        [
-                            'licenseKey' => ($license->license_key ?? 'unknown'),
-                            'userId'     => ($license->user->id ?? 'unknown'),
-                            'error'      => $e->getMessage(),
-                            'trace'      => $e->getTraceAsString(),
-                        ]
-                    );
-                }//end try
-            }//end if
-
-            // Send email to admin.
+        // Send email to customer
+        if ($license->user !== null) {
             $totalNotifications++;
-            try {
-                // Sanitize data to prevent XSS.
-                /*
-                 * @var \App\Models\User|null $user
-                 */
-                $user = $license->user;
-
-                $customerName = 'Unknown User';
-                if ($user !== null) {
-                    $customerName = $user->name;
-                }
-
-                $customerEmail = 'No email provided';
-                if ($user !== null) {
-                    $customerEmail = $user->email;
-                }
-
-                $adminExpiresAt = 'Unknown';
-                if ($license->license_expires_at !== null) {
-                    $adminExpiresAt = $license->license_expires_at->format('Y-m-d');
-                }
-
-                $adminData = [
-                    'license_key'    => htmlspecialchars(
-                        ($license->license_key ?? ''),
-                        ENT_QUOTES,
-                        'UTF-8',
-                    ),
-                    'product_name'   => htmlspecialchars(
-                        ($license->product->name ?? ''),
-                        ENT_QUOTES,
-                        'UTF-8',
-                    ),
-                    'customer_name'  => htmlspecialchars(
-                        $customerName,
-                        ENT_QUOTES,
-                        'UTF-8',
-                    ),
-                    'customer_email' => htmlspecialchars(
-                        $customerEmail,
-                        ENT_QUOTES,
-                        'UTF-8',
-                    ),
-                    'expires_at'     => $adminExpiresAt,
-                    'invoice_amount' => ($invoice->amount ?? 0),
-                    'invoice_id'     => ($invoice->id ?? 'Unknown'),
-                ];
-                $this->emailService->sendAdminRenewalReminder($adminData);
+            if ($this->sendCustomerNotification($license, $invoice)) {
                 $notificationsSent++;
-            } catch (\Exception $e) {
-                Log::error(
-                    'Failed to send admin renewal notification',
-                    [
-                        'licenseKey' => ($license->license_key ?? 'unknown'),
-                        'error'      => $e->getMessage(),
-                        'trace'      => $e->getTraceAsString(),
-                    ]
-                );
-            }//end try
-            // Log notification results.
-            if ($notificationsSent < $totalNotifications) {
-                Log::warning(
-                    'Some renewal notifications failed to send',
-                    [
-                        'licenseKey' => ($license->license_key ?? 'unknown'),
-                        'sent'       => $notificationsSent,
-                        'total'      => $totalNotifications,
-                    ]
-                );
             }
+        }
 
-            return $notificationsSent > 0;
-        } catch (\Exception $e) {
-            Log::error(
-                'Failed to send renewal notifications',
+        // Send email to admin
+        $totalNotifications++;
+        if ($this->sendAdminNotification($license, $invoice)) {
+            $notificationsSent++;
+        }
+
+        // Log notification results
+        if ($notificationsSent < $totalNotifications) {
+            Log::warning(
+                'Some renewal notifications failed to send',
                 [
-                    'licenseKey' => ($license->license_key ?? 'unknown'),
-                    'invoiceId'  => ($invoice->id ?? 'unknown'),
-                    'error'      => $e->getMessage(),
-                    'trace'      => $e->getTraceAsString(),
+                    'licenseKey' => $license->license_key ?? 'unknown',
+                    'sent' => $notificationsSent,
+                    'total' => $totalNotifications,
                 ]
             );
-            $this->error(
-                'Failed to send renewal notifications for license ' . $license->license_key . ': ' . $e->getMessage()
-            );
+        }
+
+        return $notificationsSent > 0;
+    }
+
+    /**
+     * Send customer renewal notification.
+     */
+    protected function sendCustomerNotification(License $license, \App\Models\Invoice $invoice): bool
+    {
+        try {
+            $customerData = $this->prepareCustomerData($license, $invoice);
+            $this->emailService->sendRenewalReminder($license->user, $customerData);
+            return true;
+        } catch (\Exception $e) {
+            $this->logNotificationError('customer', $license, $e);
             return false;
-        }//end try
-    }//end sendRenewalNotifications()
+        }
+    }
+
+    /**
+     * Send admin renewal notification.
+     */
+    protected function sendAdminNotification(License $license, \App\Models\Invoice $invoice): bool
+    {
+        try {
+            $adminData = $this->prepareAdminData($license, $invoice);
+            $this->emailService->sendAdminRenewalReminder($adminData);
+            return true;
+        } catch (\Exception $e) {
+            $this->logNotificationError('admin', $license, $e);
+            return false;
+        }
+    }
+
+    /**
+     * Prepare customer notification data.
+     */
+    protected function prepareCustomerData(License $license, \App\Models\Invoice $invoice): array
+    {
+        return [
+            'license_key' => $this->sanitizeString($license->license_key ?? ''),
+            'product_name' => $this->sanitizeString($license->product->name ?? ''),
+            'expires_at' => $license->license_expires_at?->format('Y-m-d') ?? 'Unknown',
+            'invoice_amount' => $invoice->amount,
+            'invoice_due_date' => $invoice->due_date->format('Y-m-d'),
+            'invoice_id' => $invoice->id,
+        ];
+    }
+
+    /**
+     * Prepare admin notification data.
+     */
+    protected function prepareAdminData(License $license, \App\Models\Invoice $invoice): array
+    {
+        $user = $license->user;
+        
+        return [
+            'license_key' => $this->sanitizeString($license->license_key ?? ''),
+            'product_name' => $this->sanitizeString($license->product->name ?? ''),
+            'customer_name' => $this->sanitizeString($user?->name ?? 'Unknown User'),
+            'customer_email' => $this->sanitizeString($user?->email ?? 'No email provided'),
+            'expires_at' => $license->license_expires_at?->format('Y-m-d') ?? 'Unknown',
+            'invoice_amount' => $invoice->amount ?? 0,
+            'invoice_id' => $invoice->id ?? 'Unknown',
+        ];
+    }
+
+    /**
+     * Sanitize string to prevent XSS.
+     */
+    protected function sanitizeString(string $string): string
+    {
+        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+    }
+
+    /**
+     * Log notification error.
+     */
+    protected function logNotificationError(string $type, License $license, \Exception $e): void
+    {
+        Log::error(
+            "Failed to send {$type} renewal notification",
+            [
+                'licenseKey' => $license->license_key ?? 'unknown',
+                'userId' => $license->user?->id ?? 'unknown',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]
+        );
+    }
+
+    /**
+     * Handle license processing error.
+     *
+     * @param License     $license The license
+     * @param \Exception $e       The exception
+     *
+     * @return void
+     */
+    protected function handleLicenseError(License $license, \Exception $e): void
+    {
+        Log::error(
+            'Failed to generate renewal invoice',
+            [
+                'licenseKey' => $license->license_key ?? 'unknown',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]
+        );
+        
+        $this->error(
+            'Failed to generate renewal invoice for license ' .
+            $license->license_key . ': ' . $e->getMessage()
+        );
+    }
 }//end class
