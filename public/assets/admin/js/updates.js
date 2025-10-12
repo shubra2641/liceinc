@@ -3,35 +3,6 @@
  * Handles update checking, installation, and rollback functionality
  */
 
-// Security utilities for safe HTML operations
-const SecurityUtils = {
-    sanitizeHtml: function(content) {
-        if (typeof content !== 'string') return '';
-        return content.replace(/[<>&"']/g, function(match) {
-            const replacements = {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                '\'': '&#x27;'
-            };
-            return replacements[match];
-        });
-    },
-    safeInnerHTML: function(element, content, sanitize) {
-        if (!element || typeof content !== 'string') return;
-        if (sanitize === false) {
-            element.innerHTML = content;
-        } else {
-            element.textContent = this.sanitizeHtml(content);
-        }
-    },
-    safeInsertAdjacentHTML: function(element, position, html) {
-        if (!element || typeof html !== 'string') return;
-        element.insertAdjacentHTML(position, this.sanitizeHtml(html));
-    }
-};
-
 document.addEventListener('DOMContentLoaded', () => {
   // Check for updates button
   document
@@ -88,11 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function checkForUpdates() {
   const btn = document.getElementById('check-updates-btn');
-  const originalText = btn.textContent;
+  const originalText = btn.innerHTML;
 
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
-    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', false);
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', true, true);
   } else {
     btn.textContent = 'Checking...';
   }
@@ -125,7 +96,7 @@ function checkForUpdates() {
     .finally(() => {
       // Use SecurityUtils for safe HTML restoration
       if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(btn, originalText, false);
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
       } else {
         btn.textContent = originalText;
       }
@@ -138,7 +109,7 @@ function showUpdateModal(version) {
   document.getElementById('confirmUpdate').checked = false;
   document.getElementById('confirm-update-btn').disabled = true;
 
-  const modal = new window.bootstrap.Modal(document.getElementById('updateModal'));
+  const modal = new bootstrap.Modal(document.getElementById('updateModal'));
   modal.show();
 }
 
@@ -148,7 +119,7 @@ function performUpdate(version) {
 
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
-    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Updating...', false);
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Updating...', true, true);
   } else {
     btn.textContent = 'Updating...';
   }
@@ -187,12 +158,12 @@ function performUpdate(version) {
     .finally(() => {
       // Use SecurityUtils for safe HTML restoration
       if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(btn, originalText, false);
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
       } else {
         btn.textContent = originalText;
       }
       btn.disabled = false;
-      window.bootstrap.Modal.getInstance(
+      bootstrap.Modal.getInstance(
         document.getElementById('updateModal'),
       ).hide();
     });
@@ -350,7 +321,7 @@ function performRollback(version) {
 
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
-    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Rolling back...', false);
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Rolling back...', true, true);
   } else {
     btn.textContent = 'Rolling back...';
   }
@@ -389,7 +360,7 @@ function performRollback(version) {
     .finally(() => {
       // Use SecurityUtils for safe HTML restoration
       if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(btn, originalText, false);
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
       } else {
         btn.textContent = originalText;
       }
@@ -409,65 +380,7 @@ function formatFileSize(bytes) {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  const power = Math.pow(k, i);
-  const result = bytes / power;
-  return parseFloat(result.toFixed(2)) + ' ' + sizes[i];
-}
-
-function uploadUpdatePackage() {
-  const fileInput = document.getElementById('update-package-file');
-  const btn = document.getElementById('confirm-upload-btn');
-  const originalText = btn.textContent;
-
-  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-    showAlert('error', 'Please select a file to upload');
-    return;
-  }
-
-  const file = fileInput.files[0];
-  const formData = new FormData();
-  formData.append('update_package', file);
-
-  // Use SecurityUtils for safe HTML insertion
-  SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Uploading...', false);
-  btn.disabled = true;
-
-  fetch('/admin/updates/upload', {
-    method: 'POST',
-    headers: {
-      'X-CSRF-TOKEN': document
-        .querySelector('meta[name="csrf-token"]')
-        .getAttribute('content'),
-    },
-    body: formData,
-  })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        showAlert('success', data.message || 'Package uploaded successfully');
-        // Close modal
-        const modal = window.bootstrap.Modal.getInstance(document.getElementById('uploadPackageModal'));
-        if (modal) {
-          modal.hide();
-        }
-        // Reload page to show updated status
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else {
-        showAlert('error', data.message || 'Upload failed');
-      }
-      return true;
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      showAlert('error', 'An error occurred during upload');
-    })
-    .finally(() => {
-      // Use SecurityUtils for safe HTML restoration
-      SecurityUtils.safeInnerHTML(btn, originalText, false);
-      btn.disabled = false;
-    });
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 // Auto Update functionality
@@ -689,7 +602,7 @@ function checkAutoUpdates() {
 
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
-    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', false);
+    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', true, true);
   } else {
     btn.textContent = 'Checking...';
   }
@@ -761,7 +674,7 @@ function checkAutoUpdates() {
     .finally(() => {
       // Use SecurityUtils for safe HTML restoration
       if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(btn, originalText, false);
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
       } else {
         btn.textContent = originalText;
       }
@@ -903,7 +816,7 @@ function installAutoUpdate(version) {
     .finally(() => {
       // Use SecurityUtils for safe HTML restoration
       if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(btn, originalText, false);
+        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
       } else {
         btn.textContent = originalText;
       }
