@@ -75,7 +75,7 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     _getCommonBackgroundColor() {
-      return 'rgba(0, 0, 0, 0.8)';
+      return this._getBackgroundColor([0, 0, 0], 0.8);
     }
 
     _getBackgroundColor(rgb, alpha = 0.1) {
@@ -145,11 +145,15 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     _logError(message, data) {
-      console.error(message, data);
+      this._log('error', message, data);
     }
 
     _logWarning(message, data) {
-      console.warn(message, data);
+      this._log('warn', message, data);
+    }
+
+    _log(type, message, data) {
+      console[type](message, data);
     }
 
     _destroyChartIfExists(ctx) {
@@ -161,6 +165,10 @@ if (typeof window.AdminCharts === 'undefined') {
 
     _isChartLoading(chartId) {
       return Object.prototype.hasOwnProperty.call(this._loadingCharts, chartId) && this._loadingCharts[chartId];
+    }
+
+    _getChart(chartId) {
+      return Object.prototype.hasOwnProperty.call(this.charts, chartId) ? this.charts[chartId] : null;
     }
 
     // ===== UNIFIED API HANDLING =====
@@ -682,7 +690,7 @@ if (typeof window.AdminCharts === 'undefined') {
       if (!this._validateChartId(chartId)) return;
       
       if (Object.prototype.hasOwnProperty.call(this.charts, chartId)) {
-        const chart = this.charts[chartId];
+        const chart = this._getChart(chartId);
         if (chart && chart.canvas && document.contains(chart.canvas)) {
           this._apiFetch(apiPath)
             .then(apiData => {
@@ -772,7 +780,7 @@ if (typeof window.AdminCharts === 'undefined') {
       // Validate chartId before accessing charts object
       if (!this._validateChartId(chartId)) return;
       
-      const chart = Object.prototype.hasOwnProperty.call(this.charts, chartId) ? this.charts[chartId] : null;
+      const chart = this._getChart(chartId);
       if (!chart) return;
 
       const { data } = chart;
@@ -861,9 +869,14 @@ function initReportsCharts() {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
 
-    const existingChart = Chart.getChart(canvas);
-    if (existingChart) {
-      existingChart.destroy();
+    // Use unified chart destruction
+    if (window.adminCharts && window.adminCharts._destroyChartIfExists) {
+      window.adminCharts._destroyChartIfExists(canvas);
+    } else {
+      const existingChart = Chart.getChart(canvas);
+      if (existingChart) {
+        existingChart.destroy();
+      }
     }
 
     const chartData = JSON.parse(canvas.getAttribute('data-chart-data') || '{}');
