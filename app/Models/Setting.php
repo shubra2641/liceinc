@@ -312,7 +312,6 @@ class Setting extends Model
         'avg_response_time',
         'version',
         'last_updated_at',
-        
         // Envato settings
         'envato_personal_token',
         'envato_api_key',

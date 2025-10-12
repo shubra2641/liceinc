@@ -93,7 +93,7 @@ class SettingRequest extends FormRequest
                 'string',
                 'max:20',
             ],
-            
+
             // Envato settings
             'envato_personal_token' => [
                 'nullable',

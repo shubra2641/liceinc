@@ -140,7 +140,8 @@ class GenerateRenewalInvoices extends Command
                         ]
                     );
                     $this->error(
-                        'Failed to generate renewal invoice for license ' . $license->license_key . ': ' . $e->getMessage()
+                        'Failed to generate renewal invoice for license ' . 
+                        $license->license_key . ': ' . $e->getMessage()
                     );
                 }//end try
             }//end foreach

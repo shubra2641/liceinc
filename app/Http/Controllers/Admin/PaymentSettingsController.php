@@ -61,7 +61,7 @@ class PaymentSettingsController extends Controller
             $paypalSettings = PaymentSetting::getByGateway('paypal');
             $stripeSettings = PaymentSetting::getByGateway('stripe');
             DB::commit();
-            
+
             // Create default settings if not found
             if (!$paypalSettings) {
                 $paypalSettings = new PaymentSetting([
