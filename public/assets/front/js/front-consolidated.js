@@ -45,89 +45,56 @@ const showNotification = (message, type = 'info') => {
   setTimeout(() => notification.remove(), 5000);
 };
 
+// Helper function to reduce duplication
+const addEventListeners = (selector, event, handler) => {
+  document.querySelectorAll(selector).forEach(element => {
+    element.addEventListener(event, handler);
+  });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   // Handle maintenance page reload
-  document.querySelectorAll('[data-action="reload"]').forEach(button => {
-    button.addEventListener('click', () => {
-      location.reload();
-    });
+  addEventListeners('[data-action="reload"]', 'click', () => {
+    location.reload();
   });
 
   // Handle product actions
-  document.querySelectorAll('[data-action="purchase"]').forEach(button => {
-    button.addEventListener('click', () => {
-      purchaseProduct();
-    });
-  });
-
-  document.querySelectorAll('[data-action="download"]').forEach(button => {
-    button.addEventListener('click', () => {
-      downloadProduct();
-    });
-  });
-
-  document.querySelectorAll('[data-action="wishlist"]').forEach(button => {
-    button.addEventListener('click', () => {
-      addToWishlist();
-    });
-  });
+  addEventListeners('[data-action="purchase"]', 'click', purchaseProduct);
+  addEventListeners('[data-action="download"]', 'click', downloadProduct);
+  addEventListeners('[data-action="wishlist"]', 'click', addToWishlist);
 
   // Handle payment methods
-  document.querySelectorAll('[data-payment]').forEach(button => {
-    button.addEventListener('click', function() {
-      const paymentMethod = this.getAttribute('data-payment');
-      processPayment(paymentMethod);
-    });
+  addEventListeners('[data-payment]', 'click', function() {
+    const paymentMethod = this.getAttribute('data-payment');
+    processPayment(paymentMethod);
   });
 
   // Handle print action
-  document.querySelectorAll('[data-action="print"]').forEach(button => {
-    button.addEventListener('click', () => {
-      window.print();
-    });
+  addEventListeners('[data-action="print"]', 'click', () => {
+    window.print();
   });
 
   // Handle copy to clipboard
-  document.querySelectorAll('[data-copy-target]').forEach(button => {
-    button.addEventListener('click', function() {
-      const targetId = this.getAttribute('data-copy-target');
-      copyToClipboard(targetId);
-    });
+  addEventListeners('[data-copy-target]', 'click', function() {
+    const targetId = this.getAttribute('data-copy-target');
+    copyToClipboard(targetId);
   });
 
   // Handle generate preview
-  document
-    .querySelectorAll('[data-action="generate-preview"]')
-    .forEach(button => {
-      button.addEventListener('click', () => {
-        generateLicenseKeyPreview();
-      });
-    });
+  addEventListeners('[data-action="generate-preview"]', 'click', generateLicenseKeyPreview);
 
   // Handle form confirmations
-  document.querySelectorAll('[data-confirm]').forEach(form => {
-    form.addEventListener('submit', function(e) {
-      const confirmType = this.getAttribute('data-confirm');
-      if (!confirmDelete(confirmType)) {
-        e.preventDefault();
-      }
-    });
+  addEventListeners('[data-confirm]', 'submit', function(e) {
+    const confirmType = this.getAttribute('data-confirm');
+    if (!confirmDelete(confirmType)) {
+      e.preventDefault();
+    }
   });
 
-  // Handle tab navigation
-  document.querySelectorAll('[data-action="show-tab"]').forEach(button => {
-    button.addEventListener('click', function() {
-      const tabId = this.getAttribute('data-tab');
-      showTab(tabId);
-    });
-  });
-
-  // Handle tab navigation by data-tab attribute
-  document.querySelectorAll('[data-tab]').forEach(button => {
-    button.addEventListener('click', function() {
-      const tabId = this.getAttribute('data-tab');
-      showTab(tabId);
-    });
+  // Handle tab navigation (both data-action="show-tab" and data-tab attributes)
+  addEventListeners('[data-action="show-tab"], [data-tab]', 'click', function() {
+    const tabId = this.getAttribute('data-tab');
+    showTab(tabId);
   });
 });
 
@@ -573,31 +540,30 @@ class ProductShowManager {
   }
 
   showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type} alert-dismissible fade show`;
-    // Sanitize message to prevent XSS
-    window.SecurityUtils.safeInnerHTML(
-      notification,
-      `
-            <div class="d-flex align-items-center">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
-                <span>${message}</span>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `,
-    );
-
-    // Insert at the top of the page
-    const container =
-      document.querySelector('.user-dashboard-container') || document.body;
-    container.insertBefore(notification, container.firstChild);
-
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-      if (notification.parentElement) {
-        notification.remove();
-      }
-    }, 5000);
+    // Use the global showNotification function to avoid duplication
+    if (typeof window.showNotification === 'function') {
+      window.showNotification(message, type);
+    } else {
+      // Fallback implementation
+      const notification = document.createElement('div');
+      notification.className = `alert alert-${type} alert-dismissible fade show`;
+      notification.innerHTML = `
+        <div class="d-flex align-items-center">
+          <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+          <span>${message}</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      
+      const container = document.querySelector('.user-dashboard-container') || document.body;
+      container.insertBefore(notification, container.firstChild);
+      
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.remove();
+        }
+      }, 5000);
+    }
   }
 }
 
