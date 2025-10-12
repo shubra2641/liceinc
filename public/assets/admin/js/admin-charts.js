@@ -34,12 +34,8 @@ if (typeof window.AdminCharts === 'undefined') {
     }
 
     _isValidUrl(url) {
-      try {
-        const urlObj = new URL(url);
-        return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
-      } catch {
-        return false;
-      }
+      const urlObj = new URL(url);
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
     }
 
     // ===== UNIFIED CHART SYSTEM =====
@@ -71,10 +67,26 @@ if (typeof window.AdminCharts === 'undefined') {
       };
     }
 
+    _getCommonFont() {
+      return { size: 12, weight: '500' };
+    }
+
+    _getCommonBackgroundColor() {
+      return 'rgba(0, 0, 0, 0.8)';
+    }
+
+    _getPrimaryBackgroundColor() {
+      return 'rgba(59, 130, 246, 0.1)';
+    }
+
+    _getSuccessBackgroundColor() {
+      return 'rgba(16, 185, 129, 0.1)';
+    }
+
     _getCommonOptions() {
       return {
         tooltip: {
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backgroundColor: this._getCommonBackgroundColor(),
           titleColor: '#fff',
           bodyColor: '#fff',
           cornerRadius: 8
@@ -83,11 +95,11 @@ if (typeof window.AdminCharts === 'undefined') {
           y: {
             beginAtZero: true,
             grid: { color: 'rgba(0, 0, 0, 0.1)' },
-            ticks: { font: { size: 12, weight: '500' } }
+            ticks: { font: this._getCommonFont() }
           },
           x: {
             grid: { display: false },
-            ticks: { font: { size: 12, weight: '500' } }
+            ticks: { font: this._getCommonFont() }
           }
         },
         animation: {
@@ -191,7 +203,7 @@ if (typeof window.AdminCharts === 'undefined') {
         plugins: {
           legend: {
             position: 'right',
-            labels: { usePointStyle: true, padding: 20, font: { size: 12, weight: '500' } }
+            labels: { usePointStyle: true, padding: 20, font: this._getCommonFont() }
           },
           tooltip: this._getCommonOptions().tooltip
         },
@@ -244,7 +256,7 @@ if (typeof window.AdminCharts === 'undefined') {
           label,
           data,
           borderColor: colors.primarySolid,
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          backgroundColor: this._getPrimaryBackgroundColor(),
           borderWidth: 3,
           fill: true,
           tension: 0.4,
@@ -418,7 +430,7 @@ if (typeof window.AdminCharts === 'undefined') {
         'Active Users',
         { 
           borderColor: colors.successSolid,
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          backgroundColor: this._getSuccessBackgroundColor(),
           pointBackgroundColor: colors.successSolid
         }
       );
@@ -494,7 +506,7 @@ if (typeof window.AdminCharts === 'undefined') {
               label: 'API Requests',
               data: [0],
               borderColor: this._getCommonColors().primarySolid,
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              backgroundColor: this._getPrimaryBackgroundColor(),
               tension: 0.1,
             }];
             this.charts.apiRequests.update();
