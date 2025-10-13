@@ -19,8 +19,7 @@ class SetupCronCommand extends Command
 
     public function handle(): int
     {
-        $platform = $this->option('platform');
-        
+        $platform = $this->option('platform');  
         if ($platform === 'auto') {
             $platform = PHP_OS_FAMILY === 'Windows' ? 'windows' : 'linux';
         }

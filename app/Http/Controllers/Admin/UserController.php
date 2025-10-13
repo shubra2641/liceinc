@@ -142,7 +142,6 @@ class UserController extends Controller
                 'postcode' => $validated['postcode'],
                 'country' => $validated['country'],
             ]);
-            
             // Assign role
             $role = Role::where('name', $validated['role'])->first();
             if ($role) {

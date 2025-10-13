@@ -103,7 +103,6 @@ class EnvatoSocialiteProvider extends ServiceProvider
             $this->validateRequiredSettings($settings);
             // Create provider with validated settings
             $request = request(); // Use global request helper
-            
             // Ensure session is available
             if (!$request->hasSession()) {
                 $request->setLaravelSession(app('session.store'));

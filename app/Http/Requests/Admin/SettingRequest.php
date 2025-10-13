@@ -145,7 +145,6 @@ class SettingRequest extends FormRequest
                 'string',
                 'max:255',
             ],
-            
             // License settings
             'license_verify_envato' => [
                 'boolean',

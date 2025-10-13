@@ -104,7 +104,7 @@
                             <!-- File Header -->
                             <div class="user-stat-header">
                                 <div class="user-stat-title">
-                                    {{ $file->original_name }}
+                                    {{ is_array($file) ? ($file['original_name'] ?? 'Unknown') : ($file->original_name ?? 'Unknown') }}
                                     @if(isset($file->is_update) && $file->is_update)
                                         <span class="inline-flex items-center p-2-8 bg-orange-500 rounded-12 fs-11 fw-500 ml-8">
                                             <i class="fas fa-sync-alt mr-4"></i>
@@ -119,15 +119,18 @@
                                     @endif
                                 </div>
                                 <div class="user-stat-icon {{ isset($file->is_update) && $file->is_update ? 'orange' : 'blue' }}">
-                                    @if($file->file_extension == 'zip')
+                                    @php
+                                        $fileExtension = is_array($file) ? ($file['file_extension'] ?? '') : ($file->file_extension ?? '');
+                                    @endphp
+                                    @if($fileExtension == 'zip')
                                         <i class="fas fa-file-archive"></i>
-                                    @elseif(in_array($file->file_extension, ['pdf']))
+                                    @elseif(in_array($fileExtension, ['pdf']))
                                         <i class="fas fa-file-pdf"></i>
-                                    @elseif(in_array($file->file_extension, ['doc', 'docx']))
+                                    @elseif(in_array($fileExtension, ['doc', 'docx']))
                                         <i class="fas fa-file-word"></i>
-                                    @elseif(in_array($file->file_extension, ['xls', 'xlsx']))
+                                    @elseif(in_array($fileExtension, ['xls', 'xlsx']))
                                         <i class="fas fa-file-excel"></i>
-                                    @elseif(in_array($file->file_extension, ['jpg', 'jpeg', 'png', 'gif']))
+                                    @elseif(in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif']))
                                         <i class="fas fa-file-image"></i>
                                     @else
                                         <i class="fas fa-file"></i>
@@ -138,18 +141,27 @@
                             <!-- Content Area (flexible) -->
                             <div class="flex-1 flex-column">
                                 <!-- File Info -->
-                                <div class="user-stat-value">{{ $file->formatted_size ?? number_format($file->file_size / 1024 / 1024, 2) . ' MB' }}</div>
+                                <div class="user-stat-value">
+                                    @php
+                                        $fileSize = is_array($file) ? ($file['file_size'] ?? 0) : ($file->file_size ?? 0);
+                                        $formattedSize = is_array($file) ? ($file['formatted_size'] ?? null) : ($file->formatted_size ?? null);
+                                    @endphp
+                                    {{ $formattedSize ?? number_format($fileSize / 1024 / 1024, 2) . ' MB' }}
+                                </div>
                                 <p class="fs-14 text-gray-500 margin-0">
-                                    {{ strtoupper($file->file_extension) }} {{ trans('app.File') }}
+                                    {{ strtoupper($fileExtension) }} {{ trans('app.File') }}
                                     @if(isset($file->is_update) && $file->is_update && isset($file->update_info))
                                         <br><span class="text-orange-500">v{{ $file->update_info->version }}</span>
                                     @endif
                                 </p>
                                 
                                 <!-- File Description -->
-                                @if($file->description)
+                                @php
+                                    $fileDescription = is_array($file) ? ($file['description'] ?? null) : ($file->description ?? null);
+                                @endphp
+                                @if($fileDescription)
                                     <div class="mt-12">
-                                        <p class="fs-12 text-gray-400 margin-0">{{ Str::limit($file->description, 80) }}</p>
+                                        <p class="fs-12 text-gray-400 margin-0">{{ Str::limit($fileDescription, 80) }}</p>
                                     </div>
                                 @endif
                             </div>
@@ -158,8 +170,12 @@
                             <div class="mt-auto">
                                 <!-- File Stats -->
                                 <div class="mt-12 d-flex justify-content-between fs-12 text-gray-500">
-                                    <span><i class="fas fa-download mr-4"></i>{{ $file->download_count ?? 0 }} {{ trans('app.Downloads') }}</span>
-                                    <span><i class="fas fa-calendar mr-4"></i>{{ $file->created_at->format('M d, Y') }}</span>
+                                    @php
+                                        $downloadCount = is_array($file) ? ($file['download_count'] ?? 0) : ($file->download_count ?? 0);
+                                        $createdAt = is_array($file) ? ($file['created_at'] ?? null) : ($file->created_at ?? null);
+                                    @endphp
+                                    <span><i class="fas fa-download mr-4"></i>{{ $downloadCount }} {{ trans('app.Downloads') }}</span>
+                                    <span><i class="fas fa-calendar mr-4"></i>{{ $createdAt ? (is_string($createdAt) ? $createdAt : $createdAt->format('M d, Y')) : 'N/A' }}</span>
                                 </div>
                                 
                                 <!-- Download Button -->
@@ -168,7 +184,7 @@
                                         @if(isset($file->update_info) && $file->update_info->file_path)
                                             <a href="{{ route('user.products.files.download-update', [$product, $file->update_info->id]) }}" 
                                                class="user-action-button"
-                                               title="{{ trans('app.Download Update') }} {{ $file->original_name }}">
+                                               title="{{ trans('app.Download Update') }} {{ is_array($file) ? ($file['original_name'] ?? 'Unknown') : ($file->original_name ?? 'Unknown') }}">
                                                 <i class="fas fa-sync-alt"></i>
                                                 {{ trans('app.Download Update') }}
                                             </a>
@@ -180,12 +196,22 @@
                                             </button>
                                         @endif
                                     @else
-                                        <a href="{{ route('user.product-files.download', $file) }}" 
-                                           class="user-action-button"
-                                           title="{{ trans('app.Download') }} {{ $file->original_name }}">
-                                            <i class="fas fa-download"></i>
-                                            {{ trans('app.Download File') }}
-                                        </a>
+                                        @php
+                                            $fileId = is_array($file) ? ($file['id'] ?? null) : ($file->id ?? null);
+                                        @endphp
+                                        @if($fileId)
+                                            <a href="{{ route('user.product-files.download', $fileId) }}" 
+                                               class="user-action-button"
+                                               title="{{ trans('app.Download') }} {{ is_array($file) ? ($file['original_name'] ?? 'Unknown') : ($file->original_name ?? 'Unknown') }}">
+                                                <i class="fas fa-download"></i>
+                                                {{ trans('app.Download File') }}
+                                            </a>
+                                        @else
+                                            <button class="user-action-button secondary" disabled>
+                                                <i class="fas fa-download"></i>
+                                                {{ trans('app.Download File') }}
+                                            </button>
+                                        @endif
                                     @endif
                                 </div>
                             </div>

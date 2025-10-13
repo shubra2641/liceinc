@@ -18,7 +18,6 @@ class RegisterRequest extends FormRequest
     {
         return true;
     }
-    
     /**
      * Handle a failed validation attempt.
      */
