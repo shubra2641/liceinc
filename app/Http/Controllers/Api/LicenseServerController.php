@@ -183,6 +183,7 @@ class LicenseServerController extends Controller
                 ] : null,
             ];
             DB::commit();
+
             return response()->json([
                 'success' => true,
                 'data' => $responseData,
@@ -201,6 +202,7 @@ class LicenseServerController extends Controller
                 'product_slug' => $request->input('product_slug', ''),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to check for updates. Please try again.',
@@ -208,6 +210,7 @@ class LicenseServerController extends Controller
             ], 500);
         }
     }
+
     /**
      * Get version history for a license with enhanced security.
      *
@@ -264,6 +267,7 @@ class LicenseServerController extends Controller
                 )
             ) {
                 DB::rollBack();
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid or expired license',
@@ -303,6 +307,7 @@ class LicenseServerController extends Controller
                     ];
                 });
             DB::commit();
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -336,6 +341,7 @@ class LicenseServerController extends Controller
             ], 500);
         }
     }
+
     /**
      * Download update file with enhanced security and rate limiting.
      *
@@ -392,6 +398,7 @@ class LicenseServerController extends Controller
                 )
             ) {
                 DB::rollBack();
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid or expired license',
@@ -433,6 +440,7 @@ class LicenseServerController extends Controller
                 ], 404);
             }
             DB::commit();
+
             // Return file download with security headers
             $response = Storage::download($update->file_path, $update->file_name ?? "update_{$version}.zip");
             $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -448,6 +456,7 @@ class LicenseServerController extends Controller
                 'version' => $version,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to download update. Please try again.',
@@ -455,6 +464,7 @@ class LicenseServerController extends Controller
             ], 500);
         }
     }
+
     /**
      * Get latest version info with enhanced security.
      *
@@ -546,6 +556,7 @@ class LicenseServerController extends Controller
                 ], 404);
             }
             DB::commit();
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -589,6 +600,7 @@ class LicenseServerController extends Controller
             ], 500);
         }
     }
+
     /**
      * Get update information without license verification with enhanced security.
      *
@@ -702,6 +714,7 @@ class LicenseServerController extends Controller
                 ],
             ];
             DB::commit();
+
             return response()->json($responseData);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -709,6 +722,7 @@ class LicenseServerController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while fetching update info. Please try again.',
@@ -765,6 +779,7 @@ class LicenseServerController extends Controller
                 ->select(['id', 'name', 'slug', 'description', 'version'])
                 ->get();
             DB::commit();
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -777,6 +792,7 @@ class LicenseServerController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to get products. Please try again.',
@@ -784,6 +800,7 @@ class LicenseServerController extends Controller
             ], 500);
         }
     }
+
     /**
      * Verify license validity using database lookup with enhanced security.
      *
@@ -829,6 +846,7 @@ class LicenseServerController extends Controller
                     'license_key' => substr($licenseKey, 0, 8) . '...',
                     'status' => $license->status,
                 ]);
+
                 return false;
             }
             // Check if license has expired
@@ -837,6 +855,7 @@ class LicenseServerController extends Controller
                     'license_key' => substr($licenseKey, 0, 8) . '...',
                     'expires_at' => $license->license_expires_at->toISOString(),
                 ]);
+
                 return false;
             }
             // Check domain if provided
@@ -854,6 +873,7 @@ class LicenseServerController extends Controller
                             'domain' => $domain,
                             'error' => $e->getMessage(),
                         ]);
+
                         return false;
                     }
                 } else {
@@ -863,10 +883,12 @@ class LicenseServerController extends Controller
                             'license_key' => substr($licenseKey, 0, 8) . '...',
                             'domain' => $domain,
                         ]);
+
                         return false;
                     }
                 }
             }
+
             // License verified successfully
             return true;
         } catch (\Exception $e) {
@@ -877,9 +899,11 @@ class LicenseServerController extends Controller
                 'product_slug' => $productSlug,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return false;
         }
     }
+
     /**
      * Verify domain authorization with enhanced security.
      *
@@ -915,6 +939,7 @@ class LicenseServerController extends Controller
                     'ip' => request()->ip(),
                     ]
                 );
+
                 return false;
             }
         }
@@ -928,6 +953,7 @@ class LicenseServerController extends Controller
             if ($authDomain === $domain) {
                 // Update last used timestamp
                 $authorizedDomain->update(['last_used_at' => now()]);
+
                 return true;
             }
             // Check wildcard domains
@@ -936,13 +962,16 @@ class LicenseServerController extends Controller
                 if ($domain && str_ends_with($domain, $pattern)) {
                     // Update last used timestamp
                     $authorizedDomain->update(['last_used_at' => now()]);
+
                     return true;
                 }
             }
         }
+
         // Domain not found in authorized domains
         return false;
     }
+
     /**
      * Register domain for license automatically with enhanced security.
      *
@@ -979,6 +1008,7 @@ class LicenseServerController extends Controller
             ]);
         }
     }
+
     /**
      * Check if license has reached its domain limit with enhanced security.
      *
@@ -1038,6 +1068,7 @@ class LicenseServerController extends Controller
                 return -1;
             }
         }
+
         return 0;
     }
 }
