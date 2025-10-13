@@ -143,7 +143,7 @@ class InstallController extends Controller
             }
 
             $result = $this->verifyLicense($request);
-            return $result['valid'] 
+            return $result['valid']
                 ? $this->handleSuccessfulVerification($request, $result)
                 : $this->handleFailedVerification($request, $result);
         } catch (\Exception $e) {
@@ -660,7 +660,6 @@ class InstallController extends Controller
     {
         $envPath = base_path('.env');
         $envContent = File::get($envPath);
-        
         $envContent = $this->updateDatabaseConfig($envContent, $databaseConfig);
         $envContent = $this->updateApplicationConfig($envContent, $settingsConfig);
         
@@ -681,7 +680,11 @@ class InstallController extends Controller
         ];
 
         foreach ($replacements as $key => $value) {
-            $envContent = preg_replace("/{$key}=.*/", "{$key}=" . (is_string($value) ? $value : ''), $envContent) ?? $envContent;
+            $envContent = preg_replace(
+                "/{$key}=.*/",
+                "{$key}=" . (is_string($value) ? $value : ''),
+                $envContent
+            ) ?? $envContent;
         }
 
         return $envContent;
@@ -708,9 +711,17 @@ class InstallController extends Controller
         $siteName = $settingsConfig['site_name'] ?? '';
         $timezone = $settingsConfig['timezone'] ?? '';
 
-        $envContent = preg_replace('/APP_NAME=.*/', 'APP_NAME="' . (is_string($siteName) ? $siteName : '') . '"', $envContent) ?? $envContent;
+        $envContent = preg_replace(
+            '/APP_NAME=.*/',
+            'APP_NAME="' . (is_string($siteName) ? $siteName : '') . '"',
+            $envContent
+        ) ?? $envContent;
         $envContent = preg_replace('/APP_URL=.*/', "APP_URL={$currentUrl}", $envContent) ?? $envContent;
-        $envContent = preg_replace('/APP_TIMEZONE=.*/', 'APP_TIMEZONE=' . (is_string($timezone) ? $timezone : ''), $envContent) ?? $envContent;
+        $envContent = preg_replace(
+            '/APP_TIMEZONE=.*/',
+            'APP_TIMEZONE=' . (is_string($timezone) ? $timezone : ''),
+            $envContent
+        ) ?? $envContent;
 
         return $envContent;
     }
@@ -725,8 +736,16 @@ class InstallController extends Controller
         $fakerLocale = $localeStr === 'ar' ? 'ar_SA' : 'en_US';
 
         $envContent = preg_replace('/APP_LOCALE=.*/', "APP_LOCALE={$localeStr}", $envContent) ?? $envContent;
-        $envContent = preg_replace('/APP_FALLBACK_LOCALE=.*/', "APP_FALLBACK_LOCALE={$localeStr}", $envContent) ?? $envContent;
-        $envContent = preg_replace('/APP_FAKER_LOCALE=.*/', "APP_FAKER_LOCALE={$fakerLocale}", $envContent) ?? $envContent;
+        $envContent = preg_replace(
+            '/APP_FALLBACK_LOCALE=.*/',
+            "APP_FALLBACK_LOCALE={$localeStr}",
+            $envContent
+        ) ?? $envContent;
+        $envContent = preg_replace(
+            '/APP_FAKER_LOCALE=.*/',
+            "APP_FAKER_LOCALE={$fakerLocale}",
+            $envContent
+        ) ?? $envContent;
 
         return $envContent;
     }

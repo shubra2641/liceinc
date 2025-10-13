@@ -171,7 +171,7 @@ class RegisteredUserController extends Controller
         if (!$settings || !$settings->enable_human_question || empty($settings->human_questions)) {
             return;
         }
-        
+
         $humanQuestions = $settings->human_questions;
         
         $given = strtolower(trim(

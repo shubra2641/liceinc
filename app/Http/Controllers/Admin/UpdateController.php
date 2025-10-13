@@ -210,7 +210,8 @@ class UpdateController extends Controller
             VersionHelper::updateVersion($targetVersion);
             DB::commit();
 
-            return redirect()->route('admin.updates.index')->with('success',
+            return redirect()->route('admin.updates.index')->with(
+                'success',
                 'System updated successfully from ' . $currentVersion
                 . ' to ' . $targetVersion
             );
@@ -223,7 +224,8 @@ class UpdateController extends Controller
                 'request_data' => $request->except(['confirm']),
             ]);
 
-            return redirect()->back()->with('error',
+            return redirect()->back()->with(
+                'error',
                 'Update failed: ' . $e->getMessage()
             );
         }
@@ -726,7 +728,10 @@ class UpdateController extends Controller
 
             // Verify license
             $updateData = $this->licenseServerService->checkUpdates(
-                $licenseKey, '1.0.0', 'the-ultimate-license-management-system', $domain
+                $licenseKey,
+                '1.0.0',
+                'the-ultimate-license-management-system',
+                $domain
             );
             if (! $updateData['success']) {
                 DB::rollBack();

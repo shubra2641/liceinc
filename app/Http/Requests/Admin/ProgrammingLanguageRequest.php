@@ -43,7 +43,6 @@ class ProgrammingLanguageRequest extends FormRequest
     {
         $languageId = $this->route('programming_language')?->id;
         $isUpdate = $languageId !== null;
-        
         return [
             'name' => [
                 $isUpdate ? 'nullable' : 'required',

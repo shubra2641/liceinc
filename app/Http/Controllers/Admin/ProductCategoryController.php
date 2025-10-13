@@ -169,7 +169,7 @@ class ProductCategoryController extends Controller
             DB::beginTransaction();
             // Get validated data from Request class
             $validated = $request->validated();
-            
+
             // Generate slug automatically from name
             $validated['slug'] = Str::slug($validated['name']);
             

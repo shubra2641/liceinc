@@ -25,7 +25,6 @@ class RegisterRequest extends FormRequest
     {
         // Apply rate limiting to registration attempts
         $this->ensureIsNotRateLimited();
-        
         parent::failedValidation($validator);
     }
     

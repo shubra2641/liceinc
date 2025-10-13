@@ -200,7 +200,7 @@ class GenerateRenewalInvoices extends Command
                 ->where('license_expires_at', '>', Carbon::now())
                 ->get()
                 ->filter(
-                function ($license) {
+                    function ($license) {
                     // Check if there's already a pending renewal invoice.
                     return ! $license->invoices()->where('type', 'renewal')->where('status', 'pending')->exists();
                 }

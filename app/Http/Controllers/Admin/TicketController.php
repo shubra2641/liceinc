@@ -253,7 +253,6 @@ class TicketController extends Controller
             $ticket = Ticket::create($ticketData);
             // Send email notifications
             $this->sendTicketNotifications($ticket);
-            
             // Send invoice email if invoice was created
             if ($ticket->invoice_id && $ticket->user && $ticket->user->email) {
                 $this->emailService->sendInvoiceCreated($ticket->user, $ticket->invoice);

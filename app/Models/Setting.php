@@ -370,7 +370,6 @@ class Setting extends Model
         'license_bypass_testing',
         'license_mock_envato',
         'license_generate_fake_data',
-        
         // SEO settings
         'seo_site_title',
         'seo_site_description',

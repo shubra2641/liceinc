@@ -121,7 +121,7 @@ class TicketRequest extends FormRequest
                 'required_if:create_invoice,1',
                 'string',
                 Rule::in([
-                    'one_time', 'recurring', 'monthly', 'quarterly', 
+                    'one_time', 'recurring', 'monthly', 'quarterly',
                     'semi_annual', 'annual', 'custom_recurring'
                 ]),
             ],

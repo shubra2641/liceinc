@@ -26,7 +26,7 @@ class ProcessCronCommand extends Command
         $type = $this->option('type');
         $this->info('🚀 Processing Cron Tasks...');
         $this->newLine();
-        
+
         try {
             DB::beginTransaction();
             
@@ -97,7 +97,10 @@ class ProcessCronCommand extends Command
                 $processed++;
                 $this->line("   • Overdue invoice: {$invoice->invoice_number}");
             } catch (\Exception $e) {
-                Log::warning("Failed to process overdue invoice {$invoice->invoice_number}", ['error' => $e->getMessage()]);
+                Log::warning(
+                    "Failed to process overdue invoice {$invoice->invoice_number}",
+                    ['error' => $e->getMessage()]
+                );
             }
         }
         
@@ -138,8 +141,10 @@ class ProcessCronCommand extends Command
                     ]);
                 }
             } catch (\Exception $e) {
-                Log::warning("Failed to renew license for invoice {$invoice->invoice_number}",
-            ['error' => $e->getMessage()]);
+                Log::warning(
+                    "Failed to renew license for invoice {$invoice->invoice_number}",
+                    ['error' => $e->getMessage()]
+                );
         }
         
         $this->line("   Processed: {$processed} paid invoices");
@@ -224,7 +229,10 @@ class ProcessCronCommand extends Command
                     }
                 }
             } catch (\Exception $e) {
-                Log::warning("Failed to create renewal invoice for license {$license->license_key}", ['error' => $e->getMessage()]);
+                Log::warning(
+                    "Failed to create renewal invoice for license {$license->license_key}",
+                    ['error' => $e->getMessage()]
+                );
             }
         }
         

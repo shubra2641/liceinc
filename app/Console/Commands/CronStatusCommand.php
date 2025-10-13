@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Cron Status Command - Monitor cron job status
- * 
+ *
  * Simple command to check the status of all cron-related processes
  */
 class CronStatusCommand extends Command
@@ -29,7 +29,7 @@ class CronStatusCommand extends Command
         $this->info('🔑 License Status:');
         $this->displayLicenseStatus();
         $this->newLine();
-        
+
         // Invoice Status
         $this->info('💰 Invoice Status:');
         $this->displayInvoiceStatus();

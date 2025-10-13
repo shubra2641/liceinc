@@ -201,7 +201,6 @@ class AppServiceProvider extends ServiceProvider
             }
             return Limit::perMinute(300)->by('127.0.0.1');
         });
-        
         // Configure general web rate limiter
         RateLimiter::for('web', function ($request) {
             if (is_object($request) && method_exists($request, 'ip')) {

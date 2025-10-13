@@ -251,7 +251,7 @@ class ProgrammingLanguageController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            
+
             // Keep existing slug if name is not provided
             if (empty($validated['name'])) {
                 $validated['name'] = $programming_language->name;

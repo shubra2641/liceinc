@@ -54,7 +54,7 @@ private const VALID_PRIORITIES = ['low', 'medium', 'high'];
     /**
      * Valid ticket statuses.
      */
-    private const VALID_STATUSES = ['open', 'pending', 'resolved', 'closed'];
+private const VALID_STATUSES = ['open', 'pending', 'resolved', 'closed'];
     /**
      * Display a listing of user tickets with enhanced security.
      *

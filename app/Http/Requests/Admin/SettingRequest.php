@@ -316,7 +316,7 @@ class SettingRequest extends FormRequest
             'license_generate_fake_data' => [
                 'boolean',
             ],
-            
+
             // SEO settings
             'seo_site_title' => [
                 'nullable',
@@ -913,5 +913,6 @@ class SettingRequest extends FormRequest
 
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
-} 
+}
+ 
  

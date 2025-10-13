@@ -200,7 +200,6 @@ class InvoiceController extends Controller
             }
             // Generate invoice number if not provided
             $invoiceNumber = $validated['invoice_number'] ?? $this->generateInvoiceNumber();
-            
             $invoice = Invoice::create([
                 'invoice_number' => $invoiceNumber,
                 'user_id' => $validated['user_id'],
@@ -380,7 +379,7 @@ class InvoiceController extends Controller
         }
         
         return view('admin.invoices.edit', [
-            'invoice' => $invoice, 
+            'invoice' => $invoice,
             'users' => $users,
             'customData' => $customData
         ]);

@@ -1022,7 +1022,11 @@ class LicenseServerController extends Controller
     /**
      * Create error response
      */
-    private function createErrorResponse(string $message, string $errorCode, int $statusCode = 400): \Illuminate\Http\JsonResponse
+    private function createErrorResponse(
+        string $message,
+        string $errorCode,
+        int $statusCode = 400
+    ): \Illuminate\Http\JsonResponse
     {
         return response()->json([
             'success' => false,

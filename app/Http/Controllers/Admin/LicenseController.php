@@ -153,7 +153,7 @@ class LicenseController extends Controller
             if (empty($validated['license_key'])) {
                 $validated['license_key'] = $this->generateLicenseKey();
             }
-            
+
             $license = License::create($validated);
             // Automatically create initial invoice with specified payment status
             $invoiceService = app(InvoiceService::class);
@@ -455,5 +455,4 @@ class LicenseController extends Controller
         
         return $licenseKey;
     }
-    
 }

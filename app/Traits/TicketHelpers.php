@@ -28,7 +28,6 @@ trait TicketHelpers
      * @param string $successRoute
      * @param string $successMessage
      * @return RedirectResponse
-     * 
      */
     protected function handleTicketCreation(
         array $ticketData,
@@ -127,8 +126,11 @@ trait TicketHelpers
      * @param bool $isAdmin
      * @return RedirectResponse
      */
-    protected function updateTicket(\Illuminate\Http\Request $request, Ticket $ticket,
-        bool $isAdmin = false): RedirectResponse
+    protected function updateTicket(
+        \Illuminate\Http\Request $request,
+        Ticket $ticket,
+        bool $isAdmin = false
+    ): RedirectResponse
     {
         try {
             if (!$isAdmin && !$this->canModifyTicket($ticket)) {
@@ -162,8 +164,11 @@ trait TicketHelpers
      * @param string $redirectRoute
      * @return RedirectResponse
      */
-    protected function destroyTicket(Ticket $ticket, bool $isAdmin = false,
-        string $redirectRoute = 'tickets.index'): RedirectResponse
+    protected function destroyTicket(
+        Ticket $ticket,
+        bool $isAdmin = false,
+        string $redirectRoute = 'tickets.index'
+    ): RedirectResponse
     {
         try {
             if (!$isAdmin && !$this->canModifyTicket($ticket)) {

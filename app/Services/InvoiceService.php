@@ -219,7 +219,6 @@ class InvoiceService
 
             // Activate license when invoice is paid
             $this->activateLicenseOnPayment($invoice);
-            
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

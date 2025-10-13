@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Test Cron Command - Simple and reliable cron testing
- * 
+ *
  * This command tests all cron-related functionality without complexity
  */
 class TestCronCommand extends Command
@@ -24,7 +24,6 @@ class TestCronCommand extends Command
     public function handle(): int
     {
         $type = $this->option('type');
-        
         $this->info('🔍 Testing Cron Functionality...');
         $this->newLine();
         
