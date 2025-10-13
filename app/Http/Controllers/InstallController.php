@@ -5,356 +5,151 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
-use App\Models\User;
+use App\Services\Installation\InstallationService;
 use App\Services\Installation\InstallationStepService;
+use App\Services\Installation\LicenseValidationService;
 use App\Services\Installation\LicenseVerificationService;
 use App\Services\Installation\SystemRequirementsService;
-use App\Services\Installation\InstallationService;
-use App\Services\Installation\LicenseValidationService;
 use App\Services\Installation\UserCreationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use App\Helpers\SecureFileHelper;
-use LicenseProtection\LicenseVerifier;
 
-/**
- * Installation Controller with enhanced security and comprehensive setup.
- *
- * This controller handles the complete installation process for the application
- * including license verification, system requirements checking, database configuration,
- * admin user creation, and system settings with comprehensive security measures.
- *
- * Features:
- * - Multi-step installation wizard with progress tracking
- * - License verification with domain validation
- * - System requirements checking and validation
- * - Database configuration and connection testing
- * - Admin user creation with role assignment
- * - System settings configuration and storage
- * - Comprehensive error handling and logging
- * - Security validation for all installation steps
- *
- * @example
- * // Start installation process
- * GET /install
- * // Verify license
- * POST /install/license
- */
 class InstallController extends Controller
 {
+    private const STEP_PROGRESS = [
+        1 => 20,
+        2 => 40,
+        3 => 60,
+        4 => 80,
+        5 => 100,
+        6 => 100,
+        7 => 100,
+    ];
+
     public function __construct(
-        protected InstallationStepService $stepService,
-        protected LicenseVerificationService $licenseService,
-        protected SystemRequirementsService $requirementsService,
-        protected InstallationService $installationService,
-        protected LicenseValidationService $validationService,
-        protected UserCreationService $userService
+        private InstallationStepService $stepService,
+        private LicenseVerificationService $licenseService,
+        private SystemRequirementsService $requirementsService,
+        private InstallationService $installationService,
+        private LicenseValidationService $validationService,
+        private UserCreationService $userService
     ) {
     }
-    /**
-     * Show installation welcome page with language support.
-     *
-     * Displays the initial installation welcome page with language switching
-     * functionality and proper validation for supported locales.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return \Illuminate\View\View The welcome page view
-     *
-     * @example
-     * // Access welcome page
-     * GET /install
-     *
-     * // Switch language
-     * GET /install?lang=ar
-     */
+
     public function welcome(Request $request): View
     {
-        try {
-            // Handle language switching with validation
-            if ($request->has('lang')) {
-                $locale = $this->sanitizeInput($request->get('lang'));
-                if (in_array($locale, ['en', 'ar'])) {
-                    app()->setLocale(is_string($locale) ? $locale : 'en');
-                    session(['locale' => $locale]);
-                }
-            }
-            $steps = $this->stepService->getInstallationStepsWithStatus(1);
-            return view('install.welcome', ['step' => 1, 'progressWidth' => 20, 'steps' => $steps]);
-        } catch (\Exception $e) {
-            Log::error('Error in installation welcome page', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            // Return welcome page even if language switching fails
-            $steps = $this->stepService->getInstallationStepsWithStatus(1);
-            return view('install.welcome', ['step' => 1, 'progressWidth' => 20, 'steps' => $steps]);
+        $locale = $this->sanitizeLocale((string) $request->get('lang', ''));
+        if ($locale !== null) {
+            app()->setLocale($locale);
+            session(['locale' => $locale]);
         }
+
+        return $this->stepView(1, 'install.welcome');
     }
-    /**
-     * Show license verification form with security validation.
-     *
-     * Displays the license verification form for the installation process
-     * with proper security measures and validation.
-     *
-     * @return \Illuminate\View\View The license verification form view
-     *
-     * @example
-     * // Access license verification form
-     * GET /install/license
-     */
-    public function license()
+
+    public function license(): View
     {
-        try {
-            $steps = $this->stepService->getInstallationStepsWithStatus(2);
-            return view('install.license', ['step' => 2, 'progressWidth' => 40, 'steps' => $steps]);
-        } catch (\Exception $e) {
-            Log::error('Error showing license verification form', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            $steps = $this->stepService->getInstallationStepsWithStatus(2);
-            return view('install.license', ['step' => 2, 'progressWidth' => 40, 'steps' => $steps]);
-        }
+        return $this->stepView(2, 'install.license');
     }
-    /**
-     * Process license verification with comprehensive security validation.
-     *
-     * @param Request $request
-     *
-     * @return RedirectResponse|JsonResponse
-     */
+
     public function licenseStore(Request $request): RedirectResponse|JsonResponse
     {
         try {
-            $validationResult = $this->validateLicenseInput($request);
-            if (!$validationResult['valid']) {
-                return $this->handleValidationError($request, $validationResult['message']);
+            $validation = $this->validationService->validateLicenseInput($request);
+            if (!$validation['valid']) {
+                $message = (string) ($validation['message'] ?? 'Validation failed');
+                return $this->validationService->handleValidationError($request, $message);
             }
 
-            $result = $this->verifyLicense($request);
-            return $result['valid']
-                ? $this->handleSuccessfulVerification($request, $result)
-                : $this->handleFailedVerification($request, $result);
-        } catch (\Exception $e) {
-            return $this->handleVerificationException($request, $e);
+            $verification = $this->verifyLicense($request);
+            if ($verification['valid'] ?? false) {
+                return $this->verificationResponse(
+                    $request,
+                    true,
+                    'License verified successfully',
+                    $verification
+                );
+            }
+
+            $errors = $verification['errors'] ?? ['general' => 'License verification failed'];
+            return $this->verificationResponse(
+                $request,
+                false,
+                'License verification failed',
+                is_array($errors) ? $errors : ['general' => (string) $errors]
+            );
+        } catch (\Throwable $exception) {
+            return $this->verificationResponse(
+                $request,
+                false,
+                'An error occurred during verification',
+                ['general' => $exception->getMessage()],
+                500
+            );
         }
     }
 
-    /**
-     * Handle successful verification.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param array<string, mixed> $result
-     *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
-     */
-    private function handleSuccessfulVerification(
-        \Illuminate\Http\Request $request,
-        array $result
-    ): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse {
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'License verified successfully',
-                'data' => $result,
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'License verified successfully');
-    }
-
-    /**
-     * Handle failed verification.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param array<string, mixed> $result
-     *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
-     */
-    private function handleFailedVerification(
-        \Illuminate\Http\Request $request,
-        array $result
-    ): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse {
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'License verification failed',
-                'errors' => $result['errors'] ?? [],
-            ], 422);
-        }
-
-        return redirect()->back()->withErrors(is_array($result['errors'] ?? null) ? $result['errors'] : []);
-    }
-
-    /**
-     * Handle verification exception.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \Exception $e
-     *
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
-     */
-    private function handleVerificationException(
-        \Illuminate\Http\Request $request,
-        \Exception $e
-    ): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse {
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred during verification',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-
-        return redirect()->back()->withErrors(['general' => 'An error occurred during verification']);
-    }
-
-
-    /**
-     * Check all requirements passed.
-     *
-     * @return bool
-     */
-    private function checkAllRequirementsPassed(): bool
-    {
-        $requirements = $this->requirementsService->checkRequirements();
-        return (bool) ($requirements['passed'] ?? false);
-    }
-
-    /**
-     * Validate database input.
-     *
-     * @param array<string, mixed> $data
-     *
-     * @return array<string, mixed>
-     */
-    private function validateDatabaseInput(array $data): array
-    {
-        $validator = Validator::make($data, [
-            'host' => 'required|string|max:255',
-            'port' => 'required|integer|min:1|max:65535',
-            'database' => 'required|string|max:255',
-            'username' => 'required|string|max:255',
-            'password' => 'nullable|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return [
-                'valid' => false,
-                'errors' => $validator->errors()->toArray(),
-            ];
-        }
-
-        return ['valid' => true];
-    }
-
-    /**
-     * Check if database is configured.
-     *
-     * @return bool
-     */
-    private function isDatabaseConfigured(): bool
-    {
-        try {
-            \DB::connection()->getPdo();
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
-
-    /**
-     * Show system requirements check.
-     */
     public function requirements(): View|RedirectResponse
     {
-        // Check if license is verified
-        if (!session('install.license')) {
-            return redirect()->route('install.license')
-                ->with('error', 'Please verify your license first.');
+        $redirect = $this->ensureSessions([
+            ['install.license', 'install.license', 'Please verify your license first.'],
+        ]);
+        if ($redirect !== null) {
+            return $redirect;
         }
 
         $requirements = $this->requirementsService->checkRequirements();
-        $allPassed = $this->checkAllRequirementsPassed();
-        $steps = $this->stepService->getInstallationStepsWithStatus(3);
 
-        return view('install.requirements', [
+        return $this->stepView(3, 'install.requirements', [
             'requirements' => $requirements,
-            'allPassed' => $allPassed,
-            'steps' => $steps,
-            'step' => 3,
-            'progressWidth' => 60
+            'allPassed' => (bool) ($requirements['passed'] ?? false),
         ]);
     }
 
-
-    /**
-     * Show database configuration form.
-     */
     public function database(): View|RedirectResponse
     {
-        if (!session('install.license')) {
-            return redirect()->route('install.license')
-                ->with('error', 'Please verify your license first.');
-        }
-
-        $steps = $this->stepService->getInstallationStepsWithStatus(4);
-        return view('install.database', [
-            'step' => 4,
-            'progressWidth' => 80,
-            'steps' => $steps
+        $redirect = $this->ensureSessions([
+            ['install.license', 'install.license', 'Please verify your license first.'],
         ]);
+        return $redirect ?? $this->stepView(4, 'install.database');
     }
-    /**
-     * Process database configuration.
-     */
+
     public function databaseStore(Request $request): RedirectResponse
     {
-        // Validate database configuration
-        /**
- * @var array<string, mixed> $requestData
-*/
-        $requestData = $request->all();
-        $validationResult = $this->validateDatabaseInput($requestData);
-        if (!$validationResult['valid']) {
-            $errors = $validationResult['errors'] ?? [];
+        $data = $request->all();
+        $validation = $this->validateDatabaseInput($data);
+        if (!$validation['valid']) {
+            $errors = $validation['errors'] ?? [];
+            return redirect()->back()->withErrors($errors)->withInput();
+        }
+
+        $connection = $this->testDatabaseConnection($data);
+        if (!($connection['success'] ?? false)) {
             return redirect()->back()
-                ->withErrors(is_array($errors) ? $errors : [])
+                ->withErrors(['database' => $connection['message'] ?? 'Connection failed'])
                 ->withInput();
         }
 
-        // Test database connection
-        $connectionResult = $this->testDatabaseConnection($request->all());
-        if (!$connectionResult['success']) {
-            return redirect()->back()
-                ->withErrors(['database' => $connectionResult['message']])
-                ->withInput();
-        }
+        session(['install.database' => $data]);
 
-        // Store database configuration
-        session(['install.database' => $request->all()]);
         return redirect()->route('install.admin');
     }
 
-    /**
-     * Show admin account creation form.
-     */
     public function admin(): View|RedirectResponse
     {
-        if (!session('install.license')) {
-            return redirect()->route('install.license')
-                ->with('error', 'Please verify your license first.');
+        $redirect = $this->ensureSessions([
+            ['install.license', 'install.license', 'Please verify your license first.'],
+            ['install.database', 'install.database', 'Please configure database settings first.'],
+        ]);
+        if ($redirect !== null) {
+            return $redirect;
         }
 
         if (!$this->isDatabaseConfigured()) {
@@ -362,481 +157,117 @@ class InstallController extends Controller
                 ->with('error', 'Please configure database settings first.');
         }
 
-        $steps = $this->stepService->getInstallationStepsWithStatus(5);
-        return view('install.admin', [
-            'step' => 5,
-            'progressWidth' => 100,
-            'steps' => $steps
-        ]);
+        return $this->stepView(5, 'install.admin');
     }
 
-    /**
-     * Process admin account creation.
-     */
     public function adminStore(Request $request): RedirectResponse
     {
-        $validationResult = $this->validationService->validateAdminInput($request);
-        if (!$validationResult['valid']) {
-            $errors = $validationResult['errors'] ?? [];
-            return redirect()->back()
-                ->withErrors(is_array($errors) ? $errors : [])
-                ->withInput();
+        $validation = $this->validationService->validateAdminInput($request);
+        if (!$validation['valid']) {
+            $errors = $validation['errors'] ?? [];
+            return redirect()->back()->withErrors($errors)->withInput();
         }
 
-        // Store admin configuration
         session(['install.admin' => $request->all()]);
+
         return redirect()->route('install.settings');
     }
 
-    /**
-     * Show system settings form.
-     */
     public function settings(): View|RedirectResponse
     {
-        if (!session('install.license')) {
-            return redirect()->route('install.license')
-                ->with('error', 'Please verify your license first.');
+        $redirect = $this->ensureSessions([
+            ['install.license', 'install.license', 'Please verify your license first.'],
+            ['install.database', 'install.database', 'Please configure database settings first.'],
+            ['install.admin', 'install.admin', 'Please create admin account first.'],
+        ]);
+        if ($redirect !== null) {
+            return $redirect;
         }
 
-        if (!session('install.database')) {
-            return redirect()->route('install.database')
-                ->with('error', 'Please configure database settings first.');
-        }
-
-        if (!session('install.admin')) {
-            return redirect()->route('install.admin')
-                ->with('error', 'Please create admin account first.');
-        }
-
-        $steps = $this->stepService->getInstallationStepsWithStatus(6);
-        $timezones = $this->stepService->getTimezones();
-        return view('install.settings', [
-            'step' => 6,
-            'progressWidth' => 100,
-            'steps' => $steps,
-            'timezones' => $timezones
+        return $this->stepView(6, 'install.settings', [
+            'timezones' => $this->stepService->getTimezones(),
         ]);
     }
 
-    /**
-     * Process system settings.
-     */
     public function settingsStore(Request $request): RedirectResponse
     {
-        $validator = $this->createSettingsValidator($request);
+        $validator = Validator::make($request->all(), $this->getSettingsValidationRules());
         if ($validator->fails()) {
-            return $this->handleValidationFailure($validator);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $this->storeSettings($request);
+        session(['install.settings' => $request->all()]);
+
         return redirect()->route('install.install');
     }
 
-    private function createSettingsValidator(Request $request): \Illuminate\Contracts\Validation\Validator
-    {
-        return Validator::make($request->all(), $this->getSettingsValidationRules());
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function getSettingsValidationRules(): array
-    {
-        return [
-            'site_name' => 'required|string|max:255',
-            'site_description' => 'nullable|string|max:500',
-            'admin_email' => 'required_if:enable_email, 1|nullable|string|email|max:255',
-            'timezone' => 'required|string',
-            'locale' => 'required|string|in:en, ar',
-            'enable_email' => 'nullable|boolean',
-            'mail_mailer' => 'required_if:enable_email, 1|nullable|string|in:smtp, mailgun, ses, postmark',
-            'mail_host' => 'required_if:enable_email, 1|nullable|string|max:255',
-            'mail_port' => 'required_if:enable_email, 1|nullable|integer|min:1|max:65535',
-            'mail_encryption' => 'nullable|string|in:tls, ssl',
-            'mail_username' => 'required_if:enable_email, 1|nullable|string|max:255',
-            'mail_password' => 'required_if:enable_email, 1|nullable|string|max:255',
-            'mail_from_address' => 'required_if:enable_email, 1|nullable|email|max:255',
-            'mail_from_name' => 'required_if:enable_email, 1|nullable|string|max:255',
-        ];
-    }
-
-    private function handleValidationFailure(\Illuminate\Contracts\Validation\Validator $validator): RedirectResponse
-    {
-        return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
-    }
-
-    private function storeSettings(Request $request): void
-    {
-        session(['install.settings' => $request->all()]);
-    }
-    /**
-     * Show installation progress.
-     */
     public function install(): View|RedirectResponse
     {
-        // Check if all required configuration is available
-        $licenseConfig = session('install.license');
-        $databaseConfig = session('install.database');
-        $adminConfig = session('install.admin');
-        $settingsConfig = session('install.settings');
-        if (! $licenseConfig) {
-            return redirect()->route('install.license')
-                ->with('error', 'Please verify your license first.');
-        }
-        if (! $databaseConfig) {
-            return redirect()->route('install.database')
-                ->with('error', 'Please configure database settings first.');
-        }
-        if (! $adminConfig) {
-            return redirect()->route('install.admin')
-                ->with('error', 'Please create admin account first.');
-        }
-        if (! $settingsConfig) {
-            return redirect()->route('install.settings')
-                ->with('error', 'Please configure system settings first.');
-        }
-        $steps = $this->stepService->getInstallationStepsWithStatus(7);
-        return view('install.install', [
-            'step' => 7,
-            'progressWidth' => 100,
-            'steps' => $steps
+        $redirect = $this->ensureSessions([
+            ['install.license', 'install.license', 'Please verify your license first.'],
+            ['install.database', 'install.database', 'Please configure database settings first.'],
+            ['install.admin', 'install.admin', 'Please create admin account first.'],
+            ['install.settings', 'install.settings', 'Please configure system settings first.'],
         ]);
+
+        return $redirect ?? $this->stepView(7, 'install.install');
     }
-    /**
-     * Process installation.
-     */
+
     public function installProcess(Request $request): JsonResponse
     {
         try {
             $configs = $this->getInstallationConfigs();
-            if (!$configs) {
-                return $this->errorResponse('Installation configuration missing. Please start over.', 400);
+            if ($configs === null) {
+                return $this->errorResponse(
+                    'Installation configuration missing. Please start over.',
+                    400
+                );
             }
 
             $this->runInstallationSteps($configs);
-            return $this->successResponse();
-        } catch (\Exception $e) {
-            return $this->errorResponse('Installation failed: ' . $e->getMessage(), 500);
+
+            return $this->successResponse('Installation completed successfully!');
+        } catch (\Throwable $exception) {
+            return $this->errorResponse(
+                'Installation failed: ' . $exception->getMessage(),
+                500
+            );
         }
     }
 
-    /**
-     * @return array<string, mixed>|null
-     */
-    private function getInstallationConfigs(): ?array
-    {
-        $configs = [
-            'license' => session('install.license'),
-            'database' => session('install.database'),
-            'admin' => session('install.admin'),
-            'settings' => session('install.settings'),
-        ];
-
-        return array_filter($configs) === $configs ? $configs : null;
-    }
-
-    /**
-     * @param array<string, mixed> $configs
-     */
-    private function runInstallationSteps(array $configs): void
-    {
-        $this->setupDatabase($configs);
-        $this->runMigrations();
-        $this->createUserAndSettings($configs);
-        $this->finalizeInstallation($configs);
-    }
-
-    protected function successResponse(
-        mixed $data = null,
-        string $message = 'Success',
-        int $statusCode = 200
-    ): JsonResponse {
-        return response()->json([
-            'success' => true,
-            'message' => 'Installation completed successfully!',
-            'redirect' => route('login'),
-        ], 200, [], JSON_UNESCAPED_SLASHES);
-    }
-
-    protected function errorResponse(
-        string $message = 'Error',
-        mixed $errors = null,
-        int $statusCode = 400
-    ): JsonResponse {
-        return response()->json([
-            'success' => false,
-            'message' => $message,
-        ], $statusCode);
-    }
-    /**
-     * Show installation completion page.
-     */
     public function completion(): View|RedirectResponse
     {
-        // Check if system is installed
-        $installedFile = storage_path('.installed');
-        if (! File::exists($installedFile)) {
+        if (!File::exists(storage_path('.installed'))) {
             return redirect()->route('install.welcome');
         }
-        // Check if we have session data
-        $licenseConfig = session('install.license');
-        $adminConfig = session('install.admin');
-        $settingsConfig = session('install.settings');
-        $databaseConfig = session('install.database');
-        if (! $licenseConfig || ! $adminConfig || ! $settingsConfig || ! $databaseConfig) {
-            return redirect()->route('install.welcome');
+
+        $redirect = $this->ensureSessions([
+            ['install.license', 'install.welcome', 'Installation data missing. Start again.'],
+            ['install.database', 'install.welcome', 'Installation data missing. Start again.'],
+            ['install.admin', 'install.welcome', 'Installation data missing. Start again.'],
+            ['install.settings', 'install.welcome', 'Installation data missing. Start again.'],
+        ]);
+        if ($redirect !== null) {
+            return $redirect;
         }
-        // Pass session data to view before clearing
-        $steps = $this->stepService->getInstallationStepsWithStatus(7);
+
         $viewData = [
-            'step' => 7,
-            'progressWidth' => 100,
-            'steps' => $steps,
-            'licenseConfig' => $licenseConfig,
-            'adminConfig' => $adminConfig,
-            'settingsConfig' => $settingsConfig,
-            'databaseConfig' => $databaseConfig,
-        ];
-        // Clear session data after passing to view
-        session()->forget(['install.license', 'install.database', 'install.admin', 'install.settings']);
-        return view('install.completion', $viewData);
-    }
-    /**
-     * Test database connection.
-     */
-    /**
-     * @param mixed $config
-     *
-     * @return array<string, mixed>
-     */
-    private function testDatabaseConnection($config)
-    {
-        try {
-            $connectionParams = $this->buildConnectionParams($config);
-            $connection = $this->createPDOConnection($connectionParams);
-            return ['success' => true, 'message' => 'Database connection successful'];
-        } catch (\PDOException $e) {
-            return ['success' => false, 'message' => $e->getMessage()];
-        }
-    }
-
-    /**
-     * Build database connection parameters
-     */
-    private function buildConnectionParams($config): array
-    {
-        return [
-            'host' => is_array($config) ? ($config['db_host'] ?? '') : '',
-            'port' => is_array($config) ? ($config['db_port'] ?? '') : '',
-            'dbname' => is_array($config) ? ($config['db_name'] ?? '') : '',
-            'username' => is_array($config) ? ($config['db_username'] ?? '') : '',
-            'password' => is_array($config) ? ($config['db_password'] ?? '') : '',
-        ];
-    }
-
-    /**
-     * Create PDO connection
-     */
-    private function createPDOConnection(array $params): \PDO
-    {
-        $dsn = "mysql:host={$params['host']};port={$params['port']};dbname={$params['dbname']}";
-        $connection = new \PDO($dsn, $params['username'], $params['password']);
-        $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        return $connection;
-    }
-    /**
-     * Update .env file.
-     *
-     * @param array<string, mixed> $databaseConfig
-     * @param array<string, mixed> $settingsConfig
-     */
-    /**
-     * @param array<string, mixed> $databaseConfig
-     * @param array<string, mixed> $settingsConfig
-     */
-    private function updateEnvFile(array $databaseConfig, array $settingsConfig): void
-    {
-        $envPath = base_path('.env');
-        $envContent = File::get($envPath);
-        $envContent = $this->updateDatabaseConfig($envContent, $databaseConfig);
-        $envContent = $this->updateApplicationConfig($envContent, $settingsConfig);
-        
-        File::put($envPath, $envContent);
-    }
-
-    /**
-     * Update database configuration in .env file
-     */
-    private function updateDatabaseConfig(string $envContent, array $databaseConfig): string
-    {
-        $replacements = [
-            'DB_HOST' => $databaseConfig['db_host'] ?? '',
-            'DB_PORT' => $databaseConfig['db_port'] ?? '',
-            'DB_DATABASE' => $databaseConfig['db_name'] ?? '',
-            'DB_USERNAME' => $databaseConfig['db_username'] ?? '',
-            'DB_PASSWORD' => $databaseConfig['db_password'] ?? '',
+            'licenseConfig' => session('install.license'),
+            'adminConfig' => session('install.admin'),
+            'settingsConfig' => session('install.settings'),
+            'databaseConfig' => session('install.database'),
         ];
 
-        foreach ($replacements as $key => $value) {
-            $envContent = preg_replace(
-                "/{$key}=.*/",
-                "{$key}=" . (is_string($value) ? $value : ''),
-                $envContent
-            ) ?? $envContent;
-        }
+        session()->forget([
+            'install.license',
+            'install.database',
+            'install.admin',
+            'install.settings',
+        ]);
 
-        return $envContent;
+        return $this->stepView(7, 'install.completion', $viewData);
     }
 
-    /**
-     * Update application configuration in .env file
-     */
-    private function updateApplicationConfig(string $envContent, array $settingsConfig): string
-    {
-        $envContent = $this->updateAppSettings($envContent, $settingsConfig);
-        $envContent = $this->updateLocaleSettings($envContent, $settingsConfig);
-        $envContent = $this->updateEmailSettings($envContent, $settingsConfig);
-        
-        return $envContent;
-    }
-
-    /**
-     * Update app settings
-     */
-    private function updateAppSettings(string $envContent, array $settingsConfig): string
-    {
-        $currentUrl = request()->getSchemeAndHttpHost();
-        $siteName = $settingsConfig['site_name'] ?? '';
-        $timezone = $settingsConfig['timezone'] ?? '';
-
-        $envContent = preg_replace(
-            '/APP_NAME=.*/',
-            'APP_NAME="' . (is_string($siteName) ? $siteName : '') . '"',
-            $envContent
-        ) ?? $envContent;
-        $envContent = preg_replace('/APP_URL=.*/', "APP_URL={$currentUrl}", $envContent) ?? $envContent;
-        $envContent = preg_replace(
-            '/APP_TIMEZONE=.*/',
-            'APP_TIMEZONE=' . (is_string($timezone) ? $timezone : ''),
-            $envContent
-        ) ?? $envContent;
-
-        return $envContent;
-    }
-
-    /**
-     * Update locale settings
-     */
-    private function updateLocaleSettings(string $envContent, array $settingsConfig): string
-    {
-        $locale = $settingsConfig['locale'] ?? '';
-        $localeStr = is_string($locale) ? $locale : '';
-        $fakerLocale = $localeStr === 'ar' ? 'ar_SA' : 'en_US';
-
-        $envContent = preg_replace('/APP_LOCALE=.*/', "APP_LOCALE={$localeStr}", $envContent) ?? $envContent;
-        $envContent = preg_replace(
-            '/APP_FALLBACK_LOCALE=.*/',
-            "APP_FALLBACK_LOCALE={$localeStr}",
-            $envContent
-        ) ?? $envContent;
-        $envContent = preg_replace(
-            '/APP_FAKER_LOCALE=.*/',
-            "APP_FAKER_LOCALE={$fakerLocale}",
-            $envContent
-        ) ?? $envContent;
-
-        return $envContent;
-    }
-
-    /**
-     * Update email settings
-     */
-    private function updateEmailSettings(string $envContent, array $settingsConfig): string
-    {
-        if (!isset($settingsConfig['enable_email']) || !$settingsConfig['enable_email']) {
-            return $envContent;
-        }
-
-        $emailConfig = [
-            'MAIL_MAILER' => $settingsConfig['mail_mailer'] ?? '',
-            'MAIL_HOST' => $settingsConfig['mail_host'] ?? '',
-            'MAIL_PORT' => $settingsConfig['mail_port'] ?? '',
-            'MAIL_USERNAME' => $settingsConfig['mail_username'] ?? '',
-            'MAIL_PASSWORD' => $settingsConfig['mail_password'] ?? '',
-            'MAIL_ENCRYPTION' => $settingsConfig['mail_encryption'] ?? '',
-            'MAIL_FROM_ADDRESS' => $settingsConfig['mail_from_address'] ?? '',
-            'MAIL_FROM_NAME' => $settingsConfig['mail_from_name'] ?? '',
-        ];
-
-        foreach ($emailConfig as $key => $value) {
-            $envContent = preg_replace("/{$key}=.*/", "{$key}=" . (is_string($value) ? $value : ''), $envContent) ?? $envContent;
-        }
-
-        return $envContent;
-    }
-    /**
-     * Create roles and permissions.
-     */
-    private function createRolesAndPermissions(): void
-    {
-        try {
-            // Create permissions
-            $permissions = [
-                'manage_users', 'manage_products', 'manage_licenses', 'manage_tickets',
-                'manage_settings', 'manage_knowledge_base', 'view_reports', 'manage_invoices',
-            ];
-            foreach ($permissions as $permission) {
-                Permission::firstOrCreate(['name' => $permission]);
-            }
-            // Create admin role
-            $adminRole = Role::firstOrCreate(['name' => 'admin']);
-            $adminRole->givePermissionTo($permissions);
-            // Create user role
-            $userRole = Role::firstOrCreate(['name' => 'user']);
-            $userRole->givePermissionTo(['view_reports']);
-            // Roles and permissions created successfully
-        } catch (\Exception $e) {
-            // Failed to create roles and permissions
-            throw $e;
-        }
-    }
-    /**
-     * Create default settings.
-     *
-     * @param array<string, mixed> $settingsConfig
-     */
-    private function createDefaultSettings(array $settingsConfig): void
-    {
-        try {
-            Setting::create([
-                'site_name' => $settingsConfig['site_name'],
-                'site_description' => $settingsConfig['site_description'],
-                'admin_email' => $settingsConfig['admin_email'] ?? null,
-                'timezone' => $settingsConfig['timezone'],
-                'locale' => $settingsConfig['locale'],
-                'preloader_enabled' => true,
-                'preloader_type' => 'spinner',
-                'preloader_color' => '#3b82f6',
-                'preloader_background_color' => '#ffffff',
-                'preloader_duration' => 2000,
-                'logo_show_text' => true,
-                'logo_text' => $settingsConfig['site_name'],
-                'maintenance_mode' => false,
-                'registration_enabled' => true,
-                'email_verification_required' => isset($settingsConfig['enable_email'])
-                    && $settingsConfig['enable_email'],
-            ]);
-            // Default settings created successfully
-        } catch (\Exception $e) {
-            // Failed to create default settings
-            throw $e;
-        }
-    }
-    /**
-     * Test database connection.
-     */
     public function testDatabase(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -846,6 +277,7 @@ class InstallController extends Controller
             'db_username' => 'required|string',
             'db_password' => 'nullable|string',
         ]);
+
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -853,56 +285,89 @@ class InstallController extends Controller
                 'errors' => $validator->errors(),
             ], 422);
         }
-        $connection = $this->testDatabaseConnection($request->all());
-        return response()->json($connection);
+
+        return response()->json($this->testDatabaseConnection($request->all()));
     }
 
-    /**
-     * Validate license input
-     */
-    private function validateLicenseInput(Request $request): array
+    private function verificationResponse(
+        Request $request,
+        bool $success,
+        string $message,
+        array $payload = [],
+        int $status = 200
+    ): RedirectResponse|JsonResponse {
+        if ($request->expectsJson()) {
+            $body = ['success' => $success, 'message' => $message];
+            if ($success) {
+                $body['data'] = $payload;
+            } else {
+                $body['errors'] = $payload;
+            }
+            $code = $success ? $status : ($status === 200 ? 422 : $status);
+
+            return response()->json($body, $code);
+        }
+
+        if ($success) {
+            return redirect()->back()->with('success', $message);
+        }
+
+        $errors = $payload ?: ['general' => $message];
+
+        return redirect()->back()->withErrors($errors);
+    }
+
+    private function validateDatabaseInput(array $data): array
     {
-        return $this->validationService->validateLicenseInput($request);
+        $validator = Validator::make($data, [
+            'db_host' => 'required|string|max:255',
+            'db_port' => 'required|integer|min:1|max:65535',
+            'db_name' => 'required|string|max:255',
+            'db_username' => 'required|string|max:255',
+            'db_password' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return ['valid' => false, 'errors' => $validator->errors()->toArray()];
+        }
+
+        return ['valid' => true];
     }
 
-    /**
-     * Handle validation error
-     */
-    private function handleValidationError(Request $request, ?string $message): RedirectResponse|JsonResponse
+    private function getInstallationConfigs(): ?array
     {
-        return $this->validationService->handleValidationError(
-            $request,
-            is_string($message) ? $message : 'Validation failed'
-        );
+        $configs = [
+            'license' => session('install.license'),
+            'database' => session('install.database'),
+            'admin' => session('install.admin'),
+            'settings' => session('install.settings'),
+        ];
+
+        foreach ($configs as $config) {
+            if (!is_array($config) || $config === []) {
+                return null;
+            }
+        }
+
+        return $configs;
     }
 
-    /**
-     * Verify license
-     */
-    private function verifyLicense(Request $request): array
+    private function runInstallationSteps(array $configs): void
     {
-        $purchaseCode = $this->validationService->sanitizeInput($request->purchase_code);
-        $domain = $this->validationService->sanitizeInput($request->getHost());
-        
-        return $this->licenseService->verifyLicense(
-            is_string($purchaseCode) ? $purchaseCode : '',
-            is_string($domain) ? $domain : ''
-        );
+        $this->setupDatabase($configs);
+        $this->runMigrations();
+        $this->createUserAndSettings($configs);
+        $this->finalizeInstallation($configs);
     }
 
-    /**
-     * Setup database configuration
-     */
     private function setupDatabase(array $configs): void
     {
-        $databaseConfig = is_array($configs['database']) ? $configs['database'] : [];
-        $settingsConfig = is_array($configs['settings']) ? $configs['settings'] : [];
-        $this->updateEnvFile($databaseConfig, $settingsConfig);
+        $database = is_array($configs['database']) ? $configs['database'] : [];
+        $settings = is_array($configs['settings']) ? $configs['settings'] : [];
+
+        $this->updateEnvFile($database, $settings);
     }
 
-    /**
-     * Run database migrations
-     */
     private function runMigrations(): void
     {
         Artisan::call('migrate:fresh', ['--force' => true]);
@@ -910,28 +375,285 @@ class InstallController extends Controller
         $this->installationService->runSeeders();
     }
 
-    /**
-     * Create user and settings
-     */
     private function createUserAndSettings(array $configs): void
     {
         $adminData = is_array($configs['admin']) ? $configs['admin'] : [];
-        $settingsConfig = is_array($configs['settings']) ? $configs['settings'] : [];
-        
+        $settings = is_array($configs['settings']) ? $configs['settings'] : [];
+
         $this->userService->createAdminUser($adminData);
-        $this->createDefaultSettings($settingsConfig);
+        $this->createDefaultSettings($settings);
     }
 
-    /**
-     * Finalize installation
-     */
     private function finalizeInstallation(array $configs): void
     {
-        $licenseConfig = is_array($configs['license']) ? $configs['license'] : [];
-        
-        $this->installationService->storeLicenseInformation($licenseConfig);
+        $license = is_array($configs['license']) ? $configs['license'] : [];
+
+        $this->installationService->storeLicenseInformation($license);
         $this->installationService->updateSessionDrivers();
         $this->installationService->createStorageLink();
         $this->installationService->createInstalledFile();
+    }
+
+    private function successResponse(string $message): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'redirect' => route('login'),
+        ]);
+    }
+
+    private function errorResponse(string $message, int $status): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+        ], $status);
+    }
+
+    private function testDatabaseConnection(array $config): array
+    {
+        try {
+            $data = $this->normalizeDatabaseData($config);
+            $dsn = sprintf(
+                'mysql:host=%s;port=%s;dbname=%s',
+                $data['host'],
+                $data['port'],
+                $data['database']
+            );
+            $pdo = new \PDO($dsn, $data['username'], $data['password']);
+            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+            return ['success' => true, 'message' => 'Database connection successful'];
+        } catch (\PDOException $exception) {
+            return ['success' => false, 'message' => $exception->getMessage()];
+        }
+    }
+
+    private function normalizeDatabaseData(array $data): array
+    {
+        return [
+            'host' => (string) ($data['db_host'] ?? ''),
+            'port' => (string) ($data['db_port'] ?? ''),
+            'database' => (string) ($data['db_name'] ?? ''),
+            'username' => (string) ($data['db_username'] ?? ''),
+            'password' => (string) ($data['db_password'] ?? ''),
+        ];
+    }
+
+    private function updateEnvFile(array $databaseConfig, array $settingsConfig): void
+    {
+        $path = base_path('.env');
+        $content = File::get($path);
+
+        $content = $this->updateDatabaseConfig($content, $databaseConfig);
+        $content = $this->updateApplicationConfig($content, $settingsConfig);
+
+        File::put($path, $content);
+    }
+
+    private function updateDatabaseConfig(string $content, array $databaseConfig): string
+    {
+        $values = [
+            'DB_HOST' => (string) ($databaseConfig['db_host'] ?? ''),
+            'DB_PORT' => (string) ($databaseConfig['db_port'] ?? ''),
+            'DB_DATABASE' => (string) ($databaseConfig['db_name'] ?? ''),
+            'DB_USERNAME' => (string) ($databaseConfig['db_username'] ?? ''),
+            'DB_PASSWORD' => (string) ($databaseConfig['db_password'] ?? ''),
+        ];
+
+        foreach ($values as $key => $value) {
+            $content = $this->replaceEnvValue($content, $key, $value);
+        }
+
+        return $content;
+    }
+
+    private function updateApplicationConfig(string $content, array $settingsConfig): string
+    {
+        $content = $this->updateAppSettings($content, $settingsConfig);
+        $content = $this->updateLocaleSettings($content, $settingsConfig);
+        $content = $this->updateEmailSettings($content, $settingsConfig);
+
+        return $content;
+    }
+
+    private function updateAppSettings(string $content, array $settingsConfig): string
+    {
+        $name = (string) ($settingsConfig['site_name'] ?? '');
+        $timezone = (string) ($settingsConfig['timezone'] ?? '');
+        $url = request()->getSchemeAndHttpHost();
+
+        $content = $this->replaceEnvValue($content, 'APP_NAME', '"' . $name . '"');
+        $content = $this->replaceEnvValue($content, 'APP_URL', $url);
+        $content = $this->replaceEnvValue($content, 'APP_TIMEZONE', $timezone);
+
+        return $content;
+    }
+
+    private function updateLocaleSettings(string $content, array $settingsConfig): string
+    {
+        $locale = (string) ($settingsConfig['locale'] ?? 'en');
+        $fallback = $locale;
+        $faker = $locale === 'ar' ? 'ar_SA' : 'en_US';
+
+        $content = $this->replaceEnvValue($content, 'APP_LOCALE', $locale);
+        $content = $this->replaceEnvValue($content, 'APP_FALLBACK_LOCALE', $fallback);
+        $content = $this->replaceEnvValue($content, 'APP_FAKER_LOCALE', $faker);
+
+        return $content;
+    }
+
+    private function updateEmailSettings(string $content, array $settingsConfig): string
+    {
+        if (empty($settingsConfig['enable_email'])) {
+            return $content;
+        }
+
+        $fields = [
+            'MAIL_MAILER' => (string) ($settingsConfig['mail_mailer'] ?? ''),
+            'MAIL_HOST' => (string) ($settingsConfig['mail_host'] ?? ''),
+            'MAIL_PORT' => (string) ($settingsConfig['mail_port'] ?? ''),
+            'MAIL_USERNAME' => (string) ($settingsConfig['mail_username'] ?? ''),
+            'MAIL_PASSWORD' => (string) ($settingsConfig['mail_password'] ?? ''),
+            'MAIL_ENCRYPTION' => (string) ($settingsConfig['mail_encryption'] ?? ''),
+            'MAIL_FROM_ADDRESS' => (string) ($settingsConfig['mail_from_address'] ?? ''),
+            'MAIL_FROM_NAME' => (string) ($settingsConfig['mail_from_name'] ?? ''),
+        ];
+
+        foreach ($fields as $key => $value) {
+            $content = $this->replaceEnvValue($content, $key, $value);
+        }
+
+        return $content;
+    }
+
+    private function createRolesAndPermissions(): void
+    {
+        $permissions = [
+            'manage_users',
+            'manage_products',
+            'manage_licenses',
+            'manage_tickets',
+            'manage_settings',
+            'manage_knowledge_base',
+            'view_reports',
+            'manage_invoices',
+        ];
+
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
+
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $adminRole->givePermissionTo($permissions);
+
+        $userRole = Role::firstOrCreate(['name' => 'user']);
+        $userRole->givePermissionTo(['view_reports']);
+    }
+
+    private function createDefaultSettings(array $settingsConfig): void
+    {
+        Setting::create([
+            'site_name' => $settingsConfig['site_name'] ?? '',
+            'site_description' => $settingsConfig['site_description'] ?? null,
+            'admin_email' => $settingsConfig['admin_email'] ?? null,
+            'timezone' => $settingsConfig['timezone'] ?? 'UTC',
+            'locale' => $settingsConfig['locale'] ?? 'en',
+            'preloader_enabled' => true,
+            'preloader_type' => 'spinner',
+            'preloader_color' => '#3b82f6',
+            'preloader_background_color' => '#ffffff',
+            'preloader_duration' => 2000,
+            'logo_show_text' => true,
+            'logo_text' => $settingsConfig['site_name'] ?? '',
+            'maintenance_mode' => false,
+            'registration_enabled' => true,
+            'email_verification_required' => !empty($settingsConfig['enable_email']),
+        ]);
+    }
+
+    private function replaceEnvValue(string $content, string $key, string $value): string
+    {
+        $pattern = "/^{$key}=.*/m";
+        $replacement = sprintf('%s=%s', $key, $value);
+
+        return preg_replace($pattern, $replacement, $content) ?? $content;
+    }
+
+    private function ensureSessions(array $requirements): ?RedirectResponse
+    {
+        foreach ($requirements as $requirement) {
+            [$key, $route, $message] = $requirement;
+            if (!session($key)) {
+                return redirect()->route($route)->with('error', $message);
+            }
+        }
+
+        return null;
+    }
+
+    private function stepView(int $step, string $view, array $data = []): View
+    {
+        $defaults = [
+            'step' => $step,
+            'progressWidth' => $this->progressForStep($step),
+            'steps' => $this->stepService->getInstallationStepsWithStatus($step),
+        ];
+
+        return view($view, array_merge($defaults, $data));
+    }
+
+    private function progressForStep(int $step): int
+    {
+        return self::STEP_PROGRESS[$step] ?? 100;
+    }
+
+    private function isDatabaseConfigured(): bool
+    {
+        try {
+            \DB::connection()->getPdo();
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    private function getSettingsValidationRules(): array
+    {
+        return [
+            'site_name' => 'required|string|max:255',
+            'site_description' => 'nullable|string|max:500',
+            'admin_email' => 'required_if:enable_email,1|nullable|string|email|max:255',
+            'timezone' => 'required|string',
+            'locale' => 'required|string|in:en,ar',
+            'enable_email' => 'nullable|boolean',
+            'mail_mailer' => 'required_if:enable_email,1|nullable|string|in:smtp,mailgun,ses,postmark',
+            'mail_host' => 'required_if:enable_email,1|nullable|string|max:255',
+            'mail_port' => 'required_if:enable_email,1|nullable|integer|min:1|max:65535',
+            'mail_encryption' => 'nullable|string|in:tls,ssl',
+            'mail_username' => 'required_if:enable_email,1|nullable|string|max:255',
+            'mail_password' => 'required_if:enable_email,1|nullable|string|max:255',
+            'mail_from_address' => 'required_if:enable_email,1|nullable|email|max:255',
+            'mail_from_name' => 'required_if:enable_email,1|nullable|string|max:255',
+        ];
+    }
+
+    private function sanitizeLocale(string $candidate): ?string
+    {
+        $value = strtolower(trim($candidate));
+
+        return in_array($value, ['en', 'ar'], true) ? $value : null;
+    }
+
+    private function verifyLicense(Request $request): array
+    {
+        $purchaseCode = $this->validationService->sanitizeInput($request->input('purchase_code'));
+        $domain = $this->validationService->sanitizeInput($request->getHost());
+
+        return $this->licenseService->verifyLicense(
+            is_string($purchaseCode) ? $purchaseCode : '',
+            is_string($domain) ? $domain : ''
+        );
     }
 }
