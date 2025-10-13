@@ -3,6 +3,66 @@
  * Handles update checking, installation, and rollback functionality
  */
 
+// Helper functions to reduce code duplication
+const UpdateHelpers = {
+  // Handle common error scenarios
+  handleUpdateError: (error, context = 'Update check') => {
+    console.error(`${context} error:`, error);
+    if (error.message.includes('HTTP 500') || error.message.includes('HTTP 404')) {
+      showAlert('error', 'Update server is temporarily unavailable');
+    } else if (error.message.includes('Failed to fetch')) {
+      showAlert('error', 'Network connection error. Please check your internet connection.');
+    } else {
+      console.warn(`${context} failed:`, error.message);
+      showAlert('info', 'Update check completed. No updates available.');
+    }
+  },
+
+  // Restore button state safely
+  restoreButton: (btn, originalText) => {
+    if (typeof SecurityUtils !== 'undefined') {
+      SecurityUtils.safeInnerHTML(btn, originalText, true, true);
+    } else {
+      btn.textContent = originalText;
+    }
+    btn.disabled = false;
+  },
+
+  // Show loading state
+  showLoading: (btn, loadingText = 'Loading...') => {
+    UpdateHelpers.showLoading(btn, 'Processing...');
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
+  },
+
+  // Validate form data
+  validateFormData: (formData) => {
+    const required = ['version', 'description', 'file'];
+    return required.every(field => formData.get(field) && formData.get(field).trim() !== '');
+  },
+
+  // Create form data object
+  createFormData: (data) => {
+    const formData = new FormData();
+    Object.keys(data).forEach(key => {
+      if (data[key] !== null && data[key] !== undefined) {
+        formData.append(key, data[key]);
+      }
+    });
+    return formData;
+  },
+
+  // Handle API response
+  handleApiResponse: (response, successMessage, errorMessage) => {
+    if (response.ok) {
+      showAlert('success', successMessage);
+      return true;
+    } else {
+      showAlert('error', errorMessage);
+      return false;
+    }
+  }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   // Check for updates button
   document
@@ -59,7 +119,7 @@ function checkForUpdates() {
   } else {
     btn.textContent = 'Checking...';
   }
-  btn.disabled = true;
+  UpdateHelpers.showLoading(btn, 'Processing...');
   // eslint-disable-next-line promise/catch-or-return
   fetch(window.location.href, {
     method: 'POST',
@@ -86,26 +146,10 @@ function checkForUpdates() {
       return true;
     })
     .catch(error => {
-      console.error('Update check error:', error);
-      // Only show error if it's a real network/server error
-      if (error.message.includes('HTTP 500') || error.message.includes('HTTP 404')) {
-        showAlert('error', 'Update server is temporarily unavailable');
-      } else if (error.message.includes('Failed to fetch')) {
-        showAlert('error', 'Network connection error. Please check your internet connection.');
-      } else {
-        // For other errors, show a more generic message or don't show at all
-        console.warn('Update check failed:', error.message);
-        showAlert('info', 'Update check completed. No updates available.');
-      }
+      UpdateHelpers.handleUpdateError(error, 'Update check');
     })
     .finally(() => {
-      // Use SecurityUtils for safe HTML restoration
-      if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
-      } else {
-        btn.textContent = originalText;
-      }
-      btn.disabled = false;
+      UpdateHelpers.restoreButton(btn, originalText);
     });
 }
 function showUpdateModal(version) {
@@ -124,7 +168,7 @@ function performUpdate(version) {
   } else {
     btn.textContent = 'Updating...';
   }
-  btn.disabled = true;
+  UpdateHelpers.showLoading(btn, 'Processing...');
   // eslint-disable-next-line promise/catch-or-return
   fetch(window.location.href, {
     method: 'POST',
@@ -141,13 +185,10 @@ function performUpdate(version) {
   })
     .then(response => response.json())
     .then(data => {
-      if (data.success) {
-        showAlert('success', data.message);
+      if (UpdateHelpers.handleApiResponse(data, data.message, data.message || 'Update failed')) {
         setTimeout(() => {
           window.location.reload();
         }, 2000);
-      } else {
-        showAlert('error', data.message || 'Update failed');
       }
       return true;
     })
@@ -315,7 +356,7 @@ function performRollback(version) {
   } else {
     btn.textContent = 'Rolling back...';
   }
-  btn.disabled = true;
+  UpdateHelpers.showLoading(btn, 'Processing...');
   // eslint-disable-next-line promise/catch-or-return
   fetch('/admin/updates/rollback', {
     method: 'POST',
@@ -578,7 +619,7 @@ function checkAutoUpdates() {
   } else {
     btn.textContent = 'Checking...';
   }
-  btn.disabled = true;
+  UpdateHelpers.showLoading(btn, 'Processing...');
   // eslint-disable-next-line promise/catch-or-return
   fetch('/admin/updates/auto-check', {
     method: 'POST',
@@ -639,23 +680,10 @@ function checkAutoUpdates() {
     .catch(error => {
       console.error('Auto update check error:', error);
       // Only show error for real network/server issues
-      if (error.message.includes('HTTP 500') || error.message.includes('HTTP 404')) {
-        showAlert('error', 'Update server is temporarily unavailable');
-      } else if (error.message.includes('Failed to fetch')) {
-        showAlert('error', 'Network connection error. Please check your internet connection.');
-      } else {
-        console.warn('Auto update check failed:', error.message);
-        showAlert('info', 'Update check completed. No updates available.');
-      }
+      UpdateHelpers.handleUpdateError(error, 'Auto update check');
     })
     .finally(() => {
-      // Use SecurityUtils for safe HTML restoration
-      if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
-      } else {
-        btn.textContent = originalText;
-      }
-      btn.disabled = false;
+      UpdateHelpers.restoreButton(btn, originalText);
     });
 }
 // eslint-disable-next-line no-unused-vars
@@ -750,7 +778,7 @@ function installAutoUpdate(version) {
   } else {
     btn.textContent = 'Installing...';
   }
-  btn.disabled = true;
+  UpdateHelpers.showLoading(btn, 'Processing...');
   // eslint-disable-next-line promise/catch-or-return
   fetch('/admin/updates/auto-install', {
     method: 'POST',
@@ -785,13 +813,7 @@ function installAutoUpdate(version) {
       showAlert('error', 'An error occurred during installation');
     })
     .finally(() => {
-      // Use SecurityUtils for safe HTML restoration
-      if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
-      } else {
-        btn.textContent = originalText;
-      }
-      btn.disabled = false;
+      UpdateHelpers.restoreButton(btn, originalText);
     });
 }
 function showAlert(type, message) {
