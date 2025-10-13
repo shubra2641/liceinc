@@ -8,17 +8,53 @@
             <p class="admin-page-subtitle">{{ trans('app.Manage system updates and version control') }}</p>
         </div>
         <div class="admin-page-actions">
-            <button id="check-updates-btn" class="admin-btn admin-btn-info admin-btn-m">
-                <i class="fas fa-sync me-2"></i>
-                {{ trans('app.Check for Updates') }}
-            </button>
-            <button id="auto-update-btn" class="admin-btn admin-btn-primary admin-btn-m">
+            <form method="POST" action="{{ route('admin.updates.check') }}" class="d-inline">
+                @csrf
+                <button type="submit" class="admin-btn admin-btn-info admin-btn-m">
+                    <i class="fas fa-sync me-2"></i>
+                    {{ trans('app.Check for Updates') }}
+                </button>
+            </form>
+            <button type="button" class="admin-btn admin-btn-primary admin-btn-m" data-bs-toggle="modal" data-bs-target="#autoUpdateModal">
                 <i class="fas fa-magic me-2"></i>
                 {{ trans('app.Auto Update') }}
             </button>
         </div>
     </div>
 </div>
+
+<!-- Flash Messages -->
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ session('error') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
+@if(session('info'))
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+    <i class="fas fa-info-circle me-2"></i>
+    {{ session('info') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
+@if(session('warning'))
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ session('warning') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
 
 
 
@@ -69,10 +105,13 @@
                         @endif
                     </div>
                     <div class="col-md-4 text-end">
-                        <button class="btn btn-primary btn-lg" onclick="checkForUpdates()">
-                            <i class="fas fa-sync me-2"></i>
-                            {{ trans('app.Check for Updates') }}
-                        </button>
+                        <form method="POST" action="{{ route('admin.updates.check') }}" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sync me-2"></i>
+                                {{ trans('app.Check for Updates') }}
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -162,11 +201,11 @@
 
                 <!-- Action Buttons -->
                 <div class="d-flex gap-2 flex-wrap mt-4">
-                    <button class="btn btn-primary" onclick="showAutoUpdateModal()">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#autoUpdateModal">
                         <i class="fas fa-magic me-2"></i>
                         {{ trans('app.Auto Update') }}
                     </button>
-                    <button class="btn btn-warning" onclick="showUploadUpdateModal()">
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#uploadUpdateModal">
                         <i class="fas fa-upload me-2"></i>
                         {{ trans('app.Upload Update') }}
                     </button>
@@ -196,10 +235,10 @@
                 </p>
             </div>
             <div class="col-md-4 text-end">
-                <button id="update-system-btn" class="btn btn-warning btn-lg" data-version="{{ $versionStatus['latest_version'] }}">
+                <a href="{{ route('admin.updates.confirm', ['version' => $versionStatus['latest_version']]) }}" class="btn btn-warning btn-lg">
                     <i class="fas fa-download me-2"></i>
                     {{ trans('app.Update Now') }}
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -306,6 +345,50 @@
 
 
 
+<!-- Upload Update Modal -->
+<div class="modal fade" id="uploadUpdateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-upload me-2"></i>
+                    {{ trans('app.Upload Update Package') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>{{ trans('app.Note') }}:</strong> {{ trans('app.Upload a ZIP file containing the update package') }}
+                </div>
+
+                <form method="POST" action="{{ route('admin.updates.upload-package') }}" enctype="multipart/form-data">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="update_package" class="form-label">
+                            <i class="fas fa-file-archive text-primary me-1"></i>
+                            {{ trans('app.Update Package') }} <span class="text-danger">*</span>
+                        </label>
+                        <input type="file" class="form-control" id="update_package" name="update_package"
+                               accept=".zip" required>
+                        <div class="form-text">{{ trans('app.Select a ZIP file containing the update files') }}</div>
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            {{ trans('app.Cancel') }}
+                        </button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-upload me-2"></i>
+                            {{ trans('app.Upload & Process') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Auto Update Modal -->
 <div class="modal fade" id="autoUpdateModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -323,7 +406,8 @@
                     <strong>{{ trans('app.Note') }}:</strong> {{ trans('app.Enter your license information to check for and install updates automatically') }}
                 </div>
                 
-                <form id="autoUpdateForm">
+                <form id="autoUpdateForm" method="POST" action="{{ route('admin.updates.auto-check') }}">
+                    @csrf
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -371,7 +455,7 @@
                     </div>
                     
                     <div class="d-grid">
-                        <button type="button" class="btn btn-primary" id="check-auto-updates-btn" onclick="checkAutoUpdates()">
+                        <button type="submit" class="btn btn-primary" id="check-auto-updates-btn">
                             <i class="fas fa-search me-2"></i>
                             {{ trans('app.Check for Updates') }}
                         </button>

@@ -417,7 +417,7 @@
 
     <!-- System Updates JavaScript -->
     @if(request()->routeIs('admin.updates*'))
-    <script src="{{ asset('assets/admin/js/updates.js') }}"></script>
+    <!-- JavaScript removed for server-side rendering -->
     @endif
 
     @yield('scripts')

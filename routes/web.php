@@ -597,6 +597,7 @@ Route::middleware(['auth', 'admin', 'verified'])->prefix('admin')->name('admin.'
     // System Updates
     Route::prefix('updates')->group(function () {
         Route::get('/', [UpdateController::class, 'index'])->name('updates.index');
+        Route::get('/confirm', [UpdateController::class, 'confirmUpdate'])->name('updates.confirm');
         Route::post(
             '/check',
             [UpdateController::class, 'checkUpdates'],

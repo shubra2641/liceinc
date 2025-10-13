@@ -48,22 +48,51 @@ class UpdateController extends Controller
     }
 
     /**
+     * Show update confirmation page.
+     *
+     * Displays a confirmation page before performing system updates,
+     * showing version details and requiring explicit user confirmation.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View
+     */
+    public function confirmUpdate(Request $request)
+    {
+        $version = $request->query('version');
+
+        if (!$version || !VersionHelper::isValidVersion($version)) {
+            return redirect()->route('admin.updates.index')
+                ->with('error', 'Invalid version specified.');
+        }
+
+        $currentVersion = VersionHelper::getCurrentVersion();
+
+        if (VersionHelper::compareVersions($version, $currentVersion) <= 0) {
+            return redirect()->route('admin.updates.index')
+                ->with('error', 'Target version must be newer than current version.');
+        }
+
+        $versionInfo = VersionHelper::getVersionInfo($version);
+
+        if (empty($versionInfo)) {
+            return redirect()->route('admin.updates.index')
+                ->with('error', 'Version information not found.');
+        }
+
+        return view('admin.updates.confirm', [
+            'version' => $version,
+            'currentVersion' => $currentVersion,
+            'versionInfo' => $versionInfo,
+        ]);
+    }
+    
+    /**
      * Display the update management page.
      *
      * Shows current version, available updates, and update options with
      * comprehensive version information and update status.
      *
      * @return \Illuminate\View\View The update management view
-     *
-     * @example
-     * // Access the update management page:
-     * GET /admin/updates
-     *
-     * // Returns view with:
-     * // - Current version status
-     * // - Available updates information
-     * // - Product information
-     * // - Update options and controls
      */
     public function index()
     {
@@ -105,36 +134,26 @@ class UpdateController extends Controller
     /**
      * Check for available updates.
      *
-     * Checks for available system updates and returns version status
-     * information including current and latest versions.
+     * Checks for available system updates and returns appropriate flash messages
+     * to inform the user about update availability or current system status.
      *
-     * @return \Illuminate\Http\JsonResponse JSON response with update status
-     *
-     * @throws \Exception When version check fails
-     *
-     * @example
-     * // Check for updates:
-     * GET /admin/updates/check
-     *
-     * // Response:
-     * {
-     *     "success": true,
-     *     "data": {
-     *         "current_version": "1.0.0",
-     *         "latest_version": "1.0.1",
-     *         "is_update_available": true
-     *     }
-     * }
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function checkUpdates()
     {
         try {
             $versionStatus = VersionHelper::getVersionStatus();
 
-            return response()->json([
-                'success' => true,
-                'data' => $versionStatus,
-            ]);
+            if ($versionStatus['is_update_available']) {
+                $message = "Update available! Current version: {$versionStatus['current_version']}, "
+                    . "Latest version: {$versionStatus['latest_version']}";
+
+                return redirect()->back()->with('success', $message);
+            }
+
+            $message = "System is up to date. Current version: {$versionStatus['current_version']}";
+
+            return redirect()->back()->with('info', $message);
         } catch (\Exception $e) {
             Log::error('Update check failed', [
                 'user_id' => auth()->id(),
@@ -142,10 +161,9 @@ class UpdateController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to check for updates: ' . $e->getMessage(),
-            ], 500);
+            return redirect()->back()->with('error',
+                'Failed to check for updates: ' . $e->getMessage()
+            );
         }
     }
 
@@ -157,28 +175,9 @@ class UpdateController extends Controller
      *
      * @param  SystemUpdateRequest  $request  The validated request containing update data
      *
-     * @return \Illuminate\Http\JsonResponse JSON response with update result
+     * @return \Illuminate\Http\RedirectResponse Redirect response with flash message
      *
      * @throws \Exception When update process fails
-     *
-     * @example
-     * // Update system:
-     * POST /admin/updates/update
-     * {
-     *     "version": "1.0.1",
-     *     "confirm": true
-     * }
-     *
-     * // Response:
-     * {
-     *     "success": true,
-     *     "message": "System updated successfully from 1.0.0 to 1.0.1",
-     *     "data": {
-     *         "from_version": "1.0.0",
-     *         "to_version": "1.0.1",
-     *         "steps_completed": ["backup created", "migrations run", "caches cleared"]
-     *     }
-     * }
      */
     public function update(SystemUpdateRequest $request)
     {
@@ -187,52 +186,49 @@ class UpdateController extends Controller
             $validated = $request->validated();
             $targetVersion = is_string($validated['version']) ? $validated['version'] : '';
             $currentVersion = VersionHelper::getCurrentVersion();
+
             // Validate version format
             if (! VersionHelper::isValidVersion($targetVersion)) {
                 DB::rollBack();
 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid version format. Please use semantic versioning (e.g., 1.0.2).',
-                ], 400);
+                return redirect()->back()->with('error',
+                    'Invalid version format. Please use semantic versioning (e.g., 1.0.2).'
+                );
             }
+
             // Check if target version is newer than current
             $targetVersionStr = $targetVersion;
             $currentVersionStr = $currentVersion;
             if (VersionHelper::compareVersions($targetVersionStr, $currentVersionStr) <= 0) {
                 DB::rollBack();
 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Target version must be newer than current version. Current: '
-                        . $currentVersionStr . ', Target: ' . $targetVersionStr,
-                ], 400);
+                return redirect()->back()->with('error',
+                    'Target version must be newer than current version. Current: '
+                    . $currentVersionStr . ', Target: ' . $targetVersionStr
+                );
             }
+
             // Check if target version exists in version.json
             $versionInfo = VersionHelper::getVersionInfo($targetVersionStr);
             if (empty($versionInfo)) {
                 DB::rollBack();
 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Target version not found in version registry.',
-                ], 400);
+                return redirect()->back()->with('error',
+                    'Target version not found in version registry.'
+                );
             }
+
             // Perform update steps
             $updateSteps = $this->performUpdate($targetVersionStr, $currentVersionStr);
+
             // Update version in database
             VersionHelper::updateVersion($targetVersionStr);
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'System updated successfully from ' . $currentVersionStr . ' to ' . $targetVersionStr,
-                'data' => [
-                    'from_version' => $currentVersion,
-                    'to_version' => $targetVersion,
-                    'steps_completed' => $updateSteps,
-                ],
-            ]);
+            return redirect()->route('admin.updates.index')->with('success',
+                'System updated successfully from ' . $currentVersionStr
+                . ' to ' . $targetVersionStr
+            );
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('System update failed', [
@@ -242,10 +238,9 @@ class UpdateController extends Controller
                 'request_data' => $request->except(['confirm']),
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Update failed: ' . $e->getMessage(),
-            ], 500);
+            return redirect()->back()->with('error',
+                'Update failed: ' . $e->getMessage()
+            );
         }
     }
 
@@ -472,28 +467,9 @@ class UpdateController extends Controller
      *
      * @param  SystemUpdateRequest  $request  The validated request containing rollback data
      *
-     * @return \Illuminate\Http\JsonResponse JSON response with rollback result
+     * @return \Illuminate\Http\RedirectResponse Redirect response with flash message
      *
      * @throws \Exception When rollback process fails
-     *
-     * @example
-     * // Rollback system:
-     * POST /admin/updates/rollback
-     * {
-     *     "version": "1.0.0",
-     *     "confirm": true
-     * }
-     *
-     * // Response:
-     * {
-     *     "success": true,
-     *     "message": "System rolled back successfully from 1.0.1 to 1.0.0",
-     *     "data": {
-     *         "from_version": "1.0.1",
-     *         "to_version": "1.0.0",
-     *         "steps_completed": ["backup restored", "version updated", "caches cleared"]
-     *     }
-     * }
      */
     public function rollback(SystemUpdateRequest $request)
     {
@@ -502,36 +478,35 @@ class UpdateController extends Controller
             $validated = $request->validated();
             $targetVersion = is_string($validated['version']) ? $validated['version'] : '';
             $currentVersion = VersionHelper::getCurrentVersion();
+
             // Validate version format
             if (! VersionHelper::isValidVersion($targetVersion)) {
                 DB::rollBack();
 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid version format.',
-                ], 400);
+                return redirect()->back()->with('error', 'Invalid version format.');
             }
+
             // Check if target version is older than current
             $targetVersionStr = $targetVersion;
             $currentVersionStr = $currentVersion;
             if (VersionHelper::compareVersions($targetVersionStr, $currentVersionStr) >= 0) {
                 DB::rollBack();
 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Target version must be older than current version for rollback.',
-                ], 400);
+                return redirect()->back()->with('error',
+                    'Target version must be older than current version for rollback.'
+                );
             }
+
             // Check if backup exists for target version
             $backupPath = $this->findBackupForVersion($targetVersionStr);
             if (! $backupPath) {
                 DB::rollBack();
 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No backup found for version ' . $targetVersionStr . '. Rollback not possible.',
-                ], 400);
+                return redirect()->back()->with('error',
+                    'No backup found for version ' . $targetVersionStr . '. Rollback not possible.'
+                );
             }
+
             // Perform rollback
             $rollbackSteps = $this->performRollback($targetVersionStr, $currentVersionStr, $backupPath);
             DB::commit();
@@ -542,15 +517,9 @@ class UpdateController extends Controller
                 'backup_used' => basename($backupPath),
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'System rolled back successfully from ' . $currentVersion . ' to ' . $targetVersion,
-                'data' => [
-                    'from_version' => $currentVersion,
-                    'to_version' => $targetVersion,
-                    'steps_completed' => $rollbackSteps,
-                ],
-            ]);
+            return redirect()->route('admin.updates.index')->with('success',
+                'System rolled back successfully from ' . $currentVersion . ' to ' . $targetVersion
+            );
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('System rollback failed', [
@@ -560,10 +529,9 @@ class UpdateController extends Controller
                 'request_data' => $request->except(['confirm']),
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Rollback failed: ' . $e->getMessage(),
-            ], 500);
+            return redirect()->back()->with('error',
+                'Rollback failed: ' . $e->getMessage()
+            );
         }
     }
 
@@ -620,28 +588,9 @@ class UpdateController extends Controller
      *
      * @param  UploadUpdatePackageRequest  $request  The validated request containing file data
      *
-     * @return \Illuminate\Http\JsonResponse JSON response with upload result
+     * @return \Illuminate\Http\RedirectResponse Redirect response with flash message
      *
      * @throws \Exception When upload or processing fails
-     *
-     * @example
-     * // Upload update package:
-     * POST /admin/updates/upload-package
-     * Content-Type: multipart/form-data
-     *
-     * // Form data:
-     * // update_package: [ZIP file]
-     *
-     * // Response:
-     * {
-     *     "success": true,
-     *     "message": "Update package uploaded and processed successfully.",
-     *     "data": {
-     *         "filename": "update_2024-01-15_10-30-00.zip",
-     *         "path": "updates/update_2024-01-15_10-30-00.zip",
-     *         "processed_data": {...}
-     *     }
-     * }
      */
     public function uploadUpdatePackage(UploadUpdatePackageRequest $request)
     {
@@ -656,32 +605,26 @@ class UpdateController extends Controller
             $filename = 'update_' . date('Y-m-d_H-i-s') . '.zip';
             $filePath = $file->storeAs('updates', $filename);
             $fullPath = storage_path('app/' . $filePath);
+
             // Process the update package
             $updateService = new UpdatePackageService();
             $processResult = $updateService->processUpdatePackage($fullPath);
             if ($processResult['success']) {
                 DB::commit();
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Update package uploaded and processed successfully.',
-                    'data' => [
-                        'filename' => $filename,
-                        'path' => $filePath,
-                        'processed_data' => $processResult['data'],
-                    ],
-                ]);
+                return redirect()->route('admin.updates.index')->with('success',
+                    'Update package uploaded and processed successfully.'
+                );
             } else {
                 DB::rollBack();
 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Update package uploaded but processing failed: ' . (
+                return redirect()->back()->with('error',
+                    'Update package uploaded but processing failed: ' . (
                         is_string($processResult['message'] ?? null)
                             ? $processResult['message']
                             : 'Unknown error'
-                    ),
-                ], 422);
+                    )
+                );
             }
         } catch (\Exception $e) {
             DB::rollBack();
@@ -691,10 +634,9 @@ class UpdateController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to upload update package: ' . $e->getMessage(),
-            ], 500);
+            return redirect()->back()->with('error',
+                'Failed to upload update package: ' . $e->getMessage()
+            );
         }
     }
 
@@ -900,50 +842,31 @@ class UpdateController extends Controller
                         if ($updateResult['success']) {
                             DB::commit();
 
-                            return response()->json([
-                                'success' => true,
-                                'message' => 'Auto update completed successfully! System updated to version '
-                                    . (is_string($nextVersion) ? $nextVersion : ''),
-                                'data' => [
-                                    'update_available' => $isUpdateAvailable,
-                                    'current_version' => $currentVersion,
-                                    'target_version' => $nextVersion,
-                                    'update_result' => $updateResult,
-                                    'files_installed' => (is_array($updateResult['data'] ?? null)
-                                        && isset($updateResult['data']['files_installed']))
-                                        ? $updateResult['data']['files_installed']
-                                        : 0,
-                                ],
-                            ]);
+                            return redirect()->route('admin.updates.index')->with('success',
+                                'Auto update completed successfully! System updated to version ' . (is_string($nextVersion) ? $nextVersion : '')
+                            );
                         } else {
                             DB::rollBack();
 
-                            return response()->json([
-                                'success' => false,
-                                'message' => 'Auto update failed: ' . (
+                            return redirect()->back()->with('error',
+                                'Auto update failed: ' . (
                                     is_string($updateResult['message'] ?? null)
                                         ? $updateResult['message']
                                         : 'Unknown error'
-                                ),
-                                'error_code' => $updateResult['error_code'] ?? 'UPDATE_FAILED',
-                            ], 500);
+                                )
+                            );
                         }
                     }
                 }
                 DB::commit();
 
-                return response()->json([
-                    'success' => true,
-                    'data' => $updateData['data'],
-                ]);
+                return redirect()->route('admin.updates.index')->with('info', 'No updates available. System is up to date.');
             } else {
                 DB::rollBack();
 
-                return response()->json([
-                    'success' => false,
-                    'message' => $updateData['message'] ?? 'Failed to check for updates',
-                    'error_code' => $updateData['error_code'] ?? 'UNKNOWN_ERROR',
-                ], 403);
+                return redirect()->back()->with('error',
+                    $updateData['message'] ?? 'Failed to check for updates'
+                );
             }
         } catch (\Exception $e) {
             DB::rollBack();
@@ -954,11 +877,9 @@ class UpdateController extends Controller
                 'request_data' => $request->except(['license_key']),
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while checking for updates: ' . $e->getMessage(),
-                'error_code' => 'SERVER_ERROR',
-            ], 500);
+            return redirect()->back()->with('error',
+                'An error occurred while checking for updates: ' . $e->getMessage()
+            );
         }
     }
 
@@ -1250,12 +1171,9 @@ class UpdateController extends Controller
                 'request_data' => $request->except(['license_key']),
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while installing update',
-                'error_detail' => $e->getMessage(), // security-ignore: SQL_STRING_CONCAT
-                'error_code' => 'SERVER_ERROR',
-            ], 500);
+            return redirect()->back()->with('error',
+                'An error occurred while installing update: ' . $e->getMessage()
+            );
         }
     }
     /**
