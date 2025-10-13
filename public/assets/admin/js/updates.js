@@ -3,6 +3,44 @@
  * Handles update checking, installation, and rollback functionality
  */
 
+/* global bootstrap, console, document, window, FormData, showAlert, fetch, setTimeout, confirm */
+
+// Security utilities for safe HTML handling
+const SecurityUtils = {
+  safeInnerHTML: (element, html, allowHTML = false, sanitize = true) => {
+    if (!element) return;
+
+    if (!allowHTML || !sanitize) {
+      element.textContent = html.replace(/<[^>]*>/g, '');
+      return;
+    }
+
+    // Basic sanitization for safe HTML
+    const sanitized = html
+      .replace(/<script[^>]*>.*?<\/script>/gi, '')
+      .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+\s*=/gi, '');
+
+    element.innerHTML = sanitized;
+  }
+};
+
+// Bootstrap Modal check
+if (typeof bootstrap === 'undefined') {
+  console.warn('Bootstrap is not loaded. Some modal functionality may not work.');
+  // Create a simple fallback
+  window.bootstrap = {
+    Modal: function (element) {
+      return {
+        show: () => console.log('Modal show fallback'),
+        hide: () => console.log('Modal hide fallback')
+      };
+    }
+  };
+  bootstrap.Modal.getInstance = () => ({ hide: () => { } });
+}
+
 // Helper functions to reduce code duplication
 const UpdateHelpers = {
   // Handle common error scenarios
@@ -30,8 +68,9 @@ const UpdateHelpers = {
 
   // Show loading state
   showLoading: (btn, loadingText = 'Loading...') => {
-    UpdateHelpers.showLoading(btn, 'Processing...');
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
+    if (!btn) return;
+    btn.disabled = true;
+    SecurityUtils.safeInnerHTML(btn, `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`, true, true);
   },
 
   // Validate form data
@@ -48,6 +87,30 @@ const UpdateHelpers = {
         formData.append(key, data[key]);
       }
     });
+    return formData;
+  },
+
+  // Handle API response consistently
+  handleApiResponse: (data, successMessage, errorMessage) => {
+    if (data && data.success) {
+      showAlert('success', successMessage || data.message);
+      return true;
+    } else {
+      showAlert('error', errorMessage || data.message || 'Operation failed');
+      return false;
+    }
+  },
+
+  // Sanitize text to prevent XSS
+  sanitizeText: (text) => {
+    if (!text) return '';
+    return String(text).replace(/[<>&"']/g, match => ({
+      '<': '&lt;',
+      '>': '&gt;',
+      '&': '&amp;',
+      '"': '&quot;',
+      '\'': '&#x27;'
+    }[match]));
     return formData;
   },
 
@@ -73,14 +136,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Update system button
   document
     .getElementById('update-system-btn')
-    .addEventListener('click', function() {
+    .addEventListener('click', function () {
       const { version } = this.dataset;
       showUpdateModal(version);
     });
   // Confirm update checkbox
   document
     .getElementById('confirmUpdate')
-    .addEventListener('change', function() {
+    .addEventListener('change', function () {
       document.getElementById('confirm-update-btn').disabled = !this.checked;
     });
   // Confirm update button
@@ -99,13 +162,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Confirm rollback checkbox
   document
     .getElementById('confirmRollback')
-    .addEventListener('change', function() {
+    .addEventListener('change', function () {
       document.getElementById('confirm-rollback-btn').disabled = !this.checked;
     });
   // Confirm rollback button
   document
     .getElementById('confirm-rollback-btn')
-    .addEventListener('click', function() {
+    .addEventListener('click', function () {
       const { version } = this.dataset;
       performRollback(version);
     });
@@ -162,13 +225,8 @@ function showUpdateModal(version) {
 function performUpdate(version) {
   const btn = document.getElementById('confirm-update-btn');
   const originalText = btn.innerHTML;
-  // Use SecurityUtils for safe HTML insertion
-  if (typeof SecurityUtils !== 'undefined') {
-    SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Updating...', true, true);
-  } else {
-    btn.textContent = 'Updating...';
-  }
-  UpdateHelpers.showLoading(btn, 'Processing...');
+
+  UpdateHelpers.showLoading(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Updating...');
   // eslint-disable-next-line promise/catch-or-return
   fetch(window.location.href, {
     method: 'POST',
@@ -197,13 +255,7 @@ function performUpdate(version) {
       showAlert('error', 'An error occurred during update');
     })
     .finally(() => {
-      // Use SecurityUtils for safe HTML restoration
-      if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(btn, originalText, true, true);
-      } else {
-        btn.textContent = originalText;
-      }
-      btn.disabled = false;
+      UpdateHelpers.restoreButton(btn, originalText);
       bootstrap.Modal.getInstance(
         document.getElementById('updateModal'),
       ).hide();
@@ -216,41 +268,21 @@ function showVersionDetails(version) {
     .then(data => {
       if (data.success) {
         // Sanitize version to prevent XSS
-        const sanitizedVersion = version.replace(/[<>&"']/g, match => ({
-          '<': '&lt;',
-          '>': '&gt;',
-          '&': '&amp;',
-          '"': '&quot;',
-          '\'': '&#x27;',
-        }[match]));
+        const sanitizedVersion = UpdateHelpers.sanitizeText(version);
         // Use SecurityUtils for safe HTML insertion
         const titleElement = document.getElementById('versionDetailsTitle');
-        if (typeof SecurityUtils !== 'undefined') {
-          SecurityUtils.safeInnerHTML(titleElement, 
-            `<i class="fas fa-info-circle me-2"></i>Version Details - ${sanitizedVersion}`, 
-            true, 
-            true
-          );
-        } else {
-          titleElement.textContent = `Version Details - ${sanitizedVersion}`;
-        }
+        SecurityUtils.safeInnerHTML(titleElement, 
+          `<i class="fas fa-info-circle me-2"></i>Version Details - ${sanitizedVersion}`, 
+          true, 
+          true
+        );
         let content = '<div class="version-details">';
         if (data.data.info.features && data.data.info.features.length > 0) {
           content +=
             '<h6 class="text-success mb-3"><i class="fas fa-plus me-2"></i>New Features</h6>';
           content += '<ul class="list-group list-group-flush mb-4">';
           data.data.info.features.forEach(feature => {
-            // Sanitize feature to prevent XSS
-            const sanitizedFeature = feature.replace(
-              /[<>&"']/g,
-              match => ({
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                '\'': '&#x27;',
-              }[match]),
-            );
+            const sanitizedFeature = UpdateHelpers.sanitizeText(feature);
             content += `<li class="list-group-item"><i class="fas fa-check text-success me-2"></i>${sanitizedFeature}</li>`;
           });
           content += '</ul>';
@@ -260,14 +292,7 @@ function showVersionDetails(version) {
             '<h6 class="text-warning mb-3"><i class="fas fa-wrench me-2"></i>Bug Fixes</h6>';
           content += '<ul class="list-group list-group-flush mb-4">';
           data.data.info.fixes.forEach(fix => {
-            // Sanitize fix to prevent XSS
-            const sanitizedFix = fix.replace(/[<>&"']/g, match => ({
-              '<': '&lt;',
-              '>': '&gt;',
-              '&': '&amp;',
-              '"': '&quot;',
-              '\'': '&#x27;',
-            }[match]));
+            const sanitizedFix = UpdateHelpers.sanitizeText(fix);
             content += `<li class="list-group-item"><i class="fas fa-check text-warning me-2"></i>${sanitizedFix}</li>`;
           });
           content += '</ul>';
@@ -280,17 +305,7 @@ function showVersionDetails(version) {
             '<h6 class="text-info mb-3"><i class="fas fa-arrow-up me-2"></i>Improvements</h6>';
           content += '<ul class="list-group list-group-flush mb-4">';
           data.data.info.improvements.forEach(improvement => {
-            // Sanitize improvement to prevent XSS
-            const sanitizedImprovement = improvement.replace(
-              /[<>&"']/g,
-              match => ({
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                '\'': '&#x27;',
-              }[match]),
-            );
+            const sanitizedImprovement = UpdateHelpers.sanitizeText(improvement);
             content += `<li class="list-group-item"><i class="fas fa-check text-info me-2"></i>${sanitizedImprovement}</li>`;
           });
           content += '</ul>';
@@ -300,17 +315,7 @@ function showVersionDetails(version) {
             '<h6 class="text-primary mb-3"><i class="fas fa-list me-2"></i>Update Instructions</h6>';
           content += '<ul class="list-group list-group-flush">';
           data.data.instructions.forEach(instruction => {
-            // Sanitize instruction to prevent XSS
-            const sanitizedInstruction = instruction.replace(
-              /[<>&"']/g,
-              match => ({
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                '\'': '&#x27;',
-              }[match]),
-            );
+            const sanitizedInstruction = UpdateHelpers.sanitizeText(instruction);
             content += `<li class="list-group-item"><i class="fas fa-arrow-right text-primary me-2"></i>${sanitizedInstruction}</li>`;
           });
           content += '</ul>';
@@ -318,11 +323,7 @@ function showVersionDetails(version) {
         content += '</div>';
         // Use SecurityUtils for safe HTML insertion
         const contentElement = document.getElementById('versionDetailsContent');
-        if (typeof SecurityUtils !== 'undefined') {
-          SecurityUtils.safeInnerHTML(contentElement, content, true, true);
-        } else {
-          contentElement.textContent = 'Version details loaded';
-        }
+        SecurityUtils.safeInnerHTML(contentElement, content, true, true);
         const modal = new bootstrap.Modal(
           document.getElementById('versionDetailsModal'),
         );
@@ -437,16 +438,28 @@ function displayUpdateInfo(updateData) {
     updateData.update_info.title || 'Update';
   document.getElementById('update-version').textContent =
     updateData.latest_version;
-  document.getElementById('update-major').innerHTML = updateData.update_info
-    .is_major ?
-    '<span class="badge bg-warning">Yes</span>' :
-    '<span class="badge bg-info">No</span>';
-  document.getElementById('update-required').innerHTML = updateData.update_info
-    .is_required ?
-    '<span class="badge bg-danger">Yes</span>' :
-    '<span class="badge bg-success">No</span>';
-  document.getElementById('update-status').innerHTML =
-    '<span class="badge bg-success">Available</span>';
+  SecurityUtils.safeInnerHTML(
+    document.getElementById('update-major'), 
+    updateData.update_info.is_major ?
+      '<span class="badge bg-warning">Yes</span>' :
+      '<span class="badge bg-info">No</span>',
+    true,
+    true
+  );
+  SecurityUtils.safeInnerHTML(
+    document.getElementById('update-required'),
+    updateData.update_info.is_required ?
+      '<span class="badge bg-danger">Yes</span>' :
+      '<span class="badge bg-success">No</span>',
+    true,
+    true
+  );
+  SecurityUtils.safeInnerHTML(
+    document.getElementById('update-status'),
+    '<span class="badge bg-success">Available</span>',
+    true,
+    true
+  );
   document.getElementById('update-release-date').textContent =
     updateData.update_info.release_date || 'Not specified';
   document.getElementById('update-file-size').textContent = formatFileSize(
@@ -463,25 +476,15 @@ function displayUpdateInfo(updateData) {
   ) {
     // Sanitize changelog items to prevent XSS
     const sanitizedChangelog = updateData.update_info.changelog.map(item => {
-      const sanitizedItem = item.replace(/[<>&"']/g, match => ({
-        '<': '&lt;',
-        '>': '&gt;',
-        '&': '&amp;',
-        '"': '&quot;',
-        '\'': '&#x27;',
-      }[match]));
+      const sanitizedItem = UpdateHelpers.sanitizeText(item);
       return `<li><i class="fas fa-check text-success me-2"></i>${sanitizedItem}</li>`;
     });
     // Use SecurityUtils for safe HTML insertion
-    if (typeof SecurityUtils !== 'undefined') {
-      SecurityUtils.safeInnerHTML(changelogElement, 
-        `<ul class="list-unstyled">${sanitizedChangelog.join('')}</ul>`, 
-        true, 
-        true
-      );
-    } else {
-      changelogElement.textContent = 'Changelog loaded';
-    }
+    SecurityUtils.safeInnerHTML(changelogElement,
+      `<ul class="list-unstyled">${sanitizedChangelog.join('')}</ul>`,
+      true,
+      true
+    );
   } else {
     changelogElement.textContent = 'No changelog available';
   }
@@ -829,7 +832,7 @@ function showAlert(type, message) {
         window.toastManager.error(message, null, 5000);
         break;
       case 'info':
-        default:
+      default:
         window.toastManager.info(message, null, 5000);
         break;
     }
@@ -896,13 +899,13 @@ function loadVersionHistory() {
       } else {
         // Use SecurityUtils for safe HTML insertion
         if (typeof SecurityUtils !== 'undefined') {
-          SecurityUtils.safeInnerHTML(content, 
+          SecurityUtils.safeInnerHTML(content,
             `<div class="text-center py-4">
                 <i class="fas fa-info-circle text-muted fs-1 mb-3"></i>
                 <h5 class="text-muted">No Version History Available</h5>
                 <p class="text-muted">Version information will appear here</p>
-            </div>`, 
-            false, 
+            </div>`,
+            false,
             true
           );
         } else {
@@ -919,13 +922,13 @@ function loadVersionHistory() {
       console.error('Error loading version history:', error);
       const content = document.getElementById('version-history-content');
       if (typeof SecurityUtils !== 'undefined') {
-        SecurityUtils.safeInnerHTML(content, 
+        SecurityUtils.safeInnerHTML(content,
           `<div class="text-center py-4">
               <i class="fas fa-exclamation-triangle text-warning fs-1 mb-3"></i>
               <h5 class="text-warning">Error loading version history</h5>
               <p class="text-muted">Please try again later</p>
-          </div>`, 
-          false, 
+          </div>`,
+          false,
           true
         );
       } else {
