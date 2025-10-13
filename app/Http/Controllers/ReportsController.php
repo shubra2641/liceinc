@@ -718,35 +718,9 @@ class ReportsController extends Controller
             $file = fopen('php://output', 'w');
             if ($file !== false) {
                 // CSV headers
-                fputcsv($file, ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price']);
-            // CSV data
-                if (is_array($data['licenses'])) {
-                    foreach ($data['licenses'] as $license) {
-                        if (is_object($license) && isset($license->license_key)) {
-                            $csvData = [
-                            is_string($license->license_key) ? $license->license_key : '',
-                            (isset($license->product) && is_object($license->product) &&
-                                isset($license->product->name)) ? $license->product->name : 'N/A',
-                            (isset($license->user) && is_object($license->user) &&
-                                isset($license->user->name)) ? $license->user->name : 'N/A',
-                            (isset($license->status) && is_string($license->status)) ? $license->status : '',
-                            (isset($license->created_at) && is_object($license->created_at) &&
-                                method_exists($license->created_at, 'format')) ?
-                                $license->created_at->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->license_expires_at) && is_object($license->license_expires_at) &&
-                                method_exists($license->license_expires_at, 'format')) ?
-                                $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->product) && is_object($license->product) &&
-                                isset($license->product->price)) ? $license->product->price : '0',
-                            ];
-                            /**
- * @var array<int|string, bool|float|int|string|null> $typedCsvData
-*/
-                            $typedCsvData = $csvData;
-                            fputcsv($file, $typedCsvData);
-                        }
-                    }
-                }
+                fputcsv($file, $this->getCsvHeaders());
+                // CSV data
+                $this->processLicenseDataForCsv($data['licenses'], $file);
                 SecureFileHelper::closeFile($file);
             }
         };
@@ -775,37 +749,66 @@ class ReportsController extends Controller
             if ($file !== false) {
                 // For now, just output CSV content as PDF placeholder
                 // In production, use a proper PDF library like dompdf
-                fputcsv($file, ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price']);
-                if (is_array($data['licenses'])) {
-                    foreach ($data['licenses'] as $license) {
-                        if (is_object($license) && isset($license->license_key)) {
-                            $csvData = [
-                            is_string($license->license_key) ? $license->license_key : '',
-                            (isset($license->product) && is_object($license->product) &&
-                                isset($license->product->name)) ? $license->product->name : 'N/A',
-                            (isset($license->user) && is_object($license->user) &&
-                                isset($license->user->name)) ? $license->user->name : 'N/A',
-                            (isset($license->status) && is_string($license->status)) ? $license->status : '',
-                            (isset($license->created_at) && is_object($license->created_at) &&
-                                method_exists($license->created_at, 'format')) ?
-                                $license->created_at->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->license_expires_at) && is_object($license->license_expires_at) &&
-                                method_exists($license->license_expires_at, 'format')) ?
-                                $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
-                            (isset($license->product) && is_object($license->product) &&
-                                isset($license->product->price)) ? $license->product->price : '0',
-                            ];
-                            /**
- * @var array<int|string, bool|float|int|string|null> $typedCsvData
-*/
-                            $typedCsvData = $csvData;
-                            fputcsv($file, $typedCsvData);
-                        }
-                    }
-                }
+                fputcsv($file, $this->getCsvHeaders());
+                $this->processLicenseDataForCsv($data['licenses'], $file);
                 SecureFileHelper::closeFile($file);
             }
         };
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Generate CSV headers for export.
+     *
+     * @return array<string>
+     */
+    private function getCsvHeaders(): array
+    {
+        return ['License Key', 'Product', 'User', 'Status', 'Created At', 'Expires At', 'Price'];
+    }
+
+    /**
+     * Process license data for CSV export.
+     *
+     * @param array $licenses
+     * @return void
+     */
+    private function processLicenseDataForCsv(array $licenses, $file): void
+    {
+        if (is_array($licenses)) {
+            foreach ($licenses as $license) {
+                if (is_object($license) && isset($license->license_key)) {
+                    $csvData = $this->formatLicenseDataForCsv($license);
+                    $typedCsvData = $csvData;
+                    fputcsv($file, $typedCsvData);
+                }
+            }
+        }
+    }
+
+    /**
+     * Format license data for CSV export.
+     *
+     * @param object $license
+     * @return array<string|int|float>
+     */
+    private function formatLicenseDataForCsv($license): array
+    {
+        return [
+            is_string($license->license_key) ? $license->license_key : '',
+            (isset($license->product) && is_object($license->product) &&
+                isset($license->product->name)) ? $license->product->name : 'N/A',
+            (isset($license->user) && is_object($license->user) &&
+                isset($license->user->name)) ? $license->user->name : 'N/A',
+            (isset($license->status) && is_string($license->status)) ? $license->status : '',
+            (isset($license->created_at) && is_object($license->created_at) &&
+                method_exists($license->created_at, 'format')) ?
+                $license->created_at->format('Y-m-d H:i:s') : 'N/A',
+            (isset($license->license_expires_at) && is_object($license->license_expires_at) &&
+                method_exists($license->license_expires_at, 'format')) ?
+                $license->license_expires_at->format('Y-m-d H:i:s') : 'N/A',
+            (isset($license->product) && is_object($license->product) &&
+                isset($license->product->price)) ? $license->product->price : '0',
+        ];
     }
 }

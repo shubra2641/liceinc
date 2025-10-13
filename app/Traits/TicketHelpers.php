@@ -300,6 +300,57 @@ trait TicketHelpers
     }
 
     /**
+     * Validate reply data.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return array
+     */
+    protected function validateReplyData(\Illuminate\Http\Request $request): array
+    {
+        return $request->validate([
+            'message' => ['required', 'string', 'min:1', 'max:10000'],
+            'action' => ['nullable', 'in:reply_and_close'],
+        ]);
+    }
+
+    /**
+     * Check if ticket should be closed based on request.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return bool
+     */
+    protected function shouldCloseTicket(\Illuminate\Http\Request $request): bool
+    {
+        return $request->input('action') === 'reply_and_close';
+    }
+
+    /**
+     * Check if user can modify the ticket.
+     *
+     * @param Ticket $ticket
+     * @return bool
+     */
+    protected function canModifyTicket(Ticket $ticket): bool
+    {
+        return Auth::id() === $ticket->user_id || Auth::user()?->hasRole('admin');
+    }
+
+    /**
+     * Check if user can view the ticket.
+     *
+     * @param Ticket $ticket
+     * @return bool
+     */
+    protected function canViewTicket(Ticket $ticket): bool
+    {
+        // Allow viewing if user owns the ticket or is admin
+        // For guest tickets (user_id is null), allow viewing
+        return !$ticket->user_id || // Guest ticket
+               Auth::id() === $ticket->user_id ||
+               Auth::user()?->hasRole('admin');
+    }
+
+    /**
      * Get tickets with pagination and filtering.
      *
      * @param array $filters

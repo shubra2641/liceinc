@@ -209,7 +209,7 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket): View
     {
-        return $this->handleTicketDisplay($ticket, 'tickets.show');
+        return $this->showTicket($ticket, 'tickets.show');
     }
     /**
      * Show the form for editing the specified ticket.
@@ -246,28 +246,7 @@ class TicketController extends Controller
      */
     public function update(Request $request, Ticket $ticket): RedirectResponse
     {
-        try {
-            if (!$this->canModifyTicket($ticket)) {
-                Log::warning('Unauthorized ticket modification attempt', [
-                    'user_id' => Auth::id(),
-                    'ticket_id' => $ticket->id,
-                    'ticket_user_id' => $ticket->user_id,
-                    'ip_address' => request()->ip(),
-                ]);
-                abort(403, 'Unauthorized access to modify ticket');
-            }
-
-            $validated = $this->validateTicketUpdateData($request);
-            return $this->handleTicketUpdate($ticket, $validated);
-        } catch (Exception $e) {
-            Log::error('Failed to update ticket: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
-                'ticket_id' => $ticket->id ?? null,
-                'request_data' => $request->all(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return back()->with('error', 'Failed to update ticket. Please try again.');
-        }
+        return $this->updateTicket($request, $ticket);
     }
     /**
      * Remove the specified ticket with enhanced security.
@@ -286,30 +265,7 @@ class TicketController extends Controller
      */
     public function destroy(Ticket $ticket): RedirectResponse
     {
-        try {
-            // Ticket is validated by type hint
-            if (! $this->canModifyTicket($ticket)) {
-                Log::warning('Unauthorized ticket deletion attempt', [
-                    'user_id' => Auth::id(),
-                    'ticket_id' => $ticket->id,
-                    'ticket_user_id' => $ticket->user_id,
-                    'ip_address' => request()->ip(),
-                ]);
-                abort(403, 'Unauthorized access to delete ticket');
-            }
-            DB::beginTransaction();
-            $ticket->delete();
-            DB::commit();
-            return redirect()->route('tickets.index')->with('success', 'Ticket deleted');
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to delete ticket: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
-                'ticket_id' => $ticket->id ?? null,
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return back()->with('error', 'Failed to delete ticket. Please try again.');
-        }
+        return $this->destroyTicket($ticket);
     }
     /**
      * Add a reply to the specified ticket with enhanced security.
@@ -334,47 +290,7 @@ class TicketController extends Controller
      */
     public function reply(Request $request, Ticket $ticket): RedirectResponse
     {
-        try {
-            // Request and ticket are validated by type hints
-            if (! $this->canModifyTicket($ticket)) {
-                Log::warning('Unauthorized ticket reply attempt', [
-                    'user_id' => Auth::id(),
-                    'ticket_id' => $ticket->id,
-                    'ticket_user_id' => $ticket->user_id,
-                    'ip_address' => request()->ip(),
-                ]);
-                abort(403, 'Unauthorized access to reply to ticket');
-            }
-            // Check if ticket is already closed
-            if ($ticket->status === 'closed') {
-                return back()->with('error', 'Cannot reply to a closed ticket');
-            }
-            $validated = $this->validateReplyData($request);
-            DB::beginTransaction();
-            // Create the reply
-            $reply = TicketReply::create([
-                'ticket_id' => $ticket->id,
-                'user_id' => Auth::id(),
-                'message' => $validated['message'],
-            ]);
-            // Handle closing the ticket
-            $shouldClose = $this->shouldCloseTicket($request);
-            $message = $shouldClose ? 'Reply added and ticket closed' : 'Reply added';
-            if ($shouldClose) {
-                $ticket->update(['status' => 'closed']);
-            }
-            DB::commit();
-            return back()->with('success', $message);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to add ticket reply: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
-                'ticket_id' => $ticket->id ?? null,
-                'request_data' => $request->all(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return back()->with('error', 'Failed to add reply. Please try again.');
-        }
+        return $this->replyToTicket($request, $ticket, false, true);
     }
     /**
      * Validate ticket creation data.
@@ -507,4 +423,3 @@ class TicketController extends Controller
     {
         return $ticket->user_id === Auth::id() || Auth::user()?->hasRole('admin');
     }
-}
