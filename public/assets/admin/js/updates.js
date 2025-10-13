@@ -112,7 +112,6 @@ function showUpdateModal(version) {
   document.getElementById('update-system-btn').dataset.version = version;
   document.getElementById('confirmUpdate').checked = false;
   document.getElementById('confirm-update-btn').disabled = true;
-
   const modal = new bootstrap.Modal(document.getElementById('updateModal'));
   modal.show();
 }
@@ -194,9 +193,7 @@ function showVersionDetails(version) {
         } else {
           titleElement.textContent = `Version Details - ${sanitizedVersion}`;
         }
-
         let content = '<div class="version-details">';
-
         if (data.data.info.features && data.data.info.features.length > 0) {
           content +=
             '<h6 class="text-success mb-3"><i class="fas fa-plus me-2"></i>New Features</h6>';
@@ -217,7 +214,6 @@ function showVersionDetails(version) {
           });
           content += '</ul>';
         }
-
         if (data.data.info.fixes && data.data.info.fixes.length > 0) {
           content +=
             '<h6 class="text-warning mb-3"><i class="fas fa-wrench me-2"></i>Bug Fixes</h6>';
@@ -235,7 +231,6 @@ function showVersionDetails(version) {
           });
           content += '</ul>';
         }
-
         if (
           data.data.info.improvements &&
           data.data.info.improvements.length > 0
@@ -259,7 +254,6 @@ function showVersionDetails(version) {
           });
           content += '</ul>';
         }
-
         if (data.data.instructions && data.data.instructions.length > 0) {
           content +=
             '<h6 class="text-primary mb-3"><i class="fas fa-list me-2"></i>Update Instructions</h6>';
@@ -288,7 +282,6 @@ function showVersionDetails(version) {
         } else {
           contentElement.textContent = 'Version details loaded';
         }
-
         const modal = new bootstrap.Modal(
           document.getElementById('versionDetailsModal'),
         );

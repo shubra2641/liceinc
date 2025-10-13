@@ -1,0 +1,12 @@
+[2025-10-13 16:12:20] local.ERROR: syntax error, unexpected character 0x00, expecting end of file {"exception":"[object] (ParseError(code: 0): syntax error, unexpected character 0x00, expecting end of file at D:\\xampp1\\htdocs\\my-logos\\app\\Console\\Commands\\SetupCronCommand.php:140)
+[stacktrace]
+#0 D:\\xampp1\\htdocs\\my-logos\\vendor\\composer\\ClassLoader.php(427): Composer\\Autoload\\{closure}('D:\\\\xampp1\\\\htdoc...')
+#1 [internal function]: Composer\\Autoload\\ClassLoader->loadClass('App\\\\Console\\\\Com...')
+#2 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(372): is_subclass_of('App\\\\Console\\\\Com...', 'Illuminate\\\\Cons...')
+#3 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(497): Illuminate\\Foundation\\Console\\Kernel->load(Array)
+#4 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(482): Illuminate\\Foundation\\Console\\Kernel->discoverCommands()
+#5 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(195): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
+#6 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#7 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#8 {main}
+"} 
