@@ -137,29 +137,15 @@ class InstallController extends Controller
     public function licenseStore(Request $request): RedirectResponse|JsonResponse
     {
         try {
-            // Validate input
-            $validationResult = $this->validationService->validateLicenseInput($request);
+            $validationResult = $this->validateLicenseInput($request);
             if (!$validationResult['valid']) {
-                $message = $validationResult['message'] ?? 'Validation failed';
-                return $this->validationService->handleValidationError(
-                    $request,
-                    is_string($message) ? $message : 'Validation failed'
-                );
+                return $this->handleValidationError($request, $validationResult['message']);
             }
 
-            // Verify license
-            $purchaseCode = $this->validationService->sanitizeInput($request->purchase_code);
-            $domain = $this->validationService->sanitizeInput($request->getHost());
-            $result = $this->licenseService->verifyLicense(
-                is_string($purchaseCode) ? $purchaseCode : '',
-                is_string($domain) ? $domain : ''
-            );
-
-            if ($result['valid']) {
-                return $this->handleSuccessfulVerification($request, $result);
-            } else {
-                return $this->handleFailedVerification($request, $result);
-            }
+            $result = $this->verifyLicense($request);
+            return $result['valid'] 
+                ? $this->handleSuccessfulVerification($request, $result)
+                : $this->handleFailedVerification($request, $result);
         } catch (\Exception $e) {
             return $this->handleVerificationException($request, $e);
         }
@@ -556,33 +542,10 @@ class InstallController extends Controller
      */
     private function runInstallationSteps(array $configs): void
     {
-        /**
- * @var array<string, mixed> $databaseConfig
-*/
-        $databaseConfig = is_array($configs['database']) ? $configs['database'] : [];
-        /**
-         * @var array<string, mixed> $settingsConfig
-         */
-        $settingsConfig = is_array($configs['settings']) ? $configs['settings'] : [];
-        $this->updateEnvFile($databaseConfig, $settingsConfig);
-
-        Artisan::call('migrate:fresh', ['--force' => true]);
-        $this->createRolesAndPermissions();
-        $this->installationService->runSeeders();
-        /**
-         * @var array<string, mixed> $adminData
-         */
-        $adminData = is_array($configs['admin']) ? $configs['admin'] : [];
-        /**
-         * @var array<string, mixed> $licenseConfig
-         */
-        $licenseConfig = is_array($configs['license']) ? $configs['license'] : [];
-        $this->userService->createAdminUser($adminData);
-        $this->createDefaultSettings($settingsConfig);
-        $this->installationService->storeLicenseInformation($licenseConfig);
-        $this->installationService->updateSessionDrivers();
-        $this->installationService->createStorageLink();
-        $this->installationService->createInstalledFile();
+        $this->setupDatabase($configs);
+        $this->runMigrations();
+        $this->createUserAndSettings($configs);
+        $this->finalizeInstallation($configs);
     }
 
     protected function successResponse(
@@ -903,5 +866,83 @@ class InstallController extends Controller
         }
         $connection = $this->testDatabaseConnection($request->all());
         return response()->json($connection);
+    }
+
+    /**
+     * Validate license input
+     */
+    private function validateLicenseInput(Request $request): array
+    {
+        return $this->validationService->validateLicenseInput($request);
+    }
+
+    /**
+     * Handle validation error
+     */
+    private function handleValidationError(Request $request, ?string $message): RedirectResponse|JsonResponse
+    {
+        return $this->validationService->handleValidationError(
+            $request,
+            is_string($message) ? $message : 'Validation failed'
+        );
+    }
+
+    /**
+     * Verify license
+     */
+    private function verifyLicense(Request $request): array
+    {
+        $purchaseCode = $this->validationService->sanitizeInput($request->purchase_code);
+        $domain = $this->validationService->sanitizeInput($request->getHost());
+        
+        return $this->licenseService->verifyLicense(
+            is_string($purchaseCode) ? $purchaseCode : '',
+            is_string($domain) ? $domain : ''
+        );
+    }
+
+    /**
+     * Setup database configuration
+     */
+    private function setupDatabase(array $configs): void
+    {
+        $databaseConfig = is_array($configs['database']) ? $configs['database'] : [];
+        $settingsConfig = is_array($configs['settings']) ? $configs['settings'] : [];
+        $this->updateEnvFile($databaseConfig, $settingsConfig);
+    }
+
+    /**
+     * Run database migrations
+     */
+    private function runMigrations(): void
+    {
+        Artisan::call('migrate:fresh', ['--force' => true]);
+        $this->createRolesAndPermissions();
+        $this->installationService->runSeeders();
+    }
+
+    /**
+     * Create user and settings
+     */
+    private function createUserAndSettings(array $configs): void
+    {
+        $adminData = is_array($configs['admin']) ? $configs['admin'] : [];
+        $settingsConfig = is_array($configs['settings']) ? $configs['settings'] : [];
+        
+        $this->userService->createAdminUser($adminData);
+        $this->createDefaultSettings($settingsConfig);
+    }
+
+    /**
+     * Finalize installation
+     */
+    private function finalizeInstallation(array $configs): void
+    {
+        $licenseConfig = is_array($configs['license']) ? $configs['license'] : [];
+        
+        $this->installationService->storeLicenseInformation($licenseConfig);
+        $this->installationService->updateSessionDrivers();
+        $this->installationService->createStorageLink();
+        $this->installationService->createInstalledFile();
     }
 }
