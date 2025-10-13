@@ -614,24 +614,37 @@ class InstallController extends Controller
     private function testDatabaseConnection($config)
     {
         try {
-            $dbHost = is_array($config) ? ($config['db_host'] ?? null) : null;
-            $dbPort = is_array($config) ? ($config['db_port'] ?? null) : null;
-            $dbName = is_array($config) ? ($config['db_name'] ?? null) : null;
-            $dbUsername = is_array($config) ? ($config['db_username'] ?? null) : null;
-            $dbPassword = is_array($config) ? ($config['db_password'] ?? null) : null;
-
-            $connection = new \PDO(
-                "mysql:host=" . (is_string($dbHost) ? $dbHost : '') .
-                ";port=" . (is_string($dbPort) ? $dbPort : '') .
-                ";dbname=" . (is_string($dbName) ? $dbName : ''),
-                is_string($dbUsername) ? $dbUsername : null,
-                is_string($dbPassword) ? $dbPassword : null,
-            );
-            $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $connectionParams = $this->buildConnectionParams($config);
+            $connection = $this->createPDOConnection($connectionParams);
             return ['success' => true, 'message' => 'Database connection successful'];
         } catch (\PDOException $e) {
             return ['success' => false, 'message' => $e->getMessage()];
         }
+    }
+
+    /**
+     * Build database connection parameters
+     */
+    private function buildConnectionParams($config): array
+    {
+        return [
+            'host' => is_array($config) ? ($config['db_host'] ?? '') : '',
+            'port' => is_array($config) ? ($config['db_port'] ?? '') : '',
+            'dbname' => is_array($config) ? ($config['db_name'] ?? '') : '',
+            'username' => is_array($config) ? ($config['db_username'] ?? '') : '',
+            'password' => is_array($config) ? ($config['db_password'] ?? '') : '',
+        ];
+    }
+
+    /**
+     * Create PDO connection
+     */
+    private function createPDOConnection(array $params): \PDO
+    {
+        $dsn = "mysql:host={$params['host']};port={$params['port']};dbname={$params['dbname']}";
+        $connection = new \PDO($dsn, $params['username'], $params['password']);
+        $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        return $connection;
     }
     /**
      * Update .env file.
