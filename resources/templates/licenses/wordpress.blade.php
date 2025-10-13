@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace App\License;
 
 if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
+    return; // Exit if accessed directly
 }
 
 class WP_LicenseVerifier
