@@ -557,7 +557,7 @@ class UpdateController extends Controller
                 ];
             }
             // Check if can update to this version (prevents downgrading)
-            if (! VersionHelper::canUpdateToVersion($version)) {
+        if (! VersionHelper::canUpdateToVersion($version)) {
                 $currentVersion = VersionHelper::getCurrentVersion();
 
                 return [
@@ -572,7 +572,7 @@ class UpdateController extends Controller
             }
             // Download update file
             $downloadResult = $this->licenseServerService->downloadUpdate($licenseKey, $version, $productSlug, $domain);
-            if (! $downloadResult['success']) {
+        if (! $downloadResult['success']) {
                 Log::error('Failed to download update package', [
                     'user_id' => auth()->id(),
                     'version' => $version,
@@ -727,7 +727,7 @@ class UpdateController extends Controller
             $updateData = $this->licenseServerService->checkUpdates(
                 $licenseKey, '1.0.0', 'the-ultimate-license-management-system', $domain
             );
-            if (! $updateData['success']) {
+        if (! $updateData['success']) {
                 DB::rollBack();
                 return response()->json([
                     'success' => false,
@@ -828,17 +828,17 @@ class UpdateController extends Controller
             $currentVersion = VersionHelper::getCurrentVersion();
             $latestVersionData = $this->licenseServerService->getUpdateInfo($productSlug, $currentVersion);
 
-            if ($latestVersionData['success']) {
+        if ($latestVersionData['success']) {
                 $data = $latestVersionData['data'];
                 $isUpdateAvailable = $data['is_update_available'] ?? false;
                 $nextVersion = (is_array($data) && isset($data['next_version'])) ? $data['next_version'] : null;
                 // Additional validation: Check if next version is actually newer than current
-                if ($isUpdateAvailable && $nextVersion) {
+        if ($isUpdateAvailable && $nextVersion) {
                     $nextVersionStr = is_string($nextVersion) ? $nextVersion : '';
                     $versionComparison = VersionHelper::compareVersions($nextVersionStr, $currentVersion);
                     // Version comparison check completed
                     // If next version is not newer, treat as no update available
-                    if ($versionComparison <= 0) {
+            if ($versionComparison <= 0) {
                         // Next version is not newer than current - hiding update
                         $isUpdateAvailable = false;
                     }
@@ -851,7 +851,7 @@ class UpdateController extends Controller
                         'next_version' => $nextVersion,
                         'update_info' => (is_array($data) && isset($data['update_info'])) ? $data['update_info'] : [],
                     ];
-                } else {
+    } else {
                     // No update available or update is older
                     return [
                         'is_update_available' => false,
@@ -891,7 +891,7 @@ class UpdateController extends Controller
             // Get all products from central API
             $productsData = $this->licenseServerService->getProducts();
 
-            if ($productsData['success']) {
+        if ($productsData['success']) {
                 $allProducts = $productsData['data']['products'] ?? [];
                 $specificProduct = array_filter($allProducts, fn($product) => $product['slug'] === $productSlug);
                 return array_values($specificProduct)[0] ?? [];
@@ -915,7 +915,7 @@ class UpdateController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getCurrentVersionFromDatabase()
+public function getCurrentVersionFromDatabase()
     {
         try {
             $currentVersion = VersionHelper::getCurrentVersion();
@@ -1053,7 +1053,7 @@ class UpdateController extends Controller
 
             $latestData = $this->licenseServerService->getLatestVersion($licenseKey, $productSlug, $domain);
 
-            if ($latestData['success']) {
+        if ($latestData['success']) {
                 return response()->json(['success' => true, 'data' => $latestData['data']]);
             } else {
                 return response()->json([
