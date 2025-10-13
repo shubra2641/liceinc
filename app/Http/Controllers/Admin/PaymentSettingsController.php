@@ -381,4 +381,5 @@ class PaymentSettingsController extends Controller
             ];
         }
     }
-}
+} 
+ 

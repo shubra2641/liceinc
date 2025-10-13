@@ -178,7 +178,7 @@ class LicenseStatusController extends Controller
             'created_at' => $license->created_at?->format('Y-m-d H:i:s'),
             'expires_at' => $license->license_expires_at?->format('Y-m-d H:i:s'),
             'is_expired' => $license->license_expires_at?->isPast() ?? false,
-            'days_remaining' => $license->license_expires_at 
+            'days_remaining' => $license->license_expires_at
                 ? max(0, now()->diffInDays($license->license_expires_at, false))
                 : null,
             'domains' => $license->domains->toArray(),

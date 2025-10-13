@@ -141,7 +141,7 @@ class ProcessCronCommand extends Command
                 }
             } catch (\Exception $e) {
                 Log::warning("Failed to renew license for invoice {$invoice->invoice_number}",
-                  ['error' => $e->getMessage()]);
+            ['error' => $e->getMessage()]);
             }
         }
         
