@@ -181,7 +181,8 @@ class InvoiceRequest extends FormRequest
             'product_id.exists' => 'Selected product does not exist.',
             'type.required' => 'Invoice type is required.',
             'type.in' => 'Invoice type must be one of: initial, renewal, upgrade, custom.',
-            'custom_invoice_type.in' => 'Custom invoice type must be one of: one_time, monthly, quarterly, semi_annual, annual, three_years, lifetime.',
+            'custom_invoice_type.in' => 'Custom invoice type must be one of: one_time, monthly, quarterly, ' .
+                'semi_annual, annual, three_years, lifetime.',
             'custom_product_name.max' => 'Product name cannot exceed 255 characters.',
             'expiration_date.date' => 'Expiration date must be a valid date.',
             'expiration_date.after' => 'Expiration date must be in the future.',

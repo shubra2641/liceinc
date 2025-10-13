@@ -189,7 +189,8 @@ class LicenseStatusController extends Controller
         } catch (Throwable $e) {
             // Log failed verification
             \App\Services\LicenseVerificationLogger::log(
-                purchaseCode: is_string($request->validated('license_key')) ? $request->validated('license_key') : 'unknown',
+                purchaseCode: is_string($request->validated('license_key')) 
+                    ? $request->validated('license_key') : 'unknown',
                 domain: 'website_check',
                 isValid: false,
                 message: 'License check error: ' . $e->getMessage(),

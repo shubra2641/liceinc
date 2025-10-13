@@ -164,7 +164,8 @@ class UserController extends Controller
                     $verificationUrl = route('verification.verify', ['id' => $user->id, 'hash' => sha1($user->email)]);
                     $this->emailService->sendEmailVerification($user, $verificationUrl);
                 } catch (\Exception $e) {
-                    Log::warning('Failed to send activation email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+                    Log::warning('Failed to send activation email', 
+                        ['user_id' => $user->id, 'error' => $e->getMessage()]);
                 }
             }
             DB::commit();

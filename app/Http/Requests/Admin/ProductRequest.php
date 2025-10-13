@@ -362,7 +362,8 @@ class ProductRequest extends FormRequest
                 : null,
             'features' => $this->input('features') ? $this->sanitizeInput($this->input('features')) : null,
             'requirements' => $this->input('requirements') ? $this->sanitizeInput($this->input('requirements')) : null,
-            'installation_guide' => $this->input('installation_guide') ? $this->sanitizeInput($this->input('installation_guide')) : null,
+            'installation_guide' => $this->input('installation_guide') 
+                ? $this->sanitizeInput($this->input('installation_guide')) : null,
             'tags' => $this->input('tags') ? $this->sanitizeInput($this->input('tags')) : null,
         ]);
         // Handle checkbox values

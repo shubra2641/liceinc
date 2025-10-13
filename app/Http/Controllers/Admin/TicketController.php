@@ -247,7 +247,6 @@ class TicketController extends Controller
                 $ticketData['invoice_id'] = $invoice->id;
             }
             $ticket = Ticket::create($ticketData);
-            
             // Send email notifications
             $this->sendTicketNotifications($ticket);
             
@@ -298,7 +297,8 @@ class TicketController extends Controller
                 'ticket_priority' => $ticket->priority,
             ]);
         } catch (\Exception $e) {
-            // Silent fail in production
+            // Silent fail in production - log error for debugging
+            Log::error('Failed to send ticket notifications', ['error' => $e->getMessage()]);
         }
     }
 
