@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     .addEventListener('click', () => {
       checkForUpdates();
     });
-
   // Update system button
   document
     .getElementById('update-system-btn')
@@ -18,14 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const { version } = this.dataset;
       showUpdateModal(version);
     });
-
   // Confirm update checkbox
   document
     .getElementById('confirmUpdate')
     .addEventListener('change', function() {
       document.getElementById('confirm-update-btn').disabled = !this.checked;
     });
-
   // Confirm update button
   document
     .getElementById('confirm-update-btn')
@@ -33,21 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const { version } = document.getElementById('update-system-btn').dataset;
       performUpdate(version);
     });
-
   // Confirm upload button
   document
     .getElementById('confirm-upload-btn')
     .addEventListener('click', () => {
       uploadUpdatePackage();
     });
-
   // Confirm rollback checkbox
   document
     .getElementById('confirmRollback')
     .addEventListener('change', function() {
       document.getElementById('confirm-rollback-btn').disabled = !this.checked;
     });
-
   // Confirm rollback button
   document
     .getElementById('confirm-rollback-btn')
@@ -56,11 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
       performRollback(version);
     });
 });
-
 function checkForUpdates() {
   const btn = document.getElementById('check-updates-btn');
   const originalText = btn.innerHTML;
-
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
     SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', true, true);
@@ -68,7 +60,6 @@ function checkForUpdates() {
     btn.textContent = 'Checking...';
   }
   btn.disabled = true;
-
   // eslint-disable-next-line promise/catch-or-return
   fetch(window.location.href, {
     method: 'POST',
@@ -117,7 +108,6 @@ function checkForUpdates() {
       btn.disabled = false;
     });
 }
-
 function showUpdateModal(version) {
   document.getElementById('update-system-btn').dataset.version = version;
   document.getElementById('confirmUpdate').checked = false;
@@ -126,11 +116,9 @@ function showUpdateModal(version) {
   const modal = new bootstrap.Modal(document.getElementById('updateModal'));
   modal.show();
 }
-
 function performUpdate(version) {
   const btn = document.getElementById('confirm-update-btn');
   const originalText = btn.innerHTML;
-
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
     SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Updating...', true, true);
@@ -138,7 +126,6 @@ function performUpdate(version) {
     btn.textContent = 'Updating...';
   }
   btn.disabled = true;
-
   // eslint-disable-next-line promise/catch-or-return
   fetch(window.location.href, {
     method: 'POST',
@@ -182,7 +169,6 @@ function performUpdate(version) {
       ).hide();
     });
 }
-
 // eslint-disable-next-line no-unused-vars
 function showVersionDetails(version) {
   fetch(`/admin/updates/version-info/${version}`)
@@ -294,7 +280,6 @@ function showVersionDetails(version) {
           });
           content += '</ul>';
         }
-
         content += '</div>';
         // Use SecurityUtils for safe HTML insertion
         const contentElement = document.getElementById('versionDetailsContent');
@@ -318,7 +303,6 @@ function showVersionDetails(version) {
       showAlert('error', 'An error occurred while loading version details');
     });
 }
-
 // eslint-disable-next-line no-unused-vars
 function showRollbackModal(version) {
   document.getElementById('confirm-rollback-btn').dataset.version = version;
@@ -332,7 +316,6 @@ function showRollbackModal(version) {
 function performRollback(version) {
   const btn = document.getElementById('confirm-rollback-btn');
   const originalText = btn.innerHTML;
-
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
     SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Rolling back...', true, true);
@@ -340,7 +323,6 @@ function performRollback(version) {
     btn.textContent = 'Rolling back...';
   }
   btn.disabled = true;
-
   // eslint-disable-next-line promise/catch-or-return
   fetch('/admin/updates/rollback', {
     method: 'POST',
@@ -384,7 +366,6 @@ function performRollback(version) {
       ).hide();
     });
 }
-
 function formatFileSize(bytes) {
   if (bytes === 0) {
     return '0 Bytes';
@@ -396,7 +377,6 @@ function formatFileSize(bytes) {
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
-
 // Auto Update functionality
 document
   .getElementById('auto-update-btn')
@@ -406,7 +386,6 @@ document
     );
     modal.show();
   });
-
 // Check for updates function (refresh page to get latest data)
 // eslint-disable-next-line no-unused-vars
 function checkForUpdatesManually() {
@@ -417,7 +396,6 @@ function checkForUpdatesManually() {
     window.location.reload();
   }, 1000);
 }
-
 // Display update information
 // eslint-disable-next-line no-unused-vars
 function displayUpdateInfo(updateData) {
@@ -481,21 +459,18 @@ function displayUpdateInfo(updateData) {
   // Store update data for download
   window.currentUpdateData = updateData;
 }
-
 // Show no updates available
 // eslint-disable-next-line no-unused-vars
 function showNoUpdatesAvailable() {
   document.getElementById('update-info-section').style.display = 'none';
   document.getElementById('no-updates-section').style.display = 'block';
 }
-
 // Show auto update modal
 // eslint-disable-next-line no-unused-vars
 function showAutoUpdateModal() {
   const modal = new bootstrap.Modal(document.getElementById('autoUpdateModal'));
   modal.show();
 }
-
 // Show upload update modal
 // eslint-disable-next-line no-unused-vars
 function showUploadUpdateModal() {
@@ -504,7 +479,6 @@ function showUploadUpdateModal() {
   );
   modal.show();
 }
-
 // eslint-disable-next-line no-unused-vars
 function showProductUpdateInfo(updateData, productName) {
   const modalHtml = `
@@ -555,13 +529,11 @@ function showProductUpdateInfo(updateData, productName) {
             </div>
         </div>
     `;
-
   // Remove existing modal if any
   const existingModal = document.getElementById('productUpdateModal');
   if (existingModal) {
     existingModal.remove();
   }
-
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
     SecurityUtils.safeInsertAdjacentHTML(document.body, 'beforeend', modalHtml, true);
@@ -573,22 +545,18 @@ function showProductUpdateInfo(updateData, productName) {
       document.body.appendChild(tempDiv.firstChild);
     }
   }
-
   // Show modal
   const modal = new bootstrap.Modal(
     document.getElementById('productUpdateModal'),
   );
   modal.show();
 }
-
 // eslint-disable-next-line no-unused-vars
 function installProductUpdate(version, downloadUrl) {
   if (!confirm('Are you sure you want to install this update?')) {
     return;
   }
-
   showAlert('info', 'Downloading and installing update...');
-
   // Here you would implement the actual download and installation
   // For now, we'll just show a success message
   setTimeout(() => {
@@ -598,7 +566,6 @@ function installProductUpdate(version, downloadUrl) {
     ).hide();
   }, 3000);
 }
-
 // eslint-disable-next-line no-unused-vars
 function checkAutoUpdates() {
   const licenseKey = document.getElementById('auto-license-key').value;
@@ -610,10 +577,8 @@ function checkAutoUpdates() {
     showAlert('error', 'Please fill all required fields');
     return;
   }
-
   const btn = document.getElementById('check-auto-updates-btn');
   const originalText = btn.innerHTML;
-
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
     SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Checking...', true, true);
@@ -621,7 +586,6 @@ function checkAutoUpdates() {
     btn.textContent = 'Checking...';
   }
   btn.disabled = true;
-
   // eslint-disable-next-line promise/catch-or-return
   fetch('/admin/updates/auto-check', {
     method: 'POST',
@@ -653,7 +617,6 @@ function checkAutoUpdates() {
         ) {
           // Auto update was completed
           showAlert('success', data.message);
-
           // Show additional info if available
           if (data.data && data.data.files_installed) {
             setTimeout(() => {
@@ -663,7 +626,6 @@ function checkAutoUpdates() {
               );
             }, 2000);
           }
-
           // Auto refresh page after 5 seconds
           setTimeout(() => {
             window.location.reload();
@@ -703,7 +665,6 @@ function checkAutoUpdates() {
       btn.disabled = false;
     });
 }
-
 // eslint-disable-next-line no-unused-vars
 function showAutoUpdateInfo(updateData) {
   const updateInfoDiv = document.getElementById('auto-update-info');
@@ -772,7 +733,6 @@ function showAutoUpdateInfo(updateData) {
             </div>
         </div>
     `;
-  
   if (typeof SecurityUtils !== 'undefined') {
     SecurityUtils.safeInnerHTML(updateInfoDiv, updateInfoHtml, true, true);
   } else {
@@ -780,7 +740,6 @@ function showAutoUpdateInfo(updateData) {
   }
   updateInfoDiv.style.display = 'block';
 }
-
 // eslint-disable-next-line no-unused-vars
 function installAutoUpdate(version) {
   const licenseKey = document.getElementById('auto-license-key').value;
@@ -790,10 +749,8 @@ function installAutoUpdate(version) {
   if (!confirm('Are you sure you want to install this update?')) {
     return;
   }
-
   const btn = document.querySelector('#auto-update-info .btn-primary');
   const originalText = btn.innerHTML;
-
   // Use SecurityUtils for safe HTML insertion
   if (typeof SecurityUtils !== 'undefined') {
     SecurityUtils.safeInnerHTML(btn, '<i class="fas fa-spinner fa-spin me-2"></i>Installing...', true, true);
@@ -801,7 +758,6 @@ function installAutoUpdate(version) {
     btn.textContent = 'Installing...';
   }
   btn.disabled = true;
-
   // eslint-disable-next-line promise/catch-or-return
   fetch('/admin/updates/auto-install', {
     method: 'POST',
@@ -845,7 +801,6 @@ function installAutoUpdate(version) {
       btn.disabled = false;
     });
 }
-
 function showAlert(type, message) {
   // Use existing toast system
   if (typeof window.adminDashboard !== 'undefined' && window.adminDashboard.showToast) {
@@ -869,7 +824,6 @@ function showAlert(type, message) {
     console.log(`${type.toUpperCase()}: ${message}`);
   }
 }
-
 // Load version history
 function loadVersionHistory() {
   fetch('/admin/updates/current-version', {
@@ -917,7 +871,6 @@ function loadVersionHistory() {
                     </div>
                 `;
         });
-
         html += '</div>';
         // Use SecurityUtils for safe HTML insertion
         if (typeof SecurityUtils !== 'undefined') {
@@ -969,7 +922,6 @@ function loadVersionHistory() {
       }
     });
 }
-
 // Initialize page
 document.addEventListener('DOMContentLoaded', () => {
   // Load version history on page load
