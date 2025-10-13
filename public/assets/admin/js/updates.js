@@ -271,9 +271,9 @@ function showVersionDetails(version) {
         const sanitizedVersion = UpdateHelpers.sanitizeText(version);
         // Use SecurityUtils for safe HTML insertion
         const titleElement = document.getElementById('versionDetailsTitle');
-        SecurityUtils.safeInnerHTML(titleElement, 
-          `<i class="fas fa-info-circle me-2"></i>Version Details - ${sanitizedVersion}`, 
-          true, 
+        SecurityUtils.safeInnerHTML(titleElement,
+          `<i class="fas fa-info-circle me-2"></i>Version Details - ${sanitizedVersion}`,
+          true,
           true
         );
         let content = '<div class="version-details">';
@@ -439,7 +439,7 @@ function displayUpdateInfo(updateData) {
   document.getElementById('update-version').textContent =
     updateData.latest_version;
   SecurityUtils.safeInnerHTML(
-    document.getElementById('update-major'), 
+    document.getElementById('update-major'),
     updateData.update_info.is_major ?
       '<span class="badge bg-warning">Yes</span>' :
       '<span class="badge bg-info">No</span>',
