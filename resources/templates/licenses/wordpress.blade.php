@@ -9,7 +9,6 @@ declare(strict_types=1);
  *
  * Usage: Add this file to your WordPress theme/plugin and call verify_license() function
  */
-
 declare(strict_types=1);
 
 namespace App\License;
@@ -18,7 +17,7 @@ if (!defined('ABSPATH')) {
     return; // Exit if accessed directly
 }
 
-class WP_LicenseVerifier
+class WpLicenseVerifier
 {
     private $api_url = '{{license_api_url}}';
     private $product_slug = '{{product_slug}}';

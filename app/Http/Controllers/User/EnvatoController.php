@@ -168,8 +168,11 @@ class EnvatoController extends Controller
         try {
             // Check if Envato is configured from database
             $settings = \App\Models\Setting::first();
-            if (!$settings || !$settings->envato_auth_enabled || !$settings->envato_client_id || !$settings->envato_client_secret) {
-                return redirect('/login')->withErrors(['envato' => 'Envato authentication is not enabled or configured. Please contact administrator.']);
+            if (!$settings || !$settings->envato_auth_enabled || 
+                !$settings->envato_client_id || !$settings->envato_client_secret) {
+                return redirect('/login')->withErrors([
+                    'envato' => 'Envato authentication is not enabled or configured. Please contact administrator.'
+                ]);
             }
             
             // Temporarily set environment variables for Socialite

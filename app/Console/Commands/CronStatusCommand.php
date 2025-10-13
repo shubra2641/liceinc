@@ -24,7 +24,7 @@ class CronStatusCommand extends Command
     {
         $this->info('📊 Cron Status Report');
         $this->newLine();
-        
+
         // License Status
         $this->info('🔑 License Status:');
         $this->displayLicenseStatus();

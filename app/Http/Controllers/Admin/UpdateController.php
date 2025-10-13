@@ -45,8 +45,8 @@ class UpdateController extends Controller
     protected UpdateService $updateService;
 
     public function __construct(
-        LicenseServerService $licenseServerService, 
-        UpdatePackageService $updatePackageService, 
+        LicenseServerService $licenseServerService,
+        UpdatePackageService $updatePackageService,
         UpdateService $updateService)
     {
         $this->licenseServerService = $licenseServerService;
@@ -93,7 +93,6 @@ class UpdateController extends Controller
             'versionInfo' => $versionInfo,
         ]);
     }
-    
     /**
      * Display the update management page.
      *
@@ -169,7 +168,8 @@ class UpdateController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return redirect()->back()->with('error',
+            return redirect()->back()->with(
+                'error',
                 'Failed to check for updates: ' . $e->getMessage()
             );
         }

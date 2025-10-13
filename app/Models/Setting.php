@@ -324,7 +324,6 @@ class Setting extends Model
         'auto_generate_license',
         'default_license_length',
         'license_api_token',
-        
         // License settings
         'license_verify_envato',
         'license_fallback_internal',

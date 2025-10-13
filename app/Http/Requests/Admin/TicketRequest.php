@@ -120,7 +120,10 @@ class TicketRequest extends FormRequest
                 'nullable',
                 'required_if:create_invoice,1',
                 'string',
-                Rule::in(['one_time', 'recurring', 'monthly', 'quarterly', 'semi_annual', 'annual', 'custom_recurring']),
+                Rule::in([
+                    'one_time', 'recurring', 'monthly', 'quarterly', 
+                    'semi_annual', 'annual', 'custom_recurring'
+                ]),
             ],
             'billing_cycle' => [
                 'nullable',

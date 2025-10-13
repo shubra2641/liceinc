@@ -239,7 +239,6 @@ class TicketCategoryController extends Controller
             $validated = $request->validated();
             // Keep existing slug (don't change it)
             $validated['slug'] = $ticket_category->slug;
-            
             $ticket_category->update($validated);
             $ticket_category->refresh(); // Refresh the model to get updated data
             DB::commit();

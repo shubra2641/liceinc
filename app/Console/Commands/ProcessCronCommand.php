@@ -24,7 +24,6 @@ class ProcessCronCommand extends Command
     public function handle(): int
     {
         $type = $this->option('type');
-        
         $this->info('🚀 Processing Cron Tasks...');
         $this->newLine();
         
@@ -49,7 +48,6 @@ class ProcessCronCommand extends Command
             $this->info("✅ Processed {$processed} items successfully!");
             
             return Command::SUCCESS;
-            
         } catch (\Exception $e) {
             DB::rollBack();
             $this->error('❌ Processing failed: ' . $e->getMessage());

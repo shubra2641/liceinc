@@ -551,7 +551,7 @@ class GenerateRenewalInvoices extends Command
                 'trace' => $e->getTraceAsString(),
             ]
         );
-        
+
         $this->error(
             'Failed to generate renewal invoice for license ' .
             $license->license_key . ': ' . $e->getMessage()

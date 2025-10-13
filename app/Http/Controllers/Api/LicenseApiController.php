@@ -275,7 +275,7 @@ class LicenseApiController extends Controller
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             // Log failed verification
             \App\Services\LicenseVerificationLogger::log(
                 purchaseCode: $request->purchase_code ?? 'unknown',

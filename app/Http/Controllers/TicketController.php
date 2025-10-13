@@ -49,7 +49,7 @@ private const PAGINATION_LIMIT = 15;
     /**
      * Valid ticket priorities.
      */
-    private const VALID_PRIORITIES = ['low', 'medium', 'high'];
+private const VALID_PRIORITIES = ['low', 'medium', 'high'];
 
     /**
      * Valid ticket statuses.

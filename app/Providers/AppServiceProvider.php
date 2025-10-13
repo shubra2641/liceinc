@@ -190,7 +190,7 @@ class AppServiceProvider extends ServiceProvider
             }
             return Limit::perMinute(100)->by('127.0.0.1');
         });
-        
+
         // Configure API rate limiter - Increased limits for better performance
         RateLimiter::for('api', function ($request) {
             if (is_object($request) && method_exists($request, 'user') && method_exists($request, 'ip')) {

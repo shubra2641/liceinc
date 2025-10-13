@@ -216,7 +216,7 @@ class InvoiceService
             $invoice->status = 'paid';
             $invoice->paid_at = now();
             $invoice->save();
-            
+
             // Activate license when invoice is paid
             $this->activateLicenseOnPayment($invoice);
             
