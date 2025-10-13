@@ -124,12 +124,13 @@ trait TicketHelpers
      *
      * @param \Illuminate\Http\Request $request
      * @param Ticket $ticket
+     * @param bool $isAdmin
      * @return RedirectResponse
      */
-    protected function updateTicket(\Illuminate\Http\Request $request, Ticket $ticket): RedirectResponse
+    protected function updateTicket(\Illuminate\Http\Request $request, Ticket $ticket, bool $isAdmin = false): RedirectResponse
     {
         try {
-            if (!$this->canModifyTicket($ticket)) {
+            if (!$isAdmin && !$this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket modification attempt', [
                     'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
@@ -156,12 +157,14 @@ trait TicketHelpers
      * Handle ticket deletion with authorization check.
      *
      * @param Ticket $ticket
+     * @param bool $isAdmin
+     * @param string $redirectRoute
      * @return RedirectResponse
      */
-    protected function destroyTicket(Ticket $ticket): RedirectResponse
+    protected function destroyTicket(Ticket $ticket, bool $isAdmin = false, string $redirectRoute = 'tickets.index'): RedirectResponse
     {
         try {
-            if (!$this->canModifyTicket($ticket)) {
+            if (!$isAdmin && !$this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket deletion attempt', [
                     'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
@@ -173,7 +176,7 @@ trait TicketHelpers
             DB::beginTransaction();
             $ticket->delete();
             DB::commit();
-            return redirect()->route('tickets.index')->with('success', 'Ticket deleted');
+            return redirect()->route($redirectRoute)->with('success', 'Ticket deleted');
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to delete ticket: ' . $e->getMessage(), [
@@ -192,16 +195,18 @@ trait TicketHelpers
      * @param Ticket $ticket
      * @param bool $sendNotification
      * @param bool $allowClose
+     * @param bool $isAdmin
      * @return RedirectResponse
      */
     protected function replyToTicket(
         \Illuminate\Http\Request $request,
         Ticket $ticket,
         bool $sendNotification = false,
-        bool $allowClose = false
+        bool $allowClose = false,
+        bool $isAdmin = false
     ): RedirectResponse {
         try {
-            if (!$this->canModifyTicket($ticket)) {
+            if (!$isAdmin && !$this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket reply attempt', [
                     'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
@@ -235,6 +240,25 @@ trait TicketHelpers
                 $this->sendReplyNotification($ticket, $validated['message']);
             }
 
+            // Send email notification for admin replies
+            if ($isAdmin && $ticket->user && method_exists($this, 'emailService')) {
+                try {
+                    $user = $request->user();
+                    $this->emailService->sendTicketReply($ticket->user, [
+                        'ticket_id' => $ticket->id,
+                        'ticket_subject' => $ticket->subject,
+                        'reply_message' => $validated['message'],
+                        'replied_by' => $user->name ?? 'Admin',
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send ticket reply email', [
+                        'error' => $e->getMessage(),
+                        'ticket_id' => $ticket->id,
+                        'user_id' => $ticket->user_id,
+                    ]);
+                }
+            }
+
             DB::commit();
             return back()->with('success', $message);
         } catch (Exception $e) {
@@ -254,11 +278,39 @@ trait TicketHelpers
      *
      * @param Ticket $ticket
      * @param string $viewName
+     * @param bool $isAdmin
      * @return View
      */
-    protected function showTicket(Ticket $ticket, string $viewName): View
+    protected function showTicket(Ticket $ticket, string $viewName, bool $isAdmin = false): View
     {
-        return $this->handleTicketDisplay($ticket, $viewName);
+        try {
+            if (!$isAdmin && !$this->canViewTicket($ticket)) {
+                Log::warning('Unauthorized ticket access attempt', [
+                    'user_id' => Auth::id(),
+                    'ticket_id' => $ticket->id,
+                    'ticket_user_id' => $ticket->user_id,
+                    'ip_address' => request()->ip(),
+                ]);
+                abort(403, 'Unauthorized access to ticket');
+            }
+
+            DB::beginTransaction();
+            if ($isAdmin) {
+                $ticket->load(['user.licenses.product', 'replies.user', 'category', 'invoice.product']);
+            } else {
+                $ticket->load(['user', 'replies.user']);
+            }
+            DB::commit();
+            return view($viewName, ['ticket' => $ticket]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to load ticket details: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'ticket_id' => $ticket->id,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            abort(500, 'Failed to load ticket details');
+        }
     }
 
     /**

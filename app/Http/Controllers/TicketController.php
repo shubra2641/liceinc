@@ -209,7 +209,7 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket): View
     {
-        return $this->showTicket($ticket, 'tickets.show');
+        return $this->showTicket($ticket, 'tickets.show', false);
     }
     /**
      * Show the form for editing the specified ticket.
@@ -246,7 +246,7 @@ class TicketController extends Controller
      */
     public function update(Request $request, Ticket $ticket): RedirectResponse
     {
-        return $this->updateTicket($request, $ticket);
+        return $this->updateTicket($request, $ticket, false);
     }
     /**
      * Remove the specified ticket with enhanced security.
@@ -265,7 +265,7 @@ class TicketController extends Controller
      */
     public function destroy(Ticket $ticket): RedirectResponse
     {
-        return $this->destroyTicket($ticket);
+        return $this->destroyTicket($ticket, false, 'tickets.index');
     }
     /**
      * Add a reply to the specified ticket with enhanced security.
@@ -290,7 +290,7 @@ class TicketController extends Controller
      */
     public function reply(Request $request, Ticket $ticket): RedirectResponse
     {
-        return $this->replyToTicket($request, $ticket, false, true);
+        return $this->replyToTicket($request, $ticket, false, true, false);
     }
     /**
      * Validate ticket creation data.

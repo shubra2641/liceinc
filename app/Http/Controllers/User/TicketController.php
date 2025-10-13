@@ -321,7 +321,7 @@ class TicketController extends Controller
      */
     public function update(Request $request, Ticket $ticket): RedirectResponse
     {
-        return $this->updateTicket($request, $ticket);
+        return $this->updateTicket($request, $ticket, false);
     }
     /**
      * Remove the specified ticket with enhanced security.
@@ -593,32 +593,5 @@ class TicketController extends Controller
         } catch (Exception $e) {
             // Silent fail in production
         }
-    }
-    /**
-     * Check if user can view ticket.
-     *
-     * @param  Ticket  $ticket  The ticket instance
-     *
-     * @return bool True if user can view ticket
-     */
-    private function canViewTicket(Ticket $ticket): bool
-    {
-        $user = Auth::user();
-        return ! $ticket->user_id || // Guest ticket
-               (Auth::check() && (
-                   $ticket->user_id === Auth::id()
-                   || ($user && $user->hasRole('admin'))
-               )); // Logged in user
-    }
-    /**
-     * Check if user can modify ticket.
-     *
-     * @param  Ticket  $ticket  The ticket instance
-     *
-     * @return bool True if user can modify ticket
-     */
-    private function canModifyTicket(Ticket $ticket): bool
-    {
-        return $ticket->user_id === Auth::id() || Auth::user()?->hasRole('admin');
     }
 }

@@ -4,6 +4,11 @@
  */
 /* eslint-disable no-new, no-unused-vars, no-undef */
 
+// Load common helpers
+const script = document.createElement('script');
+script.src = '/assets/js/common-helpers.js';
+document.head.appendChild(script);
+
 class ProductShowManager {
   constructor() {
     this.init();
@@ -99,17 +104,7 @@ class ProductShowManager {
         `,
     );
 
-    // Insert at the top of the page
-    const container =
-      document.querySelector('.user-dashboard-container') || document.body;
-    container.insertBefore(notification, container.firstChild);
-
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-      if (notification.parentElement) {
-        notification.remove();
-      }
-    }, 5000);
+    showNotification(message, type, '.user-dashboard-container');
   }
 }
 

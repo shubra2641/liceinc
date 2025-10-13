@@ -3,6 +3,11 @@
  * Handles search result interactions and card click events
  */
 
+// Load common helpers
+const script = document.createElement('script');
+script.src = '/assets/js/common-helpers.js';
+document.head.appendChild(script);
+
 document.addEventListener('DOMContentLoaded', () => {
   initializeSearchResults();
 });
@@ -115,16 +120,7 @@ function initializeSortFunctionality() {
 
   if (sortSelect) {
     sortSelect.addEventListener('change', function() {
-      const currentUrl = new URL(window.location);
-      currentUrl.searchParams.set('sort', this.value);
-      // Safe navigation - currentUrl is validated and sanitized
-      const urlString = currentUrl.toString();
-      const escapedUrl = encodeURIComponent(urlString);
-      if (escapedUrl === urlString) {
-        window.location.href = urlString; // security-ignore: VALIDATED_URL
-      } else {
-        console.error('Invalid URL: Contains dangerous characters');
-      }
+      updateUrlParam('sort', this.value);
     });
   }
 }
