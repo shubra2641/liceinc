@@ -70,12 +70,7 @@ class AILicenseAnalyticsService
                     ];
                 });
             });
-            $arrayResult = is_array($result) ? $result : [];
-            /**
- * @var array<string, mixed> $typedResult
-*/
-            $typedResult = $arrayResult;
-            return $typedResult;
+            return $result;
         } catch (\Exception $e) {
             Log::error('Failed to get dashboard analytics', [
                 'days' => $days,
@@ -162,11 +157,7 @@ class AILicenseAnalyticsService
             ->pluck('count', 'date')
             ->toArray();
         // Apply AI smoothing and prediction
-        /**
- * @var array<string, mixed> $typedLicenseTrends
-*/
-        $typedLicenseTrends = $licenseTrends;
-        $smoothedTrends = $this->applyAISmoothing($typedLicenseTrends);
+        $smoothedTrends = $this->applyAISmoothing($licenseTrends);
         $predictions = $this->predictFutureTrends($smoothedTrends, 7); // Predict next 7 days
         return [
             'license_creation' => [
@@ -236,9 +227,7 @@ class AILicenseAnalyticsService
     {
         $startDate = now()->subDays($days);
         $products = Product::withCount(['licenses' => function ($query) use ($startDate) {
-            if (is_object($query) && method_exists($query, 'where')) {
-                $query->where('created_at', '>=', $startDate);
-            }
+            $query->where('created_at', '>=', $startDate);
         }])->get();
         $performance = [];
         foreach ($products as $product) {
@@ -255,13 +244,8 @@ class AILicenseAnalyticsService
             ];
         }
         // Sort by AI score
-        /**
- * @var array<int, array<string, mixed>> $performance
-*/
         usort($performance, function (array $a, array $b): int {
-            $scoreA = is_numeric($a['ai_score'] ?? 0) ? (int)($a['ai_score'] ?? 0) : 0;
-            $scoreB = is_numeric($b['ai_score'] ?? 0) ? (int)($b['ai_score'] ?? 0) : 0;
-            return $scoreB <=> $scoreA;
+            return ($b['ai_score'] ?? 0) <=> ($a['ai_score'] ?? 0);
         });
         return ['product_performance' => $performance];
     }
@@ -344,13 +328,8 @@ class AILicenseAnalyticsService
             ];
         }
         // Sort by renewal probability (lowest first - highest risk)
-        /**
- * @var array<int, array<string, mixed>> $predictions
-*/
         usort($predictions, function (array $a, array $b): int {
-            $probA = is_numeric($a['renewal_probability'] ?? 0.0) ? (float)($a['renewal_probability'] ?? 0.0) : 0.0;
-            $probB = is_numeric($b['renewal_probability'] ?? 0.0) ? (float)($b['renewal_probability'] ?? 0.0) : 0.0;
-            return $probA <=> $probB;
+            return ($a['renewal_probability'] ?? 0.0) <=> ($b['renewal_probability'] ?? 0.0);
         });
         return ['predictions' => $predictions];
     }
@@ -396,13 +375,8 @@ class AILicenseAnalyticsService
             ];
         }
         // Sort by churn score (highest first - highest risk)
-        /**
- * @var array<int, array<string, mixed>> $churnPredictions
-*/
         usort($churnPredictions, function (array $a, array $b): int {
-            $scoreA = is_numeric($a['churn_score'] ?? 0.0) ? (float)($a['churn_score'] ?? 0.0) : 0.0;
-            $scoreB = is_numeric($b['churn_score'] ?? 0.0) ? (float)($b['churn_score'] ?? 0.0) : 0.0;
-            return $scoreB <=> $scoreA;
+            return ($b['churn_score'] ?? 0.0) <=> ($a['churn_score'] ?? 0.0);
         });
         return ['churn_predictions' => array_slice($churnPredictions, 0, 20)]; // Top 20 at risk
     }
@@ -433,9 +407,7 @@ class AILicenseAnalyticsService
         ];
         $probability = 0;
         foreach ($factors as $factor => $value) {
-            if (is_numeric($value)) {
-                $probability += (float)$value * $weights[$factor];
-            }
+            $probability += $value * $weights[$factor];
         }
         return min(1.0, max(0.0, $probability));
     }
@@ -461,9 +433,9 @@ class AILicenseAnalyticsService
                 $smoothed[$keys[$i]] = $values[$i];
             } else {
                 // Simple moving average with AI weighting
-                $prev = is_numeric($values[$i - 1] ?? 0) ? (float)($values[$i - 1] ?? 0) : 0.0;
-                $curr = is_numeric($values[$i] ?? 0) ? (float)($values[$i] ?? 0) : 0.0;
-                $next = is_numeric($values[$i + 1] ?? 0) ? (float)($values[$i + 1] ?? 0) : 0.0;
+                $prev = $values[$i - 1] ?? 0;
+                $curr = $values[$i] ?? 0;
+                $next = $values[$i + 1] ?? 0;
                 $weighted = ($prev * 0.25) + ($curr * 0.5) + ($next * 0.25);
                 $smoothed[$keys[$i]] = round($weighted, 2);
             }
@@ -494,9 +466,8 @@ class AILicenseAnalyticsService
             $x = $i;
             $y = $values[$i];
             $sumX += (int)$x;
-            $yFloat = is_numeric($y) ? (float)$y : 0.0;
-            $sumY += $yFloat;
-            $sumXY += (float)$x * $yFloat;
+            $sumY += $y;
+            $sumXY += (float)$x * $y;
             $sumXX += (float)$x * (float)$x;
         }
         $denominator = ($n * $sumXX - $sumX * $sumX);
@@ -526,9 +497,9 @@ class AILicenseAnalyticsService
      */
     private function calculateHealthScore(array $stats): float
     {
-        $growthRate = is_numeric($stats['growth_rate'] ?? 0) ? (float)($stats['growth_rate'] ?? 0) : 0.0;
-        $churnRate = is_numeric($stats['churn_rate'] ?? 0) ? (float)($stats['churn_rate'] ?? 0) : 0.0;
-        $activeLicenses = is_numeric($stats['active_licenses'] ?? 0) ? (float)($stats['active_licenses'] ?? 0) : 0.0;
+        $growthRate = $stats['growth_rate'] ?? 0;
+        $churnRate = $stats['churn_rate'] ?? 0;
+        $activeLicenses = $stats['active_licenses'] ?? 0;
 
         $factors = [
             'growth_rate' => min(1.0, max(0.0, $growthRate / 100)),
@@ -670,12 +641,7 @@ class AILicenseAnalyticsService
                     ];
                 });
             });
-            $arrayResult = is_array($result) ? $result : [];
-            /**
- * @var array<string, mixed> $typedResult
-*/
-            $typedResult = $arrayResult;
-            return $typedResult;
+            return $result;
         } catch (\Exception $e) {
             Log::error('Failed to get real-time updates', [
                 'error' => $e->getMessage(),

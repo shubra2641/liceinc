@@ -904,101 +904,64 @@ function initReportsCharts() {
     }
   };
 
+  // Helper functions to reduce duplication
+  const createLineChart = (id, yTitle, tooltipLabel, isFinancial = false) => {
+    const options = {
+      plugins: {
+        legend: { display: true, position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `${context.dataset.label}: ${tooltipLabel(context.parsed.y)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Last 3 Months' } },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: yTitle }
+        }
+      }
+    };
+
+    // Add ticks callback for financial charts
+    if (isFinancial) {
+      options.scales.y.ticks = { callback: value => `$${value.toLocaleString()}` };
+    }
+
+    createReportChart(id, 'line', options);
+  };
+
+  const createDoughnutChart = (id) => {
+    createReportChart(id, 'doughnut', {
+      plugins: { legend: { display: true, position: 'bottom' } }
+    });
+  };
+
+  const createPieChart = (id) => {
+    createReportChart(id, 'pie', {
+      plugins: { legend: { display: true, position: 'bottom' } }
+    });
+  };
+
   // Initialize all report charts
-  createReportChart('monthlyRevenueChart', 'line', {
-    plugins: {
-      legend: { display: true, position: 'top' },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            return `${context.dataset.label}: $${context.parsed.y.toLocaleString()}`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: { title: { display: true, text: 'Last 3 Months' } },
-      y: {
-        beginAtZero: true,
-        title: { display: true, text: 'Revenue ($)' },
-        ticks: { callback: value => `$${value.toLocaleString()}` }
-      }
-    }
-  });
+  createLineChart('monthlyRevenueChart', 'Revenue ($)', value => `$${value.toLocaleString()}`, true);
 
-  createReportChart('monthlyLicensesChart', 'line', {
-    plugins: {
-      legend: { display: true, position: 'top' },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            return `${context.dataset.label}: ${context.parsed.y} licenses`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: { title: { display: true, text: 'Last 3 Months' } },
-      y: {
-        beginAtZero: true,
-        title: { display: true, text: 'Number of Licenses' }
-      }
-    }
-  });
+  createLineChart('monthlyLicensesChart', 'Number of Licenses', value => `${value} licenses`);
 
-  createReportChart('userRegistrationsChart', 'line', {
-    plugins: {
-      legend: { display: true, position: 'top' },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            return `${context.dataset.label}: ${context.parsed.y} users`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: { title: { display: true, text: 'Last 3 Months' } },
-      y: {
-        beginAtZero: true,
-        title: { display: true, text: 'Number of Users' }
-      }
-    }
-  });
+  createLineChart('userRegistrationsChart', 'Number of Users', value => `${value} users`);
 
-  createReportChart('systemOverviewChart', 'doughnut', {
-    plugins: { legend: { display: true, position: 'bottom' } }
-  });
-
-  createReportChart('licenseTypeChart', 'pie', {
-    plugins: { legend: { display: true, position: 'bottom' } }
-  });
+  createDoughnutChart('systemOverviewChart');
+  createPieChart('licenseTypeChart');
 
   createReportChart('activityTimelineChart', 'bar', {
     plugins: { legend: { display: true, position: 'top' } },
     scales: { y: { beginAtZero: true } }
   });
 
-  createReportChart('invoicesMonthlyChart', 'line', {
-    plugins: {
-      legend: { display: true, position: 'top' },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            return `${context.dataset.label}: $${context.parsed.y.toLocaleString()}`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: { title: { display: true, text: 'Last 3 Months' } },
-      y: {
-        beginAtZero: true,
-        title: { display: true, text: 'Invoice Amount ($)' },
-        ticks: { callback: value => `$${value.toLocaleString()}` }
-      }
-    }
-  });
+  createLineChart('invoicesMonthlyChart', 'Invoice Amount ($)', value => `$${value.toLocaleString()}`, true);
 }
 
 // ===== LOGS PAGE FUNCTIONALITY =====
