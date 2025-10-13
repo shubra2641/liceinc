@@ -49,6 +49,42 @@ use Illuminate\Support\Facades\Storage;
 class ProductUpdateApiController extends Controller
 {
     /**
+     * Verify license and domain for product updates.
+     *
+     * @param string $licenseKey
+     * @param int $productId
+     * @param string $domain
+     * @return array|null Returns error response array or null if valid
+     */
+    private function verifyLicenseAndDomain(string $licenseKey, int $productId, string $domain): ?array
+    {
+        // Verify license
+        $license = License::where('license_key', $licenseKey)
+            ->where('product_id', $productId)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$license) {
+            return [
+                'success' => false,
+                'message' => 'Invalid license key or product',
+            ];
+        }
+
+        // Check domain if required
+        if ($license->product && $license->product->requires_domain) {
+            if ($license->domains()->where('domain', $domain)->exists() === false) {
+                return [
+                    'success' => false,
+                    'message' => 'Domain not registered for this license',
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Check for available updates for a product with enhanced security.
      *
      * Verifies the license and checks for available updates for the specified product.
@@ -91,27 +127,12 @@ class ProductUpdateApiController extends Controller
             $currentVersion = $validated['current_version'];
             $licenseKey = $validated['license_key'];
             $domain = $validated['domain'];
-            // Verify license
-            $license = License::where('license_key', $licenseKey)
-                ->where('product_id', $productId)
-                ->where('status', 'active')
-                ->first();
-            if (! $license) {
+
+            // Verify license and domain
+            $verificationError = $this->verifyLicenseAndDomain($licenseKey, $productId, $domain);
+            if ($verificationError) {
                 DB::rollBack();
-                return response()->json([
-                    'success'  => false,
-                    'message' => 'Invalid license key or product',
-                ], 403);
-            }
-            // Check domain if required
-            if ($license->product && $license->product->requires_domain) {
-                if ($license->domains()->where('domain', $domain)->exists() === false) {
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Domain not registered for this license',
-                    ], 403);
-                }
+                return response()->json($verificationError, 403);
             }
             // Get available updates
             $updates = ProductUpdate::where('product_id', $productId)
@@ -197,28 +218,14 @@ class ProductUpdateApiController extends Controller
             $productId = $validated['product_id'];
             $licenseKey = $validated['license_key'];
             $domain = $validated['domain'];
-            // Verify license
-            $license = License::where('license_key', $licenseKey)
-                ->where('product_id', $productId)
-                ->where('status', 'active')
-                ->first();
-            if (! $license) {
+
+            // Verify license and domain
+            $verificationError = $this->verifyLicenseAndDomain($licenseKey, $productId, $domain);
+            if ($verificationError) {
                 DB::rollBack();
-                return response()->json([
-                    'success'  => false,
-                    'message' => 'Invalid license key or product',
-                ], 403);
+                return response()->json($verificationError, 403);
             }
-            // Check domain if required
-            if ($license->product && $license->product->requires_domain) {
-                if ($license->domains()->where('domain', $domain)->exists() === false) {
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Domain not registered for this license',
-                    ], 403);
-                }
-            }
+
             // Get latest update
             $latestUpdate = ProductUpdate::where('product_id', $productId)
                 ->active()
@@ -384,28 +391,14 @@ class ProductUpdateApiController extends Controller
             $productId = $validated['product_id'];
             $licenseKey = $validated['license_key'];
             $domain = $validated['domain'];
-            // Verify license
-            $license = License::where('license_key', $licenseKey)
-                ->where('product_id', $productId)
-                ->where('status', 'active')
-                ->first();
-            if (! $license) {
+
+            // Verify license and domain
+            $verificationError = $this->verifyLicenseAndDomain($licenseKey, $productId, $domain);
+            if ($verificationError) {
                 DB::rollBack();
-                return response()->json([
-                    'success'  => false,
-                    'message' => 'Invalid license key or product',
-                ], 403);
+                return response()->json($verificationError, 403);
             }
-            // Check domain if required
-            if ($license->product && $license->product->requires_domain) {
-                if ($license->domains()->where('domain', $domain)->exists() === false) {
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Domain not registered for this license',
-                    ], 403);
-                }
-            }
+
             // Get all updates
             $updates = ProductUpdate::where('product_id', $productId)
                 ->active()
