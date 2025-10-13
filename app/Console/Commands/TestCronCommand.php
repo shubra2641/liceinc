@@ -45,7 +45,6 @@ class TestCronCommand extends Command
             $this->newLine();
             $this->info('✅ Cron test completed successfully!');
             return Command::SUCCESS;
-            
         } catch (\Exception $e) {
             $this->error('❌ Cron test failed: ' . $e->getMessage());
             Log::error('Cron test failed', ['error' => $e->getMessage()]);

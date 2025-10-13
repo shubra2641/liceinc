@@ -18,7 +18,6 @@ class SetupCronCommand extends Command
         if ($platform === 'auto') {
             $platform = PHP_OS_FAMILY === 'Windows' ? 'windows' : 'linux';
         }
-        
         $this->info('🔧 Setting up Cron Jobs...');
         $this->newLine();
 
@@ -93,6 +92,7 @@ class SetupCronCommand extends Command
                "* * * * * cd " . base_path() . " && {$phpPath} {$artisanPath} schedule:run >> /dev/null 2>&1\n" .
                "\n" .
                "# Optional: Log cron output\n" .
-               "# * * * * * cd " . base_path() . " && {$phpPath} {$artisanPath} schedule:run >> " . storage_path('logs/cron.log') . " 2>&1\n";
+               "# * * * * * cd " . base_path() . " && {$phpPath} {$artisanPath} " .
+               "schedule:run >> " . storage_path('logs/cron.log') . " 2>&1\n";
     }
 }

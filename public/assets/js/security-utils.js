@@ -128,7 +128,6 @@ const SecurityUtils = {
    * @returns {boolean} - True if URL is safe
    */
   isValidUrl(url) {
-    try {
       const allowedOrigins = [
         window.location.origin,
         `${window.location.protocol}//${window.location.host}`,

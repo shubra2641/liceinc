@@ -47,8 +47,8 @@ class UpdateController extends Controller
     public function __construct(
         LicenseServerService $licenseServerService,
         UpdatePackageService $updatePackageService,
-        UpdateService $updateService)
-    {
+        UpdateService $updateService
+    ) {
         $this->licenseServerService = $licenseServerService;
         $this->updatePackageService = $updatePackageService;
         $this->updateService = $updateService;
@@ -739,7 +739,10 @@ class UpdateController extends Controller
 
             // Download update file
             $downloadResult = $this->licenseServerService->downloadUpdate(
-                $licenseKey, $version, 'the-ultimate-license-management-system', $domain
+                $licenseKey,
+                $version,
+                'the-ultimate-license-management-system',
+                $domain
             );
             if (! $downloadResult['success']) {
                 DB::rollBack();

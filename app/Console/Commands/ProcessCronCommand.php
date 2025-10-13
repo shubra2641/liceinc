@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Process Cron Command - Simple cron processing
- * 
+ *
  * This command processes all cron tasks in a simple, reliable way
  */
 class ProcessCronCommand extends Command
@@ -140,7 +140,6 @@ class ProcessCronCommand extends Command
             } catch (\Exception $e) {
                 Log::warning("Failed to renew license for invoice {$invoice->invoice_number}",
             ['error' => $e->getMessage()]);
-            }
         }
         
         $this->line("   Processed: {$processed} paid invoices");
