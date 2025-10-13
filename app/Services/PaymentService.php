@@ -110,58 +110,49 @@ class PaymentService
             if (!$settings) {
                 throw new \Exception('PayPal settings not found');
             }
+
             $credentials = $settings->credentials;
-            // Validate credentials
             $this->validatePayPalCredentials($credentials);
-            // Create API context
-            $clientId = is_string($credentials['client_id'] ?? '')
-                ? (string)($credentials['client_id'] ?? '')
-                : '';
-            $clientSecret = is_string($credentials['client_secret'] ?? '')
-                ? (string)($credentials['client_secret'] ?? '')
-                : '';
 
             $apiContext = new ApiContext(
-                new OAuthTokenCredential($clientId, $clientSecret),
+                new OAuthTokenCredential(
+                    $credentials['client_id'],
+                    $credentials['client_secret']
+                )
             );
-            // Set mode (sandbox or live)
+
             $apiContext->setConfig([
                 'mode' => $settings->is_sandbox ? 'sandbox' : 'live',
                 'log.LogEnabled' => true,
-                'log.FileName' => (string)storage_path('logs/paypal.log'),
+                'log.FileName' => storage_path('logs/paypal.log'),
                 'log.LogLevel' => 'INFO',
             ]);
-            // Create payer
+
             $payer = new Payer();
             $payer->setPaymentMethod('paypal');
-            // Create amount with validation
+
             $amount = new Amount();
-            $amountValue = is_numeric($orderData['amount'] ?? 0) ? (float)($orderData['amount'] ?? 0) : 0.0;
-            $amount->setTotal(number_format($amountValue, 2, '.', ''));
-            $currency = is_string($orderData['currency'] ?? 'usd') ? (string)($orderData['currency'] ?? 'usd') : 'usd';
-            $amount->setCurrency($currency);
-            // Create transaction with sanitized data
+            $amount->setTotal(number_format($orderData['amount'], 2, '.', ''));
+            $amount->setCurrency($orderData['currency'] ?? 'usd');
+
             $transaction = new Transaction();
             $transaction->setAmount($amount);
             $transaction->setDescription('Product Purchase');
-            $userId = is_string($orderData['user_id'] ?? '') ? (string)($orderData['user_id'] ?? '') : '';
-            $productId = is_string($orderData['product_id'] ?? '') ? (string)($orderData['product_id'] ?? '') : '';
-            $transaction->setCustom("user_id:" . $userId . ", product_id:" . $productId);
-            // Create redirect URLs
+            $transaction->setCustom("user_id:{$orderData['user_id']}, product_id:{$orderData['product_id']}");
+
             $redirectUrls = new RedirectUrls();
             $appUrl = config('app.url');
-            $appUrlString = is_string($appUrl) ? $appUrl : '';
-            $redirectUrls->setReturnUrl($appUrlString . '/payment/success/paypal')
-                ->setCancelUrl($appUrlString . '/payment/cancel/paypal');
-            // Create payment with proper structure
+            $redirectUrls->setReturnUrl($appUrl . '/payment/success/paypal')
+                ->setCancelUrl($appUrl . '/payment/cancel/paypal');
+
             $payment = new Payment();
             $payment->setIntent('sale');
             $payment->setPayer($payer);
             $payment->setTransactions([$transaction]);
             $payment->setRedirectUrls($redirectUrls);
-            // Create payment
+
             $payment->create($apiContext);
-            // Get approval URL
+
             $approvalUrl = null;
             foreach ($payment->getLinks() as $link) {
                 if ($link->getRel() === 'approval_url') {
@@ -169,10 +160,11 @@ class PaymentService
                     break;
                 }
             }
+
             return [
                 'success' => true,
                 'redirect_url' => $approvalUrl,
-                'payment_url' => $approvalUrl, // Keep both for compatibility
+                'payment_url' => $approvalUrl,
                 'payment_id' => $payment->getId(),
             ];
         } catch (\Exception $e) {
@@ -181,6 +173,7 @@ class PaymentService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return [
                 'success' => false,
                 'message' => 'PayPal payment processing failed: ' . $e->getMessage(),
@@ -215,41 +208,28 @@ class PaymentService
             // Validate credentials
             $this->validateStripeCredentials($credentials);
             // Set Stripe API key
-            $secretKey = is_string($credentials['secret_key'] ?? '') ? (string)($credentials['secret_key'] ?? '') : '';
-            Stripe::setApiKey($secretKey);
+            Stripe::setApiKey($credentials['secret_key'] ?? '');
             $appUrl = config('app.url');
-            $appUrlString = is_string($appUrl) ? $appUrl : '';
             $session = Session::create([
                 'payment_method_types' => ['card'],
                 'line_items' => [
                     [
                         'price_data' => [
-                            'currency' => is_string($orderData['currency'] ?? 'usd')
-                                ? (string)($orderData['currency'] ?? 'usd')
-                                : 'usd',
+                            'currency' => $orderData['currency'] ?? 'usd',
                             'product_data' => [
                                 'name' => 'Product Purchase',
                             ],
-                            'unit_amount' => (int)(
-                                (is_numeric($orderData['amount'] ?? 0)
-                                    ? (float)($orderData['amount'] ?? 0)
-                                    : 0.0
-                                ) * 100
-                            ), // Convert to cents
+                            'unit_amount' => (int)(($orderData['amount'] ?? 0) * 100), // Convert to cents
                         ],
                         'quantity' => 1,
                     ],
                 ],
                 'mode' => 'payment',
-                'success_url' => $appUrlString . '/payment/success/stripe',
-                'cancel_url' => $appUrlString . '/payment/cancel/stripe',
+                'success_url' => $appUrl . '/payment/success/stripe',
+                'cancel_url' => $appUrl . '/payment/cancel/stripe',
                 'metadata' => [
-                    'user_id' => is_string($orderData['user_id'] ?? '')
-                        ? (string)($orderData['user_id'] ?? '')
-                        : '',
-                    'product_id' => is_string($orderData['product_id'] ?? '')
-                        ? (string)($orderData['product_id'] ?? '')
-                        : '',
+                    'user_id' => $orderData['user_id'] ?? '',
+                    'product_id' => $orderData['product_id'] ?? '',
                 ],
             ]);
             return [
@@ -666,26 +646,21 @@ class PaymentService
         if (empty($orderData)) {
             throw new InvalidArgumentException('Order data cannot be empty');
         }
-        if (
-            isset($orderData['user_id']) === false
-            || ! is_numeric($orderData['user_id'])
-            || $orderData['user_id'] < 1
-        ) {
+        if (!isset($orderData['user_id']) || !is_numeric($orderData['user_id']) || $orderData['user_id'] < 1) {
             throw new InvalidArgumentException('Valid user_id is required');
         }
-        if (! isset($orderData['amount']) || ! is_numeric($orderData['amount']) || $orderData['amount'] <= 0) {
+        if (!isset($orderData['amount']) || !is_numeric($orderData['amount']) || $orderData['amount'] <= 0) {
             throw new InvalidArgumentException('Valid amount is required');
         }
-        if (! isset($orderData['currency']) || empty($orderData['currency'])) {
+        if (!isset($orderData['currency']) || empty($orderData['currency'])) {
             throw new InvalidArgumentException('Currency is required');
         }
-        $currency = is_string($orderData['currency']) ? (string)$orderData['currency'] : '';
-        if (strlen($currency) !== 3) {
+        if (strlen($orderData['currency']) !== 3) {
             throw new InvalidArgumentException('Currency must be a 3-character code');
         }
         // Validate amount range
         if ($orderData['amount'] > 999999.99) {
-            throw new InvalidArgumentException('Amount cannot exceed 999, 999.99');
+            throw new InvalidArgumentException('Amount cannot exceed 999,999.99');
         }
     }
     /**
@@ -714,16 +689,10 @@ class PaymentService
      */
     private function validatePayPalCredentials(?array $credentials): void
     {
-        $clientId = is_string($credentials['client_id'] ?? '')
-            ? (string)($credentials['client_id'] ?? '')
-            : '';
-        if (empty($clientId)) {
+        if (empty($credentials['client_id'] ?? '')) {
             throw new InvalidArgumentException('PayPal client_id is required');
         }
-        $clientSecret = is_string($credentials['client_secret'] ?? '')
-            ? (string)($credentials['client_secret'] ?? '')
-            : '';
-        if (empty($clientSecret)) {
+        if (empty($credentials['client_secret'] ?? '')) {
             throw new InvalidArgumentException('PayPal client_secret is required');
         }
     }
@@ -739,11 +708,11 @@ class PaymentService
      */
     private function validateStripeCredentials(?array $credentials): void
     {
-        $secretKey = is_string($credentials['secret_key'] ?? '') ? (string)($credentials['secret_key'] ?? '') : '';
+        $secretKey = $credentials['secret_key'] ?? '';
         if (empty($secretKey)) {
             throw new InvalidArgumentException('Stripe secret_key is required');
         }
-        if (! str_starts_with($secretKey, 'sk_')) {
+        if (!str_starts_with($secretKey, 'sk_')) {
             throw new InvalidArgumentException('Invalid Stripe secret key format');
         }
     }
