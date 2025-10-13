@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Traits\RequestHelpers;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -25,6 +26,8 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class VersionManagementRequest extends FormRequest
 {
+    use RequestHelpers;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -286,28 +289,10 @@ class VersionManagementRequest extends FormRequest
             'product_slug' => $this->sanitizeInput($this->input('product_slug')),
             'domain' => $this->sanitizeInput($this->input('domain')),
             'version' => $this->sanitizeInput($this->input('version')),
-            'current_version' => $this->input('current_version')
-                ? $this->sanitizeInput($this->input('current_version'))
-                : null,
-            'filter_version' => $this->input('filter_version')
-                ? $this->sanitizeInput($this->input('filter_version'))
-                : null,
-            'sort_order' => $this->input('sort_order') ? $this->sanitizeInput($this->input('sort_order')) : null,
         ]);
-        // Handle checkbox values
-        $this->merge([
-            'include_changelog' => $this->has('include_changelog'),
-            'include_dependencies' => $this->has('include_dependencies'),
-            'include_security_updates' => $this->has('include_security_updates'),
-            'include_feature_updates' => $this->has('include_feature_updates'),
-            'include_bug_fixes' => $this->has('include_bug_fixes'),
-            'check_beta' => $this->has('check_beta'),
-            'check_prerelease' => $this->has('check_prerelease'),
-            'compare_versions' => $this->has('compare_versions'),
-            'include_download_url' => $this->has('include_download_url'),
-            'include_checksums' => $this->has('include_checksums'),
-            'include_file_list' => $this->has('include_file_list'),
-        ]);
+
+        $this->handleFilterAndSort(['current_version', 'filter_version', 'sort_order']);
+        $this->handleCheckboxValues();
         // Set default values
         $this->merge([
             'include_changelog' => $this->include_changelog ?? true,

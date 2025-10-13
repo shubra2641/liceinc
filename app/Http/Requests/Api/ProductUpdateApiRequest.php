@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api;
 
+use App\Traits\RequestHelpers;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -25,6 +26,8 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class ProductUpdateApiRequest extends FormRequest
 {
+    use RequestHelpers;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -400,37 +403,17 @@ class ProductUpdateApiRequest extends FormRequest
             'version' => $this->input('version')
                 ? $this->sanitizeInput($this->input('version'))
                 : null,
-            'filter_version' => $this->input('filter_version')
-                ? $this->sanitizeInput($this->input('filter_version'))
-                : null,
-            'sort_order' => $this->input('sort_order')
-                ? $this->sanitizeInput($this->input('sort_order'))
-                : null,
             'download_type' => $this->input('download_type')
                 ? $this->sanitizeInput($this->input('download_type'))
                 : null,
         ]);
-        // Handle checkbox values
-        $this->merge([
-            'include_changelog' => $this->has('include_changelog'),
-            'include_dependencies' => $this->has('include_dependencies'),
-            'include_security_updates' => $this->has('include_security_updates'),
-            'include_feature_updates' => $this->has('include_feature_updates'),
-            'include_bug_fixes' => $this->has('include_bug_fixes'),
-            'check_beta' => $this->has('check_beta'),
-            'check_prerelease' => $this->has('check_prerelease'),
-            'auto_install' => $this->has('auto_install'),
-            'notify_on_available' => $this->has('notify_on_available'),
-            'compare_versions' => $this->has('compare_versions'),
-            'include_download_url' => $this->has('include_download_url'),
-            'include_checksums' => $this->has('include_checksums'),
-            'include_file_list' => $this->has('include_file_list'),
-            'include_installation_notes' => $this->has('include_installation_notes'),
-            'include_rollback_info' => $this->has('include_rollback_info'),
-            'verify_integrity' => $this->has('verify_integrity'),
-            'include_release_notes' => $this->has('include_release_notes'),
-            'include_breaking_changes' => $this->has('include_breaking_changes'),
-            'include_deprecations' => $this->has('include_deprecations'),
+
+        $this->handleFilterAndSort(['filter_version', 'sort_order']);
+        $this->handleCheckboxValues([
+            'verify_integrity',
+            'include_release_notes',
+            'include_breaking_changes',
+            'include_deprecations',
         ]);
         // Set default values
         $this->merge([

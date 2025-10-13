@@ -28,6 +28,7 @@ trait TicketHelpers
      * @param string $successRoute
      * @param string $successMessage
      * @return RedirectResponse
+     * 
      */
     protected function handleTicketCreation(
         array $ticketData,
@@ -58,6 +59,7 @@ trait TicketHelpers
      * @param Ticket $ticket
      * @param string $viewName
      * @return View
+     * 
      */
     protected function handleTicketDisplay(Ticket $ticket, string $viewName): View
     {
@@ -118,11 +120,192 @@ trait TicketHelpers
     }
 
     /**
+     * Handle ticket update with authorization check.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param Ticket $ticket
+     * @return RedirectResponse
+     */
+    protected function updateTicket(\Illuminate\Http\Request $request, Ticket $ticket): RedirectResponse
+    {
+        try {
+            if (!$this->canModifyTicket($ticket)) {
+                Log::warning('Unauthorized ticket modification attempt', [
+                    'user_id' => Auth::id(),
+                    'ticket_id' => $ticket->id,
+                    'ticket_user_id' => $ticket->user_id,
+                    'ip_address' => request()->ip(),
+                ]);
+                abort(403, 'Unauthorized access to modify ticket');
+            }
+
+            $validated = $this->validateTicketUpdateData($request);
+            return $this->handleTicketUpdate($ticket, $validated);
+        } catch (Exception $e) {
+            Log::error('Failed to update ticket: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'ticket_id' => $ticket->id ?? null,
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return back()->with('error', 'Failed to update ticket. Please try again.');
+        }
+    }
+
+    /**
+     * Handle ticket deletion with authorization check.
+     *
+     * @param Ticket $ticket
+     * @return RedirectResponse
+     */
+    protected function destroyTicket(Ticket $ticket): RedirectResponse
+    {
+        try {
+            if (!$this->canModifyTicket($ticket)) {
+                Log::warning('Unauthorized ticket deletion attempt', [
+                    'user_id' => Auth::id(),
+                    'ticket_id' => $ticket->id,
+                    'ticket_user_id' => $ticket->user_id,
+                    'ip_address' => request()->ip(),
+                ]);
+                abort(403, 'Unauthorized access to delete ticket');
+            }
+            DB::beginTransaction();
+            $ticket->delete();
+            DB::commit();
+            return redirect()->route('tickets.index')->with('success', 'Ticket deleted');
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to delete ticket: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'ticket_id' => $ticket->id ?? null,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return back()->with('error', 'Failed to delete ticket. Please try again.');
+        }
+    }
+
+    /**
+     * Handle ticket reply with authorization check.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param Ticket $ticket
+     * @param bool $sendNotification
+     * @param bool $allowClose
+     * @return RedirectResponse
+     */
+    protected function replyToTicket(
+        \Illuminate\Http\Request $request,
+        Ticket $ticket,
+        bool $sendNotification = false,
+        bool $allowClose = false
+    ): RedirectResponse {
+        try {
+            if (!$this->canModifyTicket($ticket)) {
+                Log::warning('Unauthorized ticket reply attempt', [
+                    'user_id' => Auth::id(),
+                    'ticket_id' => $ticket->id,
+                    'ticket_user_id' => $ticket->user_id,
+                    'ip_address' => request()->ip(),
+                ]);
+                abort(403, 'Unauthorized access to reply to ticket');
+            }
+
+            if ($ticket->status === 'closed') {
+                return back()->with('error', 'Cannot reply to a closed ticket');
+            }
+
+            $validated = $this->validateReplyData($request);
+            DB::beginTransaction();
+
+            $reply = \App\Models\TicketReply::create([
+                'ticket_id' => $ticket->id,
+                'user_id' => Auth::id(),
+                'message' => $validated['message'],
+            ]);
+
+            $shouldClose = $allowClose && $this->shouldCloseTicket($request);
+            $message = $shouldClose ? 'Reply added and ticket closed' : 'Reply added';
+
+            if ($shouldClose) {
+                $ticket->update(['status' => 'closed']);
+            }
+
+            if ($sendNotification && method_exists($this, 'sendReplyNotification')) {
+                $this->sendReplyNotification($ticket, $validated['message']);
+            }
+
+            DB::commit();
+            return back()->with('success', $message);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to add ticket reply: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'ticket_id' => $ticket->id ?? null,
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return back()->with('error', 'Failed to add reply. Please try again.');
+        }
+    }
+
+    /**
+     * Handle ticket display with security checks.
+     *
+     * @param Ticket $ticket
+     * @param string $viewName
+     * @return View
+     */
+    protected function showTicket(Ticket $ticket, string $viewName): View
+    {
+        return $this->handleTicketDisplay($ticket, $viewName);
+    }
+
+    /**
+     * Validate ticket update data.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return array
+     */
+    protected function validateTicketUpdateData(\Illuminate\Http\Request $request): array
+    {
+        $validated = $request->validate([
+            'subject' => ['sometimes', 'string', 'max:255'],
+            'priority' => ['sometimes', 'in:' . implode(', ', $this->getValidPriorities())],
+            'status' => ['sometimes', 'in:' . implode(', ', $this->getValidStatuses())],
+            'content' => ['sometimes', 'string'],
+        ]);
+
+        return $validated;
+    }
+
+    /**
+     * Get valid ticket priorities.
+     *
+     * @return array
+     */
+    protected function getValidPriorities(): array
+    {
+        return ['low', 'medium', 'high', 'urgent'];
+    }
+
+    /**
+     * Get valid ticket statuses.
+     *
+     * @return array
+     */
+    protected function getValidStatuses(): array
+    {
+        return ['open', 'pending', 'closed'];
+    }
+
+    /**
      * Get tickets with pagination and filtering.
      *
      * @param array $filters
      * @param int $perPage
      * @return Collection
+     * 
      */
     protected function getTicketsWithFilters(array $filters = [], int $perPage = 15): Collection
     {
