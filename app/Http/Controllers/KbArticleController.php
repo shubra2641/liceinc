@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -60,17 +59,6 @@ class KbArticleController extends Controller
     public function index(): View
     {
         try {
-            // Rate limiting
-            $key = 'kb-articles-index:' . (Auth::id() ?? request()->ip());
-            if (RateLimiter::tooManyAttempts($key, 20)) {
-                Log::warning('Rate limit exceeded for KB articles index', [
-                    'user_id' => Auth::id(),
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                abort(429, 'Too many requests');
-            }
-            RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
             $user = Auth::user();
             if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
@@ -113,17 +101,6 @@ class KbArticleController extends Controller
     public function create(): View
     {
         try {
-            // Rate limiting
-            $key = 'kb-articles-create:' . (Auth::id() ?? request()->ip());
-            if (RateLimiter::tooManyAttempts($key, 10)) {
-                Log::warning('Rate limit exceeded for KB article creation form', [
-                    'user_id' => Auth::id(),
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                abort(429, 'Too many requests');
-            }
-            RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
             $user = Auth::user();
             if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
@@ -173,17 +150,6 @@ class KbArticleController extends Controller
     public function store(Request $request): RedirectResponse
     {
         try {
-            // Rate limiting
-            $key = 'kb-articles-store:' . (Auth::id() ?? request()->ip());
-            if (RateLimiter::tooManyAttempts($key, 5)) {
-                Log::warning('Rate limit exceeded for KB article creation', [
-                    'user_id' => Auth::id(),
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                return back()->with('error', 'Too many requests. Please try again later.');
-            }
-            RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
             $user = Auth::user();
             if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
@@ -196,9 +162,8 @@ class KbArticleController extends Controller
             }
             DB::beginTransaction();
             $validated = $request->validate([
-                'kb_category_id' => ['required', 'exists:kb_categories, id'],
+                'kb_category_id' => ['required', 'exists:kb_categories,id'],
                 'title' => ['required', 'string', 'max:255'],
-                'slug' => ['nullable', 'string', 'max:255', 'unique:kb_articles, slug'],
                 'excerpt' => ['nullable', 'string'],
                 'content' => ['required', 'string'],
                 'image' => ['nullable', 'image', 'max:2048'],
@@ -208,7 +173,7 @@ class KbArticleController extends Controller
                 'serial_message' => ['nullable', 'string'],
                 'meta_title' => ['nullable', 'string', 'max:255'],
                 'meta_description' => ['nullable', 'string', 'max:500'],
-                'meta_keywords' => ['nullable', 'string', 'max:255'],
+                'meta_keywords' => ['nullable', 'string'],
                 'allow_comments' => ['boolean'],
                 'is_featured' => ['boolean'],
             ]);
@@ -222,11 +187,8 @@ class KbArticleController extends Controller
             $validatedArray['meta_title'] = $this->sanitizeInput($validatedArray['meta_title'] ?? '');
             $validatedArray['meta_description'] = $this->sanitizeInput($validatedArray['meta_description'] ?? '');
             $validatedArray['meta_keywords'] = $this->sanitizeInput($validatedArray['meta_keywords'] ?? '');
-            $validatedArray['slug'] = $validatedArray['slug'] ?: Str::slug(
-                is_string($validatedArray['title'] ?? null)
-                    ? $validatedArray['title']
-                    : ''
-            );
+            // Generate slug automatically from title
+            $validatedArray['slug'] = Str::slug($validatedArray['title']);
             $validatedArray['is_published'] = $request->boolean('is_published');
             // Handle checkbox values
             $validatedArray['allow_comments'] = $request->has('allow_comments');
@@ -281,17 +243,6 @@ class KbArticleController extends Controller
     public function edit(KbArticle $kbArticle): View
     {
         try {
-            // Rate limiting
-            $key = 'kb-articles-edit:' . (Auth::id() ?? request()->ip());
-            if (RateLimiter::tooManyAttempts($key, 10)) {
-                Log::warning('Rate limit exceeded for KB article editing form', [
-                    'user_id' => Auth::id(),
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                abort(429, 'Too many requests');
-            }
-            RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
             $user = Auth::user();
             if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
@@ -342,17 +293,6 @@ class KbArticleController extends Controller
     public function update(Request $request, KbArticle $kbArticle): RedirectResponse
     {
         try {
-            // Rate limiting
-            $key = 'kb-articles-update:' . (Auth::id() ?? request()->ip());
-            if (RateLimiter::tooManyAttempts($key, 5)) {
-                Log::warning('Rate limit exceeded for KB article update', [
-                    'user_id' => Auth::id(),
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                return back()->with('error', 'Too many requests. Please try again later.');
-            }
-            RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
             $user = Auth::user();
             if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
@@ -365,9 +305,8 @@ class KbArticleController extends Controller
             }
             DB::beginTransaction();
             $validated = $request->validate([
-                'kb_category_id' => ['required', 'exists:kb_categories, id'],
+                'kb_category_id' => ['required', 'exists:kb_categories,id'],
                 'title' => ['required', 'string', 'max:255'],
-                'slug' => ['required', 'string', 'max:255', 'unique:kb_articles, slug, ' . $kbArticle->id],
                 'excerpt' => ['nullable', 'string'],
                 'content' => ['required', 'string'],
                 'image' => ['nullable', 'image', 'max:2048'],
@@ -377,7 +316,7 @@ class KbArticleController extends Controller
                 'serial_message' => ['nullable', 'string'],
                 'meta_title' => ['nullable', 'string', 'max:255'],
                 'meta_description' => ['nullable', 'string', 'max:500'],
-                'meta_keywords' => ['nullable', 'string', 'max:255'],
+                'meta_keywords' => ['nullable', 'string'],
                 'allow_comments' => ['boolean'],
                 'is_featured' => ['boolean'],
             ]);
@@ -445,17 +384,6 @@ class KbArticleController extends Controller
     public function destroy(KbArticle $kbArticle): RedirectResponse
     {
         try {
-            // Rate limiting
-            $key = 'kb-articles-destroy:' . (Auth::id() ?? request()->ip());
-            if (RateLimiter::tooManyAttempts($key, 3)) {
-                Log::warning('Rate limit exceeded for KB article deletion', [
-                    'user_id' => Auth::id(),
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                return back()->with('error', 'Too many requests. Please try again later.');
-            }
-            RateLimiter::hit($key, 300); // 5 minutes
             // Authorization check
             $user = Auth::user();
             if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {

@@ -41,33 +41,22 @@ class ProgrammingLanguageRequest extends FormRequest
      */
     public function rules(): array
     {
-        $language = $this->route('programming_language');
-        $languageId = $language && is_object($language) && property_exists($language, 'id') ? $language->id : null;
-        $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
+        $languageId = $this->route('programming_language')?->id;
+        $isUpdate = $languageId !== null;
+        
         return [
             'name' => [
-                'required',
+                $isUpdate ? 'nullable' : 'required',
                 'string',
                 'max:100',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
-                $isUpdate
-                    ? Rule::unique('programming_languages', 'name')->ignore($languageId)
-                    : 'unique:programming_languages, name',
+                Rule::unique('programming_languages', 'name')->ignore($languageId),
             ],
-            'extension' => [
-                'required',
+            'file_extension' => [
+                'nullable',
                 'string',
                 'max:10',
-                'regex:/^[a-zA-Z0-9]+$/',
-                $isUpdate
-                    ? Rule::unique('programming_languages', 'extension')->ignore($languageId)
-                    : 'unique:programming_languages, extension',
-            ],
-            'mime_type' => [
-                'required',
-                'string',
-                'max:100',
-                'regex:/^[a-zA-Z0-9\s\-\/]+$/',
+                'regex:/^[a-zA-Z0-9.-]+$/',
             ],
             'description' => [
                 'nullable',
@@ -81,7 +70,7 @@ class ProgrammingLanguageRequest extends FormRequest
                 'mimes:java,cpp,c,cs,go,rb,swift,kt,scala,rs,html,css,json,xml,yaml,yml,md,txt',
                 'max:10240', // 10MB
             ],
-            'template_content' => [
+            'license_template' => [
                 'nullable',
                 'string',
                 'max:50000',
@@ -145,15 +134,13 @@ class ProgrammingLanguageRequest extends FormRequest
             'name.required' => 'Programming language name is required.',
             'name.unique' => 'A programming language with this name already exists.',
             'name.regex' => 'Name contains invalid characters.',
-            'extension.required' => 'File extension is required.',
-            'extension.unique' => 'A programming language with this extension already exists.',
-            'extension.regex' => 'Extension can only contain letters and numbers.',
-            'mime_type.required' => 'MIME type is required.',
-            'mime_type.regex' => 'MIME type contains invalid characters.',
+            'file_extension.required' => 'File extension is required.',
+            'file_extension.unique' => 'A programming language with this extension already exists.',
+            'file_extension.regex' => 'Extension can only contain letters and numbers.',
             'description.regex' => 'Description contains invalid characters.',
             'template_file.mimes' => 'Template file must be a valid programming language file.',
             'template_file.max' => 'Template file size must not exceed 10MB.',
-            'template_content.max' => 'Template content must not exceed 50,000 characters.',
+            'license_template.max' => 'Template content must not exceed 50,000 characters.',
             'sort_order.min' => 'Sort order must be at least 0.',
             'sort_order.max' => 'Sort order must not exceed 9999.',
             'icon.regex' => 'Icon contains invalid characters.',
@@ -172,11 +159,10 @@ class ProgrammingLanguageRequest extends FormRequest
     {
         return [
             'name' => 'programming language name',
-            'extension' => 'file extension',
-            'mime_type' => 'MIME type',
+            'file_extension' => 'file extension',
             'description' => 'language description',
             'template_file' => 'template file',
-            'template_content' => 'template content',
+            'license_template' => 'template content',
             'is_active' => 'active status',
             'sort_order' => 'sort order',
             'icon' => 'language icon',
@@ -202,10 +188,10 @@ class ProgrammingLanguageRequest extends FormRequest
         ]);
         // Handle checkbox values
         $this->merge([
-            'is_active' => $this->has('is_active'),
-            'syntax_highlighting' => $this->has('syntax_highlighting'),
-            'auto_completion' => $this->has('auto_completion'),
-            'error_detection' => $this->has('error_detection'),
+            'is_active' => $this->boolean('is_active'),
+            'syntax_highlighting' => $this->boolean('syntax_highlighting'),
+            'auto_completion' => $this->boolean('auto_completion'),
+            'error_detection' => $this->boolean('error_detection'),
         ]);
         // Set default values
         $this->merge([

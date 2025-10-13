@@ -145,6 +145,18 @@ class EmailService
     }
 
     /**
+     * Send welcome email to new user.
+     *
+     * @param User $user
+     *
+     * @return bool
+     */
+    public function sendWelcomeEmail(User $user): bool
+    {
+        return $this->emailFacade->sendWelcomeEmail($user);
+    }
+
+    /**
      * Send new user notification.
      *
      * @param User $user

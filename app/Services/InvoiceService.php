@@ -216,6 +216,10 @@ class InvoiceService
             $invoice->status = 'paid';
             $invoice->paid_at = now();
             $invoice->save();
+            
+            // Activate license when invoice is paid
+            $this->activateLicenseOnPayment($invoice);
+            
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -508,5 +512,33 @@ class InvoiceService
         }
 
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+    }
+    
+    /**
+     * Activate license when invoice is paid
+     *
+     * @param Invoice $invoice
+     * @return void
+     */
+    private function activateLicenseOnPayment(Invoice $invoice): void
+    {
+        try {
+            if ($invoice->license) {
+                $invoice->license->update(['status' => 'active']);
+                
+                Log::info('License activated due to invoice payment', [
+                    'license_id' => $invoice->license->id,
+                    'license_key' => $invoice->license->license_key,
+                    'invoice_id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to activate license on payment', [
+                'error' => $e->getMessage(),
+                'invoice_id' => $invoice->id,
+                'license_id' => $invoice->license_id,
+            ]);
+        }
     }
 }

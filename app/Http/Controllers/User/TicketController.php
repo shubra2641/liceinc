@@ -656,8 +656,8 @@ class TicketController extends Controller
     private function sendTicketNotifications(Ticket $ticket): void
     {
         try {
-            // Send notification to user (if authenticated)
-            if (Auth::check() && $ticket->user) {
+            // Send notification to user (if has user and email)
+            if ($ticket->user && $ticket->user->email) {
                 $this->emailService->sendTicketCreated($ticket->user, [
                     'ticket_id' => $ticket->id,
                     'ticket_subject' => $ticket->subject,
@@ -673,7 +673,7 @@ class TicketController extends Controller
                 'ticket_priority' => $ticket->priority,
             ]);
         } catch (Exception $e) {
-            Log::error('Failed to send ticket notifications: ' . $e->getMessage());
+            // Silent fail in production
         }
     }
     /**
@@ -693,7 +693,7 @@ class TicketController extends Controller
                 'reply_message' => $message,
             ]);
         } catch (Exception $e) {
-            Log::error('Failed to send reply notification: ' . $e->getMessage());
+            // Silent fail in production
         }
     }
     /**

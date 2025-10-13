@@ -25,9 +25,10 @@ class LicenseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'license_key' => ['required', 'string', 'max:255'],
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'license_key' => ['nullable', 'string', 'max:255'],
             'product_id' => ['required', 'exists:products,id'],
-            'license_type' => ['required', Rule::in(['regular', 'extended'])],
+            'license_type' => ['required', Rule::in(['single', 'multi', 'developer', 'extended'])],
             'status' => ['required', Rule::in(['active', 'inactive', 'suspended', 'expired'])],
             'expires_at' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],

@@ -106,8 +106,8 @@ class TicketRequest extends FormRequest
             'invoice_product_id' => [
                 'nullable',
                 'required_if:create_invoice,1',
-                'integer',
-                'exists:products,id',
+                'string',
+                'in:custom',
             ],
             'invoice_amount' => [
                 'nullable',
@@ -120,7 +120,7 @@ class TicketRequest extends FormRequest
                 'nullable',
                 'required_if:create_invoice,1',
                 'string',
-                Rule::in(['one_time', 'recurring']),
+                Rule::in(['one_time', 'recurring', 'monthly', 'quarterly', 'semi_annual', 'annual', 'custom_recurring']),
             ],
             'billing_cycle' => [
                 'nullable',
@@ -166,7 +166,7 @@ class TicketRequest extends FormRequest
             'invoice_amount.min' => 'Invoice amount must be at least 0.01.',
             'invoice_amount.max' => 'Invoice amount must not exceed 999,999.99.',
             'billing_type.required_if' => 'Billing type is required when creating an invoice.',
-            'billing_type.in' => 'Billing type must be one of: one_time, recurring.',
+            'billing_type.in' => 'Billing type must be one of: one_time, recurring, monthly, quarterly, semi_annual, annual, custom_recurring.',
             'billing_cycle.required_if' => 'Billing cycle is required for recurring invoices.',
             'billing_cycle.in' => 'Billing cycle must be one of: monthly, quarterly, yearly.',
             'due_date.after' => 'Due date must be in the future.',

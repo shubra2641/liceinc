@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
@@ -197,7 +198,11 @@ class InvoiceController extends Controller
                 }
                 $productId = $license->product_id;
             }
+            // Generate invoice number if not provided
+            $invoiceNumber = $validated['invoice_number'] ?? $this->generateInvoiceNumber();
+            
             $invoice = Invoice::create([
+                'invoice_number' => $invoiceNumber,
                 'user_id' => $validated['user_id'],
                 'license_id' => $isCustomInvoice ? null : $validated['license_id'],
                 'product_id' => $productId,
@@ -207,13 +212,13 @@ class InvoiceController extends Controller
                 'status' => $validated['status'],
                 'due_date' => $validated['due_date'],
                 'paid_at' => $validated['status'] === 'paid' ? ($validated['paid_at'] ?? now()) : null,
-                'notes' => $validated['notes'],
+                'notes' => $validated['notes'] ?? null,
                 'metadata' => $isCustomInvoice ? [
                     'custom_invoice' => true,
-                    'custom_invoice_type' => $validated['custom_invoice_type'],
-                    'custom_product_name' => $validated['custom_product_name'],
-                    'expiration_date' => $validated['custom_invoice_type'] !== 'one_time'
-                        ? $validated['expiration_date']
+                    'custom_invoice_type' => $validated['custom_invoice_type'] ?? null,
+                    'custom_product_name' => $validated['custom_product_name'] ?? null,
+                    'expiration_date' => ($validated['custom_invoice_type'] ?? 'one_time') !== 'one_time'
+                        ? ($validated['expiration_date'] ?? null)
                         : null,
                 ] : null,
             ]);
@@ -363,7 +368,22 @@ class InvoiceController extends Controller
     {
         $users = User::select('id', 'name', 'email')->get();
         $invoice->load(['user', 'license.product']);
-        return view('admin.invoices.edit', ['invoice' => $invoice, 'users' => $users]);
+        
+        // Extract custom invoice data from metadata
+        $customData = [];
+        if ($invoice->metadata && isset($invoice->metadata['custom_invoice'])) {
+            $customData = [
+                'custom_invoice_type' => $invoice->metadata['custom_invoice_type'] ?? null,
+                'custom_product_name' => $invoice->metadata['custom_product_name'] ?? null,
+                'expiration_date' => $invoice->metadata['expiration_date'] ?? null,
+            ];
+        }
+        
+        return view('admin.invoices.edit', [
+            'invoice' => $invoice, 
+            'users' => $users,
+            'customData' => $customData
+        ]);
     }
     /**
      * Update the specified invoice in storage.
@@ -493,5 +513,25 @@ class InvoiceController extends Controller
                 ->back()
                 ->with('error', 'Failed to delete invoice. Please try again.');
         }
+    }
+
+    /**
+     * Generate unique invoice number
+     */
+    private function generateInvoiceNumber(): string
+    {
+        $maxAttempts = 10;
+        $attempts = 0;
+        
+        do {
+            $invoiceNumber = 'INV-' . strtoupper(Str::random(8));
+            $attempts++;
+            
+            if ($attempts > $maxAttempts) {
+                throw new \Exception('Failed to generate unique invoice number after ' . $maxAttempts . ' attempts');
+            }
+        } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
+        
+        return $invoiceNumber;
     }
 }

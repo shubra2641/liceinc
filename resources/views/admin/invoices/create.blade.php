@@ -192,7 +192,7 @@
                 </label>
                                 <input type="date" class="form-control @error('due_date') is-invalid @enderror" 
                                        id="due_date" name="due_date" 
-                       value="{{ old('due_date', now()->addDays(30)->format('Y-m-d')) }}">
+                       value="{{ old('due_date', now()->addDays(1)->format('Y-m-d')) }}">
                                 @error('due_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

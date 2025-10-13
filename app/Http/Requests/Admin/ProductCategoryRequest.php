@@ -50,7 +50,7 @@ class ProductCategoryRequest extends FormRequest
                 'string',
                 'max:255',
                 $isUpdate ? Rule::unique('product_categories', 'name')->ignore($categoryId)
-                    : 'unique:product_categories, name',
+                    : 'unique:product_categories,name',
                 'regex:/^[a-zA-Z0-9\s\-_&]+$/',
             ],
             'slug' => [
@@ -59,7 +59,7 @@ class ProductCategoryRequest extends FormRequest
                 'max:255',
                 $isUpdate
                     ? Rule::unique('product_categories', 'slug')->ignore($categoryId)
-                    : 'unique:product_categories, slug',
+                    : 'unique:product_categories,slug',
                 'regex:/^[a-z0-9\-_]+$/',
             ],
             'description' => [
@@ -71,7 +71,7 @@ class ProductCategoryRequest extends FormRequest
             'image' => [
                 'nullable',
                 'image',
-                'mimes:jpeg, png, jpg, gif, webp',
+                'mimes:jpeg,png,jpg,gif,webp',
                 'max:2048',
                 'dimensions:max_width=1920, max_height=1080',
             ],

@@ -30,6 +30,19 @@ class InvoiceEmailHandler
     }
 
     /**
+     * Send invoice created notification to user.
+     */
+    public function sendInvoiceCreated(User $user, Invoice $invoice): bool
+    {
+        return $this->emailService->sendToUser($user, 'user_invoice_created', [
+            'invoice_number' => $invoice->invoice_number,
+            'invoice_amount' => $invoice->amount,
+            'due_date' => $invoice->due_date,
+            'currency' => $invoice->currency,
+        ]);
+    }
+
+    /**
      * Send invoice approaching due date notification to user.
      *
      * @param array<string, mixed> $invoiceData

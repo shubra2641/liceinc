@@ -59,22 +59,6 @@
                                 @enderror
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="slug" class="form-label">
-                                    <i class="fas fa-link text-purple me-1"></i>
-                                    {{ trans('app.Slug') }}
-                                </label>
-                                <input type="text" class="form-control @error('slug') is-invalid @enderror" 
-                                       id="slug" name="slug" value="{{ old('slug') }}" 
-                                       placeholder="{{ trans('app.Auto Generated from Name') }}">
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    {{ trans('app.Leave empty to auto generate') }}
-                                </div>
-                                @error('slug')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
                         </div>
 
                         <div class="mb-3">

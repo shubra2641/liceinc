@@ -82,7 +82,7 @@
                                 <select class="form-select @error('license_id') is-invalid @enderror" 
                                         id="license_id" name="license_id" required>
                                     <option value="">{{ trans('app.Select License') }}</option>
-                                    <option value="custom" {{ old('license_id', $invoice->license_id) == 'custom' ? 'selected' : '' }}>
+                                    <option value="custom" {{ old('license_id', $invoice->license_id === null ? 'custom' : $invoice->license_id) == 'custom' ? 'selected' : '' }}>
                                         {{ trans('app.Custom Invoice (No License)') }}
                                     </option>
                                     @if($invoice->license)
@@ -220,7 +220,7 @@
                 </div>
 
                 <!-- Custom Invoice Fields -->
-                @if($invoice->license_id == 'custom' || old('license_id') == 'custom')
+                @if($invoice->license_id === null || old('license_id') == 'custom')
                 <div class="card mb-4" id="custom_invoice_fields">
                     <div class="card-header bg-success text-white">
                         <h5 class="card-title mb-0">
@@ -238,22 +238,22 @@
                                 </label>
                                 <select class="form-select @error('custom_invoice_type') is-invalid @enderror" 
                                         id="custom_invoice_type" name="custom_invoice_type">
-                                    <option value="one_time" {{ old('custom_invoice_type', $invoice->custom_invoice_type) == 'one_time' ? 'selected' : '' }}>
+                                    <option value="one_time" {{ old('custom_invoice_type', $customData['custom_invoice_type'] ?? '') == 'one_time' ? 'selected' : '' }}>
                                         {{ trans('app.One-time Payment') }}
                                     </option>
-                                    <option value="monthly" {{ old('custom_invoice_type', $invoice->custom_invoice_type) == 'monthly' ? 'selected' : '' }}>
+                                    <option value="monthly" {{ old('custom_invoice_type', $customData['custom_invoice_type'] ?? '') == 'monthly' ? 'selected' : '' }}>
                                         {{ trans('app.Monthly') }}
                                     </option>
-                                    <option value="quarterly" {{ old('custom_invoice_type', $invoice->custom_invoice_type) == 'quarterly' ? 'selected' : '' }}>
+                                    <option value="quarterly" {{ old('custom_invoice_type', $customData['custom_invoice_type'] ?? '') == 'quarterly' ? 'selected' : '' }}>
                                         {{ trans('app.Quarterly') }}
                                     </option>
-                                    <option value="semi_annual" {{ old('custom_invoice_type', $invoice->custom_invoice_type) == 'semi_annual' ? 'selected' : '' }}>
+                                    <option value="semi_annual" {{ old('custom_invoice_type', $customData['custom_invoice_type'] ?? '') == 'semi_annual' ? 'selected' : '' }}>
                                         {{ trans('app.Semi-Annual') }}
                                     </option>
-                                    <option value="annual" {{ old('custom_invoice_type', $invoice->custom_invoice_type) == 'annual' ? 'selected' : '' }}>
+                                    <option value="annual" {{ old('custom_invoice_type', $customData['custom_invoice_type'] ?? '') == 'annual' ? 'selected' : '' }}>
                                         {{ trans('app.Annual') }}
                                     </option>
-                                    <option value="custom_recurring" {{ old('custom_invoice_type', $invoice->custom_invoice_type) == 'custom_recurring' ? 'selected' : '' }}>
+                                    <option value="custom_recurring" {{ old('custom_invoice_type', $customData['custom_invoice_type'] ?? '') == 'custom_recurring' ? 'selected' : '' }}>
                                         {{ trans('app.Custom Recurring') }}
                                     </option>
                                 </select>
@@ -269,7 +269,7 @@
                                 </label>
                                 <input type="text" class="form-control @error('custom_product_name') is-invalid @enderror" 
                                        id="custom_product_name" name="custom_product_name" 
-                                       value="{{ old('custom_product_name', $invoice->custom_product_name) }}" 
+                                       value="{{ old('custom_product_name', $customData['custom_product_name'] ?? '') }}" 
                                        placeholder="{{ trans('app.Enter product or service description') }}">
                                 @error('custom_product_name')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -283,7 +283,7 @@
                                 </label>
                                 <input type="date" class="form-control @error('expiration_date') is-invalid @enderror" 
                                        id="expiration_date" name="expiration_date" 
-                                       value="{{ old('expiration_date', $invoice->expiration_date ? $invoice->expiration_date->format('Y-m-d') : '') }}">
+                                       value="{{ old('expiration_date', $customData['expiration_date'] ?? '') }}">
                                 <div class="form-text">
                                     <i class="fas fa-info-circle me-1"></i>
                                     {{ trans('app.Leave empty for one-time payment') }}

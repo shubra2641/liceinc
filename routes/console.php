@@ -53,23 +53,23 @@ if (app()->runningInConsole()) {
  * and overdue invoices with comprehensive error handling and logging.
  */
 
-// Process renewal and overdue invoices daily
-Schedule::command('invoices:process')
+// Process all cron tasks daily
+Schedule::command('cron:process')
     ->dailyAt(INVOICE_PROCESSING_TIME)
-    ->description('Process renewal and overdue invoices daily at ' . INVOICE_PROCESSING_TIME)
+    ->description('Process all cron tasks daily at ' . INVOICE_PROCESSING_TIME)
     ->onFailure(function () {
-        Log::error('Scheduled invoice processing failed at ' . now());
+        Log::error('Scheduled cron processing failed at ' . now());
     })
     ->onSuccess(function () {
         // No success logging as per Envato rules
     });
 
 // Process overdue invoices hourly for urgent cases
-Schedule::command('invoices:process --overdue')
+Schedule::command('cron:process --type=invoices')
     ->hourly()
-    ->description('Process overdue invoices hourly for urgent cases')
+    ->description('Process invoice statuses hourly for urgent cases')
     ->onFailure(function () {
-        Log::error('Scheduled overdue invoice processing failed at ' . now());
+        Log::error('Scheduled invoice processing failed at ' . now());
     })
     ->onSuccess(function () {
         // No success logging as per Envato rules

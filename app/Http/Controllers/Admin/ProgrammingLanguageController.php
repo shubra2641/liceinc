@@ -169,9 +169,7 @@ class ProgrammingLanguageController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug'] ?? Str::slug(
-                is_string($validated['name'] ?? null) ? $validated['name'] : ''
-            );
+            $validated['slug'] = Str::slug($validated['name']);
             ProgrammingLanguage::create($validated);
             DB::commit();
 
@@ -209,7 +207,7 @@ class ProgrammingLanguageController extends Controller
         $availableTemplates = ProgrammingLanguage::getAvailableTemplateFiles();
 
         return view('admin.programming-languages.show', [
-            'programming_language' => $programming_language,
+            'programmingLanguage' => $programming_language,
             'availableTemplates' => $availableTemplates
         ]);
     }
@@ -253,9 +251,17 @@ class ProgrammingLanguageController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug'] ?? Str::slug(
-                is_string($validated['name'] ?? null) ? $validated['name'] : ''
-            );
+            
+            // Keep existing slug if name is not provided
+            if (empty($validated['name'])) {
+                $validated['name'] = $programming_language->name;
+            }
+            
+            // Only update slug if name is provided and different
+            if (!empty($validated['name']) && $validated['name'] !== $programming_language->name) {
+                $validated['slug'] = Str::slug($validated['name']);
+            }
+            
             $programming_language->update($validated);
             DB::commit();
 

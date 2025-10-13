@@ -10,7 +10,6 @@ use App\Models\TicketCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -115,19 +114,11 @@ class TicketCategoryController extends Controller
      */
     public function store(TicketCategoryRequest $request): RedirectResponse
     {
-        // Rate limiting for category creation
-        $key = 'ticket-category-create:' . $request->ip();
-        if (RateLimiter::tooManyAttempts($key, 5)) {
-            return redirect()->back()
-                ->with('error', 'Too many creation attempts. Please try again later.');
-        }
-        RateLimiter::hit($key, 300); // 5 minutes
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug'] ?? Str::slug(
-                is_string($validated['name'] ?? null) ? $validated['name'] : ''
-            );
+            // Generate slug automatically from name
+            $validated['slug'] = Str::slug($validated['name']);
             TicketCategory::create($validated);
             DB::commit();
             return redirect()->route('admin.ticket-categories.index')
@@ -243,22 +234,16 @@ class TicketCategoryController extends Controller
      */
     public function update(TicketCategoryRequest $request, TicketCategory $ticket_category): RedirectResponse
     {
-        // Rate limiting for category updates
-        $key = sprintf('ticket-category-update:%s', $request->ip()); // security-ignore: SQL_STRING_CONCAT
-        if (RateLimiter::tooManyAttempts($key, 10)) {
-            return redirect()->back()
-                ->with('error', 'Too many update attempts. Please try again later.');
-        }
-        RateLimiter::hit($key, 300); // 5 minutes
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-            $validated['slug'] = $validated['slug'] ?? Str::slug(
-                is_string($validated['name'] ?? null) ? $validated['name'] : ''
-            );
+            // Keep existing slug (don't change it)
+            $validated['slug'] = $ticket_category->slug;
+            
             $ticket_category->update($validated);
+            $ticket_category->refresh(); // Refresh the model to get updated data
             DB::commit();
-            return redirect()->route('admin.ticket-categories.index')
+            return redirect()->route('admin.ticket-categories.edit', $ticket_category)
                 ->with('success', 'Ticket category updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();

@@ -144,7 +144,7 @@ class LicenseApiController extends Controller
                 if ($license->status === 'active') {
                     // Check if license has expired
                     if ($license->license_expires_at && $license->license_expires_at->isPast()) {
-                        $this->logApiVerificationAttempt($request, false, 'License has expired', 'api');
+                        $this->logFailedVerification($request, 'License has expired');
 
                         return response()->json([
                             'valid' => false,
@@ -158,7 +158,7 @@ class LicenseApiController extends Controller
                     $databaseValid = true;
                     $verificationMethod = 'database_only';
                 } elseif ($license->status === 'suspended') {
-                    $this->logApiVerificationAttempt($request, false, 'License is suspended', 'api');
+                    $this->logFailedVerification($request, 'License is suspended');
 
                     return response()->json([
                         'valid' => false,
@@ -166,7 +166,7 @@ class LicenseApiController extends Controller
                         'error_code' => 'LICENSE_SUSPENDED',
                     ], 403);
                 } else {
-                    $this->logApiVerificationAttempt($request, false, 'License is not active', 'api');
+                    $this->logFailedVerification($request, 'License is not active');
 
                     return response()->json([
                         'valid' => false,
@@ -194,7 +194,7 @@ class LicenseApiController extends Controller
                     $verificationMethod = 'envato_auto_created';
                 } else {
                     // Both invalid - reject and log error
-                    $this->logApiVerificationAttempt($request, false, 'License not found', 'api');
+                    $this->logFailedVerification($request, 'License not found');
 
                     return response()->json([
                         'valid' => false,
@@ -213,14 +213,10 @@ class LicenseApiController extends Controller
                     try {
                         $domainStr = is_string($domain) ? $domain : '';
                         $this->registerDomainForLicense($license, $domainStr);
-                        $this->logApiVerificationAttempt($request, true, 'Domain registered automatically', 'api', [
-                            'domain' => $domain,
-                            'license_id' => $license->id,
-                            'mode' => $isTestMode ? 'test' : 'auto_register',
-                        ]);
+                        // Domain registered successfully
                     } catch (\Exception $e) {
                         // Domain limit exceeded
-                        $this->logApiVerificationAttempt($request, false, $e->getMessage(), 'api');
+                        $this->logFailedVerification($request, $e->getMessage());
 
                         return response()->json([
                             'valid' => false,
@@ -238,12 +234,7 @@ class LicenseApiController extends Controller
                     // Verification mode: Verify domain authorization
                     $domainStr = is_string($domain) ? $domain : '';
                     if (! $this->verifyDomain($license, $domainStr)) {
-                        $this->logApiVerificationAttempt(
-                            $request,
-                            false,
-                            'Domain not authorized for this license',
-                            'api',
-                        );
+                        $this->logFailedVerification($request, 'Domain not authorized for this license');
 
                         return response()->json([
                             'valid' => false,
@@ -259,13 +250,7 @@ class LicenseApiController extends Controller
                     }
                 }
             }
-            // Step 6: Log successful verification
-            $this->logApiVerificationAttempt($request, true, 'License verified successfully', 'api', [
-                'license_id' => $license->id,
-                'verification_method' => $verificationMethod,
-                'envato_valid' => $envatoValid,
-                'database_valid' => $databaseValid,
-            ]);
+            // Step 6: Log successful verification (already done in logVerification)
             // Step 7: Log verification in database
             $domainForLog = is_string($domain) ? $domain : null;
             $this->logVerification($license, $domainForLog, $verificationMethod);
@@ -290,12 +275,16 @@ class LicenseApiController extends Controller
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('License verification failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'ip' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
+            
+            // Log failed verification
+            \App\Services\LicenseVerificationLogger::log(
+                purchaseCode: $request->purchase_code ?? 'unknown',
+                domain: $domain ?? 'unknown',
+                isValid: false,
+                message: 'License verification failed',
+                source: 'api',
+                errorDetails: $e->getMessage()
+            );
 
             return response()->json([
                 'valid' => false,
@@ -499,39 +488,6 @@ class LicenseApiController extends Controller
                          substr(md5(uniqid((string)mt_rand(), true)), 0, 8));
     }
 
-    /**
-     * Log API verification attempt.
-     *
-     * @param  ApiRequest  $request  The HTTP request
-     * @param  bool  $success  Whether the verification was successful
-     * @param  string  $message  The log message
-     * @param  string  $source  The verification source
-     * @param  array  $additionalData  Additional data to log
-     */
-    /**
-     * @param array<string, mixed> $additionalData
-     */
-    private function logApiVerificationAttempt(
-        LicenseVerifyRequest $request,
-        bool $success,
-        string $message,
-        string $source,
-        array $additionalData = [],
-    ): void {
-        $logData = [
-            'success' => $success,
-            'message' => $message,
-            'source' => $source,
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ];
-        if (! empty($additionalData)) {
-            $logData = array_merge($logData, $additionalData);
-        }
-        if (!$success) {
-            Log::warning('License verification attempt failed', $logData);
-        }
-    }
 
     /**
      * Sanitize output to prevent XSS attacks.
@@ -554,23 +510,28 @@ class LicenseApiController extends Controller
      */
     private function logVerification(License $license, ?string $domain, string $method): void
     {
-        $license->logs()->create([
-            'domain' => $domain ?? 'unknown',
-            'ip_address' => request()->ip(),
-            'serial' => $license->purchase_code,
-            'status' => 'success',
-            'user_agent' => request()->userAgent(),
-            'request_data' => [
-                'verification_method' => $method,
-                'domain' => $domain,
-                'ip' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ],
-            'response_data' => [
-                'valid' => true,
-                'method' => $method,
-            ],
-        ]);
+        \App\Services\LicenseVerificationLogger::log(
+            purchaseCode: $license->purchase_code,
+            domain: $domain ?? 'unknown',
+            isValid: true,
+            message: 'License verified successfully',
+            source: 'api',
+            responseData: ['method' => $method]
+        );
+    }
+
+    /**
+     * Log failed verification.
+     */
+    private function logFailedVerification(LicenseVerifyRequest $request, string $message): void
+    {
+        \App\Services\LicenseVerificationLogger::log(
+            purchaseCode: $request->purchase_code ?? 'unknown',
+            domain: $request->domain ?? 'unknown',
+            isValid: false,
+            message: $message,
+            source: 'api'
+        );
     }
 
     /**

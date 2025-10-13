@@ -188,6 +188,18 @@ class EmailFacade
         return $this->userHandler->sendNewUserNotification($user);
     }
 
+    /**
+     * Send welcome email to new user.
+     *
+     * @param User $user The new user
+     *
+     * @return bool True if email sent successfully
+     */
+    public function sendWelcomeEmail(User $user): bool
+    {
+        return $this->userHandler->sendWelcomeEmail($user);
+    }
+
     // License email methods
 
     /**
@@ -266,6 +278,20 @@ class EmailFacade
     }
 
     // Invoice email methods
+
+    /**
+     * Send invoice created notification email.
+     *
+     * @param User $user The user to send email to
+     * @param Invoice $invoice The invoice object
+     *\n     * @return bool True if email sent successfully
+     */
+    public function sendInvoiceCreated(
+        User $user,
+        Invoice $invoice
+    ): bool {
+        return $this->invoiceHandler->sendInvoiceCreated($user, $invoice);
+    }
 
     /**
      * Send invoice approaching due notification email.

@@ -416,7 +416,7 @@ class KbController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:kb_articles, slug',
             'content' => 'required|string',
-            'category_id' => 'required|exists:kb_categories, id',
+            'category_id' => 'required|exists:kb_categories,id',
             'status' => 'required|in:draft, published',
             'meta_description' => 'nullable|string|max:160',
             'tags' => 'nullable|string',
@@ -440,9 +440,9 @@ class KbController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:kb_articles, slug, ' . $article->id,
+            'slug' => 'required|string|max:255|unique:kb_articles,slug,' . $article->id,
             'content' => 'required|string',
-            'category_id' => 'required|exists:kb_categories, id',
+            'category_id' => 'required|exists:kb_categories,id',
             'status' => 'required|in:draft, published',
             'meta_description' => 'nullable|string|max:160',
             'tags' => 'nullable|string',

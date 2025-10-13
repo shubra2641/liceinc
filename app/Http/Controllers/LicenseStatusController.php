@@ -137,12 +137,14 @@ class LicenseStatusController extends Controller
                     is_string($email) ? $email : ''
                 );
                 if (! $license) {
-                    Log::warning('License not found', [
-                        'license_key' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
-                        'email' => $this->hashForLogging(is_string($email) ? $email : ''),
-                        'ip' => $ip,
-                        'user_agent' => $request->userAgent(),
-                    ]);
+                    // Log failed verification
+                    \App\Services\LicenseVerificationLogger::log(
+                        purchaseCode: is_string($licenseCode) ? $licenseCode : 'unknown',
+                        domain: 'website_check',
+                        isValid: false,
+                        message: 'License not found',
+                        source: 'website'
+                    );
                     return $this->errorResponse(
                         __('license_status.license_not_found'),
                         null,
@@ -168,13 +170,15 @@ class LicenseStatusController extends Controller
                 );
                 // Reset attempts on success
                 Cache::forget($key);
-                Log::debug('License status checked successfully', [
-                    'license_id' => $license->id,
-                    'license_key' => $this->hashForLogging(is_string($licenseCode) ? $licenseCode : ''),
-                    'email' => $this->hashForLogging(is_string($email) ? $email : ''),
-                    'status' => $status,
-                    'ip' => $ip,
-                ]);
+                
+                // Log successful verification
+                \App\Services\LicenseVerificationLogger::log(
+                    purchaseCode: $license->purchase_code ?? 'unknown',
+                    domain: 'website_check',
+                    isValid: true,
+                    message: 'License status checked successfully',
+                    source: 'website'
+                );
                 return $this->successResponse(
                     $licenseDetails,
                     __('license_status.license_found_success'),
@@ -183,18 +187,15 @@ class LicenseStatusController extends Controller
                 );
             });
         } catch (Throwable $e) {
-            Log::error('License check error', [
-                'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging(
-                    is_string($request->validated('license_key')) ? $request->validated('license_key') : ''
-                ),
-                'email' => $this->hashForLogging(
-                    is_string($request->validated('email')) ? $request->validated('email') : ''
-                ),
-                'ip' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+            // Log failed verification
+            \App\Services\LicenseVerificationLogger::log(
+                purchaseCode: is_string($request->validated('license_key')) ? $request->validated('license_key') : 'unknown',
+                domain: 'website_check',
+                isValid: false,
+                message: 'License check error: ' . $e->getMessage(),
+                source: 'website',
+                errorDetails: $e->getMessage()
+            );
             return $this->errorResponse(
                 __('license_status.unexpected_error'),
                 null,

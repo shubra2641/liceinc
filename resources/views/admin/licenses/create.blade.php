@@ -78,7 +78,11 @@
                                     <option value="">{{ trans('app.Select a Product') }}</option>
                                     @foreach($products as $product)
                                     <option value="{{ $product->id }}" 
-                                        {{ old('product_id') == $product->id ? 'selected' : '' }}>
+                                        {{ old('product_id') == $product->id ? 'selected' : '' }}
+                                        data-duration-days="{{ $product->duration_days ?? 365 }}"
+                                        data-support-days="{{ $product->support_days ?? 365 }}"
+                                        data-max-domains="{{ $product->max_domains ?? 1 }}"
+                                        data-license-type="{{ $product->license_type ?? 'single' }}">
                                         {{ $product->name }}
                                     </option>
                                     @endforeach

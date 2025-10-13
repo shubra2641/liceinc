@@ -49,9 +49,6 @@ class TicketCategoryRequest extends FormRequest
                 'string',
                 'max:255',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
-                $isUpdate
-                    ? Rule::unique('ticket_categories', 'name')->ignore($categoryId)
-                    : 'unique:ticket_categories, name',
             ],
             'description' => [
                 'nullable',
@@ -78,6 +75,12 @@ class TicketCategoryRequest extends FormRequest
                 'max:9999',
             ],
             'is_active' => [
+                'boolean',
+            ],
+            'requires_login' => [
+                'boolean',
+            ],
+            'requires_valid_purchase_code' => [
                 'boolean',
             ],
             'auto_assign' => [
@@ -124,6 +127,20 @@ class TicketCategoryRequest extends FormRequest
                 'string',
                 'max:2000',
                 'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
+            ],
+            'meta_title' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'meta_keywords' => [
+                'nullable',
+                'string',
+            ],
+            'meta_description' => [
+                'nullable',
+                'string',
+                'max:500',
             ],
         ];
     }
@@ -200,16 +217,26 @@ class TicketCategoryRequest extends FormRequest
             'template_content' => $this->input('template_content')
                 ? $this->sanitizeInput($this->input('template_content'))
                 : null,
+            'meta_title' => $this->input('meta_title')
+                ? $this->sanitizeInput($this->input('meta_title'))
+                : null,
+            'meta_keywords' => $this->input('meta_keywords')
+                ? $this->sanitizeInput($this->input('meta_keywords'))
+                : null,
+            'meta_description' => $this->input('meta_description')
+                ? $this->sanitizeInput($this->input('meta_description'))
+                : null,
         ]);
         // Handle checkbox values
         $this->merge([
-            'is_active' => $this->has('is_active'),
-            'auto_assign' => $this->has('auto_assign'),
-            'requires_approval' => $this->has('requires_approval'),
+            'is_active' => $this->boolean('is_active'),
+            'requires_login' => $this->boolean('requires_login'),
+            'requires_valid_purchase_code' => $this->boolean('requires_valid_purchase_code'),
+            'auto_assign' => $this->boolean('auto_assign'),
+            'requires_approval' => $this->boolean('requires_approval'),
         ]);
         // Set default values
         $this->merge([
-            'is_active' => $this->is_active ?? true,
             'sort_order' => $this->sort_order ?? 0,
             'priority' => $this->priority ?? 'medium',
         ]);

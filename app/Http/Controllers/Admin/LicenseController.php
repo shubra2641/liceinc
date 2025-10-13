@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LicenseRequest;
+use App\Models\Invoice;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\User;
@@ -14,6 +15,7 @@ use App\Services\InvoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use App\Helpers\SecureFileHelper;
 
@@ -74,7 +76,7 @@ class LicenseController extends Controller
     public function create(): View
     {
         $users = User::all();
-        $products = Product::all();
+        $products = Product::with(['category'])->get();
         $selectedUserId = null;
         return view('admin.licenses.create', [
             'users' => $users,
@@ -147,6 +149,11 @@ class LicenseController extends Controller
                     );
                 }
             }
+            // Generate license key if not provided
+            if (empty($validated['license_key'])) {
+                $validated['license_key'] = $this->generateLicenseKey();
+            }
+            
             $license = License::create($validated);
             // Automatically create initial invoice with specified payment status
             $invoiceService = app(InvoiceService::class);
@@ -165,13 +172,16 @@ class LicenseController extends Controller
                 if ($license->user) {
                     $this->emailService->sendLicenseCreated($license, $license->user);
                 }
-                // Send notification to admin
-                $this->emailService->sendAdminLicenseCreated([
-                    'license_key' => $license->license_key,
-                    'product_name' => $license->product->name ?? 'Unknown Product',
-                    'customer_name' => $license->user ? $license->user->name : 'Unknown User',
-                    'customer_email' => $license->user ? $license->user->email : 'No email provided',
-                ]);
+                
+                // Send notification to admin only if user exists
+                if ($license->user) {
+                    $this->emailService->sendAdminLicenseCreated([
+                        'license_key' => $license->license_key,
+                        'product_name' => $license->product->name ?? 'Unknown Product',
+                        'customer_name' => $license->user->name,
+                        'customer_email' => $license->user->email,
+                    ]);
+                }
             } catch (\Exception $e) {
                 // Log email errors but don't fail license creation
                 Log::warning('Email notification failed during license creation', [
@@ -423,4 +433,27 @@ class LicenseController extends Controller
         };
         return response()->stream($callback, 200, $headers);
     }
+    
+    /**
+     * Generate a unique license key
+     *
+     * @return string
+     */
+    private function generateLicenseKey(): string
+    {
+        $maxAttempts = 10;
+        $attempts = 0;
+        
+        do {
+            $licenseKey = 'LIC-' . strtoupper(Str::random(12));
+            $attempts++;
+            
+            if ($attempts > $maxAttempts) {
+                throw new \Exception('Failed to generate unique license key after ' . $maxAttempts . ' attempts');
+            }
+        } while (License::where('license_key', $licenseKey)->exists());
+        
+        return $licenseKey;
+    }
+    
 }

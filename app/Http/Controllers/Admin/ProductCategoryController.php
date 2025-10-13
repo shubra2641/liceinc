@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -168,6 +169,10 @@ class ProductCategoryController extends Controller
             DB::beginTransaction();
             // Get validated data from Request class
             $validated = $request->validated();
+            
+            // Generate slug automatically from name
+            $validated['slug'] = Str::slug($validated['name']);
+            
             // Handle image upload with security validation
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
@@ -330,6 +335,14 @@ class ProductCategoryController extends Controller
             DB::beginTransaction();
             // Get validated data from Request class
             $validated = $request->validated();
+            
+            // Keep existing slug if name is not provided or same
+            if (empty($validated['name']) || $validated['name'] === $product_category->name) {
+                $validated['slug'] = $product_category->slug;
+            } else {
+                $validated['slug'] = Str::slug($validated['name']);
+            }
+            
             // Handle image upload with security validation
             if ($request->hasFile('image')) {
                 $image = $request->file('image');

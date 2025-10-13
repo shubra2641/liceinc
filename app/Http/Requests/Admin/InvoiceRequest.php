@@ -53,8 +53,28 @@ class InvoiceRequest extends FormRequest
                 'integer',
                 'exists:products,id',
             ],
-            'invoice_number' => [
+            'type' => [
                 'required',
+                'string',
+                Rule::in(['initial', 'renewal', 'upgrade', 'custom']),
+            ],
+            'custom_invoice_type' => [
+                'nullable',
+                'string',
+                Rule::in(['one_time', 'monthly', 'quarterly', 'semi_annual', 'annual', 'three_years', 'lifetime']),
+            ],
+            'custom_product_name' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'expiration_date' => [
+                'nullable',
+                'date',
+                'after:today',
+            ],
+            'invoice_number' => [
+                'nullable',
                 'string',
                 'max:100',
                 'regex:/^[A-Z0-9\-]+$/',
@@ -81,7 +101,7 @@ class InvoiceRequest extends FormRequest
             'due_date' => [
                 'required',
                 'date',
-                'after:today',
+                'after_or_equal:today',
             ],
             'paid_at' => [
                 'nullable',
@@ -159,6 +179,12 @@ class InvoiceRequest extends FormRequest
             'user_id.required' => 'User selection is required.',
             'user_id.exists' => 'Selected user does not exist.',
             'product_id.exists' => 'Selected product does not exist.',
+            'type.required' => 'Invoice type is required.',
+            'type.in' => 'Invoice type must be one of: initial, renewal, upgrade, custom.',
+            'custom_invoice_type.in' => 'Custom invoice type must be one of: one_time, monthly, quarterly, semi_annual, annual, three_years, lifetime.',
+            'custom_product_name.max' => 'Product name cannot exceed 255 characters.',
+            'expiration_date.date' => 'Expiration date must be a valid date.',
+            'expiration_date.after' => 'Expiration date must be in the future.',
             'invoice_number.required' => 'Invoice number is required.',
             'invoice_number.unique' => 'This invoice number already exists.',
             'invoice_number.regex' => 'Invoice number can only contain uppercase letters, numbers, and hyphens.',

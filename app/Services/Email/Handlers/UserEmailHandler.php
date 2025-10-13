@@ -45,6 +45,14 @@ class UserEmailHandler implements EmailHandlerInterface
     }
 
     /**
+     * Send welcome email to new user.
+     */
+    public function sendWelcomeEmail(User $user): bool
+    {
+        return $this->sendUserWelcome($user);
+    }
+
+    /**
      * Send email verification email.
      */
     public function sendEmailVerification(User $user, string $verificationUrl): bool

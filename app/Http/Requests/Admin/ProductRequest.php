@@ -55,26 +55,24 @@ class ProductRequest extends FormRequest
                 'string',
                 'max:255',
                 'regex:/^[a-z0-9\-_]+$/',
-                $isUpdate ? Rule::unique('products', 'slug')->ignore($productId) : 'unique:products, slug',
+                $isUpdate ? Rule::unique('products', 'slug')->ignore($productId) : 'unique:products,slug',
             ],
             'description' => [
                 'required',
                 'string',
                 'max:2000',
-                'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
             'short_description' => [
                 'nullable',
                 'string',
                 'max:500',
-                'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
             'category_id' => [
                 'required',
                 'integer',
                 'exists:product_categories,id',
             ],
-            'programming_language_id' => [
+            'programming_language' => [
                 'nullable',
                 'integer',
                 'exists:programming_languages,id',
@@ -98,10 +96,10 @@ class ProductRequest extends FormRequest
                 'dimensions:max_width=2048,max_height=2048',
             ],
             'version' => [
-                'required',
+                'nullable',
                 'string',
                 'max:50',
-                'regex:/^[0-9]+\.[0-9]+\.[0-9]+$/',
+                'regex:/^[0-9]+(\.[0-9]+)*$/',
             ],
             'is_active' => [
                 'boolean',
@@ -128,19 +126,16 @@ class ProductRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:255',
-                'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
             'meta_description' => [
                 'nullable',
                 'string',
                 'max:500',
-                'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
             'meta_keywords' => [
                 'nullable',
                 'string',
                 'max:500',
-                'regex:/^[a-zA-Z0-9\s\-_., !?@#$%&*()]+$/',
             ],
             'envato_item_id' => [
                 'nullable',
@@ -167,6 +162,108 @@ class ProductRequest extends FormRequest
                 'nullable',
                 'url',
                 'max:500',
+            ],
+            'short_description' => [
+                'nullable',
+                'string',
+                'max:500',
+            ],
+            'support_days' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:3650', // 10 years
+            ],
+            'stock_quantity' => [
+                'nullable',
+                'integer',
+                'min:-1', // -1 for unlimited
+            ],
+            'license_type' => [
+                'nullable',
+                'string',
+                'in:single,multi,developer,unlimited,regular,extended',
+            ],
+            'renewal_price' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:999999.99',
+            ],
+            'renewal_period' => [
+                'nullable',
+                'string',
+                'in:monthly,quarterly,semi_annual,annual,three_years,lifetime',
+            ],
+            'duration_days' => [
+                'nullable',
+                'integer',
+                'min:1',
+                'max:3650', // 10 years
+            ],
+            'tax_rate' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:100',
+            ],
+            'extended_support_price' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:999999.99',
+            ],
+            'extended_support_days' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:3650',
+            ],
+            'renewal_reminder_days' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:365',
+            ],
+            'status' => [
+                'nullable',
+                'string',
+                'in:active,inactive,draft,archived',
+            ],
+            'stock' => [
+                'nullable',
+                'integer',
+                'min:-1',
+            ],
+            'supported_until' => [
+                'nullable',
+                'date',
+                'after:today',
+            ],
+            'extended_supported_until' => [
+                'nullable',
+                'date',
+                'after:today',
+            ],
+            'features' => [
+                'nullable',
+                'string',
+            ],
+            'requirements' => [
+                'nullable',
+                'string',
+            ],
+            'installation_guide' => [
+                'nullable',
+                'string',
+            ],
+            'tags' => [
+                'nullable',
+                'string',
+            ],
+            'gallery_images' => [
+                'nullable',
+                'array',
             ],
         ];
     }
@@ -263,16 +360,20 @@ class ProductRequest extends FormRequest
             'meta_keywords' => $this->input('meta_keywords')
                 ? $this->sanitizeInput($this->input('meta_keywords'))
                 : null,
+            'features' => $this->input('features') ? $this->sanitizeInput($this->input('features')) : null,
+            'requirements' => $this->input('requirements') ? $this->sanitizeInput($this->input('requirements')) : null,
+            'installation_guide' => $this->input('installation_guide') ? $this->sanitizeInput($this->input('installation_guide')) : null,
+            'tags' => $this->input('tags') ? $this->sanitizeInput($this->input('tags')) : null,
         ]);
         // Handle checkbox values
         $this->merge([
-            'is_active' => $this->has('is_active'),
-            'is_featured' => $this->has('is_featured'),
-            'is_popular' => $this->has('is_popular'),
-            'is_downloadable' => $this->has('is_downloadable'),
-            'requires_domain' => $this->has('requires_domain'),
-            'kb_access_required' => $this->has('kb_access_required'),
-            'auto_renewal' => $this->has('auto_renewal'),
+            'is_active' => $this->boolean('is_active'),
+            'is_featured' => $this->boolean('is_featured'),
+            'is_popular' => $this->boolean('is_popular'),
+            'is_downloadable' => $this->boolean('is_downloadable'),
+            'requires_domain' => $this->boolean('requires_domain'),
+            'kb_access_required' => $this->boolean('kb_access_required'),
+            'auto_renewal' => $this->boolean('auto_renewal'),
         ]);
         // Set default values
         $this->merge([

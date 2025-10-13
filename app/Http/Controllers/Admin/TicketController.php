@@ -242,10 +242,20 @@ class TicketController extends Controller
                     'currency' => config('app.currency', 'USD'),
                     'type' => ($billingType && $billingType !== 'one_time') ? 'recurring' : 'one_time',
                     'metadata' => $metadata,
+                    'invoice_number' => 'INV-' . strtoupper(uniqid()),
                 ]);
                 $ticketData['invoice_id'] = $invoice->id;
             }
-            Ticket::create($ticketData);
+            $ticket = Ticket::create($ticketData);
+            
+            // Send email notifications
+            $this->sendTicketNotifications($ticket);
+            
+            // Send invoice email if invoice was created
+            if ($ticket->invoice_id && $ticket->user && $ticket->user->email) {
+                $this->emailService->sendInvoiceCreated($ticket->user, $ticket->invoice);
+            }
+            
             DB::commit();
 
             return redirect()->route('admin.tickets.index')->with('success', 'Ticket created successfully for user');
@@ -260,6 +270,35 @@ class TicketController extends Controller
             return redirect()->back()
                 ->withErrors(['error' => 'Failed to create ticket. Please try again.'])
                 ->withInput();
+        }
+    }
+
+    /**
+     * Send ticket creation notifications.
+     *
+     * @param  Ticket  $ticket  The created ticket
+     */
+    private function sendTicketNotifications(Ticket $ticket): void
+    {
+        try {
+            // Send notification to user (if has user and email)
+            if ($ticket->user && $ticket->user->email) {
+                $this->emailService->sendTicketCreated($ticket->user, [
+                    'ticket_id' => $ticket->id,
+                    'ticket_subject' => $ticket->subject,
+                    'ticket_status' => $ticket->status,
+                ]);
+            }
+            // Send notification to admin
+            $this->emailService->sendAdminTicketCreated([
+                'ticket_id' => $ticket->id,
+                'ticket_subject' => $ticket->subject,
+                'customer_name' => $ticket->user ? $ticket->user->name : 'Guest User',
+                'customer_email' => $ticket->user ? $ticket->user->email : 'No email provided',
+                'ticket_priority' => $ticket->priority,
+            ]);
+        } catch (\Exception $e) {
+            // Silent fail in production
         }
     }
 

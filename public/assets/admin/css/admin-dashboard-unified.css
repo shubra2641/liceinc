@@ -1487,6 +1487,10 @@ body {
   display: none !important;
 }
 
+.visible-field {
+  display: block !important;
+}
+
 /* Admin Section Styles */
 .admin-section {
   margin-bottom: 2rem;
@@ -3175,6 +3179,18 @@ code {
 }
 
 /* Settings Page Tab Buttons */
+.admin-tabs-nav {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  padding: 0;
+  border: none;
+  border-bottom: 2px solid #e9ecef;
+  background: transparent;
+}
+
 .admin-settings-page .admin-tabs-nav {
   display: flex;
   flex-wrap: wrap;
@@ -5538,8 +5554,8 @@ textarea[name='license_template'].readonly-template,
 /* Responsive Design */
 @media (width <= 768px) {
   .admin-programming-languages-edit .admin-tabs-nav {
-    flex-direction: column;
-    gap: 0.25rem;
+    flex-direction: row;
+    gap: 0.5rem;
   }
 
   .admin-programming-languages-edit .admin-tab-btn {

@@ -528,6 +528,9 @@
         <div class="admin-section-header">
             <h2><i class="fas fa-table me-2"></i>{{ trans('app.detailed_reports') }}</h2>
             <div class="admin-section-actions">
+                <button class="admin-btn admin-btn-outline-primary admin-btn-sm" data-action="export-detailed-reports">
+                    <i class="fas fa-download me-1"></i>{{ trans('app.Export All') }}
+                </button>
                 <span class="admin-badge admin-badge-info">{{ trans('app.activity_logs') }}</span>
             </div>
         </div>
@@ -542,6 +545,9 @@
                                     <i class="fas fa-trophy me-2"></i>{{ trans('app.top_products') }}
                                 </h3>
                                 <div class="d-flex align-items-center gap-2">
+                                    <button class="admin-btn admin-btn-outline-success admin-btn-sm" data-action="export-top-products">
+                                        <i class="fas fa-download me-1"></i>{{ trans('app.Export') }}
+                                    </button>
                                     <span class="admin-badge admin-badge-warning">{{ $topProducts->count() }} {{ trans('app.products') }}</span>
                                 </div>
                             </div>
@@ -601,6 +607,23 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- User Activity Log Table -->
+                <div class="col-lg-6">
+                    <div class="admin-card table-card">
+                        <div class="admin-section-content">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h3 class="admin-card-title">
+                                    <i class="fas fa-history me-2"></i>{{ trans('app.user_activity_log') }}
+                                </h3>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button class="admin-btn admin-btn-outline-info admin-btn-sm" data-action="export-activity-log">
+                                        <i class="fas fa-download me-1"></i>{{ trans('app.Export') }}
+                                    </button>
+                                    <span class="admin-badge admin-badge-info">{{ $recentActivities->count() }} {{ trans('app.activities') }}</span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="admin-card-content">
                             @if($recentActivities->count() > 0)
                             <div class="table-responsive">
@@ -680,6 +703,9 @@
                                     <i class="fas fa-shield-alt me-2"></i>{{ trans('app.blocked_ips_due_to_rate_limiting') }}
                                 </h3>
                                 <div class="d-flex align-items-center gap-2">
+                                    <button class="admin-btn admin-btn-outline-danger admin-btn-sm" data-action="export-blocked-ips">
+                                        <i class="fas fa-download me-1"></i>{{ trans('app.Export') }}
+                                    </button>
                                     <span class="admin-badge admin-badge-danger">{{ $rateLimitedIPs->count() }} {{ trans('app.blocked') }}</span>
                                     @if($rateLimitedIPs->count() > 0)
                                     <button class="admin-btn admin-btn-outline-warning admin-btn-sm" data-action="clear-blocked-ips">
@@ -749,6 +775,53 @@
                                 </div>
                             </div>
                             @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Summary -->
+                <div class="col-lg-12">
+                    <div class="admin-card table-card">
+                        <div class="admin-section-content">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h3 class="admin-card-title">
+                                    <i class="fas fa-chart-line me-2"></i>{{ trans('app.financial_summary') }}
+                                </h3>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button class="admin-btn admin-btn-outline-success admin-btn-sm" data-action="export-financial-summary">
+                                        <i class="fas fa-download me-1"></i>{{ trans('app.Export') }}
+                                    </button>
+                                    <span class="admin-badge admin-badge-success">{{ trans('app.revenue_analysis') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="admin-card-content">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <div class="text-center p-3 border rounded">
+                                        <h4 class="text-success mb-1">${{ number_format($invoiceStatusTotals['paid'] ?? 0, 2) }}</h4>
+                                        <small class="text-muted">{{ trans('app.total_paid') }}</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center p-3 border rounded">
+                                        <h4 class="text-warning mb-1">${{ number_format($invoiceStatusTotals['pending'] ?? 0, 2) }}</h4>
+                                        <small class="text-muted">{{ trans('app.pending_amount') }}</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center p-3 border rounded">
+                                        <h4 class="text-danger mb-1">${{ number_format($invoiceStatusTotals['overdue'] ?? 0, 2) }}</h4>
+                                        <small class="text-muted">{{ trans('app.overdue_amount') }}</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center p-3 border rounded">
+                                        <h4 class="text-info mb-1">{{ $totalLicenses }}</h4>
+                                        <small class="text-muted">{{ trans('app.total_licenses') }}</small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

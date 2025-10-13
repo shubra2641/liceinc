@@ -133,7 +133,6 @@ class KbCategoryController extends Controller
             $result = $this->transaction(function () use ($request) {
                 $validated = $this->validateRequest($request, [
                     'name' => 'required|string|max:255',
-                    'slug' => 'nullable|string|max:255|unique:kb_categories,slug',
                     'description' => 'nullable|string',
                     'parent_id' => 'nullable|exists:kb_categories,id',
                     'product_id' => 'nullable|exists:products,id',
@@ -142,7 +141,7 @@ class KbCategoryController extends Controller
                     'serial_message' => 'nullable|string',
                     'meta_title' => 'nullable|string|max:255',
                     'meta_description' => 'nullable|string|max:500',
-                    'meta_keywords' => 'nullable|string|max:255',
+                    'meta_keywords' => 'nullable|string',
                     'icon' => 'nullable|string|max:255',
                     'is_featured' => 'sometimes|boolean',
                     'is_active' => 'sometimes|boolean',
@@ -150,12 +149,8 @@ class KbCategoryController extends Controller
                 ]);
                 // Sanitize input data
                 $validated = $this->sanitizeCategoryData($validated);
-                // Generate slug if not provided
-                $validated['slug'] = $validated['slug'] ?: Str::slug(
-                    is_string($validated['name'])
-                        ? $validated['name']
-                        : ''
-                );
+                // Generate slug automatically from name
+                $validated['slug'] = Str::slug($validated['name']);
                 $category = KbCategory::create($validated);
                 Log::debug('Knowledge base category created successfully', [
                     'category_id' => $category->id,
@@ -279,7 +274,6 @@ class KbCategoryController extends Controller
             $result = $this->transaction(function () use ($request, $kbCategory) {
                 $validated = $this->validateRequest($request, [
                     'name' => 'required|string|max:255',
-                    'slug' => 'required|string|max:255|unique:kb_categories,slug,' . $kbCategory->id,
                     'description' => 'nullable|string',
                     'parent_id' => 'nullable|exists:kb_categories,id',
                     'product_id' => 'nullable|exists:products,id',
@@ -288,7 +282,7 @@ class KbCategoryController extends Controller
                     'serial_message' => 'nullable|string',
                     'meta_title' => 'nullable|string|max:255',
                     'meta_description' => 'nullable|string|max:500',
-                    'meta_keywords' => 'nullable|string|max:255',
+                    'meta_keywords' => 'nullable|string',
                     'icon' => 'nullable|string|max:255',
                     'is_featured' => 'sometimes|boolean',
                     'is_active' => 'sometimes|boolean',
@@ -296,6 +290,8 @@ class KbCategoryController extends Controller
                 ]);
                 // Sanitize input data
                 $validated = $this->sanitizeCategoryData($validated);
+                // Keep existing slug (don't change it)
+                $validated['slug'] = $kbCategory->slug;
                 $kbCategory->update($validated);
                 Log::debug('Knowledge base category updated successfully', [
                     'category_id' => $kbCategory->id,

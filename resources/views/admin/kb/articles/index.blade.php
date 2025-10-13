@@ -227,12 +227,6 @@
                         </td>
                         <td class="text-center">
                             <div class="btn-group-vertical btn-group-sm" role="group">
-                                <a href="{{ route('admin.kb-articles.show', $article) }}"
-                                   class="btn btn-outline-info btn-sm">
-                                    <i class="fas fa-eye me-1"></i>
-                                    {{ trans('app.View') }}
-                                </a>
-
                                 <a href="{{ route('admin.kb-articles.edit', $article) }}"
                                    class="btn btn-outline-primary btn-sm">
                                     <i class="fas fa-edit me-1"></i>
@@ -240,7 +234,7 @@
                                 </a>
 
                                 <form action="{{ route('admin.kb-articles.destroy', $article) }}" method="POST"
-                                      class="d-inline" data-confirm="delete-article">
+                                      class="d-inline" data-confirm="Are you sure you want to delete this article?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-outline-danger btn-sm w-100">
@@ -290,8 +284,5 @@
         </div>
     </div>
 </div>
-
-<!-- JavaScript is now handled by admin-categories.js -->
-
 
 @endsection

@@ -129,8 +129,8 @@ class UserController extends Controller
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => Hash::make(is_string($validated['password'] ?? null) ? $validated['password'] : ''),
-                'email_verified_at' => now(),
+                'password' => Hash::make($validated['password']),
+                'email_verified_at' => $validated['email_verified'] ? now() : null,
                 'firstname' => $validated['firstname'],
                 'lastname' => $validated['lastname'],
                 'companyname' => $validated['companyname'],
@@ -142,18 +142,30 @@ class UserController extends Controller
                 'postcode' => $validated['postcode'],
                 'country' => $validated['country'],
             ]);
+            
             // Assign role
             $role = Role::where('name', $validated['role'])->first();
             if ($role) {
                 $user->assignRole($role);
             }
+            
             // Send welcome email if requested
             if ($validated['send_welcome_email'] ?? false) {
-                // TODO: Implement welcome email functionality
-                Log::info('Welcome email requested but not implemented yet', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
-                ]);
+                try {
+                    $this->emailService->sendWelcomeEmail($user);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to send welcome email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+                }
+            }
+            
+            // Send activation email if email is not verified
+            if (!($validated['email_verified'] ?? false)) {
+                try {
+                    $verificationUrl = route('verification.verify', ['id' => $user->id, 'hash' => sha1($user->email)]);
+                    $this->emailService->sendEmailVerification($user, $verificationUrl);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to send activation email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+                }
             }
             DB::commit();
             return redirect()->route('admin.users.show', $user)

@@ -309,27 +309,16 @@
                 @else
                 <div class="admin-card">
                     <div class="admin-card-content">
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="fas fa-file-contract admin-card-icon me-3"></i>
-                            <div class="flex-grow-1">
-                                <h4 class="admin-card-title">{{ __('app.license_template') }}</h4>
-                                <p class="admin-card-subtitle">{{ __('app.no_custom_template_available') }}</p>
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="fas fa-file-contract text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
                             </div>
-                            <span class="admin-badge admin-badge-info">
-                                <i class="fas fa-info-circle me-1"></i>{{ __('app.default') }}
-                            </span>
-                        </div>
-
-                        <div class="admin-empty-state">
-                            <div class="admin-empty-state-content">
-                                <i class="fas fa-file-contract admin-empty-state-icon"></i>
-                                <h4 class="admin-empty-state-title">{{ __('app.No_template_available') }}</h4>
-                                <p class="admin-empty-state-description">{{ __('app.create_template_to_get_started') }}</p>
-                                <a href="{{ route('admin.programming-languages.edit', $programmingLanguage) }}" class="admin-btn admin-btn-primary admin-btn-m">
-                                    <i class="fas fa-plus me-2"></i>
-                                    {{ __('app.create_template') }}
-                                </a>
-                            </div>
+                            <h4 class="text-muted mb-3">{{ __('app.No_template_available') }}</h4>
+                            <p class="text-muted mb-4">{{ __('app.create_template_to_get_started') }}</p>
+                            <a href="{{ route('admin.programming-languages.edit', $programmingLanguage) }}" class="admin-btn admin-btn-primary admin-btn-lg">
+                                <i class="fas fa-plus me-2"></i>
+                                {{ __('app.create_template') }}
+                            </a>
                         </div>
                     </div>
                 </div>
