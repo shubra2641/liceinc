@@ -36,6 +36,7 @@ class UpdateService
      * before performing any update operations.
      *
      * @param  string  $version  Current version to backup
+     *
      * @return string Path to created backup file
      *
      * @throws \Exception If backup creation fails
@@ -130,6 +131,7 @@ class UpdateService
      *
      * @param  string  $targetVersion  Target version to update to
      * @param  string  $currentVersion  Current system version
+     *
      * @return array<string, mixed> Array of completed update steps
      *
      * @throws \Exception If any update step fails
@@ -239,6 +241,7 @@ class UpdateService
      * the most recent backup if found.
      *
      * @param  string  $version  Version to find backup for
+     *
      * @return string|null Path to backup file or null if not found
      */
     public function findBackupForVersion(string $version): ?string
@@ -261,6 +264,7 @@ class UpdateService
      * Parses backup filename to extract the version number using regex pattern.
      *
      * @param  string  $filename  Backup filename
+     *
      * @return string|null Extracted version or null if not found
      */
     public function extractVersionFromBackupName(string $filename): ?string
@@ -281,6 +285,7 @@ class UpdateService
      * @param  string  $targetVersion  Target version to rollback to
      * @param  string  $currentVersion  Current system version
      * @param  string  $backupPath  Path to backup file to restore from
+     *
      * @return array<string, mixed> Array of completed rollback steps
      *
      * @throws \Exception If rollback operation fails
@@ -428,6 +433,7 @@ class UpdateService
      *
      * @param  string  $targetVersion  Target version to validate
      * @param  string  $currentVersion  Current system version
+     *
      * @return array{valid: bool, error?: string} Validation result
      */
     public function validateUpdateRequest(string $targetVersion, string $currentVersion): array
@@ -469,6 +475,7 @@ class UpdateService
      *
      * @param  string  $targetVersion  Target version to rollback to
      * @param  string  $currentVersion  Current system version
+     *
      * @return array{valid: bool, error?: string, backup_path?: string} Validation result
      */
     public function validateRollbackRequest(string $targetVersion, string $currentVersion): array

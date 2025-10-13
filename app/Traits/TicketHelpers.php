@@ -27,8 +27,8 @@ trait TicketHelpers
      * @param array $ticketData
      * @param string $successRoute
      * @param string $successMessage
+     *
      * @return RedirectResponse
-     * 
      */
     protected function handleTicketCreation(
         array $ticketData,
@@ -58,8 +58,8 @@ trait TicketHelpers
      *
      * @param Ticket $ticket
      * @param string $viewName
+     *
      * @return View
-     * 
      */
     protected function handleTicketDisplay(Ticket $ticket, string $viewName): View
     {
@@ -127,7 +127,8 @@ trait TicketHelpers
      * @param bool $isAdmin
      * @return RedirectResponse
      */
-    protected function updateTicket(\Illuminate\Http\Request $request, Ticket $ticket, bool $isAdmin = false): RedirectResponse
+    protected function updateTicket(\Illuminate\Http\Request $request, Ticket $ticket,
+        bool $isAdmin = false): RedirectResponse
     {
         try {
             if (!$isAdmin && !$this->canModifyTicket($ticket)) {
@@ -161,7 +162,8 @@ trait TicketHelpers
      * @param string $redirectRoute
      * @return RedirectResponse
      */
-    protected function destroyTicket(Ticket $ticket, bool $isAdmin = false, string $redirectRoute = 'tickets.index'): RedirectResponse
+    protected function destroyTicket(Ticket $ticket, bool $isAdmin = false,
+        string $redirectRoute = 'tickets.index'): RedirectResponse
     {
         try {
             if (!$isAdmin && !$this->canModifyTicket($ticket)) {
@@ -317,6 +319,7 @@ trait TicketHelpers
      * Validate ticket update data.
      *
      * @param \Illuminate\Http\Request $request
+     *
      * @return array
      */
     protected function validateTicketUpdateData(\Illuminate\Http\Request $request): array
@@ -355,20 +358,25 @@ trait TicketHelpers
      * Validate reply data.
      *
      * @param \Illuminate\Http\Request $request
+     * @param array $additionalRules
      * @return array
      */
-    protected function validateReplyData(\Illuminate\Http\Request $request): array
+    protected function validateReplyData(\Illuminate\Http\Request $request, array $additionalRules = []): array
     {
-        return $request->validate([
+        $baseRules = [
             'message' => ['required', 'string', 'min:1', 'max:10000'],
             'action' => ['nullable', 'in:reply_and_close'],
-        ]);
+        ];
+
+        $rules = array_merge($baseRules, $additionalRules);
+        return $request->validate($rules);
     }
 
     /**
      * Check if ticket should be closed based on request.
      *
      * @param \Illuminate\Http\Request $request
+     *
      * @return bool
      */
     protected function shouldCloseTicket(\Illuminate\Http\Request $request): bool
@@ -407,8 +415,8 @@ trait TicketHelpers
      *
      * @param array $filters
      * @param int $perPage
+     *
      * @return Collection
-     * 
      */
     protected function getTicketsWithFilters(array $filters = [], int $perPage = 15): Collection
     {

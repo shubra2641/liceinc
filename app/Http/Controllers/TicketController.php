@@ -293,51 +293,8 @@ class TicketController extends Controller
         return $this->replyToTicket($request, $ticket, false, true, false);
     }
 
-    /**
-     * Validate ticket update data.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return array<string, mixed> The validated data
-     *
-     * @throws \InvalidArgumentException When validation fails
-     */
-    private function validateTicketUpdateData(Request $request): array
-    {
-        $validated = $request->validate([
-            'subject' => ['sometimes', 'string', 'max:255'],
-            'priority' => ['sometimes', 'in:' . implode(', ', self::VALID_PRIORITIES)],
-            'status' => ['sometimes', 'in:' . implode(', ', self::VALID_STATUSES)],
-            'content' => ['sometimes', 'string'],
-        ]);
 
-        /**
- * @var array<string, mixed> $result
-*/
-        $result = $validated;
-        return $result;
-    }
-    /**
-     * Validate reply data.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return array<string, mixed> The validated data
-     */
-    private function validateReplyData(Request $request): array
-    {
-        $validated = $request->validate([
-            'message' => ['required', 'string'],
-            'close_ticket' => ['sometimes', 'boolean'],
-            'action' => ['sometimes', 'in:reply, reply_and_close'],
-        ]);
 
-        /**
- * @var array<string, mixed> $result
-*/
-        $result = $validated;
-        return $result;
-    }
     /**
      * Handle license registration for ticket.
      *
