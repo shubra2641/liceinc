@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+
 // use PayPal\PayPalServerSDK\PayPalServerSDK;
 // use PayPal\PayPalServerSDK\Orders\OrdersCreateRequest;
 
@@ -71,7 +72,7 @@ class PaymentSettingsController extends Controller
                     'webhook_url' => ''
                 ]);
             }
-            
+
             if (!$stripeSettings) {
                 $stripeSettings = new PaymentSetting([
                     'gateway' => 'stripe',
@@ -81,7 +82,7 @@ class PaymentSettingsController extends Controller
                     'webhook_url' => ''
                 ]);
             }
-            
+
             return view('admin.payment-settings.index', [
                 'paypalSettings' => $paypalSettings,
                 'stripeSettings' => $stripeSettings
@@ -92,7 +93,7 @@ class PaymentSettingsController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             // Return default settings on error
             $paypalSettings = new PaymentSetting([
                 'gateway' => 'paypal',
@@ -101,7 +102,7 @@ class PaymentSettingsController extends Controller
                 'credentials' => ['client_id' => '', 'client_secret' => ''],
                 'webhook_url' => ''
             ]);
-            
+
             $stripeSettings = new PaymentSetting([
                 'gateway' => 'stripe',
                 'is_enabled' => false,
@@ -109,7 +110,7 @@ class PaymentSettingsController extends Controller
                 'credentials' => ['publishable_key' => '', 'secret_key' => '', 'webhook_secret' => ''],
                 'webhook_url' => ''
             ]);
-            
+
             return view('admin.payment-settings.index', [
                 'paypalSettings' => $paypalSettings,
                 'stripeSettings' => $stripeSettings
@@ -381,5 +382,4 @@ class PaymentSettingsController extends Controller
             ];
         }
     }
-} 
- 
+}

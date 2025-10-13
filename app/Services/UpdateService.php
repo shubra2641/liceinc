@@ -45,8 +45,10 @@ class UpdateService
     {
         $backupDir = storage_path('app/backups');
 
-        if (! SecureFileHelper::isDirectory($backupDir)
-            && ! SecureFileHelper::createDirectory($backupDir, 0755, true)) {
+        if (
+            ! SecureFileHelper::isDirectory($backupDir)
+            && ! SecureFileHelper::createDirectory($backupDir, 0755, true)
+        ) {
             throw new \Exception('Failed to create backup directory');
         }
 

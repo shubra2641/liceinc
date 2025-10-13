@@ -147,7 +147,7 @@ class UserController extends Controller
             if ($role) {
                 $user->assignRole($role);
             }
-            
+
             // Send welcome email if requested
             if ($validated['send_welcome_email'] ?? false) {
                 try {
@@ -156,15 +156,20 @@ class UserController extends Controller
                     Log::warning('Failed to send welcome email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
                 }
             }
-            
+
             // Send activation email if email is not verified
             if (!($validated['email_verified'] ?? false)) {
                 try {
                     $verificationUrl = route('verification.verify', ['id' => $user->id, 'hash' => sha1($user->email)]);
                     $this->emailService->sendEmailVerification($user, $verificationUrl);
                 } catch (\Exception $e) {
-                    Log::warning('Failed to send activation email',
-                      ['user_id' => $user->id, 'error' => $e->getMessage()]);
+                    Log::warning(
+                        'Failed to send activation email',
+                        [
+                            'user_id' => $user->id,
+                            'error' => $e->getMessage()
+                        ]
+                    );
                 }
             }
             DB::commit();
@@ -514,5 +519,4 @@ class UserController extends Controller
             ], 404);
         }
     }
-} 
- 
+}
