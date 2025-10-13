@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Helpers;
 
 use App\Models\Setting;
@@ -13,6 +15,7 @@ class SettingHelper
      * @param mixed $value
      * @param string $type
      * @param string $version
+     *
      * @return Setting
      */
     public static function updateOrCreateSetting(string $key, $value, string $type = 'Lic general', string $version = '1.0.5'): Setting
@@ -47,6 +50,7 @@ class SettingHelper
      *
      * @param string $key
      * @param mixed $default
+     *
      * @return mixed
      */
     public static function getSetting(string $key, $default = null)
@@ -60,6 +64,7 @@ class SettingHelper
      * Clean duplicate settings for a specific key
      *
      * @param string $key
+     *
      * @return int Number of deleted duplicates
      */
     public static function cleanDuplicates(string $key): int

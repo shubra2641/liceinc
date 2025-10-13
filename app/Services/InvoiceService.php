@@ -518,6 +518,7 @@ class InvoiceService
      * Activate license when invoice is paid
      *
      * @param Invoice $invoice
+     *
      * @return void
      */
     private function activateLicenseOnPayment(Invoice $invoice): void

@@ -77,6 +77,7 @@ class LicenseStatusController extends Controller
      * Display license status results in Blade template.
      *
      * @param  LicenseStatusRequest  $request  The current HTTP request instance
+     *
      * @return View The license status results view
      */
     public function showResults(LicenseStatusRequest $request): View
