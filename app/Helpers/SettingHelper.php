@@ -18,11 +18,15 @@ class SettingHelper
      *
      * @return Setting
      */
-    public static function updateOrCreateSetting(string $key, $value, string $type = 'Lic general', string $version = '1.0.5'): Setting
-    {
+    public static function updateOrCreateSetting(
+        string $key,
+        $value,
+        string $type = 'Lic general',
+        string $version = '1.0.5'
+    ): Setting {
         // Find the FIRST (oldest) setting with this key
         $setting = Setting::where('key', $key)->orderBy('id', 'asc')->first();
-        
+
         if ($setting) {
             // Update existing setting
             $setting->update([
@@ -31,7 +35,7 @@ class SettingHelper
                 'version' => $version,
                 'last_updated_at' => now()
             ]);
-            
+
             return $setting;
         } else {
             // Create new setting
@@ -44,7 +48,7 @@ class SettingHelper
             ]);
         }
     }
-    
+
     /**
      * Get a setting value safely
      *
@@ -56,10 +60,10 @@ class SettingHelper
     public static function getSetting(string $key, $default = null)
     {
         $setting = Setting::where('key', $key)->orderBy('id', 'asc')->first();
-        
+
         return $setting ? $setting->value : $default;
     }
-    
+
     /**
      * Clean duplicate settings for a specific key
      *
@@ -70,25 +74,25 @@ class SettingHelper
     public static function cleanDuplicates(string $key): int
     {
         $settings = Setting::where('key', $key)->orderBy('id', 'asc')->get();
-        
+
         if ($settings->count() <= 1) {
             return 0;
         }
-        
+
         // Keep the FIRST (oldest) one
         $first = $settings->first();
         $duplicates = $settings->skip(1);
-        
+
         $deletedCount = $duplicates->count();
-        
+
         // Delete duplicates
-        $duplicates->each(function($setting) {
+        $duplicates->each(function ($setting) {
             $setting->delete();
         });
-        
+
         return $deletedCount;
     }
-    
+
     /**
      * Clean all duplicate settings
      *
@@ -97,17 +101,17 @@ class SettingHelper
     public static function cleanAllDuplicates(): array
     {
         $summary = [];
-        
+
         // Get all unique keys
         $keys = Setting::distinct()->pluck('key');
-        
+
         foreach ($keys as $key) {
             $deletedCount = self::cleanDuplicates($key);
             if ($deletedCount > 0) {
                 $summary[$key] = $deletedCount;
             }
         }
-        
+
         return $summary;
     }
 }

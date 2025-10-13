@@ -85,7 +85,9 @@ class LicenseStatusController extends Controller
         try {
             // Check rate limiting
             if ($this->isRateLimited($request)) {
-                return $this->showError(__('license_status.verification_error') . ': Too many attempts. Please try again later.');
+                return $this->showError(
+                    __('license_status.verification_error') . ': Too many attempts. Please try again later.'
+                );
             }
 
             // Validate input
@@ -117,7 +119,6 @@ class LicenseStatusController extends Controller
                 'validationErrors' => null,
                 'success' => true,
             ]);
-
         } catch (Throwable $e) {
             Log::error('License check error', [
                 'error' => $e->getMessage(),
@@ -168,7 +169,7 @@ class LicenseStatusController extends Controller
     {
         $status = $this->getLicenseStatus($license);
         $licenseType = $this->determineLicenseType($license);
-        
+
         return [
             'license_key' => $license->license_key,
             'purchase_code' => $license->purchase_code,
@@ -285,7 +286,7 @@ class LicenseStatusController extends Controller
                 );
                 // Reset attempts on success
                 Cache::forget($key);
-                
+
                 // Log successful verification
                 \App\Services\LicenseVerificationLogger::log(
                     purchaseCode: $license->purchase_code ?? 'unknown',
@@ -449,8 +450,8 @@ class LicenseStatusController extends Controller
      */
     private function determineLicenseType(License $license): string
     {
-        return $license->purchase_code && strlen($license->purchase_code) > 10 
-            ? __('license_status.envato') 
+        return $license->purchase_code && strlen($license->purchase_code) > 10
+            ? __('license_status.envato')
             : __('license_status.custom');
     }
     /**
@@ -459,12 +460,12 @@ class LicenseStatusController extends Controller
     private function getLicenseStatus(License $license): string
     {
         if ($license->status === 'active') {
-            return $license->license_expires_at?->isPast() 
+            return $license->license_expires_at?->isPast()
                 ? __('license_status.expired')
                 : __('license_status.active');
         }
 
-        return match($license->status) {
+        return match ($license->status) {
             'inactive' => __('license_status.inactive'),
             'suspended' => __('license_status.revoked'),
             'expired' => __('license_status.expired'),
