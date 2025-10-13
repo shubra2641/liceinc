@@ -30,7 +30,7 @@ class CronStatusCommand extends Command
         $this->displayLicenseStatus();
         $this->newLine();
         
-        // Invoice Status  
+        // Invoice Status
         $this->info('💰 Invoice Status:');
         $this->displayInvoiceStatus();
         $this->newLine();

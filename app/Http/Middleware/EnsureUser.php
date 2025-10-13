@@ -114,8 +114,18 @@ class EnsureUser
             throw new InvalidArgumentException('User object must have email property or method');
         }
         // Check if user has email_verified_at attribute (for Eloquent models)
+        // Note: email_verified_at can be null, so we just check if the attribute exists
         if (! isset($user->email_verified_at) && ! method_exists($user, 'getEmailVerifiedAt')) {
-            throw new InvalidArgumentException('User object must have email_verified_at property or method');
+            // For Eloquent models, check if the attribute is in the model's fillable or casts
+            if ($user instanceof \Illuminate\Database\Eloquent\Model) {
+                $fillable = $user->getFillable();
+                $casts = $user->getCasts();
+                if (! in_array('email_verified_at', $fillable) && ! array_key_exists('email_verified_at', $casts)) {
+                    throw new InvalidArgumentException('User object must have email_verified_at property or method');
+                }
+            } else {
+                throw new InvalidArgumentException('User object must have email_verified_at property or method');
+            }
         }
     }
     /**

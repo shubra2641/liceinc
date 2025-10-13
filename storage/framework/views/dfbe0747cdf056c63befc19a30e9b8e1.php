@@ -1,20 +1,20 @@
-@extends('layouts.user')
+<?php $__env->startSection('title', trans('app.page_title')); ?>
+<?php $__env->startSection('page-title', trans('app.page_title')); ?>
+<?php $__env->startSection('page-subtitle', trans('app.page_subtitle')); ?>
 
-@section('title', trans('app.page_title'))
-@section('page-title', trans('app.page_title'))
-@section('page-subtitle', trans('app.page_subtitle'))
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="user-dashboard-container">
     <!-- Header Section -->
     <div class="user-card">
         <div class="user-card-header">
             <div class="user-card-title">
                 <i class="fas fa-shield-alt"></i>
-                {{ trans('app.check_title') }}
+                <?php echo e(trans('app.check_title')); ?>
+
             </div>
             <p class="user-card-subtitle">
-                {{ trans('app.check_description') }}
+                <?php echo e(trans('app.check_description')); ?>
+
             </p>
         </div>
 
@@ -24,103 +24,110 @@
                 <!-- License Check -->
                 <div class="user-stat-card">
                     <div class="user-stat-header">
-                        <div class="user-stat-title">{{ trans('app.license_check') }}</div>
+                        <div class="user-stat-title"><?php echo e(trans('app.license_check')); ?></div>
                         <div class="user-stat-icon blue">
                             <i class="fas fa-shield-alt"></i>
                         </div>
                     </div>
                     <div class="user-stat-value" id="licenseStatusValue">
-                        @if(isset($success) && $success && isset($licenseData))
-                            {{ $licenseData['status'] ?? '-' }}
-                        @else
+                        <?php if(isset($success) && $success && isset($licenseData)): ?>
+                            <?php echo e($licenseData['status'] ?? '-'); ?>
+
+                        <?php else: ?>
                             -
-                        @endif
+                        <?php endif; ?>
                     </div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ trans('app.current_status') }}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400"><?php echo e(trans('app.current_status')); ?></p>
                 </div>
 
                 <!-- License Type -->
                 <div class="user-stat-card">
                     <div class="user-stat-header">
-                        <div class="user-stat-title">{{ trans('app.license_type') }}</div>
+                        <div class="user-stat-title"><?php echo e(trans('app.license_type')); ?></div>
                         <div class="user-stat-icon green">
                             <i class="fas fa-key"></i>
                         </div>
                     </div>
                     <div class="user-stat-value" id="licenseTypeValue">
-                        @if(isset($success) && $success && isset($licenseData))
-                            {{ $licenseData['license_type'] ?? '-' }}
-                        @else
+                        <?php if(isset($success) && $success && isset($licenseData)): ?>
+                            <?php echo e($licenseData['license_type'] ?? '-'); ?>
+
+                        <?php else: ?>
                             -
-                        @endif
+                        <?php endif; ?>
                     </div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ trans('app.license_category') }}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400"><?php echo e(trans('app.license_category')); ?></p>
                 </div>
 
                 <!-- Days Remaining -->
                 <div class="user-stat-card">
                     <div class="user-stat-header">
-                        <div class="user-stat-title">{{ trans('app.days_remaining') }}</div>
+                        <div class="user-stat-title"><?php echo e(trans('app.days_remaining')); ?></div>
                         <div class="user-stat-icon yellow">
                             <i class="fas fa-calendar"></i>
                         </div>
                     </div>
                     <div class="user-stat-value" id="daysRemainingValue">
-                        @if(isset($success) && $success && isset($licenseData))
-                            {{ $licenseData['days_remaining'] ?? '-' }}
-                        @else
+                        <?php if(isset($success) && $success && isset($licenseData)): ?>
+                            <?php echo e($licenseData['days_remaining'] ?? '-'); ?>
+
+                        <?php else: ?>
                             -
-                        @endif
+                        <?php endif; ?>
                     </div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ trans('app.expiration_info') }}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400"><?php echo e(trans('app.expiration_info')); ?></p>
                 </div>
 
                 <!-- Domains Used -->
                 <div class="user-stat-card">
                     <div class="user-stat-header">
-                        <div class="user-stat-title">{{ trans('app.domains_used') }}</div>
+                        <div class="user-stat-title"><?php echo e(trans('app.domains_used')); ?></div>
                         <div class="user-stat-icon purple">
                             <i class="fas fa-globe"></i>
                         </div>
                     </div>
                     <div class="user-stat-value" id="domainsUsedValue">
-                        @if(isset($success) && $success && isset($licenseData))
-                            {{ $licenseData['used_domains'] ?? '0' }}/{{ $licenseData['max_domains'] ?? '0' }}
-                        @else
+                        <?php if(isset($success) && $success && isset($licenseData)): ?>
+                            <?php echo e($licenseData['used_domains'] ?? '0'); ?>/<?php echo e($licenseData['max_domains'] ?? '0'); ?>
+
+                        <?php else: ?>
                             -
-                        @endif
+                        <?php endif; ?>
                     </div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ trans('app.usage_info') }}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400"><?php echo e(trans('app.usage_info')); ?></p>
                 </div>
             </div>
 
             <!-- License Check Form -->
-            @if(!isset($success) || !$success)
+            <?php if(!isset($success) || !$success): ?>
             <div id="licenseCheckFormCard" class="user-card">
                 <div class="user-card-header">
                     <div class="user-card-title">
                         <i class="fas fa-search"></i>
-                        {{ trans('app.check_license') }}
+                        <?php echo e(trans('app.check_license')); ?>
+
                     </div>
-                    <p class="user-card-subtitle">{{ trans('app.enter_license_details') }}</p>
+                    <p class="user-card-subtitle"><?php echo e(trans('app.enter_license_details')); ?></p>
                 </div>
                 <div class="user-card-content">
-                    <form id="licenseCheckForm" class="register-form license-status-form" action="{{ route('license.status.show.results') }}" method="POST">
-                        @csrf
+                    <form id="licenseCheckForm" class="register-form license-status-form" action="<?php echo e(route('license.status.show.results')); ?>" method="POST">
+                        <?php echo csrf_field(); ?>
                         <div class="form-fields-grid">
                             <!-- License Code -->
                             <div class="form-field-group">
                                 <label for="license_key" class="form-label">
                                     <i class="fas fa-key"></i>
-                                    {{ trans('app.license_code') }}
+                                    <?php echo e(trans('app.license_code')); ?>
+
                                 </label>
                                 <div class="form-input-wrapper">
                                     <input type="text" id="license_key" name="license_key" required
                                         class="form-input"
-                                        placeholder="{{ trans('app.license_code_placeholder') }}">
+                                        placeholder="<?php echo e(trans('app.license_code_placeholder')); ?>">
                                 </div>
                                 <p class="form-help-text">
-                                    {{ trans('app.license_code_example') }}
+                                    <?php echo e(trans('app.license_code_example')); ?>
+
                                 </p>
                             </div>
 
@@ -128,51 +135,54 @@
                             <div class="form-field-group">
                                 <label for="email" class="form-label">
                                     <i class="fas fa-envelope"></i>
-                                    {{ trans('app.email') }}
+                                    <?php echo e(trans('app.email')); ?>
+
                                 </label>
                                 <div class="form-input-wrapper">
                                     <input type="email" id="email" name="email" required
                                         class="form-input"
-                                        placeholder="{{ trans('app.email_placeholder') }}">
+                                        placeholder="<?php echo e(trans('app.email_placeholder')); ?>">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Submit Button -->
                         <button type="submit" id="checkButton" class="form-submit-button">
-                            <span class="button-text">{{ trans('app.check_button') }}</span>
+                            <span class="button-text"><?php echo e(trans('app.check_button')); ?></span>
                             <i class="fas fa-spinner fa-spin button-loading hidden"></i>
                         </button>
                     </form>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
             <!-- Loading Spinner -->
             <div id="loadingSpinner" class="user-card">
                 <div class="user-card-header">
                     <div class="user-card-title">
                         <i class="fas fa-clock"></i>
-                        {{ trans('app.checking_license') }}
+                        <?php echo e(trans('app.checking_license')); ?>
+
                     </div>
                 </div>
                 <div class="user-card-content">
                     <div class="user-loading-container">
                         <div class="user-loading-spinner"></div>
-                        <p class="user-loading-text">{{ trans('app.checking_license') }}</p>
+                        <p class="user-loading-text"><?php echo e(trans('app.checking_license')); ?></p>
                     </div>
                 </div>
             </div>
 
             <!-- License Details -->
-            @if(isset($success) && $success && isset($licenseData))
+            <?php if(isset($success) && $success && isset($licenseData)): ?>
             <div id="licenseDetails" class="user-card">
                 <div class="user-card-header">
                     <div class="user-card-title">
                         <i class="fas fa-check-circle"></i>
-                        {{ trans('app.license_found') }}
+                        <?php echo e(trans('app.license_found')); ?>
+
                     </div>
-                    <p class="user-card-subtitle">{{ trans('app.license_details_info') }}</p>
+                    <p class="user-card-subtitle"><?php echo e(trans('app.license_details_info')); ?></p>
                 </div>
                 <div class="user-card-content">
                     <!-- Detailed Information -->
@@ -184,18 +194,19 @@
                                     <i class="fas fa-shield-alt"></i>
                                 </div>
                                 <div class="license-info-title">
-                                    <h3>{{ trans('app.license_information') }}</h3>
-                                    <p>{{ trans('app.license_details_subtitle') }}</p>
+                                    <h3><?php echo e(trans('app.license_information')); ?></h3>
+                                    <p><?php echo e(trans('app.license_details_subtitle')); ?></p>
                                 </div>
                             </div>
                             <div class="license-info-content">
                                 <div class="license-info-row">
                                     <div class="license-info-label">
                                         <i class="fas fa-key"></i>
-                                        {{ trans('app.license_key') }}
+                                        <?php echo e(trans('app.license_key')); ?>
+
                                     </div>
                                     <div class="license-info-value">
-                                        <span id="licenseKey" class="license-key-code">{{ $licenseData['license_key'] ?? 'N/A' }}</span>
+                                        <span id="licenseKey" class="license-key-code"><?php echo e($licenseData['license_key'] ?? 'N/A'); ?></span>
                                         <button class="copy-btn" data-copy-target="licenseKey">
                                             <i class="fas fa-copy"></i>
                                         </button>
@@ -204,46 +215,51 @@
                                 <div class="license-info-row">
                                     <div class="license-info-label">
                                         <i class="fas fa-tag"></i>
-                                        {{ trans('app.license_type') }}
+                                        <?php echo e(trans('app.license_type')); ?>
+
                                     </div>
                                     <div class="license-info-value">
-                                        <span id="licenseType" class="license-type-badge">{{ $licenseData['license_type'] ?? 'N/A' }}</span>
+                                        <span id="licenseType" class="license-type-badge"><?php echo e($licenseData['license_type'] ?? 'N/A'); ?></span>
                                     </div>
                                 </div>
                                 <div class="license-info-row">
                                     <div class="license-info-label">
                                         <i class="fas fa-check-circle"></i>
-                                        {{ trans('app.status') }}
+                                        <?php echo e(trans('app.status')); ?>
+
                                     </div>
                                     <div class="license-info-value">
-                                        <span id="licenseStatus" class="license-status-badge {{ strtolower($licenseData['status'] ?? 'unknown') }}">{{ $licenseData['status'] ?? 'N/A' }}</span>
+                                        <span id="licenseStatus" class="license-status-badge <?php echo e(strtolower($licenseData['status'] ?? 'unknown')); ?>"><?php echo e($licenseData['status'] ?? 'N/A'); ?></span>
                                     </div>
                                 </div>
                                 <div class="license-info-row">
                                     <div class="license-info-label">
                                         <i class="fas fa-calendar-plus"></i>
-                                        {{ trans('app.created_at') }}
+                                        <?php echo e(trans('app.created_at')); ?>
+
                                     </div>
                                     <div class="license-info-value">
-                                        <span id="createdAt" class="license-date">{{ $licenseData['created_at'] ?? 'N/A' }}</span>
+                                        <span id="createdAt" class="license-date"><?php echo e($licenseData['created_at'] ?? 'N/A'); ?></span>
                                     </div>
                                 </div>
                                 <div class="license-info-row">
                                     <div class="license-info-label">
                                         <i class="fas fa-calendar-times"></i>
-                                        {{ trans('app.expires_at') }}
+                                        <?php echo e(trans('app.expires_at')); ?>
+
                                     </div>
                                     <div class="license-info-value">
-                                        <span id="expiresAt" class="license-date">{{ $licenseData['expires_at'] ?? 'N/A' }}</span>
+                                        <span id="expiresAt" class="license-date"><?php echo e($licenseData['expires_at'] ?? 'N/A'); ?></span>
                                     </div>
                                 </div>
                                 <div class="license-info-row">
                                     <div class="license-info-label">
                                         <i class="fas fa-clock"></i>
-                                        {{ trans('app.days_remaining') }}
+                                        <?php echo e(trans('app.days_remaining')); ?>
+
                                     </div>
                                     <div class="license-info-value">
-                                        <span id="daysRemaining" class="license-days-remaining">{{ $licenseData['days_remaining'] ?? 'N/A' }}</span>
+                                        <span id="daysRemaining" class="license-days-remaining"><?php echo e($licenseData['days_remaining'] ?? 'N/A'); ?></span>
                                     </div>
                                 </div>
                             </div>
@@ -256,61 +272,65 @@
                                     <i class="fas fa-cube"></i>
                                 </div>
                                 <div class="license-info-title">
-                                    <h3>{{ trans('app.product_information') }}</h3>
-                                    <p>{{ trans('app.product_details_subtitle') }}</p>
+                                    <h3><?php echo e(trans('app.product_information')); ?></h3>
+                                    <p><?php echo e(trans('app.product_details_subtitle')); ?></p>
                                 </div>
                             </div>
                             <div class="license-info-content">
                                 <div class="license-info-row">
                                     <div class="license-info-label">
                                         <i class="fas fa-box"></i>
-                                        {{ trans('app.product_name') }}
+                                        <?php echo e(trans('app.product_name')); ?>
+
                                     </div>
                                     <div class="license-info-value">
-                                        <span id="productName" class="product-name">{{ $licenseData['product_name'] ?? 'N/A' }}</span>
+                                        <span id="productName" class="product-name"><?php echo e($licenseData['product_name'] ?? 'N/A'); ?></span>
                                     </div>
                                 </div>
                                 <div class="license-info-row">
                                     <div class="license-info-label">
                                         <i class="fas fa-globe"></i>
-                                        {{ trans('app.max_domains') }}
+                                        <?php echo e(trans('app.max_domains')); ?>
+
                                     </div>
                                     <div class="license-info-value">
-                                        <span id="maxDomains" class="domain-limit">{{ $licenseData['max_domains'] ?? 'N/A' }}</span>
+                                        <span id="maxDomains" class="domain-limit"><?php echo e($licenseData['max_domains'] ?? 'N/A'); ?></span>
                                     </div>
                                 </div>
                                 <div class="license-info-row">
                                     <div class="license-info-label">
                                         <i class="fas fa-check-circle"></i>
-                                        {{ trans('app.used_domains') }}
+                                        <?php echo e(trans('app.used_domains')); ?>
+
                                     </div>
                                     <div class="license-info-value">
-                                        <span id="usedDomains" class="domain-used">{{ $licenseData['used_domains'] ?? 'N/A' }}</span>
+                                        <span id="usedDomains" class="domain-used"><?php echo e($licenseData['used_domains'] ?? 'N/A'); ?></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Purchase Code -->
-                        @if(isset($licenseData['purchase_code']) && $licenseData['purchase_code'])
+                        <?php if(isset($licenseData['purchase_code']) && $licenseData['purchase_code']): ?>
                         <div class="license-info-card">
                             <div class="license-info-header">
                                 <div class="license-info-icon">
                                     <i class="fas fa-barcode"></i>
                                 </div>
                                 <div class="license-info-title">
-                                    <h3>{{ trans('app.purchase_code') }}</h3>
-                                    <p>{{ trans('app.purchase_code_info') }}</p>
+                                    <h3><?php echo e(trans('app.purchase_code')); ?></h3>
+                                    <p><?php echo e(trans('app.purchase_code_info')); ?></p>
                                 </div>
                             </div>
                             <div class="license-info-content">
                                 <div class="license-info-row">
                                     <div class="license-info-label">
                                         <i class="fas fa-barcode"></i>
-                                        {{ trans('app.purchase_code') }}
+                                        <?php echo e(trans('app.purchase_code')); ?>
+
                                     </div>
                                     <div class="license-info-value">
-                                        <span id="purchaseCode" class="purchase-code">{{ $licenseData['purchase_code'] }}</span>
+                                        <span id="purchaseCode" class="purchase-code"><?php echo e($licenseData['purchase_code']); ?></span>
                                         <button class="copy-btn" data-copy-target="purchaseCode">
                                             <i class="fas fa-copy"></i>
                                         </button>
@@ -318,19 +338,20 @@
                                 </div>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
             <!-- Error Message -->
-            @if(isset($success) && !$success && isset($error))
+            <?php if(isset($success) && !$success && isset($error)): ?>
             <div id="errorMessage" class="user-card user-card-error">
                 <div class="user-card-header">
                     <div class="user-card-title">
                         <i class="fas fa-exclamation-triangle"></i>
-                        {{ trans('app.verification_error') }}
+                        <?php echo e(trans('app.verification_error')); ?>
+
                     </div>
                 </div>
                 <div class="user-card-content">
@@ -340,24 +361,25 @@
                         </div>
                         <div class="user-error-content">
                             <h3 class="user-error-title">
-                                {{ trans('app.verification_error') }}
+                                <?php echo e(trans('app.verification_error')); ?>
+
                             </h3>
-                            <p id="errorText" class="user-error-text">{{ $error }}</p>
-                            @if(isset($validationErrors))
+                            <p id="errorText" class="user-error-text"><?php echo e($error); ?></p>
+                            <?php if(isset($validationErrors)): ?>
                                 <div class="validation-errors">
-                                    <h4>{{ trans('app.validation_errors') }}:</h4>
+                                    <h4><?php echo e(trans('app.validation_errors')); ?>:</h4>
                                     <ul>
-                                        @foreach($validationErrors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
+                                        <?php $__currentLoopData = $validationErrors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <li><?php echo e($error); ?></li>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </ul>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
             <!-- Quick Actions -->
             <div class="user-actions-grid">
@@ -367,13 +389,14 @@
                             <i class="fas fa-headset"></i>
                         </div>
                         <div class="user-action-content">
-                            <h3>{{ trans('app.Get Support') }}</h3>
-                            <p>{{ trans('app.Need help with your license?') }}</p>
+                            <h3><?php echo e(trans('app.Get Support')); ?></h3>
+                            <p><?php echo e(trans('app.Need help with your license?')); ?></p>
                         </div>
                     </div>
-                    <a href="{{ route('support.tickets.create') }}" class="user-action-button">
+                    <a href="<?php echo e(route('support.tickets.create')); ?>" class="user-action-button">
                         <i class="fas fa-ticket-alt"></i>
-                        {{ trans('app.Contact Support') }}
+                        <?php echo e(trans('app.Contact Support')); ?>
+
                     </a>
                 </div>
 
@@ -383,13 +406,14 @@
                             <i class="fas fa-book"></i>
                         </div>
                         <div class="user-action-content">
-                            <h3>{{ trans('app.Knowledge Base') }}</h3>
-                            <p>{{ trans('app.Find guides and tutorials') }}</p>
+                            <h3><?php echo e(trans('app.Knowledge Base')); ?></h3>
+                            <p><?php echo e(trans('app.Find guides and tutorials')); ?></p>
                         </div>
                     </div>
-                    <a href="{{ route('kb.index') }}" class="user-action-button">
+                    <a href="<?php echo e(route('kb.index')); ?>" class="user-action-button">
                         <i class="fas fa-search"></i>
-                        {{ trans('app.Explore KB') }}
+                        <?php echo e(trans('app.Explore KB')); ?>
+
                     </a>
                 </div>
 
@@ -399,13 +423,14 @@
                             <i class="fas fa-key"></i>
                         </div>
                         <div class="user-action-content">
-                            <h3>{{ trans('app.My Licenses') }}</h3>
-                            <p>{{ trans('app.Manage your licenses') }}</p>
+                            <h3><?php echo e(trans('app.My Licenses')); ?></h3>
+                            <p><?php echo e(trans('app.Manage your licenses')); ?></p>
                         </div>
                     </div>
-                    <a href="{{ route('user.licenses.index') }}" class="user-action-button">
+                    <a href="<?php echo e(route('user.licenses.index')); ?>" class="user-action-button">
                         <i class="fas fa-list"></i>
-                        {{ trans('app.View Licenses') }}
+                        <?php echo e(trans('app.View Licenses')); ?>
+
                     </a>
                 </div>
             </div>
@@ -418,7 +443,8 @@
             <div class="user-modal-header">
                 <div class="user-modal-title">
                     <i class="fas fa-history"></i>
-                    {{ trans('app.license_history') }}
+                    <?php echo e(trans('app.license_history')); ?>
+
                 </div>
                 <button id="closeHistoryModal" class="user-modal-close">
                     <i class="fas fa-times"></i>
@@ -433,22 +459,22 @@
                                 <i class="fas fa-info-circle"></i>
                             </div>
                             <div class="history-summary-content">
-                                <h4 class="history-summary-title">{{ trans('app.License Summary') }}</h4>
-                                <p class="history-summary-subtitle">{{ trans('app.Overview of license activity') }}</p>
+                                <h4 class="history-summary-title"><?php echo e(trans('app.License Summary')); ?></h4>
+                                <p class="history-summary-subtitle"><?php echo e(trans('app.Overview of license activity')); ?></p>
                             </div>
                         </div>
                         <div class="history-summary-stats">
                             <div class="history-stat-item">
                                 <div class="history-stat-value" id="totalChecks">0</div>
-                                <div class="history-stat-label">{{ trans('app.Total Checks') }}</div>
+                                <div class="history-stat-label"><?php echo e(trans('app.Total Checks')); ?></div>
                             </div>
                             <div class="history-stat-item">
                                 <div class="history-stat-value" id="lastCheck">-</div>
-                                <div class="history-stat-label">{{ trans('app.Last Check') }}</div>
+                                <div class="history-stat-label"><?php echo e(trans('app.Last Check')); ?></div>
                             </div>
                             <div class="history-stat-item">
                                 <div class="history-stat-value" id="activeDomains">0</div>
-                                <div class="history-stat-label">{{ trans('app.Active Domains') }}</div>
+                                <div class="history-stat-label"><?php echo e(trans('app.Active Domains')); ?></div>
                             </div>
                         </div>
                     </div>
@@ -459,7 +485,8 @@
                     <div class="history-timeline-header">
                         <h4 class="history-timeline-title">
                             <i class="fas fa-clock"></i>
-                            {{ trans('app.Activity Timeline') }}
+                            <?php echo e(trans('app.Activity Timeline')); ?>
+
                         </h4>
                     </div>
                     <div id="historyContent" class="user-history-content">
@@ -471,16 +498,20 @@
                 <div class="history-modal-actions">
                     <button class="user-btn user-btn-outline" id="exportHistoryBtn">
                         <i class="fas fa-download"></i>
-                        {{ trans('app.Export History') }}
+                        <?php echo e(trans('app.Export History')); ?>
+
                     </button>
                     <button class="user-btn user-btn-primary" id="refreshHistoryBtn">
                         <i class="fas fa-sync-alt"></i>
-                        {{ trans('app.Refresh') }}
+                        <?php echo e(trans('app.Refresh')); ?>
+
                     </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
+
+<?php echo $__env->make('layouts.user', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp1\htdocs\my-logos\resources\views/license-status.blade.php ENDPATH**/ ?>

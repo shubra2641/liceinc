@@ -72,6 +72,120 @@ class LicenseStatusController extends Controller
             abort(500, 'Failed to load license status page. Please try again.');
         }
     }
+
+    /**
+     * Display license status results in Blade template.
+     *
+     * @param  LicenseStatusRequest  $request  The current HTTP request instance
+     * @return View The license status results view
+     */
+    public function showResults(LicenseStatusRequest $request): View
+    {
+        try {
+            // Check rate limiting
+            if ($this->isRateLimited($request)) {
+                return $this->showError(__('license_status.verification_error') . ': Too many attempts. Please try again later.');
+            }
+
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'license_key' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->showError('Please enter all required data correctly.', $validator->errors());
+            }
+
+            // Find license
+            $license = $this->findLicenseByCodeAndEmail(
+                $request->validated('license_key'),
+                $request->validated('email')
+            );
+
+            if (!$license) {
+                return $this->showError(__('license_status.license_not_found'));
+            }
+
+            // Build license details
+            $licenseDetails = $this->buildLicenseDetails($license);
+
+            return view('license-status', [
+                'licenseData' => $licenseDetails,
+                'error' => null,
+                'validationErrors' => null,
+                'success' => true,
+            ]);
+
+        } catch (Throwable $e) {
+            Log::error('License check error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->showError(__('license_status.unexpected_error'));
+        }
+    }
+
+    /**
+     * Check if request is rate limited.
+     */
+    private function isRateLimited(Request $request): bool
+    {
+        $ip = $request->ip();
+        $settings = Setting::first();
+        $maxAttempts = $settings->license_max_attempts ?? 5;
+        $decayMinutes = $settings->license_lockout_minutes ?? 15;
+        $key = 'license_check_' . md5($ip ?? '');
+        $attempts = Cache::get($key, 0);
+
+        if ($attempts >= $maxAttempts) {
+            return true;
+        }
+
+        Cache::put($key, $attempts + 1, now()->addMinutes($decayMinutes));
+        return false;
+    }
+
+    /**
+     * Show error view.
+     */
+    private function showError(string $error, $validationErrors = null): View
+    {
+        return view('license-status', [
+            'licenseData' => null,
+            'error' => $error,
+            'validationErrors' => $validationErrors,
+            'success' => false,
+        ]);
+    }
+
+    /**
+     * Build license details array.
+     */
+    private function buildLicenseDetails(License $license): array
+    {
+        $status = $this->getLicenseStatus($license);
+        $licenseType = $this->determineLicenseType($license);
+        
+        return [
+            'license_key' => $license->license_key,
+            'purchase_code' => $license->purchase_code,
+            'email' => $license->user?->email,
+            'status' => $status,
+            'license_type' => $licenseType,
+            'product_name' => $license->product?->name ?? 'Not specified',
+            'created_at' => $license->created_at?->format('Y-m-d H:i:s'),
+            'expires_at' => $license->license_expires_at?->format('Y-m-d H:i:s'),
+            'is_expired' => $license->license_expires_at?->isPast() ?? false,
+            'days_remaining' => $license->license_expires_at 
+                ? max(0, now()->diffInDays($license->license_expires_at, false))
+                : null,
+            'domains' => $license->domains->toArray(),
+            'max_domains' => $license->max_domains ?? 1,
+            'used_domains' => $license->domains->count(),
+        ];
+    }
     /**
      * Check license status with enhanced security and comprehensive validation.
      *
@@ -305,166 +419,56 @@ class LicenseStatusController extends Controller
         return $result instanceof JsonResponse ? $result : $this->errorResponse('Unexpected error', null, 500);
     }
     /**
-     * Find license by code and email with enhanced security.
-     *
-     * @param  string  $licenseCode  The license code to search for
-     * @param  string  $email  The email to search for
-     *
-     * @return License|null The found license or null
+     * Find license by code and email.
      */
     private function findLicenseByCodeAndEmail(string $licenseCode, string $email): ?License
     {
-        try {
-            // Search for license by code and email
-            $license = License::where('license_key', $licenseCode)
-                ->whereHas('user', function ($subQ) use ($email) {
-                    $subQ->where('email', $email);
+        // Search by license key first
+        $license = License::where('license_key', $licenseCode)
+            ->whereHas('user', function ($query) use ($email) {
+                $query->where('email', $email);
+            })
+            ->with(['product', 'user', 'domains'])
+            ->first();
+
+        // If not found, try purchase code
+        if (!$license) {
+            $license = License::where('purchase_code', $licenseCode)
+                ->whereHas('user', function ($query) use ($email) {
+                    $query->where('email', $email);
                 })
                 ->with(['product', 'user', 'domains'])
                 ->first();
-            if (! $license) {
-                // Try to find by purchase code for Envato licenses
-                $license = License::where('purchase_code', $licenseCode)
-                    ->whereHas('user', function ($subQ) use ($email) {
-                        $subQ->where('email', $email);
-                    })
-                    ->with(['product', 'user', 'domains'])
-                    ->first();
-            }
-            return $license;
-        } catch (Throwable $e) {
-            Log::error('Failed to find license by code and email', [
-                'error' => $e->getMessage(),
-                'license_key' => $this->hashForLogging($licenseCode),
-                'email' => $this->hashForLogging($email),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return null;
         }
+
+        return $license;
     }
     /**
-     * Verify license with Envato API with enhanced security.
-     *
-     * @param  string  $purchaseCode  The purchase code to verify
-     *
-     * @return array<string, mixed>|null The Envato data or null if verification fails
-     */
-    private function verifyWithEnvato(string $purchaseCode): ?array
-    {
-        try {
-            $envatoService = new EnvatoService();
-            $result = $envatoService->verifyPurchase($purchaseCode);
-            /**
- * @var array<string, mixed>|null $typedResult
-*/
-            $typedResult = $result;
-            return $typedResult;
-        } catch (Throwable $e) {
-            Log::warning('Envato verification failed', [
-                'error' => $e->getMessage(),
-                'purchase_code' => $this->hashForLogging($purchaseCode),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return null;
-        }
-    }
-    /**
-     * Build license details array with enhanced security.
-     *
-     * @param  License  $license  The license instance
-     * @param  string  $status  The license status
-     * @param  string  $licenseType  The license type
-     * @param  array<string, mixed>|null  $envatoData  The Envato verification data
-     * @param  string  $email  The user email
-     *
-     * @return array<string, mixed> The license details array
-     */
-    private function buildLicenseDetails(
-        License $license,
-        string $status,
-        string $licenseType,
-        ?array $envatoData,
-        string $email,
-    ): array {
-        return [
-            'license_key' => $license->license_key,
-            'purchase_code' => $license->purchase_code,
-            'email' => $license->user ? $license->user->email : $email,
-            'status' => $status,
-            'license_type' => $licenseType,
-            'product_name' => $license->product
-                ? $license->product->name
-                : 'Not specified',
-            'created_at' => $license->created_at?->format('Y-m-d H:i:s'),
-            'expires_at' => $license->license_expires_at ? $license->license_expires_at->format('Y-m-d H:i:s') : null,
-            'is_expired' => $license->license_expires_at && $license->license_expires_at->isPast(),
-            'days_remaining' => $license->license_expires_at
-                ? max(0, now()->diffInDays($license->license_expires_at, false))
-                : null,
-            'domains' => $license->domains->toArray(),
-            'supported_until' => $license->supported_until,
-            'max_domains' => $license->max_domains ?? 1,
-            'used_domains' => $license->domains->count(),
-            // Attach envato verification results when available
-            'envato_data' => $envatoData,
-            'envato_verification' => $envatoData ? 'success' : 'failed',
-        ];
-    }
-    /**
-     * Determine license type (Custom or Envato) with enhanced validation.
-     *
-     * @param  License  $license  The license instance
-     *
-     * @return string The license type
+     * Determine license type.
      */
     private function determineLicenseType(License $license): string
     {
-        try {
-            if ($license->purchase_code && strlen($license->purchase_code) > 10) {
-                return __('license_status.envato');
-            }
-            return __('license_status.custom');
-        } catch (Throwable $e) {
-            Log::error('Failed to determine license type', [
-                'error' => $e->getMessage(),
-                'license_id' => $license->id,
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return __('license_status.custom');
-        }
+        return $license->purchase_code && strlen($license->purchase_code) > 10 
+            ? __('license_status.envato') 
+            : __('license_status.custom');
     }
     /**
-     * Get license status with enhanced validation and Arabic labels.
-     *
-     * @param  License  $license  The license instance
-     *
-     * @return string The license status
+     * Get license status.
      */
     private function getLicenseStatus(License $license): string
     {
-        try {
-            if ($license->status === 'active') {
-                if ($license->license_expires_at && $license->license_expires_at->isPast()) {
-                    return __('license_status.expired');
-                }
-                return __('license_status.active');
-            } elseif ($license->status === 'inactive') {
-                return __('license_status.inactive');
-            } elseif ($license->status === 'suspended') {
-                return __('license_status.revoked');
-            } elseif ($license->status === 'expired') {
-                return __('license_status.expired');
-            }
-            return 'Unknown';
-        } catch (Throwable $e) {
-            Log::error('Failed to get license status', [
-                'error' => $e->getMessage(),
-                'license_id' => $license->id,
-                'license_status' => $license->status,
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return 'Unknown';
+        if ($license->status === 'active') {
+            return $license->license_expires_at?->isPast() 
+                ? __('license_status.expired')
+                : __('license_status.active');
         }
+
+        return match($license->status) {
+            'inactive' => __('license_status.inactive'),
+            'suspended' => __('license_status.revoked'),
+            'expired' => __('license_status.expired'),
+            default => 'Unknown'
+        };
     }
     /**
      * Create a standardized success response with custom data key.

@@ -62,7 +62,7 @@ return [
         'allowed_domains' => env('LICENSE_ALLOWED_DOMAINS', ''),
         'rate_limit' => [
             'enabled' => env('LICENSE_RATE_LIMIT_ENABLED', true),
-            'max_attempts' => env('LICENSE_RATE_LIMIT_MAX_ATTEMPTS', 10),
+            'max_attempts' => env('LICENSE_RATE_LIMIT_MAX_ATTEMPTS', 100),
             'decay_minutes' => env('LICENSE_RATE_LIMIT_DECAY_MINUTES', 60),
         ],
     ],

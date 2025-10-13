@@ -60,7 +60,7 @@ class LoginRequest extends FormRequest
             ],
             'remember' => [
                 'nullable',
-                'boolean',
+                'in:on,1,true,false,0,',
             ],
         ];
     }
@@ -78,7 +78,7 @@ class LoginRequest extends FormRequest
             'password.required' => 'كلمة المرور مطلوبة.',
             'password.min' => 'كلمة المرور يجب أن تكون على الأقل 8 أحرف.',
             'password.max' => 'كلمة المرور لا يمكن أن تكون أكثر من 255 حرف.',
-            'remember.boolean' => 'تذكرني يجب أن يكون صحيح أو خطأ.',
+            'remember.in' => 'تذكرني يجب أن يكون صحيح أو خطأ.',
         ];
     }
     /**
@@ -162,7 +162,7 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 20)) {
             return;
         }
         // Log rate limit exceeded for security monitoring

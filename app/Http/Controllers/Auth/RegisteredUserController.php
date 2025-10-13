@@ -110,19 +110,8 @@ class RegisteredUserController extends Controller
      */
     private function validateRegistrationRequest(RegisterRequest $request): void
     {
-        $request->validate([
-            'firstname' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
-            'lastname' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'phonenumber' => ['nullable', 'string', 'max:50', 'regex:/^[\+]?[0-9\s\-\(\)]+$/'],
-            'country' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-Z\s]+$/'],
-        ], [
-            'firstname.regex' => 'First name can only contain letters and spaces.',
-            'lastname.regex' => 'Last name can only contain letters and spaces.',
-            'phonenumber.regex' => 'Phone number contains invalid characters.',
-            'country.regex' => 'Country name can only contain letters and spaces.',
-        ]);
+        // Validation is already handled by RegisterRequest
+        // No need for additional validation here
     }
     /**
      * Validate anti-spam protection mechanisms.
@@ -145,9 +134,8 @@ class RegisteredUserController extends Controller
      */
     private function validateCaptcha(RegisterRequest $request): void
     {
-        $enableCaptcha = ConfigHelper::getSetting('enable_captcha', false);
-        $captchaSecret = ConfigHelper::getSetting('captcha_secret_key', '');
-        if (! $enableCaptcha || ! $captchaSecret) {
+        $settings = \App\Models\Setting::first();
+        if (!$settings || !$settings->enable_captcha || !$settings->captcha_secret_key) {
             return;
         }
         $token = $request->validated('g-recaptcha-response');
@@ -160,7 +148,7 @@ class RegisteredUserController extends Controller
         if (
             ! $this->verifyRecaptcha(
                 is_string($token) ? $token : '',
-                is_string($captchaSecret) ? $captchaSecret : '',
+                is_string($settings->captcha_secret_key) ? $settings->captcha_secret_key : '',
                 $request->ip()
             )
         ) {
@@ -179,16 +167,30 @@ class RegisteredUserController extends Controller
      */
     private function validateHumanQuestion(RegisterRequest $request): void
     {
-        $enableHumanQuestion = ConfigHelper::getSetting('enable_human_question', true);
-        if (! $enableHumanQuestion) {
+        $settings = \App\Models\Setting::first();
+        if (!$settings || !$settings->enable_human_question || empty($settings->human_questions)) {
             return;
         }
-        $humanQuestions = $this->getHumanQuestions();
+        
+        $humanQuestions = $settings->human_questions;
+        
         $given = strtolower(trim(
             is_string($request->validated('human_answer', ''))
                 ? $request->validated('human_answer', '')
                 : ''
         ));
+        
+        if (empty($given)) {
+            throw new \Illuminate\Validation\ValidationException(
+                validator([], []),
+                response()->json([
+                    'errors' => [
+                        'human_answer' => [__('Please answer the anti-spam question')]
+                    ]
+                ], 422)
+            );
+        }
+        
         $index = $request->validated('human_question_index', null);
         if (
             ! $this->isValidHumanAnswer(
@@ -207,56 +209,16 @@ class RegisteredUserController extends Controller
             );
         }
     }
-    /**
-     * Get human questions from configuration.
-     *
-     * @return array The human questions array
-     */
-    /**
-     * @return array<string, mixed>
-     */
-    private function getHumanQuestions(): array
-    {
-        $humanQuestionsJson = ConfigHelper::getSetting('human_questions', null);
-        if (empty($humanQuestionsJson)) {
-            return [];
-        }
-        $decoded = json_decode(is_string($humanQuestionsJson) ? $humanQuestionsJson : '', true);
-        $result = is_array($decoded) ? $decoded : [];
-
-        /**
- * @var array<string, mixed> $typedResult
-*/
-        $typedResult = $result;
-        return $typedResult;
-    }
-    /**
-     * Check if the human answer is valid.
-     *
-     * @param  string  $given  The given answer
-     * @param  mixed  $index  The question index
-     * @param  array  $humanQuestions  The human questions array
-     *
-     * @return bool True if answer is valid, false otherwise
-     */
-    /**
-     * @param array<string, mixed> $humanQuestions
-     */
     private function isValidHumanAnswer(string $given, int $index, array $humanQuestions): bool
     {
         if ($given === '') {
             return false;
         }
-        if (! isset($humanQuestions[(string)$index])) {
-            $expected = ConfigHelper::getSetting('human_question_answer', '5');
-            return strtolower(trim(
-                is_string($expected) ? $expected : ''
-            )) === $given;
-        }
-
-        $questionData = $humanQuestions[(string)$index] ?? null;
-        $answer = is_array($questionData) ? ($questionData['answer'] ?? null) : null;
-        $expected = strtolower(trim(is_string($answer) ? $answer : ''));
+        
+        $questionData = $humanQuestions[$index] ?? null;
+        $answer = $questionData['answer'] ?? null;
+        $expected = strtolower(trim($answer));
+        
         return $expected === $given;
     }
     /**
@@ -357,7 +319,7 @@ class RegisteredUserController extends Controller
         }
     }
     /**
-     * Get registration settings for the view.
+     * Get registration settings for the view using unified approach.
      *
      * @return array The registration settings
      */
@@ -366,28 +328,32 @@ class RegisteredUserController extends Controller
      */
     private function getRegistrationSettings(): array
     {
-        $enableCaptcha = ConfigHelper::getSetting('enable_captcha', false);
-        $captchaSiteKey = ConfigHelper::getSetting('captcha_site_key', '');
-        $enableHumanQuestion = ConfigHelper::getSetting('enable_human_question', true);
-        $humanQuestionsJson = ConfigHelper::getSetting('human_questions', null);
-        $humanQuestions = [];
-        if (! empty($humanQuestionsJson)) {
-            $decoded = json_decode(
-                is_string($humanQuestionsJson) ? $humanQuestionsJson : '',
-                true
-            );
-            $humanQuestions = is_array($decoded) ? $decoded : [];
+        $settings = \App\Models\Setting::first();
+        
+        if (!$settings) {
+            return [
+                'enableCaptcha' => false,
+                'captchaSiteKey' => '',
+                'enableHumanQuestion' => false,
+                'selectedQuestionIndex' => null,
+                'selectedQuestionText' => null,
+            ];
         }
-        // Choose a random question (server-side) and include its index in a hidden field
+        
+        $enableCaptcha = (bool) $settings->enable_captcha;
+        $captchaSiteKey = (string) $settings->captcha_site_key;
+        $enableHumanQuestion = (bool) $settings->enable_human_question;
+        
+        $humanQuestions = $settings->human_questions ?? [];
         $selectedQuestionIndex = null;
         $selectedQuestionText = null;
-        if (! empty($humanQuestions)) {
+        
+        if ($enableHumanQuestion && !empty($humanQuestions)) {
             $selectedQuestionIndex = array_rand($humanQuestions);
             $selectedQuestion = $humanQuestions[$selectedQuestionIndex] ?? null;
-            $selectedQuestionText = (is_array($selectedQuestion) && isset($selectedQuestion['question']))
-                ? $selectedQuestion['question']
-                : null;
+            $selectedQuestionText = $selectedQuestion['question'] ?? null;
         }
+        
         return [
             'enableCaptcha' => $enableCaptcha,
             'captchaSiteKey' => $captchaSiteKey,

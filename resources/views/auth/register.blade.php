@@ -421,7 +421,7 @@
                         <!-- Terms and Conditions -->
                         <div class="form-terms-section">
                             <div class="form-checkbox-wrapper">
-                                <input id="terms" name="terms" type="checkbox" class="form-checkbox" required>
+                                <input id="terms" name="terms" type="checkbox" class="form-checkbox" required value="1">
                                 <label for="terms" class="form-checkbox-label">
                                     {{ trans('app.I agree to the') }}
                                     <a href="#" class="form-link">{{ trans('app.Terms of Service') }}</a>
@@ -429,6 +429,12 @@
                                     <a href="#" class="form-link">{{ trans('app.Privacy Policy') }}</a>
                                 </label>
                             </div>
+                            @error('terms')
+                            <div class="form-error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}
+                            </div>
+                            @enderror
                         </div>
 
                         <!-- Submit Button -->
@@ -449,11 +455,12 @@
                             </div>
                         @endif
 
-                        @if($registrationSettings['enableHumanQuestion'])
+
+                        @if($registrationSettings['enableHumanQuestion'] && $registrationSettings['selectedQuestionText'])
                             <div class="form-field-group">
                                 <label for="human_answer" class="form-label">
                                     <i class="fas fa-question"></i>
-                                    {{ $registrationSettings['selectedQuestionText'] ?? 'Please answer the question' }}
+                                    {{ $registrationSettings['selectedQuestionText'] }}
                                 </label>
                                 <div class="form-input-wrapper">
                                     <input id="human_answer" name="human_answer" type="text"
@@ -558,7 +565,5 @@
 @endsection
 
 @if($registrationSettings['enableCaptcha'] && $registrationSettings['captchaSiteKey'])
-    @push('scripts')
-        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    @endpush
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 @endif

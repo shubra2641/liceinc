@@ -431,6 +431,53 @@ class LazyLoadManager {
   }
 }
 
+// ===== LICENSE STATUS MANAGER =====
+class LicenseStatusManager {
+  constructor() {
+    this.bindEvents();
+  }
+
+  bindEvents() {
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.copy-btn')) {
+        this.handleCopy(e);
+      }
+      if (e.target.closest('.check-another-btn')) {
+        this.handleCheckAnother();
+      }
+    });
+  }
+
+  handleCopy(e) {
+    e.preventDefault();
+    const button = e.target.closest('.copy-btn');
+    const targetId = button.getAttribute('data-copy-target');
+    const targetElement = document.getElementById(targetId);
+    
+    if (targetElement) {
+      navigator.clipboard.writeText(targetElement.textContent).then(() => {
+        this.showCopySuccess(button);
+      });
+    }
+  }
+
+  showCopySuccess(button) {
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    button.classList.add('copied');
+    
+    setTimeout(() => {
+      button.innerHTML = originalHTML;
+      button.classList.remove('copied');
+    }, 2000);
+  }
+
+  handleCheckAnother() {
+    const form = document.getElementById('licenseCheckForm');
+    if (form) form.reset();
+  }
+}
+
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize all managers
@@ -442,6 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
   new ScrollManager();
   new NotificationManager();
   new LazyLoadManager();
+  new LicenseStatusManager();
 
   console.log('User Dashboard JavaScript initialized successfully');
 });

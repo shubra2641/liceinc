@@ -1,5 +1,0 @@
-# Codacy Ignore File
-# This file specifies which patterns to ignore in Codacy analysis
-
-# Ignore only camelCase format checking
-PSR1.Methods.CamelCapsMethodName

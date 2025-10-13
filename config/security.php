@@ -39,9 +39,9 @@ return [
     |--------------------------------------------------------------------------
     */
     'rate_limiting' => [
-        'api_requests_per_minute' => env('SECURITY_API_RATE_LIMIT', 60),
-        'login_attempts_per_minute' => env('SECURITY_LOGIN_RATE_LIMIT', 5),
-        'password_reset_per_hour' => env('SECURITY_PASSWORD_RESET_RATE_LIMIT', 3),
+        'api_requests_per_minute' => env('SECURITY_API_RATE_LIMIT', 300),
+        'login_attempts_per_minute' => env('SECURITY_LOGIN_RATE_LIMIT', 20),
+        'password_reset_per_hour' => env('SECURITY_PASSWORD_RESET_RATE_LIMIT', 10),
     ],
 
     /*

@@ -1,6 +1,0 @@
-# Codacy Configuration File
-# This file configures which patterns to ignore in your repository
-
-# Ignore only camelCase format checking
-ignore:
-  - "PSR1.Methods.CamelCapsMethodName"

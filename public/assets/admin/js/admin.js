@@ -2914,7 +2914,7 @@ class AdminDashboard {
       }
 
       const response = await fetch(
-        `${window.location.origin}/lic/public/admin/settings/test-api`,
+        `${window.location.origin}${window.location.pathname.split('/admin')[0]}/admin/settings/test-api`,
         {
           method: 'POST',
           headers: {
@@ -5642,7 +5642,7 @@ function initializeApiTesting() {
       formData.append('token', token);
 
       // Make API request
-      fetch('/admin/settings/test-api', {
+      fetch(`${window.location.origin}${window.location.pathname.split('/admin')[0]}/admin/settings/test-api`, {
         method: 'POST',
         body: formData,
         headers: {

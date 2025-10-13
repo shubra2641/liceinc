@@ -296,9 +296,10 @@ class LicenseProtection
                 ) ?? '',
             );
             // Update last verification time
-            Setting::updateOrCreate(
-                ['key' => 'license_last_verification', 'type' => 'license'],
-                ['value' => now()->toISOString()],
+            \App\Helpers\SettingHelper::updateOrCreateSetting(
+                'license_last_verification',
+                now()->toISOString(),
+                'license'
             );
             // If license is invalid, log it but don't block the request immediately
             if (! $result['valid']) {

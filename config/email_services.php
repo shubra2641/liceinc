@@ -98,7 +98,7 @@ return [
         'validate_inputs' => true,
         'rate_limit' => [
             'enabled' => env('EMAIL_RATE_LIMIT_ENABLED', true),
-            'max_emails_per_minute' => env('EMAIL_RATE_LIMIT_MAX', 60),
+            'max_emails_per_minute' => env('EMAIL_RATE_LIMIT_MAX', 100),
         ],
     ],
 ];

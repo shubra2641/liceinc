@@ -662,12 +662,11 @@ class VersionHelper
                     . "Target: {$newVersion}");
             }
             // Update or create setting
-            $setting = Setting::updateOrCreate(
-                ['key' => 'current_version'],
-                [
-                    'value' => $newVersion,
-                    'updated_at' => now(),
-                ],
+            $setting = \App\Helpers\SettingHelper::updateOrCreateSetting(
+                'current_version',
+                $newVersion,
+                'version',
+                $newVersion
             );
             // Clear cache
             Cache::forget('app_version');
@@ -775,12 +774,10 @@ class VersionHelper
             }
             // Sanitize details to prevent XSS
             $sanitizedDetails = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
-            Setting::updateOrCreate(
-                ['key' => "version_{$version}"],
-                [
-                    'value' => $sanitizedDetails,
-                    'updated_at' => now(),
-                ],
+            \App\Helpers\SettingHelper::updateOrCreateSetting(
+                "version_{$version}",
+                $sanitizedDetails,
+                'version'
             );
             DB::commit();
 

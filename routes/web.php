@@ -120,9 +120,13 @@ Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.s
 Route::prefix('license-status')->group(function () {
     Route::get('/', [LicenseStatusController::class, 'index'])->name('license.status');
     Route::get('/status', [LicenseStatusController::class, 'index'])->name('license-status');
+    Route::get('/check', [LicenseStatusController::class, 'index'])->name('license.status.check');
     Route::post('/check', [LicenseStatusController::class, 'check'])
         ->middleware('throttle:10, 1') // Rate limiting: 10 requests per minute
-        ->name('license.status.check');
+        ->name('license.status.check.post');
+    Route::post('/show-results', [LicenseStatusController::class, 'showResults'])
+        ->middleware('throttle:10, 1') // Rate limiting: 10 requests per minute
+        ->name('license.status.show.results');
     Route::post('/history', [LicenseStatusController::class, 'history'])
         ->middleware('throttle:5, 1') // Rate limiting: 5 requests per minute
         ->name('license.status.history');
@@ -735,13 +739,13 @@ Route::middleware(['auth', 'admin', 'verified'])->prefix('admin')->name('admin.'
  */
 Route::prefix('auth/envato')->group(function () {
     Route::get('/', [UserEnvatoController::class, 'redirectToEnvato'])
-        ->middleware('throttle:5, 1') // Rate limiting: 5 requests per minute
+        ->middleware('throttle:60, 1') // Rate limiting: 60 requests per minute
         ->name('auth.envato');
     Route::get(
         '/callback',
         [UserEnvatoController::class, 'handleEnvatoCallback'],
     )
-        ->middleware('throttle:10, 1') // Rate limiting: 10 requests per minute
+        ->middleware('throttle:60, 1') // Rate limiting: 60 requests per minute
         ->name('auth.envato.callback');
 });
 

@@ -183,22 +183,31 @@ class AppServiceProvider extends ServiceProvider
      */
     private function configureRateLimiters(): void
     {
-        // Configure auth rate limiter
+        // Configure auth rate limiter - Increased limits for better user experience
         RateLimiter::for('auth', function ($request) {
             if (is_object($request) && method_exists($request, 'ip')) {
-                return Limit::perMinute(10)->by($request->ip());
+                return Limit::perMinute(100)->by($request->ip());
             }
-            return Limit::perMinute(10)->by('127.0.0.1');
+            return Limit::perMinute(100)->by('127.0.0.1');
         });
-        // Configure API rate limiter
+        
+        // Configure API rate limiter - Increased limits for better performance
         RateLimiter::for('api', function ($request) {
             if (is_object($request) && method_exists($request, 'user') && method_exists($request, 'ip')) {
                 $user = $request->user();
                 $userId = is_object($user) && property_exists($user, 'id') ? $user->id : null;
                 $ip = $request->ip();
-                return Limit::perMinute(60)->by($userId ?: $ip);
+                return Limit::perMinute(300)->by($userId ?: $ip);
             }
-            return Limit::perMinute(60)->by('127.0.0.1');
+            return Limit::perMinute(300)->by('127.0.0.1');
+        });
+        
+        // Configure general web rate limiter
+        RateLimiter::for('web', function ($request) {
+            if (is_object($request) && method_exists($request, 'ip')) {
+                return Limit::perMinute(200)->by($request->ip());
+            }
+            return Limit::perMinute(200)->by('127.0.0.1');
         });
     }
 }
