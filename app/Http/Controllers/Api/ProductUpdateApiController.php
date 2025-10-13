@@ -54,6 +54,7 @@ class ProductUpdateApiController extends Controller
      * @param string $licenseKey
      * @param int $productId
      * @param string $domain
+     *
      * @return array|null Returns error response array or null if valid
      */
     private function verifyLicenseAndDomain(string $licenseKey, int $productId, string $domain): ?array

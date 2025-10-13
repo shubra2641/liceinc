@@ -61,6 +61,7 @@ class UpdateController extends Controller
      * showing version details and requiring explicit user confirmation.
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View
      */
     public function confirmUpdate(Request $request)

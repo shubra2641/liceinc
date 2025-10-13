@@ -771,6 +771,7 @@ class ReportsController extends Controller
      * Process license data for CSV export.
      *
      * @param array $licenses
+     *
      * @return void
      */
     private function processLicenseDataForCsv(array $licenses, $file): void
@@ -790,6 +791,7 @@ class ReportsController extends Controller
      * Format license data for CSV export.
      *
      * @param object $license
+     *
      * @return array<string|int|float>
      */
     private function formatLicenseDataForCsv($license): array

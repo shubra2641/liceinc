@@ -16,6 +16,7 @@ trait RequestHelpers
      * Handle checkbox values for update requests.
      *
      * @param array $additionalFields Additional checkbox fields to include
+     *
      * @return void
      */
     protected function handleCheckboxValues(array $additionalFields = []): void
@@ -108,6 +109,7 @@ trait RequestHelpers
      * Sanitize input data.
      *
      * @param mixed $input The input to sanitize
+     *
      * @return string|null
      */
     protected function sanitizeInput($input): ?string

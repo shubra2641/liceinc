@@ -27,8 +27,8 @@ trait TicketHelpers
      * @param array $ticketData
      * @param string $successRoute
      * @param string $successMessage
-     *
      * @return RedirectResponse
+     * 
      */
     protected function handleTicketCreation(
         array $ticketData,
@@ -58,8 +58,8 @@ trait TicketHelpers
      *
      * @param Ticket $ticket
      * @param string $viewName
-     *
      * @return View
+     * 
      */
     protected function handleTicketDisplay(Ticket $ticket, string $viewName): View
     {
@@ -319,7 +319,6 @@ trait TicketHelpers
      * Validate ticket update data.
      *
      * @param \Illuminate\Http\Request $request
-     *
      * @return array
      */
     protected function validateTicketUpdateData(\Illuminate\Http\Request $request): array
@@ -376,7 +375,6 @@ trait TicketHelpers
      * Check if ticket should be closed based on request.
      *
      * @param \Illuminate\Http\Request $request
-     *
      * @return bool
      */
     protected function shouldCloseTicket(\Illuminate\Http\Request $request): bool
@@ -415,8 +413,8 @@ trait TicketHelpers
      *
      * @param array $filters
      * @param int $perPage
-     *
      * @return Collection
+     * 
      */
     protected function getTicketsWithFilters(array $filters = [], int $perPage = 15): Collection
     {
