@@ -13,6 +13,7 @@ use App\Models\TicketCategory;
 use App\Models\TicketReply;
 use App\Services\Email\EmailFacade;
 use App\Services\EnvatoService;
+use App\Traits\TicketHelpers;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,6 +43,8 @@ use Illuminate\View\View;
  */
 class TicketController extends Controller
 {
+    use TicketHelpers;
+
     /**
      * Pagination limit for ticket listing.
      */
@@ -236,17 +239,15 @@ class TicketController extends Controller
             // Send email notifications
             $this->sendTicketNotifications($ticket);
             DB::commit();
+
             // Redirect based on user authentication status
             if (Auth::check()) {
                 return redirect()->route('user.tickets.show', $ticket)
                     ->with('success', 'Ticket created successfully');
             } else {
-                // For guests, redirect to support ticket view
+                $message = 'Ticket created successfully. You can view it using the ticket ID: ' . $ticket->id;
                 return redirect()->route('support.tickets.show', $ticket)
-                    ->with(
-                        'success',
-                        'Ticket created successfully. You can view it using the ticket ID: ' . $ticket->id
-                    );
+                    ->with('success', $message);
             }
         } catch (Exception $e) {
             DB::rollBack();
@@ -255,7 +256,8 @@ class TicketController extends Controller
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return back()->with('error', 'Failed to create ticket. Please try again.')->withInput();
+            return back()->with('error', 'Failed to create ticket. Please try again.')
+                ->withInput();
         }
     }
     /**
@@ -282,32 +284,7 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket): View
     {
-        try {
-            // Ticket is already validated by type hint
-            // Allow viewing ticket if it has no user_id (for guests) or if user is logged in
-            // and is ticket owner or admin
-            if (! $this->canViewTicket($ticket)) {
-                Log::warning('Unauthorized ticket access attempt', [
-                    'user_id' => Auth::id(),
-                    'ticket_id' => $ticket->id,
-                    'ticket_user_id' => $ticket->user_id,
-                    'ip_address' => request()->ip(),
-                ]);
-                abort(403, 'Unauthorized access to ticket');
-            }
-            DB::beginTransaction();
-            $ticket->load(['user', 'replies.user']);
-            DB::commit();
-            return view('user.tickets.show', ['ticket' => $ticket]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to load ticket details: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
-                'ticket_id' => $ticket->id ?? null,
-                'trace' => $e->getTraceAsString(),
-            ]);
-            abort(500, 'Failed to load ticket details. Please try again.');
-        }
+        return $this->handleTicketDisplay($ticket, 'user.tickets.show');
     }
     /**
      * Show the form for editing the specified ticket.
@@ -345,8 +322,7 @@ class TicketController extends Controller
     public function update(Request $request, Ticket $ticket): RedirectResponse
     {
         try {
-            // Request and ticket are already validated by type hints
-            if (! $this->canModifyTicket($ticket)) {
+            if (!$this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket modification attempt', [
                     'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
@@ -355,13 +331,10 @@ class TicketController extends Controller
                 ]);
                 abort(403, 'Unauthorized access to modify ticket');
             }
+
             $validated = $this->validateTicketUpdateData($request);
-            DB::beginTransaction();
-            $ticket->update($validated);
-            DB::commit();
-            return back()->with('success', 'Ticket updated');
+            return $this->handleTicketUpdate($ticket, $validated);
         } catch (Exception $e) {
-            DB::rollBack();
             Log::error('Failed to update ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
