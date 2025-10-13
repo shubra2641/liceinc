@@ -493,8 +493,6 @@ class UpdateController extends Controller
             if ($updateData['success']) {
                 $data = $updateData['data'] ?? [];
                 $isUpdateAvailable = $data['is_update_available'] ?? false;
-                    ? $updateData['data']['is_update_available']
-                    : false;
                 $nextVersion = $data['latest_version'] ?? null;
                 if ($nextVersion) {
                     $updateResult = $this->performAutoUpdate(
@@ -640,12 +638,6 @@ class UpdateController extends Controller
                     'success' => false,
                     'message' => 'Installation failed: ' . ($installResult['message'] ?? 'Unknown error'),
                     'error_code' => 'INSTALL_FAILED',
-                ];
-            }
-                            ? $installResult['message']
-                            : 'Unknown error'
-                    ),
-                    'error_code' => 'INSTALLATION_FAILED',
                 ];
             }
         } catch (\Exception $e) {
