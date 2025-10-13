@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api;
 
+use App\Traits\RequestHelpers;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -14,6 +15,8 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class ProductUpdateLatestVersionRequest extends FormRequest
 {
+    use RequestHelpers;
+
     /**
      * Determine if the user is authorized to make this request.
      */

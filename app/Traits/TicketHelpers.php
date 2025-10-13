@@ -429,4 +429,25 @@ trait TicketHelpers
 
         return $query->paginate($perPage);
     }
+
+    /**
+     * Validate ticket creation data.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param array $additionalRules
+     * @return array
+     */
+    protected function validateTicketData(\Illuminate\Http\Request $request, array $additionalRules = []): array
+    {
+        $baseRules = [
+            'subject' => ['required', 'string', 'max:255'],
+            'priority' => ['required', 'in:' . implode(', ', $this->getValidPriorities())],
+            'content' => ['required', 'string'],
+            'purchase_code' => ['nullable', 'string'],
+            'product_slug' => ['nullable', 'string'],
+        ];
+
+        $rules = array_merge($baseRules, $additionalRules);
+        return $request->validate($rules);
+    }
 }

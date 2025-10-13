@@ -190,7 +190,12 @@ class TicketController extends Controller
     {
         try {
             // Request is already validated by type hint
-            $validated = $this->validateTicketData($request);
+            $validated = $this->validateTicketData($request, [
+                'product_version' => ['nullable', 'string'],
+                'browser_info' => ['nullable', 'string'],
+                'invoice_id' => ['nullable', 'exists:invoices,id'],
+                'category_id' => ['required', 'exists:ticket_categories,id'],
+            ]);
             DB::beginTransaction();
             $category = TicketCategory::find($validated['category_id']);
             if (! $category || $category instanceof \Illuminate\Database\Eloquent\Collection) {
@@ -284,7 +289,7 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket): View
     {
-        return $this->showTicket($ticket, 'user.tickets.show');
+        return $this->showTicket($ticket, 'user.tickets.show', false);
     }
     /**
      * Show the form for editing the specified ticket.
@@ -340,7 +345,7 @@ class TicketController extends Controller
      */
     public function destroy(Ticket $ticket): RedirectResponse
     {
-        return $this->destroyTicket($ticket);
+        return $this->destroyTicket($ticket, false, 'user.tickets.index');
     }
     /**
      * Add a reply to the specified ticket with enhanced security.
@@ -364,37 +369,9 @@ class TicketController extends Controller
      */
     public function reply(Request $request, Ticket $ticket): RedirectResponse
     {
-        return $this->replyToTicket($request, $ticket, true, false);
+        return $this->replyToTicket($request, $ticket, true, false, false);
     }
-    /**
-     * Validate ticket creation data.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return array<string, mixed> The validated data
-     *
-     * @throws \InvalidArgumentException When validation fails
-     */
-    private function validateTicketData(Request $request): array
-    {
-        $validated = $request->validate([
-            'subject' => ['required', 'string', 'max:255'],
-            'priority' => ['required', 'in:' . implode(', ', self::VALID_PRIORITIES)],
-            'content' => ['required', 'string'],
-            'purchase_code' => ['nullable', 'string'],
-            'product_slug' => ['nullable', 'string'],
-            'product_version' => ['nullable', 'string'],
-            'browser_info' => ['nullable', 'string'],
-            'invoice_id' => ['nullable', 'exists:invoices,id'],
-            'category_id' => ['required', 'exists:ticket_categories,id'],
-        ]);
 
-        /**
- * @var array<string, mixed> $result
-*/
-        $result = $validated;
-        return $result;
-    }
     /**
      * Validate ticket update data.
      *

@@ -13,6 +13,8 @@ use App\Models\TicketCategory;
 use App\Models\TicketReply;
 use App\Models\User;
 use App\Services\Email\EmailFacade;
+use App\Traits\TicketHelpers;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +40,8 @@ use Illuminate\View\View;
  */
 class TicketController extends Controller
 {
+    use TicketHelpers;
+
     protected EmailFacade $emailService;
 
     /**
@@ -324,9 +328,7 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket): View
     {
-        $ticket->load(['user.licenses.product', 'replies.user', 'category', 'invoice.product']);
-
-        return view('admin.tickets.show', ['ticket' => $ticket]);
+        return $this->showTicket($ticket, 'admin.tickets.show', true);
     }
 
     /**
@@ -384,24 +386,7 @@ class TicketController extends Controller
      */
     public function update(TicketRequest $request, Ticket $ticket): RedirectResponse
     {
-        try {
-            DB::beginTransaction();
-            $validated = $request->validated();
-            $ticket->update($validated);
-            DB::commit();
-
-            return back()->with('success', 'Ticket updated');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to update ticket', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'ticket_id' => $ticket->id,
-                'request_data' => $request->except(['content']),
-            ]);
-
-            return back()->withErrors(['error' => 'Failed to update ticket. Please try again.']);
-        }
+        return $this->updateTicket($request, $ticket, true);
     }
 
     /**
@@ -428,23 +413,7 @@ class TicketController extends Controller
      */
     public function destroy(Ticket $ticket): RedirectResponse
     {
-        try {
-            DB::beginTransaction();
-            $ticket->delete();
-            DB::commit();
-
-            return redirect()->route('admin.tickets.index')->with('success', 'Ticket deleted');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to delete ticket', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'ticket_id' => $ticket->id,
-            ]);
-
-            return redirect()->back()
-                ->withErrors(['error' => 'Failed to delete ticket. Please try again.']);
-        }
+        return $this->destroyTicket($ticket, true, 'admin.tickets.index');
     }
 
     /**
@@ -472,48 +441,7 @@ class TicketController extends Controller
      */
     public function reply(TicketRequest $request, Ticket $ticket): RedirectResponse
     {
-        try {
-            DB::beginTransaction();
-            $validated = $request->validated();
-            $user = $request->user();
-            if ($user) {
-                $reply = TicketReply::create([
-                    'ticket_id' => $ticket->id,
-                    'user_id' => $user->id,
-                    'message' => $validated['message'],
-                ]);
-            }
-            // Send email notification to user when admin replies
-            try {
-                if ($ticket->user) {
-                    $this->emailService->sendTicketReply($ticket->user, [
-                        'ticket_id' => $ticket->id,
-                        'ticket_subject' => $ticket->subject,
-                        'reply_message' => $validated['message'],
-                        'replied_by' => $user->name ?? 'Admin',
-                    ]);
-                }
-            } catch (\Exception $e) {
-                Log::error('Failed to send ticket reply email', [
-                    'error' => $e->getMessage(),
-                    'ticket_id' => $ticket->id,
-                    'user_id' => $ticket->user_id,
-                ]);
-            }
-            DB::commit();
-
-            return back()->with('success', 'Reply added');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to add ticket reply', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'ticket_id' => $ticket->id,
-                'request_data' => $request->except(['message']),
-            ]);
-
-            return back()->withErrors(['error' => 'Failed to add reply. Please try again.']);
-        }
+        return $this->replyToTicket($request, $ticket, false, false, true);
     }
 
     /**
