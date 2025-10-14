@@ -1,0 +1,99 @@
+# Codacy Configuration File
+# This file configures Codacy analysis for your project
+
+# Exclude files and directories from analysis
+exclude_paths:
+  - "vendor/**"
+  - "node_modules/**"
+  - "storage/**"
+  - "bootstrap/cache/**"
+  - "public/vendor/**"
+  - "database/migrations/**"
+  - "database/seeders/**"
+  - "database/factories/**"
+  - "tests/**"
+  - "*.md"
+  - "*.txt"
+  - "*.json"
+  - "*.xml"
+  - "*.yml"
+  - "*.yaml"
+  - "*.log"
+  - "*.env*"
+  - "*.lock"
+  - "*.bat"
+  - "*.sh"
+
+# Include specific file types
+include_paths:
+  - "app/**/*.php"
+  - "config/**/*.php"
+  - "routes/**/*.php"
+  - "resources/views/**/*.php"
+
+# Tool configuration
+tools:
+  # PHP tools
+  - name: "phpcs"
+    enabled: true
+    patterns:
+      - "**/*.php"
+    options:
+      standard: "PSR12"
+      
+  - name: "phpstan"
+    enabled: true
+    patterns:
+      - "**/*.php"
+    options:
+      level: "8"
+      
+  - name: "pylint"
+    enabled: false
+    
+  - name: "eslint"
+    enabled: false
+    
+  - name: "trivy"
+    enabled: true
+    patterns:
+      - "**/*.php"
+      - "**/*.js"
+      - "**/*.json"
+      - "**/*.lock"
+
+# Quality gates
+quality_gates:
+  - name: "Security"
+    enabled: true
+    tools:
+      - "trivy"
+      
+  - name: "Code Style"
+    enabled: true
+    tools:
+      - "phpcs"
+      
+  - name: "Static Analysis"
+    enabled: true
+    tools:
+      - "phpstan"
+
+# Coverage configuration
+coverage:
+  enabled: true
+  tools:
+    - "phpunit"
+  thresholds:
+    line: 80
+    branch: 70
+    function: 80
+    class: 80
+
+# Commit status
+commit_status:
+  enabled: true
+  tools:
+    - "phpcs"
+    - "phpstan"
+    - "trivy"

@@ -1,0 +1,122 @@
+name: Performance Analysis
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 5 * * 1' # Run every Monday at 5 AM
+
+jobs:
+  performance-analysis:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, dom, fileinfo, mysql, pdo_mysql, zip, gd, curl, xml, bcmath, soap, intl, readline, libxml, openssl, tokenizer, ctype, json, iconv, session, filter, hash, opcache
+        coverage: xdebug
+    
+    - name: Cache Composer dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.composer/cache
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-composer-
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+    
+    - name: Run PHPUnit with performance profiling
+      run: |
+        vendor/bin/phpunit --configuration=phpunit.xml --coverage-html=storage/app/coverage/html --coverage-clover=storage/app/coverage/clover.xml --coverage-text=storage/app/coverage/coverage.txt
+        
+    - name: Analyze database queries
+      run: |
+        echo "Analyzing database query patterns..."
+        if grep -r "DB::table\|DB::select\|DB::insert\|DB::update\|DB::delete" --include="*.php" app/ | wc -l; then
+          echo "Found $(grep -r "DB::table\|DB::select\|DB::insert\|DB::update\|DB::delete" --include="*.php" app/ | wc -l) direct database queries"
+        fi
+        
+    - name: Check for N+1 query problems
+      run: |
+        echo "Checking for potential N+1 query problems..."
+        if grep -r "->get()" --include="*.php" app/ | grep -v "vendor"; then
+          echo "⚠️  Potential N+1 queries found - consider using eager loading"
+        else
+          echo "✅ No obvious N+1 query patterns found"
+        fi
+        
+    - name: Analyze memory usage patterns
+      run: |
+        echo "Analyzing memory usage patterns..."
+        if grep -r "memory_get_usage\|memory_get_peak_usage" --include="*.php" app/ | grep -v "vendor"; then
+          echo "Found memory usage monitoring in code"
+        fi
+        
+    - name: Check for caching opportunities
+      run: |
+        echo "Checking for caching opportunities..."
+        if grep -r "Cache::\|cache()" --include="*.php" app/ | grep -v "vendor"; then
+          echo "Found caching usage in code"
+        else
+          echo "⚠️  No caching found - consider implementing caching for better performance"
+        fi
+        
+    - name: Analyze file operations
+      run: |
+        echo "Analyzing file operations..."
+        if grep -r "file_get_contents\|file_put_contents\|fopen\|fwrite" --include="*.php" app/ | grep -v "vendor"; then
+          echo "⚠️  Direct file operations found - consider using Laravel's Storage facade"
+        else
+          echo "✅ No direct file operations found"
+        fi
+        
+    - name: Check for inefficient loops
+      run: |
+        echo "Checking for inefficient loops..."
+        if grep -r "foreach.*foreach\|for.*for" --include="*.php" app/ | grep -v "vendor"; then
+          echo "⚠️  Nested loops found - consider optimizing"
+        else
+          echo "✅ No obvious nested loops found"
+        fi
+        
+    - name: Generate performance report
+      run: |
+        echo "# Performance Analysis Report" > performance-report.md
+        echo "Generated on: $(date)" >> performance-report.md
+        echo "" >> performance-report.md
+        echo "## Performance Checks:" >> performance-report.md
+        echo "- Database query analysis" >> performance-report.md
+        echo "- N+1 query detection" >> performance-report.md
+        echo "- Memory usage analysis" >> performance-report.md
+        echo "- Caching opportunities" >> performance-report.md
+        echo "- File operations analysis" >> performance-report.md
+        echo "- Loop efficiency analysis" >> performance-report.md
+        echo "" >> performance-report.md
+        echo "## Recommendations:" >> performance-report.md
+        echo "- Use eager loading to prevent N+1 queries" >> performance-report.md
+        echo "- Implement caching for frequently accessed data" >> performance-report.md
+        echo "- Use Laravel's Storage facade for file operations" >> performance-report.md
+        echo "- Optimize database queries and indexes" >> performance-report.md
+        
+    - name: Upload performance report
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-report
+        path: performance-report.md
+        retention-days: 30
+        
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-reports
+        path: storage/app/coverage/
+        retention-days: 30
