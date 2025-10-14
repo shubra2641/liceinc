@@ -133,18 +133,14 @@ class UpdateController extends Controller
     {
         try {
             DB::beginTransaction();
+            
             $validated = $request->validated();
             $targetVersion = $validated['version'];
             $currentVersion = VersionHelper::getCurrentVersion();
 
-            $validationResult = $this->updateService->validateUpdateRequest($targetVersion, $currentVersion);
-            if (!$validationResult['valid']) {
-                DB::rollBack();
-                return redirect()->back()->with('error', $validationResult['error']);
-            }
-
-            $this->updateService->performUpdate($targetVersion, $currentVersion);
-            VersionHelper::updateVersion($targetVersion);
+            $this->validateUpdateRequest($targetVersion, $currentVersion);
+            $this->performSystemUpdate($targetVersion, $currentVersion);
+            
             DB::commit();
 
             return redirect()->route('admin.updates.index')->with(
@@ -153,13 +149,40 @@ class UpdateController extends Controller
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('System update failed', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-            ]);
-
+            $this->logUpdateError('System update failed', $e);
             return redirect()->back()->with('error', 'Update failed: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Validate update request
+     */
+    private function validateUpdateRequest(string $targetVersion, string $currentVersion): void
+    {
+        $validationResult = $this->updateService->validateUpdateRequest($targetVersion, $currentVersion);
+        if (!$validationResult['valid']) {
+            throw new \InvalidArgumentException($validationResult['error']);
+        }
+    }
+
+    /**
+     * Perform system update
+     */
+    private function performSystemUpdate(string $targetVersion, string $currentVersion): void
+    {
+        $this->updateService->performUpdate($targetVersion, $currentVersion);
+        VersionHelper::updateVersion($targetVersion);
+    }
+
+    /**
+     * Log update error
+     */
+    private function logUpdateError(string $message, \Exception $e): void
+    {
+        Log::error($message, [
+            'user_id' => auth()->id(),
+            'error' => $e->getMessage(),
+        ]);
     }
 
     /**
@@ -168,9 +191,8 @@ class UpdateController extends Controller
     public function getVersionInfo(string $version)
     {
         try {
-            $versionInfo = VersionHelper::getVersionInfo($version);
-            $instructions = VersionHelper::getUpdateInstructions($version);
-
+            $versionInfo = $this->getVersionDetails($version);
+            
             if (empty($versionInfo)) {
                 return response()->json([
                     'success' => false,
@@ -180,24 +202,30 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'version' => $version,
-                    'info' => $versionInfo,
-                    'instructions' => $instructions,
-                ],
+                'data' => $versionInfo,
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to get version info', [
-                'user_id' => auth()->id(),
-                'version' => $version,
-                'error' => $e->getMessage(),
-            ]);
-
+            $this->logUpdateError('Failed to get version info', $e);
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to get version information: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Get version details
+     */
+    private function getVersionDetails(string $version): array
+    {
+        $versionInfo = VersionHelper::getVersionInfo($version);
+        $instructions = VersionHelper::getUpdateInstructions($version);
+
+        return [
+            'version' => $version,
+            'info' => $versionInfo,
+            'instructions' => $instructions,
+        ];
     }
 
     /**

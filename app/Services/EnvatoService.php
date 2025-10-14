@@ -117,62 +117,62 @@ class EnvatoService
      * @version 1.0.6
      */
     /**
-     * @return array<mixed, mixed>|null
+     * Verify purchase code
      */
     public function verifyPurchase(string $purchaseCode): ?array
     {
         try {
             $purchaseCode = $this->validatePurchaseCode($purchaseCode);
             $settings = $this->getEnvatoSettings();
-            $token = $settings['token'];
-            if (empty($token)) {
+            
+            if (empty($settings['token'])) {
                 Log::error('Envato token not configured for purchase verification');
                 return null;
             }
+            
             $cacheKey = 'envato_purchase_' . md5($purchaseCode);
-            $result = Cache::remember($cacheKey, now()->addMinutes(30), function () use ($purchaseCode, $token) {
-                try {
-                    $tokenString = is_string($token) ? $token : '';
-                    $response = Http::withToken($tokenString)
-                        ->acceptJson()
-                        ->timeout(30)
-                        ->get("{$this->baseUrl}/v3/market/author/sale", [
-                            'code' => $purchaseCode,
-                        ]);
-                    if ($response->failed()) {
-                        Log::error('Failed to verify purchase code with Envato API', [
-                            'purchase_code' => $purchaseCode,
-                            'status' => $response->status(),
-                            'response' => $response->body(),
-                        ]);
-                        return null;
-                    }
-                    $result = $response->json();
-                    return is_array($result) ? $result : null;
-                } catch (Exception $e) {
-                    Log::error('Exception during purchase verification: ' . $e->getMessage());
-                    return null;
-                }
+            return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($purchaseCode, $settings) {
+                return $this->makePurchaseVerificationRequest($purchaseCode, $settings['token']);
             });
-            return is_array($result) ? $result : null;
+            
         } catch (Exception $e) {
             Log::error('Failed to verify purchase code: ' . $e->getMessage());
             return null;
         }
     }
     /**
+     * Make purchase verification request
+     */
+    private function makePurchaseVerificationRequest(string $purchaseCode, string $token): ?array
+    {
+        try {
+            $response = Http::withToken($token)
+                ->acceptJson()
+                ->timeout(30)
+                ->get("{$this->baseUrl}/v3/market/author/sale", [
+                    'code' => $purchaseCode,
+                ]);
+            
+            if ($response->failed()) {
+                Log::error('Failed to verify purchase code with Envato API', [
+                    'purchase_code' => $purchaseCode,
+                    'status' => $response->status(),
+                    'response' => $response->body(),
+                ]);
+                return null;
+            }
+            
+            $result = $response->json();
+            return is_array($result) ? $result : null;
+            
+        } catch (Exception $e) {
+            Log::error('Exception during purchase verification: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Get user information from Envato API with enhanced security.
-     *
-     * Retrieves user information from Envato's API using secure authentication
-     * and comprehensive error handling with caching for performance.
-     *
-     * @param  string  $username  The username to retrieve information for
-     *
-     * @return array|null The user information data or null if failed
-     *
-     * @throws \InvalidArgumentException When username is invalid
-     *
-     * @version 1.0.6
      */
     /**
      * @return array<mixed, mixed>|null

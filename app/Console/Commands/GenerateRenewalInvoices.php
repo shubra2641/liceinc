@@ -87,86 +87,110 @@ class GenerateRenewalInvoices extends Command
 
 
     /**
-     * Execute the console command with enhanced security and database transactions.
-     *
-     * @return integer Command exit code
-     *
-     * @throws \InvalidArgumentException When invalid options are provided.
-     * @throws \Exception When command execution fails.
+     * Execute the console command
      */
     public function handle(): int
     {
         try {
-            // Validate and sanitize input.
             $daysBeforeExpiry = $this->validateAndSanitizeDaysOption();
-            $expiryDate       = Carbon::now()->addDays($daysBeforeExpiry);
             $this->info('Generating renewal invoices for licenses expiring within ' . $daysBeforeExpiry . ' days...');
-            // Find licenses that are about to expire and don't have pending renewal invoices.
-            $licenses       = $this->getExpiringLicenses($expiryDate);
-            $generatedCount = 0;
-            $emailSentCount = 0;
-            $errorCount     = 0;
-            /*
-             * @var License $license
-             */
-            foreach ($licenses as $license) {
-                try {
-                    DB::beginTransaction();
-                    // Generate renewal invoice.
-                    $invoice = $this->generateRenewalInvoice($license);
-                    if ($invoice !== null) {
-                        $generatedCount++;
-                        $this->line(
-                            'Generated renewal invoice for license ' .
-                            $license->license_key . ' (Product: ' .
-                            ($license->product->name ?? 'Unknown Product') . ')'
-                        );
-                        // Send email notifications.
-                        if ($this->sendRenewalNotifications($license, $invoice) === true) {
-                            $emailSentCount++;
-                        }
-
-                        DB::commit();
-                    } else {
-                        DB::rollBack();
-                        $errorCount++;
-                    }
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    $errorCount++;
-                    $this->handleLicenseError($license, $e);
-                }//end try
-            }//end foreach
-
-            $this->info(
-                'Generated ' . $generatedCount . ' renewal invoices and sent ' .
-                $emailSentCount . ' email notifications.'
-            );
-            if ($errorCount > 0) {
-                $this->warn('Encountered ' . $errorCount . ' errors during processing. Check logs for details.');
-            }
-
+            
+            $result = $this->processRenewalInvoices($daysBeforeExpiry);
+            $this->displayResults($result);
+            
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            Log::error(
-                'GenerateRenewalInvoices command failed',
-                [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]
-            );
-            $this->error('Command failed: ' . $e->getMessage());
+            $this->handleCommandError($e);
             return Command::FAILURE;
-        }//end try
+        }
     }
 
 
     /**
+     * Process renewal invoices
+     */
+    private function processRenewalInvoices(int $daysBeforeExpiry): array
+    {
+        $expiryDate = Carbon::now()->addDays($daysBeforeExpiry);
+        $licenses = $this->getExpiringLicenses($expiryDate);
+        
+        $generatedCount = 0;
+        $emailSentCount = 0;
+        $errorCount = 0;
+        
+        foreach ($licenses as $license) {
+            try {
+                DB::beginTransaction();
+                
+                $invoice = $this->generateRenewalInvoice($license);
+                if ($invoice !== null) {
+                    $generatedCount++;
+                    $this->logInvoiceGeneration($license, $invoice);
+                    
+                    if ($this->sendRenewalNotifications($license, $invoice) === true) {
+                        $emailSentCount++;
+                    }
+                    
+                    DB::commit();
+                } else {
+                    DB::rollBack();
+                    $errorCount++;
+                }
+            } catch (\Exception $e) {
+                DB::rollBack();
+                $errorCount++;
+                $this->handleLicenseError($license, $e);
+            }
+        }
+        
+        return [
+            'generated' => $generatedCount,
+            'emails_sent' => $emailSentCount,
+            'errors' => $errorCount
+        ];
+    }
+
+    /**
+     * Display command results
+     */
+    private function displayResults(array $result): void
+    {
+        $this->info(
+            'Generated ' . $result['generated'] . ' renewal invoices and sent ' .
+            $result['emails_sent'] . ' email notifications.'
+        );
+        
+        if ($result['errors'] > 0) {
+            $this->warn('Encountered ' . $result['errors'] . ' errors during processing. Check logs for details.');
+        }
+    }
+
+    /**
+     * Handle command error
+     */
+    private function handleCommandError(\Exception $e): void
+    {
+        Log::error('GenerateRenewalInvoices command failed', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+        $this->error('Command failed: ' . $e->getMessage());
+    }
+
+    /**
+     * Log invoice generation
+     */
+    private function logInvoiceGeneration(License $license, $invoice): void
+    {
+        $this->line(
+            'Generated renewal invoice for license ' .
+            $license->license_key . ' (Product: ' .
+            ($license->product->name ?? 'Unknown Product') . ')'
+        );
+    }
+
+    /**
      * Validate and sanitize the days option with enhanced security.
-     *
-     * @return integer The validated days value
-     *
-     * @throws \InvalidArgumentException When invalid days value is provided.
      */
     protected function validateAndSanitizeDaysOption(): int
     {

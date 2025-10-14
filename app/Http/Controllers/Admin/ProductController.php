@@ -11,6 +11,7 @@ use App\Models\License;
 use App\Models\LicenseLog;
 use App\Models\Product;
 use App\Services\LicenseGeneratorService;
+use App\Services\Product\ProductService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,8 +27,10 @@ use Illuminate\View\View;
  */
 class ProductController extends Controller
 {
-    public function __construct(private LicenseGeneratorService $licenseGenerator)
-    {
+    public function __construct(
+        private LicenseGeneratorService $licenseGenerator,
+        private ProductService $productService
+    ) {
     }
 
     /**
@@ -188,14 +191,24 @@ class ProductController extends Controller
     public function store(ProductRequest $request): RedirectResponse
     {
         try {
-            DB::beginTransaction();
             $data = $request->validated();
-
-            if (isset($data['requires_domain'])) {
-                $data['requires_domain'] = (bool)$data['requires_domain'];
-            }
-
-            $data['slug'] = $data['slug'] ?? Str::slug($data['name'] ?? '');
+            $files = $request->file('files', []);
+            
+            $product = $this->productService->createProduct($data, $files);
+            
+            return redirect()->route('admin.products.index')
+                ->with('success', 'Product created successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to create product', [
+                'error' => $e->getMessage(),
+                'data' => $request->validated()
+            ]);
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to create product: ' . $e->getMessage());
+        }
+    }
 
             if ($request->hasFile('image')) {
                 $data['image'] = $request->file('image')->store('products', 'public');
@@ -246,47 +259,13 @@ class ProductController extends Controller
     public function update(ProductRequest $request, Product $product): RedirectResponse
     {
         try {
-            DB::beginTransaction();
             $data = $request->validated();
-
-            if (isset($data['requires_domain'])) {
-                $data['requires_domain'] = (bool)$data['requires_domain'];
-            }
-
-            if ($request->hasFile('image')) {
-                if ($product->image) {
-                    Storage::disk('public')->delete($product->image);
-                }
-                $data['image'] = $request->file('image')->store('products', 'public');
-            }
-
-            if ($request->hasFile('gallery_images')) {
-                $data['gallery_images'] = collect($request->file('gallery_images'))->map(fn($file) => $file->store('products/gallery', 'public'))->toArray();
-            }
-
-            if (isset($data['renewal_period']) && $data['renewal_period'] === 'lifetime') {
-                $data['extended_supported_until'] = null;
-            }
-
-            $product->update($data);
-
-            if ($request->hasFile('product_files')) {
-                $productFileService = app(\App\Services\ProductFileService::class);
-                foreach ($request->file('product_files') as $file) {
-                    if ($file->isValid()) {
-                        $productFileService->uploadFile($product, $file);
-                    }
-                }
-            }
-
-            if ($product->wasChanged(['programming_language', 'envato_item_id', 'name', 'slug'])) {
-                $this->generateIntegrationFile($product);
-            }
-
-            DB::commit();
+            $files = $request->file('files', []);
+            
+            $this->productService->updateProduct($product, $data, $files);
+            
             return back()->with('success', 'Product updated successfully');
         } catch (\Exception $e) {
-            DB::rollBack();
             Log::error('Product update error: ' . $e->getMessage());
             return back()->with('error', 'Error updating product: ' . $e->getMessage())->withInput();
         }
@@ -298,16 +277,9 @@ class ProductController extends Controller
     public function destroy(Product $product): RedirectResponse
     {
         try {
-            DB::beginTransaction();
-            $filePath = "integration/{$product->slug}.php";
-            if (Storage::disk('public')->exists($filePath)) {
-                Storage::disk('public')->delete($filePath);
-            }
-            $product->delete();
-            DB::commit();
+            $this->productService->deleteProduct($product);
             return redirect()->route('admin.products.index')->with('success', 'Product deleted');
         } catch (\Exception $e) {
-            DB::rollBack();
             Log::error('Product deletion error: ' . $e->getMessage());
             return back()->with('error', 'Error deleting product: ' . $e->getMessage());
         }

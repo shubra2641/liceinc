@@ -42,74 +42,112 @@ class UpdatePackageService
      * }
      */
     /**
-     * @return array<string, mixed>
+     * Install update files from package
      */
     public function installUpdateFiles(string $packagePath): array
     {
         try {
-            // Validate input parameters
             $this->validatePackagePath($packagePath);
             DB::beginTransaction();
-            $tempDir = storage_path('app/temp/update_' . (string) time());
-            // Create temp directory with security validation
-            if (! SecureFileHelper::isDirectory($tempDir)) {
-                if (! mkdir($tempDir, 0755, true)) {
-                    throw new \Exception('Failed to create temporary directory');
-                }
-            }
-            // Extract package with validation
-            $zip = new ZipArchive();
-            if ($zip->open($packagePath) !== true) {
-                throw new \Exception('Failed to open update package');
-            }
-            $zip->extractTo($tempDir);
-            $zip->close();
-            $steps = [];
-            $filesInstalled = 0;
-            // Install files
-            $this->installFiles($tempDir, base_path(), $steps, $filesInstalled);
-            // Clean up
+            
+            $tempDir = $this->createTempDirectory();
+            $this->extractPackage($packagePath, $tempDir);
+            
+            $result = $this->installFiles($tempDir);
             $this->cleanupTempFiles($tempDir);
+            
             DB::commit();
-            return [
-                'success' => true,
-                'message' => 'Update files installed successfully',
-                'data' => [
-                    'files_installed' => $filesInstalled,
-                    'steps' => $steps,
-                ],
-            ];
+            return $this->createSuccessResponse($result);
+            
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Failed to install update files', [
-                'package_path' => $packagePath,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return [
-                'success' => false,
-                'message' => 'Failed to install update files: ' . $e->getMessage(),
-            ];
+            $this->logInstallationError($packagePath, $e);
+            return $this->createErrorResponse('Failed to install update files: ' . $e->getMessage());
         }
     }
     /**
+     * Create temporary directory
+     */
+    private function createTempDirectory(): string
+    {
+        $tempDir = storage_path('app/temp/update_' . time());
+        
+        if (!SecureFileHelper::isDirectory($tempDir)) {
+            if (!mkdir($tempDir, 0755, true)) {
+                throw new \Exception('Failed to create temporary directory');
+            }
+        }
+        
+        return $tempDir;
+    }
+
+    /**
+     * Extract package
+     */
+    private function extractPackage(string $packagePath, string $tempDir): void
+    {
+        $zip = new ZipArchive();
+        if ($zip->open($packagePath) !== true) {
+            throw new \Exception('Failed to open update package');
+        }
+        
+        $zip->extractTo($tempDir);
+        $zip->close();
+    }
+
+    /**
+     * Install files
+     */
+    private function installFiles(string $tempDir): array
+    {
+        $steps = [];
+        $filesInstalled = 0;
+        
+        $this->installFilesRecursive($tempDir, base_path(), $steps, $filesInstalled);
+        
+        return [
+            'files_installed' => $filesInstalled,
+            'steps' => $steps,
+        ];
+    }
+
+    /**
+     * Create success response
+     */
+    private function createSuccessResponse(array $data): array
+    {
+        return [
+            'success' => true,
+            'message' => 'Update files installed successfully',
+            'data' => $data,
+        ];
+    }
+
+    /**
+     * Create error response
+     */
+    private function createErrorResponse(string $message): array
+    {
+        return [
+            'success' => false,
+            'message' => $message,
+        ];
+    }
+
+    /**
+     * Log installation error
+     */
+    private function logInstallationError(string $packagePath, \Exception $e): void
+    {
+        Log::error('Failed to install update files', [
+            'package_path' => $packagePath,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+    }
+
+    /**
      * Process uploaded update package with enhanced security and error handling.
-     *
-     * Processes uploaded update packages with comprehensive validation, security measures,
-     * and error handling for reliable update package processing operations.
-     *
-     * @param  string  $packagePath  Path to the update package file
-     *
-     * @return array Processing result with success status and processing details
-     *
-     * @throws InvalidArgumentException When package path is invalid
-     * @throws \Exception When package processing fails
-     *
-     * @example
-     * $result = $service->processUpdatePackage('/path/to/update.zip');
-     * if ($result['success']) {
-     *     echo "Processed {$result['data']['files']} files";
-     * }
      */
     /**
      * @return array<string, mixed>

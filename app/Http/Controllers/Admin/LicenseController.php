@@ -6,18 +6,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LicenseRequest;
-use App\Models\Invoice;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\User;
-use App\Services\Email\EmailFacade;
-use App\Services\InvoiceService;
+use App\Services\License\LicenseManagementService;
+use App\Services\License\LicenseExportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
-use App\Helpers\SecureFileHelper;
 
 /**
  * Admin License Controller with enhanced security.
@@ -40,17 +37,10 @@ use App\Helpers\SecureFileHelper;
  */
 class LicenseController extends Controller
 {
-    protected EmailFacade $emailService;
-    /**
-     * Create a new controller instance.
-     *
-     * @param  EmailFacade  $emailService  The email service for notifications
-     *
-     * @version 1.0.6
-     */
-    public function __construct(EmailFacade $emailService)
-    {
-        $this->emailService = $emailService;
+    public function __construct(
+        private LicenseManagementService $licenseService,
+        private LicenseExportService $exportService
+    ) {
     }
     /**
      * Display a listing of licenses with pagination.
@@ -101,95 +91,12 @@ class LicenseController extends Controller
     {
         try {
             DB::beginTransaction();
+            
             $validated = $request->validated();
-            // Get product details
-            $product = Product::find($validated['product_id']);
-            if (! $product) {
-                DB::rollBack();
-                return back()->withErrors(['product_id' => 'Product not found.']);
-            }
-            // Inherit license type from product if not specified
-            if (empty($validated['license_type'])) {
-                $validated['license_type'] = $product->license_type ?? 'single';
-            }
-            // Set max_domains based on license type
-            if (empty($validated['max_domains'])) {
-                switch ($validated['license_type']) {
-                    case 'single':
-                        $validated['max_domains'] = 1;
-                        break;
-                    case 'multi':
-                        $validated['max_domains'] = $request->input('max_domains', 5); // Default to 5 for multi
-                        break;
-                    case 'developer':
-                        $validated['max_domains'] = $request->input('max_domains', 10); // Default to 10 for developer
-                        break;
-                    case 'extended':
-                        $validated['max_domains'] = $request->input('max_domains', 20); // Default to 20 for extended
-                        break;
-                    default:
-                        $validated['max_domains'] = 1;
-                }
-            }
-            // Set default values
-            $validated['status'] = $validated['status'] ?? 'active';
-            // Calculate license expiration date based on product duration
-            if (empty($validated['license_expires_at'])) {
-                if ($product->duration_days) {
-                    $validated['license_expires_at'] = now()->addDays(
-                        is_numeric($product->duration_days) ? (int)$product->duration_days : 0
-                    );
-                }
-            }
-            // Calculate support expiration date based on product support days
-            if (empty($validated['support_expires_at'])) {
-                if ($product->support_days) {
-                    $validated['support_expires_at'] = now()->addDays(
-                        is_numeric($product->support_days) ? (int)$product->support_days : 0
-                    );
-                }
-            }
-            // Generate license key if not provided
-            if (empty($validated['license_key'])) {
-                $validated['license_key'] = $this->generateLicenseKey();
-            }
-
-            $license = License::create($validated);
-            // Automatically create initial invoice with specified payment status
-            $invoiceService = app(InvoiceService::class);
-            $invoice = $invoiceService->createInitialInvoice(
-                $license,
-                is_string($validated['invoice_payment_status'] ?? null)
-                    ? $validated['invoice_payment_status']
-                    : 'pending',
-                ($validated['invoice_due_date'] ?? null) instanceof \DateTimeInterface
-                    ? $validated['invoice_due_date']
-                    : null,
-            );
-            // Send email notifications
-            try {
-                // Send notification to user
-                if ($license->user) {
-                    $this->emailService->sendLicenseCreated($license, $license->user);
-                }
-
-                // Send notification to admin only if user exists
-                if ($license->user) {
-                    $this->emailService->sendAdminLicenseCreated([
-                        'license_key' => $license->license_key,
-                        'product_name' => $license->product->name ?? 'Unknown Product',
-                        'customer_name' => $license->user->name,
-                        'customer_email' => $license->user->email,
-                    ]);
-                }
-            } catch (\Exception $e) {
-                // Log email errors but don't fail license creation
-                Log::warning('Email notification failed during license creation', [
-                    'error' => $e->getMessage(),
-                    'license_id' => $license->id,
-                ]);
-            }
+            $license = $this->licenseService->createLicense($validated);
+            
             DB::commit();
+            
             return redirect()->route('admin.licenses.show', $license)
                 ->with('success', 'License created successfully with automatic invoice generation.');
         } catch (\Exception $e) {
@@ -199,6 +106,7 @@ class LicenseController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['notes']),
             ]);
+            
             return redirect()
                 ->back()
                 ->withInput()
@@ -257,53 +165,14 @@ class LicenseController extends Controller
     {
         try {
             DB::beginTransaction();
+            
             $validated = $request->validated();
-            // Map UI field to DB column with proper parsing
-            // and allowing null to clear
-            if (array_key_exists('expires_at', $validated)) {
-                $validated['license_expires_at'] = ($validated['expires_at'] !== null
-                && $validated['expires_at'] !== '')
-                    ? \Carbon\Carbon::parse(
-                        is_string($validated['expires_at'])
-                            ? $validated['expires_at']
-                            : ''
-                    )->format('Y-m-d H:i:s')
-                    : null;
-                unset($validated['expires_at']);
-            }
-            // Get product details for inheritance
-            $product = Product::find($validated['product_id']);
-            if (! $product) {
-                DB::rollBack();
-                return back()->withErrors(['product_id' => 'Product not found.']);
-            }
-            // Inherit license type from product if not specified
-            if (empty($validated['license_type'])) {
-                $validated['license_type'] = $product->license_type ?? 'single';
-            }
-            // Set max_domains based on license type
-            if (empty($validated['max_domains'])) {
-                switch ($validated['license_type']) {
-                    case 'single':
-                        $validated['max_domains'] = 1;
-                        break;
-                    case 'multi':
-                        $validated['max_domains'] = 5;
-                        break;
-                    case 'developer':
-                        $validated['max_domains'] = 10;
-                        break;
-                    case 'extended':
-                        $validated['max_domains'] = 20;
-                        break;
-                    default:
-                        $validated['max_domains'] = 1;
-                }
-            }
-            // Set default values
-            $validated['max_domains'] = $validated['max_domains'];
-            $license->update($validated);
+            $validated = $this->processExpirationDate($validated);
+            
+            $this->licenseService->updateLicense($license, $validated);
+            
             DB::commit();
+            
             return redirect()->route('admin.licenses.show', $license)
                 ->with('success', 'License updated successfully.');
         } catch (\Exception $e) {
@@ -314,6 +183,7 @@ class LicenseController extends Controller
                 'license_id' => $license->id,
                 'request_data' => $request->except(['notes']),
             ]);
+            
             return redirect()
                 ->back()
                 ->withInput()
@@ -335,8 +205,11 @@ class LicenseController extends Controller
     {
         try {
             DB::beginTransaction();
-            $license->delete();
+            
+            $this->licenseService->deleteLicense($license);
+            
             DB::commit();
+            
             return redirect()->route('admin.licenses.index')
                 ->with('success', 'License deleted successfully.');
         } catch (\Exception $e) {
@@ -346,6 +219,7 @@ class LicenseController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'license_id' => $license->id,
             ]);
+            
             return redirect()
                 ->back()
                 ->with('error', 'Failed to delete license. Please try again.');
@@ -367,10 +241,11 @@ class LicenseController extends Controller
     {
         try {
             DB::beginTransaction();
-            $license->update([
-                'status' => $license->status === 'active' ? 'inactive' : 'active',
-            ]);
+            
+            $this->licenseService->toggleLicenseStatus($license);
+            
             DB::commit();
+            
             return back()->with('success', 'License status updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -379,6 +254,7 @@ class LicenseController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'license_id' => $license->id,
             ]);
+            
             return back()->with('error', 'Failed to update license status. Please try again.');
         }
     }
@@ -394,65 +270,40 @@ class LicenseController extends Controller
      */
     public function export(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        $licenses = License::with(['user', 'product'])->get();
-        $filename = 'licenses_' . date('Y-m-d_H-i-s') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-        $callback = function () use ($licenses) {
-            $file = SecureFileHelper::openOutput('w');
-            if (!is_resource($file)) {
-                return;
+        try {
+            $exportResult = $this->exportService->exportToCsv();
+            
+            if (!$exportResult['success']) {
+                throw new \Exception($exportResult['error']);
             }
-            // CSV Headers
-            fputcsv($file, [
-                'ID',
-                'License Key',
-                'User',
-                'Product',
-                'Status',
-                'Max Domains',
-                'Expires At',
-                'Created At',
-            ]);
-            // CSV Data
-            foreach ($licenses as $license) {
-                fputcsv($file, [
-                    $license->id,
-                    $license->license_key,
-                    $license->user->name ?? 'N/A',
-                    $license->product->name ?? 'N/A',
-                    $license->status,
-                    $license->max_domains,
-                    $license->expires_at,
-                    $license->created_at,
-                ]);
-            }
-            SecureFileHelper::closeFile($file);
-        };
-        return response()->stream($callback, 200, $headers);
+            
+            $callback = $this->exportService->generateCsvCallback($exportResult['licenses']);
+            $headers = $this->exportService->getCsvHeaders();
+            
+            return response()->stream($callback, 200, $headers);
+        } catch (\Exception $e) {
+            Log::error('License export failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to export licenses: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Generate a unique license key
-     *
-     * @return string
+     * Process expiration date field mapping
      */
-    private function generateLicenseKey(): string
+    private function processExpirationDate(array $validated): array
     {
-        $maxAttempts = 10;
-        $attempts = 0;
-
-        do {
-            $licenseKey = 'LIC-' . strtoupper(Str::random(12));
-            $attempts++;
-
-            if ($attempts > $maxAttempts) {
-                throw new \Exception('Failed to generate unique license key after ' . $maxAttempts . ' attempts');
-            }
-        } while (License::where('license_key', $licenseKey)->exists());
-
-        return $licenseKey;
+        if (array_key_exists('expires_at', $validated)) {
+            $validated['license_expires_at'] = ($validated['expires_at'] !== null
+            && $validated['expires_at'] !== '')
+                ? \Carbon\Carbon::parse(
+                    is_string($validated['expires_at'])
+                        ? $validated['expires_at']
+                        : ''
+                )->format('Y-m-d H:i:s')
+                : null;
+            unset($validated['expires_at']);
+        }
+        
+        return $validated;
     }
 }
