@@ -9,13 +9,13 @@
 
     <title>
         @hasSection('title')
-        @yield('title') - {{ $siteName ?? 'Admin Dashboard' }}
+        @yield('title') - {{ $siteName }}
         @elseif(View::hasSection('page-title'))
-        @yield('page-title') - {{ $siteName ?? 'Admin Dashboard' }}
+        @yield('page-title') - {{ $siteName }}
         @elseif(View::hasSection('seo_title'))
-        @yield('seo_title') - {{ $siteName ?? 'Admin Dashboard' }}
+        @yield('seo_title') - {{ $siteName }}
         @else
-        {{ $siteName ?? 'Admin Dashboard' }}
+        {{ $siteName }}
         @endif
     </title>
 
@@ -77,7 +77,7 @@
                         </div>
                         @endif
                         <div>
-                            <h2 class="admin-sidebar-logo-text">{{ $siteName ?? trans('app.Admin Panel') }}</h2>
+                            <h2 class="admin-sidebar-logo-text">{{ $siteName }}</h2>
                             <p class="admin-sidebar-subtitle">{{ trans('app.License Manager') }}</p>
                         </div>
                     </div>

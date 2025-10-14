@@ -8,15 +8,15 @@
     {{-- Page title: prefer @section('title') then page-title section then specific SEO then site SEO title then app name --}}
     <title>
         @hasSection('title')
-        @yield('title') - {{ $siteName ?? config('app.name', 'Laravel') }}
+        @yield('title') - {{ $siteName }}
         @elseif(View::hasSection('page-title'))
-        @yield('page-title') - {{ $siteName ?? config('app.name', 'Laravel') }}
+        @yield('page-title') - {{ $siteName }}
         @elseif(View::hasSection('seo_title'))
-        @yield('seo_title') - {{ $siteName ?? config('app.name', 'Laravel') }}
+        @yield('seo_title') - {{ $siteName }}
         @elseif($siteSeoTitle)
-        {{ $siteSeoTitle }} - {{ $siteName ?? config('app.name', 'Laravel') }}
+        {{ $siteSeoTitle }} - {{ $siteName }}
         @else
-        {{ $siteName ?? config('app.name', 'Laravel') }} - {{ trans('app.Dashboard') }}
+        {{ $siteName }} - {{ trans('app.Dashboard') }}
         @endif
     </title>
 
@@ -34,9 +34,9 @@
     {{-- Open Graph and Twitter tags: prefer explicit sections, then settings --}}
     @if(View::hasSection('og:title') || View::hasSection('page-title'))
     <meta property="og:title"
-        content="@yield('og:title', View::hasSection('page-title') ? trim(strip_tags($__env->yieldContent('page-title'))) . ' - ' . ($siteName ?? config('app.name', 'Laravel')) : '')">
+        content="@yield('og:title', View::hasSection('page-title') ? trim(strip_tags($__env->yieldContent('page-title'))) . ' - ' . $siteName : '')">
     @elseif($siteSeoTitle)
-    <meta property="og:title" content="{{ $siteSeoTitle }} - {{ $siteName ?? config('app.name', 'Laravel') }}">
+    <meta property="og:title" content="{{ $siteSeoTitle }} - {{ $siteName }}">
     @endif
 
     @if(View::hasSection('og:description') || View::hasSection('page-subtitle'))
@@ -86,13 +86,13 @@
                 <!-- Logo Section -->
                 <a href="{{ route('dashboard') }}" class="user-logo">
                     @if($siteLogo)
-                    <img src="{{ Storage::url($siteLogo) }}" alt="{{ $siteName ?? config('app.name', 'Laravel') }}" class="user-logo-icon" />
+                    <img src="{{ Storage::url($siteLogo) }}" alt="{{ $siteName }}" class="user-logo-icon" />
                     @else
                     <div class="user-logo-icon">
                         <i class="fas fa-bolt text-white"></i>
                     </div>
                     @endif
-                    <span>{{ $siteName ?? config('app.name', 'Laravel') }}</span>
+                    <span>{{ $siteName }}</span>
                 </a>
 
                 <!-- Desktop Navigation -->
@@ -211,7 +211,7 @@
         <div class="mobile-menu-content">
             <!-- Mobile Menu Header -->
             <div class="mobile-menu-header">
-                <div class="mobile-menu-title">{{ $siteName ?? config('app.name', 'Laravel') }}</div>
+                <div class="mobile-menu-title">{{ $siteName }}</div>
                 <button class="mobile-menu-close" aria-label="Close menu">
                     <i class="fas fa-times"></i>
                 </button>
@@ -356,7 +356,7 @@
     <!-- Integrated Footer Links -->
     <div class="user-footer-integrated">
         <div class="user-footer-content">
-            <p>&copy; {{ date('Y') }} {{ $siteName ?? config('app.name', 'Laravel') }}. {{ trans('app.All rights reserved.') }}</p>
+            <p>&copy; {{ date('Y') }} {{ $siteName }}. {{ trans('app.All rights reserved.') }}</p>
         </div>
         <div class="user-footer-links">
             <a href="{{ route('kb.index') }}" class="user-footer-link">
