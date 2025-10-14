@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             RoleSeeder::class,
             ProgrammingLanguageSeeder::class,
+            EmailTemplateSeeder::class,
         ]);
 
         // Add test licenses at the very end if seeder exists

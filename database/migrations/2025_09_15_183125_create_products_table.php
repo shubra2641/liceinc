@@ -26,7 +26,6 @@ return new class() extends Migration {
             $table->integer('extended_support_days')->default(365);
             $table->timestamp('extended_supported_until')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->boolean('is_downloadable')->default(true);
             $table->timestamps();
         });
     }
