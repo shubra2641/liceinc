@@ -12,25 +12,48 @@ return new class() extends Migration {
      */
     public function up(): void
     {
-        // Check if table exists before modifying it
-        if (Schema::hasTable('kb_categories')) {
-            Schema::table('kb_categories', function (Blueprint $table) {
-                // Add icon column if it doesn't exist
-                if (! Schema::hasColumn('kb_categories', 'icon')) {
-                    $table->string('icon')->nullable()->default('fas fa-folder')->after('description');
-                }
-
-                // Add is_featured column if it doesn't exist
-                if (! Schema::hasColumn('kb_categories', 'is_featured')) {
-                    $table->boolean('is_featured')->default(false)->after('is_published');
-                }
-
-                // Add is_active column if it doesn't exist
-                if (! Schema::hasColumn('kb_categories', 'is_active')) {
-                    $table->boolean('is_active')->default(true)->after('is_featured');
-                }
-            });
+        if (!Schema::hasTable('kb_categories')) {
+            return;
         }
+
+        Schema::table('kb_categories', function (Blueprint $table) {
+            $this->addMissingColumns($table);
+        });
+    }
+
+    /**
+     * Add missing columns to kb_categories table
+     */
+    private function addMissingColumns(Blueprint $table): void
+    {
+        $this->addColumnIfNotExists($table, 'icon', 'string', 'description', [
+            'default' => 'fas fa-folder'
+        ]);
+        $this->addColumnIfNotExists($table, 'is_featured', 'boolean', 'is_published', [
+            'default' => false
+        ]);
+        $this->addColumnIfNotExists($table, 'is_active', 'boolean', 'is_featured', [
+            'default' => true
+        ]);
+    }
+
+    /**
+     * Helper method to add column if it doesn't exist
+     */
+    private function addColumnIfNotExists(Blueprint $table, string $column, string $type, string $after, array $options = []): void
+    {
+        if (Schema::hasColumn('kb_categories', $column)) {
+            return;
+        }
+
+        $columnDefinition = $table->{$type}($column);
+        $columnDefinition->nullable();
+        
+        if (isset($options['default'])) {
+            $columnDefinition->default($options['default']);
+        }
+        
+        $columnDefinition->after($after);
     }
 
     /**
@@ -38,19 +61,26 @@ return new class() extends Migration {
      */
     public function down(): void
     {
-        if (Schema::hasTable('kb_categories')) {
-            Schema::table('kb_categories', function (Blueprint $table) {
-                // Only drop columns if they exist
-                if (Schema::hasColumn('kb_categories', 'icon')) {
-                    $table->dropColumn('icon');
-                }
-                if (Schema::hasColumn('kb_categories', 'is_featured')) {
-                    $table->dropColumn('is_featured');
-                }
-                if (Schema::hasColumn('kb_categories', 'is_active')) {
-                    $table->dropColumn('is_active');
-                }
-            });
+        if (!Schema::hasTable('kb_categories')) {
+            return;
+        }
+
+        Schema::table('kb_categories', function (Blueprint $table) {
+            $this->dropAddedColumns($table);
+        });
+    }
+
+    /**
+     * Drop all added columns
+     */
+    private function dropAddedColumns(Blueprint $table): void
+    {
+        $columnsToDrop = ['icon', 'is_featured', 'is_active'];
+
+        foreach ($columnsToDrop as $column) {
+            if (Schema::hasColumn('kb_categories', $column)) {
+                $table->dropColumn($column);
+            }
         }
     }
 };
