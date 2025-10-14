@@ -44,7 +44,8 @@ use Illuminate\View\View;
  */
 class TicketController extends Controller
 {
-    use TicketHelpers, TicketNotificationTrait;
+    use TicketHelpers;
+    use TicketNotificationTrait;
 
     /**
      * Pagination limit for ticket listing.

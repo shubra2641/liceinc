@@ -172,7 +172,7 @@ class LicenseController extends Controller
                 if ($license->user) {
                     $this->emailService->sendLicenseCreated($license, $license->user);
                 }
-                
+
                 // Send notification to admin only if user exists
                 if ($license->user) {
                     $this->emailService->sendAdminLicenseCreated([
@@ -433,7 +433,7 @@ class LicenseController extends Controller
         };
         return response()->stream($callback, 200, $headers);
     }
-    
+
     /**
      * Generate a unique license key
      *
@@ -443,16 +443,16 @@ class LicenseController extends Controller
     {
         $maxAttempts = 10;
         $attempts = 0;
-        
+
         do {
             $licenseKey = 'LIC-' . strtoupper(Str::random(12));
             $attempts++;
-            
+
             if ($attempts > $maxAttempts) {
                 throw new \Exception('Failed to generate unique license key after ' . $maxAttempts . ' attempts');
             }
         } while (License::where('license_key', $licenseKey)->exists());
-        
+
         return $licenseKey;
     }
 }

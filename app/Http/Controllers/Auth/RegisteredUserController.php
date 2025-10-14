@@ -173,13 +173,13 @@ class RegisteredUserController extends Controller
         }
 
         $humanQuestions = $settings->human_questions;
-        
+
         $given = strtolower(trim(
             is_string($request->validated('human_answer', ''))
                 ? $request->validated('human_answer', '')
                 : ''
         ));
-        
+
         if (empty($given)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
@@ -190,7 +190,7 @@ class RegisteredUserController extends Controller
                 ], 422)
             );
         }
-        
+
         $index = $request->validated('human_question_index', null);
         if (
             ! $this->isValidHumanAnswer(
@@ -214,11 +214,11 @@ class RegisteredUserController extends Controller
         if ($given === '') {
             return false;
         }
-        
+
         $questionData = $humanQuestions[$index] ?? null;
         $answer = $questionData['answer'] ?? null;
         $expected = strtolower(trim($answer));
-        
+
         return $expected === $given;
     }
     /**
@@ -329,7 +329,7 @@ class RegisteredUserController extends Controller
     private function getRegistrationSettings(): array
     {
         $settings = \App\Models\Setting::first();
-        
+
         if (!$settings) {
             return [
                 'enableCaptcha' => false,
@@ -339,21 +339,21 @@ class RegisteredUserController extends Controller
                 'selectedQuestionText' => null,
             ];
         }
-        
+
         $enableCaptcha = (bool) $settings->enable_captcha;
         $captchaSiteKey = (string) $settings->captcha_site_key;
         $enableHumanQuestion = (bool) $settings->enable_human_question;
-        
+
         $humanQuestions = $settings->human_questions ?? [];
         $selectedQuestionIndex = null;
         $selectedQuestionText = null;
-        
+
         if ($enableHumanQuestion && !empty($humanQuestions)) {
             $selectedQuestionIndex = array_rand($humanQuestions);
             $selectedQuestion = $humanQuestions[$selectedQuestionIndex] ?? null;
             $selectedQuestionText = $selectedQuestion['question'] ?? null;
         }
-        
+
         return [
             'enableCaptcha' => $enableCaptcha,
             'captchaSiteKey' => $captchaSiteKey,

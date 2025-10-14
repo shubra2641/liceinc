@@ -316,7 +316,8 @@ class UpdateController extends Controller
                 'backup_used' => basename($backupPath),
             ]);
 
-            return redirect()->route('admin.updates.index')->with('success',
+            return redirect()->route('admin.updates.index')->with(
+                'success',
                 'System rolled back successfully from ' . $currentVersion . ' to ' . $targetVersion
             );
         } catch (\Exception $e) {
@@ -328,7 +329,8 @@ class UpdateController extends Controller
                 'request_data' => $request->except(['confirm']),
             ]);
 
-            return redirect()->back()->with('error',
+            return redirect()->back()->with(
+                'error',
                 'Rollback failed: ' . $e->getMessage()
             );
         }
@@ -411,13 +413,15 @@ class UpdateController extends Controller
             if ($processResult['success']) {
                 DB::commit();
 
-                return redirect()->route('admin.updates.index')->with('success',
+                return redirect()->route('admin.updates.index')->with(
+                    'success',
                     'Update package uploaded and processed successfully.'
                 );
             } else {
                 DB::rollBack();
 
-                return redirect()->back()->with('error',
+                return redirect()->back()->with(
+                    'error',
                     'Update package uploaded but processing failed: ' . (
                         is_string($processResult['message'] ?? null)
                             ? $processResult['message']
@@ -433,7 +437,8 @@ class UpdateController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return redirect()->back()->with('error',
+            return redirect()->back()->with(
+                'error',
                 'Failed to upload update package: ' . $e->getMessage()
             );
         }
@@ -533,7 +538,8 @@ class UpdateController extends Controller
                 'request_data' => $request->except(['license_key']),
             ]);
 
-            return redirect()->back()->with('error',
+            return redirect()->back()->with(
+                'error',
                 'An error occurred while checking for updates: ' . $e->getMessage()
             );
         }
@@ -821,7 +827,8 @@ class UpdateController extends Controller
                 'request_data' => $request->except(['license_key']),
             ]);
 
-            return redirect()->back()->with('error',
+            return redirect()->back()->with(
+                'error',
                 'An error occurred while installing update: ' . $e->getMessage()
             );
         }

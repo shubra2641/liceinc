@@ -1026,8 +1026,7 @@ class LicenseServerController extends Controller
         string $message,
         string $errorCode,
         int $statusCode = 400
-    ): \Illuminate\Http\JsonResponse
-    {
+    ): \Illuminate\Http\JsonResponse {
         return response()->json([
             'success' => false,
             'message' => $message,

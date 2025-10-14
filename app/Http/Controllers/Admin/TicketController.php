@@ -41,7 +41,8 @@ use Illuminate\View\View;
  */
 class TicketController extends Controller
 {
-    use TicketHelpers, TicketNotificationTrait;
+    use TicketHelpers;
+    use TicketNotificationTrait;
 
     protected EmailFacade $emailService;
 
@@ -258,7 +259,7 @@ class TicketController extends Controller
             if ($ticket->invoice_id && $ticket->user && $ticket->user->email) {
                 $this->emailService->sendInvoiceCreated($ticket->user, $ticket->invoice);
             }
-            
+
             DB::commit();
 
             return redirect()->route('admin.tickets.index')->with('success', 'Ticket created successfully for user');

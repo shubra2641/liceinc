@@ -367,7 +367,7 @@ class InvoiceController extends Controller
     {
         $users = User::select('id', 'name', 'email')->get();
         $invoice->load(['user', 'license.product']);
-        
+
         // Extract custom invoice data from metadata
         $customData = [];
         if ($invoice->metadata && isset($invoice->metadata['custom_invoice'])) {
@@ -377,7 +377,7 @@ class InvoiceController extends Controller
                 'expiration_date' => $invoice->metadata['expiration_date'] ?? null,
             ];
         }
-        
+
         return view('admin.invoices.edit', [
             'invoice' => $invoice,
             'users' => $users,
@@ -521,16 +521,16 @@ class InvoiceController extends Controller
     {
         $maxAttempts = 10;
         $attempts = 0;
-        
+
         do {
             $invoiceNumber = 'INV-' . strtoupper(Str::random(8));
             $attempts++;
-            
+
             if ($attempts > $maxAttempts) {
                 throw new \Exception('Failed to generate unique invoice number after ' . $maxAttempts . ' attempts');
             }
         } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
-        
+
         return $invoiceNumber;
     }
 }

@@ -202,9 +202,9 @@ class GenerateRenewalInvoices extends Command
                 ->filter(
                     function ($license) {
                     // Check if there's already a pending renewal invoice.
-                    return ! $license->invoices()->where('type', 'renewal')->where('status', 'pending')->exists();
-                }
-            );
+                        return ! $license->invoices()->where('type', 'renewal')->where('status', 'pending')->exists();
+                    }
+                );
         } catch (\Exception $e) {
             Log::error(
                 'Failed to get expiring licenses',

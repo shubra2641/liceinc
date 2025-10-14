@@ -29,24 +29,24 @@ class ProcessCronCommand extends Command
 
         try {
             DB::beginTransaction();
-            
+
             $processed = 0;
-            
+
             if ($type === 'all' || $type === 'licenses') {
                 $processed += $this->processExpiredLicenses();
             }
-            
+
             if ($type === 'all' || $type === 'invoices') {
                 $processed += $this->processOverdueInvoices();
                 $processed += $this->processPaidInvoices();
                 $processed += $this->generateRenewalInvoices();
             }
-            
+
             DB::commit();
-            
+
             $this->newLine();
             $this->info("✅ Processed {$processed} items successfully!");
-            
+
             return Command::SUCCESS;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -59,13 +59,13 @@ class ProcessCronCommand extends Command
     private function processExpiredLicenses(): int
     {
         $this->info('🔑 Processing Expired Licenses...');
-        
+
         $expiredLicenses = License::where('license_expires_at', '<', Carbon::now())
             ->where('status', 'active')
             ->get();
-            
+
         $processed = 0;
-        
+
         foreach ($expiredLicenses as $license) {
             try {
                 $license->update(['status' => 'expired']);
@@ -75,7 +75,7 @@ class ProcessCronCommand extends Command
                 Log::warning("Failed to expire license {$license->license_key}", ['error' => $e->getMessage()]);
             }
         }
-        
+
         $this->line("   Processed: {$processed} expired licenses");
         return $processed;
     }
@@ -83,14 +83,14 @@ class ProcessCronCommand extends Command
     private function processOverdueInvoices(): int
     {
         $this->info('💰 Processing Overdue Invoices...');
-        
+
         $overdueInvoices = Invoice::where('status', 'pending')
             ->where('due_date', '<', Carbon::now())
             ->whereNotNull('due_date')
             ->get();
-            
+
         $processed = 0;
-        
+
         foreach ($overdueInvoices as $invoice) {
             try {
                 $invoice->update(['status' => 'overdue']);
@@ -103,7 +103,7 @@ class ProcessCronCommand extends Command
                 );
             }
         }
-        
+
         $this->line("   Processed: {$processed} overdue invoices");
         return $processed;
     }
@@ -111,15 +111,15 @@ class ProcessCronCommand extends Command
     private function processPaidInvoices(): int
     {
         $this->info('✅ Processing Paid Invoices...');
-        
+
         $paidInvoices = Invoice::where('status', 'paid')
             ->where('type', 'renewal')
             ->where('paid_at', '>=', Carbon::now()->subDays(1))
             ->with('license')
             ->get();
-            
+
         $processed = 0;
-        
+
         foreach ($paidInvoices as $invoice) {
             try {
                 $license = $invoice->license;
@@ -132,7 +132,7 @@ class ProcessCronCommand extends Command
                     ]);
                     $processed++;
                     $this->line("   • Renewed license: {$license->license_key}");
-                    
+
                     Log::info('License renewed via paid invoice', [
                         'license_id' => $license->id,
                         'license_key' => $license->license_key,
@@ -147,7 +147,7 @@ class ProcessCronCommand extends Command
                 );
             }
         }
-        
+
         $this->line("   Processed: {$processed} paid invoices");
         return $processed;
     }
@@ -156,7 +156,7 @@ class ProcessCronCommand extends Command
     {
         $currentExpiry = $license->license_expires_at ?? Carbon::now();
         $product = $license->product;
-        
+
         if ($product && $product->renewal_period) {
             switch ($product->renewal_period) {
                 case 'monthly':
@@ -173,7 +173,7 @@ class ProcessCronCommand extends Command
                     return $currentExpiry->copy()->addYears(100);
             }
         }
-        
+
         // Default to product duration
         $durationDays = $product->duration_days ?? 365;
         return $currentExpiry->copy()->addDays($durationDays);
@@ -182,15 +182,15 @@ class ProcessCronCommand extends Command
     private function generateRenewalInvoices(): int
     {
         $this->info('🔄 Generating Renewal Invoices...');
-        
+
         $expiringLicenses = License::where('license_expires_at', '<=', Carbon::now()->addDays(7))
             ->where('license_expires_at', '>', Carbon::now())
             ->where('status', 'active')
             ->with(['product', 'invoices'])
             ->get();
-            
+
         $processed = 0;
-        
+
         foreach ($expiringLicenses as $license) {
             try {
                 // Check if renewal invoice already exists
@@ -198,10 +198,10 @@ class ProcessCronCommand extends Command
                     ->where('type', 'renewal')
                     ->where('status', 'pending')
                     ->first();
-                    
+
                 if (!$existingInvoice && $license->product) {
                     $renewalPrice = $license->product->renewal_price ?? $license->product->price ?? 0;
-                    
+
                     if ($renewalPrice > 0) {
                         // Create renewal invoice
                         $invoice = Invoice::create([
@@ -216,10 +216,10 @@ class ProcessCronCommand extends Command
                             'due_date' => Carbon::now()->addDays(30),
                             'notes' => "Renewal for {$license->product->name} - License {$license->license_key}",
                         ]);
-                        
+
                         $processed++;
                         $this->line("   • Created renewal invoice: {$invoice->invoice_number}");
-                        
+
                         // Log the creation
                         Log::info('Renewal invoice created', [
                             'license_id' => $license->id,
@@ -236,7 +236,7 @@ class ProcessCronCommand extends Command
                 );
             }
         }
-        
+
         $this->line("   Generated: {$processed} renewal invoices");
         return $processed;
     }

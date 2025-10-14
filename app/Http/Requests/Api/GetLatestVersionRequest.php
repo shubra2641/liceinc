@@ -40,7 +40,7 @@ class GetLatestVersionRequest extends BaseApiRequest
     protected function prepareForValidation(): void
     {
         parent::prepareForValidation();
-        
+
         $this->merge([
             'product_slug' => $this->sanitizeInput($this->input('product_slug')),
         ]);

@@ -192,7 +192,6 @@ class UpdateService
             // Step 10: Update system information
             $this->updateSystemInfo($targetVersion, $currentVersion);
             $steps['system_info'] = 'System information updated';
-
         } catch (\Exception $e) {
             Log::error('Update step failed', [
                 'error' => $e->getMessage(),
@@ -315,7 +314,6 @@ class UpdateService
 
             // Step 4: Run rollback migrations if needed
             $steps['migrations'] = 'Rollback migrations completed';
-
         } catch (\Exception $e) {
             Log::error('Rollback step failed', [
                 'error' => $e->getMessage(),

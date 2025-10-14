@@ -256,12 +256,12 @@ class ProgrammingLanguageController extends Controller
             if (empty($validated['name'])) {
                 $validated['name'] = $programming_language->name;
             }
-            
+
             // Only update slug if name is provided and different
             if (!empty($validated['name']) && $validated['name'] !== $programming_language->name) {
                 $validated['slug'] = Str::slug($validated['name']);
             }
-            
+
             $programming_language->update($validated);
             DB::commit();
 

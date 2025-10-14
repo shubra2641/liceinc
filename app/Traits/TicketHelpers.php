@@ -58,7 +58,6 @@ trait TicketHelpers
      * @param Ticket $ticket
      * @param string $viewName
      * @return View
-     * 
      */
     protected function handleTicketDisplay(Ticket $ticket, string $viewName): View
     {
@@ -130,8 +129,7 @@ trait TicketHelpers
         \Illuminate\Http\Request $request,
         Ticket $ticket,
         bool $isAdmin = false
-    ): RedirectResponse
-    {
+    ): RedirectResponse {
         try {
             if (!$isAdmin && !$this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket modification attempt', [
@@ -168,8 +166,7 @@ trait TicketHelpers
         Ticket $ticket,
         bool $isAdmin = false,
         string $redirectRoute = 'tickets.index'
-    ): RedirectResponse
-    {
+    ): RedirectResponse {
         try {
             if (!$isAdmin && !$this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket deletion attempt', [
@@ -419,7 +416,6 @@ trait TicketHelpers
      * @param array $filters
      * @param int $perPage
      * @return Collection
-     * 
      */
     protected function getTicketsWithFilters(array $filters = [], int $perPage = 15): Collection
     {

@@ -34,11 +34,11 @@ class CronStatusCommand extends Command
         $this->info('💰 Invoice Status:');
         $this->displayInvoiceStatus();
         $this->newLine();
-        
+
         // System Status
         $this->info('⚙️ System Status:');
         $this->displaySystemStatus();
-        
+
         return Command::SUCCESS;
     }
 
@@ -50,7 +50,7 @@ class CronStatusCommand extends Command
         $expiring = License::where('license_expires_at', '<=', Carbon::now()->addDays(7))
             ->where('license_expires_at', '>', Carbon::now())
             ->count();
-            
+
         $this->line("   Total Licenses: {$total}");
         $this->line("   Active: {$active}");
         $this->line("   Expired: {$expired}");
@@ -66,7 +66,7 @@ class CronStatusCommand extends Command
             ->whereNotNull('due_date')
             ->count();
         $renewal = Invoice::where('type', 'renewal')->count();
-        
+
         $this->line("   Total Invoices: {$total}");
         $this->line("   Pending: {$pending}");
         $this->line("   Overdue: {$overdue}");

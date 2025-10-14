@@ -27,7 +27,7 @@ class RegisterRequest extends FormRequest
         $this->ensureIsNotRateLimited();
         parent::failedValidation($validator);
     }
-    
+
     /**
      * Ensure the registration request is not rate limited.
      */
@@ -36,7 +36,7 @@ class RegisterRequest extends FormRequest
         if (! RateLimiter::tooManyAttempts($this->throttleKey(), 50)) {
             return;
         }
-        
+
         $seconds = RateLimiter::availableIn($this->throttleKey());
         throw ValidationException::withMessages([
             'email' => trans('auth.throttle', [
@@ -45,7 +45,7 @@ class RegisterRequest extends FormRequest
             ]),
         ]);
     }
-    
+
     /**
      * Get the rate limiting throttle key for the request.
      */

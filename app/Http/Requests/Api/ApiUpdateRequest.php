@@ -421,7 +421,7 @@ class ApiUpdateRequest extends FormRequest
 
         $this->handleFilterAndSort(['current_version', 'filter_version', 'sort_order']);
         $this->handleCheckboxValues();
-        
+
         // Set default values using trait method
         $this->setDefaultValues([
             'limit' => $this->limit ?? 20,

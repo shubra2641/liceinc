@@ -415,7 +415,7 @@ class ProductUpdateApiRequest extends FormRequest
             'include_breaking_changes',
             'include_deprecations',
         ]);
-        
+
         // Set default values using trait method
         $this->setDefaultValues([
             'verify_integrity' => $this->verify_integrity ?? true,

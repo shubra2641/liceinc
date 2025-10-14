@@ -23,7 +23,7 @@ trait TicketNotificationTrait
                     'ticket_status' => $ticket->status,
                 ]);
             }
-            
+
             // Send notification to admin
             $this->emailService->sendAdminTicketCreated([
                 'ticket_id' => $ticket->id,

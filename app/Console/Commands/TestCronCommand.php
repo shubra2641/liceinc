@@ -26,7 +26,7 @@ class TestCronCommand extends Command
         $type = $this->option('type');
         $this->info('🔍 Testing Cron Functionality...');
         $this->newLine();
-        
+
         try {
             switch ($type) {
                 case 'licenses':
@@ -40,7 +40,7 @@ class TestCronCommand extends Command
                     $this->newLine();
                     $this->testInvoices();
             }
-            
+
             $this->newLine();
             $this->info('✅ Cron test completed successfully!');
             return Command::SUCCESS;
@@ -54,22 +54,22 @@ class TestCronCommand extends Command
     private function testLicenses(): void
     {
         $this->info('📋 Testing License Expiration...');
-        
+
         // Count expiring licenses
         $expiringCount = License::where('license_expires_at', '<=', Carbon::now()->addDays(7))
             ->where('license_expires_at', '>', Carbon::now())
             ->where('status', 'active')
             ->count();
-            
+
         $this->line("   • Licenses expiring in 7 days: {$expiringCount}");
-        
+
         // Count expired licenses
         $expiredCount = License::where('license_expires_at', '<', Carbon::now())
             ->where('status', 'active')
             ->count();
-            
+
         $this->line("   • Expired licenses: {$expiredCount}");
-        
+
         // Count total active licenses
         $activeCount = License::where('status', 'active')->count();
         $this->line("   • Total active licenses: {$activeCount}");
@@ -78,18 +78,18 @@ class TestCronCommand extends Command
     private function testInvoices(): void
     {
         $this->info('💰 Testing Invoice Processing...');
-        
+
         // Count pending invoices
         $pendingCount = Invoice::where('status', 'pending')->count();
         $this->line("   • Pending invoices: {$pendingCount}");
-        
+
         // Count overdue invoices
         $overdueCount = Invoice::where('status', 'pending')
             ->where('due_date', '<', Carbon::now())
             ->whereNotNull('due_date')
             ->count();
         $this->line("   • Overdue invoices: {$overdueCount}");
-        
+
         // Count renewal invoices
         $renewalCount = Invoice::where('type', 'renewal')->count();
         $this->line("   • Renewal invoices: {$renewalCount}");

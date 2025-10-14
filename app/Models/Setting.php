@@ -378,7 +378,7 @@ class Setting extends Model
         'seo_kb_description',
         'seo_tickets_title',
         'seo_tickets_description',
-        
+
         // Logo settings
         'site_logo_dark',
         'logo_width',
@@ -387,7 +387,7 @@ class Setting extends Model
         'logo_text',
         'logo_text_color',
         'logo_text_font_size',
-        
+
         // Preloader settings
         'preloader_enabled',
         'preloader_type',
@@ -395,14 +395,14 @@ class Setting extends Model
         'preloader_background_color',
         'preloader_duration',
         'preloader_custom_css',
-        
+
         // Anti-spam settings
         'enable_captcha',
         'captcha_site_key',
         'captcha_secret_key',
         'enable_human_question',
         'human_questions',
-        
+
         // Additional fields from latest migration
         'site_keywords',
         'maintenance_message',
@@ -435,7 +435,7 @@ class Setting extends Model
         'contact_state',
         'contact_country',
         'contact_postal_code',
-        
+
         // Key-value fields
         'key',
         'value',

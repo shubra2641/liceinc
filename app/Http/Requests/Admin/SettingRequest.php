@@ -356,7 +356,7 @@ class SettingRequest extends FormRequest
                 'string',
                 'max:500',
             ],
-            
+
             // Logo settings
             'site_logo' => [
                 'nullable',
@@ -404,7 +404,7 @@ class SettingRequest extends FormRequest
                 'string',
                 'max:20',
             ],
-            
+
             // Preloader settings
             'preloader_enabled' => [
                 'boolean',
@@ -435,7 +435,7 @@ class SettingRequest extends FormRequest
                 'string',
                 'max:5000',
             ],
-            
+
             // Anti-spam settings
             'enable_captcha' => [
                 'boolean',
@@ -457,7 +457,7 @@ class SettingRequest extends FormRequest
                 'nullable',
                 'array',
             ],
-            
+
             // Additional fields from latest migration
             'site_keywords' => [
                 'nullable',
@@ -612,7 +612,7 @@ class SettingRequest extends FormRequest
                 'string',
                 'max:20',
             ],
-            
+
             // Key-value fields
             'key' => [
                 'nullable',
@@ -879,7 +879,7 @@ class SettingRequest extends FormRequest
             'license_mock_envato' => $this->has('license_mock_envato'),
             'license_generate_fake_data' => $this->has('license_generate_fake_data'),
         ]);
-        
+
         // Handle array fields
         if ($this->has('human_questions')) {
             $this->merge([
@@ -914,5 +914,3 @@ class SettingRequest extends FormRequest
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }
- 
- 

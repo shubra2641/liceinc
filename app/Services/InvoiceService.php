@@ -512,7 +512,7 @@ class InvoiceService
 
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
-    
+
     /**
      * Activate license when invoice is paid
      *
@@ -525,7 +525,7 @@ class InvoiceService
         try {
             if ($invoice->license) {
                 $invoice->license->update(['status' => 'active']);
-                
+
                 Log::info('License activated due to invoice payment', [
                     'license_id' => $invoice->license->id,
                     'license_key' => $invoice->license->license_key,

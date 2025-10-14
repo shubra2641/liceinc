@@ -181,7 +181,7 @@ class EnvatoController extends Controller
             config(['services.envato.client_id' => $settings->envato_client_id]);
             config(['services.envato.client_secret' => $settings->envato_client_secret]);
             config(['services.envato.redirect' => url('/auth/envato/callback')]);
-            
+
             return redirect(Socialite::driver('envato')->redirect()->getTargetUrl());
         } catch (Throwable $e) {
             Log::error('Envato OAuth redirect error', [
