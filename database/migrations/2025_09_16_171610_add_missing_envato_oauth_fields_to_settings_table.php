@@ -13,26 +13,48 @@ return new class() extends Migration {
     public function up(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            // Check if columns don't exist before adding them
-            if (! Schema::hasColumn('settings', 'envato_client_id')) {
-                $table->string('envato_client_id')->nullable()->after('envato_username');
-            }
-            if (! Schema::hasColumn('settings', 'envato_client_secret')) {
-                $table->string('envato_client_secret')->nullable()->after('envato_client_id');
-            }
-            if (! Schema::hasColumn('settings', 'envato_redirect_uri')) {
-                $table->string('envato_redirect_uri')->nullable()->after('envato_client_secret');
-            }
-            if (! Schema::hasColumn('settings', 'envato_oauth_enabled')) {
-                $table->boolean('envato_oauth_enabled')->default(false)->after('envato_redirect_uri');
-            }
-            if (! Schema::hasColumn('settings', 'license_max_attempts')) {
-                $table->integer('license_max_attempts')->default(5)->after('default_license_length');
-            }
-            if (! Schema::hasColumn('settings', 'license_lockout_minutes')) {
-                $table->integer('license_lockout_minutes')->default(15)->after('license_max_attempts');
-            }
+            $this->addEnvatoOAuthFields($table);
+            $this->addLicenseSecurityFields($table);
         });
+    }
+
+    /**
+     * Add Envato OAuth fields
+     */
+    private function addEnvatoOAuthFields(Blueprint $table): void
+    {
+        $this->addColumnIfNotExists($table, 'envato_client_id', 'string', 'envato_username');
+        $this->addColumnIfNotExists($table, 'envato_client_secret', 'string', 'envato_client_id');
+        $this->addColumnIfNotExists($table, 'envato_redirect_uri', 'string', 'envato_client_secret');
+        $this->addColumnIfNotExists($table, 'envato_oauth_enabled', 'boolean', 'envato_redirect_uri', ['default' => false]);
+    }
+
+    /**
+     * Add license security fields
+     */
+    private function addLicenseSecurityFields(Blueprint $table): void
+    {
+        $this->addColumnIfNotExists($table, 'license_max_attempts', 'integer', 'default_license_length', ['default' => 5]);
+        $this->addColumnIfNotExists($table, 'license_lockout_minutes', 'integer', 'license_max_attempts', ['default' => 15]);
+    }
+
+    /**
+     * Helper method to add column if it doesn't exist
+     */
+    private function addColumnIfNotExists(Blueprint $table, string $column, string $type, string $after, array $options = []): void
+    {
+        if (Schema::hasColumn('settings', $column)) {
+            return;
+        }
+
+        $columnDefinition = $table->{$type}($column);
+        $columnDefinition->nullable();
+        
+        if (isset($options['default'])) {
+            $columnDefinition->default($options['default']);
+        }
+        
+        $columnDefinition->after($after);
     }
 
     /**
@@ -41,14 +63,23 @@ return new class() extends Migration {
     public function down(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->dropColumn([
-                'envato_client_id',
-                'envato_client_secret',
-                'envato_redirect_uri',
-                'envato_oauth_enabled',
-                'license_max_attempts',
-                'license_lockout_minutes',
-            ]);
+            $this->dropAddedColumns($table);
         });
+    }
+
+    /**
+     * Drop all added columns
+     */
+    private function dropAddedColumns(Blueprint $table): void
+    {
+        $columnsToDrop = [
+            // Envato OAuth Fields
+            'envato_client_id', 'envato_client_secret', 'envato_redirect_uri', 'envato_oauth_enabled',
+            
+            // License Security Fields
+            'license_max_attempts', 'license_lockout_minutes'
+        ];
+
+        $table->dropColumn($columnsToDrop);
     }
 };
