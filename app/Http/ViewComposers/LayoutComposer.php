@@ -11,72 +11,38 @@ class LayoutComposer
 {
     public function compose(View $view): void
     {
-        $view->with($this->getLayoutData());
+        $view->with($this->getData());
     }
-    private function getLayoutData(): array
+
+    private function getData(): array
     {
         return Cache::remember('layout_data', 60, function () {
             return [
-                'siteName' => $this->getSiteName(),
-                'siteLogo' => $this->getSiteLogo(),
-                'siteSeoTitle' => $this->getSiteSeoTitle(),
-                'siteSeoDescription' => $this->getSiteSeoDescription(),
-                'ogImage' => $this->getOgImage(),
-                'availableLanguages' => $this->getAvailableLanguages(),
-                'currentLocale' => $this->getCurrentLocale(),
+                'siteName' => Setting::get('site_name', config('app.name', 'Laravel')),
+                'siteLogo' => Setting::get('site_logo'),
+                'siteSeoTitle' => Setting::get('seo_site_title'),
+                'siteSeoDescription' => Setting::get('seo_site_description'),
+                'ogImage' => Setting::get('seo_og_image'),
+                'availableLanguages' => LanguageController::getAvailableLanguagesWithMetadata(),
+                'currentLocale' => app()->getLocale(),
                 'currentLanguage' => $this->getCurrentLanguage(),
                 'otherLanguage' => $this->getOtherLanguage(),
                 'preloaderSettings' => $this->getPreloaderSettings(),
             ];
         });
     }
-    private function getSiteName(): string
-    {
-        return Setting::get('site_name', config('app.name', 'Laravel'));
-    }
-
-    private function getSiteLogo(): ?string
-    {
-        return Setting::get('site_logo');
-    }
-
-    private function getSiteSeoTitle(): ?string
-    {
-        return Setting::get('seo_site_title');
-    }
-
-    private function getSiteSeoDescription(): ?string
-    {
-        return Setting::get('seo_site_description');
-    }
-
-    private function getOgImage(): ?string
-    {
-        return Setting::get('seo_og_image');
-    }
-    private function getAvailableLanguages(): array
-    {
-        return LanguageController::getAvailableLanguagesWithMetadata();
-    }
-
-    private function getCurrentLocale(): string
-    {
-        return app()->getLocale();
-    }
-
     private function getCurrentLanguage(): ?array
     {
-        $currentLocale = $this->getCurrentLocale();
-        $availableLanguages = $this->getAvailableLanguages();
-        return collect($availableLanguages)->firstWhere('code', $currentLocale);
+        $languages = LanguageController::getAvailableLanguagesWithMetadata();
+        return collect($languages)->firstWhere('code', app()->getLocale());
     }
 
     private function getOtherLanguage(): ?array
     {
-        $availableLanguages = $this->getAvailableLanguages();
-        $currentLocale = $this->getCurrentLocale();
-        return collect($availableLanguages)->firstWhere('code', '!=', $currentLocale);
+        $languages = LanguageController::getAvailableLanguagesWithMetadata();
+        return collect($languages)->firstWhere('code', '!=', app()->getLocale());
     }
+
     private function getPreloaderSettings(): array
     {
         $settings = Setting::first();
