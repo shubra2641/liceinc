@@ -49,20 +49,76 @@ return new class() extends Migration {
     private function updateTable(): void
     {
         Schema::table('kb_categories', function (Blueprint $table) {
-            $this->addColumnIfMissing($table, 'name', 'string', 'id');
-            $this->addColumnIfMissing($table, 'slug', 'string', 'name', ['unique' => true]);
-            $this->addColumnIfMissing($table, 'description', 'text', 'slug', ['nullable' => true]);
-            $this->addColumnIfMissing($table, 'sort_order', 'integer', 'description', ['default' => 0]);
-            $this->addColumnIfMissing($table, 'parent_id', 'foreignId', 'sort_order', ['nullable' => true, 'constrained' => 'kb_categories']);
-            $this->addColumnIfMissing($table, 'product_id', 'foreignId', 'parent_id', ['nullable' => true, 'constrained' => 'products']);
-            $this->addColumnIfMissing($table, 'is_published', 'boolean', 'product_id', ['default' => true]);
-            $this->addColumnIfMissing($table, 'icon', 'string', 'is_published', ['nullable' => true, 'default' => 'fas fa-folder']);
-            $this->addColumnIfMissing($table, 'is_featured', 'boolean', 'icon', ['default' => false]);
-            $this->addColumnIfMissing($table, 'is_active', 'boolean', 'is_featured', ['default' => true]);
-            $this->addColumnIfMissing($table, 'meta_title', 'string', 'is_active', ['nullable' => true]);
-            $this->addColumnIfMissing($table, 'meta_description', 'text', 'meta_title', ['nullable' => true]);
-            $this->addColumnIfMissing($table, 'meta_keywords', 'text', 'meta_description', ['nullable' => true]);
+            $this->addBasicFields($table);
+            $this->addRelationshipFields($table);
+            $this->addStatusFields($table);
+            $this->addMetaFields($table);
         });
+    }
+
+    /**
+     * Add basic category fields
+     */
+    private function addBasicFields(Blueprint $table): void
+    {
+        $basicFields = [
+            ['name', 'string', 'id', []],
+            ['slug', 'string', 'name', ['unique' => true]],
+            ['description', 'text', 'slug', ['nullable' => true]],
+            ['sort_order', 'integer', 'description', ['default' => 0]]
+        ];
+
+        foreach ($basicFields as $field) {
+            $this->addColumnIfMissing($table, $field[0], $field[1], $field[2], $field[3]);
+        }
+    }
+
+    /**
+     * Add relationship fields
+     */
+    private function addRelationshipFields(Blueprint $table): void
+    {
+        $relationshipFields = [
+            ['parent_id', 'foreignId', 'sort_order', ['nullable' => true, 'constrained' => 'kb_categories']],
+            ['product_id', 'foreignId', 'parent_id', ['nullable' => true, 'constrained' => 'products']]
+        ];
+
+        foreach ($relationshipFields as $field) {
+            $this->addColumnIfMissing($table, $field[0], $field[1], $field[2], $field[3]);
+        }
+    }
+
+    /**
+     * Add status and display fields
+     */
+    private function addStatusFields(Blueprint $table): void
+    {
+        $statusFields = [
+            ['is_published', 'boolean', 'product_id', ['default' => true]],
+            ['icon', 'string', 'is_published', ['nullable' => true, 'default' => 'fas fa-folder']],
+            ['is_featured', 'boolean', 'icon', ['default' => false]],
+            ['is_active', 'boolean', 'is_featured', ['default' => true]]
+        ];
+
+        foreach ($statusFields as $field) {
+            $this->addColumnIfMissing($table, $field[0], $field[1], $field[2], $field[3]);
+        }
+    }
+
+    /**
+     * Add meta fields
+     */
+    private function addMetaFields(Blueprint $table): void
+    {
+        $metaFields = [
+            ['meta_title', 'string', 'is_active', ['nullable' => true]],
+            ['meta_description', 'text', 'meta_title', ['nullable' => true]],
+            ['meta_keywords', 'text', 'meta_description', ['nullable' => true]]
+        ];
+
+        foreach ($metaFields as $field) {
+            $this->addColumnIfMissing($table, $field[0], $field[1], $field[2], $field[3]);
+        }
     }
 
     /**
@@ -100,12 +156,26 @@ return new class() extends Migration {
      */
     public function down(): void
     {
-        if (Schema::hasTable('kb_categories')) {
-            Schema::table('kb_categories', function (Blueprint $table) {
-                $table->dropForeign(['parent_id']);
-                $table->dropForeign(['product_id']);
-            });
-            Schema::dropIfExists('kb_categories');
+        if (!Schema::hasTable('kb_categories')) {
+            return;
         }
+
+        $this->dropForeignKeys();
+        Schema::dropIfExists('kb_categories');
+    }
+
+    /**
+     * Drop foreign key constraints
+     */
+    private function dropForeignKeys(): void
+    {
+        Schema::table('kb_categories', function (Blueprint $table) {
+            if (Schema::hasColumn('kb_categories', 'parent_id')) {
+                $table->dropForeign(['parent_id']);
+            }
+            if (Schema::hasColumn('kb_categories', 'product_id')) {
+                $table->dropForeign(['product_id']);
+            }
+        });
     }
 };
