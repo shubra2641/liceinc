@@ -204,70 +204,8 @@ class ProductController extends Controller
                 ]);
                 abort(404);
             }
-            // Check if user owns this product and has paid invoice
-            $userOwnsProduct = false;
-            $userCanDownload = false;
-            $downloadMessage = '';
-            $userHasPurchasedBefore = false;
-            if (Auth::check()) {
-                $user = Auth::user();
-                $userOwnsProduct = $user ? $user->licenses()
-                    ->where('product_id', $product->id)
-                    ->where('status', 'active')
-                    ->where(function ($q) {
-                        $q->whereNull('license_expires_at')
-                            ->orWhere('license_expires_at', '>', now());
-                    })
-                    ->exists() : false;
-                // Check if user has purchased this product before (any license, even expired)
-                $userHasPurchasedBefore = $user?->licenses()
-                    ->where('product_id', $product->id)
-                    ->exists();
-                // Check download permissions if product is downloadable
-                if ($product->is_downloadable) {
-                    $productFileService = app(ProductFileService::class);
-                    $permissions = $productFileService->userCanDownloadFiles(
-                        $product,
-                        Auth::id() ? (int)Auth::id() : 0
-                    );
-                    $userCanDownload = $permissions['can_download'];
-                    $downloadMessage = $permissions['message'];
-                }
-            }
-            // Process content for HTML/text detection
-            $product->description_has_html = false;
-            $product->requirements_has_html = false;
-            $product->installation_guide_has_html = false;
-
-            // Check if fields are strings before processing
-            $description = $product->description;
-            $requirements = $product->requirements;
-            $installationGuide = $product->installation_guide;
-
-            if (is_string($description)) {
-                $product->description_has_html = strip_tags($description) !== $description;
-            }
-            if (is_string($requirements)) {
-                $product->requirements_has_html = strip_tags($requirements) !== $requirements;
-            }
-            if (is_string($installationGuide)) {
-                $product->installation_guide_has_html = strip_tags($installationGuide) !== $installationGuide;
-            }
-            // Get license count for this product
-            $licenseCount = License::where('product_id', $product->id)
-                ->where('status', 'active')
-                ->where(function ($q) {
-                    $q->whereNull('license_expires_at')
-                        ->orWhere('license_expires_at', '>', now());
-                })
-                ->count();
-            $relatedProducts = Product::where('category_id', $product->category_id)
-                ->where('id', '!=', $product->id)
-                ->where('is_active', true)
-                ->with(['category', 'programmingLanguage'])
-                ->orderBy('created_at', 'desc')
-                ->limit(3)
-                ->get();
+            // Process product data
+            $productData = $this->processProductData($product);
             // Process screenshots data
             $screenshots = null;
             if ($product->screenshots && ! empty($product->screenshots)) {
@@ -277,12 +215,12 @@ class ProductController extends Controller
             }
             return view('user.products.show', [
                 'product' => $product,
-                'relatedProducts' => $relatedProducts,
-                'userOwnsProduct' => $userOwnsProduct,
-                'licenseCount' => $licenseCount,
-                'userCanDownload' => $userCanDownload,
-                'downloadMessage' => $downloadMessage,
-                'userHasPurchasedBefore' => $userHasPurchasedBefore,
+                'relatedProducts' => $productData['relatedProducts'],
+                'userOwnsProduct' => $productData['userOwnsProduct'],
+                'licenseCount' => $productData['licenseCount'],
+                'userCanDownload' => $productData['userCanDownload'],
+                'downloadMessage' => $productData['downloadMessage'],
+                'userHasPurchasedBefore' => $productData['userHasPurchasedBefore'],
                 'screenshots' => $screenshots,
             ]);
         } catch (\Exception $e) {
@@ -342,78 +280,16 @@ class ProductController extends Controller
                 ->where('is_active', true)
                 ->with(['category', 'programmingLanguage'])
                 ->firstOrFail();
-            // Check if user owns this product and has paid invoice
-            $userOwnsProduct = false;
-            $userCanDownload = false;
-            $downloadMessage = '';
-            $userHasPurchasedBefore = false;
-            if (Auth::check()) {
-                $user = Auth::user();
-                $userOwnsProduct = $user ? $user->licenses()
-                    ->where('product_id', $product->id)
-                    ->where('status', 'active')
-                    ->where(function ($q) {
-                        $q->whereNull('license_expires_at')
-                            ->orWhere('license_expires_at', '>', now());
-                    })
-                    ->exists() : false;
-                // Check if user has purchased this product before (any license, even expired)
-                $userHasPurchasedBefore = $user?->licenses()
-                    ->where('product_id', $product->id)
-                    ->exists();
-                // Check download permissions if product is downloadable
-                if ($product->is_downloadable) {
-                    $productFileService = app(ProductFileService::class);
-                    $permissions = $productFileService->userCanDownloadFiles(
-                        $product,
-                        Auth::id() ? (int)Auth::id() : 0
-                    );
-                    $userCanDownload = $permissions['can_download'];
-                    $downloadMessage = $permissions['message'];
-                }
-            }
-            // Process content for HTML/text detection
-            $product->description_has_html = false;
-            $product->requirements_has_html = false;
-            $product->installation_guide_has_html = false;
-
-            // Check if fields are strings before processing
-            $description = $product->description;
-            $requirements = $product->requirements;
-            $installationGuide = $product->installation_guide;
-
-            if (is_string($description)) {
-                $product->description_has_html = strip_tags($description) !== $description;
-            }
-            if (is_string($requirements)) {
-                $product->requirements_has_html = strip_tags($requirements) !== $requirements;
-            }
-            if (is_string($installationGuide)) {
-                $product->installation_guide_has_html = strip_tags($installationGuide) !== $installationGuide;
-            }
-            // Get license count for this product
-            $licenseCount = License::where('product_id', $product->id)
-                ->where('status', 'active')
-                ->where(function ($q) {
-                    $q->whereNull('license_expires_at')
-                        ->orWhere('license_expires_at', '>', now());
-                })
-                ->count();
-            $relatedProducts = Product::where('category_id', $product->category_id)
-                ->where('id', '!=', $product->id)
-                ->where('is_active', true)
-                ->with(['category', 'programmingLanguage'])
-                ->orderBy('created_at', 'desc')
-                ->limit(3)
-                ->get();
+            // Process product data
+            $productData = $this->processProductData($product);
             return view('user.products.show', [
                 'product' => $product,
-                'relatedProducts' => $relatedProducts,
-                'userOwnsProduct' => $userOwnsProduct,
-                'licenseCount' => $licenseCount,
-                'userCanDownload' => $userCanDownload,
-                'downloadMessage' => $downloadMessage,
-                'userHasPurchasedBefore' => $userHasPurchasedBefore,
+                'relatedProducts' => $productData['relatedProducts'],
+                'userOwnsProduct' => $productData['userOwnsProduct'],
+                'licenseCount' => $productData['licenseCount'],
+                'userCanDownload' => $productData['userCanDownload'],
+                'downloadMessage' => $productData['downloadMessage'],
+                'userHasPurchasedBefore' => $productData['userHasPurchasedBefore'],
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             Log::warning('Product not found for public show', [
@@ -434,5 +310,89 @@ class ProductController extends Controller
             ]);
             abort(500, 'Failed to load product details');
         }
+    }
+
+    /**
+     * Process product data for display
+     */
+    private function processProductData($product): array
+    {
+        // Check user ownership and permissions
+        $userOwnsProduct = false;
+        $userCanDownload = false;
+        $downloadMessage = '';
+        $userHasPurchasedBefore = false;
+
+        if (Auth::check()) {
+            $user = Auth::user();
+            $userOwnsProduct = $user ? $user->licenses()
+                ->where('product_id', $product->id)
+                ->where('status', 'active')
+                ->where(function ($q) {
+                    $q->whereNull('license_expires_at')
+                        ->orWhere('license_expires_at', '>', now());
+                })
+                ->exists() : false;
+
+            $userHasPurchasedBefore = $user?->licenses()
+                ->where('product_id', $product->id)
+                ->exists();
+
+            if ($product->is_downloadable) {
+                $productFileService = app(ProductFileService::class);
+                $permissions = $productFileService->userCanDownloadFiles(
+                    $product,
+                    Auth::id() ? (int)Auth::id() : 0
+                );
+                $userCanDownload = $permissions['can_download'];
+                $downloadMessage = $permissions['message'];
+            }
+        }
+
+        // Process content for HTML/text detection
+        $product->description_has_html = false;
+        $product->requirements_has_html = false;
+        $product->installation_guide_has_html = false;
+
+        $description = $product->description;
+        $requirements = $product->requirements;
+        $installationGuide = $product->installation_guide;
+
+        if (is_string($description)) {
+            $product->description_has_html = strip_tags($description) !== $description;
+        }
+        if (is_string($requirements)) {
+            $product->requirements_has_html = strip_tags($requirements) !== $requirements;
+        }
+        if (is_string($installationGuide)) {
+            $product->installation_guide_has_html = strip_tags($installationGuide) !== $installationGuide;
+        }
+
+        // Get license count
+        $licenseCount = License::where('product_id', $product->id)
+            ->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('license_expires_at')
+                    ->orWhere('license_expires_at', '>', now());
+            })
+            ->count();
+
+        // Get related products
+        $relatedProducts = Product::where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->where('is_active', true)
+            ->with(['category', 'programmingLanguage'])
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->get();
+
+        return [
+            'userOwnsProduct' => $userOwnsProduct,
+            'userCanDownload' => $userCanDownload,
+            'downloadMessage' => $downloadMessage,
+            'userHasPurchasedBefore' => $userHasPurchasedBefore,
+            'licenseCount' => $licenseCount,
+            'relatedProducts' => $relatedProducts,
+        ];
     }
 }
