@@ -10,9 +10,6 @@ class LayoutComposer
 {
     public function compose(View $view): void
     {
-        // Debug: Log that composer is being called
-        \Log::info('LayoutComposer called for view: ' . $view->getName());
-        
         $view->with([
             'siteName' => $this->getSiteName(),
             'siteLogo' => $this->getSiteLogo(),

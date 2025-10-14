@@ -13,33 +13,12 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Application Service Provider with enhanced security.
- *
- * This service provider handles the registration and bootstrapping of application
- * services, including view composers, pagination settings, and third-party
- * service providers with comprehensive security measures.
- *
- * Features:
- * - Service registration and bootstrapping
- * - View composer registration with security validation
- * - Pagination configuration with proper defaults
- * - Enhanced security measures (input validation, error handling)
- * - Comprehensive error handling for service registration
- * - Proper type hints and return types
- * - Clean code structure with no duplicate patterns
- * - Third-party service provider integration
+ * Application Service Provider
  */
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services with enhanced security.
-     *
-     * Registers application services including third-party providers
-     * with proper validation and error handling.
-     *
-     * @throws \InvalidArgumentException When service registration fails
-     *
-     * @version 1.0.6
+     * Register application services
      */
     public function register(): void
     {
@@ -66,50 +45,18 @@ class AppServiceProvider extends ServiceProvider
         }
     }
     /**
-     * Bootstrap any application services with enhanced security.
-     *
-     * Bootstraps application services including view composers and
-     * pagination settings with proper validation and error handling.
-     *
-     * @throws \InvalidArgumentException When service bootstrapping fails
-     *
-     * @version 1.0.6
+     * Bootstrap application services
      */
     public function boot(): void
     {
-        // Debug: Log that AppServiceProvider boot is called
-        \Log::info('AppServiceProvider boot() called');
-        
-        try {
-            // Auto-detect proper app URL to fix routing issues
-            $this->configureAppUrl();
-
-            // Register View Composers with validation
-            $this->registerViewComposers();
-            // Set default pagination view with validation
-            $this->configurePagination();
-            // Configure rate limiters
-            $this->configureRateLimiters();
-            
-            \Log::info('AppServiceProvider boot() completed successfully');
-        } catch (\Exception $e) {
-            // Log error but don't break the application
-            \Log::error('Failed to bootstrap AppServiceProvider: ' . $e->getMessage());
-            if (app()->bound('log')) {
-                app('log')->error('Failed to bootstrap AppServiceProvider: ' . $e->getMessage());
-            }
-            // Re-throw if it's a critical error
-            if ($e instanceof \InvalidArgumentException) {
-                throw $e;
-            }
-        }
+        $this->configureAppUrl();
+        $this->registerViewComposers();
+        $this->configurePagination();
+        $this->configureRateLimiters();
     }
 
     /**
-     * Configure application URL for proper route generation.
-     *
-     * Auto-detects the correct base URL when APP_URL doesn't match
-     * the current request URL, fixing routing issues in subfolders.
+     * Configure application URL
      */
     private function configureAppUrl(): void
     {
@@ -117,25 +64,15 @@ class AppServiceProvider extends ServiceProvider
             $currentHost = request()->getHost();
             $currentScheme = request()->getScheme();
             $appUrl = config('app.url');
-
-            // Check if current URL differs from configured APP_URL
-            $parsedAppUrl = parse_url(is_string($appUrl) ? $appUrl : '');
-            $parsedHost = $parsedAppUrl['host'] ?? 'localhost';
-            $parsedScheme = $parsedAppUrl['scheme'] ?? 'http';
-
-            if (
-                $currentHost !== $parsedHost ||
-                $currentScheme !== $parsedScheme
-            ) {
-                // Build proper base URL without /public
+            $parsedAppUrl = parse_url($appUrl);
+            
+            if ($currentHost !== ($parsedAppUrl['host'] ?? 'localhost') || 
+                $currentScheme !== ($parsedAppUrl['scheme'] ?? 'http')) {
                 $path = trim(dirname(request()->getScriptName()), '/');
                 $baseUrl = $currentScheme . '://' . $currentHost;
-
                 if ($path && $path !== '.') {
                     $baseUrl .= '/' . $path;
                 }
-
-                // Update the URL configuration
                 config(['app.url' => $baseUrl]);
                 app('url')->useOrigin($baseUrl);
             }
@@ -143,73 +80,36 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register view composers with enhanced security.
-     *
-     * Registers view composers with proper validation and error handling.
-     *
-     * @throws \InvalidArgumentException When view composer registration fails
-     *
-     * @version 1.0.6
+     * Register view composers
      */
     private function registerViewComposers(): void
     {
-        // Debug: Log that we're registering the composer
-        \Log::info('Registering LayoutComposer for all views');
-        
-        // Register LayoutComposer for ALL views
         View::composer('*', LayoutComposer::class);
-        
-        \Log::info('LayoutComposer registered successfully');
     }
     /**
-     * Configure pagination with enhanced security.
-     *
-     * Sets up pagination defaults with proper validation and error handling.
-     *
-     * @throws \InvalidArgumentException When pagination configuration fails
-     *
-     * @version 1.0.6
+     * Configure pagination
      */
     private function configurePagination(): void
     {
-        $defaultView = 'pagination::bootstrap-5';
-        $defaultSimpleView = 'pagination::simple-bootstrap-5';
-        // Validate pagination view names (always valid for hardcoded values)
-        Paginator::defaultView($defaultView);
-        Paginator::defaultSimpleView($defaultSimpleView);
+        Paginator::defaultView('pagination::bootstrap-5');
+        Paginator::defaultSimpleView('pagination::simple-bootstrap-5');
     }
     /**
-     * Configure rate limiters with enhanced security.
-     *
-     * Sets up rate limiters for authentication and API endpoints
-     * with proper validation and security measures.
+     * Configure rate limiters
      */
     private function configureRateLimiters(): void
     {
-        // Configure auth rate limiter - Increased limits for better user experience
         RateLimiter::for('auth', function ($request) {
-            if (is_object($request) && method_exists($request, 'ip')) {
-                return Limit::perMinute(100)->by($request->ip());
-            }
-            return Limit::perMinute(100)->by('127.0.0.1');
+            return Limit::perMinute(100)->by($request->ip());
         });
 
-        // Configure API rate limiter - Increased limits for better performance
         RateLimiter::for('api', function ($request) {
-            if (is_object($request) && method_exists($request, 'user') && method_exists($request, 'ip')) {
-                $user = $request->user();
-                $userId = is_object($user) && property_exists($user, 'id') ? $user->id : null;
-                $ip = $request->ip();
-                return Limit::perMinute(300)->by($userId ?: $ip);
-            }
-            return Limit::perMinute(300)->by('127.0.0.1');
+            $user = $request->user();
+            return Limit::perMinute(300)->by($user?->id ?: $request->ip());
         });
-        // Configure general web rate limiter
+
         RateLimiter::for('web', function ($request) {
-            if (is_object($request) && method_exists($request, 'ip')) {
-                return Limit::perMinute(200)->by($request->ip());
-            }
-            return Limit::perMinute(200)->by('127.0.0.1');
+            return Limit::perMinute(200)->by($request->ip());
         });
     }
 }
