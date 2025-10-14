@@ -177,30 +177,15 @@ class KbArticleController extends Controller
                 'allow_comments' => ['boolean'],
                 'is_featured' => ['boolean'],
             ]);
-            // Sanitize input
-            $validatedArray = is_array($validated) ? $validated : [];
-            $validatedArray['title'] = $this->sanitizeInput($validatedArray['title'] ?? '');
-            $validatedArray['excerpt'] = $this->sanitizeInput($validatedArray['excerpt'] ?? '');
-            $validatedArray['content'] = $this->sanitizeInput($validatedArray['content'] ?? '');
-            $validatedArray['serial'] = $this->sanitizeInput($validatedArray['serial'] ?? '');
-            $validatedArray['serial_message'] = $this->sanitizeInput($validatedArray['serial_message'] ?? '');
-            $validatedArray['meta_title'] = $this->sanitizeInput($validatedArray['meta_title'] ?? '');
-            $validatedArray['meta_description'] = $this->sanitizeInput($validatedArray['meta_description'] ?? '');
-            $validatedArray['meta_keywords'] = $this->sanitizeInput($validatedArray['meta_keywords'] ?? '');
-            // Generate slug automatically from title
-            $validatedArray['slug'] = Str::slug($validatedArray['title']);
-            $validatedArray['is_published'] = $request->boolean('is_published');
-            // Handle checkbox values
-            $validatedArray['allow_comments'] = $request->has('allow_comments');
-            $validatedArray['is_featured'] = $request->has('is_featured');
-            $validatedArray['requires_serial'] = $request->has('requires_serial');
+            // Process and sanitize data
+            $data = $this->processArticleData($validated, $request);
             // Handle image upload
             if ($request->hasFile('image')) {
                 $path = $request->file('image')->store('kb_images', 'public');
-                $validatedArray['image'] = $path;
+                $data['image'] = $path;
             }
             // @phpstan-ignore-next-line
-            KbArticle::create($validatedArray);
+            KbArticle::create($data);
             DB::commit();
             return redirect()->route('admin.kb-articles.index')->with('success', 'Article created successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -320,27 +305,14 @@ class KbArticleController extends Controller
                 'allow_comments' => ['boolean'],
                 'is_featured' => ['boolean'],
             ]);
-            // Sanitize input
-            $validatedArray = is_array($validated) ? $validated : [];
-            $validatedArray['title'] = $this->sanitizeInput($validatedArray['title'] ?? '');
-            $validatedArray['excerpt'] = $this->sanitizeInput($validatedArray['excerpt'] ?? '');
-            $validatedArray['content'] = $this->sanitizeInput($validatedArray['content'] ?? '');
-            $validatedArray['serial'] = $this->sanitizeInput($validatedArray['serial'] ?? '');
-            $validatedArray['serial_message'] = $this->sanitizeInput($validatedArray['serial_message'] ?? '');
-            $validatedArray['meta_title'] = $this->sanitizeInput($validatedArray['meta_title'] ?? '');
-            $validatedArray['meta_description'] = $this->sanitizeInput($validatedArray['meta_description'] ?? '');
-            $validatedArray['meta_keywords'] = $this->sanitizeInput($validatedArray['meta_keywords'] ?? '');
-            $validatedArray['is_published'] = $request->boolean('is_published');
-            // Handle checkbox values
-            $validatedArray['allow_comments'] = $request->has('allow_comments');
-            $validatedArray['is_featured'] = $request->has('is_featured');
-            $validatedArray['requires_serial'] = $request->has('requires_serial');
+            // Process and sanitize data
+            $data = $this->processArticleData($validated, $request);
             if ($request->hasFile('image')) {
                 $path = $request->file('image')->store('kb_images', 'public');
-                $validatedArray['image'] = $path;
+                $data['image'] = $path;
             }
             // @phpstan-ignore-next-line
-            $kbArticle->update($validatedArray);
+            $kbArticle->update($data);
             DB::commit();
             return back()->with('success', 'Article updated successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -410,5 +382,30 @@ class KbArticleController extends Controller
             ]);
             return back()->with('error', 'Failed to delete article. Please try again.');
         }
+    }
+
+    /**
+     * Process and sanitize article data
+     */
+    private function processArticleData(array $validated, Request $request): array
+    {
+        $data = [
+            'title' => $this->sanitizeInput($validated['title'] ?? ''),
+            'excerpt' => $this->sanitizeInput($validated['excerpt'] ?? ''),
+            'content' => $this->sanitizeInput($validated['content'] ?? ''),
+            'serial' => $this->sanitizeInput($validated['serial'] ?? ''),
+            'serial_message' => $this->sanitizeInput($validated['serial_message'] ?? ''),
+            'meta_title' => $this->sanitizeInput($validated['meta_title'] ?? ''),
+            'meta_description' => $this->sanitizeInput($validated['meta_description'] ?? ''),
+            'meta_keywords' => $this->sanitizeInput($validated['meta_keywords'] ?? ''),
+            'slug' => Str::slug($validated['title']),
+            'is_published' => $request->boolean('is_published'),
+            'allow_comments' => $request->has('allow_comments'),
+            'is_featured' => $request->has('is_featured'),
+            'requires_serial' => $request->has('requires_serial'),
+            'kb_category_id' => $validated['kb_category_id'],
+        ];
+
+        return $data;
     }
 }
