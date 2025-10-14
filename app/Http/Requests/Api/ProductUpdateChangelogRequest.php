@@ -10,23 +10,27 @@ namespace App\Http\Requests\Api;
  * This request class handles validation for changelog operations
  * with comprehensive security measures and input sanitization.
  */
-class ProductUpdateChangelogRequest extends BaseProductUpdateRequest
+class ProductUpdateChangelogRequest extends BaseApiRequest
 {
-    // All validation logic is inherited from BaseProductUpdateRequest
+    /**
+     * Get the validation rules that apply to the request.
+     */
+    public function rules(): array
+    {
+        return array_merge(
+            $this->getCommonRules(),
+            $this->getProductIdRules()
+        );
+    }
 
     /**
-     * Sanitize input to prevent XSS attacks.
+     * Get custom validation messages.
      */
-    private function sanitizeInput(mixed $input): ?string
+    public function messages(): array
     {
-        if ($input === null || $input === '') {
-            return null;
-        }
-
-        if (!is_string($input)) {
-            return null;
-        }
-
-        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+        return array_merge(
+            $this->getCommonMessages(),
+            $this->getProductIdMessages()
+        );
     }
 }
