@@ -415,18 +415,9 @@ class ProductUpdateApiRequest extends FormRequest
             'include_breaking_changes',
             'include_deprecations',
         ]);
-        // Set default values
-        $this->merge([
-            'include_changelog' => $this->include_changelog ?? true,
-            'include_dependencies' => $this->include_dependencies ?? true,
-            'include_security_updates' => $this->include_security_updates ?? true,
-            'include_feature_updates' => $this->include_feature_updates ?? true,
-            'include_bug_fixes' => $this->include_bug_fixes ?? true,
-            'include_download_url' => $this->include_download_url ?? true,
-            'include_checksums' => $this->include_checksums ?? false,
-            'include_file_list' => $this->include_file_list ?? false,
-            'include_installation_notes' => $this->include_installation_notes ?? false,
-            'include_rollback_info' => $this->include_rollback_info ?? false,
+        
+        // Set default values using trait method
+        $this->setDefaultValues([
             'verify_integrity' => $this->verify_integrity ?? true,
             'include_release_notes' => $this->include_release_notes ?? true,
             'include_breaking_changes' => $this->include_breaking_changes ?? true,

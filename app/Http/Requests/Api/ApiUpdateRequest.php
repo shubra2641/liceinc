@@ -421,18 +421,9 @@ class ApiUpdateRequest extends FormRequest
 
         $this->handleFilterAndSort(['current_version', 'filter_version', 'sort_order']);
         $this->handleCheckboxValues();
-        // Set default values
-        $this->merge([
-            'include_changelog' => $this->include_changelog ?? true,
-            'include_dependencies' => $this->include_dependencies ?? true,
-            'include_security_updates' => $this->include_security_updates ?? true,
-            'include_feature_updates' => $this->include_feature_updates ?? true,
-            'include_bug_fixes' => $this->include_bug_fixes ?? true,
-            'include_download_url' => $this->include_download_url ?? true,
-            'include_checksums' => $this->include_checksums ?? false,
-            'include_file_list' => $this->include_file_list ?? false,
-            'include_installation_notes' => $this->include_installation_notes ?? false,
-            'include_rollback_info' => $this->include_rollback_info ?? false,
+        
+        // Set default values using trait method
+        $this->setDefaultValues([
             'limit' => $this->limit ?? 20,
             'offset' => $this->offset ?? 0,
             'sort_order' => $this->sort_order ?? 'desc',
