@@ -147,8 +147,13 @@ class AppServiceProvider extends ServiceProvider
      */
     private function registerViewComposers(): void
     {
+        // Debug: Log that we're registering the composer
+        \Log::info('Registering LayoutComposer for all views');
+        
         // Register LayoutComposer for ALL views
         View::composer('*', LayoutComposer::class);
+        
+        \Log::info('LayoutComposer registered successfully');
     }
     /**
      * Configure pagination with enhanced security.

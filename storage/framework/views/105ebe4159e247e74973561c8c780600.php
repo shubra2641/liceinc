@@ -9,16 +9,16 @@
 
     <title>
         <?php if (! empty(trim($__env->yieldContent('title')))): ?>
-        <?php echo $__env->yieldContent('title'); ?> - <?php echo e($siteName ?? 'Admin Dashboard'); ?>
+        <?php echo $__env->yieldContent('title'); ?> - <?php echo e($siteName); ?>
 
         <?php elseif(View::hasSection('page-title')): ?>
-        <?php echo $__env->yieldContent('page-title'); ?> - <?php echo e($siteName ?? 'Admin Dashboard'); ?>
+        <?php echo $__env->yieldContent('page-title'); ?> - <?php echo e($siteName); ?>
 
         <?php elseif(View::hasSection('seo_title')): ?>
-        <?php echo $__env->yieldContent('seo_title'); ?> - <?php echo e($siteName ?? 'Admin Dashboard'); ?>
+        <?php echo $__env->yieldContent('seo_title'); ?> - <?php echo e($siteName); ?>
 
         <?php else: ?>
-        <?php echo e($siteName ?? 'Admin Dashboard'); ?>
+        <?php echo e($siteName); ?>
 
         <?php endif; ?>
     </title>
@@ -81,7 +81,7 @@
                         </div>
                         <?php endif; ?>
                         <div>
-                            <h2 class="admin-sidebar-logo-text"><?php echo e($siteName ?? trans('app.Admin Panel')); ?></h2>
+                            <h2 class="admin-sidebar-logo-text"><?php echo e($siteName); ?></h2>
                             <p class="admin-sidebar-subtitle"><?php echo e(trans('app.License Manager')); ?></p>
                         </div>
                     </div>
