@@ -1,0 +1,86 @@
+[2025-10-13 16:12:20] local.ERROR: syntax error, unexpected character 0x00, expecting end of file {"exception":"[object] (ParseError(code: 0): syntax error, unexpected character 0x00, expecting end of file at D:\\xampp1\\htdocs\\my-logos\\app\\Console\\Commands\\SetupCronCommand.php:140)
+[stacktrace]
+#0 D:\\xampp1\\htdocs\\my-logos\\vendor\\composer\\ClassLoader.php(427): Composer\\Autoload\\{closure}('D:\\\\xampp1\\\\htdoc...')
+#1 [internal function]: Composer\\Autoload\\ClassLoader->loadClass('App\\\\Console\\\\Com...')
+#2 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(372): is_subclass_of('App\\\\Console\\\\Com...', 'Illuminate\\\\Cons...')
+#3 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(497): Illuminate\\Foundation\\Console\\Kernel->load(Array)
+#4 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(482): Illuminate\\Foundation\\Console\\Kernel->discoverCommands()
+#5 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(195): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
+#6 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#7 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#8 {main}
+"} 
+[2025-10-14 00:56:06] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/logos/uy5CedurksGNSIxWqD08MFqZEFu16XGXiJPLLKJU.png","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-14 00:56:06"} 
+[2025-10-14 00:58:44] local.ERROR: syntax error, unexpected token "private" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"private\" at D:\\xampp1\\htdocs\\my-logos\\app\\Console\\Commands\\ProcessCronCommand.php:154)
+[stacktrace]
+#0 D:\\xampp1\\htdocs\\my-logos\\vendor\\composer\\ClassLoader.php(427): Composer\\Autoload\\{closure}('D:\\\\xampp1\\\\htdoc...')
+#1 [internal function]: Composer\\Autoload\\ClassLoader->loadClass('App\\\\Console\\\\Com...')
+#2 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(372): is_subclass_of('App\\\\Console\\\\Com...', 'Illuminate\\\\Cons...')
+#3 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(497): Illuminate\\Foundation\\Console\\Kernel->load(Array)
+#4 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(482): Illuminate\\Foundation\\Console\\Kernel->discoverCommands()
+#5 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(195): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
+#6 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#7 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#8 {main}
+"} 
+[2025-10-14 00:59:27] local.ERROR: syntax error, unexpected token "private" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"private\" at D:\\xampp1\\htdocs\\my-logos\\app\\Console\\Commands\\ProcessCronCommand.php:154)
+[stacktrace]
+#0 D:\\xampp1\\htdocs\\my-logos\\vendor\\composer\\ClassLoader.php(427): Composer\\Autoload\\{closure}('D:\\\\xampp1\\\\htdoc...')
+#1 [internal function]: Composer\\Autoload\\ClassLoader->loadClass('App\\\\Console\\\\Com...')
+#2 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(372): is_subclass_of('App\\\\Console\\\\Com...', 'Illuminate\\\\Cons...')
+#3 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(497): Illuminate\\Foundation\\Console\\Kernel->load(Array)
+#4 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(482): Illuminate\\Foundation\\Console\\Kernel->discoverCommands()
+#5 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(195): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
+#6 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#7 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#8 {main}
+"} 
+[2025-10-14 01:03:37] local.ERROR: Command "complexity:analyzephp" is not defined.
+
+Did you mean one of these?
+    completion
+    complexity:analyze {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"complexity:analyzephp\" is not defined.
+
+Did you mean one of these?
+    completion
+    complexity:analyze at D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Application.php:743)
+[stacktrace]
+#0 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Application.php(301): Symfony\\Component\\Console\\Application->find('complexity:anal...')
+#1 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Application.php(194): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#2 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#3 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#4 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#5 {main}
+"} 
+[2025-10-14 01:03:38] local.ERROR: The "--min-complexity" option does not exist. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\RuntimeException(code: 0): The \"--min-complexity\" option does not exist. at D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Input\\ArgvInput.php:226)
+[stacktrace]
+#0 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Input\\ArgvInput.php(153): Symfony\\Component\\Console\\Input\\ArgvInput->addLongOption('min-complexity', '10')
+#1 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Input\\ArgvInput.php(88): Symfony\\Component\\Console\\Input\\ArgvInput->parseLongOption('--min-complexit...')
+#2 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Input\\ArgvInput.php(77): Symfony\\Component\\Console\\Input\\ArgvInput->parseToken('--min-complexit...', true)
+#3 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Input\\Input.php(53): Symfony\\Component\\Console\\Input\\ArgvInput->parse()
+#4 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Command\\Command.php(276): Symfony\\Component\\Console\\Input\\Input->bind(Object(Symfony\\Component\\Console\\Input\\InputDefinition))
+#5 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#6 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Application.php(1110): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#7 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Application.php(359): Symfony\\Component\\Console\\Application->doRunCommand(Object(App\\Console\\Commands\\AnalyzeComplexityCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#8 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Application.php(194): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#9 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#10 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#11 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#12 {main}
+"} 
+[2025-10-14 01:03:39] local.ERROR: The "--min-complexity" option does not exist. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\RuntimeException(code: 0): The \"--min-complexity\" option does not exist. at D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Input\\ArgvInput.php:226)
+[stacktrace]
+#0 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Input\\ArgvInput.php(153): Symfony\\Component\\Console\\Input\\ArgvInput->addLongOption('min-complexity', '10')
+#1 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Input\\ArgvInput.php(88): Symfony\\Component\\Console\\Input\\ArgvInput->parseLongOption('--min-complexit...')
+#2 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Input\\ArgvInput.php(77): Symfony\\Component\\Console\\Input\\ArgvInput->parseToken('--min-complexit...', true)
+#3 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Input\\Input.php(53): Symfony\\Component\\Console\\Input\\ArgvInput->parse()
+#4 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Command\\Command.php(276): Symfony\\Component\\Console\\Input\\Input->bind(Object(Symfony\\Component\\Console\\Input\\InputDefinition))
+#5 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#6 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Application.php(1110): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#7 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Application.php(359): Symfony\\Component\\Console\\Application->doRunCommand(Object(App\\Console\\Commands\\AnalyzeComplexityCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#8 D:\\xampp1\\htdocs\\my-logos\\vendor\\symfony\\console\\Application.php(194): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#9 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(197): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#10 D:\\xampp1\\htdocs\\my-logos\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#11 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#12 {main}
+"} 
