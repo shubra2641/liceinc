@@ -66,8 +66,8 @@ class KbPublicController extends Controller
 
             if (!$this->categoryRequiresAccess($category)) {
                 $articles = $this->getCategoryArticles($category);
-                $related = $this->getRelatedCategories($category);
-                return view('kb.category', compact('category', 'articles', 'related'));
+                $relatedCategories = $this->getRelatedCategories($category);
+                return view('kb.category', compact('category', 'articles', 'relatedCategories'));
             }
 
             if (!auth()->check()) {
@@ -98,8 +98,8 @@ class KbPublicController extends Controller
 
             if ($hasAccess) {
                 $articles = $this->getCategoryArticles($category);
-                $related = $this->getRelatedCategories($category);
-                return view('kb.category', compact('category', 'articles', 'related', 'accessSource'));
+                $relatedCategories = $this->getRelatedCategories($category);
+                return view('kb.category', compact('category', 'articles', 'relatedCategories', 'accessSource'));
             }
 
             return view('kb.category-purchase', compact('category'));
