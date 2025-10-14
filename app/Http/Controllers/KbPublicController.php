@@ -6,8 +6,6 @@ namespace App\Http\Controllers;
 
 use App\Models\KbArticle;
 use App\Models\KbCategory;
-use App\Services\KbAccessService;
-use App\Services\KbSearchService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -19,11 +17,6 @@ use InvalidArgumentException;
  */
 class KbPublicController extends Controller
 {
-    public function __construct(
-        private KbAccessService $accessService,
-        private KbSearchService $searchService
-    ) {
-    }
 
     /**
      * Display KB index
@@ -64,7 +57,7 @@ class KbPublicController extends Controller
                 ->with('product')
                 ->firstOrFail();
 
-            if (!$this->accessService->categoryRequiresAccess($category)) {
+            if (!$this->categoryRequiresAccess($category)) {
                 return $this->showPublicCategory($category);
             }
 
@@ -101,7 +94,7 @@ class KbPublicController extends Controller
                 ->with('category', 'product')
                 ->firstOrFail();
 
-            if (!$this->accessService->articleRequiresAccess($article)) {
+            if (!$this->articleRequiresAccess($article)) {
                 return $this->showPublicArticle($article);
             }
 
@@ -134,15 +127,15 @@ class KbPublicController extends Controller
                 'page' => 'sometimes|integer|min:1',
             ]);
 
-            $q = $this->searchService->sanitizeSearchQuery($request->get('q', ''));
+            $q = $this->sanitizeSearchQuery($request->get('q', ''));
             $results = collect();
             $resultsWithAccess = collect();
             $categoriesWithAccess = collect();
 
-            $allCategories = $this->searchService->getAllCategoriesWithAccess();
+            $allCategories = $this->getAllCategoriesWithAccess();
 
             if ($q !== '') {
-                $searchResults = $this->searchService->performSearch($q);
+                $searchResults = $this->performSearch($q);
                 $results = $searchResults['results'];
                 $resultsWithAccess = $searchResults['resultsWithAccess'];
                 $categoriesWithAccess = $searchResults['categoriesWithAccess'];
@@ -324,5 +317,167 @@ class KbPublicController extends Controller
         $article->increment('views');
     }
 
+    /**
+     * Check if category requires access
+     */
+    private function categoryRequiresAccess($category): bool
+    {
+        return $category->requires_serial || $category->product_id;
+    }
 
+    /**
+     * Check if article requires access
+     */
+    private function articleRequiresAccess($article): bool
+    {
+        return $article->requires_serial ||
+               $article->requires_purchase_code ||
+               $article->product_id ||
+               $article->category->requires_serial ||
+               $article->category->product_id;
+    }
+
+    /**
+     * Sanitize search query
+     */
+    private function sanitizeSearchQuery(string $query): string
+    {
+        $query = trim($query);
+        $query = htmlspecialchars($query, ENT_QUOTES, 'UTF-8');
+        return strlen($query) > 255 ? substr($query, 0, 255) : $query;
+    }
+
+    /**
+     * Get all categories with access
+     */
+    private function getAllCategoriesWithAccess()
+    {
+        $categories = KbCategory::where('is_active', true)
+            ->with('product', 'articles')
+            ->get();
+
+        $user = auth()->user();
+        $categories->each(function ($category) use ($user) {
+            $category->hasAccess = $this->checkCategoryAccess($category, $user);
+        });
+
+        return $categories;
+    }
+
+    /**
+     * Perform search
+     */
+    private function performSearch(string $q): array
+    {
+        $searchTerm = '%' . strtolower($q) . '%';
+        $user = auth()->user();
+
+        $articles = KbArticle::where('is_published', true)
+            ->whereHas('category', function ($query) {
+                $query->where('is_active', true);
+            })
+            ->where(function ($query) use ($searchTerm) {
+                $query->whereRaw('LOWER(title) LIKE ?', [$searchTerm])
+                    ->orWhereRaw('LOWER(content) LIKE ?', [$searchTerm])
+                    ->orWhereRaw('LOWER(excerpt) LIKE ?', [$searchTerm]);
+            })
+            ->with('category', 'product')
+            ->get();
+
+        $categories = KbCategory::where('is_active', true)
+            ->where(function ($query) use ($searchTerm) {
+                $query->whereRaw('LOWER(name) LIKE ?', [$searchTerm])
+                    ->orWhereRaw('LOWER(description) LIKE ?', [$searchTerm]);
+            })
+            ->with('product')
+            ->get();
+
+        $articles->each(fn($article) => $article->search_type = 'article');
+        $categories->each(fn($category) => $category->search_type = 'category');
+
+        $results = $articles->concat($categories);
+        $resultsWithAccess = collect();
+        $categoriesWithAccess = collect();
+
+        foreach ($results as $item) {
+            $hasAccess = true;
+            if ($item instanceof KbArticle) {
+                $hasAccess = $this->checkArticleAccess($item, $user);
+            } elseif ($item instanceof KbCategory) {
+                $hasAccess = $this->checkCategoryAccess($item, $user);
+            }
+
+            $item->hasAccess = $hasAccess;
+
+            if ($item instanceof KbArticle) {
+                $resultsWithAccess->push($item);
+            } else {
+                $categoriesWithAccess->push($item);
+                $resultsWithAccess->push($item);
+            }
+        }
+
+        return [
+            'results' => $results,
+            'resultsWithAccess' => $resultsWithAccess,
+            'categoriesWithAccess' => $categoriesWithAccess,
+        ];
+    }
+
+    /**
+     * Check category access
+     */
+    private function checkCategoryAccess($category, $user): bool
+    {
+        if (!$category->requires_serial && !$category->product_id) {
+            return true;
+        }
+
+        if (!$user || !$category->product_id) {
+            return false;
+        }
+
+        return $user->licenses()
+            ->where('product_id', $category->product_id)
+            ->where('status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('license_expires_at')
+                    ->orWhere('license_expires_at', '>', now());
+            })
+            ->exists();
+    }
+
+    /**
+     * Check article access
+     */
+    private function checkArticleAccess($article, $user): bool
+    {
+        $requiresAccess = $article->requires_serial ||
+                         $article->requires_purchase_code ||
+                         $article->product_id ||
+                         $article->category->requires_serial ||
+                         $article->category->product_id;
+
+        if (!$requiresAccess) {
+            return true;
+        }
+
+        if (!$user) {
+            return false;
+        }
+
+        $productId = $article->product_id ?: $article->category->product_id;
+        if (!$productId) {
+            return false;
+        }
+
+        return $user->licenses()
+            ->where('product_id', $productId)
+            ->where('status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('license_expires_at')
+                    ->orWhere('license_expires_at', '>', now());
+            })
+            ->exists();
+    }
 }
