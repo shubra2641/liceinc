@@ -2,17 +2,9 @@
  * Admin Dashboard Charts - Simplified and Secure
  */
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Simple utility functions
-  const Utils = {
-    get: (selector) => document.querySelector(selector),
-    getAll: (selector) => document.querySelectorAll(selector),
-    safeText: (el, text) => el && (el.textContent = text),
-    escapeHTML: (text) => {
-      if (typeof text !== 'string') return text;
-      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-  };
+document.addEventListener('DOMContentLoaded', function () {
+  // Use shared utilities
+  const Utils = window.CommonUtils;
 
   // Chart colors
   const colors = {
@@ -127,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
         type: type,
         data: {
           labels: data.labels || [],
-          datasets: [{
+        datasets: [{
             label: label,
             data: data.values || [],
             backgroundColor: this.getColors(data.values?.length || 0),
@@ -138,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
+        plugins: {
             legend: {
               position: 'bottom',
               labels: {
@@ -191,7 +183,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async fetchChartData(type) {
-      const response = await fetch(`/api/admin/charts/${type}`, {
+      return await this.apiRequest(`/api/admin/charts/${type}`);
+    }
+
+    async apiRequest(url) {
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -264,23 +260,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async loadStats() {
       try {
-        const response = await fetch('/api/admin/stats', {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': Utils.get('meta[name="csrf-token"]')?.getAttribute('content') || ''
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
+        const data = await this.apiRequest('/api/admin/stats');
         this.updateStatsCards(data);
       } catch (error) {
-        console.error('Error loading stats:', error);
         this.showStatsError();
       }
     }

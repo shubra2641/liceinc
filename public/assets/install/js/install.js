@@ -2,58 +2,16 @@
  * Installation Wizard JavaScript - Simplified and Secure
  */
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Utility functions
-  const Utils = {
-    get: (selector) => document.querySelector(selector),
-    getAll: (selector) => document.querySelectorAll(selector),
-    addClass: (el, cls) => el && el.classList.add(cls),
-    removeClass: (el, cls) => el && el.classList.remove(cls),
-    toggleClass: (el, cls) => el && el.classList.toggle(cls),
-    setStyle: (el, prop, val) => el && (el.style[prop] = val),
-    debounce: (func, wait) => {
-      let timeout;
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-      };
-    },
-    // Safe text content to prevent XSS - NEVER use innerHTML
-    safeText: (element, text) => {
-      if (!element) return;
-      element.textContent = text;
-    },
-    // Escape HTML to prevent XSS
-    escapeHTML: (text) => {
-      if (typeof text !== 'string') return text;
-      return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#x27;');
-    },
-    // Safe URL validation and escaping
-    safeUrl: (url) => {
-      try {
-        const urlObj = new URL(url, window.location.origin);
-        return urlObj.origin === window.location.origin ? urlObj.href : '/login?from_install=1';
-      } catch {
-        return '/login?from_install=1';
-      }
-    }
-  };
+document.addEventListener('DOMContentLoaded', function () {
+  // Use shared utilities
+  const Utils = window.CommonUtils;
 
   // Form validation
   function setupFormValidation() {
     const forms = Utils.getAll('.install-form');
     forms.forEach(form => {
       form.addEventListener('submit', handleFormSubmission);
-      
+
       // Real-time validation
       const inputs = form.querySelectorAll('input, select, textarea');
       inputs.forEach(input => {
@@ -74,13 +32,13 @@ document.addEventListener('DOMContentLoaded', function() {
   function validateForm(form) {
     let isValid = true;
     const inputs = form.querySelectorAll('input, select, textarea');
-    
+
     inputs.forEach(input => {
       if (!validateField({ target: input })) {
         isValid = false;
       }
     });
-    
+
     return isValid;
   }
 
@@ -252,27 +210,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const notification = document.createElement('div');
     notification.className = `install-notification install-alert-${type}`;
-    
+
     const icon = getIconForType(type);
     const escapedMessage = Utils.escapeHTML(message);
-    
+
     // Create elements safely without innerHTML
     const iconElement = document.createElement('i');
     iconElement.className = `fas ${icon}`;
-    
+
     const messageElement = document.createElement('span');
     Utils.safeText(messageElement, escapedMessage);
-    
+
     const closeButton = document.createElement('button');
     closeButton.className = 'notification-close';
-    closeButton.addEventListener('click', function() {
+    closeButton.addEventListener('click', function () {
       notification.remove();
     });
-    
+
     const closeIcon = document.createElement('i');
     closeIcon.className = 'fas fa-times';
     closeButton.appendChild(closeIcon);
-    
+
     // Append elements safely
     notification.appendChild(iconElement);
     notification.appendChild(messageElement);
@@ -296,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function setupLanguageSwitcher() {
     const languageSelect = Utils.get('#language-select');
     if (languageSelect) {
-      languageSelect.addEventListener('change', function() {
+      languageSelect.addEventListener('change', function () {
         updateUrlParam('lang', this.value);
       });
     }
@@ -307,15 +265,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!param || !value || typeof param !== 'string' || typeof value !== 'string') {
       return;
     }
-    
+
     // Sanitize parameter and value - only allow alphanumeric and hyphens
     const sanitizedParam = param.replace(/[^a-zA-Z0-9_-]/g, '');
     const sanitizedValue = value.replace(/[^a-zA-Z0-9_-]/g, '');
-    
+
     if (!sanitizedParam || !sanitizedValue) {
       return;
     }
-    
+
     const url = new URL(window.location);
     url.searchParams.set(sanitizedParam, sanitizedValue);
     window.history.replaceState({}, '', url);
@@ -385,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function() {
       startInstallationBtn.addEventListener('click', startInstallation);
     }
 
-    window.addEventListener('beforeunload', function(event) {
+    window.addEventListener('beforeunload', function (event) {
       const isInstalling = Utils.get('.installation-step.current');
       if (isInstalling) {
         event.preventDefault();
@@ -393,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
-    window.addEventListener('resize', Utils.debounce(function() {
+    window.addEventListener('resize', Utils.debounce(function () {
       const isMobile = window.innerWidth < 768;
       Utils.toggleClass(document.body, 'mobile', isMobile);
     }, 250));
