@@ -1,5 +1,5 @@
 /**
- * Installation Wizard JavaScript - Simplified
+ * Installation Wizard JavaScript - Simplified and Secure
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -21,6 +21,26 @@ document.addEventListener('DOMContentLoaded', function() {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
       };
+    },
+    // Safe HTML insertion to prevent XSS
+    safeHTML: (element, html) => {
+      if (!element) return;
+      element.innerHTML = html;
+    },
+    // Safe text content to prevent XSS
+    safeText: (element, text) => {
+      if (!element) return;
+      element.textContent = text;
+    },
+    // Escape HTML to prevent XSS
+    escapeHTML: (text) => {
+      if (typeof text !== 'string') return text;
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
     }
   };
 
@@ -110,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (errorMessage && formGroup) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'form-error';
-        errorDiv.textContent = errorMessage;
+        Utils.safeText(errorDiv, errorMessage);
         formGroup.appendChild(errorDiv);
       }
     }
@@ -136,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const result = await response.json();
       showConnectionResult(result.success, result.message);
     } catch (error) {
-      showConnectionResult(false, `Connection test failed: ${error.message}`);
+      showConnectionResult(false, `Connection test failed: ${Utils.escapeHTML(error.message)}`);
     } finally {
       setButtonLoading(testButton, false);
     }
@@ -148,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     Utils.removeClass(resultDiv, 'success error');
     Utils.addClass(resultDiv, success ? 'success' : 'error');
-    resultDiv.textContent = message;
+    Utils.safeText(resultDiv, message);
     Utils.setStyle(resultDiv, 'display', 'flex');
   }
 
@@ -186,14 +206,20 @@ document.addEventListener('DOMContentLoaded', function() {
       if (result.success) {
         showNotification('Installation completed successfully! Redirecting...', 'success');
         setTimeout(() => {
-          window.location.href = result.redirect || '/login?from_install=1';
+          const redirectUrl = result.redirect || '/login?from_install=1';
+          // Validate URL to prevent open redirect
+          if (isValidUrl(redirectUrl)) {
+            window.location.href = redirectUrl;
+          } else {
+            window.location.href = '/login?from_install=1';
+          }
         }, 1000);
       } else {
-        showNotification(`Installation failed: ${result.message}`, 'error');
+        showNotification(`Installation failed: ${Utils.escapeHTML(result.message)}`, 'error');
         setButtonLoading(button, false);
       }
     } catch (error) {
-      showNotification(`Installation error: ${error.message}`, 'error');
+      showNotification(`Installation error: ${Utils.escapeHTML(error.message)}`, 'error');
       setButtonLoading(button, false);
     }
   }
@@ -207,18 +233,18 @@ document.addEventListener('DOMContentLoaded', function() {
       button.disabled = true;
       const originalText = button.textContent;
       button.dataset.originalText = originalText;
-      button.textContent = 'Testing...';
+      Utils.safeText(button, 'Testing...');
     } else {
       Utils.removeClass(button, 'loading');
       button.disabled = false;
       if (button.dataset.originalText) {
-        button.textContent = button.dataset.originalText;
+        Utils.safeText(button, button.dataset.originalText);
         delete button.dataset.originalText;
       }
     }
   }
 
-  // Notifications
+  // Notifications - Fixed XSS vulnerability
   function showNotification(message, type = 'info') {
     const existingNotifications = Utils.getAll('.install-notification');
     existingNotifications.forEach(notification => notification.remove());
@@ -227,13 +253,16 @@ document.addEventListener('DOMContentLoaded', function() {
     notification.className = `install-notification install-alert-${type}`;
     
     const icon = getIconForType(type);
-    notification.innerHTML = `
+    const escapedMessage = Utils.escapeHTML(message);
+    
+    // Use safe HTML construction
+    Utils.safeHTML(notification, `
       <i class="fas ${icon}"></i>
-      <span>${message}</span>
+      <span>${escapedMessage}</span>
       <button class="notification-close" onclick="this.parentElement.remove()">
         <i class="fas fa-times"></i>
       </button>
-    `;
+    `);
 
     const container = Utils.get('.install-container') || document.body;
     container.appendChild(notification);
@@ -260,8 +289,21 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function updateUrlParam(param, value) {
+    // Validate parameter and value to prevent XSS
+    if (!param || !value || typeof param !== 'string' || typeof value !== 'string') {
+      return;
+    }
+    
+    // Sanitize parameter and value
+    const sanitizedParam = param.replace(/[^a-zA-Z0-9_-]/g, '');
+    const sanitizedValue = value.replace(/[^a-zA-Z0-9_-]/g, '');
+    
+    if (!sanitizedParam || !sanitizedValue) {
+      return;
+    }
+    
     const url = new URL(window.location);
-    url.searchParams.set(param, value);
+    url.searchParams.set(sanitizedParam, sanitizedValue);
     window.history.replaceState({}, '', url);
     window.location.reload();
   }
@@ -303,7 +345,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const formData = new FormData(form);
     const data = {};
     for (const [key, value] of formData.entries()) {
-      data[key] = value;
+      // Sanitize data before saving
+      data[key] = Utils.escapeHTML(value);
     }
     localStorage.setItem('install_form_data', JSON.stringify(data));
   }
@@ -312,6 +355,16 @@ document.addEventListener('DOMContentLoaded', function() {
   function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  }
+
+  // Validate URL to prevent open redirect attacks
+  function isValidUrl(url) {
+    try {
+      const urlObj = new URL(url, window.location.origin);
+      return urlObj.origin === window.location.origin;
+    } catch {
+      return false;
+    }
   }
 
   // Event listeners
