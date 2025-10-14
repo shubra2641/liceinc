@@ -6,7 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Models\KbArticle;
 use App\Models\KbCategory;
+use App\Models\License;
 use App\Models\Product;
+use App\Services\EnvatoService;
 use App\Services\PurchaseCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

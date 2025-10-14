@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
         type: type,
         data: {
           labels: data.labels || [],
-        datasets: [{
+          datasets: [{
             label: label,
             data: data.values || [],
             backgroundColor: this.getColors(data.values?.length || 0),
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-        plugins: {
+          plugins: {
             legend: {
               position: 'bottom',
               labels: {
