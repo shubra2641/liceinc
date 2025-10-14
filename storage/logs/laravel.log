@@ -84,3 +84,4 @@ Did you mean one of these?
 #11 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
 #12 {main}
 "} 
+[2025-10-14 01:58:07] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/logos/uy5CedurksGNSIxWqD08MFqZEFu16XGXiJPLLKJU.png","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-14 01:58:07"} 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Traits\ProfileDataSanitization;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,6 +26,7 @@ use Illuminate\Validation\Rule;
  */
 class UserRequest extends FormRequest
 {
+    use ProfileDataSanitization;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -206,20 +208,7 @@ class UserRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        // Sanitize input to prevent XSS
-        $this->merge([
-            'name' => $this->sanitizeInput($this->input('name')),
-            'firstname' => $this->input('firstname') ? $this->sanitizeInput($this->input('firstname')) : null,
-            'lastname' => $this->input('lastname') ? $this->sanitizeInput($this->input('lastname')) : null,
-            'companyname' => $this->input('companyname') ? $this->sanitizeInput($this->input('companyname')) : null,
-            'phonenumber' => $this->input('phonenumber') ? $this->sanitizeInput($this->input('phonenumber')) : null,
-            'address1' => $this->input('address1') ? $this->sanitizeInput($this->input('address1')) : null,
-            'address2' => $this->input('address2') ? $this->sanitizeInput($this->input('address2')) : null,
-            'city' => $this->input('city') ? $this->sanitizeInput($this->input('city')) : null,
-            'state' => $this->input('state') ? $this->sanitizeInput($this->input('state')) : null,
-            'postcode' => $this->input('postcode') ? $this->sanitizeInput($this->input('postcode')) : null,
-            'country' => $this->input('country') ? $this->sanitizeInput($this->input('country')) : null,
-        ]);
+        $this->sanitizeProfileFields();
         // Handle checkbox values
         $this->merge([
             'send_welcome_email' => $this->has('send_welcome_email'),
