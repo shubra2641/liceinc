@@ -6,8 +6,13 @@ namespace App\Http\Controllers;
 
 use App\Models\KbArticle;
 use App\Models\KbCategory;
+use App\Models\License;
+use App\Models\Product;
+use App\Services\EnvatoService;
+use App\Services\PurchaseCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use InvalidArgumentException;
@@ -17,6 +22,10 @@ use InvalidArgumentException;
  */
 class KbPublicController extends Controller
 {
+    public function __construct(
+        private PurchaseCodeService $purchaseCodeService
+    ) {
+    }
 
     /**
      * Display KB index
@@ -58,7 +67,9 @@ class KbPublicController extends Controller
                 ->firstOrFail();
 
             if (!$this->categoryRequiresAccess($category)) {
-                return $this->showPublicCategory($category);
+                $articles = $this->getCategoryArticles($category);
+                $relatedCategories = $this->getRelatedCategories($category);
+                return view('kb.category', compact('category', 'articles', 'relatedCategories'));
             }
 
             if (!auth()->check()) {
@@ -66,9 +77,31 @@ class KbPublicController extends Controller
                     ->with('error', 'You must be logged in to access this category.');
             }
 
-            $accessResult = $this->handleCategoryAccess($category);
-            if ($accessResult['hasAccess']) {
-                return $this->showProtectedCategory($category, $accessResult['accessSource']);
+            $user = auth()->user();
+            $hasAccess = $this->checkCategoryAccess($category, $user);
+            $accessSource = 'user_license';
+
+            if (!$hasAccess && request()->query('raw_code')) {
+                $result = $this->handleRawCodeAccess($category, request()->query('raw_code'));
+                if ($result['success']) {
+                    return $result['redirect'];
+                }
+                return redirect()->route('kb.category', ['slug' => $category->slug])
+                    ->with('error', $result['error']);
+            }
+
+            if (!$hasAccess && request()->query('token')) {
+                $tokenResult = $this->validateAccessToken(request()->query('token'), $category->id);
+                if ($tokenResult['valid']) {
+                    $hasAccess = true;
+                    $accessSource = 'token';
+                }
+            }
+
+            if ($hasAccess) {
+                $articles = $this->getCategoryArticles($category);
+                $relatedCategories = $this->getRelatedCategories($category);
+                return view('kb.category', compact('category', 'articles', 'relatedCategories', 'accessSource'));
             }
 
             return view('kb.category-purchase', compact('category'));
@@ -95,7 +128,9 @@ class KbPublicController extends Controller
                 ->firstOrFail();
 
             if (!$this->articleRequiresAccess($article)) {
-                return $this->showPublicArticle($article);
+                $this->incrementArticleViews($article);
+                $related = $this->getRelatedArticles($article);
+                return view('kb.article', compact('article', 'related'));
             }
 
             if (!auth()->check()) {
@@ -103,9 +138,31 @@ class KbPublicController extends Controller
                     ->with('error', 'You must be logged in to access this article.');
             }
 
-            $accessResult = $this->handleArticleAccess($article);
-            if ($accessResult['hasAccess']) {
-                return $this->showProtectedArticle($article, $accessResult['accessSource']);
+            $user = auth()->user();
+            $hasAccess = $this->checkArticleAccess($article, $user);
+            $accessSource = 'user_license';
+
+            if (!$hasAccess && request()->query('raw_code')) {
+                $result = $this->handleArticleRawCodeAccess($article, request()->query('raw_code'));
+                if ($result['success']) {
+                    return $result['redirect'];
+                }
+                return redirect()->route('kb.article', ['slug' => $article->slug])
+                    ->with('error', $result['error']);
+            }
+
+            if (!$hasAccess && request()->query('token')) {
+                $tokenResult = $this->validateArticleAccessToken(request()->query('token'), $article->id);
+                if ($tokenResult['valid']) {
+                    $hasAccess = true;
+                    $accessSource = 'token';
+                }
+            }
+
+            if ($hasAccess) {
+                $this->incrementArticleViews($article);
+                $related = $this->getRelatedArticles($article);
+                return view('kb.article', compact('article', 'related', 'accessSource'));
             }
 
             return view('kb.article-purchase', compact('article'));
@@ -158,99 +215,60 @@ class KbPublicController extends Controller
     }
 
     /**
-     * Show public category (no access required)
+     * Check category access
      */
-    private function showPublicCategory(KbCategory $category): View
+    private function checkCategoryAccess($category, $user): bool
     {
-        $articles = $this->getCategoryArticles($category);
-        $relatedCategories = $this->getRelatedCategories($category);
-        return view('kb.category', compact('category', 'articles', 'relatedCategories'));
-    }
-
-    /**
-     * Show protected category (access required)
-     */
-    private function showProtectedCategory(KbCategory $category, string $accessSource): View
-    {
-        $articles = $this->getCategoryArticles($category);
-        $relatedCategories = $this->getRelatedCategories($category);
-        return view('kb.category', compact('category', 'articles', 'relatedCategories', 'accessSource'));
-    }
-
-    /**
-     * Handle category access logic
-     */
-    private function handleCategoryAccess(KbCategory $category): array
-    {
-        $user = auth()->user();
-        $hasAccess = $this->accessService->checkCategoryAccess($category, $user);
-        $accessSource = 'user_license';
-
-        if (!$hasAccess && request()->query('raw_code')) {
-            $result = $this->accessService->handleRawCodeAccess($category, request()->query('raw_code'));
-            if ($result['success']) {
-                return ['hasAccess' => true, 'accessSource' => 'raw_code', 'redirect' => $result['redirect']];
-            }
-            return ['hasAccess' => false, 'error' => $result['error']];
+        if (!$category->requires_serial && !$category->product_id) {
+            return true;
         }
 
-        if (!$hasAccess && request()->query('token')) {
-            $tokenResult = $this->accessService->validateAccessToken(request()->query('token'), $category->id);
-            if ($tokenResult['valid']) {
-                $hasAccess = true;
-                $accessSource = 'token';
-            }
+        if (!$user || !$category->product_id) {
+            return false;
         }
 
-        return ['hasAccess' => $hasAccess, 'accessSource' => $accessSource];
+        return $user->licenses()
+            ->where('product_id', $category->product_id)
+            ->where('status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('license_expires_at')
+                    ->orWhere('license_expires_at', '>', now());
+            })
+            ->exists();
     }
 
     /**
-     * Show public article (no access required)
+     * Check article access
      */
-    private function showPublicArticle(KbArticle $article): View
+    private function checkArticleAccess($article, $user): bool
     {
-        $this->incrementArticleViews($article);
-        $related = $this->getRelatedArticles($article);
-        return view('kb.article', compact('article', 'related'));
-    }
+        $requiresAccess = $article->requires_serial ||
+                         $article->requires_purchase_code ||
+                         $article->product_id ||
+                         $article->category->requires_serial ||
+                         $article->category->product_id;
 
-    /**
-     * Show protected article (access required)
-     */
-    private function showProtectedArticle(KbArticle $article, string $accessSource): View
-    {
-        $this->incrementArticleViews($article);
-        $related = $this->getRelatedArticles($article);
-        return view('kb.article', compact('article', 'related', 'accessSource'));
-    }
-
-    /**
-     * Handle article access logic
-     */
-    private function handleArticleAccess(KbArticle $article): array
-    {
-        $user = auth()->user();
-        $hasAccess = $this->accessService->checkArticleAccess($article, $user);
-        $accessSource = 'user_license';
-
-        if (!$hasAccess && request()->query('raw_code')) {
-            $result = $this->accessService->handleArticleRawCodeAccess($article, request()->query('raw_code'));
-            if ($result['success']) {
-                return ['hasAccess' => true, 'accessSource' => 'raw_code', 'redirect' => $result['redirect']];
-            }
-            return ['hasAccess' => false, 'error' => $result['error']];
+        if (!$requiresAccess) {
+            return true;
         }
 
-        if (!$hasAccess && request()->query('token')) {
-            $tokenResult = $this->accessService->validateArticleAccessToken(request()->query('token'), $article->id);
-            if ($tokenResult['valid']) {
-                $hasAccess = true;
-                $accessSource = 'token';
-            }
+        if (!$user) {
+            return false;
         }
 
-        return ['hasAccess' => $hasAccess, 'accessSource' => $accessSource];
+        $productId = $article->product_id ?: $article->category->product_id;
+        if (!$productId) {
+            return false;
+        }
+
+        return $user->licenses()
+            ->where('product_id', $productId)
+            ->where('status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('license_expires_at')
+                    ->orWhere('license_expires_at', '>', now());
+            })
+            ->exists();
     }
 
     /**
@@ -263,6 +281,25 @@ class KbPublicController extends Controller
         }
     }
 
+    /**
+     * Check if category requires access
+     */
+    private function categoryRequiresAccess($category): bool
+    {
+        return $category->requires_serial || $category->product_id;
+    }
+
+    /**
+     * Check if article requires access
+     */
+    private function articleRequiresAccess($article): bool
+    {
+        return $article->requires_serial ||
+               $article->requires_purchase_code ||
+               $article->product_id ||
+               $article->category->requires_serial ||
+               $article->category->product_id;
+    }
 
     /**
      * Get category articles
@@ -318,23 +355,130 @@ class KbPublicController extends Controller
     }
 
     /**
-     * Check if category requires access
+     * Handle raw code access for category
      */
-    private function categoryRequiresAccess($category): bool
+    private function handleRawCodeAccess($category, string $rawCode): array
     {
-        return $category->requires_serial || $category->product_id;
+        try {
+            $result = $this->purchaseCodeService->verifyRawCode($rawCode, $category->product_id);
+
+            if ($result['success']) {
+                $license = $result['license'] ?? null;
+                $productId = $result['product_id'] ?? ($license?->product_id);
+                $product = $productId ? Product::find($productId) : null;
+
+                if ($product && $product->id == $category->product_id) {
+                    $accessToken = 'kb_access_' . $category->id . '_' . time() . '_' . substr(md5($license?->license_key ?? ''), 0, 8);
+                    session([$accessToken => [
+                        'license_id' => $license?->id,
+                        'product_id' => $product->id,
+                        'category_id' => $category->id,
+                        'expires_at' => now()->addHours(24),
+                    ]]);
+
+                    return [
+                        'success' => true,
+                        'redirect' => redirect()->route('kb.category', [
+                            'slug' => $category->slug,
+                            'token' => $accessToken,
+                        ]),
+                    ];
+                }
+            }
+
+            return [
+                'success' => false,
+                'error' => $result['message'] ?? 'Invalid license code',
+            ];
+        } catch (\Exception $e) {
+            Log::error('Raw code access failed', ['error' => $e->getMessage()]);
+            return ['success' => false, 'error' => 'Access verification failed'];
+        }
     }
 
     /**
-     * Check if article requires access
+     * Handle raw code access for article
      */
-    private function articleRequiresAccess($article): bool
+    private function handleArticleRawCodeAccess($article, string $rawCode): array
     {
-        return $article->requires_serial ||
-               $article->requires_purchase_code ||
-               $article->product_id ||
-               $article->category->requires_serial ||
-               $article->category->product_id;
+        try {
+            $productId = $article->product_id ?: $article->category->product_id;
+            $result = $this->purchaseCodeService->verifyRawCode($rawCode, $productId);
+
+            if ($result['success']) {
+                $license = $result['license'] ?? null;
+                $productId = $result['product_id'] ?? ($license?->product_id);
+                $product = $productId ? Product::find($productId) : null;
+
+                if ($product && $product->id == $productId) {
+                    $accessToken = 'kb_article_access_' . $article->id . '_' . time() . '_' . substr(md5($license?->license_key ?? ''), 0, 8);
+                    session([$accessToken => [
+                        'license_id' => $license?->id,
+                        'product_id' => $product->id,
+                        'article_id' => $article->id,
+                        'expires_at' => now()->addHours(24),
+                    ]]);
+
+                    return [
+                        'success' => true,
+                        'redirect' => redirect()->route('kb.article', [
+                            'slug' => $article->slug,
+                            'token' => $accessToken,
+                        ]),
+                    ];
+                }
+            }
+
+            return [
+                'success' => false,
+                'error' => $result['message'] ?? 'Invalid license code',
+            ];
+        } catch (\Exception $e) {
+            Log::error('Article raw code access failed', ['error' => $e->getMessage()]);
+            return ['success' => false, 'error' => 'Access verification failed'];
+        }
+    }
+
+    /**
+     * Validate access token
+     */
+    private function validateAccessToken(string $accessToken, int $categoryId): array
+    {
+        if (session()->has($accessToken)) {
+            $tokenData = session($accessToken);
+            if (
+                is_array($tokenData) &&
+                isset($tokenData['expires_at']) &&
+                isset($tokenData['category_id']) &&
+                $tokenData['expires_at'] > now() &&
+                $tokenData['category_id'] == $categoryId
+            ) {
+                return ['valid' => true];
+            }
+            session()->forget($accessToken);
+        }
+        return ['valid' => false];
+    }
+
+    /**
+     * Validate article access token
+     */
+    private function validateArticleAccessToken(string $accessToken, int $articleId): array
+    {
+        if (session()->has($accessToken)) {
+            $tokenData = session($accessToken);
+            if (
+                is_array($tokenData) &&
+                isset($tokenData['expires_at']) &&
+                isset($tokenData['article_id']) &&
+                $tokenData['expires_at'] > now() &&
+                $tokenData['article_id'] == $articleId
+            ) {
+                return ['valid' => true];
+            }
+            session()->forget($accessToken);
+        }
+        return ['valid' => false];
     }
 
     /**
@@ -425,59 +569,17 @@ class KbPublicController extends Controller
     }
 
     /**
-     * Check category access
+     * Highlight search terms
      */
-    private function checkCategoryAccess($category, $user): bool
+    public static function highlightSearchTerm($text, $query)
     {
-        if (!$category->requires_serial && !$category->product_id) {
-            return true;
+        if (empty($query)) {
+            return $text;
         }
-
-        if (!$user || !$category->product_id) {
-            return false;
-        }
-
-        return $user->licenses()
-            ->where('product_id', $category->product_id)
-            ->where('status', 'active')
-            ->where(function ($query) {
-                $query->whereNull('license_expires_at')
-                    ->orWhere('license_expires_at', '>', now());
-            })
-            ->exists();
-    }
-
-    /**
-     * Check article access
-     */
-    private function checkArticleAccess($article, $user): bool
-    {
-        $requiresAccess = $article->requires_serial ||
-                         $article->requires_purchase_code ||
-                         $article->product_id ||
-                         $article->category->requires_serial ||
-                         $article->category->product_id;
-
-        if (!$requiresAccess) {
-            return true;
-        }
-
-        if (!$user) {
-            return false;
-        }
-
-        $productId = $article->product_id ?: $article->category->product_id;
-        if (!$productId) {
-            return false;
-        }
-
-        return $user->licenses()
-            ->where('product_id', $productId)
-            ->where('status', 'active')
-            ->where(function ($query) {
-                $query->whereNull('license_expires_at')
-                    ->orWhere('license_expires_at', '>', now());
-            })
-            ->exists();
+        return preg_replace(
+            '/(' . preg_quote($query, '/') . ')/i',
+            '<mark class="search-highlight">$1</mark>',
+            $text
+        ) ?? $text;
     }
 }

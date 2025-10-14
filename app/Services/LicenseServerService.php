@@ -130,7 +130,7 @@ class LicenseServerService
      * $updates = $licenseServer->checkUpdates('ABC123', '1.0.0', 'my-product', 'example.com');
      */
     /**
-     * Check for available updates from license server
+     * @return array<mixed, mixed>
      */
     public function checkUpdates(
         string $licenseKey,
@@ -140,89 +140,61 @@ class LicenseServerService
     ): array {
         try {
             $this->validateUpdateParameters($licenseKey, $currentVersion, $productSlug, $domain);
-            
-            $cacheKey = $this->getUpdateCacheKey($licenseKey, $productSlug, $currentVersion);
-            $cached = $this->getCachedUpdate($cacheKey);
+            $cacheKey = "license_updates_{$this->hashForCache($licenseKey)}_{$productSlug}_{$currentVersion}";
+            // Check cache first
+            $cached = Cache::get($cacheKey);
             if ($cached) {
-                return $cached;
+                return is_array($cached) ? $cached : [];
             }
-            
-            $response = $this->makeUpdateRequest($licenseKey, $currentVersion, $productSlug, $domain);
-            return $this->handleUpdateResponse($response, $cacheKey);
-            
+            $response = Http::timeout($this->timeout)
+                ->post("{$this->getBaseUrl()}/license/check-updates", [
+                    'license_key' => $this->sanitizeInput($licenseKey),
+                    'current_version' => $this->sanitizeInput($currentVersion),
+                    'product_slug' => $this->sanitizeInput($productSlug),
+                    'domain' => $domain ? $this->sanitizeDomain($domain) : null,
+                ]);
+            if ($response->successful()) {
+                $data = $response->json();
+                // Validate response data
+                if (is_array($data) && $this->validateUpdateResponse($data)) {
+                    // Cache successful response
+                    Cache::put($cacheKey, $data, self::CACHE_DURATION_UPDATES);
+                    return $this->convertToTypedArray($data);
+                } else {
+                    return $this->createErrorResponse(
+                        'Invalid response format from license server',
+                        'INVALID_RESPONSE',
+                    );
+                }
+            } else {
+                return $this->createErrorResponse('Failed to check for updates', 'SERVER_ERROR');
+            }
         } catch (\Exception $e) {
-            $this->logUpdateError($e, $licenseKey, $productSlug);
+            Log::error('License server update check exception', [
+                'error' => $e->getMessage(),
+                'license_key' => $this->hashForLogging($licenseKey),
+                'product_slug' => $productSlug,
+                'trace' => $e->getTraceAsString(),
+            ]);
             return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
         }
     }
     /**
-     * Get update cache key
-     */
-    private function getUpdateCacheKey(string $licenseKey, string $productSlug, string $currentVersion): string
-    {
-        return "license_updates_{$this->hashForCache($licenseKey)}_{$productSlug}_{$currentVersion}";
-    }
-
-    /**
-     * Get cached update
-     */
-    private function getCachedUpdate(string $cacheKey): ?array
-    {
-        $cached = Cache::get($cacheKey);
-        return is_array($cached) ? $cached : null;
-    }
-
-    /**
-     * Make update request
-     */
-    private function makeUpdateRequest(string $licenseKey, string $currentVersion, string $productSlug, ?string $domain): \Illuminate\Http\Client\Response
-    {
-        return Http::timeout($this->timeout)
-            ->post("{$this->getBaseUrl()}/license/check-updates", [
-                'license_key' => $this->sanitizeInput($licenseKey),
-                'current_version' => $this->sanitizeInput($currentVersion),
-                'product_slug' => $this->sanitizeInput($productSlug),
-                'domain' => $domain ? $this->sanitizeDomain($domain) : null,
-            ]);
-    }
-
-    /**
-     * Handle update response
-     */
-    private function handleUpdateResponse(\Illuminate\Http\Client\Response $response, string $cacheKey): array
-    {
-        if ($response->successful()) {
-            $data = $response->json();
-            
-            if (is_array($data) && $this->validateUpdateResponse($data)) {
-                Cache::put($cacheKey, $data, self::CACHE_DURATION_UPDATES);
-                return $this->convertToTypedArray($data);
-            }
-            
-            return $this->createErrorResponse(
-                'Invalid response format from license server',
-                'INVALID_RESPONSE',
-            );
-        }
-        
-        return $this->createErrorResponse('Failed to check for updates', 'SERVER_ERROR');
-    }
-
-    /**
-     * Log update error
-     */
-    private function logUpdateError(\Exception $e, string $licenseKey, string $productSlug): void
-    {
-        Log::error('License server update check exception', [
-            'error' => $e->getMessage(),
-            'license_key' => $this->hashForLogging($licenseKey),
-            'product_slug' => $productSlug,
-            'trace' => $e->getTraceAsString(),
-        ]);
-    }
-
-    /**
      * Get version history from license server with enhanced security.
+     *
+     * Retrieves version history for a specific license and product with
+     * comprehensive error handling and caching.
+     *
+     * @param  string  $licenseKey  The license key
+     * @param  string  $productSlug  The product slug identifier
+     * @param  string|null  $domain  The domain to check for (optional)
+     *
+     * @return array<mixed, mixed> Array containing version history or error details
+     *
+     * @throws \InvalidArgumentException When invalid parameters are provided
+     *
+     * @example
+     * $history = $licenseServer->getVersionHistory('ABC123', 'my-product', 'example.com');
      */
     /**
      * @return array<mixed, mixed>

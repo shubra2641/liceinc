@@ -59,12 +59,67 @@ class PaymentService
     protected function processPayPalPayment(array $orderData): array
     {
         try {
-            $settings = $this->getPayPalSettings();
-            $apiContext = $this->createPayPalApiContext($settings);
-            $payment = $this->createPayPalPayment($orderData, $apiContext);
-            
-            return $this->handlePayPalPaymentResult($payment);
-            
+            $settings = PaymentSetting::getByGateway('paypal');
+            if (!$settings) {
+                throw new \Exception('PayPal settings not found');
+            }
+
+            $credentials = $settings->credentials;
+            $this->validatePayPalCredentials($credentials);
+
+            $apiContext = new ApiContext(
+                new OAuthTokenCredential(
+                    $credentials['client_id'],
+                    $credentials['client_secret']
+                )
+            );
+
+            $apiContext->setConfig([
+                'mode' => $settings->is_sandbox ? 'sandbox' : 'live',
+                'log.LogEnabled' => true,
+                'log.FileName' => storage_path('logs/paypal.log'),
+                'log.LogLevel' => 'INFO',
+            ]);
+
+            $payer = new Payer();
+            $payer->setPaymentMethod('paypal');
+
+            $amount = new Amount();
+            $amount->setTotal(number_format($orderData['amount'], 2, '.', ''));
+            $amount->setCurrency($orderData['currency'] ?? 'usd');
+
+            $transaction = new Transaction();
+            $transaction->setAmount($amount);
+            $transaction->setDescription('Product Purchase');
+            $transaction->setCustom("user_id:{$orderData['user_id']}, product_id:{$orderData['product_id']}");
+
+            $redirectUrls = new RedirectUrls();
+            $appUrl = config('app.url');
+            $redirectUrls->setReturnUrl($appUrl . '/payment/success/paypal')
+                ->setCancelUrl($appUrl . '/payment/cancel/paypal');
+
+            $payment = new Payment();
+            $payment->setIntent('sale');
+            $payment->setPayer($payer);
+            $payment->setTransactions([$transaction]);
+            $payment->setRedirectUrls($redirectUrls);
+
+            $payment->create($apiContext);
+
+            $approvalUrl = null;
+            foreach ($payment->getLinks() as $link) {
+                if ($link->getRel() === 'approval_url') {
+                    $approvalUrl = $link->getHref();
+                    break;
+                }
+            }
+
+            return [
+                'success' => true,
+                'redirect_url' => $approvalUrl,
+                'payment_url' => $approvalUrl,
+                'payment_id' => $payment->getId(),
+            ];
         } catch (\Exception $e) {
             Log::error('PayPal payment processing failed', [
                 'order_data' => $orderData,
@@ -79,147 +134,51 @@ class PaymentService
     }
 
     /**
-     * Get PayPal settings
-     */
-    private function getPayPalSettings(): PaymentSetting
-    {
-        $settings = PaymentSetting::getByGateway('paypal');
-        if (!$settings) {
-            throw new \Exception('PayPal settings not found');
-        }
-        return $settings;
-    }
-
-    /**
-     * Create PayPal API context
-     */
-    private function createPayPalApiContext(PaymentSetting $settings): ApiContext
-    {
-        $credentials = $settings->credentials;
-        $this->validatePayPalCredentials($credentials);
-
-        $apiContext = new ApiContext(
-            new OAuthTokenCredential(
-                $credentials['client_id'],
-                $credentials['client_secret']
-            )
-        );
-
-        $apiContext->setConfig([
-            'mode' => $settings->is_sandbox ? 'sandbox' : 'live',
-            'log.LogEnabled' => true,
-            'log.FileName' => storage_path('logs/paypal.log'),
-            'log.LogLevel' => 'INFO',
-        ]);
-
-        return $apiContext;
-    }
-
-    /**
-     * Create PayPal payment
-     */
-    private function createPayPalPayment(array $orderData, ApiContext $apiContext): Payment
-    {
-        $payer = $this->createPayPalPayer();
-        $amount = $this->createPayPalAmount($orderData);
-        $transaction = $this->createPayPalTransaction($orderData, $amount);
-        $redirectUrls = $this->createPayPalRedirectUrls();
-
-        $payment = new Payment();
-        $payment->setIntent('sale');
-        $payment->setPayer($payer);
-        $payment->setTransactions([$transaction]);
-        $payment->setRedirectUrls($redirectUrls);
-
-        $payment->create($apiContext);
-        return $payment;
-    }
-
-    /**
-     * Handle PayPal payment result
-     */
-    private function handlePayPalPaymentResult(Payment $payment): array
-    {
-        $approvalUrl = $this->getPayPalApprovalUrl($payment);
-
-        return [
-            'success' => true,
-            'redirect_url' => $approvalUrl,
-            'payment_url' => $approvalUrl,
-            'payment_id' => $payment->getId(),
-        ];
-    }
-
-    /**
-     * Create PayPal payer
-     */
-    private function createPayPalPayer(): Payer
-    {
-        $payer = new Payer();
-        $payer->setPaymentMethod('paypal');
-        return $payer;
-    }
-
-    /**
-     * Create PayPal amount
-     */
-    private function createPayPalAmount(array $orderData): Amount
-    {
-        $amount = new Amount();
-        $amount->setTotal(number_format($orderData['amount'], 2, '.', ''));
-        $amount->setCurrency($orderData['currency'] ?? 'usd');
-        return $amount;
-    }
-
-    /**
-     * Create PayPal transaction
-     */
-    private function createPayPalTransaction(array $orderData, Amount $amount): Transaction
-    {
-        $transaction = new Transaction();
-        $transaction->setAmount($amount);
-        $transaction->setDescription('Product Purchase');
-        $transaction->setCustom("user_id:{$orderData['user_id']}, product_id:{$orderData['product_id']}");
-        return $transaction;
-    }
-
-    /**
-     * Create PayPal redirect URLs
-     */
-    private function createPayPalRedirectUrls(): RedirectUrls
-    {
-        $redirectUrls = new RedirectUrls();
-        $appUrl = config('app.url');
-        $redirectUrls->setReturnUrl($appUrl . '/payment/success/paypal')
-            ->setCancelUrl($appUrl . '/payment/cancel/paypal');
-        return $redirectUrls;
-    }
-
-    /**
-     * Get PayPal approval URL
-     */
-    private function getPayPalApprovalUrl(Payment $payment): string
-    {
-        foreach ($payment->getLinks() as $link) {
-            if ($link->getRel() === 'approval_url') {
-                return $link->getHref();
-            }
-        }
-        throw new \Exception('PayPal approval URL not found');
-    }
-
-    /**
      * Process Stripe payment.
      */
     protected function processStripePayment(array $orderData): array
     {
         try {
-            $settings = $this->getStripeSettings();
-            $this->configureStripe($settings);
-            $session = $this->createStripeSession($orderData);
-            
-            return $this->handleStripePaymentResult($session);
-            
+            $settings = PaymentSetting::getByGateway('stripe');
+            if (!$settings) {
+                throw new \Exception('Stripe settings not found');
+            }
+
+            $credentials = $settings->credentials;
+            $this->validateStripeCredentials($credentials);
+
+            Stripe::setApiKey($credentials['secret_key'] ?? '');
+
+            $appUrl = config('app.url');
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [
+                    [
+                        'price_data' => [
+                            'currency' => $orderData['currency'] ?? 'usd',
+                            'product_data' => [
+                                'name' => 'Product Purchase',
+                            ],
+                            'unit_amount' => (int)(($orderData['amount'] ?? 0) * 100),
+                        ],
+                        'quantity' => 1,
+                    ],
+                ],
+                'mode' => 'payment',
+                'success_url' => $appUrl . '/payment/success/stripe',
+                'cancel_url' => $appUrl . '/payment/cancel/stripe',
+                'metadata' => [
+                    'user_id' => $orderData['user_id'] ?? '',
+                    'product_id' => $orderData['product_id'] ?? '',
+                ],
+            ]);
+
+            return [
+                'success' => true,
+                'redirect_url' => $session->url,
+                'payment_url' => $session->url,
+                'session_id' => $session->id,
+            ];
         } catch (\Exception $e) {
             Log::error('Stripe payment processing failed', [
                 'order_data' => $orderData,
@@ -231,88 +190,6 @@ class PaymentService
                 'message' => 'Stripe payment processing failed: ' . $e->getMessage(),
             ];
         }
-    }
-
-    /**
-     * Get Stripe settings
-     */
-    private function getStripeSettings(): PaymentSetting
-    {
-        $settings = PaymentSetting::getByGateway('stripe');
-        if (!$settings) {
-            throw new \Exception('Stripe settings not found');
-        }
-        return $settings;
-    }
-
-    /**
-     * Configure Stripe API
-     */
-    private function configureStripe(PaymentSetting $settings): void
-    {
-        $credentials = $settings->credentials;
-        $this->validateStripeCredentials($credentials);
-        Stripe::setApiKey($credentials['secret_key'] ?? '');
-    }
-
-    /**
-     * Create Stripe session
-     */
-    private function createStripeSession(array $orderData): Session
-    {
-        $appUrl = config('app.url');
-        
-        return Session::create([
-            'payment_method_types' => ['card'],
-            'line_items' => $this->createStripeLineItems($orderData),
-            'mode' => 'payment',
-            'success_url' => $appUrl . '/payment/success/stripe',
-            'cancel_url' => $appUrl . '/payment/cancel/stripe',
-            'metadata' => $this->createStripeMetadata($orderData),
-        ]);
-    }
-
-    /**
-     * Handle Stripe payment result
-     */
-    private function handleStripePaymentResult(Session $session): array
-    {
-        return [
-            'success' => true,
-            'redirect_url' => $session->url,
-            'payment_url' => $session->url,
-            'session_id' => $session->id,
-        ];
-    }
-
-    /**
-     * Create Stripe line items
-     */
-    private function createStripeLineItems(array $orderData): array
-    {
-        return [
-            [
-                'price_data' => [
-                    'currency' => $orderData['currency'] ?? 'usd',
-                    'product_data' => [
-                        'name' => 'Product Purchase',
-                    ],
-                    'unit_amount' => (int)(($orderData['amount'] ?? 0) * 100),
-                ],
-                'quantity' => 1,
-            ],
-        ];
-    }
-
-    /**
-     * Create Stripe metadata
-     */
-    private function createStripeMetadata(array $orderData): array
-    {
-        return [
-            'user_id' => $orderData['user_id'] ?? '',
-            'product_id' => $orderData['product_id'] ?? '',
-        ];
     }
 
     /**

@@ -5,15 +5,23 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
+use App\Models\KbArticle;
+use App\Models\License;
+use App\Models\LicenseLog;
+use App\Models\Product;
 use App\Models\Setting;
-use App\Services\Dashboard\DashboardStatsService;
-use App\Services\Dashboard\DashboardChartService;
-use App\Services\Dashboard\DashboardCacheService;
+use App\Models\Ticket;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use App\Helpers\SecureFileHelper;
 
 /**
  * Admin Dashboard Controller with enhanced security.
@@ -48,12 +56,6 @@ use Illuminate\Validation\ValidationException;
  */
 class DashboardController extends Controller
 {
-    public function __construct(
-        private DashboardStatsService $statsService,
-        private DashboardChartService $chartService,
-        private DashboardCacheService $cacheService
-    ) {
-    }
     /**
      * Display the admin dashboard with comprehensive statistics and enhanced security.
      *
@@ -81,21 +83,49 @@ class DashboardController extends Controller
     {
         try {
             DB::beginTransaction();
-            
-            $basicStats = $this->statsService->getBasicStats();
-            $invoiceStats = $this->statsService->getInvoiceStats();
-            $apiStats = $this->statsService->getApiStats();
-            $latestData = $this->statsService->getLatestData();
-            
-            $stats = array_merge($basicStats, $invoiceStats, $apiStats);
+            $stats = [
+                'products' => Product::count(),
+                'customers' => User::count(),
+                'licenses_active' => License::where('status', 'active')->count(),
+                'tickets_open' => Ticket::whereIn('status', ['open', 'pending'])->count(),
+                'kb_articles' => KbArticle::count(),
+            ];
+            // Invoice monetary statistics
+            $invoiceTotalCount = Invoice::count();
+            $invoiceTotalAmount = (float)Invoice::sum('amount');
+            $invoicePaidAmount = (float)Invoice::where('status', 'paid')->sum('amount');
+            $invoicePaidCount = Invoice::where('status', 'paid')->count();
+            $invoiceDueSoonAmount = (float)Invoice::where('status', 'pending')
+                ->where('due_date', '<=', now()->addDays(7))
+                ->sum('amount');
+            // Unpaid includes pending, overdue and cancelled
+            $invoiceUnpaidAmount = (float)Invoice::where('status', '!=', 'paid')->sum('amount');
+            // Cancelled invoices
+            $invoiceCancelledCount = Invoice::where('status', 'cancelled')->count();
+            $invoiceCancelledAmount = (float)Invoice::where('status', 'cancelled')->sum('amount');
+            $stats['invoices_count'] = $invoiceTotalCount;
+            $stats['invoices_total_amount'] = $invoiceTotalAmount;
+            $stats['invoices_paid_amount'] = $invoicePaidAmount;
+            $stats['invoices_paid_count'] = $invoicePaidCount;
+            $stats['invoices_due_soon_amount'] = $invoiceDueSoonAmount;
+            $stats['invoices_unpaid_amount'] = $invoiceUnpaidAmount;
+            $stats['invoices_cancelled_count'] = $invoiceCancelledCount;
+            $stats['invoices_cancelled_amount'] = $invoiceCancelledAmount;
+            // API Statistics
+            $stats['api_requests_today'] = LicenseLog::whereDate('created_at', today())->count();
+            $stats['api_requests_this_month'] = LicenseLog::whereMonth('created_at', now()->month)->count();
+            $stats['api_success_rate'] = $this->calculateApiSuccessRate();
+            $stats['api_errors_today'] = $this->getApiErrorsToday();
+            $stats['api_errors_this_month'] = $this->getApiErrorsThisMonth();
+            $latestTickets = Ticket::latest()->with('user')->limit(5)->get();
+            $latestLicenses = License::latest()->with('product', 'user')->limit(5)->get();
+            // Read maintenance mode from cached settings. If true -> site is in maintenance (Offline)
             $isMaintenance = Setting::get('maintenance_mode', false);
-            
             DB::commit();
-            
             return view('admin.dashboard', [
                 'stats' => $stats,
-                'latestTickets' => $latestData['latestTickets'],
-                'latestLicenses' => $latestData['latestLicenses'],
+                'latestTickets' => $latestTickets,
+                'latestLicenses' => $latestLicenses,
                 'isMaintenance' => $isMaintenance
             ]);
         } catch (\Exception $e) {
@@ -104,8 +134,29 @@ class DashboardController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
-            return $this->getFallbackDashboardData();
+            // Return fallback data
+            $stats = [
+                'products' => 0,
+                'customers' => 0,
+                'licenses_active' => 0,
+                'tickets_open' => 0,
+                'kb_articles' => 0,
+                'invoices_count' => 0,
+                'invoices_total_amount' => 0,
+                'invoices_paid_amount' => 0,
+                'invoices_paid_count' => 0,
+                'invoices_due_soon_amount' => 0,
+                'invoices_unpaid_amount' => 0,
+                'invoices_cancelled_count' => 0,
+                'invoices_cancelled_amount' => 0,
+                'api_requests_today' => 0,
+                'api_requests_this_month' => 0,
+                'api_success_rate' => 0,
+                'api_errors_today' => 0,
+                'api_errors_this_month' => 0,
+            ];
+            $isMaintenance = Setting::get('maintenance_mode', false);
+            return view('admin.dashboard', ['stats' => $stats, 'isMaintenance' => $isMaintenance]);
         }
     }
     /**
@@ -131,14 +182,23 @@ class DashboardController extends Controller
     public function getSystemOverviewData(): JsonResponse
     {
         try {
-            $data = $this->chartService->getSystemOverviewData();
-            return response()->json($data);
+            DB::beginTransaction();
+            $activeLicenses = License::where('status', 'active')->count();
+            $expiredLicenses = License::where('status', 'expired')->count();
+            $pendingRequests = Ticket::whereIn('status', ['open', 'pending'])->count();
+            $totalProducts = Product::count();
+            DB::commit();
+            return response()->json([
+                'labels' => ['Active Licenses', 'Expired Licenses', 'Pending Requests', 'Total Products'],
+                'data' => [$activeLicenses, $expiredLicenses, $pendingRequests, $totalProducts],
+            ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('System overview data loading failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+            // Return fallback data
             return response()->json([
                 'labels' => ['Active Licenses', 'Expired Licenses', 'Pending Requests', 'Total Products'],
                 'data' => [0, 0, 0, 0],
@@ -168,10 +228,17 @@ class DashboardController extends Controller
     public function getLicenseDistributionData(): JsonResponse
     {
         try {
-            $data = $this->chartService->getLicenseDistributionData();
-            return response()->json($data);
+            // Use actual enum values defined in the licenses table: regular / extended
+            $regularLicenses = License::where('license_type', 'regular')->count();
+            $extendedLicenses = License::where('license_type', 'extended')->count();
+            return response()->json([
+                'labels' => ['Regular', 'Extended'],
+                'data' => [$regularLicenses, $extendedLicenses],
+            ]);
         } catch (\Exception $e) {
-            Log::error('License distribution data loading failed', ['error' => $e->getMessage()]);
+            // Log the error for debugging
+            // License distribution data error handled gracefully
+            // Return fallback data
             return response()->json([
                 'labels' => ['Regular', 'Extended'],
                 'data' => [0, 0],
@@ -204,6 +271,7 @@ class DashboardController extends Controller
     public function getRevenueData(Request $request): JsonResponse
     {
         try {
+            DB::beginTransaction();
             $validated = $request->validate([
                 'period' => ['sometimes', 'string', 'in:monthly, quarterly, yearly'],
                 'year' => ['sometimes', 'integer', 'min:2020', 'max:2030'],
@@ -212,25 +280,68 @@ class DashboardController extends Controller
                 'year.min' => 'Year must be at least 2020.',
                 'year.max' => 'Year cannot exceed 2030.',
             ]);
-            
             $validatedArray = is_array($validated) ? $validated : [];
             $period = $this->sanitizeInput($validatedArray['period'] ?? 'monthly');
             $year = isset($validatedArray['year']) && is_numeric($validatedArray['year'])
                 ? (int)$validatedArray['year']
                 : (int)date('Y');
-            
-            $data = $this->chartService->getRevenueData($period, $year);
-            return response()->json($data);
+            if ($period === 'monthly') {
+                $data = [];
+                $labels = [];
+                for ($month = 1; $month <= 12; $month++) {
+                    $startDate = Carbon::create($year, $month, 1)?->startOfMonth();
+                    $endDate = Carbon::create($year, $month, 1)?->endOfMonth();
+                    // Calculate revenue from licenses created in this month
+                    $monthlyRevenue = License::join('products', 'licenses.product_id', '=', 'products.id')
+                        ->whereBetween('licenses.created_at', [$startDate, $endDate])
+                        ->sum('products.price');
+                    $data[] = (float)$monthlyRevenue;
+                    $labels[] = Carbon::create($year, $month, 1)?->format('M');
+                }
+            } elseif ($period === 'quarterly') {
+                $data = [];
+                $labels = ['Q1', 'Q2', 'Q3', 'Q4'];
+                for ($quarter = 1; $quarter <= 4; $quarter++) {
+                    $startMonth = ($quarter - 1) * 3 + 1;
+                    $endMonth = $quarter * 3;
+                    $startDate = Carbon::create($year, $startMonth, 1)?->startOfMonth();
+                    $endDate = Carbon::create($year, $endMonth, 1)?->endOfMonth();
+                    $quarterlyRevenue = License::join('products', 'licenses.product_id', '=', 'products.id')
+                        ->whereBetween('licenses.created_at', [$startDate, $endDate])
+                        ->sum('products.price');
+                    $data[] = (float)$quarterlyRevenue;
+                }
+            } else { // yearly
+                $currentYear = date('Y');
+                $data = [];
+                $labels = [];
+                for ($y = $currentYear - 4; $y <= $currentYear; $y++) {
+                    $startDate = Carbon::create((int)$y, 1, 1)?->startOfYear();
+                    $endDate = Carbon::create((int)$y, 12, 31)?->endOfYear();
+                    $yearlyRevenue = License::join('products', 'licenses.product_id', '=', 'products.id')
+                        ->whereBetween('licenses.created_at', [$startDate, $endDate])
+                        ->sum('products.price');
+                    $data[] = (float)$yearlyRevenue;
+                    $labels[] = $y;
+                }
+            }
+            DB::commit();
+            return response()->json([
+                'labels' => $labels,
+                'data' => $data,
+            ]);
         } catch (ValidationException $e) {
+            DB::rollBack();
             throw $e;
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Revenue data loading failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'period' => $request->get('period'),
                 'year' => $request->get('year'),
             ]);
-            
+            // Return fallback data
             return response()->json([
                 'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                 'data' => [0, 0, 0, 0, 0, 0],
@@ -260,10 +371,29 @@ class DashboardController extends Controller
     public function getActivityTimelineData(): JsonResponse
     {
         try {
-            $data = $this->chartService->getActivityTimelineData();
-            return response()->json($data);
+            $today = Carbon::today();
+            $data = [];
+            $labels = [];
+            // Get activity data for the last 7 days
+            for ($i = 6; $i >= 0; $i--) {
+                $date = $today->copy()->subDays($i);
+                $startOfDay = $date->copy()->startOfDay();
+                $endOfDay = $date->copy()->endOfDay();
+                // Sum total activity counts for the day (tickets created + licenses created)
+                $ticketsCount = Ticket::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
+                $licensesCount = License::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
+                $dailyTotal = $ticketsCount + $licensesCount;
+                $data[] = $dailyTotal;
+                $labels[] = $date->format('M j');
+            }
+            return response()->json([
+                'labels' => $labels,
+                'data' => $data,
+            ]);
         } catch (\Exception $e) {
-            Log::error('Activity timeline data loading failed', ['error' => $e->getMessage()]);
+            // Log the error for debugging
+            // Activity timeline data error handled gracefully
+            // Return fallback data
             return response()->json([
                 'labels' => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                 'data' => [0, 0, 0, 0, 0, 0, 0],
@@ -298,16 +428,20 @@ class DashboardController extends Controller
     public function getStats(): JsonResponse
     {
         try {
-            $basicStats = $this->statsService->getBasicStats();
-            $additionalStats = [
-                'licenses_expired' => \App\Models\License::where('status', 'expired')->count(),
-                'tickets_closed' => \App\Models\Ticket::where('status', 'closed')->count(),
+            $stats = [
+                'products' => Product::count(),
+                'customers' => User::count(),
+                'licenses_active' => License::where('status', 'active')->count(),
+                'licenses_expired' => License::where('status', 'expired')->count(),
+                'tickets_open' => Ticket::whereIn('status', ['open', 'pending'])->count(),
+                'tickets_closed' => Ticket::where('status', 'closed')->count(),
+                'kb_articles' => KbArticle::count(),
             ];
-            
-            $stats = array_merge($basicStats, $additionalStats);
             return response()->json($stats);
         } catch (\Exception $e) {
-            Log::error('Dashboard stats error', ['error' => $e->getMessage()]);
+            // Log the error for debugging
+            // Dashboard stats error handled gracefully
+            // Return fallback data
             return response()->json([
                 'products' => 0,
                 'customers' => 0,
@@ -318,6 +452,89 @@ class DashboardController extends Controller
                 'kb_articles' => 0,
             ]);
         }
+    }
+    /**
+     * Calculate API success rate.
+     *
+     * Calculates the percentage of successful API requests out of total requests
+     * based on license verification logs.
+     *
+     * @return float The API success rate as a percentage
+     *
+     * @version 1.0.6
+     */
+    private function calculateApiSuccessRate(): float
+    {
+        $totalRequests = LicenseLog::count();
+        if ($totalRequests === 0) {
+            return 0.0;
+        }
+        $successfulRequests = LicenseLog::where('status', 'success')->count();
+        return round(($successfulRequests / $totalRequests) * 100, 2);
+    }
+    /**
+     * Get API errors today from Laravel logs.
+     *
+     * Counts the number of API errors that occurred today by parsing
+     * the Laravel log file for license verification errors.
+     *
+     * @return int The number of API errors today
+     *
+     * @version 1.0.6
+     */
+    private function getApiErrorsToday(): int
+    {
+        $logFile = storage_path('logs/laravel.log');
+        if (! SecureFileHelper::fileExists($logFile)) {
+            return 0;
+        }
+        $today = now()->format('Y-m-d');
+        $errorCount = 0;
+        $handle = fopen($logFile, 'r');
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                if (
+                    strpos($line, $today) !== false &&
+                    strpos($line, 'License verification error') !== false
+                ) {
+                    $errorCount++;
+                }
+            }
+            SecureFileHelper::closeFile($handle);
+        }
+        return $errorCount;
+    }
+    /**
+     * Get API errors this month from Laravel logs.
+     *
+     * Counts the number of API errors that occurred this month by parsing
+     * the Laravel log file for license verification errors.
+     *
+     * @return int The number of API errors this month
+     *
+     * @version 1.0.6
+     */
+    private function getApiErrorsThisMonth(): int
+    {
+        $logFile = storage_path('logs/laravel.log');
+        if (! SecureFileHelper::fileExists($logFile)) {
+            return 0;
+        }
+        $month = now()->format('Y-m');
+        $errorCount = 0;
+        $handle = fopen($logFile, 'r');
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                if (
+                    strpos($line, $month) !== false &&
+                    strpos($line, 'License verification error') !== false
+                ) {
+                    $errorCount++;
+                }
+            }
+            SecureFileHelper::closeFile($handle);
+        }
+        return $errorCount;
     }
     /**
      * Get API requests chart data with enhanced security.
@@ -349,6 +566,7 @@ class DashboardController extends Controller
     public function getApiRequestsData(Request $request): JsonResponse
     {
         try {
+            DB::beginTransaction();
             $validated = $request->validate([
                 'period' => ['sometimes', 'string', 'in:daily, hourly'],
                 'days' => ['sometimes', 'integer', 'min:1', 'max:30'],
@@ -357,25 +575,84 @@ class DashboardController extends Controller
                 'days.min' => 'Days must be at least 1.',
                 'days.max' => 'Days cannot exceed 30.',
             ]);
-            
             $validatedArray = is_array($validated) ? $validated : [];
             $period = $this->sanitizeInput($validatedArray['period'] ?? 'daily');
             $days = isset($validatedArray['days']) && is_numeric($validatedArray['days'])
                 ? (int)$validatedArray['days']
                 : 7;
-            
-            $data = $this->chartService->getApiRequestsData($period, $days);
-            return response()->json($data);
+            $data = [];
+            $labels = [];
+            $successData = [];
+            $failedData = [];
+            if ($period === 'daily') {
+                for ($i = $days - 1; $i >= 0; $i--) {
+                    $date = now()->subDays($i);
+                    $startOfDay = $date->copy()->startOfDay();
+                    $endOfDay = $date->copy()->endOfDay();
+                    $totalRequests = LicenseLog::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
+                    $successRequests = LicenseLog::whereBetween('created_at', [$startOfDay, $endOfDay])
+                        ->where('status', 'success')->count();
+                    $failedRequests = LicenseLog::whereBetween('created_at', [$startOfDay, $endOfDay])
+                        ->where('status', 'failed')->count();
+                    $data[] = $totalRequests;
+                    $successData[] = $successRequests;
+                    $failedData[] = $failedRequests;
+                    $labels[] = $date->format('M j');
+                }
+            } elseif ($period === 'hourly') {
+                for ($i = 23; $i >= 0; $i--) {
+                    $hour = now()->subHours($i);
+                    $startOfHour = $hour->copy()->startOfHour();
+                    $endOfHour = $hour->copy()->endOfHour();
+                    $totalRequests = LicenseLog::whereBetween('created_at', [$startOfHour, $endOfHour])->count();
+                    $successRequests = LicenseLog::whereBetween('created_at', [$startOfHour, $endOfHour])
+                        ->where('status', 'success')->count();
+                    $failedRequests = LicenseLog::whereBetween('created_at', [$startOfHour, $endOfHour])
+                        ->where('status', 'failed')->count();
+                    $data[] = $totalRequests;
+                    $successData[] = $successRequests;
+                    $failedData[] = $failedRequests;
+                    $labels[] = $hour->format('H:i');
+                }
+            }
+            DB::commit();
+            return response()->json([
+                'labels' => $labels,
+                'datasets' => [
+                    [
+                        'label' => 'Total Requests',
+                        'data' => $data,
+                        'borderColor' => '#3B82F6',
+                        'backgroundColor' => 'rgba(59, 130, 246, 0.1)',
+                        'fill' => true,
+                    ],
+                    [
+                        'label' => 'Successful',
+                        'data' => $successData,
+                        'borderColor' => '#10B981',
+                        'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
+                        'fill' => true,
+                    ],
+                    [
+                        'label' => 'Failed',
+                        'data' => $failedData,
+                        'borderColor' => '#EF4444',
+                        'backgroundColor' => 'rgba(239, 68, 68, 0.1)',
+                        'fill' => true,
+                    ],
+                ],
+            ]);
         } catch (ValidationException $e) {
+            DB::rollBack();
             throw $e;
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('API requests data loading failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'period' => $request->get('period'),
                 'days' => $request->get('days'),
             ]);
-            
             return response()->json([
                 'labels' => [],
                 'datasets' => [],
@@ -419,10 +696,41 @@ class DashboardController extends Controller
     public function getApiPerformanceData(): JsonResponse
     {
         try {
-            $data = $this->chartService->getApiPerformanceData();
-            return response()->json($data);
+            $today = now()->startOfDay();
+            $yesterday = now()->subDay()->startOfDay();
+            // Today's metrics
+            $todayRequests = LicenseLog::whereDate('created_at', today())->count();
+            $todaySuccess = LicenseLog::whereDate('created_at', today())->where('status', 'success')->count();
+            $todayFailed = LicenseLog::whereDate('created_at', today())->where('status', 'failed')->count();
+            // Yesterday's metrics
+            $yesterdayRequests = LicenseLog::whereDate('created_at', $yesterday)->count();
+            $yesterdaySuccess = LicenseLog::whereDate('created_at', $yesterday)->where('status', 'success')->count();
+            $yesterdayFailed = LicenseLog::whereDate('created_at', $yesterday)->where('status', 'failed')->count();
+            // Top domains
+            $topDomains = LicenseLog::selectRaw('domain, COUNT(*) as count')
+                ->where('created_at', '>=', now()->subDays(7))
+                ->groupBy('domain')
+                ->orderBy('count', 'desc')
+                ->limit(5)
+                ->get();
+            return response()->json([
+                'today' => [
+                    'total' => $todayRequests,
+                    'success' => $todaySuccess,
+                    'failed' => $todayFailed,
+                    'success_rate' => $todayRequests > 0 ? round(($todaySuccess / $todayRequests) * 100, 2) : 0,
+                ],
+                'yesterday' => [
+                    'total' => $yesterdayRequests,
+                    'success' => $yesterdaySuccess,
+                    'failed' => $yesterdayFailed,
+                    'success_rate' => $yesterdayRequests > 0
+                        ? round(($yesterdaySuccess / $yesterdayRequests) * 100, 2)
+                        : 0,
+                ],
+                'top_domains' => $topDomains,
+            ]);
         } catch (\Exception $e) {
-            Log::error('API performance data loading failed', ['error' => $e->getMessage()]);
             return response()->json([
                 'today' => ['total' => 0, 'success' => 0, 'failed' => 0, 'success_rate' => 0],
                 'yesterday' => ['total' => 0, 'success' => 0, 'failed' => 0, 'success_rate' => 0],
@@ -450,63 +758,28 @@ class DashboardController extends Controller
     public function clearCache()
     {
         try {
-            $result = $this->cacheService->clearAllCaches();
-            
-            if ($result['success']) {
-                return redirect()->back()->with('success', $result['message']);
-            } else {
-                return redirect()->back()->with('error', $result['message']);
-            }
+            DB::beginTransaction();
+            // Clear application cache
+            Artisan::call('cache:clear');
+            // Clear config cache
+            Artisan::call('config:clear');
+            // Clear route cache
+            Artisan::call('route:clear');
+            // Clear view cache
+            Artisan::call('view:clear');
+            // Clear compiled classes
+            Artisan::call('clear-compiled');
+            // Clear license-specific caches if any
+            Cache::flush(); // Clear all cache keys
+            DB::commit();
+            return redirect()->back()->with('success', 'All caches cleared successfully!');
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Cache clearing failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
             return redirect()->back()->with('error', 'Failed to clear caches. Please try again.');
         }
-    }
-
-    /**
-     * Get fallback dashboard data
-     */
-    private function getFallbackDashboardData()
-    {
-        $stats = [
-            'products' => 0,
-            'customers' => 0,
-            'licenses_active' => 0,
-            'tickets_open' => 0,
-            'kb_articles' => 0,
-            'invoices_count' => 0,
-            'invoices_total_amount' => 0,
-            'invoices_paid_amount' => 0,
-            'invoices_paid_count' => 0,
-            'invoices_due_soon_amount' => 0,
-            'invoices_unpaid_amount' => 0,
-            'invoices_cancelled_count' => 0,
-            'invoices_cancelled_amount' => 0,
-            'api_requests_today' => 0,
-            'api_requests_this_month' => 0,
-            'api_success_rate' => 0,
-            'api_errors_today' => 0,
-            'api_errors_this_month' => 0,
-        ];
-        
-        $isMaintenance = Setting::get('maintenance_mode', false);
-        
-        return view('admin.dashboard', [
-            'stats' => $stats,
-            'latestTickets' => collect(),
-            'latestLicenses' => collect(),
-            'isMaintenance' => $isMaintenance
-        ]);
-    }
-
-    /**
-     * Sanitize input string
-     */
-    private function sanitizeInput(string $input): string
-    {
-        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

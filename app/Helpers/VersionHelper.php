@@ -39,34 +39,27 @@ class VersionHelper
     public static function getCurrentVersion(): string
     {
         try {
-            return Cache::remember('app_version', 3600, function () {
-                return self::fetchCurrentVersionFromDatabase();
+            $result = Cache::remember('app_version', 3600, function () {
+                DB::beginTransaction();
+                try {
+                    $setting = Setting::where('key', 'site_name')->first() ?? Setting::first();
+                    $version = $setting->version ?? '1.0.1';
+                    DB::commit();
+
+                    return $version;
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    Log::error('Failed to get current version from database', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+
+                    return '1.0.1';
+                }
             });
+            return is_string($result) ? $result : '1.0.1';
         } catch (\Exception $e) {
-            Log::error('Failed to get current version', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return '1.0.1';
-        }
-    }
-
-    /**
-     * Fetch current version from database
-     */
-    private static function fetchCurrentVersionFromDatabase(): string
-    {
-        DB::beginTransaction();
-        try {
-            $setting = Setting::where('key', 'site_name')->first() ?? Setting::first();
-            $version = $setting->version ?? '1.0.1';
-            DB::commit();
-
-            return $version;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to get current version from database', [
+            Log::error('Failed to get current version from cache', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -77,24 +70,54 @@ class VersionHelper
 
     /**
      * Get latest version from version.json file with enhanced security.
+     *
+     * Reads the latest version information from the version.json file
+     * with proper file validation and security measures.
+     *
+     * @return string The latest version string
+     *
+     * @throws \Exception When file operations fail
      */
     public static function getLatestVersion(): string
     {
         try {
             $versionFile = storage_path('version.json');
-            
-            if (!self::isVersionFileValid($versionFile)) {
+            // Validate file path and existence
+            if (! file_exists($versionFile) || ! is_readable($versionFile)) {
+                Log::warning('Version file not found or not readable', [
+                    'file' => $versionFile,
+                ]);
+
                 return '1.0.1';
             }
-            
-            $versionData = self::readVersionFile($versionFile);
-            $version = $versionData['current_version'] ?? '1.0.1';
-            
-            if (!self::isValidVersion($version)) {
+            // Read and validate file content
+            $fileContent = file_get_contents($versionFile);
+            if ($fileContent === false) {
+                Log::error('Failed to read version file content', [
+                    'file' => $versionFile,
+                ]);
+
+                return '1.0.1';
+            }
+            $versionData = json_decode($fileContent, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error('Invalid JSON in version file', [
+                    'file' => $versionFile,
+                    'json_error' => json_last_error_msg(),
+                ]);
+
+                return '1.0.1';
+            }
+            $version = (is_array($versionData) && isset($versionData['current_version']))
+                ? $versionData['current_version']
+                : '1.0.1';
+            // Validate version format
+            if (! is_string($version) || ! self::isValidVersion($version)) {
                 Log::error('Invalid version format in version file', [
                     'file' => $versionFile,
                     'version' => $version,
                 ]);
+
                 return '1.0.1';
             }
 
@@ -108,45 +131,6 @@ class VersionHelper
 
             return '1.0.1';
         }
-    }
-
-    /**
-     * Check if version file is valid
-     */
-    private static function isVersionFileValid(string $versionFile): bool
-    {
-        if (!file_exists($versionFile) || !is_readable($versionFile)) {
-            Log::warning('Version file not found or not readable', [
-                'file' => $versionFile,
-            ]);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Read version file content
-     */
-    private static function readVersionFile(string $versionFile): array
-    {
-        $fileContent = file_get_contents($versionFile);
-        if ($fileContent === false) {
-            Log::error('Failed to read version file content', [
-                'file' => $versionFile,
-            ]);
-            return [];
-        }
-
-        $versionData = json_decode($fileContent, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            Log::error('Invalid JSON in version file', [
-                'file' => $versionFile,
-                'json_error' => json_last_error_msg(),
-            ]);
-            return [];
-        }
-
-        return is_array($versionData) ? $versionData : [];
     }
 
     /**

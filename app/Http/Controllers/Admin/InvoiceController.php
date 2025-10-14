@@ -7,12 +7,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\InvoiceRequest;
 use App\Models\Invoice;
+use App\Models\License;
 use App\Models\User;
-use App\Services\Invoice\InvoiceManagementService;
+use App\Services\InvoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
@@ -48,9 +50,15 @@ use Illuminate\View\View;
  */
 class InvoiceController extends Controller
 {
-    public function __construct(
-        private InvoiceManagementService $invoiceService
-    ) {
+    protected InvoiceService $invoiceService;
+    /**
+     * Create a new controller instance.
+     *
+     * @param  InvoiceService  $invoiceService  The invoice service for business logic
+     */
+    public function __construct(InvoiceService $invoiceService)
+    {
+        $this->invoiceService = $invoiceService;
     }
     /**
      * Display a listing of invoices with filtering and pagination and enhanced security.
@@ -77,12 +85,29 @@ class InvoiceController extends Controller
     {
         try {
             DB::beginTransaction();
-            
-            $invoices = $this->invoiceService->getFilteredInvoices($request);
+            $query = Invoice::with(['user', 'product', 'license']);
+            // Filter by status with validation
+            if ($request->filled('status')) {
+                $status = trim(is_string($request->status) ? $request->status : '');
+                if (in_array($status, ['pending', 'paid', 'overdue', 'cancelled'])) {
+                    $query->where('status', $status);
+                }
+            }
+            if ($request->filled('date_from')) {
+                $dateFrom = trim(is_string($request->date_from) ? $request->date_from : '');
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateFrom) === 1) {
+                    $query->whereDate('created_at', '>=', $dateFrom);
+                }
+            }
+            if ($request->filled('date_to')) {
+                $dateTo = trim(is_string($request->date_to) ? $request->date_to : '');
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateTo)) {
+                    $query->whereDate('created_at', '<=', $dateTo);
+                }
+            }
+            $invoices = $query->latest()->paginate(10);
             $stats = $this->invoiceService->getInvoiceStats();
-            
             DB::commit();
-            
             return view('admin.invoices.index', ['invoices' => $invoices, 'stats' => $stats]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -90,7 +115,7 @@ class InvoiceController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+            // Return empty results on error
             return view('admin.invoices.index', [
                 'invoices' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
                 'stats' => [],
@@ -162,12 +187,41 @@ class InvoiceController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+            $isCustomInvoice = $request->license_id === 'custom';
             $validated = $request->validated();
-            $invoice = $this->invoiceService->createInvoice($validated);
-            
+            $license = null;
+            $productId = null;
+            if (! $isCustomInvoice) {
+                $license = License::find($validated['license_id']);
+                if (! $license) {
+                    throw new \Exception('License not found');
+                }
+                $productId = $license->product_id;
+            }
+            // Generate invoice number if not provided
+            $invoiceNumber = $validated['invoice_number'] ?? $this->generateInvoiceNumber();
+            $invoice = Invoice::create([
+                'invoice_number' => $invoiceNumber,
+                'user_id' => $validated['user_id'],
+                'license_id' => $isCustomInvoice ? null : $validated['license_id'],
+                'product_id' => $productId,
+                'type' => $validated['type'],
+                'amount' => $validated['amount'],
+                'currency' => $validated['currency'],
+                'status' => $validated['status'],
+                'due_date' => $validated['due_date'],
+                'paid_at' => $validated['status'] === 'paid' ? ($validated['paid_at'] ?? now()) : null,
+                'notes' => $validated['notes'] ?? null,
+                'metadata' => $isCustomInvoice ? [
+                    'custom_invoice' => true,
+                    'custom_invoice_type' => $validated['custom_invoice_type'] ?? null,
+                    'custom_product_name' => $validated['custom_product_name'] ?? null,
+                    'expiration_date' => ($validated['custom_invoice_type'] ?? 'one_time') !== 'one_time'
+                        ? ($validated['expiration_date'] ?? null)
+                        : null,
+                ] : null,
+            ]);
             DB::commit();
-            
             return redirect()->route('admin.invoices.show', $invoice)
                 ->with('success', 'Invoice created successfully');
         } catch (\Exception $e) {
@@ -177,7 +231,6 @@ class InvoiceController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['notes']),
             ]);
-            
             return redirect()
                 ->back()
                 ->withInput()
@@ -235,11 +288,8 @@ class InvoiceController extends Controller
     {
         try {
             DB::beginTransaction();
-            
             $this->invoiceService->markAsPaid($invoice);
-            
             DB::commit();
-            
             return redirect()->back()->with('success', 'Invoice marked as paid successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -248,7 +298,6 @@ class InvoiceController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'invoice_id' => $invoice->id,
             ]);
-            
             return redirect()
                 ->back()
                 ->with('error', 'Failed to mark invoice as paid. Please try again.');
@@ -277,11 +326,8 @@ class InvoiceController extends Controller
     {
         try {
             DB::beginTransaction();
-            
-            $this->invoiceService->cancelInvoice($invoice);
-            
+            $invoice->update(['status' => 'cancelled']);
             DB::commit();
-            
             return redirect()->back()->with('success', 'Invoice cancelled successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -290,7 +336,6 @@ class InvoiceController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'invoice_id' => $invoice->id,
             ]);
-            
             return redirect()
                 ->back()
                 ->with('error', 'Failed to cancel invoice. Please try again.');
@@ -373,12 +418,38 @@ class InvoiceController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+            $isCustomInvoice = $request->license_id === 'custom';
             $validated = $request->validated();
-            $this->invoiceService->updateInvoice($invoice, $validated);
-            
+            $license = null;
+            $productId = null;
+            if (! $isCustomInvoice) {
+                $license = License::find($validated['license_id']);
+                if (! $license) {
+                    throw new \Exception('License not found');
+                }
+                $productId = $license->product_id;
+            }
+            $invoice->update([
+                'user_id' => $validated['user_id'],
+                'license_id' => $isCustomInvoice ? null : $validated['license_id'],
+                'product_id' => $productId,
+                'type' => $validated['type'],
+                'amount' => $validated['amount'],
+                'currency' => $validated['currency'],
+                'status' => $validated['status'],
+                'due_date' => $validated['due_date'],
+                'paid_at' => $validated['status'] === 'paid' ? ($validated['paid_at'] ?? now()) : null,
+                'notes' => $validated['notes'],
+                'metadata' => $isCustomInvoice ? [
+                    'custom_invoice' => true,
+                    'custom_invoice_type' => $validated['custom_invoice_type'],
+                    'custom_product_name' => $validated['custom_product_name'],
+                    'expiration_date' => $validated['custom_invoice_type'] !== 'one_time'
+                        ? $validated['expiration_date']
+                        : null,
+                ] : null,
+            ]);
             DB::commit();
-            
             return redirect()->route('admin.invoices.show', $invoice)
                 ->with('success', 'Invoice updated successfully');
         } catch (\Exception $e) {
@@ -389,7 +460,6 @@ class InvoiceController extends Controller
                 'invoice_id' => $invoice->id,
                 'request_data' => $request->except(['notes']),
             ]);
-            
             return redirect()
                 ->back()
                 ->withInput()
@@ -422,11 +492,13 @@ class InvoiceController extends Controller
     {
         try {
             DB::beginTransaction();
-            
-            $this->invoiceService->deleteInvoice($invoice);
-            
+            // Check if invoice can be deleted (not paid)
+            if ($invoice->status === 'paid') {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Cannot delete a paid invoice');
+            }
+            $invoice->delete();
             DB::commit();
-            
             return redirect()->route('admin.invoices.index')
                 ->with('success', 'Invoice deleted successfully');
         } catch (\Exception $e) {
@@ -436,11 +508,29 @@ class InvoiceController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'invoice_id' => $invoice->id,
             ]);
-            
             return redirect()
                 ->back()
                 ->with('error', 'Failed to delete invoice. Please try again.');
         }
     }
 
+    /**
+     * Generate unique invoice number
+     */
+    private function generateInvoiceNumber(): string
+    {
+        $maxAttempts = 10;
+        $attempts = 0;
+
+        do {
+            $invoiceNumber = 'INV-' . strtoupper(Str::random(8));
+            $attempts++;
+
+            if ($attempts > $maxAttempts) {
+                throw new \Exception('Failed to generate unique invoice number after ' . $maxAttempts . ' attempts');
+            }
+        } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
+
+        return $invoiceNumber;
+    }
 }

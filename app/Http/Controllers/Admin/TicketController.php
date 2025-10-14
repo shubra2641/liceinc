@@ -7,11 +7,15 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\TicketNotificationTrait;
 use App\Http\Requests\Admin\TicketRequest;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Ticket;
 use App\Models\TicketCategory;
+use App\Models\TicketReply;
 use App\Models\User;
+use App\Services\Email\EmailFacade;
 use App\Traits\TicketHelpers;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -40,6 +44,17 @@ class TicketController extends Controller
     use TicketHelpers;
     use TicketNotificationTrait;
 
+    protected EmailFacade $emailService;
+
+    /**
+     * Create a new controller instance.
+     *
+     * @param  EmailFacade  $emailService  The email service instance
+     */
+    public function __construct(EmailFacade $emailService)
+    {
+        $this->emailService = $emailService;
+    }
 
     /**
      * Display a listing of tickets with enhanced security.
@@ -64,9 +79,7 @@ class TicketController extends Controller
     {
         try {
             DB::beginTransaction();
-            
-            $tickets = $this->getTicketsWithRelations();
-            
+            $tickets = Ticket::with(['user', 'category', 'invoice.product'])->latest()->paginate(10);
             DB::commit();
 
             return view('admin.tickets.index', ['tickets' => $tickets]);
@@ -77,6 +90,7 @@ class TicketController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
+            // Return empty results on error
             return view('admin.tickets.index', [
                 'tickets' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
             ]);
@@ -143,10 +157,109 @@ class TicketController extends Controller
     {
         try {
             DB::beginTransaction();
-            
             $validated = $request->validated();
-            $ticket = $this->ticketService->createTicket($validated, $request);
-            
+            // Build ticket data
+            $ticketData = [
+                'user_id' => $validated['user_id'],
+                'category_id' => $validated['category_id'],
+                'subject' => $validated['subject'],
+                'priority' => $validated['priority'],
+                'content' => $validated['content'],
+                'status' => 'open',
+            ];
+            // If admin requested to create an invoice for the user
+            if ($request->filled('create_invoice') && $request->boolean('create_invoice')) {
+                $invoiceProductId = $request->input('invoice_product_id');
+                $billingType = $request->input('billing_type', 'one_time');
+                // If custom invoice selected
+                if ($invoiceProductId === 'custom' || empty($invoiceProductId)) {
+                    $amount = $validated['invoice_amount'] ?? 0;
+                    $duration = $validated['invoice_duration_days'] ?? 0;
+                    $dueDate = now()->addDays(is_numeric($duration) ? (int)$duration : 0)->toDateString();
+                    $metadata = [];
+                    if ($billingType !== 'one_time') {
+                        if ($billingType === 'custom_recurring') {
+                            $metadata['renewal_price'] = $request->input('invoice_renewal_price')
+                                ?: $amount;
+                            $metadata['renewal_period_days'] = $request->input('invoice_renewal_period_days')
+                                ?: $duration;
+                            $metadata['recurrence'] = 'custom';
+                        } else {
+                            $map = [
+                                'monthly' => 30,
+                                'quarterly' => 90,
+                                'semi_annual' => 182,
+                                'annual' => 365,
+                            ];
+                            $metadata['recurrence'] = $billingType;
+                            $metadata['renewal_period_days'] = (is_string($billingType) && isset($map[$billingType]))
+                                ? $map[$billingType]
+                                : $duration;
+                            $metadata['renewal_price'] = $amount;
+                        }
+                    }
+                } else {
+                    // Product-based invoice
+                    $product = Product::find($invoiceProductId);
+                    if (! $product) {
+                        DB::rollBack();
+
+                        return back()->withErrors(['invoice_product_id' => 'Invalid product selected'])->withInput();
+                    }
+                    $amount = $request->input('invoice_amount') ?: $product->price;
+                    $duration = $request->input('invoice_duration_days') ?: $product->duration_days ?: null;
+                    $dueDate = $request->input('invoice_due_date')
+                        ?: ($duration
+                            ? now()->addDays(is_numeric($duration) ? (int)$duration : 0)->toDateString()
+                            : null);
+                    $metadata = [];
+                    if ($billingType !== 'one_time') {
+                        $map = [
+                            'monthly' => 30,
+                            'quarterly' => 90,
+                            'semi_annual' => 182,
+                            'annual' => 365,
+                        ];
+                        if ($billingType === 'custom_recurring') {
+                            $metadata['recurrence'] = 'custom';
+                            $metadata['renewal_price'] = $request->input('invoice_renewal_price')
+                                ?: $product->renewal_price ?? $amount;
+                            $metadata['renewal_period_days'] = $request->input('invoice_renewal_period_days')
+                                ?: $product->renewal_period
+                                ?: ($duration ?: 30);
+                        } else {
+                            $metadata['recurrence'] = $billingType;
+                            $metadata['renewal_period_days'] = (
+                                is_string($billingType) && array_key_exists($billingType, $map)
+                            )
+                                ? $map[$billingType]
+                                : ($product->renewal_period ?? $duration);
+                            $metadata['renewal_price'] = $product->renewal_price ?? $amount;
+                        }
+                    }
+                }
+                $invoice = Invoice::create([
+                    'user_id' => $validated['user_id'],
+                    'product_id' => is_numeric($invoiceProductId) ? $invoiceProductId : null,
+                    'amount' => $amount,
+                    'status' => $request->input('invoice_status') ?? 'pending',
+                    'due_date' => $dueDate,
+                    'notes' => $request->input('invoice_notes') ?? null,
+                    'currency' => config('app.currency', 'USD'),
+                    'type' => ($billingType && $billingType !== 'one_time') ? 'recurring' : 'one_time',
+                    'metadata' => $metadata,
+                    'invoice_number' => 'INV-' . strtoupper(uniqid()),
+                ]);
+                $ticketData['invoice_id'] = $invoice->id;
+            }
+            $ticket = Ticket::create($ticketData);
+            // Send email notifications
+            $this->sendTicketNotifications($ticket);
+            // Send invoice email if invoice was created
+            if ($ticket->invoice_id && $ticket->user && $ticket->user->email) {
+                $this->emailService->sendInvoiceCreated($ticket->user, $ticket->invoice);
+            }
+
             DB::commit();
 
             return redirect()->route('admin.tickets.index')->with('success', 'Ticket created successfully for user');
@@ -245,27 +358,7 @@ class TicketController extends Controller
      */
     public function update(TicketRequest $request, Ticket $ticket): RedirectResponse
     {
-        try {
-            DB::beginTransaction();
-            
-            $validated = $request->validated();
-            $this->ticketService->updateTicket($ticket, $validated, $request);
-            
-            DB::commit();
-
-            return redirect()->route('admin.tickets.index')->with('success', 'Ticket updated successfully');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to update ticket', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'request_data' => $request->except(['content']),
-            ]);
-
-            return redirect()->back()
-                ->withErrors(['error' => 'Failed to update ticket. Please try again.'])
-                ->withInput();
-        }
+        return $this->updateTicket($request, $ticket, true);
     }
 
     /**
@@ -292,25 +385,7 @@ class TicketController extends Controller
      */
     public function destroy(Ticket $ticket): RedirectResponse
     {
-        try {
-            DB::beginTransaction();
-            
-            $this->ticketService->deleteTicket($ticket);
-            
-            DB::commit();
-
-            return redirect()->route('admin.tickets.index')->with('success', 'Ticket deleted successfully');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to delete ticket', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'ticket_id' => $ticket->id,
-            ]);
-
-            return redirect()->back()
-                ->withErrors(['error' => 'Failed to delete ticket. Please try again.']);
-        }
+        return $this->destroyTicket($ticket, true, 'admin.tickets.index');
     }
 
     /**
@@ -338,26 +413,7 @@ class TicketController extends Controller
      */
     public function reply(TicketRequest $request, Ticket $ticket): RedirectResponse
     {
-        try {
-            DB::beginTransaction();
-            
-            $validated = $request->validated();
-            $this->ticketService->addReply($ticket, $validated);
-            
-            DB::commit();
-
-            return redirect()->back()->with('success', 'Reply added successfully');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to add reply', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'ticket_id' => $ticket->id,
-            ]);
-
-            return redirect()->back()
-                ->withErrors(['error' => 'Failed to add reply. Please try again.']);
-        }
+        return $this->replyToTicket($request, $ticket, false, false, true);
     }
 
     /**
@@ -387,10 +443,32 @@ class TicketController extends Controller
     {
         try {
             DB::beginTransaction();
-            
             $validated = $request->validated();
-            $this->ticketService->updateTicketStatus($ticket, $validated);
-            
+            $oldStatus = $ticket->status;
+            $ticket->status = is_string($validated['status'] ?? null) ? $validated['status'] : 'open';
+            $saved = $ticket->save();
+            if (! $saved) {
+                DB::rollBack();
+
+                return back()->withErrors(['status' => 'Failed to update ticket status']);
+            }
+            // Send email notification to user when status is updated
+            try {
+                if ($ticket->user) {
+                    $this->emailService->sendTicketStatusUpdate($ticket->user, [
+                        'ticket_id' => $ticket->id,
+                        'ticket_subject' => $ticket->subject,
+                        'old_status' => $oldStatus,
+                        'new_status' => $ticket->status,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send ticket status update email', [
+                    'error' => $e->getMessage(),
+                    'ticket_id' => $ticket->id,
+                    'user_id' => $ticket->user_id,
+                ]);
+            }
             DB::commit();
 
             $status = $ticket->status ?? 'open';
@@ -406,230 +484,5 @@ class TicketController extends Controller
 
             return back()->withErrors(['status' => 'Error updating ticket status: ' . $e->getMessage()]);
         }
-    }
-
-    /**
-     * Get tickets with relations
-     */
-    private function getTicketsWithRelations()
-    {
-        return Ticket::with(['user', 'category'])
-            ->latest()
-            ->paginate(10);
-    }
-
-    /**
-     * Create ticket
-     */
-    private function createTicket(array $validated, Request $request): Ticket
-    {
-        $ticketData = [
-            'user_id' => $validated['user_id'],
-            'category_id' => $validated['category_id'],
-            'subject' => $validated['subject'],
-            'priority' => $validated['priority'],
-            'content' => $validated['content'],
-            'status' => 'open',
-        ];
-
-        if ($request->filled('create_invoice') && $request->boolean('create_invoice')) {
-            $invoice = $this->createInvoice($validated, $request);
-            $ticketData['invoice_id'] = $invoice->id;
-        }
-
-        $ticket = Ticket::create($ticketData);
-
-        $this->sendTicketNotifications($ticket);
-
-        if ($ticket->invoice_id && $ticket->user && $ticket->user->email) {
-            $this->emailService->sendInvoiceCreated($ticket->user, $ticket->invoice);
-        }
-
-        return $ticket;
-    }
-
-    /**
-     * Update ticket
-     */
-    private function updateTicket(Ticket $ticket, array $validated, Request $request): void
-    {
-        $ticket->update([
-            'user_id' => $validated['user_id'],
-            'category_id' => $validated['category_id'],
-            'subject' => $validated['subject'],
-            'priority' => $validated['priority'],
-            'content' => $validated['content'],
-        ]);
-
-        if ($request->filled('create_invoice') && $request->boolean('create_invoice')) {
-            $invoice = $this->createInvoice($validated, $request);
-            $ticket->update(['invoice_id' => $invoice->id]);
-        }
-
-        $this->sendTicketNotifications($ticket);
-
-        if ($ticket->invoice_id && $ticket->user && $ticket->user->email) {
-            $this->emailService->sendInvoiceCreated($ticket->user, $ticket->invoice);
-        }
-    }
-
-    /**
-     * Delete ticket
-     */
-    private function deleteTicket(Ticket $ticket): void
-    {
-        $ticket->delete();
-    }
-
-    /**
-     * Add reply to ticket
-     */
-    private function addReply(Ticket $ticket, array $validated): void
-    {
-        $ticket->replies()->create([
-            'user_id' => auth()->id(),
-            'message' => $validated['message'],
-        ]);
-
-        $this->sendTicketNotifications($ticket);
-    }
-
-    /**
-     * Update ticket status
-     */
-    private function updateTicketStatus(Ticket $ticket, array $validated): void
-    {
-        $oldStatus = $ticket->status;
-        $ticket->status = is_string($validated['status'] ?? null) ? $validated['status'] : 'open';
-        
-        if (!$ticket->save()) {
-            throw new \Exception('Failed to update ticket status');
-        }
-
-        try {
-            if ($ticket->user) {
-                $this->emailService->sendTicketStatusUpdate($ticket->user, [
-                    'ticket_id' => $ticket->id,
-                    'ticket_subject' => $ticket->subject,
-                    'old_status' => $oldStatus,
-                    'new_status' => $ticket->status,
-                ]);
-            }
-        } catch (\Exception $e) {
-            Log::error('Failed to send ticket status update email', [
-                'error' => $e->getMessage(),
-                'ticket_id' => $ticket->id,
-                'user_id' => $ticket->user_id,
-            ]);
-        }
-    }
-
-    /**
-     * Create invoice for ticket
-     */
-    private function createInvoice(array $validated, Request $request): \App\Models\Invoice
-    {
-        $invoiceProductId = $request->input('invoice_product_id');
-        $billingType = $request->input('billing_type', 'one_time');
-
-        if ($invoiceProductId === 'custom' || empty($invoiceProductId)) {
-            return $this->createCustomInvoice($validated, $request, $billingType);
-        }
-
-        return $this->createProductBasedInvoice($validated, $request, $invoiceProductId, $billingType);
-    }
-
-    /**
-     * Create custom invoice
-     */
-    private function createCustomInvoice(array $validated, Request $request, string $billingType): \App\Models\Invoice
-    {
-        $amount = $validated['invoice_amount'] ?? 0;
-        $duration = $validated['invoice_duration_days'] ?? 0;
-        $dueDate = now()->addDays(is_numeric($duration) ? (int)$duration : 0)->toDateString();
-        
-        $metadata = $this->buildInvoiceMetadata($billingType, $amount, $duration, $request);
-
-        return \App\Models\Invoice::create([
-            'user_id' => $validated['user_id'],
-            'product_id' => null,
-            'amount' => $amount,
-            'status' => $request->input('invoice_status') ?? 'pending',
-            'due_date' => $dueDate,
-            'notes' => $request->input('invoice_notes') ?? null,
-            'currency' => config('app.currency', 'USD'),
-            'type' => ($billingType && $billingType !== 'one_time') ? 'recurring' : 'one_time',
-            'metadata' => $metadata,
-            'invoice_number' => 'INV-' . strtoupper(uniqid()),
-        ]);
-    }
-
-    /**
-     * Create product-based invoice
-     */
-    private function createProductBasedInvoice(array $validated, Request $request, string $invoiceProductId, string $billingType): \App\Models\Invoice
-    {
-        $product = Product::find($invoiceProductId);
-        
-        if (!$product) {
-            throw new \Exception('Invalid product selected');
-        }
-
-        $amount = $request->input('invoice_amount') ?: $product->price;
-        $duration = $request->input('invoice_duration_days') ?: $product->duration_days ?: null;
-        $dueDate = $request->input('invoice_due_date')
-            ?: ($duration
-                ? now()->addDays(is_numeric($duration) ? (int)$duration : 0)->toDateString()
-                : null);
-
-        $metadata = $this->buildInvoiceMetadata($billingType, $amount, $duration, $request, $product);
-
-        return \App\Models\Invoice::create([
-            'user_id' => $validated['user_id'],
-            'product_id' => is_numeric($invoiceProductId) ? $invoiceProductId : null,
-            'amount' => $amount,
-            'status' => $request->input('invoice_status') ?? 'pending',
-            'due_date' => $dueDate,
-            'notes' => $request->input('invoice_notes') ?? null,
-            'currency' => config('app.currency', 'USD'),
-            'type' => ($billingType && $billingType !== 'one_time') ? 'recurring' : 'one_time',
-            'metadata' => $metadata,
-            'invoice_number' => 'INV-' . strtoupper(uniqid()),
-        ]);
-    }
-
-    /**
-     * Build invoice metadata
-     */
-    private function buildInvoiceMetadata(string $billingType, float $amount, int $duration, Request $request, ?Product $product = null): array
-    {
-        if ($billingType === 'one_time') {
-            return [];
-        }
-
-        $map = [
-            'monthly' => 30,
-            'quarterly' => 90,
-            'semi_annual' => 182,
-            'annual' => 365,
-        ];
-
-        if ($billingType === 'custom_recurring') {
-            return [
-                'recurrence' => 'custom',
-                'renewal_price' => $request->input('invoice_renewal_price')
-                    ?: ($product?->renewal_price ?? $amount),
-                'renewal_period_days' => $request->input('invoice_renewal_period_days')
-                    ?: ($product?->renewal_period ?? ($duration ?: 30)),
-            ];
-        }
-
-        return [
-            'recurrence' => $billingType,
-            'renewal_period_days' => (is_string($billingType) && isset($map[$billingType]))
-                ? $map[$billingType]
-                : ($product?->renewal_period ?? $duration),
-            'renewal_price' => $product?->renewal_price ?? $amount,
-        ];
     }
 }
