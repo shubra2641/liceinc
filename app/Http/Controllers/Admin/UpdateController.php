@@ -9,7 +9,6 @@ use App\Helpers\VersionHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AutoUpdateRequest;
 use App\Http\Requests\Admin\SystemUpdateRequest;
-use App\Http\Requests\Admin\UploadUpdatePackageRequest;
 use App\Services\LicenseServerService;
 use App\Services\UpdatePackageService;
 use App\Services\UpdateService;
@@ -285,50 +284,6 @@ class UpdateController extends Controller
         }
     }
 
-    /**
-     * Upload update package
-     */
-    public function uploadUpdatePackage(UploadUpdatePackageRequest $request)
-    {
-        try {
-            DB::beginTransaction();
-            $file = $request->file('update_package');
-            $uploadDir = storage_path('app/updates');
-
-            if (!SecureFileHelper::isDirectory($uploadDir)) {
-                SecureFileHelper::createDirectory($uploadDir, 0755, true);
-            }
-
-            $filename = 'update_' . date('Y-m-d_H-i-s') . '.zip';
-            $filePath = $file->storeAs('updates', $filename);
-            $fullPath = storage_path('app/' . $filePath);
-
-            $updateService = new UpdatePackageService();
-            $processResult = $updateService->processUpdatePackage($fullPath);
-
-            if ($processResult['success']) {
-                DB::commit();
-                return redirect()->route('admin.updates.index')->with(
-                    'success',
-                    'Update package uploaded and processed successfully.'
-                );
-            } else {
-                DB::rollBack();
-                return redirect()->back()->with(
-                    'error',
-                    'Update package uploaded but processing failed: ' . ($processResult['message'] ?? 'Unknown error')
-                );
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to upload update package', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-            ]);
-
-            return redirect()->back()->with('error', 'Failed to upload update package: ' . $e->getMessage());
-        }
-    }
 
     /**
      * Check for auto updates

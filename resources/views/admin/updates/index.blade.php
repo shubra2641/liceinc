@@ -205,10 +205,6 @@
                         <i class="fas fa-magic me-2"></i>
                         {{ trans('app.Auto Update') }}
                     </button>
-                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#uploadUpdateModal">
-                        <i class="fas fa-upload me-2"></i>
-                        {{ trans('app.Upload Update') }}
-                    </button>
                 </div>
             </div>
         </div>
@@ -325,49 +321,6 @@
 
 
 
-<!-- Upload Update Modal -->
-<div class="modal fade" id="uploadUpdateModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title">
-                    <i class="fas fa-upload me-2"></i>
-                    {{ trans('app.Upload Update Package') }}
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>{{ trans('app.Note') }}:</strong> {{ trans('app.Upload a ZIP file containing the update package') }}
-                </div>
-
-                <form method="POST" action="{{ route('admin.updates.upload-package') }}" enctype="multipart/form-data">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="update_package" class="form-label">
-                            <i class="fas fa-file-archive text-primary me-1"></i>
-                            {{ trans('app.Update Package') }} <span class="text-danger">*</span>
-                        </label>
-                        <input type="file" class="form-control" id="update_package" name="update_package"
-                               accept=".zip" required>
-                        <div class="form-text">{{ trans('app.Select a ZIP file containing the update files') }}</div>
-                    </div>
-
-                    <div class="d-flex gap-2 justify-content-end">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            {{ trans('app.Cancel') }}
-                        </button>
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-upload me-2"></i>
-                            {{ trans('app.Upload & Process') }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Auto Update Modal -->
 <div class="modal fade" id="autoUpdateModal" tabindex="-1">

@@ -618,10 +618,6 @@ Route::middleware(['auth', 'admin', 'verified'])->prefix('admin')->name('admin.'
             '/backups',
             [UpdateController::class, 'getBackups'],
         )->name('updates.backups');
-        Route::post(
-            '/upload-package',
-            [UpdateController::class, 'uploadUpdatePackage'],
-        )->name('updates.upload-package');
 
         // Auto Update System
         Route::post(

@@ -213,11 +213,6 @@
                         <?php echo e(trans('app.Auto Update')); ?>
 
                     </button>
-                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#uploadUpdateModal">
-                        <i class="fas fa-upload me-2"></i>
-                        <?php echo e(trans('app.Upload Update')); ?>
-
-                    </button>
                 </div>
             </div>
         </div>
@@ -256,26 +251,6 @@
 </div>
 <?php endif; ?>
 
-<!-- Version History -->
-<div class="card">
-    <div class="card-header bg-light">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-history me-3 text-primary"></i>
-            <div>
-                <h5 class="card-title mb-0"><?php echo e(trans('app.Version History')); ?></h5>
-                <small class="text-muted"><?php echo e(trans('app.Release notes and changelog')); ?></small>
-            </div>
-        </div>
-    </div>
-    <div class="card-body">
-        <div id="version-history-content">
-            <div class="text-center py-4">
-                <i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i>
-                <p class="text-muted"><?php echo e(trans('app.Loading version history...')); ?></p>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Update Confirmation Modal -->
 <div class="modal fade" id="updateModal" tabindex="-1">
@@ -366,53 +341,6 @@
 
 
 
-<!-- Upload Update Modal -->
-<div class="modal fade" id="uploadUpdateModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title">
-                    <i class="fas fa-upload me-2"></i>
-                    <?php echo e(trans('app.Upload Update Package')); ?>
-
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong><?php echo e(trans('app.Note')); ?>:</strong> <?php echo e(trans('app.Upload a ZIP file containing the update package')); ?>
-
-                </div>
-
-                <form method="POST" action="<?php echo e(route('admin.updates.upload-package')); ?>" enctype="multipart/form-data">
-                    <?php echo csrf_field(); ?>
-                    <div class="mb-3">
-                        <label for="update_package" class="form-label">
-                            <i class="fas fa-file-archive text-primary me-1"></i>
-                            <?php echo e(trans('app.Update Package')); ?> <span class="text-danger">*</span>
-                        </label>
-                        <input type="file" class="form-control" id="update_package" name="update_package"
-                               accept=".zip" required>
-                        <div class="form-text"><?php echo e(trans('app.Select a ZIP file containing the update files')); ?></div>
-                    </div>
-
-                    <div class="d-flex gap-2 justify-content-end">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <?php echo e(trans('app.Cancel')); ?>
-
-                        </button>
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-upload me-2"></i>
-                            <?php echo e(trans('app.Upload & Process')); ?>
-
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Auto Update Modal -->
 <div class="modal fade" id="autoUpdateModal" tabindex="-1">
