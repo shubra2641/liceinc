@@ -1,66 +1,29 @@
 <?php
 
-declare(strict_types=1);
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('payment_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('gateway')->unique(); // 'paypal' or 'stripe'
-            $table->boolean('is_enabled')->default(false);
-            $table->boolean('is_sandbox')->default(true);
-            $table->json('credentials')->nullable(); // Store API keys and secrets
-            $table->string('webhook_url')->nullable();
-            $table->string('return_url')->nullable();
-            $table->string('cancel_url')->nullable();
+            $table->string('gateway')->default('stripe');
+            $table->boolean('is_active')->default(true);
+            $table->boolean('test_mode')->default(true);
+            $table->json('credentials')->nullable();
+            $table->json('webhook_settings')->nullable();
+            $table->json('currency_settings')->nullable();
             $table->timestamps();
+            
+            // Indexes
+            $table->index(['gateway', 'is_active']);
+            $table->index(['test_mode', 'is_active']);
         });
-
-        // Insert default payment settings
-        DB::table('payment_settings')->insert([
-            [
-                'gateway' => 'paypal',
-                'is_enabled' => false,
-                'is_sandbox' => true,
-                'credentials' => json_encode([
-                    'client_id' => '',
-                    'client_secret' => '',
-                ]),
-                'webhook_url' => '',
-                'return_url' => '',
-                'cancel_url' => '',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'gateway' => 'stripe',
-                'is_enabled' => false,
-                'is_sandbox' => true,
-                'credentials' => json_encode([
-                    'publishable_key' => '',
-                    'secret_key' => '',
-                    'webhook_secret' => '',
-                ]),
-                'webhook_url' => '',
-                'return_url' => '',
-                'cancel_url' => '',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('payment_settings');

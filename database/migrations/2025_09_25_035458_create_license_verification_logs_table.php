@@ -1,43 +1,43 @@
 <?php
 
-declare(strict_types=1);
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('license_verification_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('purchase_code_hash', 64); // MD5 hash of purchase code for security
-            $table->string('domain', 255);
-            $table->string('ip_address', 45); // IPv6 support
-            $table->string('user_agent', 500)->nullable();
-            $table->boolean('is_valid')->default(false);
-            $table->text('response_message')->nullable();
+            $table->string('purchase_code');
+            $table->string('domain');
+            $table->string('ip_address');
+            $table->string('user_agent');
+            $table->boolean('is_valid');
+            $table->text('message');
+            $table->string('source');
             $table->json('response_data')->nullable();
-            $table->string('verification_source', 50)->default('install'); // install, api, admin
-            $table->string('status', 20)->default('failed'); // success, failed, error
-            $table->text('error_details')->nullable();
-            $table->timestamp('verified_at')->nullable();
             $table->timestamps();
-
-            // Indexes for performance
-            $table->index(['purchase_code_hash', 'domain']);
-            $table->index(['ip_address', 'created_at']);
+            
+            // Foreign keys
+            $table->foreignId('license_id')->nullable()->constrained('licenses')->onDelete('cascade');
+            
+            // Security fields
+            $table->boolean('is_suspicious')->default(false);
+            $table->text('suspicious_reason')->nullable();
+            $table->json('security_flags')->nullable();
+            
+            // Indexes
+            $table->index(['purchase_code', 'is_valid']);
+            $table->index(['domain', 'is_valid']);
+            $table->index(['ip_address', 'is_valid']);
+            $table->index(['license_id', 'is_valid']);
             $table->index(['is_valid', 'created_at']);
-            $table->index('verification_source');
+            $table->index(['is_suspicious', 'created_at']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('license_verification_logs');
