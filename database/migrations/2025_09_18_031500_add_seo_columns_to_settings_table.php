@@ -13,50 +13,28 @@ return new class() extends Migration {
     public function up(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $this->addSeoSiteFields($table);
-            $this->addSeoKbFields($table);
-            $this->addSeoTicketsFields($table);
+            if (! Schema::hasColumn('settings', 'seo_site_title')) {
+                $table->string('seo_site_title')->nullable();
+            }
+            if (! Schema::hasColumn('settings', 'seo_site_description')) {
+                $table->text('seo_site_description')->nullable();
+            }
+            if (! Schema::hasColumn('settings', 'seo_og_image')) {
+                $table->string('seo_og_image')->nullable();
+            }
+            if (! Schema::hasColumn('settings', 'seo_kb_title')) {
+                $table->string('seo_kb_title')->nullable();
+            }
+            if (! Schema::hasColumn('settings', 'seo_kb_description')) {
+                $table->text('seo_kb_description')->nullable();
+            }
+            if (! Schema::hasColumn('settings', 'seo_tickets_title')) {
+                $table->string('seo_tickets_title')->nullable();
+            }
+            if (! Schema::hasColumn('settings', 'seo_tickets_description')) {
+                $table->text('seo_tickets_description')->nullable();
+            }
         });
-    }
-
-    /**
-     * Add SEO site fields
-     */
-    private function addSeoSiteFields(Blueprint $table): void
-    {
-        $this->addColumnIfNotExists($table, 'seo_site_title', 'string');
-        $this->addColumnIfNotExists($table, 'seo_site_description', 'text');
-        $this->addColumnIfNotExists($table, 'seo_og_image', 'string');
-    }
-
-    /**
-     * Add SEO knowledge base fields
-     */
-    private function addSeoKbFields(Blueprint $table): void
-    {
-        $this->addColumnIfNotExists($table, 'seo_kb_title', 'string');
-        $this->addColumnIfNotExists($table, 'seo_kb_description', 'text');
-    }
-
-    /**
-     * Add SEO tickets fields
-     */
-    private function addSeoTicketsFields(Blueprint $table): void
-    {
-        $this->addColumnIfNotExists($table, 'seo_tickets_title', 'string');
-        $this->addColumnIfNotExists($table, 'seo_tickets_description', 'text');
-    }
-
-    /**
-     * Helper method to add column if it doesn't exist
-     */
-    private function addColumnIfNotExists(Blueprint $table, string $column, string $type): void
-    {
-        if (Schema::hasColumn('settings', $column)) {
-            return;
-        }
-
-        $table->{$type}($column)->nullable();
     }
 
     /**
@@ -65,30 +43,27 @@ return new class() extends Migration {
     public function down(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $this->dropAddedColumns($table);
-        });
-    }
-
-    /**
-     * Drop all added columns
-     */
-    private function dropAddedColumns(Blueprint $table): void
-    {
-        $columnsToDrop = [
-            // SEO Site Fields
-            'seo_site_title', 'seo_site_description', 'seo_og_image',
-            
-            // SEO Knowledge Base Fields
-            'seo_kb_title', 'seo_kb_description',
-            
-            // SEO Tickets Fields
-            'seo_tickets_title', 'seo_tickets_description'
-        ];
-
-        foreach ($columnsToDrop as $column) {
-            if (Schema::hasColumn('settings', $column)) {
-                $table->dropColumn($column);
+            if (Schema::hasColumn('settings', 'seo_tickets_description')) {
+                $table->dropColumn('seo_tickets_description');
             }
-        }
+            if (Schema::hasColumn('settings', 'seo_tickets_title')) {
+                $table->dropColumn('seo_tickets_title');
+            }
+            if (Schema::hasColumn('settings', 'seo_kb_description')) {
+                $table->dropColumn('seo_kb_description');
+            }
+            if (Schema::hasColumn('settings', 'seo_kb_title')) {
+                $table->dropColumn('seo_kb_title');
+            }
+            if (Schema::hasColumn('settings', 'seo_og_image')) {
+                $table->dropColumn('seo_og_image');
+            }
+            if (Schema::hasColumn('settings', 'seo_site_description')) {
+                $table->dropColumn('seo_site_description');
+            }
+            if (Schema::hasColumn('settings', 'seo_site_title')) {
+                $table->dropColumn('seo_site_title');
+            }
+        });
     }
 };

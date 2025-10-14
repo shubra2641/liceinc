@@ -13,57 +13,29 @@ return new class() extends Migration {
     public function up(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $this->addLogoImageFields($table);
-            $this->addLogoSizeFields($table);
-            $this->addLogoTextFields($table);
+            // Add missing logo settings columns
+            if (! Schema::hasColumn('settings', 'site_logo_dark')) {
+                $table->string('site_logo_dark')->nullable()->after('site_logo');
+            }
+            if (! Schema::hasColumn('settings', 'logo_width')) {
+                $table->integer('logo_width')->default(150)->after('site_logo_dark');
+            }
+            if (! Schema::hasColumn('settings', 'logo_height')) {
+                $table->integer('logo_height')->default(50)->after('logo_width');
+            }
+            if (! Schema::hasColumn('settings', 'logo_show_text')) {
+                $table->boolean('logo_show_text')->default(true)->after('logo_height');
+            }
+            if (! Schema::hasColumn('settings', 'logo_text')) {
+                $table->string('logo_text')->nullable()->after('logo_show_text');
+            }
+            if (! Schema::hasColumn('settings', 'logo_text_color')) {
+                $table->string('logo_text_color')->default('#1f2937')->after('logo_text');
+            }
+            if (! Schema::hasColumn('settings', 'logo_text_font_size')) {
+                $table->string('logo_text_font_size')->default('24px')->after('logo_text_color');
+            }
         });
-    }
-
-    /**
-     * Add logo image fields
-     */
-    private function addLogoImageFields(Blueprint $table): void
-    {
-        $this->addColumnIfNotExists($table, 'site_logo_dark', 'string', 'site_logo');
-    }
-
-    /**
-     * Add logo size fields
-     */
-    private function addLogoSizeFields(Blueprint $table): void
-    {
-        $this->addColumnIfNotExists($table, 'logo_width', 'integer', 'site_logo_dark', ['default' => 150]);
-        $this->addColumnIfNotExists($table, 'logo_height', 'integer', 'logo_width', ['default' => 50]);
-    }
-
-    /**
-     * Add logo text fields
-     */
-    private function addLogoTextFields(Blueprint $table): void
-    {
-        $this->addColumnIfNotExists($table, 'logo_show_text', 'boolean', 'logo_height', ['default' => true]);
-        $this->addColumnIfNotExists($table, 'logo_text', 'string', 'logo_show_text');
-        $this->addColumnIfNotExists($table, 'logo_text_color', 'string', 'logo_text', ['default' => '#1f2937']);
-        $this->addColumnIfNotExists($table, 'logo_text_font_size', 'string', 'logo_text_color', ['default' => '24px']);
-    }
-
-    /**
-     * Helper method to add column if it doesn't exist
-     */
-    private function addColumnIfNotExists(Blueprint $table, string $column, string $type, string $after, array $options = []): void
-    {
-        if (Schema::hasColumn('settings', $column)) {
-            return;
-        }
-
-        $columnDefinition = $table->{$type}($column);
-        $columnDefinition->nullable();
-        
-        if (isset($options['default'])) {
-            $columnDefinition->default($options['default']);
-        }
-        
-        $columnDefinition->after($after);
     }
 
     /**
@@ -72,26 +44,15 @@ return new class() extends Migration {
     public function down(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $this->dropAddedColumns($table);
+            $table->dropColumn([
+                'site_logo_dark',
+                'logo_width',
+                'logo_height',
+                'logo_show_text',
+                'logo_text',
+                'logo_text_color',
+                'logo_text_font_size',
+            ]);
         });
-    }
-
-    /**
-     * Drop all added columns
-     */
-    private function dropAddedColumns(Blueprint $table): void
-    {
-        $columnsToDrop = [
-            // Logo Image Fields
-            'site_logo_dark',
-            
-            // Logo Size Fields
-            'logo_width', 'logo_height',
-            
-            // Logo Text Fields
-            'logo_show_text', 'logo_text', 'logo_text_color', 'logo_text_font_size'
-        ];
-
-        $table->dropColumn($columnsToDrop);
     }
 };

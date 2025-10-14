@@ -13,33 +13,17 @@ return new class() extends Migration {
      */
     public function up(): void
     {
-        if (!$this->shouldRunMigration()) {
+        // Skip this migration in testing environment if using SQLite
+        if (config('database.default') === 'sqlite' && app()->environment('testing')) {
             return;
         }
 
-        $this->removeDeprecatedColumns();
-        $this->cleanupLicenseTypeEnum();
-    }
-
-    /**
-     * Check if migration should run
-     */
-    private function shouldRunMigration(): bool
-    {
-        // Skip this migration in testing environment if using SQLite
-        if (config('database.default') === 'sqlite' && app()->environment('testing')) {
-            return false;
+        // Only run on MySQL/MariaDB
+        if (config('database.default') !== 'mysql') {
+            return;
         }
 
-        // Only run on MySQL/MariaDB
-        return config('database.default') === 'mysql';
-    }
-
-    /**
-     * Remove deprecated columns
-     */
-    private function removeDeprecatedColumns(): void
-    {
+        // Remove deprecated columns if they exist
         $columnsToRemove = [
             'old_license_key', 'old_license_email', 'old_verification_token',
             'old_usage_count', 'old_max_usage', 'deprecated_status',
@@ -53,58 +37,34 @@ return new class() extends Migration {
                 }
             }
         });
-    }
 
-    /**
-     * Clean up license_type enum values
-     */
-    private function cleanupLicenseTypeEnum(): void
-    {
-        if (!Schema::hasColumn('licenses', 'license_type')) {
-            return;
+        // Clean up license_type enum values (MySQL specific)
+        if (Schema::hasColumn('licenses', 'license_type')) {
+            // Create a temporary column with the correct enum values
+            Schema::table('licenses', function (Blueprint $table) {
+                $table->enum('license_type_temp', ['single', 'multi', 'developer', 'extended'])
+                    ->default('single')
+                    ->after('license_type');
+            });
+
+            // Update data to map old values to new values
+            DB::statement("UPDATE licenses SET license_type_temp = CASE 
+                WHEN license_type = 'regular' THEN 'single'
+                WHEN license_type = 'extended' THEN 'extended'
+                ELSE 'single'
+            END");
+
+            // Drop the old column
+            Schema::table('licenses', function (Blueprint $table) {
+                $table->dropColumn('license_type');
+            });
         }
 
-        $this->createTemporaryColumn();
-        $this->updateDataMapping();
-        $this->replaceOriginalColumn();
-    }
-
-    /**
-     * Create temporary column with correct enum values
-     */
-    private function createTemporaryColumn(): void
-    {
-        Schema::table('licenses', function (Blueprint $table) {
-            $table->enum('license_type_temp', ['single', 'multi', 'developer', 'extended'])
-                ->default('single')
-                ->after('license_type');
-        });
-    }
-
-    /**
-     * Update data to map old values to new values
-     */
-    private function updateDataMapping(): void
-    {
-        DB::statement("UPDATE licenses SET license_type_temp = CASE 
-            WHEN license_type = 'regular' THEN 'single'
-            WHEN license_type = 'extended' THEN 'extended'
-            ELSE 'single'
-        END");
-    }
-
-    /**
-     * Replace original column with cleaned up version
-     */
-    private function replaceOriginalColumn(): void
-    {
-        // Drop the old column
-        Schema::table('licenses', function (Blueprint $table) {
-            $table->dropColumn('license_type');
-        });
-
-        // Rename the new column to the original name
+        // Rename the new column to the original name.
+        // Use a raw ALTER TABLE statement to avoid Blueprint creating malformed default quoting
+        // which can produce SQL like default '''single'''.
         if (Schema::hasColumn('licenses', 'license_type_temp')) {
+            // MySQL ALTER TABLE CHANGE requires the full column definition; ensure correct ENUM and default
             DB::statement("ALTER TABLE `licenses` CHANGE `license_type_temp` `license_type` ENUM('single','multi','developer','extended') NOT NULL DEFAULT 'single'");
         }
     }
@@ -114,56 +74,33 @@ return new class() extends Migration {
      */
     public function down(): void
     {
-        if (!$this->shouldRunMigration()) {
+        // Skip this migration in testing environment if using SQLite
+        if (config('database.default') === 'sqlite' && app()->environment('testing')) {
             return;
         }
 
-        $this->restoreOldLicenseTypeEnum();
-    }
+        // Only run on MySQL/MariaDB
+        if (config('database.default') !== 'mysql') {
+            return;
+        }
 
-    /**
-     * Restore old license_type enum values
-     */
-    private function restoreOldLicenseTypeEnum(): void
-    {
-        $this->createOldTemporaryColumn();
-        $this->mapDataBackToOldValues();
-        $this->replaceWithOldColumn();
-    }
-
-    /**
-     * Create temporary column with old enum values
-     */
-    private function createOldTemporaryColumn(): void
-    {
+        // Create a temporary column with the old enum values
         Schema::table('licenses', function (Blueprint $table) {
             $table->enum('license_type_old', ['regular', 'extended'])->default('regular');
         });
-    }
 
-    /**
-     * Map current values back to old values
-     */
-    private function mapDataBackToOldValues(): void
-    {
+        // Map current values back to old values
         DB::statement("UPDATE licenses SET license_type_old = CASE 
             WHEN license_type IN ('single', 'multi', 'developer') THEN 'regular'
             WHEN license_type = 'extended' THEN 'extended'
             ELSE 'regular'
         END");
-    }
 
-    /**
-     * Replace current column with old version
-     */
-    private function replaceWithOldColumn(): void
-    {
-        // Drop current column
+        // Drop current column and rename old one back
         Schema::table('licenses', function (Blueprint $table) {
             $table->dropColumn('license_type');
         });
 
-        // Rename old column back
         DB::statement("ALTER TABLE `licenses` CHANGE `license_type_old` `license_type` ENUM('regular','extended') NOT NULL DEFAULT 'regular'");
     }
 };

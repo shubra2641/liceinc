@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('complete_settings', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('kb_categories', function (Blueprint $table) {
+            $table->text('meta_keywords')->nullable()->change();
         });
     }
 
@@ -22,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('complete_settings');
+        Schema::table('kb_categories', function (Blueprint $table) {
+            $table->string('meta_keywords')->nullable()->change();
+        });
     }
 };
