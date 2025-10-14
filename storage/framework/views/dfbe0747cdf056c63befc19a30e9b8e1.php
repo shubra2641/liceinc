@@ -1,4 +1,4 @@
-<?php $__env->startSection('title', trans('app.checking_license')); ?>
+<?php $__env->startSection('title', trans('app.license_check')); ?>
 <?php $__env->startSection('page-title', trans('app.license_check')); ?>
 <?php $__env->startSection('page-subtitle', trans('app.checking_license')); ?>
 

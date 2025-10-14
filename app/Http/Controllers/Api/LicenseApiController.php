@@ -51,7 +51,7 @@ class LicenseApiController extends Controller
             // Find product
             $product = Product::where('slug', $productSlug)->first();
             if (!$product) {
-                return $this->errorResponse('Product not found', 'PRODUCT_NOT_FOUND', 404);
+                return $this->licenseErrorResponse('Product not found', 'PRODUCT_NOT_FOUND', 404);
             }
 
             // Find license
@@ -70,7 +70,7 @@ class LicenseApiController extends Controller
                 if ($this->isValidEnvatoData($envatoData, $product)) {
                     $license = $this->createLicenseFromEnvato($product, $purchaseCode, $envatoData);
                 } else {
-                    return $this->errorResponse('License not found', 'LICENSE_NOT_FOUND', 404);
+                    return $this->licenseErrorResponse('License not found', 'LICENSE_NOT_FOUND', 404);
                 }
             }
 
@@ -83,11 +83,11 @@ class LicenseApiController extends Controller
             $this->logVerification($license, $domain, 'api_verification');
             DB::commit();
 
-            return $this->successResponse($license, $domain);
+            return $this->licenseSuccessResponse($license, $domain);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('License verification failed', ['error' => $e->getMessage()]);
-            return $this->errorResponse('Verification failed: ' . $e->getMessage(), 'INTERNAL_ERROR', 500);
+            return $this->licenseErrorResponse('Verification failed: ' . $e->getMessage(), 'INTERNAL_ERROR', 500);
         }
     }
 
@@ -112,7 +112,7 @@ class LicenseApiController extends Controller
             // Find product
             $product = Product::where('slug', $productSlug)->first();
             if (!$product) {
-                return $this->errorResponse('Product not found', 'PRODUCT_NOT_FOUND', 404);
+                return $this->licenseErrorResponse('Product not found', 'PRODUCT_NOT_FOUND', 404);
             }
 
             // Check if license already exists
@@ -143,7 +143,7 @@ class LicenseApiController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('License registration failed', ['error' => $e->getMessage()]);
-            return $this->errorResponse('Registration failed: ' . $e->getMessage(), 'INTERNAL_ERROR', 500);
+            return $this->licenseErrorResponse('Registration failed: ' . $e->getMessage(), 'INTERNAL_ERROR', 500);
         }
     }
 
@@ -160,7 +160,7 @@ class LicenseApiController extends Controller
             // Find product
             $product = Product::where('slug', $productSlug)->first();
             if (!$product) {
-                return $this->errorResponse('Product not found', 'PRODUCT_NOT_FOUND', 404);
+                return $this->licenseErrorResponse('Product not found', 'PRODUCT_NOT_FOUND', 404);
             }
 
             // Find license
@@ -169,7 +169,7 @@ class LicenseApiController extends Controller
                 ->first();
 
             if (!$license) {
-                return $this->errorResponse('License not found', 'LICENSE_NOT_FOUND', 404);
+                return $this->licenseErrorResponse('License not found', 'LICENSE_NOT_FOUND', 404);
             }
 
             $isActive = $this->isLicenseActive($license);
@@ -194,7 +194,7 @@ class LicenseApiController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('License status check failed', ['error' => $e->getMessage()]);
-            return $this->errorResponse('Status check failed: ' . $e->getMessage(), 'INTERNAL_ERROR', 500);
+            return $this->licenseErrorResponse('Status check failed: ' . $e->getMessage(), 'INTERNAL_ERROR', 500);
         }
     }
 
@@ -221,9 +221,9 @@ class LicenseApiController extends Controller
     }
 
     /**
-     * Error response
+     * License error response
      */
-    private function errorResponse(string $message, string $errorCode, int $status = 400): JsonResponse
+    private function licenseErrorResponse(string $message, string $errorCode, int $status = 400): JsonResponse
     {
         return response()->json([
             'valid' => false,
@@ -233,9 +233,9 @@ class LicenseApiController extends Controller
     }
 
     /**
-     * Success response
+     * License success response
      */
-    private function successResponse(License $license, ?string $domain): JsonResponse
+    private function licenseSuccessResponse(License $license, ?string $domain): JsonResponse
     {
         return response()->json([
             'valid' => true,
@@ -275,7 +275,7 @@ class LicenseApiController extends Controller
     private function handleInactiveLicense(License $license): JsonResponse
     {
         if ($license->status === 'suspended') {
-            return $this->errorResponse('License is suspended', 'LICENSE_SUSPENDED', 403);
+            return $this->licenseErrorResponse('License is suspended', 'LICENSE_SUSPENDED', 403);
         }
 
         if ($license->license_expires_at && $license->license_expires_at->isPast()) {
@@ -289,7 +289,7 @@ class LicenseApiController extends Controller
             ], 403);
         }
 
-        return $this->errorResponse('License is not active', 'LICENSE_INACTIVE', 403);
+        return $this->licenseErrorResponse('License is not active', 'LICENSE_INACTIVE', 403);
     }
 
     /**
