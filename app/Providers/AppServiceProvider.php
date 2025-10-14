@@ -77,6 +77,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Debug: Log that AppServiceProvider boot is called
+        \Log::info('AppServiceProvider boot() called');
+        
         try {
             // Auto-detect proper app URL to fix routing issues
             $this->configureAppUrl();
@@ -87,8 +90,11 @@ class AppServiceProvider extends ServiceProvider
             $this->configurePagination();
             // Configure rate limiters
             $this->configureRateLimiters();
+            
+            \Log::info('AppServiceProvider boot() completed successfully');
         } catch (\Exception $e) {
             // Log error but don't break the application
+            \Log::error('Failed to bootstrap AppServiceProvider: ' . $e->getMessage());
             if (app()->bound('log')) {
                 app('log')->error('Failed to bootstrap AppServiceProvider: ' . $e->getMessage());
             }
