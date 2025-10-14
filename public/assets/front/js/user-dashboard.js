@@ -25,8 +25,8 @@ const Utils = {
   }
 };
 
-// ===== MODAL MANAGER =====
-class ModalManager {
+// ===== BASE MANAGER =====
+class BaseManager {
   constructor() {
     this.init();
   }
@@ -39,7 +39,14 @@ class ModalManager {
     document.addEventListener('click', (e) => {
       this.handleClick(e);
     });
+  }
+}
 
+// ===== MODAL MANAGER =====
+class ModalManager extends BaseManager {
+  bindEvents() {
+    super.bindEvents();
+    
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         this.hideAll();
@@ -241,20 +248,10 @@ class MobileMenuManager {
 }
 
 // ===== DROPDOWN MANAGER =====
-class DropdownManager {
-  constructor() {
-    this.init();
-  }
-
-  init() {
-    this.bindEvents();
-  }
-
+class DropdownManager extends BaseManager {
   bindEvents() {
-    document.addEventListener('click', (e) => {
-      this.handleClick(e);
-    });
-
+    super.bindEvents();
+    
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         this.handleTabNavigation(e);
