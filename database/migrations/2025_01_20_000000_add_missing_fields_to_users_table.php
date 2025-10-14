@@ -16,7 +16,7 @@ return new class() extends Migration {
             return;
         }
 
-        Schema::table('users', function (Blueprint $table) {
+            Schema::table('users', function (Blueprint $table) {
             $this->addPersonalInfoFields($table);
             $this->addAddressFields($table);
             $this->addContactFields($table);
