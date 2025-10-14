@@ -131,7 +131,15 @@ return new class() extends Migration {
         }
 
         $columnDefinition = $table->{$type}($column);
-        
+        $this->applyColumnOptions($columnDefinition, $options);
+        $columnDefinition->after($after);
+    }
+
+    /**
+     * Apply options to column definition
+     */
+    private function applyColumnOptions($columnDefinition, array $options): void
+    {
         if (isset($options['nullable']) && $options['nullable']) {
             $columnDefinition->nullable();
         }
@@ -147,8 +155,6 @@ return new class() extends Migration {
         if (isset($options['constrained'])) {
             $columnDefinition->constrained($options['constrained'])->nullOnDelete();
         }
-        
-        $columnDefinition->after($after);
     }
 
     /**
