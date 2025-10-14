@@ -405,20 +405,64 @@ class Product extends Model
             'categories' => new \Illuminate\Database\Eloquent\Collection(),
             'articles' => new \Illuminate\Database\Eloquent\Collection(),
         ];
-        // Get selected categories
-        if (is_array($this->kb_categories) && count($this->kb_categories) > 0) {
-            $categories = KbCategory::whereIn('id', $this->kb_categories)->get();
-            $accessibleContent['categories'] = $categories;
-            // Get all articles from selected categories
-            $articles = KbArticle::whereIn('kb_category_id', $this->kb_categories)->get();
-            $accessibleContent['articles'] = $articles;
-        }
-        // Add specifically selected articles
-        if (is_array($this->kb_articles) && count($this->kb_articles) > 0) {
-            $specificArticles = KbArticle::whereIn('id', $this->kb_articles)->get();
-            $accessibleContent['articles'] = $accessibleContent['articles']->merge($specificArticles)->unique('id');
-        }
+
+        $this->loadCategories($accessibleContent);
+        $this->loadArticles($accessibleContent);
+
         return $accessibleContent;
+    }
+
+    /**
+     * Load KB categories for accessible content.
+     */
+    private function loadCategories(array &$accessibleContent): void
+    {
+        if (!$this->hasValidKbCategories()) {
+            return;
+        }
+
+        $categories = KbCategory::whereIn('id', $this->kb_categories)->get();
+        $accessibleContent['categories'] = $categories;
+
+        $this->loadArticlesFromCategories($accessibleContent);
+    }
+
+    /**
+     * Load specifically selected KB articles.
+     */
+    private function loadArticles(array &$accessibleContent): void
+    {
+        if (!$this->hasValidKbArticles()) {
+            return;
+        }
+
+        $specificArticles = KbArticle::whereIn('id', $this->kb_articles)->get();
+        $accessibleContent['articles'] = $accessibleContent['articles']->merge($specificArticles)->unique('id');
+    }
+
+    /**
+     * Load articles from selected categories.
+     */
+    private function loadArticlesFromCategories(array &$accessibleContent): void
+    {
+        $articles = KbArticle::whereIn('kb_category_id', $this->kb_categories)->get();
+        $accessibleContent['articles'] = $articles;
+    }
+
+    /**
+     * Check if KB categories are valid.
+     */
+    private function hasValidKbCategories(): bool
+    {
+        return is_array($this->kb_categories) && count($this->kb_categories) > 0;
+    }
+
+    /**
+     * Check if KB articles are valid.
+     */
+    private function hasValidKbArticles(): bool
+    {
+        return is_array($this->kb_articles) && count($this->kb_articles) > 0;
     }
     /**
      * Check if support is still active for a license.

@@ -145,6 +145,7 @@ class ProcessCronCommand extends Command
                     "Failed to renew license for invoice {$invoice->invoice_number}",
                     ['error' => $e->getMessage()]
                 );
+            }
         }
         
         $this->line("   Processed: {$processed} paid invoices");

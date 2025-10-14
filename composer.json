@@ -68,6 +68,27 @@
         "code-quality": [
             "@phpstan",
             "@php artisan pint"
+        ],
+        "complexity": [
+            "php artisan complexity:analyze"
+        ],
+        "complexity:app": [
+            "php artisan complexity:analyze app --threshold=10"
+        ],
+        "complexity:controllers": [
+            "php artisan complexity:analyze app/Http/Controllers --threshold=15"
+        ],
+        "complexity:models": [
+            "php artisan complexity:analyze app/Models --threshold=8"
+        ],
+        "complexity:services": [
+            "php artisan complexity:analyze app/Services --threshold=12"
+        ],
+        "complexity:json": [
+            "php artisan complexity:analyze app --format=json --threshold=10"
+        ],
+        "complexity:high": [
+            "php artisan complexity:analyze app --threshold=20 --sort=complexity"
         ]
     },
     "extra": {
