@@ -1,136 +1,79 @@
 /**
- * User Dashboard JavaScript - Optimized and Secure
- * Handles modal, dark mode, and responsive navigation with reduced complexity
+ * User Dashboard JavaScript - Simple and Clean
  */
 
-'use strict';
+document.addEventListener('DOMContentLoaded', function () {
+  // ===== MODAL FUNCTIONS =====
+  function initModals() {
+    document.addEventListener('click', function (e) {
+      // Close modal on backdrop click
+      if (e.target.classList.contains('user-modal-backdrop')) {
+        hideAllModals();
+        return;
+      }
 
-// ===== UTILITY FUNCTIONS =====
-const Utils = {
-  // Simple DOM helpers
-  addClass(element, className) {
-    if (element) element.classList.add(className);
-  },
+      // Close modal on close button click
+      if (e.target.classList.contains('user-modal-close') || e.target.closest('.user-modal-close')) {
+        hideAllModals();
+        return;
+      }
 
-  removeClass(element, className) {
-    if (element) element.classList.remove(className);
-  },
-
-  toggleClass(element, className) {
-    if (element) element.classList.toggle(className);
-  },
-
-  setStyle(element, property, value) {
-    if (element) element.style.setProperty(property, value);
-  }
-};
-
-// ===== BASE MANAGER =====
-class BaseManager {
-  constructor() {
-    this.init();
-  }
-
-  init() {
-    this.bindEvents();
-  }
-
-  bindEvents() {
-    document.addEventListener('click', (e) => {
-      this.handleClick(e);
+      // Show modal on trigger click
+      if (e.target.hasAttribute('data-modal-trigger')) {
+        const modalId = e.target.getAttribute('data-modal-trigger');
+        showModal(modalId);
+      }
     });
-  }
-}
 
-// ===== MODAL MANAGER =====
-class ModalManager extends BaseManager {
-  bindEvents() {
-    super.bindEvents();
-    
-    document.addEventListener('keydown', (e) => {
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
-        this.hideAll();
+        hideAllModals();
       }
     });
   }
 
-  handleClick(e) {
-    // Close modal on backdrop click
-    if (e.target.classList.contains('user-modal-backdrop')) {
-      this.hideAll();
-      return;
-    }
-
-    // Close modal on close button click
-    if (e.target.classList.contains('user-modal-close') || 
-        e.target.closest('.user-modal-close')) {
-      this.hideAll();
-      return;
-    }
-
-    // Show modal on trigger click
-    if (e.target.hasAttribute('data-modal-trigger')) {
-      const modalId = e.target.getAttribute('data-modal-trigger');
-      this.show(modalId);
-    }
-  }
-
-  hideAll() {
+  function hideAllModals() {
     const modals = document.querySelectorAll('.license-history-modal, .user-modal-backdrop');
     modals.forEach(modal => {
-      Utils.removeClass(modal, 'show');
-      Utils.setStyle(modal, 'display', 'none');
+      modal.classList.remove('show');
+      modal.style.display = 'none';
     });
-    Utils.setStyle(document.body, 'overflow', 'auto');
+    document.body.style.overflow = 'auto';
   }
 
-  show(modalId) {
+  function showModal(modalId) {
     const modal = document.getElementById(modalId);
     const backdrop = document.querySelector('.user-modal-backdrop');
 
     if (modal && backdrop) {
-      Utils.addClass(modal, 'show');
-      Utils.addClass(backdrop, 'show');
-      Utils.setStyle(modal, 'display', 'block');
-      Utils.setStyle(backdrop, 'display', 'block');
-      Utils.setStyle(document.body, 'overflow', 'hidden');
+      modal.classList.add('show');
+      backdrop.classList.add('show');
+      modal.style.display = 'block';
+      backdrop.style.display = 'block';
+      document.body.style.overflow = 'hidden';
     }
   }
-}
 
-// ===== THEME MANAGER =====
-class ThemeManager {
-  constructor() {
-    this.init();
-  }
-
-  init() {
-    this.bindEvents();
-    this.initializeTheme();
-  }
-
-  bindEvents() {
+  // ===== THEME FUNCTIONS =====
+  function initTheme() {
     const themeToggleBtn = document.querySelector('[data-theme-toggle]');
     if (themeToggleBtn) {
-      themeToggleBtn.addEventListener('click', () => this.toggle());
+      themeToggleBtn.addEventListener('click', toggleTheme);
     }
 
-    // Listen for system theme changes
-    window.matchMedia('(prefers-color-scheme: dark)')
-      .addEventListener('change', (e) => {
-        if (!localStorage.getItem('theme')) {
-          this.set(e.matches ? 'dark' : 'light');
-        }
-      });
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
   }
 
-  getStoredTheme() {
-    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return localStorage.getItem('theme') || (prefersDarkMode ? 'dark' : 'light');
+  function toggleTheme() {
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
   }
 
-  set(theme) {
-    // Safe theme setting without direct DOM manipulation
+  function setTheme(theme) {
     if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('dark');
@@ -138,355 +81,201 @@ class ThemeManager {
       document.documentElement.removeAttribute('data-theme');
       document.documentElement.classList.remove('dark');
     }
-
     localStorage.setItem('theme', theme);
   }
 
-  toggle() {
-    const currentTheme = this.getStoredTheme();
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    this.set(newTheme);
-  }
+  // ===== MOBILE MENU FUNCTIONS =====
+  function initMobileMenu() {
+    const mobileMenuToggle = document.querySelector('[data-mobile-menu-toggle]');
+    const mobileMenu = document.querySelector('[data-mobile-menu]');
+    const mobileMenuClose = document.querySelector('.mobile-menu-close');
 
-  initializeTheme() {
-    const theme = this.getStoredTheme();
-    this.set(theme);
-  }
-}
-
-// ===== MOBILE MENU MANAGER =====
-class MobileMenuManager {
-  constructor() {
-    this.mobileMenuToggle = document.querySelector('[data-mobile-menu-toggle]');
-    this.mobileMenu = document.querySelector('[data-mobile-menu]');
-    this.mobileMenuClose = document.querySelector('.mobile-menu-close');
-    this.init();
-  }
-
-  init() {
-    this.bindEvents();
-    this.handleResize();
-    window.addEventListener('resize', () => this.handleResize());
-  }
-
-  bindEvents() {
-    if (this.mobileMenuToggle) {
-      this.mobileMenuToggle.addEventListener('click', () => this.toggle());
+    if (mobileMenuToggle) {
+      mobileMenuToggle.addEventListener('click', toggleMobileMenu);
     }
 
-    if (this.mobileMenuClose) {
-      this.mobileMenuClose.addEventListener('click', () => this.close());
+    if (mobileMenuClose) {
+      mobileMenuClose.addEventListener('click', closeMobileMenu);
     }
 
-    document.addEventListener('click', (e) => {
+    // Close on backdrop click
+    document.addEventListener('click', function (e) {
       if (e.target.classList.contains('mobile-menu-backdrop')) {
-        this.close();
+        closeMobileMenu();
       }
     });
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.mobileMenu && this.mobileMenu.classList.contains('show')) {
-        this.close();
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && mobileMenu && mobileMenu.classList.contains('active')) {
+        closeMobileMenu();
       }
     });
+
+    // Handle resize
+    window.addEventListener('resize', handleResize);
+    handleResize();
   }
 
-  toggle() {
-    if (this.mobileMenu) {
-      Utils.toggleClass(this.mobileMenu, 'active');
-      Utils.toggleClass(document.body, 'mobile-menu-open');
-      this.toggleBackdrop();
+  function toggleMobileMenu() {
+    const mobileMenu = document.querySelector('[data-mobile-menu]');
+    if (mobileMenu) {
+      mobileMenu.classList.toggle('active');
+      document.body.classList.toggle('mobile-menu-open');
+      toggleBackdrop();
     }
   }
 
-  close() {
-    if (this.mobileMenu) {
-      Utils.removeClass(this.mobileMenu, 'active');
-      Utils.removeClass(document.body, 'mobile-menu-open');
-      this.hideBackdrop();
+  function closeMobileMenu() {
+    const mobileMenu = document.querySelector('[data-mobile-menu]');
+    if (mobileMenu) {
+      mobileMenu.classList.remove('active');
+      document.body.classList.remove('mobile-menu-open');
+      hideBackdrop();
     }
   }
 
-  toggleBackdrop() {
+  function toggleBackdrop() {
     let backdrop = document.querySelector('.mobile-menu-backdrop');
     if (!backdrop) {
       backdrop = document.createElement('div');
       backdrop.classList.add('mobile-menu-backdrop');
       document.body.appendChild(backdrop);
     }
-    Utils.toggleClass(backdrop, 'active');
+    backdrop.classList.toggle('active');
   }
 
-  hideBackdrop() {
+  function hideBackdrop() {
     const backdrop = document.querySelector('.mobile-menu-backdrop');
     if (backdrop) {
-      Utils.removeClass(backdrop, 'active');
+      backdrop.classList.remove('active');
     }
   }
 
-  handleResize() {
+  function handleResize() {
     const isMobile = window.innerWidth <= 768;
     const desktopNav = document.querySelector('.user-nav-links');
+    const mobileMenuToggle = document.querySelector('[data-mobile-menu-toggle]');
 
     if (isMobile) {
-      if (desktopNav) {
-        Utils.setStyle(desktopNav, 'display', 'none');
-      }
-      if (this.mobileMenuToggle) {
-        Utils.setStyle(this.mobileMenuToggle, 'display', 'flex');
-      }
+      if (desktopNav) desktopNav.style.display = 'none';
+      if (mobileMenuToggle) mobileMenuToggle.style.display = 'flex';
     } else {
-      if (desktopNav) {
-        Utils.setStyle(desktopNav, 'display', 'flex');
-      }
-      if (this.mobileMenuToggle) {
-        Utils.setStyle(this.mobileMenuToggle, 'display', 'none');
-      }
-      this.close();
-    }
-  }
-}
-
-// ===== DROPDOWN MANAGER =====
-class DropdownManager extends BaseManager {
-  bindEvents() {
-    super.bindEvents();
-    
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Tab') {
-        this.handleTabNavigation(e);
-      }
-    });
-  }
-
-  handleClick(e) {
-    const dropdownToggle = e.target.closest('.user-dropdown-toggle');
-    const dropdown = e.target.closest('.user-dropdown');
-
-    if (dropdownToggle) {
-      e.preventDefault();
-      const dropdownMenu = dropdown?.querySelector('.user-dropdown-menu');
-      if (dropdownMenu) {
-        this.closeOthers(dropdownMenu);
-        Utils.toggleClass(dropdownMenu, 'open');
-      }
-    } else {
-      this.closeAll();
+      if (desktopNav) desktopNav.style.display = 'flex';
+      if (mobileMenuToggle) mobileMenuToggle.style.display = 'none';
+      closeMobileMenu();
     }
   }
 
-  handleTabNavigation(e) {
-    const focusedElement = document.activeElement;
-    const dropdown = focusedElement?.closest('.user-dropdown');
-
-    if (dropdown && !e.shiftKey) {
-      const dropdownMenu = dropdown.querySelector('.user-dropdown-menu');
-      if (dropdownMenu && !dropdownMenu.classList.contains('open')) {
-        SecureUtils.safeAddClass(dropdownMenu, 'open');
+  // ===== DROPDOWN FUNCTIONS =====
+  function initDropdowns() {
+    document.addEventListener('click', function (e) {
+      // Close dropdown on outside click
+      if (!e.target.closest('.dropdown')) {
+        closeAllDropdowns();
+        return;
       }
-    }
-  }
 
-  closeOthers(currentMenu) {
-    document.querySelectorAll('.user-dropdown-menu').forEach(menu => {
-      if (menu !== currentMenu) {
-        SecureUtils.safeRemoveClass(menu, 'open');
+      // Toggle dropdown on trigger click
+      if (e.target.hasAttribute('data-dropdown-toggle')) {
+        const dropdownId = e.target.getAttribute('data-dropdown-toggle');
+        toggleDropdown(dropdownId);
       }
     });
   }
 
-  closeAll() {
-    document.querySelectorAll('.user-dropdown-menu').forEach(menu => {
-      SecureUtils.safeRemoveClass(menu, 'open');
-    });
-  }
-}
-
-// ===== FORM MANAGER =====
-class FormManager {
-  constructor() {
-    this.init();
-  }
-
-  init() {
-    this.bindEvents();
-  }
-
-  bindEvents() {
-    document.querySelectorAll('form').forEach(form => {
-      form.addEventListener('submit', () => this.handleSubmit(form));
-    });
-
-    document.addEventListener('click', (e) => {
-      if (e.target.hasAttribute('data-action') && 
-          e.target.getAttribute('data-action') === 'logout') {
-        e.preventDefault();
-        this.handleLogout();
+  function toggleDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    if (dropdown) {
+      if (dropdown.classList.contains('active')) {
+        closeAllDropdowns();
+      } else {
+        closeAllDropdowns();
+        dropdown.classList.add('active');
       }
-    });
-  }
-
-  handleSubmit(form) {
-    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      SecureUtils.safeAddClass(submitBtn, 'loading');
-
-      // Re-enable after 5 seconds as fallback
-      setTimeout(() => {
-        submitBtn.disabled = false;
-        SecureUtils.safeRemoveClass(submitBtn, 'loading');
-      }, 5000);
     }
   }
 
-  handleLogout() {
-    const logoutForm = document.getElementById('logout-form');
-    if (logoutForm) {
-      logoutForm.submit();
-    }
-  }
-}
-
-// ===== SCROLL MANAGER =====
-class ScrollManager {
-  constructor() {
-    this.init();
-  }
-
-  init() {
-    this.bindEvents();
-  }
-
-  bindEvents() {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', (e) => this.handleAnchorClick(e));
+  function closeAllDropdowns() {
+    const activeDropdowns = document.querySelectorAll('.dropdown.active');
+    activeDropdowns.forEach(dropdown => {
+      dropdown.classList.remove('active');
     });
   }
 
-  handleAnchorClick(e) {
-    e.preventDefault();
-    const target = document.querySelector(e.target.getAttribute('href'));
-    if (target) {
-      target.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
-  }
-}
-
-// ===== NOTIFICATION MANAGER =====
-class NotificationManager {
-  constructor() {
-    this.init();
-  }
-
-  init() {
-    this.autoHideNotifications();
-  }
-
-  autoHideNotifications() {
-    document.querySelectorAll('.user-notification').forEach(notification => {
-      setTimeout(() => {
-        SecureUtils.safeRemoveClass(notification, 'show');
-        setTimeout(() => {
-          notification.remove();
-        }, 300);
-      }, 5000);
-    });
-  }
-}
-
-// ===== LAZY LOAD MANAGER =====
-class LazyLoadManager {
-  constructor() {
-    this.init();
-  }
-
-  init() {
-    if ('IntersectionObserver' in window) {
-      this.setupImageObserver();
-    }
-  }
-
-  setupImageObserver() {
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target;
-          img.src = img.dataset.src;
-          SecureUtils.safeRemoveClass(img, 'lazy');
-          observer.unobserve(img);
-        }
-      });
-    });
-
-    document.querySelectorAll('img[data-src]').forEach(img => {
-      imageObserver.observe(img);
-    });
-  }
-}
-
-// ===== LICENSE STATUS MANAGER =====
-class LicenseStatusManager {
-  constructor() {
-    this.bindEvents();
-  }
-
-  bindEvents() {
-    document.addEventListener('click', (e) => {
+  // ===== COPY FUNCTION =====
+  function initCopyButtons() {
+    document.addEventListener('click', function (e) {
       if (e.target.closest('.copy-btn')) {
-        this.handleCopy(e);
-      }
-      if (e.target.closest('.check-another-btn')) {
-        this.handleCheckAnother();
+        e.preventDefault();
+        const button = e.target.closest('.copy-btn');
+        const targetId = button.getAttribute('data-copy-target');
+        const targetElement = document.getElementById(targetId);
+
+        if (targetElement) {
+          navigator.clipboard.writeText(targetElement.textContent).then(() => {
+            showCopySuccess(button);
+          });
+        }
       }
     });
   }
 
-  handleCopy(e) {
-    e.preventDefault();
-    const button = e.target.closest('.copy-btn');
-    const targetId = button.getAttribute('data-copy-target');
-    const targetElement = document.getElementById(targetId);
-    
-    if (targetElement) {
-      navigator.clipboard.writeText(targetElement.textContent).then(() => {
-        this.showCopySuccess(button);
-      });
-    }
-  }
-
-  showCopySuccess(button) {
-    const originalHTML = button.innerHTML;
-    button.innerHTML = '<i class="fas fa-check"></i>';
+  function showCopySuccess(button) {
+    const originalText = button.textContent;
+    button.textContent = '✓';
     button.classList.add('copied');
-    
+
     setTimeout(() => {
-      button.innerHTML = originalHTML;
+      button.textContent = originalText;
       button.classList.remove('copied');
     }, 2000);
   }
 
-  handleCheckAnother() {
-    const form = document.getElementById('licenseCheckForm');
-    if (form) form.reset();
+  // ===== LAZY LOAD FUNCTIONS =====
+  function initLazyLoad() {
+    if ('IntersectionObserver' in window) {
+      const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src;
+            img.classList.remove('lazy');
+            observer.unobserve(img);
+          }
+        });
+      });
+
+      document.querySelectorAll('img[data-src]').forEach(img => {
+        imageObserver.observe(img);
+      });
+    }
   }
-}
 
-// ===== INITIALIZATION =====
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialize all managers
-  new ModalManager();
-  new ThemeManager();
-  new MobileMenuManager();
-  new DropdownManager();
-  new FormManager();
-  new ScrollManager();
-  new NotificationManager();
-  new LazyLoadManager();
-  new LicenseStatusManager();
+  // ===== SCROLL FUNCTIONS =====
+  function initScroll() {
+    window.addEventListener('scroll', function () {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const header = document.querySelector('.user-header');
 
-  console.log('User Dashboard JavaScript initialized successfully');
+      if (header) {
+        if (scrollTop > 100) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      }
+    });
+  }
+
+  // ===== INITIALIZE ALL =====
+  initModals();
+  initTheme();
+  initMobileMenu();
+  initDropdowns();
+  initCopyButtons();
+  initLazyLoad();
+  initScroll();
+
+  console.log('User Dashboard JavaScript initialized');
 });
