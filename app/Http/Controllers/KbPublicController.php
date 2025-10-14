@@ -24,7 +24,7 @@ class KbPublicController extends Controller
 {
     public function __construct(
         private PurchaseCodeService $purchaseCodeService
-    )
+    ) {}
 
     /**
      * Display KB index
