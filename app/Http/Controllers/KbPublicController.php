@@ -61,7 +61,6 @@ class KbPublicController extends Controller
     {
         try {
             $this->validateSlug($slug);
-            
             $category = KbCategory::where('slug', $slug)
                 ->with('product')
                 ->firstOrFail();
@@ -242,10 +241,10 @@ class KbPublicController extends Controller
      */
     private function checkArticleAccess($article, $user): bool
     {
-        $requiresAccess = $article->requires_serial || 
-                         $article->requires_purchase_code || 
-                         $article->product_id || 
-                         $article->category->requires_serial || 
+        $requiresAccess = $article->requires_serial ||
+                         $article->requires_purchase_code ||
+                         $article->product_id ||
+                         $article->category->requires_serial ||
                          $article->category->product_id;
 
         if (!$requiresAccess) {
@@ -294,10 +293,10 @@ class KbPublicController extends Controller
      */
     private function articleRequiresAccess($article): bool
     {
-        return $article->requires_serial || 
-               $article->requires_purchase_code || 
-               $article->product_id || 
-               $article->category->requires_serial || 
+        return $article->requires_serial ||
+               $article->requires_purchase_code ||
+               $article->product_id ||
+               $article->category->requires_serial ||
                $article->category->product_id;
     }
 
@@ -446,10 +445,10 @@ class KbPublicController extends Controller
     {
         if (session()->has($accessToken)) {
             $tokenData = session($accessToken);
-            if (is_array($tokenData) && 
-                isset($tokenData['expires_at']) && 
-                isset($tokenData['category_id']) && 
-                $tokenData['expires_at'] > now() && 
+            if (is_array($tokenData) &&
+                isset($tokenData['expires_at']) &&
+                isset($tokenData['category_id']) &&
+                $tokenData['expires_at'] > now() &&
                 $tokenData['category_id'] == $categoryId) {
                 return ['valid' => true];
             }
@@ -465,10 +464,10 @@ class KbPublicController extends Controller
     {
         if (session()->has($accessToken)) {
             $tokenData = session($accessToken);
-            if (is_array($tokenData) && 
-                isset($tokenData['expires_at']) && 
-                isset($tokenData['article_id']) && 
-                $tokenData['expires_at'] > now() && 
+            if (is_array($tokenData) &&
+                isset($tokenData['expires_at']) &&
+                isset($tokenData['article_id']) &&
+                $tokenData['expires_at'] > now() &&
                 $tokenData['article_id'] == $articleId) {
                 return ['valid' => true];
             }
