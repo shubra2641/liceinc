@@ -14,15 +14,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            AdminSeeder::class,
             RoleSeeder::class,
             ProgrammingLanguageSeeder::class,
             EmailTemplateSeeder::class,
         ]);
-
-        // Add test licenses at the very end if seeder exists
-        if (class_exists(TestLicenseSeeder::class)) {
-            $this->call(TestLicenseSeeder::class);
-        }
     }
 }
