@@ -633,15 +633,6 @@ Route::middleware(['auth', 'admin', 'verified'])->prefix('admin')->name('admin.'
             [UpdateController::class, 'installAutoUpdate'],
         )->name('updates.auto-install');
 
-        // Central API Integration
-        Route::post(
-            '/central/version-history',
-            [UpdateController::class, 'getVersionHistoryFromCentral'],
-        )->name('updates.central.version-history');
-        Route::post(
-            '/central/latest-version',
-            [UpdateController::class, 'getLatestVersionFromCentral'],
-        )->name('updates.central.latest-version');
 
         // Database Version Management
         Route::get(

@@ -10,7 +10,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AutoUpdateRequest;
 use App\Http\Requests\Admin\SystemUpdateRequest;
 use App\Http\Requests\Admin\UploadUpdatePackageRequest;
-use App\Http\Requests\Admin\VersionManagementRequest;
 use App\Services\LicenseServerService;
 use App\Services\UpdatePackageService;
 use App\Services\UpdateService;
@@ -717,78 +716,5 @@ class UpdateController extends Controller
         }
     }
 
-    /**
-     * Get version history from central API
-     */
-    public function getVersionHistoryFromCentral(VersionManagementRequest $request)
-    {
-        try {
-            $validated = $request->validated();
-            $licenseKey = $validated['license_key'];
-            $productSlug = $validated['product_slug'];
-            $domain = $validated['domain'] ?? null;
 
-            $historyData = $this->licenseServerService->getVersionHistory($licenseKey, $productSlug, $domain);
-
-            if ($historyData['success']) {
-                return response()->json([
-                    'success' => true,
-                    'data' => $historyData['data'],
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => $historyData['message'] ?? 'Failed to get version history',
-                    'error_code' => $historyData['error_code'] ?? 'UNKNOWN_ERROR',
-                ], 403);
-            }
-        } catch (\Exception $e) {
-            Log::error('Failed to get version history from central API', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while getting version history: ' . $e->getMessage(),
-                'error_code' => 'SERVER_ERROR',
-            ], 500);
-        }
-    }
-
-    /**
-     * Get latest version from central API
-     */
-    public function getLatestVersionFromCentral(VersionManagementRequest $request)
-    {
-        try {
-            $validated = $request->validated();
-            $licenseKey = $validated['license_key'];
-            $productSlug = $validated['product_slug'];
-            $domain = $validated['domain'] ?? null;
-
-            $latestData = $this->licenseServerService->getLatestVersion($licenseKey, $productSlug, $domain);
-
-            if ($latestData['success']) {
-                return response()->json(['success' => true, 'data' => $latestData['data']]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => $latestData['message'] ?? 'Failed to get latest version',
-                    'error_code' => $latestData['error_code'] ?? 'UNKNOWN_ERROR',
-                ], 403);
-            }
-        } catch (\Exception $e) {
-            Log::error('Failed to get latest version from central API', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while getting latest version: ' . $e->getMessage(),
-                'error_code' => 'SERVER_ERROR',
-            ], 500);
-        }
-    }
 }
