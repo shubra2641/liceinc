@@ -150,33 +150,9 @@ class KbArticleController extends Controller
     public function store(Request $request): RedirectResponse
     {
         try {
-            // Authorization check
-            $user = Auth::user();
-            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
-                Log::warning('Unauthorized attempt to create KB article', [
-                    'user_id' => Auth::id(),
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                abort(403, 'Unauthorized access');
-            }
+            $this->checkAdminAuthorization('create KB article');
             DB::beginTransaction();
-            $validated = $request->validate([
-                'kb_category_id' => ['required', 'exists:kb_categories,id'],
-                'title' => ['required', 'string', 'max:255'],
-                'excerpt' => ['nullable', 'string'],
-                'content' => ['required', 'string'],
-                'image' => ['nullable', 'image', 'max:2048'],
-                'is_published' => ['sometimes', 'boolean'],
-                'serial' => ['nullable', 'string', 'max:255'],
-                'requires_serial' => ['sometimes', 'boolean'],
-                'serial_message' => ['nullable', 'string'],
-                'meta_title' => ['nullable', 'string', 'max:255'],
-                'meta_description' => ['nullable', 'string', 'max:500'],
-                'meta_keywords' => ['nullable', 'string'],
-                'allow_comments' => ['boolean'],
-                'is_featured' => ['boolean'],
-            ]);
+            $validated = $request->validate($this->getArticleValidationRules());
             // Process and sanitize data
             $data = $this->processArticleData($validated, $request);
             // Handle image upload
@@ -278,33 +254,9 @@ class KbArticleController extends Controller
     public function update(Request $request, KbArticle $kbArticle): RedirectResponse
     {
         try {
-            // Authorization check
-            $user = Auth::user();
-            if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
-                Log::warning('Unauthorized attempt to update KB article', [
-                    'user_id' => Auth::id(),
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                abort(403, 'Unauthorized access');
-            }
+            $this->checkAdminAuthorization('update KB article');
             DB::beginTransaction();
-            $validated = $request->validate([
-                'kb_category_id' => ['required', 'exists:kb_categories,id'],
-                'title' => ['required', 'string', 'max:255'],
-                'excerpt' => ['nullable', 'string'],
-                'content' => ['required', 'string'],
-                'image' => ['nullable', 'image', 'max:2048'],
-                'is_published' => ['sometimes', 'boolean'],
-                'serial' => ['nullable', 'string', 'max:255'],
-                'requires_serial' => ['sometimes', 'boolean'],
-                'serial_message' => ['nullable', 'string'],
-                'meta_title' => ['nullable', 'string', 'max:255'],
-                'meta_description' => ['nullable', 'string', 'max:500'],
-                'meta_keywords' => ['nullable', 'string'],
-                'allow_comments' => ['boolean'],
-                'is_featured' => ['boolean'],
-            ]);
+            $validated = $request->validate($this->getArticleValidationRules());
             // Process and sanitize data
             $data = $this->processArticleData($validated, $request);
             if ($request->hasFile('image')) {
@@ -407,5 +359,44 @@ class KbArticleController extends Controller
         ];
 
         return $data;
+    }
+
+    /**
+     * Check admin authorization
+     */
+    private function checkAdminAuthorization(string $action): void
+    {
+        $user = Auth::user();
+        if (!$user || (!$user->is_admin && !$user->hasRole('admin'))) {
+            Log::warning("Unauthorized attempt to {$action}", [
+                'user_id' => Auth::id(),
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+            abort(403, 'Unauthorized access');
+        }
+    }
+
+    /**
+     * Get article validation rules
+     */
+    private function getArticleValidationRules(): array
+    {
+        return [
+            'kb_category_id' => ['required', 'exists:kb_categories,id'],
+            'title' => ['required', 'string', 'max:255'],
+            'excerpt' => ['nullable', 'string'],
+            'content' => ['required', 'string'],
+            'image' => ['nullable', 'image', 'max:2048'],
+            'is_published' => ['sometimes', 'boolean'],
+            'serial' => ['nullable', 'string', 'max:255'],
+            'requires_serial' => ['sometimes', 'boolean'],
+            'serial_message' => ['nullable', 'string'],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:500'],
+            'meta_keywords' => ['nullable', 'string'],
+            'allow_comments' => ['boolean'],
+            'is_featured' => ['boolean'],
+        ];
     }
 }
