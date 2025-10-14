@@ -22,12 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         timeout = setTimeout(later, wait);
       };
     },
-    // Safe HTML insertion to prevent XSS
-    safeHTML: (element, html) => {
-      if (!element) return;
-      element.innerHTML = html;
-    },
-    // Safe text content to prevent XSS
+    // Safe text content to prevent XSS - NEVER use innerHTML
     safeText: (element, text) => {
       if (!element) return;
       element.textContent = text;
@@ -41,6 +36,15 @@ document.addEventListener('DOMContentLoaded', function() {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#x27;');
+    },
+    // Safe URL validation and escaping
+    safeUrl: (url) => {
+      try {
+        const urlObj = new URL(url, window.location.origin);
+        return urlObj.origin === window.location.origin ? urlObj.href : '/login?from_install=1';
+      } catch {
+        return '/login?from_install=1';
+      }
     }
   };
 
@@ -206,13 +210,10 @@ document.addEventListener('DOMContentLoaded', function() {
       if (result.success) {
         showNotification('Installation completed successfully! Redirecting...', 'success');
         setTimeout(() => {
+          // Use safe URL handling
           const redirectUrl = result.redirect || '/login?from_install=1';
-          // Validate URL to prevent open redirect
-          if (isValidUrl(redirectUrl)) {
-            window.location.href = redirectUrl;
-          } else {
-            window.location.href = '/login?from_install=1';
-          }
+          const safeUrl = Utils.safeUrl(redirectUrl);
+          window.location.href = safeUrl;
         }, 1000);
       } else {
         showNotification(`Installation failed: ${Utils.escapeHTML(result.message)}`, 'error');
@@ -244,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Notifications - Fixed XSS vulnerability
+  // Notifications - Completely secure implementation
   function showNotification(message, type = 'info') {
     const existingNotifications = Utils.getAll('.install-notification');
     existingNotifications.forEach(notification => notification.remove());
@@ -255,14 +256,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const icon = getIconForType(type);
     const escapedMessage = Utils.escapeHTML(message);
     
-    // Use safe HTML construction
-    Utils.safeHTML(notification, `
-      <i class="fas ${icon}"></i>
-      <span>${escapedMessage}</span>
-      <button class="notification-close" onclick="this.parentElement.remove()">
-        <i class="fas fa-times"></i>
-      </button>
-    `);
+    // Create elements safely without innerHTML
+    const iconElement = document.createElement('i');
+    iconElement.className = `fas ${icon}`;
+    
+    const messageElement = document.createElement('span');
+    Utils.safeText(messageElement, escapedMessage);
+    
+    const closeButton = document.createElement('button');
+    closeButton.className = 'notification-close';
+    closeButton.addEventListener('click', function() {
+      notification.remove();
+    });
+    
+    const closeIcon = document.createElement('i');
+    closeIcon.className = 'fas fa-times';
+    closeButton.appendChild(closeIcon);
+    
+    // Append elements safely
+    notification.appendChild(iconElement);
+    notification.appendChild(messageElement);
+    notification.appendChild(closeButton);
 
     const container = Utils.get('.install-container') || document.body;
     container.appendChild(notification);
@@ -294,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     
-    // Sanitize parameter and value
+    // Sanitize parameter and value - only allow alphanumeric and hyphens
     const sanitizedParam = param.replace(/[^a-zA-Z0-9_-]/g, '');
     const sanitizedValue = value.replace(/[^a-zA-Z0-9_-]/g, '');
     
@@ -345,8 +359,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const formData = new FormData(form);
     const data = {};
     for (const [key, value] of formData.entries()) {
-      // Sanitize data before saving
-      data[key] = Utils.escapeHTML(value);
+      // Sanitize data before saving - escape HTML and validate
+      const sanitizedKey = Utils.escapeHTML(key);
+      const sanitizedValue = Utils.escapeHTML(value);
+      data[sanitizedKey] = sanitizedValue;
     }
     localStorage.setItem('install_form_data', JSON.stringify(data));
   }
@@ -355,16 +371,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
-  }
-
-  // Validate URL to prevent open redirect attacks
-  function isValidUrl(url) {
-    try {
-      const urlObj = new URL(url, window.location.origin);
-      return urlObj.origin === window.location.origin;
-    } catch {
-      return false;
-    }
   }
 
   // Event listeners
