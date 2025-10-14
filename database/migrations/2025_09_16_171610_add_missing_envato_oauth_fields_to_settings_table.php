@@ -23,10 +23,16 @@ return new class() extends Migration {
      */
     private function addEnvatoOAuthFields(Blueprint $table): void
     {
-        $this->addColumnIfNotExists($table, 'envato_client_id', 'string', 'envato_username');
-        $this->addColumnIfNotExists($table, 'envato_client_secret', 'string', 'envato_client_id');
-        $this->addColumnIfNotExists($table, 'envato_redirect_uri', 'string', 'envato_client_secret');
-        $this->addColumnIfNotExists($table, 'envato_oauth_enabled', 'boolean', 'envato_redirect_uri', ['default' => false]);
+        $envatoFields = [
+            ['envato_client_id', 'string', 'envato_username'],
+            ['envato_client_secret', 'string', 'envato_client_id'],
+            ['envato_redirect_uri', 'string', 'envato_client_secret'],
+            ['envato_oauth_enabled', 'boolean', 'envato_redirect_uri', ['default' => false]]
+        ];
+
+        foreach ($envatoFields as $field) {
+            $this->addColumnIfNotExists($table, $field[0], $field[1], $field[2], $field[3] ?? []);
+        }
     }
 
     /**
@@ -34,8 +40,14 @@ return new class() extends Migration {
      */
     private function addLicenseSecurityFields(Blueprint $table): void
     {
-        $this->addColumnIfNotExists($table, 'license_max_attempts', 'integer', 'default_license_length', ['default' => 5]);
-        $this->addColumnIfNotExists($table, 'license_lockout_minutes', 'integer', 'license_max_attempts', ['default' => 15]);
+        $securityFields = [
+            ['license_max_attempts', 'integer', 'default_license_length', ['default' => 5]],
+            ['license_lockout_minutes', 'integer', 'license_max_attempts', ['default' => 15]]
+        ];
+
+        foreach ($securityFields as $field) {
+            $this->addColumnIfNotExists($table, $field[0], $field[1], $field[2], $field[3]);
+        }
     }
 
     /**
@@ -73,10 +85,7 @@ return new class() extends Migration {
     private function dropAddedColumns(Blueprint $table): void
     {
         $columnsToDrop = [
-            // Envato OAuth Fields
             'envato_client_id', 'envato_client_secret', 'envato_redirect_uri', 'envato_oauth_enabled',
-            
-            // License Security Fields
             'license_max_attempts', 'license_lockout_minutes'
         ];
 
