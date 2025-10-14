@@ -34,7 +34,6 @@
     30 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
     31 => 'Spatie\\Permission\\PermissionServiceProvider',
     32 => 'App\\Providers\\EnvatoSocialiteProvider',
-    33 => 'App\\Providers\\AppServiceProvider',
   ),
   'eager' => 
   array (
@@ -55,7 +54,6 @@
     14 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
     15 => 'Spatie\\Permission\\PermissionServiceProvider',
     16 => 'App\\Providers\\EnvatoSocialiteProvider',
-    17 => 'App\\Providers\\AppServiceProvider',
   ),
   'deferred' => 
   array (
