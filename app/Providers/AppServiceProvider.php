@@ -147,16 +147,8 @@ class AppServiceProvider extends ServiceProvider
      */
     private function registerViewComposers(): void
     {
-        $viewPaths = ['layouts.*', 'welcome'];
-        // Validate view paths (hardcoded values are always valid)
-        // $viewPaths = ['layouts.*', 'welcome']; - these are always valid
-        // Validate LayoutComposer class
-        if (!class_exists(LayoutComposer::class)) {
-            throw new \InvalidArgumentException(
-                'LayoutComposer class not found. Please ensure the view composer is properly implemented.',
-            );
-        }
-        View::composer($viewPaths, LayoutComposer::class);
+        // Register LayoutComposer for ALL views
+        View::composer('*', LayoutComposer::class);
     }
     /**
      * Configure pagination with enhanced security.
