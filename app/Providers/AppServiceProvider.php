@@ -65,9 +65,11 @@ class AppServiceProvider extends ServiceProvider
             $currentScheme = request()->getScheme();
             $appUrl = config('app.url');
             $parsedAppUrl = parse_url($appUrl);
-            
-            if ($currentHost !== ($parsedAppUrl['host'] ?? 'localhost') || 
-                $currentScheme !== ($parsedAppUrl['scheme'] ?? 'http')) {
+
+            if (
+                $currentHost !== ($parsedAppUrl['host'] ?? 'localhost') ||
+                $currentScheme !== ($parsedAppUrl['scheme'] ?? 'http')
+            ) {
                 $path = trim(dirname(request()->getScriptName()), '/');
                 $baseUrl = $currentScheme . '://' . $currentHost;
                 if ($path && $path !== '.') {

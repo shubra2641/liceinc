@@ -18,26 +18,28 @@ use Illuminate\Support\Facades\Log;
  */
 class LicenseApiController extends Controller
 {
-    public function __construct(private EnvatoService $envatoService) {}
+    public function __construct(private EnvatoService $envatoService)
+    {
+    }
 
     /**
      * Verify license
      */
     public function verify(LicenseVerifyRequest $request): JsonResponse
     {
-        return $this->safeExecute(function() use ($request) {
+        return $this->safeExecute(function () use ($request) {
             $data = $request->validated();
             $product = $this->getProduct($data['product_slug']);
             $license = $this->getOrCreateLicense($product, $data['purchase_code'], $data['domain'] ?? null);
-            
+
             if (!$this->isActive($license)) {
                 return $this->error('License inactive', 'LICENSE_INACTIVE', 403);
             }
-            
+
             if ($data['domain'] && !$this->handleDomain($license, $data['domain'])) {
                 return $this->error('Domain limit reached', 'DOMAIN_LIMIT', 403);
             }
-            
+
             $this->log($license, $data['domain'] ?? null);
             return $this->success($license, $data['domain'] ?? null);
         });
@@ -48,17 +50,17 @@ class LicenseApiController extends Controller
      */
     public function register(LicenseRegisterRequest $request): JsonResponse
     {
-        return $this->safeExecute(function() use ($request) {
+        return $this->safeExecute(function () use ($request) {
             $data = $request->validated();
             $product = $this->getProduct($data['product_slug']);
-            
+
             if ($this->licenseExists($data['purchase_code'], $product->id)) {
                 return response()->json(['success' => true, 'message' => 'License exists']);
             }
-            
+
             $license = $this->createLicense($product, $data['purchase_code'], $data['domain'] ?? null);
             $this->log($license, $data['domain'] ?? null);
-            
+
             return response()->json(['success' => true, 'message' => 'License registered', 'license_id' => $license->id]);
         });
     }
@@ -68,14 +70,16 @@ class LicenseApiController extends Controller
      */
     public function status(LicenseStatusRequest $request): JsonResponse
     {
-        return $this->safeExecute(function() use ($request) {
+        return $this->safeExecute(function () use ($request) {
             $data = $request->validated();
             $product = $this->getProduct($data['product_slug']);
             $license = $this->getLicense($data['license_key'], $product->id);
-            
+
             $isActive = $this->isActive($license);
-            if ($isActive) $this->log($license, null);
-            
+            if ($isActive) {
+                $this->log($license, null);
+            }
+
             return response()->json([
                 'valid' => $isActive,
                 'license' => $this->getLicenseData($license),
@@ -119,7 +123,7 @@ class LicenseApiController extends Controller
     private function getOrCreateLicense(Product $product, string $purchaseCode, ?string $domain): License
     {
         $license = License::where('purchase_code', $purchaseCode)->where('product_id', $product->id)->first();
-        
+
         if (!$license) {
             $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
             if (!$envatoData || $envatoData['item']['id'] != $product->envato_item_id) {
@@ -127,7 +131,7 @@ class LicenseApiController extends Controller
             }
             $license = $this->createLicense($product, $purchaseCode, $domain);
         }
-        
+
         return $license;
     }
 
@@ -166,7 +170,7 @@ class LicenseApiController extends Controller
     {
         $autoRegister = \App\Helpers\ConfigHelper::getSetting('license_auto_register_domains', false);
         $isTest = config('app.env') === 'local' || config('app.debug');
-        
+
         if ($autoRegister || $isTest) {
             try {
                 $this->registerDomain($license, $domain);
@@ -175,7 +179,7 @@ class LicenseApiController extends Controller
                 return false;
             }
         }
-        
+
         return $this->verifyDomain($license, $domain);
     }
 
@@ -186,7 +190,7 @@ class LicenseApiController extends Controller
     {
         $clean = $this->cleanDomain($domain);
         $domains = $license->domains()->where('status', 'active')->get();
-        
+
         if ($domains->isEmpty()) {
             try {
                 $this->checkLimit($license, $domain);
@@ -196,7 +200,7 @@ class LicenseApiController extends Controller
                 return false;
             }
         }
-        
+
         foreach ($domains as $d) {
             $authDomain = $this->cleanDomain($d->domain ?? '');
             if ($authDomain === $clean) {
@@ -221,7 +225,7 @@ class LicenseApiController extends Controller
     {
         $clean = $this->cleanDomain($domain);
         $existing = $license->domains()->where('domain', $clean)->first();
-        
+
         if ($existing) {
             $existing->update(['last_used_at' => now()]);
         } else {
@@ -263,7 +267,7 @@ class LicenseApiController extends Controller
         $maxDomains = match ($product->license_type ?? 'single') {
             'single' => 1, 'multi' => 5, 'developer' => 10, 'extended' => 3, default => 1
         };
-        
+
         $license = License::create([
             'product_id' => $product->id,
             'purchase_code' => $purchaseCode,
@@ -274,11 +278,11 @@ class LicenseApiController extends Controller
             'license_expires_at' => $product->license_type === 'extended' ? now()->addYear() : null,
             'status' => 'active',
         ]);
-        
+
         if ($domain) {
             $license->domains()->create(['domain' => $domain, 'status' => 'active']);
         }
-        
+
         return $license;
     }
 
@@ -353,7 +357,7 @@ class LicenseApiController extends Controller
                     'support_expires_at' => $license->support_expires_at?->toISOString(),
                     'status' => $license->status,
                 ],
-        ]);
+                ]);
     }
 
     /**
@@ -365,6 +369,6 @@ class LicenseApiController extends Controller
                 'valid' => false,
             'message' => $message,
             'error_code' => $code,
-        ], $status);
+            ], $status);
     }
 }

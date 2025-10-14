@@ -14,7 +14,7 @@ class LayoutComposer
     {
         $this->settings = $this->getSettings();
         $languages = $this->getLanguages();
-        
+
         $view->with([
             'siteName' => $this->settings?->site_name ?? config('app.name', 'Laravel'),
             'siteLogo' => $this->settings?->site_logo,

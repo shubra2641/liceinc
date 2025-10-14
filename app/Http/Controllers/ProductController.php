@@ -66,18 +66,22 @@ class ProductController extends Controller
 
     public function show(Product $product): View
     {
-        if (!$product->is_active) abort(404);
+        if (!$product->is_active) {
+            abort(404);
+        }
         return $this->showProduct($product);
     }
 
     public function publicShow(string $slug): View
     {
         $slug = htmlspecialchars(trim($slug), ENT_QUOTES, 'UTF-8');
-        if (!$slug) abort(404);
-        
+        if (!$slug) {
+            abort(404);
+        }
+
         $product = Product::where('slug', $slug)->where('is_active', true)
             ->with(['category', 'programmingLanguage'])->firstOrFail();
-        
+
         return $this->showProduct($product);
     }
 
@@ -88,17 +92,17 @@ class ProductController extends Controller
             ->where(function ($q) {
                 $q->whereNull('license_expires_at')->orWhere('license_expires_at', '>', now());
             })->exists() : false;
-        
+
         $purchased = $user ? $user->licenses()->where('product_id', $product->id)->exists() : false;
-        
-        $download = $product->is_downloadable && $user ? 
-            app(ProductFileService::class)->userCanDownloadFiles($product, Auth::id() ?: 0) : 
+
+        $download = $product->is_downloadable && $user ?
+            app(ProductFileService::class)->userCanDownloadFiles($product, Auth::id() ?: 0) :
             ['can_download' => false, 'message' => ''];
-        
+
         $product->description_has_html = is_string($product->description) && strip_tags($product->description) !== $product->description;
         $product->requirements_has_html = is_string($product->requirements) && strip_tags($product->requirements) !== $product->requirements;
         $product->installation_guide_has_html = is_string($product->installation_guide) && strip_tags($product->installation_guide) !== $product->installation_guide;
-        
+
         return view('user.products.show', [
             'product' => $product,
             'userOwnsProduct' => $owns,
@@ -112,7 +116,7 @@ class ProductController extends Controller
             'relatedProducts' => Product::where('category_id', $product->category_id)->where('id', '!=', $product->id)
                 ->where('is_active', true)->with(['category', 'programmingLanguage'])
                 ->orderBy('created_at', 'desc')->limit(3)->get(),
-            'screenshots' => $product->screenshots && !empty($product->screenshots) ? 
+            'screenshots' => $product->screenshots && !empty($product->screenshots) ?
                 (is_string($product->screenshots) ? json_decode($product->screenshots, true) : $product->screenshots) : null
         ]);
     }

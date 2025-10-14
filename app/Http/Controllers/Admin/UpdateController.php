@@ -27,7 +27,8 @@ class UpdateController extends Controller
         private LicenseServerService $licenseServerService,
         private UpdatePackageService $updatePackageService,
         private UpdateService $updateService
-    ) {}
+    ) {
+    }
 
     /**
      * Show update confirmation page
@@ -670,6 +671,4 @@ class UpdateController extends Controller
             ], 500);
         }
     }
-
-
 }

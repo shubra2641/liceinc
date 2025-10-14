@@ -12,11 +12,11 @@ return new class() extends Migration {
      */
     public function up(): void
     {
-        Schema::create('license_domains', function (Blueprint $table) {
+        Schema::create('ticket_replies', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('license_id')->constrained('licenses')->cascadeOnDelete();
-            $table->string('domain')->index();
-            $table->string('status')->default('active');
+            $table->foreignId('ticket_id')->constrained('tickets')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->text('message');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class() extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('license_domains');
+        Schema::dropIfExists('ticket_replies');
     }
 };

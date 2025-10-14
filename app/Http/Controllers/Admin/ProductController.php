@@ -36,15 +36,15 @@ class ProductController extends Controller
     public function getEnvatoProductData(Request $request): JsonResponse
     {
         $request->validate(['item_id' => 'required|integer|min:1']);
-        
+
         try {
             $envatoService = app(\App\Services\EnvatoService::class);
             $itemData = $envatoService->getItemInfo((int)$request->input('item_id'));
-            
+
             if (!$itemData) {
                 return response()->json(['success' => false, 'message' => trans('app.Unable to fetch product data from Envato')], 404);
             }
-            
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -71,17 +71,17 @@ class ProductController extends Controller
         try {
             $envatoService = app(\App\Services\EnvatoService::class);
             $settings = $envatoService->getEnvatoSettings();
-            
+
             if (empty($settings['username'])) {
                 return response()->json(['success' => false, 'message' => trans('app.Envato username not configured')], 400);
             }
-            
+
             $userItems = $envatoService->getUserItems($settings['username']);
-            
+
             if (!$userItems || !isset($userItems['matches'])) {
                 return response()->json(['success' => false, 'message' => trans('app.Unable to fetch user items from Envato')], 404);
             }
-            
+
             $items = collect($userItems['matches'])->map(function (array $item): array {
                 return [
                     'id' => $item['id'],
@@ -135,24 +135,24 @@ class ProductController extends Controller
     public function index(): View
     {
         $query = Product::with(['category', 'programmingLanguage']);
-        
+
         if ($search = request('q', request('search'))) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")->orWhere('description', 'like', "%{$search}%");
             });
         }
-        
+
         if ($language = request('language')) {
             $query->where('programming_language', $language);
         }
-        
+
         $priceFilter = request('price_filter');
         if ($priceFilter === 'free') {
             $query->where('price', 0);
         } elseif ($priceFilter === 'paid') {
             $query->where('price', '>', 0);
         }
-        
+
         $sort = request('sort', 'name');
         match ($sort) {
             'price_low' => $query->orderBy('price', 'asc'),
@@ -160,7 +160,7 @@ class ProductController extends Controller
             'newest' => $query->orderBy('created_at', 'desc'),
             default => $query->orderBy('name', 'asc')
         };
-        
+
         return view('admin.products.index', [
             'products' => $query->paginate(10)->withQueryString(),
             'categories' => \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get(),
@@ -190,27 +190,27 @@ class ProductController extends Controller
         try {
             DB::beginTransaction();
             $data = $request->validated();
-            
+
             if (isset($data['requires_domain'])) {
                 $data['requires_domain'] = (bool)$data['requires_domain'];
             }
-            
+
             $data['slug'] = $data['slug'] ?? Str::slug($data['name'] ?? '');
-            
+
             if ($request->hasFile('image')) {
                 $data['image'] = $request->file('image')->store('products', 'public');
             }
-            
+
             if ($request->hasFile('gallery_images')) {
                 $data['gallery_images'] = collect($request->file('gallery_images'))->map(fn($file) => $file->store('products/gallery', 'public'))->toArray();
             }
-            
+
             if (isset($data['renewal_period']) && $data['renewal_period'] === 'lifetime') {
                 $data['extended_supported_until'] = null;
             }
-            
+
             $product = Product::create($data);
-            
+
             if ($request->hasFile('product_files')) {
                 $productFileService = app(\App\Services\ProductFileService::class);
                 foreach ($request->file('product_files') as $file) {
@@ -219,10 +219,10 @@ class ProductController extends Controller
                     }
                 }
             }
-            
+
             $this->generateIntegrationFile($product);
             DB::commit();
-            
+
             return redirect()->route('admin.products.edit', $product)->with('success', 'Product created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -248,28 +248,28 @@ class ProductController extends Controller
         try {
             DB::beginTransaction();
             $data = $request->validated();
-            
+
             if (isset($data['requires_domain'])) {
                 $data['requires_domain'] = (bool)$data['requires_domain'];
             }
-            
+
             if ($request->hasFile('image')) {
                 if ($product->image) {
                     Storage::disk('public')->delete($product->image);
                 }
                 $data['image'] = $request->file('image')->store('products', 'public');
             }
-            
+
             if ($request->hasFile('gallery_images')) {
                 $data['gallery_images'] = collect($request->file('gallery_images'))->map(fn($file) => $file->store('products/gallery', 'public'))->toArray();
             }
-            
+
             if (isset($data['renewal_period']) && $data['renewal_period'] === 'lifetime') {
                 $data['extended_supported_until'] = null;
             }
-            
+
             $product->update($data);
-            
+
             if ($request->hasFile('product_files')) {
                 $productFileService = app(\App\Services\ProductFileService::class);
                 foreach ($request->file('product_files') as $file) {
@@ -278,11 +278,11 @@ class ProductController extends Controller
                     }
                 }
             }
-            
+
             if ($product->wasChanged(['programming_language', 'envato_item_id', 'name', 'slug'])) {
                 $this->generateIntegrationFile($product);
             }
-            
+
             DB::commit();
             return back()->with('success', 'Product updated successfully');
         } catch (\Exception $e) {
@@ -353,7 +353,7 @@ class ProductController extends Controller
             if (Storage::disk('public')->exists($oldFilePath)) {
                 Storage::disk('public')->delete($oldFilePath);
             }
-            
+
             if ($programmingLanguage = $product->programmingLanguage) {
                 foreach ($this->getFileExtensionsForLanguage($programmingLanguage->slug) as $ext) {
                     $oldFileWithExt = "integration/{$product->slug}.{$ext}";
@@ -362,7 +362,7 @@ class ProductController extends Controller
                     }
                 }
             }
-            
+
             return $this->licenseGenerator->generateLicenseFile($product);
         } catch (\Exception $e) {
             $apiDomain = rtrim(config('app.url', ''), '/');
@@ -397,7 +397,7 @@ class ProductController extends Controller
             if (Storage::disk('public')->exists($oldFilePath)) {
                 Storage::disk('public')->delete($oldFilePath);
             }
-            
+
             if ($programmingLanguage = $product->programmingLanguage) {
                 foreach ($this->getFileExtensionsForLanguage($programmingLanguage->slug) as $ext) {
                     $oldFileWithExt = "integration/{$product->slug}.{$ext}";
@@ -406,7 +406,7 @@ class ProductController extends Controller
                     }
                 }
             }
-            
+
             $this->generateIntegrationFile($product);
             return redirect()->back()->with('success', 'Integration file regenerated successfully.');
         } catch (\Exception $e) {
@@ -438,7 +438,7 @@ class ProductController extends Controller
         try {
             DB::beginTransaction();
             $data = $request->validated();
-            
+
             $user = \App\Models\User::firstOrCreate(
                 ['email' => $data['email']],
                 [
@@ -448,9 +448,9 @@ class ProductController extends Controller
                     'email_verified_at' => now(),
                 ]
             );
-            
+
             $purchaseCode = 'TEST-' . strtoupper(Str::random(16));
-            
+
             $license = License::create([
                 'product_id' => $product->id,
                 'user_id' => $user->id,
@@ -460,10 +460,10 @@ class ProductController extends Controller
                 'support_expires_at' => now()->addDays($product->support_days),
                 'license_expires_at' => now()->addYear(),
             ]);
-            
+
             $license->domains()->create(['domain' => $data['domain']]);
             DB::commit();
-            
+
             return redirect()->back()->with('success', "Test license generated: {$purchaseCode}");
         } catch (\Exception $e) {
             DB::rollBack();

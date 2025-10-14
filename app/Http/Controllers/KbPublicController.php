@@ -24,7 +24,8 @@ class KbPublicController extends Controller
 {
     public function __construct(
         private PurchaseCodeService $purchaseCodeService
-    ) {}
+    ) {
+    }
 
     /**
      * Display KB index
@@ -117,7 +118,7 @@ class KbPublicController extends Controller
     {
         try {
             $this->validateSlug($slug);
-            
+
             $article = KbArticle::where('slug', $slug)
                 ->where('is_published', true)
                 ->whereHas('category', function ($query) {
@@ -360,7 +361,7 @@ class KbPublicController extends Controller
     {
         try {
             $result = $this->purchaseCodeService->verifyRawCode($rawCode, $category->product_id);
-            
+
             if ($result['success']) {
                 $license = $result['license'] ?? null;
                 $productId = $result['product_id'] ?? ($license?->product_id);
@@ -403,7 +404,7 @@ class KbPublicController extends Controller
         try {
             $productId = $article->product_id ?: $article->category->product_id;
             $result = $this->purchaseCodeService->verifyRawCode($rawCode, $productId);
-            
+
             if ($result['success']) {
                 $license = $result['license'] ?? null;
                 $productId = $result['product_id'] ?? ($license?->product_id);
@@ -445,11 +446,13 @@ class KbPublicController extends Controller
     {
         if (session()->has($accessToken)) {
             $tokenData = session($accessToken);
-            if (is_array($tokenData) &&
+            if (
+                is_array($tokenData) &&
                 isset($tokenData['expires_at']) &&
                 isset($tokenData['category_id']) &&
                 $tokenData['expires_at'] > now() &&
-                $tokenData['category_id'] == $categoryId) {
+                $tokenData['category_id'] == $categoryId
+            ) {
                 return ['valid' => true];
             }
             session()->forget($accessToken);
@@ -464,11 +467,13 @@ class KbPublicController extends Controller
     {
         if (session()->has($accessToken)) {
             $tokenData = session($accessToken);
-            if (is_array($tokenData) &&
+            if (
+                is_array($tokenData) &&
                 isset($tokenData['expires_at']) &&
                 isset($tokenData['article_id']) &&
                 $tokenData['expires_at'] > now() &&
-                $tokenData['article_id'] == $articleId) {
+                $tokenData['article_id'] == $articleId
+            ) {
                 return ['valid' => true];
             }
             session()->forget($accessToken);

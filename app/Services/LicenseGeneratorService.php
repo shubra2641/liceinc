@@ -89,7 +89,7 @@ class LicenseGeneratorService
             }
 
             $templatePath = resource_path("templates/licenses/{$language->slug}.blade.php");
-            
+
             if (!file_exists($templatePath)) {
                 $this->createDefaultTemplate($language);
             }
@@ -195,7 +195,7 @@ class LicenseGeneratorService
             $extension = $this->getFileExtensionForLanguage($language->slug);
             $timestamp = now()->format('Y-m-d_H-i-s');
             $sanitizedSlug = preg_replace('/[^a-zA-Z0-9_-]/', '', $product->slug);
-            
+
             return "license-{$sanitizedSlug}-{$timestamp}.{$extension}";
         } catch (\Exception $e) {
             Log::error('Error generating filename', [
@@ -257,7 +257,7 @@ class LicenseGeneratorService
 
             $sanitizedFileName = preg_replace('/[^a-zA-Z0-9._-]/', '', $fileName);
             $path = "licenses/{$product->id}/{$sanitizedFileName}";
-            
+
             Storage::disk('public')->put($path, $content);
             return $path;
         } catch (\Exception $e) {
@@ -299,7 +299,7 @@ class LicenseGeneratorService
         }
 
         $templatePath = "{$templateDir}/{$language->slug}.blade.php";
-        
+
         if ($language->slug === 'php') {
             $template = $this->getPHPTemplate();
         } elseif ($language->slug === 'javascript') {

@@ -27,7 +27,7 @@ class AILicenseAnalyticsService
     {
         $this->validateDays($days);
         $cacheKey = "analytics_dashboard_{$days}";
-        
+
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($days) {
                     return [
                 'overview' => $this->getOverview($days),
@@ -35,7 +35,7 @@ class AILicenseAnalyticsService
                 'predictions' => $this->getPredictions($days),
                         'generated_at' => now()->toISOString(),
                     ];
-                });
+        });
     }
 
     /**
@@ -44,7 +44,7 @@ class AILicenseAnalyticsService
     private function getOverview(int $days): array
     {
             $startDate = now()->subDays($days);
-        
+
         return [
             'total_licenses' => License::count(),
             'active_licenses' => License::where('status', 'active')->count(),
@@ -64,7 +64,7 @@ class AILicenseAnalyticsService
     private function getTrends(int $days): array
     {
         $startDate = now()->subDays($days);
-        
+
         $licenseTrends = License::selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->where('created_at', '>=', $startDate)
             ->groupBy('date')
@@ -107,7 +107,7 @@ class AILicenseAnalyticsService
     public function getRealTimeUpdates(): array
     {
             $cacheKey = 'realtime_analytics_' . now()->format('Y-m-d-H');
-        
+
         return Cache::remember($cacheKey, 300, function () {
                     return [
                 'active_licenses_now' => License::where('status', 'active')->count(),
@@ -115,7 +115,7 @@ class AILicenseAnalyticsService
                         'revenue_today' => $this->calculateTodayRevenue(),
                         'generated_at' => now()->toISOString(),
                     ];
-                });
+        });
     }
 
     /**
@@ -239,7 +239,7 @@ class AILicenseAnalyticsService
     {
         $historical = $this->getRevenueTrends(now()->subDays($days));
         $avgRevenue = count($historical) > 0 ? array_sum($historical) / count($historical) : 0;
-        
+
         return [
             'historical' => $historical,
             'forecast' => ['next_30_days' => $avgRevenue * 1.1],
@@ -276,7 +276,9 @@ class AILicenseAnalyticsService
     private function calculateRenewalProbability(License $license): float
     {
         $user = $license->user;
-        if (!$user) return 0.5;
+        if (!$user) {
+            return 0.5;
+        }
 
         $factors = [
             'history' => $this->getUserHistory($user->id),
@@ -300,15 +302,23 @@ class AILicenseAnalyticsService
     private function calculateChurnScore(int $userId): float
     {
         $user = User::find($userId);
-        if (!$user) return 0.0;
+        if (!$user) {
+            return 0.0;
+        }
 
         $lastLogin = $user->last_login_at;
         $daysSinceLogin = $lastLogin ? now()->diffInDays($lastLogin) : 999;
-        
-        if ($daysSinceLogin > 30) return 0.9;
-        if ($daysSinceLogin > 14) return 0.6;
-        if ($daysSinceLogin > 7) return 0.3;
-        
+
+        if ($daysSinceLogin > 30) {
+            return 0.9;
+        }
+        if ($daysSinceLogin > 14) {
+            return 0.6;
+        }
+        if ($daysSinceLogin > 7) {
+            return 0.3;
+        }
+
         return 0.1;
     }
 
@@ -338,8 +348,10 @@ class AILicenseAnalyticsService
     private function getUserActivity(int $userId): float
     {
         $user = User::find($userId);
-        if (!$user || !$user->last_login_at) return 0.0;
-        
+        if (!$user || !$user->last_login_at) {
+            return 0.0;
+        }
+
         $daysSinceLogin = now()->diffInDays($user->last_login_at);
         return max(0.0, 1.0 - ($daysSinceLogin / 30));
     }
@@ -353,14 +365,16 @@ class AILicenseAnalyticsService
             ->where('user_id', $userId)
             ->where('status', 'paid')
             ->count();
-            
+
         $latePayments = DB::table('invoices')
             ->where('user_id', $userId)
             ->where('status', 'overdue')
             ->count();
 
-        if ($payments === 0) return 0.5;
-        
+        if ($payments === 0) {
+            return 0.5;
+        }
+
         return max(0.0, 1.0 - ($latePayments / $payments));
     }
 

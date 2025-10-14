@@ -24,7 +24,7 @@ class ConfigHelper
     {
         try {
             $cacheKey = self::CACHE_PREFIX . md5($key);
-            
+
             // Try cache first
             $cachedValue = Cache::get($cacheKey);
             if ($cachedValue !== null) {
@@ -106,7 +106,7 @@ class ConfigHelper
                     ->whereNotNull($key)
                     ->where($key, '!=', '')
                     ->value($key);
-                
+
                 return $setting;
             }
 
@@ -201,7 +201,7 @@ class ConfigHelper
     public static function getTypedSetting(string $key, string $type, $default = null): mixed
     {
         $value = self::getSetting($key, $default);
-        
+
         switch ($type) {
             case 'string':
                 return is_string($value) ? $value : (is_string($default) ? $default : '');
@@ -342,7 +342,7 @@ class ConfigHelper
     public static function getSettingsWithEnvFallback(array $keys, array $envMappings = []): array
     {
         $settings = self::getSettings($keys);
-        
+
         foreach ($keys as $key) {
             if (($settings[$key] ?? null) === null) {
                 $envKey = $envMappings[$key] ?? strtoupper($key);

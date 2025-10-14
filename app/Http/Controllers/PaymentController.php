@@ -20,7 +20,7 @@ use Illuminate\View\View;
 
 /**
  * Payment Controller - Ultra Simplified
- * 
+ *
  * Handles payment processing with minimal complexity.
  */
 class PaymentController extends Controller
@@ -28,7 +28,8 @@ class PaymentController extends Controller
     public function __construct(
         private PaymentService $paymentService,
         private EmailFacade $emailService
-    ) {}
+    ) {
+    }
 
     /**
      * Show payment gateways
@@ -153,7 +154,7 @@ class PaymentController extends Controller
     {
         session()->forget('payment_product_id');
         $error = $request->get('error', 'Unknown error');
-        
+
         return redirect()->route('payment.failure', $gateway)
             ->with('error_message', trans('app.Payment failed: :error', ['error' => $error]));
     }
