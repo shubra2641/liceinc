@@ -8,7 +8,7 @@ use App\Models\Invoice;
 use App\Models\PaymentSetting;
 use App\Models\Product;
 use App\Services\Email\EmailFacade;
-use App\Services\PaymentService;
+use App\Services\Payment\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

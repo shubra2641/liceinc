@@ -11,7 +11,7 @@ use App\Models\License;
 use App\Models\LicenseLog;
 use App\Models\Product;
 use App\Services\EnvatoProductService;
-use App\Services\LicenseGeneratorService;
+use App\Services\License\LicenseGeneratorService;
 use App\Services\Product\ProductApiService;
 use App\Services\Product\ProductIntegrationService;
 use App\Services\Product\ProductKbService;

@@ -7,7 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Ticket;
 use App\Models\TicketReply;
-use App\Services\LicenseAutoRegistrationService;
+use App\Services\License\LicenseAutoRegistrationService;
 use App\Traits\TicketHelpers;
 use Exception;
 use Illuminate\Http\RedirectResponse;

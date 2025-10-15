@@ -8,7 +8,7 @@ use App\Http\Requests\Api\LicenseStatusRequest;
 use App\Http\Requests\Api\LicenseVerifyRequest;
 use App\Models\License;
 use App\Models\Product;
-use App\Services\EnvatoService;
+use App\Services\Envato\EnvatoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
