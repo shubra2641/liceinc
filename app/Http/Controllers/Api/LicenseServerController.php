@@ -54,320 +54,262 @@ class LicenseServerController extends Controller
 {
     /**
      * Check for available updates for a license with enhanced security.
+     *
+     * Verifies the license and checks if there are any available updates
+     * for the specified product. Returns update information if available.
+     *
+     * @param  CheckUpdatesRequest  $request  The validated request containing license data
+     *
+     * @return JsonResponse JSON response with update information
+     *
+     * @throws \Exception When database operations fail
+     *
+     * @example
+     * // Request body:
+     * {
+     *     "license_key": "ABC123-DEF456-GHI789",
+     *     "current_version": "1.0.0",
+     *     "domain": "example.com",
+     *     "product_slug": "my-product"
+     * }
+     *
+     * // Success response:
+     * {
+     *     "success": true,
+     *     "data": {
+     *         "current_version": "1.0.0",
+     *         "latest_version": "1.1.0",
+     *         "is_update_available": true,
+     *         "update_info": {...}
+     *     }
+     * }
      */
     public function checkUpdates(CheckUpdatesRequest $request): JsonResponse
     {
-        if ($this->isRateLimited('license-update-check', $request->ip(), 20, 300)) {
-            return $this->createRateLimitResponse();
+        // Rate limiting for update checks
+        $key = 'license-update-check:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($key, 20)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many update check attempts. Please try again later.',
+                'error_code' => 'RATE_LIMIT_EXCEEDED',
+            ], 429);
         }
-
-        return $this->executeUpdateCheck($request);
-    }
-
-    /**
-     * Execute update check logic.
-     */
-    private function executeUpdateCheck(CheckUpdatesRequest $request): JsonResponse
-    {
+        RateLimiter::hit($key, 300); // 5 minutes
         try {
             DB::beginTransaction();
-            
-            $validated = $this->extractValidatedData($request);
-            $this->validateLicenseForUpdate($validated);
-            
-            $product = $this->findProductBySlug($validated['product_slug']);
-            $latestUpdate = $this->getLatestUpdate($product);
-            
-            if (!$latestUpdate) {
-                return $this->buildNoUpdateResponse($validated['current_version'], $product);
+            $validated = $request->validated();
+            $licenseKey = $validated['license_key'];
+            $currentVersion = $validated['current_version'];
+            $domain = $validated['domain'];
+            $productSlug = $validated['product_slug'];
+            // Verify license
+            if (
+                ! $this->verifyLicense(
+                    is_string($licenseKey) ? $licenseKey : '',
+                    is_string($domain) ? $domain : null,
+                    is_string($productSlug) ? $productSlug : ''
+                )
+            ) {
+                DB::rollBack();
+
+                return $this->createErrorResponse('Invalid or expired license', 'INVALID_LICENSE', 403);
             }
-            
-            $responseData = $this->buildUpdateResponse($validated, $product, $latestUpdate);
-            DB::commit();
-            
-            return response()->json(['success' => true, 'data' => $responseData]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $this->logUpdateCheckError($e, $request);
-            return $this->createServerErrorResponse('Failed to check for updates. Please try again.');
-        }
-    }
+            // Get product
+            $product = Product::where('slug', $productSlug)->first();
+            if (! $product) {
+                DB::rollBack();
 
-    /**
-     * Extract validated data from request.
-     */
-    private function extractValidatedData(CheckUpdatesRequest $request): array
-    {
-        $validated = $request->validated();
-        return [
-            'license_key' => $validated['license_key'],
-            'current_version' => $validated['current_version'],
-            'domain' => $validated['domain'],
-            'product_slug' => $validated['product_slug'],
-        ];
-    }
+                return $this->createErrorResponse('Product not found', 'PRODUCT_NOT_FOUND', 404);
+            }
+            // Get latest update
+            $latestUpdate = ProductUpdate::where('product_id', $product->id)
+                ->where('is_active', true)
+                ->orderBy('version', 'desc')
+                ->first();
+            if (! $latestUpdate) {
+                DB::commit();
 
-    /**
-     * Validate license for update check.
-     */
-    private function validateLicenseForUpdate(array $data): void
-    {
-        if (!$this->verifyLicense($data['license_key'], $data['domain'], $data['product_slug'])) {
-            throw new \Exception('Invalid or expired license');
-        }
-    }
-
-    /**
-     * Find product by slug.
-     */
-    private function findProductBySlug(string $productSlug): Product
-    {
-        $product = Product::where('slug', $productSlug)->first();
-        if (!$product) {
-            throw new \Exception('Product not found');
-        }
-        return $product;
-    }
-
-    /**
-     * Get latest update for product.
-     */
-    private function getLatestUpdate(Product $product): ?ProductUpdate
-    {
-        return ProductUpdate::where('product_id', $product->id)
-            ->where('is_active', true)
-            ->orderBy('version', 'desc')
-            ->first();
-    }
-
-    /**
-     * Build no update response.
-     */
-    private function buildNoUpdateResponse(string $currentVersion, Product $product): JsonResponse
-    {
-        DB::commit();
-        return response()->json([
-            'success' => true,
-            'data' => [
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'current_version' => $currentVersion,
+                        'latest_version' => $currentVersion,
+                        'is_update_available' => false,
+                        'update_info' => null,
+                        'product' => [
+                            'name' => $product->name,
+                            'slug' => $product->slug,
+                        ],
+                    ],
+                ]);
+            }
+            // Check if update is available
+            $latestVersion = $latestUpdate->version;
+            $currentVersionStr = $currentVersion;
+            $isUpdateAvailable = $this->compareVersions(
+                $latestVersion,
+                is_string($currentVersionStr) ? $currentVersionStr : ''
+            ) > 0;
+            $responseData = [
                 'current_version' => $currentVersion,
-                'latest_version' => $currentVersion,
-                'is_update_available' => false,
-                'update_info' => null,
+                'latest_version' => $latestUpdate->version,
+                'is_update_available' => $isUpdateAvailable,
                 'product' => [
                     'name' => $product->name,
                     'slug' => $product->slug,
                 ],
-            ],
-        ]);
-    }
-
-    /**
-     * Build update response.
-     */
-    private function buildUpdateResponse(array $data, Product $product, ProductUpdate $latestUpdate): array
-    {
-        $isUpdateAvailable = $this->compareVersions($latestUpdate->version, $data['current_version']) > 0;
-        
-        return [
-            'current_version' => $data['current_version'],
-            'latest_version' => $latestUpdate->version,
-            'is_update_available' => $isUpdateAvailable,
-            'product' => [
-                'name' => $product->name,
-                'slug' => $product->slug,
-            ],
-            'update_info' => $isUpdateAvailable ? $this->buildUpdateInfo($latestUpdate, $data) : null,
-        ];
-    }
-
-    /**
-     * Build update info.
-     */
-    private function buildUpdateInfo(ProductUpdate $update, array $data): array
-    {
-        return [
-            'version' => $update->version,
-            'title' => $update->title,
-            'description' => $update->description,
-            'changelog' => $update->changelog,
-            'is_major' => $update->is_major,
-            'is_required' => $update->is_required,
-            'released_at' => $update->released_at?->toISOString(),
-            'file_size' => $update->file_size,
-            'download_url' => $this->buildDownloadUrl($data['license_key'], $update->version, $data['product_slug']),
-        ];
-    }
-
-    /**
-     * Build download URL.
-     */
-    private function buildDownloadUrl(string $licenseKey, string $version, string $productSlug): string
-    {
-        return route('api.license.download-update', [
-            'license_key' => $licenseKey,
-            'version' => $version,
-        ]) . '?product_slug=' . $productSlug;
-    }
-
-    /**
-     * Log update check error.
-     */
-    private function logUpdateCheckError(\Exception $e, CheckUpdatesRequest $request): void
-    {
-        Log::error('Update check failed', [
-            'error' => $e->getMessage(),
-            'license_key' => $this->maskLicenseKey($request->input('license_key', '')),
-            'product_slug' => $request->input('product_slug', ''),
-            'trace' => $e->getTraceAsString(),
-        ]);
-    }
-
-    /**
-     * Mask license key for logging.
-     */
-    private function maskLicenseKey(string $licenseKey): string
-    {
-        return substr($licenseKey, 0, 8) . '...';
-    }
-
-    /**
-     * Check if request is rate limited.
-     */
-    private function isRateLimited(string $key, string $ip, int $maxAttempts, int $decayMinutes): bool
-    {
-        $fullKey = $key . ':' . $ip;
-        return RateLimiter::tooManyAttempts($fullKey, $maxAttempts);
-    }
-
-    /**
-     * Create rate limit response.
-     */
-    private function createRateLimitResponse(): JsonResponse
-    {
-        return response()->json([
-            'success' => false,
-            'message' => 'Too many requests. Please try again later.',
-            'error_code' => 'RATE_LIMIT_EXCEEDED',
-        ], 429);
-    }
-
-    /**
-     * Create server error response.
-     */
-    private function createServerErrorResponse(string $message): JsonResponse
-    {
-        return response()->json([
-            'success' => false,
-            'message' => $message,
-            'error_code' => 'SERVER_ERROR',
-        ], 500);
+                'update_info' => $isUpdateAvailable ? [
+                    'version' => $latestUpdate->version,
+                    'title' => $latestUpdate->title,
+                    'description' => $latestUpdate->description,
+                    'changelog' => $latestUpdate->changelog,
+                    'is_major' => $latestUpdate->is_major,
+                    'is_required' => $latestUpdate->is_required,
+                    'released_at' => $latestUpdate->released_at?->toISOString(),
+                    'file_size' => $latestUpdate->file_size,
+                    'download_url' => route('api.license.download-update', [
+                        'license_key' => $licenseKey,
+                        'version' => $latestUpdate->version,
+                    ]) . '?product_slug=' . (is_string($productSlug) ? $productSlug : ''),
+                ] : null,
+            ];
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'data' => $responseData,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Update check failed', [
+                'error' => $e->getMessage(),
+                'license_key' => substr(
+                    is_string($request->input('license_key', ''))
+                        ? $request->input('license_key', '')
+                        : '',
+                    0,
+                    8
+                ) . '...',
+                'product_slug' => $request->input('product_slug', ''),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to check for updates. Please try again.',
+                'error_code' => 'SERVER_ERROR',
+            ], 500);
+        }
     }
     /**
      * Get version history for a license with enhanced security.
+     *
+     * Retrieves the complete version history for a product, including all
+     * available updates with download links and version information.
+     *
+     * @param  GetVersionHistoryRequest  $request  The validated request containing license data
+     *
+     * @return JsonResponse JSON response with version history
+     *
+     * @throws \Exception When database operations fail
+     *
+     * @example
+     * // Request body:
+     * {
+     *     "license_key": "ABC123-DEF456-GHI789",
+     *     "domain": "example.com",
+     *     "product_slug": "my-product"
+     * }
+     *
+     * // Success response:
+     * {
+     *     "success": true,
+     *     "data": {
+     *         "product": {...},
+     *         "versions": [...]
+     *     }
+     * }
      */
     public function getVersionHistory(GetVersionHistoryRequest $request): JsonResponse
     {
-        if ($this->isRateLimited('license-version-history', $request->ip(), 10, 600)) {
-            return $this->createRateLimitResponse();
+        // Rate limiting for version history requests
+        $key = 'license-version-history:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($key, 10)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many version history requests. Please try again later.',
+                'error_code' => 'RATE_LIMIT_EXCEEDED',
+            ], 429);
         }
-
-        return $this->executeVersionHistoryRequest($request);
-    }
-
-    /**
-     * Execute version history request.
-     */
-    private function executeVersionHistoryRequest(GetVersionHistoryRequest $request): JsonResponse
-    {
+        RateLimiter::hit($key, 600); // 10 minutes
         try {
             DB::beginTransaction();
-            
             $data = $this->validateLicenseRequest($request);
-            $this->validateLicenseForVersionHistory($data);
-            
-            $product = $this->findProductBySlug($data['product_slug']);
-            $updates = $this->getAllUpdates($product, $data);
-            
+            // Verify license
+            if (!$this->verifyLicense($data['license_key'], $data['domain'], $data['product_slug'])) {
+                DB::rollBack();
+                return $this->createErrorResponse('Invalid or expired license', 'INVALID_LICENSE', 403);
+            }
+            // Get product
+            $product = Product::where('slug', $productSlug)->first();
+            if (! $product) {
+                DB::rollBack();
+
+                return $this->createErrorResponse('Product not found', 'PRODUCT_NOT_FOUND', 404);
+            }
+            // Get all updates
+            $updates = ProductUpdate::where('product_id', $product->id)
+                ->where('is_active', true)
+                ->orderBy('version', 'desc')
+                ->get()
+                ->map(function ($update) use ($licenseKey, $productSlug) {
+                    return [
+                        'version' => $update->version,
+                        'title' => $update->title,
+                        'description' => $update->description,
+                        'changelog' => $update->changelog,
+                        'is_major' => $update->is_major,
+                        'is_required' => $update->is_required,
+                        'released_at' => $update->released_at?->toISOString(),
+                        'file_size' => $update->file_size,
+                        'download_url' => route('api.license.download-update', [
+                            'license_key' => $licenseKey,
+                            'version' => $update->version,
+                        ]) . '?product_slug=' . (is_string($productSlug) ? $productSlug : ''),
+                    ];
+                });
             DB::commit();
-            return $this->buildVersionHistoryResponse($product, $updates);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'product' => [
+                        'name' => $product->name,
+                        'slug' => $product->slug,
+                        'current_version' => $product->current_version,
+                    ],
+                    'versions' => $updates,
+                ],
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->logVersionHistoryError($e, $request);
-            return $this->createServerErrorResponse('Failed to get version history. Please try again.');
+            Log::error('Version history request failed', [
+                'error' => $e->getMessage(),
+                'license_key' => substr(
+                    is_string($request->input('license_key', ''))
+                        ? $request->input('license_key', '')
+                        : '',
+                    0,
+                    8
+                ) . '...',
+                'product_slug' => $request->input('product_slug', ''),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get version history. Please try again.',
+                'error_code' => 'SERVER_ERROR',
+            ], 500);
         }
-    }
-
-    /**
-     * Validate license for version history.
-     */
-    private function validateLicenseForVersionHistory(array $data): void
-    {
-        if (!$this->verifyLicense($data['license_key'], $data['domain'], $data['product_slug'])) {
-            throw new \Exception('Invalid or expired license');
-        }
-    }
-
-    /**
-     * Get all updates for product.
-     */
-    private function getAllUpdates(Product $product, array $data): \Illuminate\Support\Collection
-    {
-        return ProductUpdate::where('product_id', $product->id)
-            ->where('is_active', true)
-            ->orderBy('version', 'desc')
-            ->get()
-            ->map(function ($update) use ($data) {
-                return $this->buildVersionInfo($update, $data);
-            });
-    }
-
-    /**
-     * Build version info.
-     */
-    private function buildVersionInfo(ProductUpdate $update, array $data): array
-    {
-        return [
-            'version' => $update->version,
-            'title' => $update->title,
-            'description' => $update->description,
-            'changelog' => $update->changelog,
-            'is_major' => $update->is_major,
-            'is_required' => $update->is_required,
-            'released_at' => $update->released_at?->toISOString(),
-            'file_size' => $update->file_size,
-            'download_url' => $this->buildDownloadUrl($data['license_key'], $update->version, $data['product_slug']),
-        ];
-    }
-
-    /**
-     * Build version history response.
-     */
-    private function buildVersionHistoryResponse(Product $product, \Illuminate\Support\Collection $updates): JsonResponse
-    {
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'product' => [
-                    'name' => $product->name,
-                    'slug' => $product->slug,
-                    'current_version' => $product->current_version,
-                ],
-                'versions' => $updates,
-            ],
-        ]);
-    }
-
-    /**
-     * Log version history error.
-     */
-    private function logVersionHistoryError(\Exception $e, GetVersionHistoryRequest $request): void
-    {
-        Log::error('Version history request failed', [
-            'error' => $e->getMessage(),
-            'license_key' => $this->maskLicenseKey($request->input('license_key', '')),
-            'product_slug' => $request->input('product_slug', ''),
-            'trace' => $e->getTraceAsString(),
-        ]);
     }
     /**
      * Download update file with enhanced security and rate limiting.
