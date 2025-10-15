@@ -9,127 +9,69 @@ use Illuminate\Support\Facades\Schema;
 return new class() extends Migration {
     public function up(): void
     {
-        if (!Schema::hasTable('users')) {
-            return;
-        }
+        if (!Schema::hasTable('users')) return;
 
         Schema::table('users', function (Blueprint $table) {
-            // Personal information fields
-            if (!Schema::hasColumn('users', 'firstname')) {
-                $table->string('firstname')->nullable()->after('name');
-            }
-            if (!Schema::hasColumn('users', 'lastname')) {
-                $table->string('lastname')->nullable()->after('firstname');
-            }
-            if (!Schema::hasColumn('users', 'companyname')) {
-                $table->string('companyname')->nullable()->after('lastname');
-            }
-
-            // Address fields
-            if (!Schema::hasColumn('users', 'address1')) {
-                $table->text('address1')->nullable()->after('companyname');
-            }
-            if (!Schema::hasColumn('users', 'address2')) {
-                $table->text('address2')->nullable()->after('address1');
-            }
-            if (!Schema::hasColumn('users', 'city')) {
-                $table->string('city')->nullable()->after('address2');
-            }
-            if (!Schema::hasColumn('users', 'state')) {
-                $table->string('state')->nullable()->after('city');
-            }
-            if (!Schema::hasColumn('users', 'postcode')) {
-                $table->string('postcode')->nullable()->after('state');
-            }
-            if (!Schema::hasColumn('users', 'country')) {
-                $table->string('country')->nullable()->after('postcode');
-            }
-
-            // Contact fields
-            if (!Schema::hasColumn('users', 'phonenumber')) {
-                $table->string('phonenumber')->nullable()->after('country');
-            }
-            if (!Schema::hasColumn('users', 'currency')) {
-                $table->string('currency', 3)->default('USD')->after('phonenumber');
-            }
-
-            // Additional fields
-            if (!Schema::hasColumn('users', 'notes')) {
-                $table->text('notes')->nullable()->after('currency');
-            }
-            if (!Schema::hasColumn('users', 'cardnum')) {
-                $table->string('cardnum')->nullable()->after('notes');
-            }
-            if (!Schema::hasColumn('users', 'startdate')) {
-                $table->date('startdate')->nullable()->after('cardnum');
-            }
-            if (!Schema::hasColumn('users', 'expdate')) {
-                $table->date('expdate')->nullable()->after('startdate');
-            }
-            if (!Schema::hasColumn('users', 'lastlogin')) {
-                $table->timestamp('lastlogin')->nullable()->after('expdate');
-            }
-            if (!Schema::hasColumn('users', 'status')) {
-                $table->enum('status', ['active', 'inactive', 'suspended'])->default('active')->after('lastlogin');
-            }
-            if (!Schema::hasColumn('users', 'language')) {
-                $table->string('language', 5)->default('en')->after('status');
-            }
-
-            // Email and SSO fields
-            if (!Schema::hasColumn('users', 'allow_sso')) {
-                $table->boolean('allow_sso')->default(false)->after('language');
-            }
-            if (!Schema::hasColumn('users', 'email_verified')) {
-                $table->boolean('email_verified')->default(false)->after('allow_sso');
-            }
-            if (!Schema::hasColumn('users', 'email_preferences')) {
-                $table->json('email_preferences')->nullable()->after('email_verified');
-            }
-
-            // Password reset fields
-            if (!Schema::hasColumn('users', 'password_reset_token')) {
-                $table->string('password_reset_token')->nullable()->after('email_preferences');
-            }
-            if (!Schema::hasColumn('users', 'password_reset_expires')) {
-                $table->timestamp('password_reset_expires')->nullable()->after('password_reset_token');
-            }
-
-            // Financial fields
-            if (!Schema::hasColumn('users', 'balance')) {
-                $table->decimal('balance', 10, 2)->default(0)->after('password_reset_expires');
-            }
-            if (!Schema::hasColumn('users', 'credit_limit')) {
-                $table->decimal('credit_limit', 10, 2)->nullable()->after('balance');
-            }
-
-            // Timestamp fields
-            if (!Schema::hasColumn('users', 'created_by')) {
-                $table->unsignedBigInteger('created_by')->nullable()->after('credit_limit');
-            }
-            if (!Schema::hasColumn('users', 'updated_by')) {
-                $table->unsignedBigInteger('updated_by')->nullable()->after('created_by');
-            }
+            $this->addColumn($table, 'firstname', 'string', 'name');
+            $this->addColumn($table, 'lastname', 'string', 'firstname');
+            $this->addColumn($table, 'companyname', 'string', 'lastname');
+            $this->addColumn($table, 'address1', 'text', 'companyname');
+            $this->addColumn($table, 'address2', 'text', 'address1');
+            $this->addColumn($table, 'city', 'string', 'address2');
+            $this->addColumn($table, 'state', 'string', 'city');
+            $this->addColumn($table, 'postcode', 'string', 'state');
+            $this->addColumn($table, 'country', 'string', 'postcode');
+            $this->addColumn($table, 'phonenumber', 'string', 'country');
+            $this->addColumn($table, 'currency', 'string', 'phonenumber', 3, 'USD');
+            $this->addColumn($table, 'notes', 'text', 'currency');
+            $this->addColumn($table, 'cardnum', 'string', 'notes');
+            $this->addColumn($table, 'startdate', 'date', 'cardnum');
+            $this->addColumn($table, 'expdate', 'date', 'startdate');
+            $this->addColumn($table, 'lastlogin', 'timestamp', 'expdate');
+            $this->addEnumColumn($table, 'status', 'lastlogin', ['active', 'inactive', 'suspended'], 'active');
+            $this->addColumn($table, 'language', 'string', 'status', 5, 'en');
+            $this->addColumn($table, 'allow_sso', 'boolean', 'language', null, false);
+            $this->addColumn($table, 'email_verified', 'boolean', 'allow_sso', null, false);
+            $this->addColumn($table, 'email_preferences', 'json', 'email_verified');
+            $this->addColumn($table, 'password_reset_token', 'string', 'email_preferences');
+            $this->addColumn($table, 'password_reset_expires', 'timestamp', 'password_reset_token');
+            $this->addColumn($table, 'balance', 'decimal', 'password_reset_expires', null, 0, [10, 2]);
+            $this->addColumn($table, 'credit_limit', 'decimal', 'balance', null, null, [10, 2]);
+            $this->addColumn($table, 'created_by', 'unsignedBigInteger', 'credit_limit');
+            $this->addColumn($table, 'updated_by', 'unsignedBigInteger', 'created_by');
         });
     }
 
     public function down(): void
     {
-        if (!Schema::hasTable('users')) {
-            return;
-        }
+        if (!Schema::hasTable('users')) return;
 
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
-                'firstname', 'lastname', 'companyname',
-                'address1', 'address2', 'city', 'state', 'postcode', 'country',
-                'phonenumber', 'currency',
-                'notes', 'cardnum', 'startdate', 'expdate', 'lastlogin', 'status', 'language',
-                'allow_sso', 'email_verified', 'email_preferences',
-                'password_reset_token', 'password_reset_expires',
-                'balance', 'credit_limit',
-                'created_by', 'updated_by'
+                'firstname', 'lastname', 'companyname', 'address1', 'address2', 'city', 'state', 'postcode', 'country',
+                'phonenumber', 'currency', 'notes', 'cardnum', 'startdate', 'expdate', 'lastlogin', 'status', 'language',
+                'allow_sso', 'email_verified', 'email_preferences', 'password_reset_token', 'password_reset_expires',
+                'balance', 'credit_limit', 'created_by', 'updated_by'
             ]);
         });
+    }
+
+    private function addColumn(Blueprint $table, string $name, string $type, string $after, ?int $length = null, $default = null, ?array $precision = null): void
+    {
+        if (Schema::hasColumn('users', $name)) return;
+
+        $column = $table->$type($name, $length);
+        if ($precision) $column = $table->$type($name, $precision[0], $precision[1]);
+        if ($default !== null) $column->default($default);
+        $column->nullable()->after($after);
+    }
+
+    private function addEnumColumn(Blueprint $table, string $name, string $after, array $values, $default = null): void
+    {
+        if (Schema::hasColumn('users', $name)) return;
+
+        $column = $table->enum($name, $values);
+        if ($default !== null) $column->default($default);
+        $column->after($after);
     }
 };
