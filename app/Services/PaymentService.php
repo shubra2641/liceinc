@@ -179,10 +179,7 @@ class PaymentService
             return match ($gateway) {
                 'paypal' => $this->verifyPayPalPayment($transactionId),
                 'stripe' => $this->verifyStripePayment($transactionId),
-                default => [
-                    'success' => false,
-                    'message' => 'Unsupported payment gateway',
-                ]
+                default => $this->buildFailure('Unsupported payment gateway')
             };
         } catch (\Exception $e) {
             Log::error('Payment verification failed', [
@@ -191,10 +188,7 @@ class PaymentService
                 'error' => $e->getMessage()
             ]);
 
-            return [
-                'success' => false,
-                'message' => 'Payment verification failed',
-            ];
+            return $this->buildFailure('Payment verification failed');
         }
     }
 
@@ -217,18 +211,20 @@ class PaymentService
 
             $payment = Payment::get($paymentId, $apiContext);
 
-            if ($payment->getState() === 'approved') {
-                $execution = new PaymentExecution();
-                $payerId = request()->get('PayerID');
-                $execution->setPayerId($payerId ?? '');
-                $result = $payment->execute($execution, $apiContext);
+            if ($payment->getState() !== 'approved') {
+                return $this->buildFailure('Payment not approved');
+            }
 
-                if ($result->getState() === 'approved') {
-                    return $this->buildSuccess([
-                        'transaction_id' => $paymentId,
-                        'message' => 'Payment verified successfully',
-                    ]);
-                }
+            $execution = new PaymentExecution();
+            $payerId = request()->get('PayerID');
+            $execution->setPayerId($payerId ?? '');
+            $result = $payment->execute($execution, $apiContext);
+
+            if ($result->getState() === 'approved') {
+                return $this->buildSuccess([
+                    'transaction_id' => $paymentId,
+                    'message' => 'Payment verified successfully',
+                ]);
             }
 
             return $this->buildFailure('Payment not approved');
