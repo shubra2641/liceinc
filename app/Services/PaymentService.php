@@ -295,85 +295,20 @@ class PaymentService
 
             // Handle existing invoice
             if (isset($orderData['invoice_id']) && $orderData['invoice_id']) {
-                $existingInvoice = Invoice::find($orderData['invoice_id']);
-                if ($existingInvoice) {
-                    $existingInvoice->update([
-                        'status' => 'paid',
-                        'paid_at' => now(),
-                        'notes' => "Payment via {$gateway}",
-                        'metadata' => array_merge($existingInvoice->metadata ?? [], [
-                            'gateway' => $gateway,
-                            'transaction_id' => $transactionId,
-                        ])
-                    ]);
-
-                    DB::commit();
-                    return [
-                        'success' => true,
-                        'license' => $existingInvoice->license,
-                        'invoice' => $existingInvoice,
-                    ];
+                $handled = $this->handleExistingInvoiceFlow($orderData, $gateway, $transactionId);
+                if ($handled !== null) {
+                    return $handled;
                 }
             }
 
             // Handle custom invoice
             if (isset($orderData['is_custom']) && $orderData['is_custom']) {
-                $invoice = Invoice::create([
-                    'user_id' => $user->id,
-                    'product_id' => null,
-                    'license_id' => null,
-                    'invoice_number' => $this->generateInvoiceNumber(),
-                    'amount' => $orderData['amount'],
-                    'currency' => $orderData['currency'],
-                    'status' => 'paid',
-                    'paid_at' => now(),
-                    'due_date' => now()->addDays(30),
-                    'notes' => "Custom service payment via {$gateway}",
-                    'metadata' => [
-                        'gateway' => $gateway,
-                        'transaction_id' => $transactionId,
-                        'is_custom' => true,
-                    ],
-                ]);
-
-                DB::commit();
-                return [
-                    'success' => true,
-                    'license' => null,
-                    'invoice' => $invoice,
-                ];
+                return $this->handleCustomInvoiceFlow($user, $orderData, $gateway, $transactionId);
             }
 
             // Create license and invoice for product purchase
             if ($product) {
-                $license = License::create([
-                    'user_id' => $user->id,
-                    'product_id' => $product->id,
-                    'license_type' => $product->license_type ?? 'single',
-                    'status' => 'active',
-                    'max_domains' => $product->max_domains ?? 1,
-                    'license_expires_at' => $this->calculateLicenseExpiry($product),
-                    'support_expires_at' => $this->calculateSupportExpiry($product),
-                    'notes' => "Purchased via {$gateway}",
-                ]);
-
-                $invoiceService = app(InvoiceService::class);
-                $invoice = $invoiceService->createInvoice(
-                    $user,
-                    $license,
-                    $product,
-                    $orderData['amount'],
-                    $orderData['currency'] ?? 'usd',
-                    $gateway,
-                    $transactionId
-                );
-
-                DB::commit();
-                return [
-                    'success' => true,
-                    'license' => $license,
-                    'invoice' => $invoice,
-                ];
+                return $this->handleProductPurchaseFlow($user, $product, $orderData, $gateway, $transactionId);
             }
 
             throw new \Exception('Product not found');
@@ -387,6 +322,107 @@ class PaymentService
             ]);
             throw $e;
         }
+    }
+
+    /**
+     * Handle updating an existing invoice if present.
+     * Returns the success response or null if no invoice to handle.
+     *
+     * @return array{success:bool,license:mixed,invoice:mixed}|null
+     */
+    private function handleExistingInvoiceFlow(array $orderData, string $gateway, ?string $transactionId): ?array
+    {
+        $existingInvoice = Invoice::find($orderData['invoice_id']);
+        if (!$existingInvoice) {
+            return null;
+        }
+
+        $existingInvoice->update([
+            'status' => 'paid',
+            'paid_at' => now(),
+            'notes' => "Payment via {$gateway}",
+            'metadata' => array_merge($existingInvoice->metadata ?? [], [
+                'gateway' => $gateway,
+                'transaction_id' => $transactionId,
+            ])
+        ]);
+
+        DB::commit();
+        return [
+            'success' => true,
+            'license' => $existingInvoice->license,
+            'invoice' => $existingInvoice,
+        ];
+    }
+
+    /**
+     * Handle custom invoice creation flow.
+     *
+     * @return array{success:bool,license:null,invoice:mixed}
+     */
+    private function handleCustomInvoiceFlow(User $user, array $orderData, string $gateway, ?string $transactionId): array
+    {
+        $invoice = Invoice::create([
+            'user_id' => $user->id,
+            'product_id' => null,
+            'license_id' => null,
+            'invoice_number' => $this->generateInvoiceNumber(),
+            'amount' => $orderData['amount'],
+            'currency' => $orderData['currency'],
+            'status' => 'paid',
+            'paid_at' => now(),
+            'due_date' => now()->addDays(30),
+            'notes' => "Custom service payment via {$gateway}",
+            'metadata' => [
+                'gateway' => $gateway,
+                'transaction_id' => $transactionId,
+                'is_custom' => true,
+            ],
+        ]);
+
+        DB::commit();
+        return [
+            'success' => true,
+            'license' => null,
+            'invoice' => $invoice,
+        ];
+    }
+
+    /**
+     * Handle product purchase flow: create license and invoice.
+     *
+     * @return array{success:bool,license:mixed,invoice:mixed}
+     */
+    private function handleProductPurchaseFlow(User $user, Product $product, array $orderData, string $gateway, ?string $transactionId): array
+    {
+        $license = License::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'license_type' => $product->license_type ?? 'single',
+            'status' => 'active',
+            'max_domains' => $product->max_domains ?? 1,
+            'license_expires_at' => $this->calculateLicenseExpiry($product),
+            'support_expires_at' => $this->calculateSupportExpiry($product),
+            'notes' => "Purchased via {$gateway}",
+        ]);
+
+        $invoiceService = app(InvoiceService::class);
+        $invoice = $invoiceService->createInvoice(
+            $user,
+            $license,
+            $product,
+            $orderData['amount'],
+            $orderData['currency'] ?? 'usd',
+            $gateway,
+            $transactionId
+        );
+
+        DB::commit();
+        return [
+            'success' => true,
+            'license' => $license,
+            'invoice' => $invoice,
+        ];
     }
 
     /**
