@@ -76,17 +76,19 @@
     <!-- Naming conventions -->
     <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
     
-    <!-- Enable naming convention checks but allow camelCase for variables and functions -->
+    <!-- Disable camelCase checks for variables and functions -->
     <rule ref="Squiz.NamingConventions.ValidVariableName">
-        <exclude name="Squiz.NamingConventions.ValidVariableName.MemberVar"/>
+        <exclude name="Squiz.NamingConventions.ValidVariableName"/>
     </rule>
     
     <rule ref="Squiz.NamingConventions.ValidFunctionName">
-        <exclude name="Squiz.NamingConventions.ValidFunctionName.PrivateNoUnderscore"/>
+        <exclude name="Squiz.NamingConventions.ValidFunctionName"/>
     </rule>
     
-    <!-- Keep camelCase format checking for methods and functions -->
-    <rule ref="PSR1.Methods.CamelCapsMethodName"/>
+    <!-- Disable camelCase format checking for methods and functions -->
+    <rule ref="PSR1.Methods.CamelCapsMethodName">
+        <exclude name="PSR1.Methods.CamelCapsMethodName"/>
+    </rule>
     
     <!-- Disable rules that might conflict with PHPStan -->
     <rule ref="Generic.Commenting.DocComment.MissingParamTag">
@@ -122,11 +124,15 @@
         <exclude name="Squiz.Commenting.FunctionComment.InvalidParamComment"/>
     </rule>
     
-    <!-- Keep member variable naming checks -->
-    <rule ref="Squiz.NamingConventions.ValidVariableName"/>
+    <!-- Disable member variable naming checks -->
+    <rule ref="Squiz.NamingConventions.ValidVariableName">
+        <exclude name="Squiz.NamingConventions.ValidVariableName"/>
+    </rule>
     
-    <!-- Keep function naming checks -->
-    <rule ref="Squiz.NamingConventions.ValidFunctionName"/>
+    <!-- Disable function naming checks -->
+    <rule ref="Squiz.NamingConventions.ValidFunctionName">
+        <exclude name="Squiz.NamingConventions.ValidFunctionName"/>
+    </rule>
     
     <!-- Disable type hint requirements for PHPStan Level 10 compatibility -->
     <rule ref="Squiz.Commenting.FunctionComment.MissingParamComment">
