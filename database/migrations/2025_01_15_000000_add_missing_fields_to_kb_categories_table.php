@@ -7,37 +7,46 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Check if table exists before modifying it
-        if (Schema::hasTable('kb_categories')) {
-            Schema::table('kb_categories', function (Blueprint $table) {
-                // Check if columns don't exist before adding them
-                if (! Schema::hasColumn('kb_categories', 'icon')) {
-                    $table->string('icon')->nullable()->default('fas fa-folder')->after('description');
-                }
-                if (! Schema::hasColumn('kb_categories', 'is_featured')) {
-                    $table->boolean('is_featured')->default(false)->after('is_published');
-                }
-                if (! Schema::hasColumn('kb_categories', 'is_active')) {
-                    $table->boolean('is_active')->default(true)->after('is_featured');
-                }
-            });
+        if (!Schema::hasTable('kb_categories')) {
+            return;
         }
+
+        Schema::table('kb_categories', function (Blueprint $table) {
+            $this->addColumnIfNotExists($table, 'icon', 'string', ['nullable', 'default' => 'fas fa-folder'], 'description');
+            $this->addColumnIfNotExists($table, 'is_featured', 'boolean', ['default' => false], 'is_published');
+            $this->addColumnIfNotExists($table, 'is_active', 'boolean', ['default' => true], 'is_featured');
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        if (Schema::hasTable('kb_categories')) {
-            Schema::table('kb_categories', function (Blueprint $table) {
-                $table->dropColumn(['icon', 'is_featured', 'is_active']);
-            });
+        if (!Schema::hasTable('kb_categories')) {
+            return;
+        }
+
+        Schema::table('kb_categories', function (Blueprint $table) {
+            $table->dropColumn(['icon', 'is_featured', 'is_active']);
+        });
+    }
+
+    private function addColumnIfNotExists(Blueprint $table, string $column, string $type, array $options = [], ?string $after = null): void
+    {
+        if (!Schema::hasColumn('kb_categories', $column)) {
+            $columnDefinition = $table->$type($column);
+            
+            foreach ($options as $option => $value) {
+                if (is_numeric($option)) {
+                    $columnDefinition->$value();
+                } else {
+                    $columnDefinition->$option($value);
+                }
+            }
+            
+            if ($after) {
+                $columnDefinition->after($after);
+            }
         }
     }
 };
