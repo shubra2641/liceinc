@@ -14,9 +14,15 @@ return new class() extends Migration {
         }
 
         Schema::table('kb_categories', function (Blueprint $table) {
-            $this->addColumnIfNotExists($table, 'icon', 'string', ['nullable', 'default' => 'fas fa-folder'], 'description');
-            $this->addColumnIfNotExists($table, 'is_featured', 'boolean', ['default' => false], 'is_published');
-            $this->addColumnIfNotExists($table, 'is_active', 'boolean', ['default' => true], 'is_featured');
+            if (!Schema::hasColumn('kb_categories', 'icon')) {
+                $table->string('icon')->nullable()->default('fas fa-folder')->after('description');
+            }
+            if (!Schema::hasColumn('kb_categories', 'is_featured')) {
+                $table->boolean('is_featured')->default(false)->after('is_published');
+            }
+            if (!Schema::hasColumn('kb_categories', 'is_active')) {
+                $table->boolean('is_active')->default(true)->after('is_featured');
+            }
         });
     }
 
@@ -29,24 +35,5 @@ return new class() extends Migration {
         Schema::table('kb_categories', function (Blueprint $table) {
             $table->dropColumn(['icon', 'is_featured', 'is_active']);
         });
-    }
-
-    private function addColumnIfNotExists(Blueprint $table, string $column, string $type, array $options = [], ?string $after = null): void
-    {
-        if (!Schema::hasColumn('kb_categories', $column)) {
-            $columnDefinition = $table->$type($column);
-            
-            foreach ($options as $option => $value) {
-                if (is_numeric($option)) {
-                    $columnDefinition->$value();
-                } else {
-                    $columnDefinition->$option($value);
-                }
-            }
-            
-            if ($after) {
-                $columnDefinition->after($after);
-            }
-        }
     }
 };
