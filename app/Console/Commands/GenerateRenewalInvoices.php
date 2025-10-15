@@ -97,69 +97,132 @@ class GenerateRenewalInvoices extends Command
     public function handle(): int
     {
         try {
-            // Validate and sanitize input.
             $daysBeforeExpiry = $this->validateAndSanitizeDaysOption();
-            $expiryDate       = Carbon::now()->addDays($daysBeforeExpiry);
-            $this->info('Generating renewal invoices for licenses expiring within ' . $daysBeforeExpiry . ' days...');
-            // Find licenses that are about to expire and don't have pending renewal invoices.
-            $licenses       = $this->getExpiringLicenses($expiryDate);
-            $generatedCount = 0;
-            $emailSentCount = 0;
-            $errorCount     = 0;
-            /*
-             * @var License $license
-             */
-            foreach ($licenses as $license) {
-                try {
-                    DB::beginTransaction();
-                    // Generate renewal invoice.
-                    $invoice = $this->generateRenewalInvoice($license);
-                    if ($invoice !== null) {
-                        $generatedCount++;
-                        $this->line(
-                            'Generated renewal invoice for license ' .
-                            $license->license_key . ' (Product: ' .
-                            ($license->product->name ?? 'Unknown Product') . ')'
-                        );
-                        // Send email notifications.
-                        if ($this->sendRenewalNotifications($license, $invoice) === true) {
-                            $emailSentCount++;
-                        }
+            $expiryDate = $this->calculateExpiryDate($daysBeforeExpiry);
 
-                        DB::commit();
-                    } else {
-                        DB::rollBack();
-                        $errorCount++;
-                    }
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    $errorCount++;
-                    $this->handleLicenseError($license, $e);
-                }//end try
-            }//end foreach
+            $this->displayStartMessage($daysBeforeExpiry);
 
-            $this->info(
-                'Generated ' . $generatedCount . ' renewal invoices and sent ' .
-                $emailSentCount . ' email notifications.'
-            );
-            if ($errorCount > 0) {
-                $this->warn('Encountered ' . $errorCount . ' errors during processing. Check logs for details.');
-            }
+            $licenses = $this->getExpiringLicenses($expiryDate);
+            $results = $this->processLicenses($licenses);
+
+            $this->displayResults($results);
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            Log::error(
-                'GenerateRenewalInvoices command failed',
-                [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]
-            );
-            $this->error('Command failed: ' . $e->getMessage());
+            $this->handleCommandError($e);
             return Command::FAILURE;
-        }//end try
+        }
     }
 
+
+    /**
+     * Calculate expiry date based on days.
+     */
+    protected function calculateExpiryDate(int $days): Carbon
+    {
+        return Carbon::now()->addDays($days);
+    }
+
+    /**
+     * Display start message.
+     */
+    protected function displayStartMessage(int $days): void
+    {
+        $this->info('Generating renewal invoices for licenses expiring within ' . $days . ' days...');
+    }
+
+    /**
+     * Process all licenses and return results.
+     */
+    protected function processLicenses($licenses): array
+    {
+        $generatedCount = 0;
+        $emailSentCount = 0;
+        $errorCount = 0;
+
+        foreach ($licenses as $license) {
+            $result = $this->processSingleLicense($license);
+            $generatedCount += $result['generated'];
+            $emailSentCount += $result['emails'];
+            $errorCount += $result['errors'];
+        }
+
+        return [
+            'generated' => $generatedCount,
+            'emails' => $emailSentCount,
+            'errors' => $errorCount
+        ];
+    }
+
+    /**
+     * Process a single license.
+     */
+    protected function processSingleLicense(License $license): array
+    {
+        try {
+            DB::beginTransaction();
+
+            $invoice = $this->generateRenewalInvoice($license);
+            if ($invoice === null) {
+                DB::rollBack();
+                return ['generated' => 0, 'emails' => 0, 'errors' => 1];
+            }
+
+            $this->displayLicenseSuccess($license);
+
+            $emailsSent = $this->sendRenewalNotifications($license, $invoice) ? 1 : 0;
+
+            DB::commit();
+
+            return ['generated' => 1, 'emails' => $emailsSent, 'errors' => 0];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->handleLicenseError($license, $e);
+            return ['generated' => 0, 'emails' => 0, 'errors' => 1];
+        }
+    }
+
+    /**
+     * Display license success message.
+     */
+    protected function displayLicenseSuccess(License $license): void
+    {
+        $this->line(
+            'Generated renewal invoice for license ' .
+            $license->license_key . ' (Product: ' .
+            ($license->product->name ?? 'Unknown Product') . ')'
+        );
+    }
+
+    /**
+     * Display final results.
+     */
+    protected function displayResults(array $results): void
+    {
+        $this->info(
+            'Generated ' . $results['generated'] . ' renewal invoices and sent ' .
+            $results['emails'] . ' email notifications.'
+        );
+
+        if ($results['errors'] > 0) {
+            $this->warn('Encountered ' . $results['errors'] . ' errors during processing. Check logs for details.');
+        }
+    }
+
+    /**
+     * Handle command error.
+     */
+    protected function handleCommandError(\Exception $e): void
+    {
+        Log::error(
+            'GenerateRenewalInvoices command failed',
+            [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]
+        );
+        $this->error('Command failed: ' . $e->getMessage());
+    }
 
     /**
      * Validate and sanitize the days option with enhanced security.
@@ -231,84 +294,136 @@ class GenerateRenewalInvoices extends Command
     protected function generateRenewalInvoice(License $license): ?\App\Models\Invoice
     {
         try {
-            $product = $license->product;
+            $product = $this->validateProduct($license);
             if ($product === null) {
-                Log::warning(
-                    'No product found for license',
-                    [
-                        'licenseKey' => ($license->license_key ?? 'unknown'),
-                    ]
-                );
                 return null;
             }
 
-            /*
-             * @var Product $product
-             */
-            // Calculate renewal price based on product settings.
-            $renewalPrice = ($product->renewal_price ?? $product->price ?? 0);
-            if ($renewalPrice <= 0) {
-                Log::warning(
-                    'No renewal price set for product',
-                    [
-                        'productId'   => $product->id,
-                        'productName' => $product->name,
-                        'licenseKey'  => ($license->license_key ?? 'unknown'),
-                    ]
-                );
-                $this->warn(
-                    'No renewal price set for product ' . $product->name . ', skipping invoice generation.'
-                );
+            $renewalPrice = $this->calculateRenewalPrice($product, $license);
+            if ($renewalPrice === null) {
                 return null;
             }
 
-            // Validate renewal price.
-            if ($renewalPrice > 999999.99) {
-                Log::error(
-                    'Renewal price exceeds maximum allowed value',
-                    [
-                        'productId'    => $product->id,
-                        'renewalPrice' => $renewalPrice,
-                        'licenseKey'   => ($license->license_key ?? 'unknown'),
-                    ]
-                );
-                throw new \InvalidArgumentException(
-                    'Renewal price exceeds maximum allowed value: ' . $renewalPrice
-                );
-            }
+            $this->validateRenewalPrice($renewalPrice, $product, $license);
 
-            // Calculate new expiry date based on renewal period.
             $newExpiryDate = $this->calculateNewExpiryDate($license, $product);
-            // Sanitize description to prevent XSS.
-            $description = htmlspecialchars(
-                'Renewal for ' . $product->name . ' - License ' . $license->license_key,
-                ENT_QUOTES,
-                'UTF-8',
-            );
-            // Create renewal invoice.
-            $invoice = $this->invoiceService->createRenewalInvoice(
-                $license,
-                [
-                    'amount'          => $renewalPrice,
-                    'description'     => $description,
-                    'due_date'        => Carbon::now()->addDays(30),
-                // 30 days to pay
-                    'new_expiry_date' => $newExpiryDate,
-                ]
-            );
-            return $invoice;
+            $description = $this->createInvoiceDescription($product, $license);
+
+            return $this->createInvoice($license, $renewalPrice, $description, $newExpiryDate);
         } catch (\Exception $e) {
+            $this->logInvoiceError($license, $e);
+            throw $e;
+        }
+    }
+
+    /**
+     * Validate product exists.
+     */
+    protected function validateProduct(License $license): ?\App\Models\Product
+    {
+        $product = $license->product;
+        if ($product === null) {
+            Log::warning(
+                'No product found for license',
+                ['licenseKey' => ($license->license_key ?? 'unknown')]
+            );
+        }
+        return $product;
+    }
+
+    /**
+     * Calculate renewal price.
+     */
+    protected function calculateRenewalPrice($product, License $license): ?float
+    {
+        $renewalPrice = ($product->renewal_price ?? $product->price ?? 0);
+
+        if ($renewalPrice <= 0) {
+            $this->logNoRenewalPrice($product, $license);
+            $this->warn('No renewal price set for product ' . $product->name . ', skipping invoice generation.');
+            return null;
+        }
+
+        return $renewalPrice;
+    }
+
+    /**
+     * Log no renewal price warning.
+     */
+    protected function logNoRenewalPrice($product, License $license): void
+    {
+        Log::warning(
+            'No renewal price set for product',
+            [
+                'productId' => $product->id,
+                'productName' => $product->name,
+                'licenseKey' => ($license->license_key ?? 'unknown'),
+            ]
+        );
+    }
+
+    /**
+     * Validate renewal price.
+     */
+    protected function validateRenewalPrice(float $renewalPrice, $product, License $license): void
+    {
+        if ($renewalPrice > 999999.99) {
             Log::error(
-                'Failed to generate renewal invoice',
+                'Renewal price exceeds maximum allowed value',
                 [
+                    'productId' => $product->id,
+                    'renewalPrice' => $renewalPrice,
                     'licenseKey' => ($license->license_key ?? 'unknown'),
-                    'productId'  => ($license->product_id ?? 'unknown'),
-                    'error'      => $e->getMessage(),
-                    'trace'      => $e->getTraceAsString(),
                 ]
             );
-            throw $e;
-        }//end try
+            throw new \InvalidArgumentException(
+                'Renewal price exceeds maximum allowed value: ' . $renewalPrice
+            );
+        }
+    }
+
+    /**
+     * Create invoice description.
+     */
+    protected function createInvoiceDescription($product, License $license): string
+    {
+        return htmlspecialchars(
+            'Renewal for ' . $product->name . ' - License ' . $license->license_key,
+            ENT_QUOTES,
+            'UTF-8',
+        );
+    }
+
+    /**
+     * Create the invoice.
+     */
+    protected function createInvoice(License $license, float $renewalPrice, string $description, Carbon $newExpiryDate): \App\Models\Invoice
+    {
+        return $this->invoiceService->createRenewalInvoice(
+            $license,
+            [
+                'amount' => $renewalPrice,
+                'description' => $description,
+                'due_date' => Carbon::now()->addDays(30),
+                'new_expiry_date' => $newExpiryDate,
+            ]
+        );
+    }
+
+    /**
+     * Log invoice error.
+     */
+    protected function logInvoiceError(License $license, \Exception $e): void
+    {
+        Log::error(
+            'Failed to generate renewal invoice',
+            [
+                'licenseKey' => ($license->license_key ?? 'unknown'),
+                'productId' => ($license->product_id ?? 'unknown'),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]
+        );
     }
 
 
@@ -326,79 +441,139 @@ class GenerateRenewalInvoices extends Command
     protected function calculateNewExpiryDate(License $license, Product $product): Carbon
     {
         try {
-            $currentExpiry = ($license->license_expires_at ?? Carbon::now());
-            $renewalPeriod = $product->renewal_period;
-            // Current expiry is already a Carbon instance.
-            // Validate renewal period.
-            $validPeriods = [
-                'monthly',
-                'quarterly',
-                'semi-annual',
-                'annual',
-                'three-years',
-                'lifetime',
-            ];
-            if ($renewalPeriod !== null && in_array($renewalPeriod, $validPeriods) === false) {
-                Log::warning(
-                    'Invalid renewal period, using default',
-                    [
-                        'renewalPeriod' => $renewalPeriod,
-                        'productId'     => $product->id,
-                        'licenseKey'    => ($license->license_key ?? 'unknown'),
-                    ]
-                );
-                $renewalPeriod = null;
-            }
+            $currentExpiry = $this->getCurrentExpiry($license);
+            $renewalPeriod = $this->validateRenewalPeriod($product, $license);
 
-            switch ($renewalPeriod) {
-                case 'monthly':
-                    return $currentExpiry->copy()->addMonth();
-
-                case 'quarterly':
-                    return $currentExpiry->copy()->addMonths(3);
-
-                case 'semi-annual':
-                    return $currentExpiry->copy()->addMonths(6);
-
-                case 'annual':
-                    return $currentExpiry->copy()->addYear();
-
-                case 'three-years':
-                    return $currentExpiry->copy()->addYears(3);
-
-                case 'lifetime':
-                    return $currentExpiry->copy()->addYears(100);
-
-                default:
-                    // Default to product duration_days.
-                    $durationDays = ($product->duration_days ?? 365);
-                    // Validate duration days.
-                    if ($durationDays < 1 || $durationDays > 36500) {
-                        // Max 100 years.
-                        Log::warning(
-                            'Invalid duration days, using default',
-                            [
-                                'durationDays' => $durationDays,
-                                'productId'    => $product->id,
-                            ]
-                        );
-                        $durationDays = 365;
-                    }
-                    return $currentExpiry->copy()->addDays($durationDays);
-            }//end switch
+            return $this->calculateExpiryByPeriod($currentExpiry, $renewalPeriod, $product);
         } catch (\Exception $e) {
-            Log::error(
-                'Failed to calculate new expiry date',
-                [
-                    'licenseKey'    => ($license->license_key ?? 'unknown'),
-                    'productId'     => $product->id,
-                    'renewalPeriod' => ($product->renewal_period ?? 'unknown'),
-                    'error'         => $e->getMessage(),
-                    'trace'         => $e->getTraceAsString(),
-                ]
-            );
+            $this->logExpiryCalculationError($license, $product, $e);
             throw $e;
-        }//end try
+        }
+    }
+
+    /**
+     * Get current expiry date.
+     */
+    protected function getCurrentExpiry(License $license): Carbon
+    {
+        return $license->license_expires_at ?? Carbon::now();
+    }
+
+    /**
+     * Validate renewal period.
+     */
+    protected function validateRenewalPeriod($product, License $license): ?string
+    {
+        $renewalPeriod = $product->renewal_period;
+        $validPeriods = [
+            'monthly', 'quarterly', 'semi-annual',
+            'annual', 'three-years', 'lifetime'
+        ];
+
+        if ($renewalPeriod !== null && !in_array($renewalPeriod, $validPeriods)) {
+            $this->logInvalidRenewalPeriod($renewalPeriod, $product, $license);
+            return null;
+        }
+
+        return $renewalPeriod;
+    }
+
+    /**
+     * Log invalid renewal period.
+     */
+    protected function logInvalidRenewalPeriod($renewalPeriod, $product, License $license): void
+    {
+        Log::warning(
+            'Invalid renewal period, using default',
+            [
+                'renewalPeriod' => $renewalPeriod,
+                'productId' => $product->id,
+                'licenseKey' => ($license->license_key ?? 'unknown'),
+            ]
+        );
+    }
+
+    /**
+     * Calculate expiry by period.
+     */
+    protected function calculateExpiryByPeriod(Carbon $currentExpiry, ?string $renewalPeriod, $product): Carbon
+    {
+        if ($renewalPeriod === null) {
+            return $this->calculateDefaultExpiry($currentExpiry, $product);
+        }
+
+        return $this->calculatePeriodExpiry($currentExpiry, $renewalPeriod);
+    }
+
+    /**
+     * Calculate expiry for specific period.
+     */
+    protected function calculatePeriodExpiry(Carbon $currentExpiry, string $period): Carbon
+    {
+        return match ($period) {
+            'monthly' => $currentExpiry->copy()->addMonth(),
+            'quarterly' => $currentExpiry->copy()->addMonths(3),
+            'semi-annual' => $currentExpiry->copy()->addMonths(6),
+            'annual' => $currentExpiry->copy()->addYear(),
+            'three-years' => $currentExpiry->copy()->addYears(3),
+            'lifetime' => $currentExpiry->copy()->addYears(100),
+            default => $currentExpiry->copy()->addDays(365),
+        };
+    }
+
+    /**
+     * Calculate default expiry based on product duration.
+     */
+    protected function calculateDefaultExpiry(Carbon $currentExpiry, $product): Carbon
+    {
+        $durationDays = $this->validateDurationDays($product);
+        return $currentExpiry->copy()->addDays($durationDays);
+    }
+
+    /**
+     * Validate duration days.
+     */
+    protected function validateDurationDays($product): int
+    {
+        $durationDays = $product->duration_days ?? 365;
+
+        if ($durationDays < 1 || $durationDays > 36500) {
+            $this->logInvalidDurationDays($durationDays, $product);
+            return 365;
+        }
+
+        return $durationDays;
+    }
+
+    /**
+     * Log invalid duration days.
+     */
+    protected function logInvalidDurationDays(int $durationDays, $product): void
+    {
+        Log::warning(
+            'Invalid duration days, using default',
+            [
+                'durationDays' => $durationDays,
+                'productId' => $product->id,
+            ]
+        );
+    }
+
+    /**
+     * Log expiry calculation error.
+     */
+    protected function logExpiryCalculationError(License $license, $product, \Exception $e): void
+    {
+        Log::error(
+            'Failed to calculate new expiry date',
+            [
+                'licenseKey' => ($license->license_key ?? 'unknown'),
+                'productId' => $product->id,
+                'renewalPeriod' => ($product->renewal_period ?? 'unknown'),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]
+        );
     }
 
 
@@ -413,6 +588,17 @@ class GenerateRenewalInvoices extends Command
      * @throws \Exception When notification sending fails.
      */
     protected function sendRenewalNotifications(License $license, \App\Models\Invoice $invoice): bool
+    {
+        $results = $this->sendAllNotifications($license, $invoice);
+        $this->logNotificationResults($license, $results);
+
+        return $results['sent'] > 0;
+    }
+
+    /**
+     * Send all notifications.
+     */
+    protected function sendAllNotifications(License $license, \App\Models\Invoice $invoice): array
     {
         $notificationsSent = 0;
         $totalNotifications = 0;
@@ -431,19 +617,27 @@ class GenerateRenewalInvoices extends Command
             $notificationsSent++;
         }
 
-        // Log notification results
-        if ($notificationsSent < $totalNotifications) {
+        return [
+            'sent' => $notificationsSent,
+            'total' => $totalNotifications
+        ];
+    }
+
+    /**
+     * Log notification results.
+     */
+    protected function logNotificationResults(License $license, array $results): void
+    {
+        if ($results['sent'] < $results['total']) {
             Log::warning(
                 'Some renewal notifications failed to send',
                 [
                     'licenseKey' => $license->license_key ?? 'unknown',
-                    'sent' => $notificationsSent,
-                    'total' => $totalNotifications,
+                    'sent' => $results['sent'],
+                    'total' => $results['total'],
                 ]
             );
         }
-
-        return $notificationsSent > 0;
     }
 
     /**
