@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Helpers\SecureFileHelper;
 use App\Helpers\VersionHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AutoUpdateRequest;
@@ -19,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Update Controller - Simplified
+ * Simplified Update Controller
  */
 class UpdateController extends Controller
 {
@@ -31,7 +30,36 @@ class UpdateController extends Controller
     }
 
     /**
-     * Show update confirmation page
+     * Show update management page
+     */
+    public function index()
+    {
+        try {
+            $versionStatus = VersionHelper::getVersionStatus();
+            $versionInfo = VersionHelper::getVersionInfo();
+            $products = $this->getProducts();
+            $updateInfo = $this->getUpdateInfo();
+
+            return view('admin.updates.index', [
+                'versionStatus' => $versionStatus,
+                'versionInfo' => $versionInfo,
+                'products' => $products,
+                'updateInfo' => $updateInfo
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to load update page', ['error' => $e->getMessage()]);
+            return view('admin.updates.index', [
+                'versionStatus' => null,
+                'versionInfo' => null,
+                'products' => [],
+                'updateInfo' => null,
+                'error' => 'Failed to load update information.',
+            ]);
+        }
+    }
+
+    /**
+     * Show update confirmation
      */
     public function confirmUpdate(Request $request)
     {
@@ -64,44 +92,7 @@ class UpdateController extends Controller
     }
 
     /**
-     * Display update management page
-     */
-    public function index()
-    {
-        try {
-            $versionStatus = VersionHelper::getVersionStatus();
-            $versionInfo = VersionHelper::getVersionInfo();
-            $products = $this->getSpecificProduct('the-ultimate-license-management-system');
-            $updateInfo = null;
-
-            if (count($products) > 0) {
-                $updateInfo = $this->getUpdateInfoForProduct('the-ultimate-license-management-system', '1.0.0');
-            }
-
-            return view('admin.updates.index', [
-                'versionStatus' => $versionStatus,
-                'versionInfo' => $versionInfo,
-                'products' => $products,
-                'updateInfo' => $updateInfo
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Failed to load update management page', [
-                'error' => $e->getMessage(),
-                'user_id' => auth()->id(),
-            ]);
-
-            return view('admin.updates.index', [
-                'versionStatus' => null,
-                'versionInfo' => null,
-                'products' => [],
-                'updateInfo' => null,
-                'error' => 'Failed to load update information. Please try again.',
-            ]);
-        }
-    }
-
-    /**
-     * Check for available updates
+     * Check for updates
      */
     public function checkUpdates()
     {
@@ -109,19 +100,14 @@ class UpdateController extends Controller
             $versionStatus = VersionHelper::getVersionStatus();
 
             if ($versionStatus['is_update_available']) {
-                $message = "Update available! Current version: {$versionStatus['current_version']}, "
-                    . "Latest version: {$versionStatus['latest_version']}";
+                $message = "Update available! Current: {$versionStatus['current_version']}, Latest: {$versionStatus['latest_version']}";
                 return redirect()->back()->with('success', $message);
             }
 
             $message = "System is up to date. Current version: {$versionStatus['current_version']}";
             return redirect()->back()->with('info', $message);
         } catch (\Exception $e) {
-            Log::error('Update check failed', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-            ]);
-
+            Log::error('Update check failed', ['error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Failed to check for updates: ' . $e->getMessage());
         }
     }
@@ -153,12 +139,45 @@ class UpdateController extends Controller
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('System update failed', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
+            Log::error('System update failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Update failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Rollback to previous version
+     */
+    public function rollback(SystemUpdateRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+            $validated = $request->validated();
+            $targetVersion = $validated['version'];
+            $currentVersion = VersionHelper::getCurrentVersion();
+
+            $validationResult = $this->updateService->validateRollbackRequest($targetVersion, $currentVersion);
+            if (!$validationResult['valid']) {
+                DB::rollBack();
+                return redirect()->back()->with('error', $validationResult['error']);
+            }
+
+            $backupPath = $validationResult['backup_path'];
+            $this->updateService->performRollback($targetVersion, $currentVersion, $backupPath);
+            DB::commit();
+
+            Log::warning('System rollback performed', [
+                'from_version' => $currentVersion,
+                'to_version' => $targetVersion,
             ]);
 
-            return redirect()->back()->with('error', 'Update failed: ' . $e->getMessage());
+            return redirect()->route('admin.updates.index')->with(
+                'success',
+                'System rolled back successfully from ' . $currentVersion . ' to ' . $targetVersion
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('System rollback failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Rollback failed: ' . $e->getMessage());
         }
     }
 
@@ -187,59 +206,11 @@ class UpdateController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to get version info', [
-                'user_id' => auth()->id(),
-                'version' => $version,
-                'error' => $e->getMessage(),
-            ]);
-
+            Log::error('Failed to get version info', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to get version information: ' . $e->getMessage(),
             ], 500);
-        }
-    }
-
-    /**
-     * Rollback to previous version
-     */
-    public function rollback(SystemUpdateRequest $request)
-    {
-        try {
-            DB::beginTransaction();
-            $validated = $request->validated();
-            $targetVersion = $validated['version'];
-            $currentVersion = VersionHelper::getCurrentVersion();
-
-            $validationResult = $this->updateService->validateRollbackRequest($targetVersion, $currentVersion);
-            if (!$validationResult['valid']) {
-                DB::rollBack();
-                return redirect()->back()->with('error', $validationResult['error']);
-            }
-
-            $backupPath = $validationResult['backup_path'];
-            $this->updateService->performRollback($targetVersion, $currentVersion, $backupPath);
-            DB::commit();
-
-            Log::warning('System rollback performed', [
-                'user_id' => auth()->id(),
-                'from_version' => $currentVersion,
-                'to_version' => $targetVersion,
-                'backup_used' => basename($backupPath),
-            ]);
-
-            return redirect()->route('admin.updates.index')->with(
-                'success',
-                'System rolled back successfully from ' . $currentVersion . ' to ' . $targetVersion
-            );
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('System rollback failed', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-            ]);
-
-            return redirect()->back()->with('error', 'Rollback failed: ' . $e->getMessage());
         }
     }
 
@@ -252,7 +223,7 @@ class UpdateController extends Controller
             $backupDir = storage_path('app/backups');
             $backups = [];
 
-            if (SecureFileHelper::isDirectory($backupDir)) {
+            if (is_dir($backupDir)) {
                 $files = glob($backupDir . '/backup_*.zip');
                 if ($files !== false) {
                     foreach ($files as $file) {
@@ -261,7 +232,7 @@ class UpdateController extends Controller
                             'path' => $file,
                             'size' => filesize($file),
                             'created_at' => date('Y-m-d H:i:s', filemtime($file)),
-                            'version' => $this->updateService->extractVersionFromBackupName(basename($file)),
+                            'version' => $this->extractVersionFromBackupName(basename($file)),
                         ];
                     }
                 }
@@ -277,14 +248,12 @@ class UpdateController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to get backups', ['error' => $e->getMessage()]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to get backups: ' . $e->getMessage(),
             ], 500);
         }
     }
-
 
     /**
      * Check for auto updates
@@ -339,111 +308,8 @@ class UpdateController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Auto update check failed', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-            ]);
-
+            Log::error('Auto update check failed', ['error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'An error occurred while checking for updates: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Perform auto update
-     */
-    private function performAutoUpdate(string $version, string $licenseKey, string $productSlug, ?string $domain = null): array
-    {
-        try {
-            if (!VersionHelper::isValidVersion($version)) {
-                return [
-                    'success' => false,
-                    'message' => 'Invalid version format. Must be in format X.Y.Z',
-                    'error_code' => 'INVALID_VERSION_FORMAT',
-                ];
-            }
-
-            if (!VersionHelper::canUpdateToVersion($version)) {
-                $currentVersion = VersionHelper::getCurrentVersion();
-                return [
-                    'success' => false,
-                    'message' => "Cannot update to version " . $version . ". Current version is " . $currentVersion . ". Only newer versions are allowed.",
-                    'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
-                    'current_version' => $currentVersion,
-                    'target_version' => $version,
-                ];
-            }
-
-            $downloadResult = $this->licenseServerService->downloadUpdate($licenseKey, $version, $productSlug, $domain);
-            if (!$downloadResult['success']) {
-                Log::error('Failed to download update package', [
-                    'user_id' => auth()->id(),
-                    'version' => $version,
-                    'error' => $downloadResult['message'] ?? 'Unknown error',
-                ]);
-
-                return [
-                    'success' => false,
-                    'message' => 'Download failed: ' . ($downloadResult['message'] ?? 'Unknown error'),
-                    'error_code' => 'DOWNLOAD_FAILED',
-                ];
-            }
-
-            $installResult = $this->updatePackageService->installUpdateFiles($downloadResult['file_path'] ?? '');
-            if ($installResult['success']) {
-                Artisan::call('migrate', ['--force' => true]);
-                Artisan::call('cache:clear');
-                Artisan::call('config:clear');
-                Artisan::call('route:clear');
-                Artisan::call('view:clear');
-                Cache::flush();
-
-                if (!VersionHelper::updateVersion($version)) {
-                    Log::error('Failed to update version in database', [
-                        'version' => $version,
-                        'user_id' => auth()->id(),
-                    ]);
-
-                    return [
-                        'success' => false,
-                        'message' => 'Update installed but failed to update version in database.',
-                        'error_code' => 'VERSION_UPDATE_FAILED',
-                    ];
-                }
-
-                return [
-                    'success' => true,
-                    'message' => 'Update installed successfully! System updated to version ' . $version,
-                    'data' => [
-                        'version' => $version,
-                        'files_installed' => $installResult['data']['files_installed'] ?? 0,
-                        'steps' => $installResult['data']['steps'] ?? [],
-                    ],
-                ];
-            } else {
-                Log::error('Failed to install update files', [
-                    'user_id' => auth()->id(),
-                    'version' => $version,
-                    'error' => $installResult['message'] ?? 'Unknown error',
-                ]);
-
-                return [
-                    'success' => false,
-                    'message' => 'Installation failed: ' . ($installResult['message'] ?? 'Unknown error'),
-                    'error_code' => 'INSTALL_FAILED',
-                ];
-            }
-        } catch (\Exception $e) {
-            Log::error('Auto update process failed', [
-                'user_id' => auth()->id(),
-                'version' => $version,
-                'error' => $e->getMessage(),
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Auto update failed: ' . $e->getMessage(),
-                'error_code' => 'PROCESS_FAILED',
-            ];
         }
     }
 
@@ -475,8 +341,6 @@ class UpdateController extends Controller
                     'success' => false,
                     'message' => 'Cannot update to version ' . $version . '. Current version is ' . $currentVersion,
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
-                    'current_version' => $currentVersion,
-                    'target_version' => $version,
                 ], 400);
             }
 
@@ -520,14 +384,10 @@ class UpdateController extends Controller
 
                 if (!VersionHelper::updateVersion($version)) {
                     DB::rollBack();
-                    Log::error('Failed to update version in database after successful installation', [
-                        'version' => $version,
-                        'user_id' => auth()->id(),
-                    ]);
-
+                    Log::error('Failed to update version in database after successful installation');
                     return response()->json([
                         'success' => false,
-                        'message' => 'Update installed but failed to update version in database. Please check logs.',
+                        'message' => 'Update installed but failed to update version in database.',
                         'error_code' => 'VERSION_UPDATE_FAILED',
                     ], 500);
                 }
@@ -553,92 +413,8 @@ class UpdateController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Auto update installation failed', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-            ]);
-
+            Log::error('Auto update installation failed', ['error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'An error occurred while installing update: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Get update info for product
-     */
-    private function getUpdateInfoForProduct(string $productSlug, string $currentVersion): ?array
-    {
-        try {
-            $currentVersion = VersionHelper::getCurrentVersion();
-            $latestVersionData = $this->licenseServerService->getUpdateInfo($productSlug, $currentVersion);
-
-            if ($latestVersionData['success']) {
-                $data = $latestVersionData['data'];
-                $isUpdateAvailable = $data['is_update_available'] ?? false;
-                $nextVersion = $data['next_version'] ?? null;
-
-                if ($isUpdateAvailable && $nextVersion) {
-                    $versionComparison = VersionHelper::compareVersions($nextVersion, $currentVersion);
-                    if ($versionComparison <= 0) {
-                        $isUpdateAvailable = false;
-                    }
-                }
-
-                if ($isUpdateAvailable) {
-                    return [
-                        'is_update_available' => true,
-                        'current_version' => $currentVersion,
-                        'next_version' => $nextVersion,
-                        'update_info' => $data['update_info'] ?? [],
-                    ];
-                } else {
-                    return [
-                        'is_update_available' => false,
-                        'current_version' => $currentVersion,
-                        'next_version' => $nextVersion ?? $currentVersion,
-                        'update_info' => $data['update_info'] ?? [],
-                        'reason' => $nextVersion ? 'version_not_newer' : 'no_update_available',
-                    ];
-                }
-            }
-
-            Log::warning('Failed to get latest version from central API', [
-                'response' => $latestVersionData,
-            ]);
-
-            return null;
-        } catch (\Exception $e) {
-            Log::error('Error getting update info for product', [
-                'error' => $e->getMessage(),
-                'product_slug' => $productSlug,
-                'current_version' => $currentVersion,
-            ]);
-
-            return null;
-        }
-    }
-
-    /**
-     * Get specific product
-     */
-    private function getSpecificProduct(string $productSlug): array
-    {
-        try {
-            $productsData = $this->licenseServerService->getProducts();
-
-            if ($productsData['success']) {
-                $allProducts = $productsData['data']['products'] ?? [];
-                $specificProduct = array_filter($allProducts, fn($product) => $product['slug'] === $productSlug);
-                return array_values($specificProduct)[0] ?? [];
-            }
-
-            Log::warning('Failed to get products from central API', ['response' => $productsData]);
-            return [];
-        } catch (\Exception $e) {
-            Log::error('Error getting specific product from central API', [
-                'error' => $e->getMessage(),
-                'product_slug' => $productSlug,
-            ]);
-            return [];
         }
     }
 
@@ -660,15 +436,183 @@ class UpdateController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to get current version from database', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-            ]);
-
+            Log::error('Failed to get current version from database', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to get current version: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Perform auto update
+     */
+    private function performAutoUpdate(string $version, string $licenseKey, string $productSlug, ?string $domain = null): array
+    {
+        try {
+            if (!VersionHelper::isValidVersion($version)) {
+                return [
+                    'success' => false,
+                    'message' => 'Invalid version format. Must be in format X.Y.Z',
+                    'error_code' => 'INVALID_VERSION_FORMAT',
+                ];
+            }
+
+            if (!VersionHelper::canUpdateToVersion($version)) {
+                $currentVersion = VersionHelper::getCurrentVersion();
+                return [
+                    'success' => false,
+                    'message' => "Cannot update to version " . $version . ". Current version is " . $currentVersion,
+                    'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
+                ];
+            }
+
+            $downloadResult = $this->licenseServerService->downloadUpdate($licenseKey, $version, $productSlug, $domain);
+            if (!$downloadResult['success']) {
+                Log::error('Failed to download update package', [
+                    'version' => $version,
+                    'error' => $downloadResult['message'] ?? 'Unknown error',
+                ]);
+
+                return [
+                    'success' => false,
+                    'message' => 'Download failed: ' . ($downloadResult['message'] ?? 'Unknown error'),
+                    'error_code' => 'DOWNLOAD_FAILED',
+                ];
+            }
+
+            $installResult = $this->updatePackageService->installUpdateFiles($downloadResult['file_path'] ?? '');
+            if ($installResult['success']) {
+                $this->clearCaches();
+                $this->runMigrations();
+
+                if (!VersionHelper::updateVersion($version)) {
+                    Log::error('Failed to update version in database', ['version' => $version]);
+                    return [
+                        'success' => false,
+                        'message' => 'Update installed but failed to update version in database.',
+                        'error_code' => 'VERSION_UPDATE_FAILED',
+                    ];
+                }
+
+                return [
+                    'success' => true,
+                    'message' => 'Update installed successfully! System updated to version ' . $version,
+                    'data' => [
+                        'version' => $version,
+                        'files_installed' => $installResult['data']['files_installed'] ?? 0,
+                        'steps' => $installResult['data']['steps'] ?? [],
+                    ],
+                ];
+            } else {
+                Log::error('Failed to install update files', [
+                    'version' => $version,
+                    'error' => $installResult['message'] ?? 'Unknown error',
+                ]);
+
+                return [
+                    'success' => false,
+                    'message' => 'Installation failed: ' . ($installResult['message'] ?? 'Unknown error'),
+                    'error_code' => 'INSTALL_FAILED',
+                ];
+            }
+        } catch (\Exception $e) {
+            Log::error('Auto update process failed', [
+                'version' => $version,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Auto update failed: ' . $e->getMessage(),
+                'error_code' => 'PROCESS_FAILED',
+            ];
+        }
+    }
+
+    /**
+     * Get products
+     */
+    private function getProducts(): array
+    {
+        try {
+            $productsData = $this->licenseServerService->getProducts();
+            if ($productsData['success']) {
+                $allProducts = $productsData['data']['products'] ?? [];
+                $specificProduct = array_filter($allProducts, fn($product) => $product['slug'] === 'the-ultimate-license-management-system');
+                return array_values($specificProduct)[0] ?? [];
+            }
+            return [];
+        } catch (\Exception $e) {
+            Log::error('Error getting products', ['error' => $e->getMessage()]);
+            return [];
+        }
+    }
+
+    /**
+     * Get update info
+     */
+    private function getUpdateInfo(): ?array
+    {
+        try {
+            $currentVersion = VersionHelper::getCurrentVersion();
+            $latestVersionData = $this->licenseServerService->getUpdateInfo('the-ultimate-license-management-system', $currentVersion);
+
+            if ($latestVersionData['success']) {
+                $data = $latestVersionData['data'];
+                $isUpdateAvailable = $data['is_update_available'] ?? false;
+                $nextVersion = $data['next_version'] ?? null;
+
+                if ($isUpdateAvailable && $nextVersion) {
+                    $versionComparison = VersionHelper::compareVersions($nextVersion, $currentVersion);
+                    if ($versionComparison <= 0) {
+                        $isUpdateAvailable = false;
+                    }
+                }
+
+                return [
+                    'is_update_available' => $isUpdateAvailable,
+                    'current_version' => $currentVersion,
+                    'next_version' => $nextVersion,
+                    'update_info' => $data['update_info'] ?? [],
+                ];
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Error getting update info', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
+     * Extract version from backup name
+     */
+    private function extractVersionFromBackupName(string $filename): string
+    {
+        if (preg_match('/backup_(\d+\.\d+\.\d+)_/', $filename, $matches)) {
+            return $matches[1];
+        }
+        return 'unknown';
+    }
+
+    /**
+     * Clear all caches
+     */
+    private function clearCaches(): void
+    {
+        Artisan::call('cache:clear');
+        Artisan::call('config:clear');
+        Artisan::call('route:clear');
+        Artisan::call('view:clear');
+        Cache::flush();
+    }
+
+    /**
+     * Run migrations
+     */
+    private function runMigrations(): void
+    {
+        Artisan::call('migrate', ['--force' => true]);
     }
 }
