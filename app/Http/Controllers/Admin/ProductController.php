@@ -10,7 +10,10 @@ use App\Models\KbCategory;
 use App\Models\License;
 use App\Models\LicenseLog;
 use App\Models\Product;
+use App\Services\EnvatoProductService;
 use App\Services\LicenseGeneratorService;
+use App\Services\ProductIntegrationService;
+use App\Services\ProductKbService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,8 +29,12 @@ use Illuminate\View\View;
  */
 class ProductController extends Controller
 {
-    public function __construct(private LicenseGeneratorService $licenseGenerator)
-    {
+    public function __construct(
+        private LicenseGeneratorService $licenseGenerator,
+        private EnvatoProductService $envatoProductService,
+        private ProductIntegrationService $productIntegrationService,
+        private ProductKbService $productKbService
+    ) {
     }
 
     /**
@@ -36,37 +43,7 @@ class ProductController extends Controller
     public function getEnvatoProductData(Request $request): JsonResponse
     {
         $request->validate(['item_id' => 'required|integer|min:1']);
-
-        try {
-            $envatoService = app(\App\Services\EnvatoService::class);
-            $itemData = $envatoService->getItemInfo((int)$request->input('item_id'));
-
-            if (!$itemData) {
-                return response()->json([
-                    'success' => false,
-                    'message' => trans('app.Unable to fetch product data from Envato')
-                ], 404);
-            }
-
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'envato_item_id' => $itemData['id'] ?? null,
-                    'purchase_url_envato' => $itemData['url'] ?? null,
-                    'purchase_url_buy' => $itemData['url'] ?? null,
-                    'support_days' => $this->calculateSupportDays($itemData),
-                    'version' => $itemData['version'] ?? null,
-                    'price' => isset($itemData['price_cents']) ? ($itemData['price_cents'] / 100) : null,
-                    'name' => $itemData['name'] ?? null,
-                    'description' => $itemData['description'] ?? null,
-                ],
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => trans('app.Error fetching product data: ') . $e->getMessage()
-            ], 500);
-        }
+        return $this->envatoProductService->getProductData((int)$request->input('item_id'));
     }
 
     /**
@@ -74,67 +51,9 @@ class ProductController extends Controller
      */
     public function getEnvatoUserItems(Request $request): JsonResponse
     {
-        try {
-            $envatoService = app(\App\Services\EnvatoService::class);
-            $settings = $envatoService->getEnvatoSettings();
-
-            if (empty($settings['username'])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => trans('app.Envato username not configured')
-                ], 400);
-            }
-
-            $userItems = $envatoService->getUserItems($settings['username']);
-
-            if (!$userItems || !isset($userItems['matches'])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => trans('app.Unable to fetch user items from Envato')
-                ], 404);
-            }
-
-            $items = collect($userItems['matches'])->map(function (array $item): array {
-                return [
-                    'id' => $item['id'],
-                    'name' => $item['name'],
-                    'url' => $item['url'],
-                    'price' => isset($item['price_cents']) ? ($item['price_cents'] / 100) : 0,
-                    'rating' => $item['rating'] ?? null,
-                    'sales' => $item['number_of_sales'] ?? 0,
-                ];
-            });
-
-            return response()->json(['success' => true, 'items' => $items]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => trans('app.Error fetching user items: ') . $e->getMessage()
-            ], 500);
-        }
+        return $this->envatoProductService->getUserItems();
     }
 
-    /**
-     * Calculate support days from Envato item data
-     */
-    private function calculateSupportDays(array $itemData): int
-    {
-        if (isset($itemData['attributes']) && is_array($itemData['attributes'])) {
-            foreach ($itemData['attributes'] as $attribute) {
-                if (is_array($attribute) && isset($attribute['name']) && $attribute['name'] === 'support') {
-                    $value = strtolower($attribute['value'] ?? '');
-                    if (strpos($value, 'month') !== false) {
-                        preg_match('/(\d+)/', $value, $matches);
-                        return isset($matches[1]) ? (int)$matches[1] * 30 : 180;
-                    } elseif (strpos($value, 'year') !== false) {
-                        preg_match('/(\d+)/', $value, $matches);
-                        return isset($matches[1]) ? (int)$matches[1] * 365 : 365;
-                    }
-                }
-            }
-        }
-        return 180;
-    }
 
     /**
      * Get integration code template for product
@@ -406,10 +325,7 @@ class ProductController extends Controller
      */
     public function downloadIntegration(Product $product)
     {
-        if (!$product->integration_file_path || !Storage::disk('public')->exists($product->integration_file_path)) {
-            return redirect()->back()->with('error', 'Integration file not found. Please regenerate it.');
-        }
-        return Storage::disk('public')->download($product->integration_file_path, "{$product->slug}.php");
+        return $this->productIntegrationService->downloadIntegration($product);
     }
 
     /**
