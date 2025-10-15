@@ -30,6 +30,41 @@ window.CommonUtils = {
             .replace(/'/g, '&#x27;');
     },
 
+    // URL validation to prevent SSRF attacks
+    isValidUrl: (url) => {
+        if (typeof url !== 'string') return false;
+
+        try {
+            const urlObj = new URL(url);
+            // Only allow HTTP and HTTPS protocols
+            if (!['http:', 'https:'].includes(urlObj.protocol)) {
+                return false;
+            }
+
+            // Prevent localhost and internal IP access
+            const hostname = urlObj.hostname.toLowerCase();
+            if (hostname === 'localhost' ||
+                hostname.startsWith('127.') ||
+                hostname.startsWith('192.168.') ||
+                hostname.startsWith('10.') ||
+                hostname.startsWith('172.')) {
+                return false;
+            }
+
+            return true;
+        } catch {
+            return false;
+        }
+    },
+
+    // Safe URL sanitization
+    sanitizeUrl: (url) => {
+        if (!this.isValidUrl(url)) {
+            throw new Error('Invalid or unsafe URL provided');
+        }
+        return url;
+    },
+
     // URL utilities
     safeUrl: (url) => {
         if (typeof url !== 'string') return '#';
@@ -54,15 +89,6 @@ window.CommonUtils = {
         return emailRegex.test(email);
     },
 
-    isValidUrl: (url) => {
-        try {
-            new URL(url);
-            return true;
-        } catch (e) {
-            return false;
-        }
-    },
-
     // Performance utilities
     debounce: (func, wait) => {
         let timeout;
@@ -83,9 +109,12 @@ window.CommonUtils = {
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
     }),
 
-    // Safe API request
+    // Safe API request with URL validation
     apiRequest: async (url, options = {}) => {
-        const response = await fetch(url, {
+        // Validate URL before making request
+        const safeUrl = this.sanitizeUrl(url);
+
+        const response = await fetch(safeUrl, {
             method: 'GET',
             headers: this.getApiHeaders(),
             ...options

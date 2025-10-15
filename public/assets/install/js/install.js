@@ -167,6 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const result = await response.json();
       if (result.success) {
         showNotification('Installation completed successfully! Redirecting...', 'success');
+        // Safe setTimeout - no user-controlled JavaScript execution
         setTimeout(() => {
           // Use safe URL handling
           const redirectUrl = result.redirect || '/login?from_install=1';
