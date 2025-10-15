@@ -42,7 +42,10 @@ class ProductController extends Controller
             $itemData = $envatoService->getItemInfo((int)$request->input('item_id'));
 
             if (!$itemData) {
-                return response()->json(['success' => false, 'message' => trans('app.Unable to fetch product data from Envato')], 404);
+                return response()->json([
+                    'success' => false,
+                    'message' => trans('app.Unable to fetch product data from Envato')
+                ], 404);
             }
 
             return response()->json([
@@ -59,7 +62,10 @@ class ProductController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => trans('app.Error fetching product data: ') . $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'message' => trans('app.Error fetching product data: ') . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -73,13 +79,19 @@ class ProductController extends Controller
             $settings = $envatoService->getEnvatoSettings();
 
             if (empty($settings['username'])) {
-                return response()->json(['success' => false, 'message' => trans('app.Envato username not configured')], 400);
+                return response()->json([
+                    'success' => false,
+                    'message' => trans('app.Envato username not configured')
+                ], 400);
             }
 
             $userItems = $envatoService->getUserItems($settings['username']);
 
             if (!$userItems || !isset($userItems['matches'])) {
-                return response()->json(['success' => false, 'message' => trans('app.Unable to fetch user items from Envato')], 404);
+                return response()->json([
+                    'success' => false,
+                    'message' => trans('app.Unable to fetch user items from Envato')
+                ], 404);
             }
 
             $items = collect($userItems['matches'])->map(function (array $item): array {
@@ -95,7 +107,10 @@ class ProductController extends Controller
 
             return response()->json(['success' => true, 'items' => $items]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => trans('app.Error fetching user items: ') . $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'message' => trans('app.Error fetching user items: ') . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -164,7 +179,8 @@ class ProductController extends Controller
         return view('admin.products.index', [
             'products' => $query->paginate(10)->withQueryString(),
             'categories' => \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get(),
-            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get(),
+            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)
+                ->orderBy('sort_order')->get(),
             'allProducts' => Product::with(['category', 'programmingLanguage'])->get()
         ]);
     }
@@ -176,9 +192,13 @@ class ProductController extends Controller
     {
         return view('admin.products.create', [
             'categories' => \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get(),
-            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get(),
+            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)
+                ->orderBy('sort_order')->get(),
             'kbCategories' => KbCategory::where('is_published', true)->orderBy('name')->get(['id', 'name', 'slug']),
-            'kbArticles' => KbArticle::where('is_published', true)->with('category:id, name')->orderBy('title')->get(['id', 'title', 'slug', 'kb_category_id']),
+            'kbArticles' => KbArticle::where('is_published', true)
+                ->with('category:id, name')
+                ->orderBy('title')
+                ->get(['id', 'title', 'slug', 'kb_category_id']),
         ]);
     }
 
@@ -202,7 +222,9 @@ class ProductController extends Controller
             }
 
             if ($request->hasFile('gallery_images')) {
-                $data['gallery_images'] = collect($request->file('gallery_images'))->map(fn($file) => $file->store('products/gallery', 'public'))->toArray();
+                $data['gallery_images'] = collect($request->file('gallery_images'))
+                    ->map(fn($file) => $file->store('products/gallery', 'public'))
+                    ->toArray();
             }
 
             if (isset($data['renewal_period']) && $data['renewal_period'] === 'lifetime') {
@@ -261,7 +283,9 @@ class ProductController extends Controller
             }
 
             if ($request->hasFile('gallery_images')) {
-                $data['gallery_images'] = collect($request->file('gallery_images'))->map(fn($file) => $file->store('products/gallery', 'public'))->toArray();
+                $data['gallery_images'] = collect($request->file('gallery_images'))
+                    ->map(fn($file) => $file->store('products/gallery', 'public'))
+                    ->toArray();
             }
 
             if (isset($data['renewal_period']) && $data['renewal_period'] === 'lifetime') {
@@ -339,7 +363,8 @@ class ProductController extends Controller
         return view('admin.products.edit', [
             'product' => $product,
             'categories' => \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get(),
-            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get()
+            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)
+                ->orderBy('sort_order')->get()
         ]);
     }
 
@@ -494,7 +519,10 @@ class ProductController extends Controller
         return response()->json([
             'success' => true,
             'categories' => KbCategory::where('is_published', true)->orderBy('name')->get(['id', 'name', 'slug']),
-            'articles' => KbArticle::where('is_published', true)->with('category:id, name')->orderBy('title')->get(['id', 'title', 'slug', 'kb_category_id']),
+            'articles' => KbArticle::where('is_published', true)
+                ->with('category:id, name')
+                ->orderBy('title')
+                ->get(['id', 'title', 'slug', 'kb_category_id']),
         ]);
     }
 
