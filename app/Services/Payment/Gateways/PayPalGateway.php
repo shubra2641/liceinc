@@ -41,7 +41,6 @@ class PayPalGateway implements GatewayInterface
     {
         try {
             $this->validateCredentials();
-            
             $apiContext = $this->createApiContext();
             $payment = $this->createPayment($orderData, $apiContext);
             $approvalUrl = $this->getApprovalUrl($payment);
@@ -52,14 +51,8 @@ class PayPalGateway implements GatewayInterface
                 'payment_id' => $payment->getId(),
             ]);
         } catch (\Exception $e) {
-            Log::error('PayPal payment processing failed', [
-                'order_data' => $orderData,
-                'error' => $e->getMessage()
-            ]);
-
-            return $this->responseHelper->buildFailure(
-                'PayPal payment processing failed: ' . $e->getMessage()
-            );
+            $this->logError('PayPal payment processing failed', $e, $orderData);
+            return $this->responseHelper->buildFailure('PayPal payment processing failed: ' . $e->getMessage());
         }
     }
 
@@ -70,7 +63,6 @@ class PayPalGateway implements GatewayInterface
     {
         try {
             $this->validateCredentials();
-            
             $apiContext = $this->createApiContext();
             $payment = Payment::get($paymentId, $apiContext);
 
@@ -85,14 +77,8 @@ class PayPalGateway implements GatewayInterface
 
             return $this->responseHelper->buildFailure('Payment not approved');
         } catch (\Exception $e) {
-            Log::error('PayPal payment verification failed', [
-                'payment_id' => $paymentId,
-                'error' => $e->getMessage()
-            ]);
-
-            return $this->responseHelper->buildFailure(
-                'PayPal payment verification failed: ' . $e->getMessage()
-            );
+            $this->logError('PayPal payment verification failed', $e, ['payment_id' => $paymentId]);
+            return $this->responseHelper->buildFailure('PayPal payment verification failed: ' . $e->getMessage());
         }
     }
 
@@ -277,5 +263,16 @@ class PayPalGateway implements GatewayInterface
     private function getCancelUrl(): string
     {
         return url('/payment/cancel/paypal');
+    }
+
+    /**
+     * Log error details.
+     */
+    private function logError(string $message, \Exception $e, array $data = []): void
+    {
+        Log::error($message, [
+            'error' => $e->getMessage(),
+            'data' => $data
+        ]);
     }
 }

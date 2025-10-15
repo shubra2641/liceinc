@@ -36,7 +36,6 @@ class StripeGateway implements GatewayInterface
         try {
             $this->validateCredentials();
             $this->configureStripe();
-
             $session = Session::create($this->buildSessionPayload($orderData));
 
             return $this->responseHelper->buildSuccess([
@@ -45,14 +44,8 @@ class StripeGateway implements GatewayInterface
                 'session_id' => $session->id,
             ]);
         } catch (\Exception $e) {
-            Log::error('Stripe payment processing failed', [
-                'order_data' => $orderData,
-                'error' => $e->getMessage()
-            ]);
-
-            return $this->responseHelper->buildFailure(
-                'Stripe payment processing failed: ' . $e->getMessage()
-            );
+            $this->logError('Stripe payment processing failed', $e, $orderData);
+            return $this->responseHelper->buildFailure('Stripe payment processing failed: ' . $e->getMessage());
         }
     }
 
@@ -64,28 +57,21 @@ class StripeGateway implements GatewayInterface
         try {
             $this->validateCredentials();
             $this->configureStripe();
-
             $session = Session::retrieve($sessionId);
 
             if ($session->payment_status === 'paid') {
                 return $this->responseHelper->buildSuccess([
                     'session_id' => $sessionId,
                     'status' => 'paid',
-                    'amount' => $session->amount_total / 100, // Convert from cents
+                    'amount' => $session->amount_total / 100,
                     'currency' => $session->currency,
                 ]);
             }
 
             return $this->responseHelper->buildFailure('Payment not completed');
         } catch (\Exception $e) {
-            Log::error('Stripe payment verification failed', [
-                'session_id' => $sessionId,
-                'error' => $e->getMessage()
-            ]);
-
-            return $this->responseHelper->buildFailure(
-                'Stripe payment verification failed: ' . $e->getMessage()
-            );
+            $this->logError('Stripe payment verification failed', $e, ['session_id' => $sessionId]);
+            return $this->responseHelper->buildFailure('Stripe payment verification failed: ' . $e->getMessage());
         }
     }
 
@@ -212,5 +198,16 @@ class StripeGateway implements GatewayInterface
     private function getCancelUrl(): string
     {
         return url('/payment/cancel/stripe');
+    }
+
+    /**
+     * Log error details.
+     */
+    private function logError(string $message, \Exception $e, array $data = []): void
+    {
+        Log::error($message, [
+            'error' => $e->getMessage(),
+            'data' => $data
+        ]);
     }
 }

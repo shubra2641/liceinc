@@ -32,50 +32,85 @@ class PaymentProcessor
 
     /**
      * Create license and invoice for payment.
-     * 
-     * @param array $orderData Order data
-     * @param string $gateway Payment gateway
-     * @param string|null $transactionId Transaction ID
-     * @return array Processing result
      */
     public function createLicenseAndInvoice(array $orderData, string $gateway, ?string $transactionId = null): array
     {
         try {
             DB::beginTransaction();
-
-            $user = $this->getUser($orderData['user_id']);
-            $product = $this->getProduct($orderData['product_id'] ?? null);
-
-            // Handle existing invoice
-            $existingInvoice = $this->handleExistingInvoice($orderData, $gateway, $transactionId);
-            if ($existingInvoice !== null) {
-                return $existingInvoice;
-            }
-
-            // Handle custom invoice
-            if (!empty($orderData['is_custom'])) {
-                return $this->handleCustomInvoice($user, $orderData, $gateway, $transactionId);
-            }
-
-            // Create license and invoice for product purchase
-            if ($product) {
-                return $this->createProductLicenseAndInvoice($user, $product, $orderData, $gateway, $transactionId);
-            }
-
-            throw new \Exception('Product not found');
+            
+            $result = $this->processOrder($orderData, $gateway, $transactionId);
+            DB::commit();
+            
+            return $result;
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('License and invoice creation failed', [
-                'order_data' => $orderData,
-                'gateway' => $gateway,
-                'transaction_id' => $transactionId,
-                'error' => $e->getMessage()
-            ]);
-
-            return $this->responseHelper->buildFailure(
-                'License and invoice creation failed: ' . $e->getMessage()
-            );
+            $this->logError($e, $orderData, $gateway, $transactionId);
+            return $this->responseHelper->buildFailure('License and invoice creation failed: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Process order logic.
+     */
+    private function processOrder(array $orderData, string $gateway, ?string $transactionId): array
+    {
+        $user = $this->getUser($orderData['user_id']);
+        $product = $this->getProduct($orderData['product_id'] ?? null);
+
+        // Check existing invoice
+        $existing = $this->checkExistingInvoice($orderData, $gateway, $transactionId);
+        if ($existing) {
+            return $existing;
+        }
+
+        // Handle custom invoice
+        if (!empty($orderData['is_custom'])) {
+            return $this->handleCustomInvoice($user, $orderData, $gateway, $transactionId);
+        }
+
+        // Create product license and invoice
+        if ($product) {
+            return $this->createProductLicenseAndInvoice($user, $product, $orderData, $gateway, $transactionId);
+        }
+
+        throw new \Exception('Product not found');
+    }
+
+    /**
+     * Check for existing invoice.
+     */
+    private function checkExistingInvoice(array $orderData, string $gateway, ?string $transactionId): ?array
+    {
+        if (!$transactionId) {
+            return null;
+        }
+
+        $existingInvoice = Invoice::where('metadata->transaction_id', $transactionId)
+            ->where('metadata->gateway', $gateway)
+            ->first();
+
+        if ($existingInvoice) {
+            return $this->responseHelper->buildSuccess([
+                'invoice_id' => $existingInvoice->id,
+                'license_id' => $existingInvoice->license_id,
+                'message' => 'Invoice already exists'
+            ]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Log error details.
+     */
+    private function logError(\Exception $e, array $orderData, string $gateway, ?string $transactionId): void
+    {
+        Log::error('License and invoice creation failed', [
+            'order_data' => $orderData,
+            'gateway' => $gateway,
+            'transaction_id' => $transactionId,
+            'error' => $e->getMessage()
+        ]);
     }
 
     /**
@@ -108,34 +143,6 @@ class PaymentProcessor
         return Product::find($productId);
     }
 
-    /**
-     * Handle existing invoice.
-     * 
-     * @param array $orderData Order data
-     * @param string $gateway Payment gateway
-     * @param string|null $transactionId Transaction ID
-     * @return array|null Processing result or null if no existing invoice
-     */
-    private function handleExistingInvoice(array $orderData, string $gateway, ?string $transactionId): ?array
-    {
-        if (!$transactionId) {
-            return null;
-        }
-
-        $existingInvoice = Invoice::where('metadata->transaction_id', $transactionId)
-            ->where('metadata->gateway', $gateway)
-            ->first();
-
-        if ($existingInvoice) {
-            return $this->responseHelper->buildSuccess([
-                'invoice_id' => $existingInvoice->id,
-                'license_id' => $existingInvoice->license_id,
-                'message' => 'Invoice already exists'
-            ]);
-        }
-
-        return null;
-    }
 
     /**
      * Handle custom invoice creation.
