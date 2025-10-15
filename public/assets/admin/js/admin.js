@@ -18,11 +18,21 @@ function showNotification(message, type = 'info') {
   // Create notification content safely
   const iconClass = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
   
-  notification.innerHTML = `
-    <i class="fas fa-${iconClass} me-2"></i>
-    ${message}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  `;
+  // Create notification content safely without innerHTML
+  const icon = document.createElement('i');
+  icon.className = `fas fa-${iconClass} me-2`;
+  
+  const messageSpan = document.createElement('span');
+  messageSpan.textContent = message; // Use textContent for safety
+  
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.className = 'btn-close';
+  closeButton.setAttribute('data-bs-dismiss', 'alert');
+  
+  notification.appendChild(icon);
+  notification.appendChild(messageSpan);
+  notification.appendChild(closeButton);
 
   notification.style.cssText = `
     position: fixed;
@@ -101,13 +111,26 @@ class ToastManager {
     // Create toast content safely
     const header = document.createElement('div');
     header.className = 'toast-header';
-    header.innerHTML = `
-      <i class="${icons[type]} toast-icon"></i>
-      <h6 class="toast-title">${titles[type]}</h6>
-      <button type="button" class="toast-close" onclick="window.toastManager.hide(this.closest('.toast'))">
-        <i class="fas fa-times"></i>
-      </button>
-    `;
+    // Create header content safely without innerHTML
+    const icon = document.createElement('i');
+    icon.className = `${icons[type]} toast-icon`;
+    
+    const title = document.createElement('h6');
+    title.className = 'toast-title';
+    title.textContent = titles[type];
+    
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'toast-close';
+    closeButton.onclick = () => window.toastManager.hide(closeButton.closest('.toast'));
+    
+    const closeIcon = document.createElement('i');
+    closeIcon.className = 'fas fa-times';
+    closeButton.appendChild(closeIcon);
+    
+    header.appendChild(icon);
+    header.appendChild(title);
+    header.appendChild(closeButton);
 
     const body = document.createElement('div');
     body.className = 'toast-body';
