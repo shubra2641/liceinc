@@ -55,7 +55,7 @@ class VersionHelper
         try {
             $currentVersion = self::getCurrentVersion();
             $latestVersion = self::getLatestVersion();
-            
+
             if (!self::isValidVersion($currentVersion) || !self::isValidVersion($latestVersion)) {
                 return false;
             }
@@ -260,7 +260,9 @@ class VersionHelper
 
             $currentVersion = self::getCurrentVersionFromDatabase();
             if (!self::canUpdateToVersion($newVersion)) {
-                throw new \InvalidArgumentException("Cannot update to older version. Current: {$currentVersion}, Target: {$newVersion}");
+                throw new \InvalidArgumentException(
+                    "Cannot update to older version. Current: {$currentVersion}, Target: {$newVersion}"
+                );
             }
 
             DB::beginTransaction();

@@ -27,6 +27,21 @@ class ProductController extends Controller
     {
         $query = Product::with(['category', 'programmingLanguage'])->where('is_active', true);
 
+        $this->applySearchFilter($query, $request);
+        $this->applyCategoryFilter($query, $request);
+        $this->applyLanguageFilter($query, $request);
+        $this->applyPriceFilter($query, $request);
+        $this->applySorting($query, $request);
+
+        return view('user.products.index', [
+            'products' => $query->paginate(15)->withQueryString(),
+            'categories' => ProductCategory::where('is_active', true)->orderBy('sort_order')->get(),
+            'programmingLanguages' => ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get()
+        ]);
+    }
+
+    private function applySearchFilter($query, ?ProductSearchRequest $request): void
+    {
         if ($request?->filled('search')) {
             $search = htmlspecialchars(trim($request->validated('search')), ENT_QUOTES, 'UTF-8');
             if ($search) {
@@ -35,20 +50,32 @@ class ProductController extends Controller
                 });
             }
         }
+    }
 
+    private function applyCategoryFilter($query, ?ProductSearchRequest $request): void
+    {
         if ($request?->filled('category') && is_numeric($request->validated('category'))) {
             $query->where('category_id', (int)$request->validated('category'));
         }
+    }
 
+    private function applyLanguageFilter($query, ?ProductSearchRequest $request): void
+    {
         if ($request?->filled('language') && is_numeric($request->validated('language'))) {
             $query->where('programming_language', (int)$request->validated('language'));
         }
+    }
 
+    private function applyPriceFilter($query, ?ProductSearchRequest $request): void
+    {
         if ($request?->filled('price_filter')) {
             $filter = $request->validated('price_filter');
             $query->where($filter === 'free' ? 'price' : 'price', $filter === 'free' ? 0 : '>', $filter === 'free' ? null : 0);
         }
+    }
 
+    private function applySorting($query, ?ProductSearchRequest $request): void
+    {
         $sort = $request?->validated('sort', 'name') ?? 'name';
         match ($sort) {
             'price_low' => $query->orderBy('price', 'asc'),
@@ -56,12 +83,6 @@ class ProductController extends Controller
             'newest' => $query->orderBy('created_at', 'desc'),
             default => $query->orderBy('name', 'asc')
         };
-
-        return view('user.products.index', [
-            'products' => $query->paginate(15)->withQueryString(),
-            'categories' => ProductCategory::where('is_active', true)->orderBy('sort_order')->get(),
-            'programmingLanguages' => ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get()
-        ]);
     }
 
     public function show(Product $product): View

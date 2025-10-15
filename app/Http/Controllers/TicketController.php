@@ -358,3 +358,4 @@ private function canModifyTicket(Ticket $ticket): bool
 {
     return $ticket->user_id === Auth::id() || Auth::user()?->hasRole('admin');
 }
+}

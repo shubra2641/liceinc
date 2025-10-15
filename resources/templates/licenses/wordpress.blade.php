@@ -10,8 +10,6 @@ declare(strict_types=1);
  * Usage: Add this file to your WordPress theme/plugin and call verify_license() function
  */
 
-declare(strict_types=1);
-
 namespace App\License;
 
 if (!defined('ABSPATH')) {
@@ -88,8 +86,8 @@ class WpLicenseVerifier
 
             // Validate response data
             $valid = isset($data['valid']) ? (bool) $data['valid'] : false;
-            $message = isset($data['message']) 
-                ? sanitize_text_field($data['message']) 
+            $message = isset($data['message'])
+                ? sanitize_text_field($data['message'])
                 : 'Verification completed'; // @phpstan-ignore-line
 
             return $this->create_license_response($valid, $message, $data);
