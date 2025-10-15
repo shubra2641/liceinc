@@ -59,16 +59,7 @@ class PaymentService
     protected function processPayPalPayment(array $orderData): array
     {
         try {
-            $settings = $this->getSettingsOrFail('paypal');
-
-            $credentials = $settings->credentials;
-            $this->validatePayPalCredentials($credentials);
-
-            $apiContext = $this->createPayPalApiContext(
-                $credentials,
-                (bool)($settings->is_sandbox ?? false),
-                true
-            );
+            $apiContext = $this->buildPayPalApiContext(true);
 
             $payer = new Payer();
             $payer->setPaymentMethod('paypal');
@@ -123,12 +114,7 @@ class PaymentService
     protected function processStripePayment(array $orderData): array
     {
         try {
-            $settings = $this->getSettingsOrFail('stripe');
-
-            $credentials = $settings->credentials;
-            $this->validateStripeCredentials($credentials);
-
-            Stripe::setApiKey($credentials['secret_key'] ?? '');
+            $this->configureStripe();
             $session = Session::create([
                 'payment_method_types' => ['card'],
                 'line_items' => [
@@ -204,16 +190,7 @@ class PaymentService
     protected function verifyPayPalPayment(string $paymentId): array
     {
         try {
-            $settings = $this->getSettingsOrFail('paypal');
-
-            $credentials = $settings->credentials;
-            $this->validatePayPalCredentials($credentials);
-
-            $apiContext = $this->createPayPalApiContext(
-                $credentials,
-                (bool)($settings->is_sandbox ?? false),
-                false
-            );
+            $apiContext = $this->buildPayPalApiContext(false);
 
             $payment = Payment::get($paymentId, $apiContext);
 
@@ -248,12 +225,7 @@ class PaymentService
     protected function verifyStripePayment(string $transactionId): array
     {
         try {
-            $settings = $this->getSettingsOrFail('stripe');
-
-            $credentials = $settings->credentials;
-            $this->validateStripeCredentials($credentials);
-
-            Stripe::setApiKey($credentials['secret_key'] ?? '');
+            $this->configureStripe();
 
             $session = Session::retrieve($transactionId);
 
@@ -301,18 +273,12 @@ class PaymentService
                         'status' => 'paid',
                         'paid_at' => now(),
                         'notes' => "Payment via {$gateway}",
-                        'metadata' => array_merge($existingInvoice->metadata ?? [], [
-                            'gateway' => $gateway,
-                            'transaction_id' => $transactionId,
-                        ])
+                        'metadata' => array_merge(
+                            $existingInvoice->metadata ?? [],
+                            $this->buildMetadata($gateway, $transactionId)
+                        )
                     ]);
-
-                    DB::commit();
-                    return [
-                        'success' => true,
-                        'license' => $existingInvoice->license,
-                        'invoice' => $existingInvoice,
-                    ];
+                    return $this->commitAndRespond($existingInvoice->license, $existingInvoice);
                 }
             }
 
@@ -329,19 +295,9 @@ class PaymentService
                     'paid_at' => now(),
                     'due_date' => now()->addDays(30),
                     'notes' => "Custom service payment via {$gateway}",
-                    'metadata' => [
-                        'gateway' => $gateway,
-                        'transaction_id' => $transactionId,
-                        'is_custom' => true,
-                    ],
+                    'metadata' => $this->buildMetadata($gateway, $transactionId, ['is_custom' => true]),
                 ]);
-
-                DB::commit();
-                return [
-                    'success' => true,
-                    'license' => null,
-                    'invoice' => $invoice,
-                ];
+                return $this->commitAndRespond(null, $invoice);
             }
 
             // Create license and invoice for product purchase
@@ -368,12 +324,7 @@ class PaymentService
                     $transactionId
                 );
 
-                DB::commit();
-                return [
-                    'success' => true,
-                    'license' => $license,
-                    'invoice' => $invoice,
-                ];
+                return $this->commitAndRespond($license, $invoice);
             }
 
             throw new \Exception('Product not found');
@@ -543,6 +494,57 @@ class PaymentService
         $apiContext->setConfig($config);
 
         return $apiContext;
+    }
+
+    /**
+     * Build PayPal ApiContext from stored settings and credentials.
+     */
+    private function buildPayPalApiContext(bool $withLogging): ApiContext
+    {
+        $settings = $this->getSettingsOrFail('paypal');
+        $credentials = $settings->credentials;
+        $this->validatePayPalCredentials($credentials);
+
+        return $this->createPayPalApiContext(
+            $credentials,
+            (bool)($settings->is_sandbox ?? false),
+            $withLogging
+        );
+    }
+
+    /**
+     * Configure Stripe by loading and validating credentials, then setting API key.
+     */
+    private function configureStripe(): void
+    {
+        $settings = $this->getSettingsOrFail('stripe');
+        $credentials = $settings->credentials;
+        $this->validateStripeCredentials($credentials);
+        Stripe::setApiKey($credentials['secret_key'] ?? '');
+    }
+
+    /**
+     * Build common metadata payload for invoices/updates.
+     */
+    private function buildMetadata(string $gateway, ?string $transactionId = null, array $extra = []): array
+    {
+        return array_merge([
+            'gateway' => $gateway,
+            'transaction_id' => $transactionId,
+        ], $extra);
+    }
+
+    /**
+     * Commit DB transaction and build standard success response.
+     */
+    private function commitAndRespond(?License $license, Invoice $invoice): array
+    {
+        DB::commit();
+        return [
+            'success' => true,
+            'license' => $license,
+            'invoice' => $invoice,
+        ];
     }
 
     /**
