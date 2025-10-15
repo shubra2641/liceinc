@@ -76,19 +76,17 @@
     <!-- Naming conventions -->
     <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
     
-    <!-- Completely disable all naming convention checks -->
+    <!-- Enable naming convention checks but allow camelCase for variables and functions -->
     <rule ref="Squiz.NamingConventions.ValidVariableName">
-        <exclude name="Squiz.NamingConventions.ValidVariableName"/>
+        <exclude name="Squiz.NamingConventions.ValidVariableName.MemberVar"/>
     </rule>
     
     <rule ref="Squiz.NamingConventions.ValidFunctionName">
-        <exclude name="Squiz.NamingConventions.ValidFunctionName"/>
+        <exclude name="Squiz.NamingConventions.ValidFunctionName.PrivateNoUnderscore"/>
     </rule>
     
-    <!-- Disable camelCase format checking for methods and functions -->
-    <rule ref="PSR1.Methods.CamelCapsMethodName">
-        <exclude name="PSR1.Methods.CamelCapsMethodName"/>
-    </rule>
+    <!-- Keep camelCase format checking for methods and functions -->
+    <rule ref="PSR1.Methods.CamelCapsMethodName"/>
     
     <!-- Disable rules that might conflict with PHPStan -->
     <rule ref="Generic.Commenting.DocComment.MissingParamTag">
@@ -124,15 +122,11 @@
         <exclude name="Squiz.Commenting.FunctionComment.InvalidParamComment"/>
     </rule>
     
-    <!-- Disable member variable naming for Laravel compatibility -->
-    <rule ref="Squiz.NamingConventions.ValidVariableName">
-        <exclude name="Squiz.NamingConventions.ValidVariableName.MemberVar"/>
-    </rule>
+    <!-- Keep member variable naming checks -->
+    <rule ref="Squiz.NamingConventions.ValidVariableName"/>
     
-    <!-- Disable private method naming for Laravel compatibility -->
-    <rule ref="Squiz.NamingConventions.ValidFunctionName">
-        <exclude name="Squiz.NamingConventions.ValidFunctionName.PrivateNoUnderscore"/>
-    </rule>
+    <!-- Keep function naming checks -->
+    <rule ref="Squiz.NamingConventions.ValidFunctionName"/>
     
     <!-- Disable type hint requirements for PHPStan Level 10 compatibility -->
     <rule ref="Squiz.Commenting.FunctionComment.MissingParamComment">
