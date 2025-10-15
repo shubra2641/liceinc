@@ -94,13 +94,7 @@ class PaymentService
 
             $payment->create($apiContext);
 
-            $approvalUrl = null;
-            foreach ($payment->getLinks() as $link) {
-                if ($link->getRel() === 'approval_url') {
-                    $approvalUrl = $link->getHref();
-                    break;
-                }
-            }
+            $approvalUrl = $this->getPayPalApprovalUrl($payment);
 
             return $this->buildSuccess([
                 'redirect_url' => $approvalUrl,
@@ -128,29 +122,8 @@ class PaymentService
             $credentials = $settings->credentials;
             $this->validateStripeCredentials($credentials);
 
-            Stripe::setApiKey($credentials['secret_key'] ?? '');
-            $session = Session::create([
-                'payment_method_types' => ['card'],
-                'line_items' => [
-                    [
-                        'price_data' => [
-                            'currency' => $orderData['currency'] ?? 'usd',
-                            'product_data' => [
-                                'name' => 'Product Purchase',
-                            ],
-                            'unit_amount' => (int)(($orderData['amount'] ?? 0) * 100),
-                        ],
-                        'quantity' => 1,
-                    ],
-                ],
-                'mode' => 'payment',
-                'success_url' => $this->successUrl('stripe'),
-                'cancel_url' => $this->cancelUrl('stripe'),
-                'metadata' => [
-                    'user_id' => $orderData['user_id'] ?? '',
-                    'product_id' => $orderData['product_id'] ?? '',
-                ],
-            ]);
+            $this->configureStripe($credentials);
+            $session = Session::create($this->buildStripeSessionPayload($orderData));
 
             return $this->buildSuccess([
                 'redirect_url' => $session->url,
@@ -249,7 +222,7 @@ class PaymentService
             $credentials = $settings->credentials;
             $this->validateStripeCredentials($credentials);
 
-            Stripe::setApiKey($credentials['secret_key'] ?? '');
+            $this->configureStripe($credentials);
 
             $session = Session::retrieve($transactionId);
 
@@ -290,55 +263,14 @@ class PaymentService
             $product = isset($orderData['product_id']) ? Product::find($orderData['product_id']) : null;
 
             // Handle existing invoice
-            $invoiceId = $orderData['invoice_id'] ?? null;
-            if ($invoiceId) {
-                $existingInvoice = Invoice::find($invoiceId);
-                if ($existingInvoice) {
-                    $existingInvoice->update([
-                        'status' => 'paid',
-                        'paid_at' => now(),
-                        'notes' => "Payment via {$gateway}",
-                        'metadata' => array_merge($existingInvoice->metadata ?? [], [
-                            'gateway' => $gateway,
-                            'transaction_id' => $transactionId,
-                        ])
-                    ]);
-
-                    DB::commit();
-                    return [
-                        'success' => true,
-                        'license' => $existingInvoice->license,
-                        'invoice' => $existingInvoice,
-                    ];
-                }
+            $handledExisting = $this->handleExistingInvoice($orderData, $gateway, $transactionId);
+            if ($handledExisting !== null) {
+                return $handledExisting;
             }
 
             // Handle custom invoice
             if (!empty($orderData['is_custom'])) {
-                $invoice = Invoice::create([
-                    'user_id' => $user->id,
-                    'product_id' => null,
-                    'license_id' => null,
-                    'invoice_number' => $this->generateInvoiceNumber(),
-                    'amount' => $orderData['amount'],
-                    'currency' => $orderData['currency'],
-                    'status' => 'paid',
-                    'paid_at' => now(),
-                    'due_date' => now()->addDays(30),
-                    'notes' => "Custom service payment via {$gateway}",
-                    'metadata' => [
-                        'gateway' => $gateway,
-                        'transaction_id' => $transactionId,
-                        'is_custom' => true,
-                    ],
-                ]);
-
-                DB::commit();
-                return [
-                    'success' => true,
-                    'license' => null,
-                    'invoice' => $invoice,
-                ];
+                return $this->handleCustomInvoice($user, $orderData, $gateway, $transactionId);
             }
 
             // Create license and invoice for product purchase
@@ -365,12 +297,7 @@ class PaymentService
                     $transactionId
                 );
 
-                DB::commit();
-                return [
-                    'success' => true,
-                    'license' => $license,
-                    'invoice' => $invoice,
-                ];
+                return $this->commitAndReturn($license, $invoice);
             }
 
             throw new \Exception('Product not found');
@@ -384,6 +311,56 @@ class PaymentService
             ]);
             throw $e;
         }
+    }
+
+    /**
+     * If invoice_id is present and found, mark it paid and return the success result; otherwise null.
+     *
+     * @return array{success:bool,license:mixed,invoice:mixed}|null
+     */
+    private function handleExistingInvoice(array $orderData, string $gateway, ?string $transactionId): ?array
+    {
+        $invoiceId = $orderData['invoice_id'] ?? null;
+        if (!$invoiceId) {
+            return null;
+        }
+        $existingInvoice = Invoice::find($invoiceId);
+        if (!$existingInvoice) {
+            return null;
+        }
+
+        $existingInvoice->update([
+            'status' => 'paid',
+            'paid_at' => now(),
+            'notes' => "Payment via {$gateway}",
+            'metadata' => $this->buildInvoiceMetadata($gateway, $transactionId, false, $existingInvoice->metadata ?? [])
+        ]);
+
+        return $this->commitAndReturn($existingInvoice->license, $existingInvoice);
+    }
+
+    /**
+     * Create a paid custom invoice and return the success result.
+     *
+     * @return array{success:bool,license:null,invoice:mixed}
+     */
+    private function handleCustomInvoice(User $user, array $orderData, string $gateway, ?string $transactionId): array
+    {
+        $invoice = Invoice::create([
+            'user_id' => $user->id,
+            'product_id' => null,
+            'license_id' => null,
+            'invoice_number' => $this->generateInvoiceNumber(),
+            'amount' => $orderData['amount'],
+            'currency' => $orderData['currency'],
+            'status' => 'paid',
+            'paid_at' => now(),
+            'due_date' => now()->addDays(30),
+            'notes' => "Custom service payment via {$gateway}",
+            'metadata' => $this->buildInvoiceMetadata($gateway, $transactionId, true),
+        ]);
+
+        return $this->commitAndReturn(null, $invoice);
     }
 
     /**
@@ -540,6 +517,84 @@ class PaymentService
         $apiContext->setConfig($config);
 
         return $apiContext;
+    }
+
+    /**
+     * Configure Stripe API key (centralized).
+     */
+    private function configureStripe(array $credentials): void
+    {
+        Stripe::setApiKey($credentials['secret_key'] ?? '');
+    }
+
+    /**
+     * Build Stripe Session payload from order data.
+     */
+    private function buildStripeSessionPayload(array $orderData): array
+    {
+        return [
+            'payment_method_types' => ['card'],
+            'line_items' => [
+                [
+                    'price_data' => [
+                        'currency' => $orderData['currency'] ?? 'usd',
+                        'product_data' => [
+                            'name' => 'Product Purchase',
+                        ],
+                        'unit_amount' => (int)(($orderData['amount'] ?? 0) * 100),
+                    ],
+                    'quantity' => 1,
+                ],
+            ],
+            'mode' => 'payment',
+            'success_url' => $this->successUrl('stripe'),
+            'cancel_url' => $this->cancelUrl('stripe'),
+            'metadata' => [
+                'user_id' => $orderData['user_id'] ?? '',
+                'product_id' => $orderData['product_id'] ?? '',
+            ],
+        ];
+    }
+
+    /**
+     * Extract approval URL from PayPal Payment links.
+     */
+    private function getPayPalApprovalUrl(Payment $payment): ?string
+    {
+        foreach ($payment->getLinks() as $link) {
+            if ($link->getRel() === 'approval_url') {
+                return $link->getHref();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Build invoice metadata consistently, optionally merging with base.
+     */
+    private function buildInvoiceMetadata(string $gateway, ?string $transactionId, bool $isCustom = false, ?array $base = null): array
+    {
+        $metadata = [
+            'gateway' => $gateway,
+            'transaction_id' => $transactionId,
+        ];
+        if ($isCustom) {
+            $metadata['is_custom'] = true;
+        }
+        return $base ? array_merge($base, $metadata) : $metadata;
+    }
+
+    /**
+     * Commit DB transaction and build success response in one place.
+     */
+    private function commitAndReturn(?License $license, Invoice $invoice): array
+    {
+        DB::commit();
+        return [
+            'success' => true,
+            'license' => $license,
+            'invoice' => $invoice,
+        ];
     }
 
     /**
