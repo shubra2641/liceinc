@@ -9,10 +9,8 @@ use App\Models\License;
 use App\Models\PaymentSetting;
 use App\Models\Product;
 use App\Models\User;
-use App\Services\Request as ServiceRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use InvalidArgumentException;
 use PayPal\Api\Amount;
 use PayPal\Api\Payer;
 use PayPal\Api\Payment;
@@ -25,38 +23,37 @@ use Stripe\Checkout\Session;
 use Stripe\Stripe;
 
 /**
- * Simplified Payment Service with essential functionality.
+ * Simplified Payment Service
  */
 class PaymentService
 {
     /**
-     * Process payment with the specified gateway.
+     * Process payment
      */
     public function processPayment(array $orderData, string $gateway): array
     {
         try {
-            $this->validateOrderData($orderData);
-            $this->validateGateway($gateway);
-
-            return match ($gateway) {
-                'paypal' => $this->processPayPalPayment($orderData),
-                'stripe' => $this->processStripePayment($orderData),
-                default => throw new InvalidArgumentException("Unsupported gateway: {$gateway}")
-            };
+            $this->validateOrder($orderData);
+            
+            if ($gateway === 'paypal') {
+                return $this->processPayPal($orderData);
+            }
+            
+            if ($gateway === 'stripe') {
+                return $this->processStripe($orderData);
+            }
+            
+            return ['success' => false, 'message' => 'Unsupported gateway'];
         } catch (\Exception $e) {
-            Log::error('Payment processing failed', [
-                'gateway' => $gateway,
-                'order_data' => $orderData,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
+            Log::error('Payment failed', ['error' => $e->getMessage()]);
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
 
     /**
-     * Process PayPal payment.
+     * Process PayPal payment
      */
-    protected function processPayPalPayment(array $orderData): array
+    private function processPayPal(array $orderData): array
     {
         try {
             $settings = PaymentSetting::getByGateway('paypal');
@@ -64,79 +61,27 @@ class PaymentService
                 throw new \Exception('PayPal settings not found');
             }
 
-            $credentials = $settings->credentials;
-            $this->validatePayPalCredentials($credentials);
-
-            $apiContext = new ApiContext(
-                new OAuthTokenCredential(
-                    $credentials['client_id'],
-                    $credentials['client_secret']
-                )
-            );
-
-            $apiContext->setConfig([
-                'mode' => $settings->is_sandbox ? 'sandbox' : 'live',
-                'log.LogEnabled' => true,
-                'log.FileName' => storage_path('logs/paypal.log'),
-                'log.LogLevel' => 'INFO',
-            ]);
-
-            $payer = new Payer();
-            $payer->setPaymentMethod('paypal');
-
-            $amount = new Amount();
-            $amount->setTotal(number_format($orderData['amount'], 2, '.', ''));
-            $amount->setCurrency($orderData['currency'] ?? 'usd');
-
-            $transaction = new Transaction();
-            $transaction->setAmount($amount);
-            $transaction->setDescription('Product Purchase');
-            $transaction->setCustom("user_id:{$orderData['user_id']}, product_id:{$orderData['product_id']}");
-
-            $redirectUrls = new RedirectUrls();
-            $appUrl = config('app.url');
-            $redirectUrls->setReturnUrl($appUrl . '/payment/success/paypal')
-                ->setCancelUrl($appUrl . '/payment/cancel/paypal');
-
-            $payment = new Payment();
-            $payment->setIntent('sale');
-            $payment->setPayer($payer);
-            $payment->setTransactions([$transaction]);
-            $payment->setRedirectUrls($redirectUrls);
-
+            $apiContext = $this->getPayPalContext($settings);
+            $payment = $this->createPayPalPayment($orderData, $apiContext);
             $payment->create($apiContext);
 
-            $approvalUrl = null;
-            foreach ($payment->getLinks() as $link) {
-                if ($link->getRel() === 'approval_url') {
-                    $approvalUrl = $link->getHref();
-                    break;
-                }
-            }
+            $approvalUrl = $this->getApprovalUrl($payment);
 
             return [
                 'success' => true,
                 'redirect_url' => $approvalUrl,
-                'payment_url' => $approvalUrl,
                 'payment_id' => $payment->getId(),
             ];
         } catch (\Exception $e) {
-            Log::error('PayPal payment processing failed', [
-                'order_data' => $orderData,
-                'error' => $e->getMessage()
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'PayPal payment processing failed: ' . $e->getMessage(),
-            ];
+            Log::error('PayPal payment failed', ['error' => $e->getMessage()]);
+            return ['success' => false, 'message' => 'PayPal payment failed'];
         }
     }
 
     /**
-     * Process Stripe payment.
+     * Process Stripe payment
      */
-    protected function processStripePayment(array $orderData): array
+    private function processStripe(array $orderData): array
     {
         try {
             $settings = PaymentSetting::getByGateway('stripe');
@@ -144,196 +89,95 @@ class PaymentService
                 throw new \Exception('Stripe settings not found');
             }
 
-            $credentials = $settings->credentials;
-            $this->validateStripeCredentials($credentials);
-
-            Stripe::setApiKey($credentials['secret_key'] ?? '');
-
-            $appUrl = config('app.url');
-            $session = Session::create([
-                'payment_method_types' => ['card'],
-                'line_items' => [
-                    [
-                        'price_data' => [
-                            'currency' => $orderData['currency'] ?? 'usd',
-                            'product_data' => [
-                                'name' => 'Product Purchase',
-                            ],
-                            'unit_amount' => (int)(($orderData['amount'] ?? 0) * 100),
-                        ],
-                        'quantity' => 1,
-                    ],
-                ],
-                'mode' => 'payment',
-                'success_url' => $appUrl . '/payment/success/stripe',
-                'cancel_url' => $appUrl . '/payment/cancel/stripe',
-                'metadata' => [
-                    'user_id' => $orderData['user_id'] ?? '',
-                    'product_id' => $orderData['product_id'] ?? '',
-                ],
-            ]);
+            Stripe::setApiKey($settings->credentials['secret_key']);
+            $session = $this->createStripeSession($orderData);
 
             return [
                 'success' => true,
                 'redirect_url' => $session->url,
-                'payment_url' => $session->url,
                 'session_id' => $session->id,
             ];
         } catch (\Exception $e) {
-            Log::error('Stripe payment processing failed', [
-                'order_data' => $orderData,
-                'error' => $e->getMessage()
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Stripe payment processing failed: ' . $e->getMessage(),
-            ];
+            Log::error('Stripe payment failed', ['error' => $e->getMessage()]);
+            return ['success' => false, 'message' => 'Stripe payment failed'];
         }
     }
 
     /**
-     * Verify payment with gateway.
+     * Verify payment
      */
     public function verifyPayment(string $gateway, string $transactionId): array
     {
         try {
-            $this->validateGateway($gateway);
-            $this->validateTransactionId($transactionId);
-
-            return match ($gateway) {
-                'paypal' => $this->verifyPayPalPayment($transactionId),
-                'stripe' => $this->verifyStripePayment($transactionId),
-                default => [
-                    'success' => false,
-                    'message' => 'Unsupported payment gateway',
-                ]
-            };
+            if ($gateway === 'paypal') {
+                return $this->verifyPayPal($transactionId);
+            }
+            
+            if ($gateway === 'stripe') {
+                return $this->verifyStripe($transactionId);
+            }
+            
+            return ['success' => false, 'message' => 'Unsupported gateway'];
         } catch (\Exception $e) {
-            Log::error('Payment verification failed', [
-                'gateway' => $gateway,
-                'transaction_id' => $transactionId,
-                'error' => $e->getMessage()
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Payment verification failed',
-            ];
+            Log::error('Payment verification failed', ['error' => $e->getMessage()]);
+            return ['success' => false, 'message' => 'Verification failed'];
         }
     }
 
     /**
-     * Verify PayPal payment.
+     * Verify PayPal payment
      */
-    protected function verifyPayPalPayment(string $paymentId): array
+    private function verifyPayPal(string $paymentId): array
     {
         try {
             $settings = PaymentSetting::getByGateway('paypal');
-            if (!$settings) {
-                throw new \Exception('PayPal settings not found');
-            }
-
-            $credentials = $settings->credentials;
-            $this->validatePayPalCredentials($credentials);
-
-            $apiContext = new ApiContext(
-                new OAuthTokenCredential(
-                    $credentials['client_id'],
-                    $credentials['client_secret']
-                )
-            );
-
-            $apiContext->setConfig([
-                'mode' => $settings->is_sandbox ? 'sandbox' : 'live',
-            ]);
-
+            $apiContext = $this->getPayPalContext($settings);
             $payment = Payment::get($paymentId, $apiContext);
 
             if ($payment->getState() === 'approved') {
                 $execution = new PaymentExecution();
-                $payerId = request()->get('PayerID');
-                $execution->setPayerId($payerId ?? '');
+                $execution->setPayerId(request()->get('PayerID'));
                 $result = $payment->execute($execution, $apiContext);
 
                 if ($result->getState() === 'approved') {
-                    return [
-                        'success' => true,
-                        'transaction_id' => $paymentId,
-                        'message' => 'Payment verified successfully',
-                    ];
+                    return ['success' => true, 'transaction_id' => $paymentId];
                 }
             }
 
-            return [
-                'success' => false,
-                'message' => 'Payment not approved',
-            ];
+            return ['success' => false, 'message' => 'Payment not approved'];
         } catch (\Exception $e) {
-            Log::error('PayPal verification failed', [
-                'payment_id' => $paymentId,
-                'error' => $e->getMessage()
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'PayPal verification failed',
-            ];
+            Log::error('PayPal verification failed', ['error' => $e->getMessage()]);
+            return ['success' => false, 'message' => 'PayPal verification failed'];
         }
     }
 
     /**
-     * Verify Stripe payment.
+     * Verify Stripe payment
      */
-    protected function verifyStripePayment(string $transactionId): array
+    private function verifyStripe(string $sessionId): array
     {
         try {
             $settings = PaymentSetting::getByGateway('stripe');
-            if (!$settings) {
-                throw new \Exception('Stripe settings not found');
-            }
-
-            $credentials = $settings->credentials;
-            $this->validateStripeCredentials($credentials);
-
-            Stripe::setApiKey($credentials['secret_key'] ?? '');
-
-            $session = Session::retrieve($transactionId);
+            Stripe::setApiKey($settings->credentials['secret_key']);
+            $session = Session::retrieve($sessionId);
 
             if ($session->payment_status === 'paid') {
-                return [
-                    'success' => true,
-                    'transaction_id' => $transactionId,
-                    'message' => 'Payment verified successfully',
-                ];
+                return ['success' => true, 'transaction_id' => $sessionId];
             }
 
-            return [
-                'success' => false,
-                'message' => 'Payment not completed',
-            ];
+            return ['success' => false, 'message' => 'Payment not completed'];
         } catch (\Exception $e) {
-            Log::error('Stripe verification failed', [
-                'transaction_id' => $transactionId,
-                'error' => $e->getMessage()
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Stripe verification failed',
-            ];
+            Log::error('Stripe verification failed', ['error' => $e->getMessage()]);
+            return ['success' => false, 'message' => 'Stripe verification failed'];
         }
     }
 
     /**
-     * Create license and invoice after successful payment.
+     * Create license and invoice
      */
     public function createLicenseAndInvoice(array $orderData, string $gateway, ?string $transactionId = null): array
     {
         try {
-            $this->validateOrderData($orderData);
-            $this->validateGateway($gateway);
-
             DB::beginTransaction();
 
             $user = User::find($orderData['user_id']);
@@ -341,229 +185,189 @@ class PaymentService
                 throw new \Exception('User not found');
             }
 
-            $product = isset($orderData['product_id']) ? Product::find($orderData['product_id']) : null;
-
             // Handle existing invoice
-            if (isset($orderData['invoice_id']) && $orderData['invoice_id']) {
-                $existingInvoice = Invoice::find($orderData['invoice_id']);
-                if ($existingInvoice) {
-                    $existingInvoice->update([
+            if (isset($orderData['invoice_id'])) {
+                $invoice = Invoice::find($orderData['invoice_id']);
+                if ($invoice) {
+                    $invoice->update([
                         'status' => 'paid',
                         'paid_at' => now(),
                         'notes' => "Payment via {$gateway}",
-                        'metadata' => array_merge($existingInvoice->metadata ?? [], [
-                            'gateway' => $gateway,
-                            'transaction_id' => $transactionId,
-                        ])
                     ]);
-
                     DB::commit();
-                    return [
-                        'success' => true,
-                        'license' => $existingInvoice->license,
-                        'invoice' => $existingInvoice,
-                    ];
+                    return ['success' => true, 'invoice' => $invoice];
                 }
             }
 
-            // Handle custom invoice
-            if (isset($orderData['is_custom']) && $orderData['is_custom']) {
-                $invoice = Invoice::create([
-                    'user_id' => $user->id,
-                    'product_id' => null,
-                    'license_id' => null,
-                    'invoice_number' => $this->generateInvoiceNumber(),
-                    'amount' => $orderData['amount'],
-                    'currency' => $orderData['currency'],
-                    'status' => 'paid',
-                    'paid_at' => now(),
-                    'due_date' => now()->addDays(30),
-                    'notes' => "Custom service payment via {$gateway}",
-                    'metadata' => [
-                        'gateway' => $gateway,
-                        'transaction_id' => $transactionId,
-                        'is_custom' => true,
-                    ],
-                ]);
+            // Create new license and invoice
+            if (isset($orderData['product_id'])) {
+                $product = Product::find($orderData['product_id']);
+                if (!$product) {
+                    throw new \Exception('Product not found');
+                }
+
+                $license = $this->createLicense($user, $product, $gateway);
+                $invoice = $this->createInvoice($user, $license, $product, $orderData, $gateway, $transactionId);
 
                 DB::commit();
-                return [
-                    'success' => true,
-                    'license' => null,
-                    'invoice' => $invoice,
-                ];
-            }
-
-            // Create license and invoice for product purchase
-            if ($product) {
-                $license = License::create([
-                    'user_id' => $user->id,
-                    'product_id' => $product->id,
-                    'license_type' => $product->license_type ?? 'single',
-                    'status' => 'active',
-                    'max_domains' => $product->max_domains ?? 1,
-                    'license_expires_at' => $this->calculateLicenseExpiry($product),
-                    'support_expires_at' => $this->calculateSupportExpiry($product),
-                    'notes' => "Purchased via {$gateway}",
-                ]);
-
-                $invoiceService = app(InvoiceService::class);
-                $invoice = $invoiceService->createInvoice(
-                    $user,
-                    $license,
-                    $product,
-                    $orderData['amount'],
-                    $orderData['currency'] ?? 'usd',
-                    $gateway,
-                    $transactionId
-                );
-
-                DB::commit();
-                return [
-                    'success' => true,
-                    'license' => $license,
-                    'invoice' => $invoice,
-                ];
+                return ['success' => true, 'license' => $license, 'invoice' => $invoice];
             }
 
             throw new \Exception('Product not found');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Failed to create license and invoice', [
-                'order_data' => $orderData,
-                'gateway' => $gateway,
-                'transaction_id' => $transactionId,
-                'error' => $e->getMessage()
-            ]);
+            Log::error('Failed to create license and invoice', ['error' => $e->getMessage()]);
             throw $e;
         }
     }
 
     /**
-     * Handle webhook from payment gateway.
+     * Validate order data
      */
-    public function handleWebhook(ServiceRequest $request, string $gateway): array
+    private function validateOrder(array $orderData): void
     {
-        try {
-            $this->validateGateway($gateway);
+        if (empty($orderData['user_id']) || !is_numeric($orderData['user_id'])) {
+            throw new \Exception('Valid user_id is required');
+        }
 
-            return match ($gateway) {
-                'stripe' => $this->handleStripeWebhook($request),
-                'paypal' => $this->handlePayPalWebhook($request),
-                default => ['success' => false, 'message' => 'Unsupported gateway']
-            };
-        } catch (\Exception $e) {
-            Log::error('Webhook processing failed', [
+        if (empty($orderData['amount']) || !is_numeric($orderData['amount']) || $orderData['amount'] <= 0) {
+            throw new \Exception('Valid amount is required');
+        }
+
+        if (empty($orderData['currency']) || strlen($orderData['currency']) !== 3) {
+            throw new \Exception('Valid currency is required');
+        }
+    }
+
+    /**
+     * Get PayPal API context
+     */
+    private function getPayPalContext($settings): ApiContext
+    {
+        $credentials = $settings->credentials;
+        $apiContext = new ApiContext(
+            new OAuthTokenCredential($credentials['client_id'], $credentials['client_secret'])
+        );
+
+        $apiContext->setConfig([
+            'mode' => $settings->is_sandbox ? 'sandbox' : 'live',
+        ]);
+
+        return $apiContext;
+    }
+
+    /**
+     * Create PayPal payment
+     */
+    private function createPayPalPayment(array $orderData, ApiContext $apiContext): Payment
+    {
+        $payer = new Payer();
+        $payer->setPaymentMethod('paypal');
+
+        $amount = new Amount();
+        $amount->setTotal(number_format($orderData['amount'], 2, '.', ''));
+        $amount->setCurrency($orderData['currency']);
+
+        $transaction = new Transaction();
+        $transaction->setAmount($amount);
+        $transaction->setDescription('Product Purchase');
+
+        $redirectUrls = new RedirectUrls();
+        $appUrl = config('app.url');
+        $redirectUrls->setReturnUrl($appUrl . '/payment/success/paypal')
+            ->setCancelUrl($appUrl . '/payment/cancel/paypal');
+
+        $payment = new Payment();
+        $payment->setIntent('sale');
+        $payment->setPayer($payer);
+        $payment->setTransactions([$transaction]);
+        $payment->setRedirectUrls($redirectUrls);
+
+        return $payment;
+    }
+
+    /**
+     * Get PayPal approval URL
+     */
+    private function getApprovalUrl(Payment $payment): ?string
+    {
+        foreach ($payment->getLinks() as $link) {
+            if ($link->getRel() === 'approval_url') {
+                return $link->getHref();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Create Stripe session
+     */
+    private function createStripeSession(array $orderData): Session
+    {
+        $appUrl = config('app.url');
+        
+        return Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [
+                [
+                    'price_data' => [
+                        'currency' => $orderData['currency'],
+                        'product_data' => ['name' => 'Product Purchase'],
+                        'unit_amount' => (int)($orderData['amount'] * 100),
+                    ],
+                    'quantity' => 1,
+                ],
+            ],
+            'mode' => 'payment',
+            'success_url' => $appUrl . '/payment/success/stripe',
+            'cancel_url' => $appUrl . '/payment/cancel/stripe',
+        ]);
+    }
+
+    /**
+     * Create license
+     */
+    private function createLicense(User $user, Product $product, string $gateway): License
+    {
+        return License::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'license_type' => $product->license_type ?? 'single',
+            'status' => 'active',
+            'max_domains' => $product->max_domains ?? 1,
+            'license_expires_at' => $this->calculateExpiry($product),
+            'support_expires_at' => now()->addDays(365),
+            'notes' => "Purchased via {$gateway}",
+        ]);
+    }
+
+    /**
+     * Create invoice
+     */
+    private function createInvoice(User $user, License $license, Product $product, array $orderData, string $gateway, ?string $transactionId): Invoice
+    {
+        return Invoice::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'license_id' => $license->id,
+            'invoice_number' => $this->generateInvoiceNumber(),
+            'amount' => $orderData['amount'],
+            'currency' => $orderData['currency'],
+            'status' => 'paid',
+            'paid_at' => now(),
+            'due_date' => now()->addDays(30),
+            'notes' => "Payment via {$gateway}",
+            'metadata' => [
                 'gateway' => $gateway,
-                'error' => $e->getMessage()
-            ]);
-            return ['success' => false, 'message' => 'Webhook processing failed'];
-        }
+                'transaction_id' => $transactionId,
+            ],
+        ]);
     }
 
     /**
-     * Handle Stripe webhook.
+     * Generate invoice number
      */
-    private function handleStripeWebhook(ServiceRequest $request): array
-    {
-        return ['success' => true, 'message' => 'Stripe webhook processed'];
-    }
-
-    /**
-     * Handle PayPal webhook.
-     */
-    private function handlePayPalWebhook(ServiceRequest $request): array
-    {
-        return ['success' => true, 'message' => 'PayPal webhook processed'];
-    }
-
-    /**
-     * Validate order data.
-     */
-    private function validateOrderData(array $orderData): void
-    {
-        if (empty($orderData)) {
-            throw new InvalidArgumentException('Order data cannot be empty');
-        }
-
-        if (!isset($orderData['user_id']) || !is_numeric($orderData['user_id']) || $orderData['user_id'] < 1) {
-            throw new InvalidArgumentException('Valid user_id is required');
-        }
-
-        if (!isset($orderData['amount']) || !is_numeric($orderData['amount']) || $orderData['amount'] <= 0) {
-            throw new InvalidArgumentException('Valid amount is required');
-        }
-
-        if (!isset($orderData['currency']) || empty($orderData['currency'])) {
-            throw new InvalidArgumentException('Currency is required');
-        }
-
-        if (strlen($orderData['currency']) !== 3) {
-            throw new InvalidArgumentException('Currency must be a 3-character code');
-        }
-
-        if ($orderData['amount'] > 999999.99) {
-            throw new InvalidArgumentException('Amount cannot exceed 999,999.99');
-        }
-    }
-
-    /**
-     * Validate payment gateway.
-     */
-    private function validateGateway(string $gateway): void
-    {
-        if (!in_array($gateway, ['paypal', 'stripe'])) {
-            throw new InvalidArgumentException('Unsupported payment gateway');
-        }
-    }
-
-    /**
-     * Validate PayPal credentials.
-     */
-    private function validatePayPalCredentials(?array $credentials): void
-    {
-        if (empty($credentials['client_id'] ?? '')) {
-            throw new InvalidArgumentException('PayPal client_id is required');
-        }
-        if (empty($credentials['client_secret'] ?? '')) {
-            throw new InvalidArgumentException('PayPal client_secret is required');
-        }
-    }
-
-    /**
-     * Validate Stripe credentials.
-     */
-    private function validateStripeCredentials(?array $credentials): void
-    {
-        $secretKey = $credentials['secret_key'] ?? '';
-        if (empty($secretKey)) {
-            throw new InvalidArgumentException('Stripe secret_key is required');
-        }
-        if (!str_starts_with($secretKey, 'sk_')) {
-            throw new InvalidArgumentException('Invalid Stripe secret key format');
-        }
-    }
-
-    /**
-     * Validate transaction ID.
-     */
-    private function validateTransactionId(string $transactionId): void
-    {
-        if (empty($transactionId)) {
-            throw new InvalidArgumentException('Transaction ID cannot be empty');
-        }
-        if (strlen($transactionId) < 5 || strlen($transactionId) > 100) {
-            throw new InvalidArgumentException('Transaction ID must be between 5 and 100 characters');
-        }
-        if (!preg_match('/^[A-Za-z0-9\-_]+$/', $transactionId)) {
-            throw new InvalidArgumentException('Transaction ID contains invalid characters');
-        }
-    }
-
-    /**
-     * Generate unique invoice number.
-     */
-    protected function generateInvoiceNumber(): string
+    private function generateInvoiceNumber(): string
     {
         do {
             $invoiceNumber = 'INV-' . strtoupper(\Illuminate\Support\Str::random(8));
@@ -573,50 +377,23 @@ class PaymentService
     }
 
     /**
-     * Calculate license expiry date.
+     * Calculate license expiry
      */
-    protected function calculateLicenseExpiry(Product $product): ?\DateTime
+    private function calculateExpiry(Product $product): ?\DateTime
     {
-        if ($product->license_type === 'lifetime' || $product->renewal_period === 'lifetime') {
+        if ($product->license_type === 'lifetime') {
             return null;
         }
 
-        $days = $this->getRenewalPeriodInDays($product->renewal_period);
-        if ($days === null) {
-            $defaultDuration = \App\Helpers\ConfigHelper::getSetting('license_default_duration', 365);
-            $days = is_numeric($defaultDuration) ? (int)$defaultDuration : 365;
-        }
-
-        return now()->addDays($days);
-    }
-
-    /**
-     * Calculate support expiry date.
-     */
-    protected function calculateSupportExpiry(Product $product): \DateTime
-    {
-        $productSupportDays = $product->support_days ?? null;
-        $defaultSupportDuration = \App\Helpers\ConfigHelper::getSetting('license_support_duration', 365);
-        $supportDuration = is_numeric($productSupportDays)
-            ? (int)$productSupportDays
-            : (is_numeric($defaultSupportDuration) ? (int)$defaultSupportDuration : 365);
-
-        return now()->addDays($supportDuration);
-    }
-
-    /**
-     * Convert renewal period to days.
-     */
-    protected function getRenewalPeriodInDays(?string $renewalPeriod): ?int
-    {
-        return match ($renewalPeriod) {
+        $days = match ($product->renewal_period) {
             'monthly' => 30,
             'quarterly' => 90,
             'semi-annual' => 180,
             'annual' => 365,
             'three-years' => 1095,
-            'lifetime' => null,
-            default => null,
+            default => 365,
         };
+
+        return now()->addDays($days);
     }
 }
