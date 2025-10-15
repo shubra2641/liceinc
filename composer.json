@@ -87,9 +87,10 @@
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.6",
         "fakerphp/faker": "^1.24",
+        "larastan/larastan": "^3.7",
         "laravel/pint": "^1.25",
         "mockery/mockery": "^1.6",
-        "larastan/larastan": "^3.7",
+        "phpmd/phpmd": "^2.15",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-deprecation-rules": "^2.0",
