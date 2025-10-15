@@ -31,10 +31,9 @@
     27 => 'Laravel\\Tinker\\TinkerServiceProvider',
     28 => 'Carbon\\Laravel\\ServiceProvider',
     29 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    30 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
-    31 => 'Spatie\\Permission\\PermissionServiceProvider',
-    32 => 'App\\Providers\\AppServiceProvider',
-    33 => 'App\\Providers\\EnvatoSocialiteProvider',
+    30 => 'Spatie\\Permission\\PermissionServiceProvider',
+    31 => 'App\\Providers\\AppServiceProvider',
+    32 => 'App\\Providers\\EnvatoSocialiteProvider',
   ),
   'eager' => 
   array (
@@ -52,10 +51,9 @@
     11 => 'Laravel\\Scout\\ScoutServiceProvider',
     12 => 'Carbon\\Laravel\\ServiceProvider',
     13 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    14 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
-    15 => 'Spatie\\Permission\\PermissionServiceProvider',
-    16 => 'App\\Providers\\AppServiceProvider',
-    17 => 'App\\Providers\\EnvatoSocialiteProvider',
+    14 => 'Spatie\\Permission\\PermissionServiceProvider',
+    15 => 'App\\Providers\\AppServiceProvider',
+    16 => 'App\\Providers\\EnvatoSocialiteProvider',
   ),
   'deferred' => 
   array (

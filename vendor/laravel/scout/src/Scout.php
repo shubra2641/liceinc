@@ -2,6 +2,7 @@
 
 namespace Laravel\Scout;
 
+use Laravel\Scout\Engines\Engine;
 use Laravel\Scout\Jobs\MakeSearchable;
 use Laravel\Scout\Jobs\RemoveFromSearch;
 
@@ -12,7 +13,7 @@ class Scout
      *
      * @var string
      */
-    const VERSION = '10.19.0';
+    const VERSION = '10.20.0';
 
     /**
      * The job class that should make models searchable.
@@ -27,6 +28,14 @@ class Scout
      * @var string
      */
     public static $removeFromSearchJob = RemoveFromSearch::class;
+
+    /**
+     * Get a Scout engine instance.
+     */
+    public static function engine(string $engine): Engine
+    {
+        return app(EngineManager::class)->engine($engine);
+    }
 
     /**
      * Specify the job class that should make models searchable.

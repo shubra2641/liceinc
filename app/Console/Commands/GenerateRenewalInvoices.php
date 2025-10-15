@@ -37,14 +37,14 @@ class GenerateRenewalInvoices extends Command
         try {
             $days = $this->validateDays();
             $expiryDate = Carbon::now()->addDays($days);
-            
+
             $this->info("Generating renewal invoices for licenses expiring within {$days} days...");
-            
+
             $licenses = $this->getExpiringLicenses($expiryDate);
             $results = $this->processLicenses($licenses);
-            
+
             $this->displayResults($results);
-            
+
             return Command::SUCCESS;
         } catch (\Exception $e) {
             $this->handleError($e);
@@ -55,13 +55,13 @@ class GenerateRenewalInvoices extends Command
     protected function validateDays(): int
     {
         $days = (int) $this->option('days');
-        
+
         if ($days < 1 || $days > 365) {
             throw new \InvalidArgumentException(
                 'Days must be between 1 and 365, got: ' . SecurityHelper::escapeVariable((string) $days)
             );
         }
-        
+
         return $days;
     }
 
@@ -100,7 +100,7 @@ class GenerateRenewalInvoices extends Command
     {
         try {
             DB::beginTransaction();
-            
+
             $invoice = $this->generateInvoice($license);
             if (!$invoice) {
                 DB::rollBack();
@@ -108,11 +108,11 @@ class GenerateRenewalInvoices extends Command
             }
 
             $this->line("Generated renewal invoice for license {$license->license_key}");
-            
+
             $emailsSent = $this->sendNotifications($license, $invoice) ? 1 : 0;
-            
+
             DB::commit();
-            
+
             return ['generated' => 1, 'emails' => $emailsSent, 'errors' => 0];
         } catch (\Exception $e) {
             DB::rollBack();
@@ -254,7 +254,7 @@ class GenerateRenewalInvoices extends Command
         $this->info(
             "Generated {$results['generated']} renewal invoices and sent {$results['emails']} email notifications."
         );
-        
+
         if ($results['errors'] > 0) {
             $this->warn("Encountered {$results['errors']} errors during processing. Check logs for details.");
         }
