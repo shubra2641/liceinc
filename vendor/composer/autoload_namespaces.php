@@ -7,5 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Rs\\Json' => array($vendorDir . '/php-jsonpointer/php-jsonpointer/src'),
+    'PHPMD\\' => array($vendorDir . '/phpmd/phpmd/src/main/php'),
     'Barryvdh' => array($vendorDir . '/barryvdh/reflection-docblock/src'),
 );

@@ -7,3 +7,4 @@
 #4 D:\\xampp1\\htdocs\\my-logos\\artisan(16): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
 #5 {main}
 "} 
+[2025-10-15 21:01:24] local.WARNING: Authentication route not found {"url":"https://localhost/my-logos/public/logos/uy5CedurksGNSIxWqD08MFqZEFu16XGXiJPLLKJU.png","method":"GET","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36","timestamp":"2025-10-15 21:01:24"} 

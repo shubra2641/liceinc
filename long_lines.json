@@ -1,0 +1,394 @@
+[
+    {
+        "Content":  {
+                        "value":  "    protected $signature = \u0027licenses:generate-renewal-invoices {--days=7 : Number of days before expiry to generate invoices}\u0027;",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Console\\Commands\\GenerateRenewalInvoices.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Console\\Commands",
+                        "PSChildName":  "GenerateRenewalInvoices.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  22
+                    },
+        "LineNumber":  22,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Console\\Commands\\GenerateRenewalInvoices.php",
+        "Length":  127
+    },
+    {
+        "Content":  {
+                        "value":  "                throw new \\InvalidArgumentException(\"Cannot update to older version. Current: {$currentVersion}, Target: {$newVersion}\");",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Helpers\\VersionHelper.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Helpers",
+                        "PSChildName":  "VersionHelper.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  263
+                    },
+        "LineNumber":  263,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Helpers\\VersionHelper.php",
+        "Length":  137
+    },
+    {
+        "Content":  {
+                        "value":  "            return redirect()-\u003eback()-\u003ewith(\u0027error\u0027, \u0027An error occurred while checking for updates: \u0027 . $e-\u003egetMessage());",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\Admin\\UpdateController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\Admin",
+                        "PSChildName":  "UpdateController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  347
+                    },
+        "LineNumber":  347,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\Admin\\UpdateController.php",
+        "Length":  122
+    },
+    {
+        "Content":  {
+                        "value":  "    private function performAutoUpdate(string $version, string $licenseKey, string $productSlug, ?string $domain = null): array",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\Admin\\UpdateController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\Admin",
+                        "PSChildName":  "UpdateController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  354
+                    },
+        "LineNumber":  354,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\Admin\\UpdateController.php",
+        "Length":  127
+    },
+    {
+        "Content":  {
+                        "value":  "                    \u0027message\u0027 =\u003e \"Cannot update to version \" . $version . \". Current version is \" . $currentVersion . \". Only newer versions are allowed.\",",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\Admin\\UpdateController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\Admin",
+                        "PSChildName":  "UpdateController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  369
+                    },
+        "LineNumber":  369,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\Admin\\UpdateController.php",
+        "Length":  155
+    },
+    {
+        "Content":  {
+                        "value":  "            return response()-\u003ejson([\u0027success\u0027 =\u003e true, \u0027message\u0027 =\u003e \u0027License registered\u0027, \u0027license_id\u0027 =\u003e $license-\u003eid]);",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\Api\\LicenseApiController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\Api",
+                        "PSChildName":  "LicenseApiController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  64
+                    },
+        "LineNumber":  64,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\Api\\LicenseApiController.php",
+        "Length":  122
+    },
+    {
+        "Content":  {
+                        "value":  "                return $this-\u003everificationResponse($request, true, \u0027License verified successfully\u0027, $verificationResult);",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "InstallController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  58
+                    },
+        "LineNumber":  58,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+        "Length":  121
+    },
+    {
+        "Content":  {
+                        "value":  "            return $this-\u003everificationResponse($request, false, \u0027An error occurred during verification\u0027, [\u0027general\u0027 =\u003e $exception-\u003egetMessage()], 500);",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "InstallController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  65
+                    },
+        "LineNumber":  65,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+        "Length":  151
+    },
+    {
+        "Content":  {
+                        "value":  "            return redirect()-\u003eback()-\u003ewithErrors([\u0027database\u0027 =\u003e \u0027Database connection failed: \u0027 . $e-\u003egetMessage()])-\u003ewithInput();",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "InstallController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  143
+                    },
+        "LineNumber":  143,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+        "Length":  130
+    },
+    {
+        "Content":  {
+                        "value":  "            return redirect()-\u003eroute(\u0027install.database\u0027)-\u003ewithErrors([\u0027error\u0027 =\u003e \u0027Please configure database settings first.\u0027]);",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "InstallController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  153
+                    },
+        "LineNumber":  153,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+        "Length":  127
+    },
+    {
+        "Content":  {
+                        "value":  "            return redirect()-\u003eroute(\u0027install.database\u0027)-\u003ewithErrors([\u0027error\u0027 =\u003e \u0027Please configure database settings first.\u0027]);",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "InstallController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  181
+                    },
+        "LineNumber":  181,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+        "Length":  127
+    },
+    {
+        "Content":  {
+                        "value":  "            return redirect()-\u003eroute(\u0027install.database\u0027)-\u003ewithErrors([\u0027error\u0027 =\u003e \u0027Please configure database settings first.\u0027]);",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "InstallController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  216
+                    },
+        "LineNumber":  216,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+        "Length":  127
+    },
+    {
+        "Content":  {
+                        "value":  "            return redirect()-\u003eroute(\u0027install.settings\u0027)-\u003ewithErrors([\u0027error\u0027 =\u003e \u0027Please configure application settings first.\u0027]);",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "InstallController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  222
+                    },
+        "LineNumber":  222,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+        "Length":  130
+    },
+    {
+        "Content":  {
+                        "value":  "            $envContent = str_replace(\u0027MAIL_ENCRYPTION=null\u0027, \u0027MAIL_ENCRYPTION=\u0027 . $settings[\u0027mail_encryption\u0027], $envContent);",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "InstallController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  273
+                    },
+        "LineNumber":  273,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+        "Length":  126
+    },
+    {
+        "Content":  {
+                        "value":  "    private function verificationResponse(Request $request, bool $success, string $message, array $data = [], int $statusCode = 200): RedirectResponse|JsonResponse",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "InstallController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  328
+                    },
+        "LineNumber":  328,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\InstallController.php",
+        "Length":  163
+    },
+    {
+        "Content":  {
+                        "value":  "            return view(\u0027kb.search\u0027, compact(\u0027q\u0027, \u0027results\u0027, \u0027resultsWithAccess\u0027, \u0027categoriesWithAccess\u0027, \u0027highlightQuery\u0027));",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\KbPublicController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "KbPublicController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  204
+                    },
+        "LineNumber":  204,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\KbPublicController.php",
+        "Length":  125
+    },
+    {
+        "Content":  {
+                        "value":  "                    $accessToken = \u0027kb_access_\u0027 . $category-\u003eid . \u0027_\u0027 . time() . \u0027_\u0027 . substr(md5($license?-\u003elicense_key ?? \u0027\u0027), 0, 8);",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\KbPublicController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "KbPublicController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  371
+                    },
+        "LineNumber":  371,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\KbPublicController.php",
+        "Length":  135
+    },
+    {
+        "Content":  {
+                        "value":  "                    $accessToken = \u0027kb_article_access_\u0027 . $article-\u003eid . \u0027_\u0027 . time() . \u0027_\u0027 . substr(md5($license?-\u003elicense_key ?? \u0027\u0027), 0, 8);",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\KbPublicController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "KbPublicController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  414
+                    },
+        "LineNumber":  414,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\KbPublicController.php",
+        "Length":  142
+    },
+    {
+        "Content":  {
+                        "value":  "        $product = $productId ? Product::find($productId) : Product::where(\u0027is_active\u0027, true)-\u003ewhere(\u0027price\u0027, \u0027\u003e\u0027, 0)-\u003efirst();",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\PaymentController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "PaymentController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  272
+                    },
+        "LineNumber":  272,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\PaymentController.php",
+        "Length":  127
+    },
+    {
+        "Content":  {
+                        "value":  "                if ($result[\u0027license\u0027] instanceof \\App\\Models\\License \u0026\u0026 $result[\u0027invoice\u0027] instanceof \\App\\Models\\Invoice) {",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\PaymentController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "PaymentController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  297
+                    },
+        "LineNumber":  297,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\PaymentController.php",
+        "Length":  125
+    },
+    {
+        "Content":  {
+                        "value":  "                -\u003ewith(\u0027error_message\u0027, trans(\u0027app.Payment successful but failed to create license. Please contact support.\u0027));",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\PaymentController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "PaymentController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  312
+                    },
+        "LineNumber":  312,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\PaymentController.php",
+        "Length":  127
+    },
+    {
+        "Content":  {
+                        "value":  "            $query-\u003ewhere($filter === \u0027free\u0027 ? \u0027price\u0027 : \u0027price\u0027, $filter === \u0027free\u0027 ? 0 : \u0027\u003e\u0027, $filter === \u0027free\u0027 ? null : 0);",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\ProductController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "ProductController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  49
+                    },
+        "LineNumber":  49,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\ProductController.php",
+        "Length":  127
+    },
+    {
+        "Content":  {
+                        "value":  "        $product-\u003edescription_has_html = is_string($product-\u003edescription) \u0026\u0026 strip_tags($product-\u003edescription) !== $product-\u003edescription;",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\ProductController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "ProductController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  102
+                    },
+        "LineNumber":  102,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\ProductController.php",
+        "Length":  137
+    },
+    {
+        "Content":  {
+                        "value":  "        $product-\u003erequirements_has_html = is_string($product-\u003erequirements) \u0026\u0026 strip_tags($product-\u003erequirements) !== $product-\u003erequirements;",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\ProductController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "ProductController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  103
+                    },
+        "LineNumber":  103,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\ProductController.php",
+        "Length":  141
+    },
+    {
+        "Content":  {
+                        "value":  "        $product-\u003einstallation_guide_has_html = is_string($product-\u003einstallation_guide) \u0026\u0026 strip_tags($product-\u003einstallation_guide) !== $product-\u003einstallation_guide;",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\ProductController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "ProductController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  104
+                    },
+        "LineNumber":  104,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\ProductController.php",
+        "Length":  165
+    },
+    {
+        "Content":  {
+                        "value":  "                (is_string($product-\u003escreenshots) ? json_decode($product-\u003escreenshots, true) : $product-\u003escreenshots) : null",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\ProductController.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers",
+                        "PSChildName":  "ProductController.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  120
+                    },
+        "LineNumber":  120,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Controllers\\ProductController.php",
+        "Length":  124
+    },
+    {
+        "Content":  {
+                        "value":  "            \u0027envato_username\u0027 =\u003e $this-\u003einput(\u0027envato_username\u0027) ? $this-\u003esanitizeInput($this-\u003einput(\u0027envato_username\u0027)) : null,",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Requests\\Traits\\ProfileDataSanitization.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Requests\\Traits",
+                        "PSChildName":  "ProfileDataSanitization.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  48
+                    },
+        "LineNumber":  48,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Http\\Requests\\Traits\\ProfileDataSanitization.php",
+        "Length":  128
+    },
+    {
+        "Content":  {
+                        "value":  "    private function createProductLicenseAndInvoice(User $user, Product $product, array $orderData, string $gateway, ?string $transactionId): array",
+                        "PSPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Services\\Payment\\Processors\\PaymentProcessor.php",
+                        "PSParentPath":  "D:\\xampp1\\htdocs\\my-logos\\app\\Services\\Payment\\Processors",
+                        "PSChildName":  "PaymentProcessor.php",
+                        "PSDrive":  "D",
+                        "PSProvider":  "Microsoft.PowerShell.Core\\FileSystem",
+                        "ReadCount":  178
+                    },
+        "LineNumber":  178,
+        "File":  "D:\\xampp1\\htdocs\\my-logos\\app\\Services\\Payment\\Processors\\PaymentProcessor.php",
+        "Length":  147
+    }
+]
