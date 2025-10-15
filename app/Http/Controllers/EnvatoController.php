@@ -167,11 +167,11 @@ class EnvatoController extends Controller
     public function verifyUserPurchase(Request $request, EnvatoService $envato): JsonResponse
     {
         $result = $this->purchaseVerificationService->verifyUserPurchaseAjax($request);
-        
+
         if ($result['valid']) {
             return response()->json($result);
         }
-        
+
         $statusCode = isset($result['errors']) ? 422 : 500;
         return response()->json($result, $statusCode);
     }

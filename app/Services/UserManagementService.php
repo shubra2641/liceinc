@@ -34,28 +34,35 @@ class UserManagementService
     {
         try {
             DB::beginTransaction();
-            
+
             $envatoUser = Socialite::driver('envato')->user();
             $username = $this->extractUsername($envatoUser);
-            
+
             if (!$username) {
                 return $this->handleUsernameNotFound($envatoUser);
             }
-            
-            $userInfo = app(EnvatoService::class)->getOAuthUserInfo($envatoUser->token);
-            $userData = $this->prepareUserData($envatoUser, $userInfo, $username);
-            $email = $this->prepareUserEmail($envatoUser, $username);
-            
-            $user = User::updateOrCreate(['email' => $email], $userData);
+
+            $user = $this->createOrUpdateUser($envatoUser, $username);
             Auth::login($user, true);
-            
+
             DB::commit();
-            
-            return $this->handleSuccessfulLogin($email);
-            
+
+            return $this->handleSuccessfulLogin($user->email);
         } catch (\Exception $e) {
             return $this->handleOAuthError($e);
         }
+    }
+
+    /**
+     * Create or update user from Envato data.
+     */
+    private function createOrUpdateUser($envatoUser, string $username): User
+    {
+        $userInfo = app(EnvatoService::class)->getOAuthUserInfo($envatoUser->token);
+        $userData = $this->prepareUserData($envatoUser, $userInfo, $username);
+        $email = $this->prepareUserEmail($envatoUser, $username);
+
+        return User::updateOrCreate(['email' => $email], $userData);
     }
 
     /**
@@ -67,28 +74,35 @@ class UserManagementService
             if (auth()->guest()) {
                 return redirect('/login')->withErrors(['envato' => 'Please log in to link your Envato account.']);
             }
-            
+
             DB::beginTransaction();
-            
+
             $envatoUser = Socialite::driver('envato')->user();
-            $userInfo = app(EnvatoService::class)->getOAuthUserInfo($envatoUser->token);
-            
+            $userInfo = $this->getUserInfo($envatoUser);
+
             if (!$userInfo) {
                 return $this->handleUserInfoRetrievalFailure($envatoUser);
             }
-            
+
             if ($this->isAccountAlreadyLinked($envatoUser->getId())) {
                 return $this->handleAccountAlreadyLinked($envatoUser);
             }
-            
+
             $this->updateUserWithEnvatoData($envatoUser, $userInfo);
-            
+
             DB::commit();
             return back()->with('success', 'Envato account linked successfully! You can now verify your purchases.');
-            
         } catch (\Exception $e) {
             return $this->handleLinkingError($e);
         }
+    }
+
+    /**
+     * Get user info from Envato service.
+     */
+    private function getUserInfo($envatoUser)
+    {
+        return app(EnvatoService::class)->getOAuthUserInfo($envatoUser->token);
     }
 
     /**

@@ -49,43 +49,57 @@ class PurchaseVerificationService
     {
         try {
             $data = $this->validatePurchaseRequest($request);
-            
-            // Rate limiting check
+
             if ($this->isRateLimited($request->ip(), 'verify_purchase_')) {
-                $this->logRateLimitExceeded($request, $data);
-                return back()->withErrors(['purchase_code' => 'Too many verification attempts. Please try again later.']);
+                return $this->handleRateLimit($request, $data);
             }
-            
+
             $this->setRateLimit($request->ip(), 'verify_purchase_');
-            
-            DB::beginTransaction();
-            
-            // Verify purchase with Envato API
-            $sale = $this->verifyWithEnvato($data['purchase_code']);
-            if (!$sale) {
-                return $this->handleVerificationFailure($request, $data);
-            }
-            
-            // Find product and validate ownership
-            $product = $this->findAndValidateProduct($data['product_slug'], $sale);
-            if (!$product) {
-                return $this->handleProductMismatch($request, $data);
-            }
-            
-            // Create or find user
-            $user = $this->createOrFindUser($sale);
-            
-            // Create or update license
-            $this->createOrUpdateLicense($data['purchase_code'], $product, $user, $sale);
-            
-            DB::commit();
-            return back()->with('success', 'Purchase verified and license updated successfully.');
-            
+
+            return $this->processPurchaseVerification($request, $data);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->handleValidationError($e, $request);
         } catch (Exception $e) {
             return $this->handleGeneralError($e, $request);
         }
+    }
+
+    /**
+     * Process purchase verification with database transaction.
+     */
+    private function processPurchaseVerification(Request $request, array $data): RedirectResponse
+    {
+        DB::beginTransaction();
+
+        try {
+            $sale = $this->verifyWithEnvato($data['purchase_code']);
+            if (!$sale) {
+                return $this->handleVerificationFailure($request, $data);
+            }
+
+            $product = $this->findAndValidateProduct($data['product_slug'], $sale);
+            if (!$product) {
+                return $this->handleProductMismatch($request, $data);
+            }
+
+            $user = $this->createOrFindUser($sale);
+            $this->createOrUpdateLicense($data['purchase_code'], $product, $user, $sale);
+
+            DB::commit();
+            return back()->with('success', 'Purchase verified and license updated successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Handle rate limit exceeded.
+     */
+    private function handleRateLimit(Request $request, array $data): RedirectResponse
+    {
+        $this->logRateLimitExceeded($request, $data);
+        return back()->withErrors(['purchase_code' => 'Too many verification attempts. Please try again later.']);
     }
 
     /**
@@ -97,31 +111,60 @@ class PurchaseVerificationService
             if (auth()->guest()) {
                 return ['valid' => false, 'message' => 'Authentication required'];
             }
-            
+
             $data = $this->validateAjaxPurchaseRequest($request);
-            
-            // Rate limiting for AJAX requests
-            $rateLimitKey = 'ajax_verify_' . auth()->id() . '_' . $request->ip();
-            if ($this->isRateLimited($rateLimitKey, 'ajax_verify_')) {
-                $this->logAjaxRateLimitExceeded($request);
-                return ['valid' => false, 'message' => 'Too many verification attempts. Please try again later.'];
+
+            if ($this->isAjaxRateLimited($request)) {
+                return $this->handleAjaxRateLimit($request);
             }
-            
-            $this->setRateLimit($rateLimitKey, 'ajax_verify_');
-            
-            DB::beginTransaction();
-            
+
+            return $this->processAjaxVerification($request, $data);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->handleAjaxValidationError($e, $request);
+        } catch (Exception $e) {
+            return $this->handleAjaxGeneralError($e, $request);
+        }
+    }
+
+    /**
+     * Check if AJAX request is rate limited.
+     */
+    private function isAjaxRateLimited(Request $request): bool
+    {
+        $rateLimitKey = 'ajax_verify_' . auth()->id() . '_' . $request->ip();
+        return $this->isRateLimited($rateLimitKey, 'ajax_verify_');
+    }
+
+    /**
+     * Handle AJAX rate limit.
+     */
+    private function handleAjaxRateLimit(Request $request): array
+    {
+        $this->logAjaxRateLimitExceeded($request);
+        return ['valid' => false, 'message' => 'Too many verification attempts. Please try again later.'];
+    }
+
+    /**
+     * Process AJAX verification with database transaction.
+     */
+    private function processAjaxVerification(Request $request, array $data): array
+    {
+        $rateLimitKey = 'ajax_verify_' . auth()->id() . '_' . $request->ip();
+        $this->setRateLimit($rateLimitKey, 'ajax_verify_');
+
+        DB::beginTransaction();
+
+        try {
             $sale = $this->verifyWithEnvato($data['purchase_code']);
             if (!$sale) {
                 return $this->handleAjaxVerificationFailure($request, $data);
             }
-            
+
             $product = Product::findOrFail($data['product_id']);
             if (!$this->validateProductOwnership($product, $sale)) {
                 return $this->handleAjaxProductMismatch($request, $data, $product);
             }
-            
-            // Check if user already has this license
+
             $existingLicense = $this->checkExistingLicense($data['purchase_code']);
             if ($existingLicense) {
                 DB::rollBack();
@@ -131,21 +174,18 @@ class PurchaseVerificationService
                     'license' => $existingLicense
                 ];
             }
-            
-            // Create license for user
+
             $license = $this->createUserLicense($data['purchase_code'], $product, $sale);
-            
+
             DB::commit();
             return [
                 'valid' => true,
                 'message' => 'License verified and added to your account',
                 'license' => $license
             ];
-            
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->handleAjaxValidationError($e, $request);
         } catch (Exception $e) {
-            return $this->handleAjaxGeneralError($e, $request);
+            DB::rollBack();
+            throw $e;
         }
     }
 
@@ -211,11 +251,11 @@ class PurchaseVerificationService
     {
         $product = Product::where('slug', $productSlug)->firstOrFail();
         $itemId = data_get($sale, 'item.id');
-        
+
         if ((string)$product->envato_item_id !== $itemId) {
             return null;
         }
-        
+
         return $product;
     }
 
@@ -235,7 +275,7 @@ class PurchaseVerificationService
     {
         $buyerName = data_get($sale, 'buyer', 'Unknown Buyer');
         $buyerEmail = data_get($sale, 'buyer_email');
-        
+
         return User::firstOrCreate(
             ['email' => $buyerEmail ?: Str::uuid() . '@envato-temp.local'],
             [
@@ -252,7 +292,7 @@ class PurchaseVerificationService
     private function createOrUpdateLicense(string $purchaseCode, Product $product, User $user, array $sale): void
     {
         $supportEnd = data_get($sale, 'supported_until');
-        
+
         License::updateOrCreate(
             ['purchase_code' => $purchaseCode],
             [
