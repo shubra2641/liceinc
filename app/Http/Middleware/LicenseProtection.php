@@ -55,41 +55,9 @@ class LicenseProtection
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            // Skip license check for installation routes
-            if ($this->isInstallationRoute($request)) {
-                $response = $next($request);
-                /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
-                $typedResponse = $response;
-                return $typedResponse;
-            }
-            // Skip license check for API routes (they have their own protection)
-            if ($this->isApiRoute($request)) {
-                $response = $next($request);
-                /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
-                $typedResponse = $response;
-                return $typedResponse;
-            }
-            // Skip license check for public routes
-            if ($this->isPublicRoute($request)) {
-                $response = $next($request);
-                /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
-                $typedResponse = $response;
-                return $typedResponse;
-            }
-            // Check if system is installed
-            if (! $this->isSystemInstalled()) {
-                $response = $next($request);
-                /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
-                $typedResponse = $response;
-                return $typedResponse;
+            // Skip license checks for installation, API, public routes or when system not installed
+            if ($this->shouldBypass($request)) {
+                return $this->passThrough($next, $request);
             }
             // Get license information from database
             $licenseInfo = $this->getLicenseInfo();
@@ -109,12 +77,7 @@ class LicenseProtection
             if ($this->shouldVerifyLicense($licenseInfo)) {
                 $this->verifyLicensePeriodically($licenseInfo);
             }
-            $response = $next($request);
-            /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
-            $typedResponse = $response;
-            return $typedResponse;
+            return $this->passThrough($next, $request);
         } catch (\Exception $e) {
             Log::error('License protection middleware failed', [
                 'error' => $e->getMessage(),
@@ -124,12 +87,7 @@ class LicenseProtection
                 'url' => $request->fullUrl(),
             ]);
             // In case of error, allow the request to proceed
-            $response = $next($request);
-            /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
-            $typedResponse = $response;
-            return $typedResponse;
+            return $this->passThrough($next, $request);
         }
     }
     /**
@@ -164,12 +122,7 @@ class LicenseProtection
     private function isPublicRoute(Request $request): bool
     {
         $publicRoutes = ['license-status*', 'kb*', 'support*'];
-        foreach ($publicRoutes as $route) {
-            if ($request->is($route)) {
-                return true;
-            }
-        }
-        return false;
+        return $request->is($publicRoutes);
     }
     /**
      * Check if the system is installed.
@@ -284,16 +237,8 @@ class LicenseProtection
                 }
             };
             $result = $licenseVerifier->verifyLicense(
-                $this->sanitizeInput(
-                    is_string($licenseInfo['license_purchase_code'] ?? null)
-                        ? $licenseInfo['license_purchase_code']
-                        : null
-                ) ?? '',
-                $this->sanitizeInput(
-                    is_string($licenseInfo['license_domain'] ?? null)
-                        ? $licenseInfo['license_domain']
-                        : null
-                ) ?? '',
+                $this->getSanitizedString($licenseInfo, 'license_purchase_code'),
+                $this->getSanitizedString($licenseInfo, 'license_domain'),
             );
             // Update last verification time
             \App\Helpers\SettingHelper::updateOrCreateSetting(
@@ -370,5 +315,37 @@ class LicenseProtection
             return str_repeat('*', strlen($purchaseCode));
         }
         return substr($purchaseCode, 0, 8) . '...';
+    }
+
+    /**
+     * Determine if current request should bypass license checks.
+     */
+    private function shouldBypass(Request $request): bool
+    {
+        return $this->isInstallationRoute($request)
+            || $this->isApiRoute($request)
+            || $this->isPublicRoute($request)
+            || ! $this->isSystemInstalled();
+    }
+
+    /**
+     * Proxy to next middleware returning a typed Response.
+     */
+    private function passThrough(Closure $next, Request $request): Response
+    {
+        /** @var Response $response */
+        $response = $next($request);
+        return $response;
+    }
+
+    /**
+     * Get a sanitized string value from an array by key, or empty string.
+     *
+     * @param array<string, mixed> $data
+     */
+    private function getSanitizedString(array $data, string $key): string
+    {
+        $raw = $data[$key] ?? null;
+        return $this->sanitizeInput(is_string($raw) ? $raw : null) ?? '';
     }
 }
