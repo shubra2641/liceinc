@@ -12,6 +12,7 @@ use App\Models\LicenseLog;
 use App\Models\Product;
 use App\Services\EnvatoProductService;
 use App\Services\LicenseGeneratorService;
+use App\Services\ProductApiService;
 use App\Services\ProductIntegrationService;
 use App\Services\ProductKbService;
 use Illuminate\Http\JsonResponse;
@@ -31,37 +32,20 @@ class ProductController extends Controller
 {
     public function __construct(
         private LicenseGeneratorService $licenseGenerator,
-        private EnvatoProductService $envatoProductService,
-        private ProductIntegrationService $productIntegrationService,
-        private ProductKbService $productKbService
+        private ProductApiService $productApiService,
+        private ProductIntegrationService $productIntegrationService
     ) {
     }
 
     /**
-     * Get product data from Envato API
+     * Handle API requests for product operations
      */
-    public function getEnvatoProductData(Request $request): JsonResponse
+    public function api(Request $request): JsonResponse
     {
-        $request->validate(['item_id' => 'required|integer|min:1']);
-        return $this->envatoProductService->getProductData((int)$request->input('item_id'));
-    }
-
-    /**
-     * Get user's Envato items for selection
-     */
-    public function getEnvatoUserItems(Request $request): JsonResponse
-    {
-        return $this->envatoProductService->getUserItems();
+        return $this->productApiService->handleApiRequest($request);
     }
 
 
-    /**
-     * Get integration code template for product
-     */
-    private function getIntegrationCodeTemplate(Product $product, string $apiUrl): string
-    {
-        return "<?php\ndeclare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// API: {$apiUrl}\n";
-    }
 
     /**
      * Display products listing
@@ -161,7 +145,7 @@ class ProductController extends Controller
                 }
             }
 
-            $this->generateIntegrationFile($product);
+            $this->productIntegrationService->generateIntegrationFile($product);
             DB::commit();
 
             return redirect()->route('admin.products.edit', $product)->with('success', 'Product created successfully');
@@ -223,7 +207,7 @@ class ProductController extends Controller
             }
 
             if ($product->wasChanged(['programming_language', 'envato_item_id', 'name', 'slug'])) {
-                $this->generateIntegrationFile($product);
+                $this->productIntegrationService->generateIntegrationFile($product);
             }
 
             DB::commit();
@@ -256,22 +240,6 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * Get product data for license forms
-     */
-    public function getProductData(Product $product): JsonResponse
-    {
-        return response()->json([
-            'id' => $product->id,
-            'name' => $product->name,
-            'license_type' => $product->license_type,
-            'duration_days' => $product->duration_days,
-            'support_days' => $product->support_days,
-            'price' => $product->price,
-            'renewal_price' => $product->renewal_price,
-            'renewal_period' => $product->renewal_period,
-        ]);
-    }
 
     /**
      * Show edit product form
@@ -287,38 +255,6 @@ class ProductController extends Controller
         ]);
     }
 
-    /**
-     * Generate integration file for product
-     */
-    private function generateIntegrationFile(Product $product): string
-    {
-        try {
-            $oldFilePath = "integration/{$product->slug}.php";
-            if (Storage::disk('public')->exists($oldFilePath)) {
-                Storage::disk('public')->delete($oldFilePath);
-            }
-
-            if ($programmingLanguage = $product->programmingLanguage) {
-                foreach ($this->getFileExtensionsForLanguage($programmingLanguage->slug) as $ext) {
-                    $oldFileWithExt = "integration/{$product->slug}.{$ext}";
-                    if (Storage::disk('public')->exists($oldFileWithExt)) {
-                        Storage::disk('public')->delete($oldFileWithExt);
-                    }
-                }
-            }
-
-            return $this->licenseGenerator->generateLicenseFile($product);
-        } catch (\Exception $e) {
-            $apiDomain = rtrim(config('app.url', ''), '/');
-            $verificationEndpoint = config('license.verification_endpoint', '/api/license/verify');
-            $apiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
-            $integrationCode = $this->getIntegrationCodeTemplate($product, $apiUrl);
-            $filePath = "integration/{$product->slug}.php";
-            Storage::disk('public')->put($filePath, $integrationCode);
-            $product->update(['integration_file_path' => $filePath]);
-            return $filePath;
-        }
-    }
 
     /**
      * Download integration file
@@ -333,43 +269,9 @@ class ProductController extends Controller
      */
     public function regenerateIntegration(Product $product): RedirectResponse
     {
-        try {
-            $oldFilePath = "integration/{$product->slug}.php";
-            if (Storage::disk('public')->exists($oldFilePath)) {
-                Storage::disk('public')->delete($oldFilePath);
-            }
-
-            if ($programmingLanguage = $product->programmingLanguage) {
-                foreach ($this->getFileExtensionsForLanguage($programmingLanguage->slug) as $ext) {
-                    $oldFileWithExt = "integration/{$product->slug}.{$ext}";
-                    if (Storage::disk('public')->exists($oldFileWithExt)) {
-                        Storage::disk('public')->delete($oldFileWithExt);
-                    }
-                }
-            }
-
-            $this->generateIntegrationFile($product);
-            return redirect()->back()->with('success', 'Integration file regenerated successfully.');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to Regenerate file: ' . $e->getMessage());
-        }
+        return $this->productIntegrationService->regenerateIntegration($product);
     }
 
-    /**
-     * Get file extensions for programming language
-     */
-    private function getFileExtensionsForLanguage(string $languageSlug): array
-    {
-        return [
-            'php' => ['php'], 'laravel' => ['php'], 'javascript' => ['js'], 'python' => ['py'],
-            'java' => ['java'], 'csharp' => ['cs'], 'cpp' => ['cpp', 'h'], 'wordpress' => ['php'],
-            'react' => ['js', 'jsx'], 'angular' => ['ts'], 'nodejs' => ['js'], 'vuejs' => ['js', 'vue'],
-            'go' => ['go'], 'swift' => ['swift'], 'typescript' => ['ts'], 'kotlin' => ['kt'],
-            'c' => ['c', 'h'], 'html-css' => ['html', 'css'], 'flask' => ['py'], 'django' => ['py'],
-            'expressjs' => ['js'], 'ruby-on-rails' => ['rb'], 'spring-boot' => ['java'], 'symfony' => ['php'],
-            'aspnet' => ['cs'], 'html' => ['html'], 'ruby' => ['rb'],
-        ][$languageSlug] ?? ['php'];
-    }
 
     /**
      * Generate test license for product
@@ -427,33 +329,4 @@ class ProductController extends Controller
         return view('admin.products.logs', ['product' => $product, 'logs' => $logs]);
     }
 
-    /**
-     * Get KB categories and articles
-     */
-    public function getKbData(): JsonResponse
-    {
-        return response()->json([
-            'success' => true,
-            'categories' => KbCategory::where('is_published', true)->orderBy('name')->get(['id', 'name', 'slug']),
-            'articles' => KbArticle::where('is_published', true)
-                ->with('category:id, name')
-                ->orderBy('title')
-                ->get(['id', 'title', 'slug', 'kb_category_id']),
-        ]);
-    }
-
-    /**
-     * Get KB articles for specific category
-     */
-    public function getKbArticles(int $categoryId): JsonResponse
-    {
-        return response()->json([
-            'success' => true,
-            'articles' => KbArticle::where('kb_category_id', $categoryId)
-                ->where('is_published', true)
-                ->with('category:id, name')
-                ->orderBy('title')
-                ->get(['id', 'title', 'slug', 'kb_category_id']),
-        ]);
-    }
 }

@@ -61,7 +61,11 @@ class LicenseApiController extends Controller
             $license = $this->createLicense($product, $data['purchase_code'], $data['domain'] ?? null);
             $this->log($license, $data['domain'] ?? null);
 
-            return response()->json(['success' => true, 'message' => 'License registered', 'license_id' => $license->id]);
+            return response()->json([
+                'success' => true, 
+                'message' => 'License registered', 
+                'license_id' => $license->id
+            ]);
         });
     }
 

@@ -344,14 +344,21 @@ class UpdateController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return redirect()->back()->with('error', 'An error occurred while checking for updates: ' . $e->getMessage());
+            return redirect()->back()->with('error', 
+                'An error occurred while checking for updates: ' . $e->getMessage()
+            );
         }
     }
 
     /**
      * Perform auto update
      */
-    private function performAutoUpdate(string $version, string $licenseKey, string $productSlug, ?string $domain = null): array
+    private function performAutoUpdate(
+        string $version, 
+        string $licenseKey, 
+        string $productSlug, 
+        ?string $domain = null
+    ): array
     {
         try {
             if (!VersionHelper::isValidVersion($version)) {
@@ -366,7 +373,9 @@ class UpdateController extends Controller
                 $currentVersion = VersionHelper::getCurrentVersion();
                 return [
                     'success' => false,
-                    'message' => "Cannot update to version " . $version . ". Current version is " . $currentVersion . ". Only newer versions are allowed.",
+                    'message' => "Cannot update to version " . $version . 
+                        ". Current version is " . $currentVersion . 
+                        ". Only newer versions are allowed.",
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
                     'current_version' => $currentVersion,
                     'target_version' => $version,

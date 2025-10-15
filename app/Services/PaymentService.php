@@ -599,7 +599,12 @@ class PaymentService
     /**
      * Build invoice metadata consistently, optionally merging with base.
      */
-    private function buildInvoiceMetadata(string $gateway, ?string $transactionId, bool $isCustom = false, ?array $base = null): array
+    private function buildInvoiceMetadata(
+        string $gateway, 
+        ?string $transactionId, 
+        bool $isCustom = false, 
+        ?array $base = null
+    ): array
     {
         $metadata = [
             'gateway' => $gateway,

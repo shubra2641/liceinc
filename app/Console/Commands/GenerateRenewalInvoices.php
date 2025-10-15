@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\Log;
  */
 class GenerateRenewalInvoices extends Command
 {
-    protected $signature = 'licenses:generate-renewal-invoices {--days=7 : Number of days before expiry to generate invoices}';
+    protected $signature = 'licenses:generate-renewal-invoices 
+        {--days=7 : Number of days before expiry to generate invoices}';
     protected $description = 'Generate renewal invoices for licenses that are about to expire';
 
     protected InvoiceService $invoiceService;
