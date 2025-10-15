@@ -46,7 +46,8 @@ class ProductController extends Controller
             $search = htmlspecialchars(trim($request->validated('search')), ENT_QUOTES, 'UTF-8');
             if ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")->orWhere('description', 'like', "%{$search}%");
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
                 });
             }
         }
@@ -100,8 +101,10 @@ class ProductController extends Controller
             abort(404);
         }
 
-        $product = Product::where('slug', $slug)->where('is_active', true)
-            ->with(['category', 'programmingLanguage'])->firstOrFail();
+        $product = Product::where('slug', $slug)
+            ->where('is_active', true)
+            ->with(['category', 'programmingLanguage'])
+            ->firstOrFail();
 
         return $this->showProduct($product);
     }
@@ -114,15 +117,20 @@ class ProductController extends Controller
                 $q->whereNull('license_expires_at')->orWhere('license_expires_at', '>', now());
             })->exists() : false;
 
-        $purchased = $user ? $user->licenses()->where('product_id', $product->id)->exists() : false;
+        $purchased = $user ? 
+            $user->licenses()->where('product_id', $product->id)->exists() : 
+            false;
 
         $download = $product->is_downloadable && $user ?
             app(ProductFileService::class)->userCanDownloadFiles($product, Auth::id() ?: 0) :
             ['can_download' => false, 'message' => ''];
 
-        $product->description_has_html = is_string($product->description) && strip_tags($product->description) !== $product->description;
-        $product->requirements_has_html = is_string($product->requirements) && strip_tags($product->requirements) !== $product->requirements;
-        $product->installation_guide_has_html = is_string($product->installation_guide) && strip_tags($product->installation_guide) !== $product->installation_guide;
+        $product->description_has_html = is_string($product->description) && 
+            strip_tags($product->description) !== $product->description;
+        $product->requirements_has_html = is_string($product->requirements) && 
+            strip_tags($product->requirements) !== $product->requirements;
+        $product->installation_guide_has_html = is_string($product->installation_guide) && 
+            strip_tags($product->installation_guide) !== $product->installation_guide;
 
         return view('user.products.show', [
             'product' => $product,

@@ -55,11 +55,7 @@ class PreloaderManager {
     };
 
     // Merge settings with precedence: window > data > defaults
-    return {
-      ...defaultSettings,
-      ...dataSettings,
-      ...windowSettings
-    };
+    return { ...defaultSettings, ...dataSettings, ...windowSettings };
   }
 
   init() {
@@ -86,7 +82,7 @@ class PreloaderManager {
 
     const style = document.createElement('style');
     style.id = 'preloader-dynamic-styles';
-    
+
     // Animation speed mapping
     const animationSpeeds = {
       slow: '2s',
@@ -366,7 +362,7 @@ class PreloaderManager {
         clearInterval(interval);
       }
       progressBar.style.width = `${progress}%`;
-      
+
       // Update progress text if enabled
       if (this.settings.progressText) {
         const progressText = this.container.querySelector('.preloader-progress-text');
