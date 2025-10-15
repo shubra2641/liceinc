@@ -8,7 +8,7 @@ use App\Http\Requests\Api\LicenseStatusRequest;
 use App\Http\Requests\Api\LicenseVerifyRequest;
 use App\Models\License;
 use App\Models\Product;
-use App\Services\Envato\EnvatoService;
+use App\Services\EnvatoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -61,11 +61,7 @@ class LicenseApiController extends Controller
             $license = $this->createLicense($product, $data['purchase_code'], $data['domain'] ?? null);
             $this->log($license, $data['domain'] ?? null);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'License registered',
-                'license_id' => $license->id
-            ]);
+            return response()->json(['success' => true, 'message' => 'License registered', 'license_id' => $license->id]);
         });
     }
 

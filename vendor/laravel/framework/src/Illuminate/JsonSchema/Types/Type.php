@@ -35,30 +35,11 @@ abstract class Type extends JsonSchema
     protected ?array $enum = null;
 
     /**
-     * Indicates if the type is nullable.
-     */
-    protected ?bool $nullable = null;
-
-    /**
      * Indicate that the type is required.
      */
-    public function required(bool $required = true): static
+    public function required(): static
     {
-        if ($required) {
-            $this->required = true;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Indicate that the type is optional.
-     */
-    public function nullable(bool $nullable = true): static
-    {
-        if ($nullable) {
-            $this->nullable = true;
-        }
+        $this->required = true;
 
         return $this;
     }

@@ -10,11 +10,7 @@ use App\Models\KbCategory;
 use App\Models\License;
 use App\Models\LicenseLog;
 use App\Models\Product;
-use App\Services\Envato\EnvatoProductService;
-use App\Services\License\LicenseGeneratorService;
-use App\Services\Product\ProductApiService;
-use App\Services\Product\ProductIntegrationService;
-use App\Services\Product\ProductKbService;
+use App\Services\LicenseGeneratorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,22 +26,108 @@ use Illuminate\View\View;
  */
 class ProductController extends Controller
 {
-    public function __construct(
-        private LicenseGeneratorService $licenseGenerator,
-        private ProductApiService $productApiService,
-        private ProductIntegrationService $productIntegrationService
-    ) {
+    public function __construct(private LicenseGeneratorService $licenseGenerator)
+    {
     }
 
     /**
-     * Handle API requests for product operations
+     * Get product data from Envato API
      */
-    public function api(Request $request): JsonResponse
+    public function getEnvatoProductData(Request $request): JsonResponse
     {
-        return $this->productApiService->handleApiRequest($request);
+        $request->validate(['item_id' => 'required|integer|min:1']);
+
+        try {
+            $envatoService = app(\App\Services\EnvatoService::class);
+            $itemData = $envatoService->getItemInfo((int)$request->input('item_id'));
+
+            if (!$itemData) {
+                return response()->json(['success' => false, 'message' => trans('app.Unable to fetch product data from Envato')], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'envato_item_id' => $itemData['id'] ?? null,
+                    'purchase_url_envato' => $itemData['url'] ?? null,
+                    'purchase_url_buy' => $itemData['url'] ?? null,
+                    'support_days' => $this->calculateSupportDays($itemData),
+                    'version' => $itemData['version'] ?? null,
+                    'price' => isset($itemData['price_cents']) ? ($itemData['price_cents'] / 100) : null,
+                    'name' => $itemData['name'] ?? null,
+                    'description' => $itemData['description'] ?? null,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => trans('app.Error fetching product data: ') . $e->getMessage()], 500);
+        }
     }
 
+    /**
+     * Get user's Envato items for selection
+     */
+    public function getEnvatoUserItems(Request $request): JsonResponse
+    {
+        try {
+            $envatoService = app(\App\Services\EnvatoService::class);
+            $settings = $envatoService->getEnvatoSettings();
 
+            if (empty($settings['username'])) {
+                return response()->json(['success' => false, 'message' => trans('app.Envato username not configured')], 400);
+            }
+
+            $userItems = $envatoService->getUserItems($settings['username']);
+
+            if (!$userItems || !isset($userItems['matches'])) {
+                return response()->json(['success' => false, 'message' => trans('app.Unable to fetch user items from Envato')], 404);
+            }
+
+            $items = collect($userItems['matches'])->map(function (array $item): array {
+                return [
+                    'id' => $item['id'],
+                    'name' => $item['name'],
+                    'url' => $item['url'],
+                    'price' => isset($item['price_cents']) ? ($item['price_cents'] / 100) : 0,
+                    'rating' => $item['rating'] ?? null,
+                    'sales' => $item['number_of_sales'] ?? 0,
+                ];
+            });
+
+            return response()->json(['success' => true, 'items' => $items]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => trans('app.Error fetching user items: ') . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Calculate support days from Envato item data
+     */
+    private function calculateSupportDays(array $itemData): int
+    {
+        if (isset($itemData['attributes']) && is_array($itemData['attributes'])) {
+            foreach ($itemData['attributes'] as $attribute) {
+                if (is_array($attribute) && isset($attribute['name']) && $attribute['name'] === 'support') {
+                    $value = strtolower($attribute['value'] ?? '');
+                    if (strpos($value, 'month') !== false) {
+                        preg_match('/(\d+)/', $value, $matches);
+                        return isset($matches[1]) ? (int)$matches[1] * 30 : 180;
+                    } elseif (strpos($value, 'year') !== false) {
+                        preg_match('/(\d+)/', $value, $matches);
+                        return isset($matches[1]) ? (int)$matches[1] * 365 : 365;
+                    }
+                }
+            }
+        }
+        return 180;
+    }
+
+    /**
+     * Get integration code template for product
+     */
+    private function getIntegrationCodeTemplate(Product $product, string $apiUrl): string
+    {
+        return "<?php\ndeclare(strict_types=1);\n// Integration placeholder for {$product->slug}\n// API: {$apiUrl}\n";
+    }
 
     /**
      * Display products listing
@@ -82,8 +164,7 @@ class ProductController extends Controller
         return view('admin.products.index', [
             'products' => $query->paginate(10)->withQueryString(),
             'categories' => \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get(),
-            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)
-                ->orderBy('sort_order')->get(),
+            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get(),
             'allProducts' => Product::with(['category', 'programmingLanguage'])->get()
         ]);
     }
@@ -95,13 +176,9 @@ class ProductController extends Controller
     {
         return view('admin.products.create', [
             'categories' => \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get(),
-            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)
-                ->orderBy('sort_order')->get(),
+            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get(),
             'kbCategories' => KbCategory::where('is_published', true)->orderBy('name')->get(['id', 'name', 'slug']),
-            'kbArticles' => KbArticle::where('is_published', true)
-                ->with('category:id, name')
-                ->orderBy('title')
-                ->get(['id', 'title', 'slug', 'kb_category_id']),
+            'kbArticles' => KbArticle::where('is_published', true)->with('category:id, name')->orderBy('title')->get(['id', 'title', 'slug', 'kb_category_id']),
         ]);
     }
 
@@ -125,9 +202,7 @@ class ProductController extends Controller
             }
 
             if ($request->hasFile('gallery_images')) {
-                $data['gallery_images'] = collect($request->file('gallery_images'))
-                    ->map(fn($file) => $file->store('products/gallery', 'public'))
-                    ->toArray();
+                $data['gallery_images'] = collect($request->file('gallery_images'))->map(fn($file) => $file->store('products/gallery', 'public'))->toArray();
             }
 
             if (isset($data['renewal_period']) && $data['renewal_period'] === 'lifetime') {
@@ -145,7 +220,7 @@ class ProductController extends Controller
                 }
             }
 
-            $this->productIntegrationService->generateIntegrationFile($product);
+            $this->generateIntegrationFile($product);
             DB::commit();
 
             return redirect()->route('admin.products.edit', $product)->with('success', 'Product created successfully');
@@ -186,9 +261,7 @@ class ProductController extends Controller
             }
 
             if ($request->hasFile('gallery_images')) {
-                $data['gallery_images'] = collect($request->file('gallery_images'))
-                    ->map(fn($file) => $file->store('products/gallery', 'public'))
-                    ->toArray();
+                $data['gallery_images'] = collect($request->file('gallery_images'))->map(fn($file) => $file->store('products/gallery', 'public'))->toArray();
             }
 
             if (isset($data['renewal_period']) && $data['renewal_period'] === 'lifetime') {
@@ -207,7 +280,7 @@ class ProductController extends Controller
             }
 
             if ($product->wasChanged(['programming_language', 'envato_item_id', 'name', 'slug'])) {
-                $this->productIntegrationService->generateIntegrationFile($product);
+                $this->generateIntegrationFile($product);
             }
 
             DB::commit();
@@ -240,6 +313,22 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Get product data for license forms
+     */
+    public function getProductData(Product $product): JsonResponse
+    {
+        return response()->json([
+            'id' => $product->id,
+            'name' => $product->name,
+            'license_type' => $product->license_type,
+            'duration_days' => $product->duration_days,
+            'support_days' => $product->support_days,
+            'price' => $product->price,
+            'renewal_price' => $product->renewal_price,
+            'renewal_period' => $product->renewal_period,
+        ]);
+    }
 
     /**
      * Show edit product form
@@ -250,18 +339,52 @@ class ProductController extends Controller
         return view('admin.products.edit', [
             'product' => $product,
             'categories' => \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get(),
-            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)
-                ->orderBy('sort_order')->get()
+            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get()
         ]);
     }
 
+    /**
+     * Generate integration file for product
+     */
+    private function generateIntegrationFile(Product $product): string
+    {
+        try {
+            $oldFilePath = "integration/{$product->slug}.php";
+            if (Storage::disk('public')->exists($oldFilePath)) {
+                Storage::disk('public')->delete($oldFilePath);
+            }
+
+            if ($programmingLanguage = $product->programmingLanguage) {
+                foreach ($this->getFileExtensionsForLanguage($programmingLanguage->slug) as $ext) {
+                    $oldFileWithExt = "integration/{$product->slug}.{$ext}";
+                    if (Storage::disk('public')->exists($oldFileWithExt)) {
+                        Storage::disk('public')->delete($oldFileWithExt);
+                    }
+                }
+            }
+
+            return $this->licenseGenerator->generateLicenseFile($product);
+        } catch (\Exception $e) {
+            $apiDomain = rtrim(config('app.url', ''), '/');
+            $verificationEndpoint = config('license.verification_endpoint', '/api/license/verify');
+            $apiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
+            $integrationCode = $this->getIntegrationCodeTemplate($product, $apiUrl);
+            $filePath = "integration/{$product->slug}.php";
+            Storage::disk('public')->put($filePath, $integrationCode);
+            $product->update(['integration_file_path' => $filePath]);
+            return $filePath;
+        }
+    }
 
     /**
      * Download integration file
      */
     public function downloadIntegration(Product $product)
     {
-        return $this->productIntegrationService->downloadIntegration($product);
+        if (!$product->integration_file_path || !Storage::disk('public')->exists($product->integration_file_path)) {
+            return redirect()->back()->with('error', 'Integration file not found. Please regenerate it.');
+        }
+        return Storage::disk('public')->download($product->integration_file_path, "{$product->slug}.php");
     }
 
     /**
@@ -269,9 +392,43 @@ class ProductController extends Controller
      */
     public function regenerateIntegration(Product $product): RedirectResponse
     {
-        return $this->productIntegrationService->regenerateIntegration($product);
+        try {
+            $oldFilePath = "integration/{$product->slug}.php";
+            if (Storage::disk('public')->exists($oldFilePath)) {
+                Storage::disk('public')->delete($oldFilePath);
+            }
+
+            if ($programmingLanguage = $product->programmingLanguage) {
+                foreach ($this->getFileExtensionsForLanguage($programmingLanguage->slug) as $ext) {
+                    $oldFileWithExt = "integration/{$product->slug}.{$ext}";
+                    if (Storage::disk('public')->exists($oldFileWithExt)) {
+                        Storage::disk('public')->delete($oldFileWithExt);
+                    }
+                }
+            }
+
+            $this->generateIntegrationFile($product);
+            return redirect()->back()->with('success', 'Integration file regenerated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to Regenerate file: ' . $e->getMessage());
+        }
     }
 
+    /**
+     * Get file extensions for programming language
+     */
+    private function getFileExtensionsForLanguage(string $languageSlug): array
+    {
+        return [
+            'php' => ['php'], 'laravel' => ['php'], 'javascript' => ['js'], 'python' => ['py'],
+            'java' => ['java'], 'csharp' => ['cs'], 'cpp' => ['cpp', 'h'], 'wordpress' => ['php'],
+            'react' => ['js', 'jsx'], 'angular' => ['ts'], 'nodejs' => ['js'], 'vuejs' => ['js', 'vue'],
+            'go' => ['go'], 'swift' => ['swift'], 'typescript' => ['ts'], 'kotlin' => ['kt'],
+            'c' => ['c', 'h'], 'html-css' => ['html', 'css'], 'flask' => ['py'], 'django' => ['py'],
+            'expressjs' => ['js'], 'ruby-on-rails' => ['rb'], 'spring-boot' => ['java'], 'symfony' => ['php'],
+            'aspnet' => ['cs'], 'html' => ['html'], 'ruby' => ['rb'],
+        ][$languageSlug] ?? ['php'];
+    }
 
     /**
      * Generate test license for product
@@ -327,5 +484,32 @@ class ProductController extends Controller
             ->paginate(50);
 
         return view('admin.products.logs', ['product' => $product, 'logs' => $logs]);
+    }
+
+    /**
+     * Get KB categories and articles
+     */
+    public function getKbData(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'categories' => KbCategory::where('is_published', true)->orderBy('name')->get(['id', 'name', 'slug']),
+            'articles' => KbArticle::where('is_published', true)->with('category:id, name')->orderBy('title')->get(['id', 'title', 'slug', 'kb_category_id']),
+        ]);
+    }
+
+    /**
+     * Get KB articles for specific category
+     */
+    public function getKbArticles(int $categoryId): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'articles' => KbArticle::where('kb_category_id', $categoryId)
+                ->where('is_published', true)
+                ->with('category:id, name')
+                ->orderBy('title')
+                ->get(['id', 'title', 'slug', 'kb_category_id']),
+        ]);
     }
 }

@@ -9,9 +9,9 @@ use App\Helpers\VersionHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AutoUpdateRequest;
 use App\Http\Requests\Admin\SystemUpdateRequest;
-use App\Services\License\LicenseServerService;
-use App\Services\System\UpdatePackageService;
-use App\Services\System\UpdateService;
+use App\Services\LicenseServerService;
+use App\Services\UpdatePackageService;
+use App\Services\UpdateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
@@ -344,22 +344,15 @@ class UpdateController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return redirect()->back()->with(
-                'error',
-                'An error occurred while checking for updates: ' . $e->getMessage()
-            );
+            return redirect()->back()->with('error', 'An error occurred while checking for updates: ' . $e->getMessage());
         }
     }
 
     /**
      * Perform auto update
      */
-    private function performAutoUpdate(
-        string $version,
-        string $licenseKey,
-        string $productSlug,
-        ?string $domain = null
-    ): array {
+    private function performAutoUpdate(string $version, string $licenseKey, string $productSlug, ?string $domain = null): array
+    {
         try {
             if (!VersionHelper::isValidVersion($version)) {
                 return [
@@ -373,9 +366,7 @@ class UpdateController extends Controller
                 $currentVersion = VersionHelper::getCurrentVersion();
                 return [
                     'success' => false,
-                    'message' => "Cannot update to version " . $version .
-                        ". Current version is " . $currentVersion .
-                        ". Only newer versions are allowed.",
+                    'message' => "Cannot update to version " . $version . ". Current version is " . $currentVersion . ". Only newer versions are allowed.",
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
                     'current_version' => $currentVersion,
                     'target_version' => $version,

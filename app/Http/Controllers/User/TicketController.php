@@ -13,7 +13,7 @@ use App\Models\Ticket;
 use App\Models\TicketCategory;
 use App\Models\TicketReply;
 use App\Services\Email\EmailFacade;
-use App\Services\Envato\EnvatoService;
+use App\Services\EnvatoService;
 use App\Traits\TicketHelpers;
 use Exception;
 use Illuminate\Http\RedirectResponse;

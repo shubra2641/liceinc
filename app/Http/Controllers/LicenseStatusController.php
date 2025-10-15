@@ -8,7 +8,7 @@ use App\Http\Requests\LicenseStatusRequest;
 use App\Models\License;
 use App\Models\LicenseDomain;
 use App\Models\Setting;
-use App\Services\Envato\EnvatoService;
+use App\Services\EnvatoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;

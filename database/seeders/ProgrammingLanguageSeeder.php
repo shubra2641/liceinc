@@ -9,221 +9,172 @@ use Illuminate\Database\Seeder;
 
 class ProgrammingLanguageSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
         $languages = [
             [
                 'name' => 'PHP',
                 'slug' => 'php',
-                'description' => 'Server-side scripting language',
+                'description' => 'Server-side scripting language for web development',
                 'file_extension' => '.php',
                 'status' => 'active',
-                'sort_order' => 1
+                'sort_order' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'name' => 'JavaScript',
                 'slug' => 'javascript',
-                'description' => 'Client-side and server-side language',
+                'description' => 'Client-side and server-side programming language',
                 'file_extension' => '.js',
                 'status' => 'active',
-                'sort_order' => 2
+                'sort_order' => 2,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'name' => 'Python',
                 'slug' => 'python',
-                'description' => 'High-level programming language',
+                'description' => 'High-level programming language for various applications',
                 'file_extension' => '.py',
                 'status' => 'active',
-                'sort_order' => 3
+                'sort_order' => 3,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'name' => 'Java',
                 'slug' => 'java',
-                'description' => 'Object-oriented programming language',
+                'description' => 'Object-oriented programming language for enterprise applications',
                 'file_extension' => '.java',
                 'status' => 'active',
-                'sort_order' => 4
+                'sort_order' => 4,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'name' => 'C#',
                 'slug' => 'csharp',
-                'description' => 'Microsoft .NET language',
+                'description' => 'Microsoft programming language for .NET applications',
                 'file_extension' => '.cs',
                 'status' => 'active',
-                'sort_order' => 5
+                'sort_order' => 5,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'name' => 'C++',
                 'slug' => 'cpp',
-                'description' => 'General-purpose language',
+                'description' => 'General-purpose programming language with object-oriented features',
                 'file_extension' => '.cpp',
                 'status' => 'active',
-                'sort_order' => 6
-            ],
-            [
-                'name' => 'WordPress',
-                'slug' => 'wordpress',
-                'description' => 'PHP-based CMS',
-                'file_extension' => '.php',
-                'status' => 'active',
-                'sort_order' => 7
-            ],
-            [
-                'name' => 'React',
-                'slug' => 'react',
-                'description' => 'JavaScript UI library',
-                'file_extension' => '.jsx',
-                'status' => 'active',
-                'sort_order' => 8
-            ],
-            [
-                'name' => 'Angular',
-                'slug' => 'angular',
-                'description' => 'TypeScript framework',
-                'file_extension' => '.ts',
-                'status' => 'active',
-                'sort_order' => 9
-            ],
-            [
-                'name' => 'Node.js',
-                'slug' => 'nodejs',
-                'description' => 'JavaScript runtime',
-                'file_extension' => '.js',
-                'status' => 'active',
-                'sort_order' => 10
-            ],
-            [
-                'name' => 'Vue.js',
-                'slug' => 'vuejs',
-                'description' => 'Progressive JavaScript framework',
-                'file_extension' => '.vue',
-                'status' => 'active',
-                'sort_order' => 11
-            ],
-            [
-                'name' => 'Go',
-                'slug' => 'go',
-                'description' => 'Google programming language',
-                'file_extension' => '.go',
-                'status' => 'active',
-                'sort_order' => 12
-            ],
-            [
-                'name' => 'Swift',
-                'slug' => 'swift',
-                'description' => 'Apple iOS language',
-                'file_extension' => '.swift',
-                'status' => 'active',
-                'sort_order' => 13
-            ],
-            [
-                'name' => 'TypeScript',
-                'slug' => 'typescript',
-                'description' => 'Typed JavaScript',
-                'file_extension' => '.ts',
-                'status' => 'active',
-                'sort_order' => 14
-            ],
-            [
-                'name' => 'Kotlin',
-                'slug' => 'kotlin',
-                'description' => 'Android language',
-                'file_extension' => '.kt',
-                'status' => 'active',
-                'sort_order' => 15
-            ],
-            [
-                'name' => 'C',
-                'slug' => 'c',
-                'description' => 'General-purpose language',
-                'file_extension' => '.c',
-                'status' => 'active',
-                'sort_order' => 16
+                'sort_order' => 6,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'name' => 'HTML/CSS',
                 'slug' => 'html-css',
-                'description' => 'Web markup languages',
+                'description' => 'Markup and styling languages for web development',
                 'file_extension' => '.html',
                 'status' => 'active',
-                'sort_order' => 17
+                'sort_order' => 7,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'name' => 'Flask',
-                'slug' => 'flask',
-                'description' => 'Python web framework',
-                'file_extension' => '.py',
-                'status' => 'active',
-                'sort_order' => 18
-            ],
-            [
-                'name' => 'Django',
-                'slug' => 'django',
-                'description' => 'Python web framework',
-                'file_extension' => '.py',
-                'status' => 'active',
-                'sort_order' => 19
-            ],
-            [
-                'name' => 'Express.js',
-                'slug' => 'expressjs',
-                'description' => 'Node.js framework',
-                'file_extension' => '.js',
-                'status' => 'active',
-                'sort_order' => 20
-            ],
-            [
-                'name' => 'Ruby on Rails',
-                'slug' => 'ruby-on-rails',
-                'description' => 'Ruby web framework',
-                'file_extension' => '.rb',
-                'status' => 'active',
-                'sort_order' => 21
-            ],
-            [
-                'name' => 'Spring Boot',
-                'slug' => 'spring-boot',
-                'description' => 'Java framework',
-                'file_extension' => '.java',
-                'status' => 'active',
-                'sort_order' => 22
-            ],
-            [
-                'name' => 'Symfony',
-                'slug' => 'symfony',
-                'description' => 'PHP framework',
+                'name' => 'WordPress',
+                'slug' => 'wordpress',
+                'description' => 'Content management system with PHP-based plugins and themes',
                 'file_extension' => '.php',
                 'status' => 'active',
-                'sort_order' => 23
+                'sort_order' => 8,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'name' => 'ASP.NET',
-                'slug' => 'aspnet',
-                'description' => 'Microsoft framework',
-                'file_extension' => '.cs',
+                'name' => 'Laravel',
+                'slug' => 'laravel',
+                'description' => 'PHP web application framework with elegant syntax',
+                'file_extension' => '.php',
                 'status' => 'active',
-                'sort_order' => 24
+                'sort_order' => 9,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'name' => 'HTML',
-                'slug' => 'html',
-                'description' => 'Markup language',
-                'file_extension' => '.html',
+                'name' => 'React',
+                'slug' => 'react',
+                'description' => 'JavaScript library for building user interfaces',
+                'file_extension' => '.jsx',
                 'status' => 'active',
-                'sort_order' => 25
+                'sort_order' => 10,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Vue.js',
+                'slug' => 'vuejs',
+                'description' => 'Progressive JavaScript framework for building UIs',
+                'file_extension' => '.vue',
+                'status' => 'active',
+                'sort_order' => 11,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Angular',
+                'slug' => 'angular',
+                'description' => 'TypeScript-based web application framework',
+                'file_extension' => '.ts',
+                'status' => 'active',
+                'sort_order' => 12,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Node.js',
+                'slug' => 'nodejs',
+                'description' => 'JavaScript runtime for server-side development',
+                'file_extension' => '.js',
+                'status' => 'active',
+                'sort_order' => 13,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'name' => 'Ruby',
                 'slug' => 'ruby',
-                'description' => 'Dynamic language',
+                'description' => 'Dynamic programming language with elegant syntax',
                 'file_extension' => '.rb',
                 'status' => 'active',
-                'sort_order' => 26
+                'sort_order' => 14,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Go',
+                'slug' => 'go',
+                'description' => 'Google programming language for efficient software development',
+                'file_extension' => '.go',
+                'status' => 'active',
+                'sort_order' => 15,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
         ];
 
-        foreach ($languages as $lang) {
-            ProgrammingLanguage::firstOrCreate(['slug' => $lang['slug']], $lang);
+        foreach ($languages as $language) {
+            ProgrammingLanguage::create($language);
         }
+
+        $this->command->info('Programming languages created successfully:');
+        $this->command->info('- PHP, JavaScript, Python, Java, C#, C++');
+        $this->command->info('- HTML/CSS, WordPress, Laravel, React');
+        $this->command->info('- Vue.js, Angular, Node.js, Ruby, Go');
+        $this->command->info('Total: 15 programming languages');
     }
 }

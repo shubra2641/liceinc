@@ -8,7 +8,7 @@ use App\Models\Invoice;
 use App\Models\PaymentSetting;
 use App\Models\Product;
 use App\Services\Email\EmailFacade;
-use App\Services\Payment\PaymentService;
+use App\Services\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -269,9 +269,7 @@ class PaymentController extends Controller
     private function handleProductPayment(string $transactionId, string $gateway): RedirectResponse
     {
         $productId = session('payment_product_id');
-        $product = $productId ?
-            Product::find($productId) :
-            Product::where('is_active', true)->where('price', '>', 0)->first();
+        $product = $productId ? Product::find($productId) : Product::where('is_active', true)->where('price', '>', 0)->first();
 
         if (!$product) {
             return redirect()->route('user.dashboard')->with('error', trans('app.No products available for purchase'));
@@ -296,10 +294,7 @@ class PaymentController extends Controller
             session()->forget(['payment_product_id', 'payment_invoice_id']);
 
             try {
-                if (
-                    $result['license'] instanceof \App\Models\License &&
-                    $result['invoice'] instanceof \App\Models\Invoice
-                ) {
+                if ($result['license'] instanceof \App\Models\License && $result['invoice'] instanceof \App\Models\Invoice) {
                     $this->emailService->sendPaymentConfirmation($result['license'], $result['invoice']);
                     $this->emailService->sendLicenseCreated($result['license']);
                     $this->emailService->sendAdminPaymentNotification($result['license'], $result['invoice']);
@@ -314,9 +309,7 @@ class PaymentController extends Controller
                 ->with('success', trans('app.Payment successful! Your license has been activated.'));
         } else {
             return redirect()->route('payment.failure-page', $gateway)
-                ->with('error_message', trans(
-                    'app.Payment successful but failed to create license. Please contact support.'
-                ));
+                ->with('error_message', trans('app.Payment successful but failed to create license. Please contact support.'));
         }
     }
 }

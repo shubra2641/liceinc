@@ -55,25 +55,14 @@ class InstallController extends Controller
 
             if ($verificationResult['valid'] ?? false) {
                 session(['install.license' => $verificationResult['data']]);
-                return $this->verificationResponse(
-                    $request,
-                    true,
-                    'License verified successfully',
-                    $verificationResult
-                );
+                return $this->verificationResponse($request, true, 'License verified successfully', $verificationResult);
             } else {
                 $message = $verificationResult['message'] ?? 'License verification failed';
                 return $this->verificationResponse($request, false, $message, $verificationResult);
             }
         } catch (\Throwable $exception) {
             Log::error('License verification error in InstallController', ['error' => $exception->getMessage()]);
-            return $this->verificationResponse(
-                $request,
-                false,
-                'An error occurred during verification',
-                ['general' => $exception->getMessage()],
-                500
-            );
+            return $this->verificationResponse($request, false, 'An error occurred during verification', ['general' => $exception->getMessage()], 500);
         }
     }
 
@@ -151,9 +140,7 @@ class InstallController extends Controller
             session(['install.database' => $request->all()]);
             return redirect()->route('install.admin');
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->withErrors(['database' => 'Database connection failed: ' . $e->getMessage()])
-                ->withInput();
+            return redirect()->back()->withErrors(['database' => 'Database connection failed: ' . $e->getMessage()])->withInput();
         }
     }
 

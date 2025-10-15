@@ -87,10 +87,7 @@ class Algolia4Engine extends AlgoliaEngine
                 $model->scoutMetadata(),
                 ['objectID' => $model->getScoutKey()],
             );
-        })
-            ->filter()
-            ->values()
-            ->all();
+        })->filter()->values()->all();
 
         if (! empty($objects)) {
             $this->algolia->saveObjects($index, $objects);

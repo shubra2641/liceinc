@@ -579,12 +579,4 @@ class Builder
     {
         return $this->model->searchableUsing();
     }
-
-    /**
-     * Get the connection type for the underlying model.
-     */
-    public function modelConnectionType(): string
-    {
-        return $this->model->getConnection()->getDriverName();
-    }
 }

@@ -11,7 +11,7 @@ use App\Models\License;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Email\EmailFacade;
-use App\Services\Payment\InvoiceService;
+use App\Services\InvoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

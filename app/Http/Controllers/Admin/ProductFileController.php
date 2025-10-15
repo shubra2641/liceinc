@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductFileRequest;
 use App\Models\Product;
 use App\Models\ProductFile;
-use App\Services\Product\ProductFileService;
+use App\Services\ProductFileService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

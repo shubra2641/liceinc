@@ -97,16 +97,6 @@ class Exception
     }
 
     /**
-     * Get the HTTP status code.
-     *
-     * @return int
-     */
-    public function httpStatusCode()
-    {
-        return $this->exception->getStatusCode();
-    }
-
-    /**
      * Get the exception's frames.
      *
      * @return \Illuminate\Support\Collection<int, Frame>

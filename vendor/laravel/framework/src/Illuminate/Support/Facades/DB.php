@@ -114,7 +114,6 @@ use Illuminate\Database\Console\WipeCommand;
  * @method static void rollBack(int|null $toLevel = null)
  * @method static int transactionLevel()
  * @method static void afterCommit(callable $callback)
- * @method static void afterRollBack(callable $callback)
  *
  * @see \Illuminate\Database\DatabaseManager
  */

@@ -259,8 +259,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async loadStats() {
-      const data = await this.apiRequest('/api/admin/stats');
-      this.updateStatsCards(data);
+      try {
+        const data = await this.apiRequest('/api/admin/stats');
+        this.updateStatsCards(data);
+      } catch (error) {
+        this.showStatsError();
+      }
     }
 
     updateStatsCards(data) {

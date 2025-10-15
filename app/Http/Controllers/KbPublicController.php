@@ -8,8 +8,8 @@ use App\Models\KbArticle;
 use App\Models\KbCategory;
 use App\Models\License;
 use App\Models\Product;
-use App\Services\Envato\EnvatoService;
-use App\Services\License\PurchaseCodeService;
+use App\Services\EnvatoService;
+use App\Services\PurchaseCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -201,13 +201,7 @@ class KbPublicController extends Controller
             }
 
             $highlightQuery = htmlspecialchars($q, ENT_QUOTES, 'UTF-8');
-            return view('kb.search', compact(
-                'q',
-                'results',
-                'resultsWithAccess',
-                'categoriesWithAccess',
-                'highlightQuery'
-            ));
+            return view('kb.search', compact('q', 'results', 'resultsWithAccess', 'categoriesWithAccess', 'highlightQuery'));
         } catch (\Exception $e) {
             Log::error('KB search failed', ['error' => $e->getMessage()]);
             return view('kb.search', [
@@ -374,8 +368,7 @@ class KbPublicController extends Controller
                 $product = $productId ? Product::find($productId) : null;
 
                 if ($product && $product->id == $category->product_id) {
-                    $accessToken = 'kb_access_' . $category->id . '_' . time() . '_' .
-                        substr(md5($license?->license_key ?? ''), 0, 8);
+                    $accessToken = 'kb_access_' . $category->id . '_' . time() . '_' . substr(md5($license?->license_key ?? ''), 0, 8);
                     session([$accessToken => [
                         'license_id' => $license?->id,
                         'product_id' => $product->id,
@@ -418,8 +411,7 @@ class KbPublicController extends Controller
                 $product = $productId ? Product::find($productId) : null;
 
                 if ($product && $product->id == $productId) {
-                    $accessToken = 'kb_article_access_' . $article->id . '_' . time() . '_' .
-                        substr(md5($license?->license_key ?? ''), 0, 8);
+                    $accessToken = 'kb_article_access_' . $article->id . '_' . time() . '_' . substr(md5($license?->license_key ?? ''), 0, 8);
                     session([$accessToken => [
                         'license_id' => $license?->id,
                         'product_id' => $product->id,

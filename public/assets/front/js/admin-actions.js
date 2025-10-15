@@ -4,33 +4,17 @@
 const showNotification = (message, type = 'info') => {
   const notification = document.createElement('div');
   notification.className = `user-notification user-notification-${type} show`;
-
-  // Create notification content safely without innerHTML
-  const content = document.createElement('div');
-  content.className = 'user-notification-content';
-
-  const icon = document.createElement('div');
-  icon.className = 'user-notification-icon';
-  const iconElement = document.createElement('i');
-  const iconClass = type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info';
-  iconElement.className = `fas fa-${iconClass}-circle`;
-  icon.appendChild(iconElement);
-
-  const messageDiv = document.createElement('div');
-  messageDiv.className = 'user-notification-message';
-  messageDiv.textContent = message; // Use textContent instead of innerHTML
-
-  const closeButton = document.createElement('button');
-  closeButton.className = 'user-notification-close';
-  closeButton.onclick = () => notification.remove();
-  const closeIcon = document.createElement('i');
-  closeIcon.className = 'fas fa-times';
-  closeButton.appendChild(closeIcon);
-
-  content.appendChild(icon);
-  content.appendChild(messageDiv);
-  content.appendChild(closeButton);
-  notification.appendChild(content);
+  notification.innerHTML = `
+        <div class="user-notification-content">
+            <div class="user-notification-icon">
+                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle"></i>
+            </div>
+            <div class="user-notification-message">${message}</div>
+            <button class="user-notification-close" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
 
   document.body.appendChild(notification);
   setTimeout(() => notification.remove(), 5000);
@@ -65,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle payment methods
   document.querySelectorAll('[data-payment]').forEach(button => {
-    button.addEventListener('click', function () {
+    button.addEventListener('click', function() {
       const paymentMethod = this.getAttribute('data-payment');
       processPayment(paymentMethod);
     });
@@ -80,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle copy to clipboard
   document.querySelectorAll('[data-copy-target]').forEach(button => {
-    button.addEventListener('click', function () {
+    button.addEventListener('click', function() {
       const targetId = this.getAttribute('data-copy-target');
       copyToClipboard(targetId);
     });
@@ -97,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle form confirmations
   document.querySelectorAll('[data-confirm]').forEach(form => {
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', function(e) {
       const confirmType = this.getAttribute('data-confirm');
       if (!confirmDelete(confirmType)) {
         e.preventDefault();
@@ -107,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle tab navigation
   document.querySelectorAll('[data-action="show-tab"]').forEach(button => {
-    button.addEventListener('click', function () {
+    button.addEventListener('click', function() {
       const tabId = this.getAttribute('data-tab');
       showTab(tabId);
     });
@@ -115,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle tab navigation by data-tab attribute
   document.querySelectorAll('[data-tab]').forEach(button => {
-    button.addEventListener('click', function () {
+    button.addEventListener('click', function() {
       const tabId = this.getAttribute('data-tab');
       showTab(tabId);
     });

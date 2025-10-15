@@ -28,11 +28,13 @@
     24 => 'Laravel\\Sanctum\\SanctumServiceProvider',
     25 => 'Laravel\\Scout\\ScoutServiceProvider',
     26 => 'Laravel\\Socialite\\SocialiteServiceProvider',
-    27 => 'Carbon\\Laravel\\ServiceProvider',
-    28 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    29 => 'Spatie\\Permission\\PermissionServiceProvider',
-    30 => 'App\\Providers\\AppServiceProvider',
-    31 => 'App\\Providers\\EnvatoSocialiteProvider',
+    27 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    28 => 'Carbon\\Laravel\\ServiceProvider',
+    29 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    30 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
+    31 => 'Spatie\\Permission\\PermissionServiceProvider',
+    32 => 'App\\Providers\\AppServiceProvider',
+    33 => 'App\\Providers\\EnvatoSocialiteProvider',
   ),
   'eager' => 
   array (
@@ -50,9 +52,10 @@
     11 => 'Laravel\\Scout\\ScoutServiceProvider',
     12 => 'Carbon\\Laravel\\ServiceProvider',
     13 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    14 => 'Spatie\\Permission\\PermissionServiceProvider',
-    15 => 'App\\Providers\\AppServiceProvider',
-    16 => 'App\\Providers\\EnvatoSocialiteProvider',
+    14 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
+    15 => 'Spatie\\Permission\\PermissionServiceProvider',
+    16 => 'App\\Providers\\AppServiceProvider',
+    17 => 'App\\Providers\\EnvatoSocialiteProvider',
   ),
   'deferred' => 
   array (
@@ -212,6 +215,7 @@
     'Barryvdh\\LaravelIdeHelper\\Console\\MetaCommand' => 'Barryvdh\\LaravelIdeHelper\\IdeHelperServiceProvider',
     'Barryvdh\\LaravelIdeHelper\\Console\\EloquentCommand' => 'Barryvdh\\LaravelIdeHelper\\IdeHelperServiceProvider',
     'Laravel\\Socialite\\Contracts\\Factory' => 'Laravel\\Socialite\\SocialiteServiceProvider',
+    'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
   ),
   'when' => 
   array (
@@ -258,6 +262,9 @@
     array (
     ),
     'Laravel\\Socialite\\SocialiteServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Tinker\\TinkerServiceProvider' => 
     array (
     ),
   ),

@@ -9,7 +9,7 @@ use App\Http\Requests\Admin\InvoiceRequest;
 use App\Models\Invoice;
 use App\Models\License;
 use App\Models\User;
-use App\Services\Payment\InvoiceService;
+use App\Services\InvoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

@@ -10,7 +10,7 @@ use App\Http\Requests\Api\LicenseVerifyRequest;
 use App\Models\License;
 use App\Models\LicenseLog;
 use App\Models\Product;
-use App\Services\Envato\EnvatoService;
+use App\Services\EnvatoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

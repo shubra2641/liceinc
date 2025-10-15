@@ -473,7 +473,7 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
      *
      * @template TGetDefault
      *
-     * @param  TKey|null  $key
+     * @param  TKey  $key
      * @param  TGetDefault|(\Closure(): TGetDefault)  $default
      * @return TValue|TGetDefault
      */
@@ -740,7 +740,7 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
      *
      * @param  string  $glue
      * @param  string  $finalGlue
-     * @return TValue|string
+     * @return string
      */
     public function join($glue, $finalGlue = '')
     {
@@ -792,8 +792,8 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
     /**
      * Get the values of a given key.
      *
-     * @param  \Closure|string|int|array<array-key, string>|null  $value
-     * @param  \Closure|string|null  $key
+     * @param  string|int|array<array-key, string>|null  $value
+     * @param  string|null  $key
      * @return static<array-key, mixed>
      */
     public function pluck($value, $key = null)

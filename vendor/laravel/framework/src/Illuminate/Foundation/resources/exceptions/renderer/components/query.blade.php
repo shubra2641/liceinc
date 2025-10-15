@@ -107,7 +107,7 @@
                 </div>
                 <x-laravel-exceptions-renderer::syntax-highlight
                     :code="$sql"
-                    language="sql"
+                    grammar="sql"
                     truncate
                     class="min-w-0"
                     data-tippy-content="{{ $sql }}"

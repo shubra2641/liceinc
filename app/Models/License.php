@@ -105,28 +105,23 @@ class License extends Model
     }
     protected static function generateUniquePurchaseCode(): string
     {
-        return static::generateUniqueCode('purchase_code', 16, 4);
+        do {
+            $code = strtoupper(Str::random(16));
+            // Format like XXXX-XXXX-XXXX-XXXX
+            $code = substr($code, 0, 4) . '-' . substr($code, 4, 4) . '-' .
+                substr($code, 8, 4) . '-' . substr($code, 12, 4);
+        } while (static::where('purchase_code', $code)->exists());
+        return $code;
     }
-
     protected static function generateUniqueLicenseKey(): string
     {
-        return static::generateUniqueCode('license_key', 32, 8);
-    }
-
-    private static function generateUniqueCode(string $field, int $length, int $segmentSize): string
-    {
         do {
-            $code = strtoupper(Str::random($length));
-            $formatted = static::formatCode($code, $segmentSize);
-        } while (static::where($field, $formatted)->exists());
-
-        return $formatted;
-    }
-
-    private static function formatCode(string $code, int $segmentSize): string
-    {
-        $segments = str_split($code, $segmentSize);
-        return implode('-', $segments);
+            $key = strtoupper(Str::random(32));
+            // Format like XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX
+            $key = substr($key, 0, 8) . '-' . substr($key, 8, 8) . '-' .
+                substr($key, 16, 8) . '-' . substr($key, 24, 8);
+        } while (static::where('license_key', $key)->exists());
+        return $key;
     }
     /**
      * @return BelongsTo<Product, $this>
@@ -190,7 +185,12 @@ class License extends Model
      */
     public function scopeForUser(Builder $query, User|int $user): Builder
     {
-        $userId = is_numeric($user) ? (int)$user : ($user instanceof User ? $user->id : null);
+        $userId = null;
+        if (is_numeric($user)) {
+            $userId = (int)$user;
+        } elseif ($user instanceof User) {
+            $userId = $user->id;
+        }
         return $query->where('user_id', $userId);
     }
     /**
@@ -238,19 +238,15 @@ class License extends Model
      */
     public function hasReachedDomainLimit(): bool
     {
-        return $this->active_domains_count >= $this->getMaxDomains();
+        $maxDomains = $this->max_domains ?? 1;
+        return $this->active_domains_count >= $maxDomains;
     }
-
     /**
      * Get remaining domains that can be added.
      */
     public function getRemainingDomainsAttribute(): int
     {
-        return max(0, $this->getMaxDomains() - $this->active_domains_count);
-    }
-
-    private function getMaxDomains(): int
-    {
-        return $this->max_domains ?? 1;
+        $maxDomains = $this->max_domains ?? 1;
+        return max(0, $maxDomains - $this->active_domains_count);
     }
 }

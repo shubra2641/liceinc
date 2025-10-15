@@ -45,8 +45,7 @@ trait ProfileDataSanitization
     protected function sanitizeEnvatoFields(): void
     {
         $this->merge([
-            'envato_username' => $this->input('envato_username') ?
-                $this->sanitizeInput($this->input('envato_username')) : null,
+            'envato_username' => $this->input('envato_username') ? $this->sanitizeInput($this->input('envato_username')) : null,
             'envato_id' => $this->input('envato_id') ? $this->sanitizeInput($this->input('envato_id')) : null,
         ]);
     }

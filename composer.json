@@ -16,8 +16,10 @@
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^10.11",
         "laravel/socialite": "^5.15",
+        "laravel/tinker": "^2.10.1",
         "meilisearch/meilisearch-php": "^1.10",
         "paypal/paypal-server-sdk": "^1.1",
+        "paypal/rest-api-sdk-php": "^1.6",
         "spatie/laravel-permission": "^6.21",
         "stichoza/google-translate-php": "^5.3",
         "stripe/stripe-php": "^18.0"
@@ -87,10 +89,9 @@
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.6",
         "fakerphp/faker": "^1.24",
-        "larastan/larastan": "^3.7",
         "laravel/pint": "^1.25",
         "mockery/mockery": "^1.6",
-        "phpmd/phpmd": "^2.15",
+        "nunomaduro/larastan": "^3.7",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-deprecation-rules": "^2.0",

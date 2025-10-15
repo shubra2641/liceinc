@@ -4,9 +4,7 @@ namespace Illuminate\Cache;
 
 use Illuminate\Cache\Events\CacheFlushed;
 use Illuminate\Cache\Events\CacheFlushing;
-use Illuminate\Redis\Connections\PhpRedisClusterConnection;
 use Illuminate\Redis\Connections\PhpRedisConnection;
-use Illuminate\Redis\Connections\PredisClusterConnection;
 use Illuminate\Redis\Connections\PredisConnection;
 
 class RedisTaggedCache extends TaggedCache
@@ -112,14 +110,9 @@ class RedisTaggedCache extends TaggedCache
      */
     public function flush()
     {
-        $connection = $this->store->connection();
-
-        if ($connection instanceof PredisClusterConnection ||
-            $connection instanceof PhpRedisClusterConnection) {
-            return $this->flushClusteredConnection();
-        }
-
         $this->event(new CacheFlushing($this->getName()));
+
+        $connection = $this->store->connection();
 
         $redisPrefix = match (true) {
             $connection instanceof PhpRedisConnection => $connection->client()->getOption(\Redis::OPT_PREFIX),
@@ -158,23 +151,6 @@ class RedisTaggedCache extends TaggedCache
             ...$keysToBeDeleted,
             ...[$cachePrefix, ...$cacheTags]
         );
-
-        $this->event(new CacheFlushed($this->getName()));
-
-        return true;
-    }
-
-    /**
-     * Remove all items from the cache.
-     *
-     * @return bool
-     */
-    protected function flushClusteredConnection()
-    {
-        $this->event(new CacheFlushing($this->getName()));
-
-        $this->flushValues();
-        $this->tags->flush();
 
         $this->event(new CacheFlushed($this->getName()));
 

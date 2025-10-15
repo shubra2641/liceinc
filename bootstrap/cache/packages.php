@@ -31,6 +31,13 @@
       0 => 'Laravel\\Socialite\\SocialiteServiceProvider',
     ),
   ),
+  'laravel/tinker' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    ),
+  ),
   'nesbot/carbon' => 
   array (
     'providers' => 
@@ -43,6 +50,13 @@
     'providers' => 
     array (
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    ),
+  ),
+  'phiki/phiki' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
     ),
   ),
   'spatie/laravel-permission' => 

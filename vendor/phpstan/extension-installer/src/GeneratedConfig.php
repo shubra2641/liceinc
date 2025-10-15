@@ -24,20 +24,6 @@ final class GeneratedConfig
     'version' => '3.3.2',
     'phpstanVersionConstraint' => NULL,
   ),
-  'larastan/larastan' => 
-  array (
-    'install_path' => 'D:\\xampp1\\htdocs\\my-logos\\vendor/larastan/larastan',
-    'relative_install_path' => '../../../larastan/larastan',
-    'extra' => 
-    array (
-      'includes' => 
-      array (
-        0 => 'extension.neon',
-      ),
-    ),
-    'version' => 'v3.7.2',
-    'phpstanVersionConstraint' => '>=2.1.28.0-dev, <3.0.0.0-dev',
-  ),
   'nesbot/carbon' => 
   array (
     'install_path' => 'D:\\xampp1\\htdocs\\my-logos\\vendor/nesbot/carbon',
@@ -51,6 +37,20 @@ final class GeneratedConfig
     ),
     'version' => '3.10.3',
     'phpstanVersionConstraint' => NULL,
+  ),
+  'nunomaduro/larastan' => 
+  array (
+    'install_path' => 'D:\\xampp1\\htdocs\\my-logos\\vendor/nunomaduro/larastan',
+    'relative_install_path' => '../../../nunomaduro/larastan',
+    'extra' => 
+    array (
+      'includes' => 
+      array (
+        0 => 'extension.neon',
+      ),
+    ),
+    'version' => 'v3.7.2',
+    'phpstanVersionConstraint' => '>=2.1.28.0-dev, <3.0.0.0-dev',
   ),
   'phpstan/phpstan-deprecation-rules' => 
   array (
