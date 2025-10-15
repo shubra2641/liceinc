@@ -58,7 +58,7 @@ class UserManagementService
      */
     private function createOrUpdateUser($envatoUser, string $username): User
     {
-        $userInfo = app(EnvatoService::class)->getOAuthUserInfo($envatoUser->token);
+        $userInfo = app(\App\Services\Envato\EnvatoService::class)->getOAuthUserInfo($envatoUser->token);
         $userData = $this->prepareUserData($envatoUser, $userInfo, $username);
         $email = $this->prepareUserEmail($envatoUser, $username);
 
@@ -102,7 +102,7 @@ class UserManagementService
      */
     private function getUserInfo($envatoUser)
     {
-        return app(EnvatoService::class)->getOAuthUserInfo($envatoUser->token);
+        return app(\App\Services\Envato\EnvatoService::class)->getOAuthUserInfo($envatoUser->token);
     }
 
     /**

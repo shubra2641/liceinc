@@ -36,9 +36,10 @@ class PurchaseVerificationService
     private const RATE_LIMIT_DURATION = 1;
 
     public function __construct(
-        private EnvatoService $envatoService,
+        private \App\Services\Envato\EnvatoService $envatoService,
         private LicenseService $licenseService,
-        private PurchaseCodeService $purchaseCodeService
+        private PurchaseCodeService $purchaseCodeService,
+        private \App\Services\System\ErrorHandlingService $errorHandlingService
     ) {
     }
 
@@ -58,9 +59,9 @@ class PurchaseVerificationService
 
             return $this->processPurchaseVerification($request, $data);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->handleValidationError($e, $request);
+            return $this->errorHandlingService->handleValidationError($e, $request);
         } catch (Exception $e) {
-            return $this->handleGeneralError($e, $request);
+            return $this->errorHandlingService->handleGeneralError($e, $request);
         }
     }
 
@@ -74,12 +75,12 @@ class PurchaseVerificationService
         try {
             $sale = $this->verifyWithEnvato($data['purchase_code']);
             if (!$sale) {
-                return $this->handleVerificationFailure($request, $data);
+                return $this->errorHandlingService->handleVerificationFailure($request, $data);
             }
 
             $product = $this->findAndValidateProduct($data['product_slug'], $sale);
             if (!$product) {
-                return $this->handleProductMismatch($request, $data);
+                return $this->errorHandlingService->handleProductMismatch($request, $data);
             }
 
             $user = $this->createOrFindUser($sale);
@@ -98,7 +99,7 @@ class PurchaseVerificationService
      */
     private function handleRateLimit(Request $request, array $data): RedirectResponse
     {
-        $this->logRateLimitExceeded($request, $data);
+        $this->errorHandlingService->logRateLimitExceeded($request, $data);
         return back()->withErrors(['purchase_code' => 'Too many verification attempts. Please try again later.']);
     }
 
@@ -120,9 +121,9 @@ class PurchaseVerificationService
 
             return $this->processAjaxVerification($request, $data);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->handleAjaxValidationError($e, $request);
+            return $this->errorHandlingService->handleAjaxValidationError($e, $request);
         } catch (Exception $e) {
-            return $this->handleAjaxGeneralError($e, $request);
+            return $this->errorHandlingService->handleAjaxGeneralError($e, $request);
         }
     }
 
@@ -140,7 +141,7 @@ class PurchaseVerificationService
      */
     private function handleAjaxRateLimit(Request $request): array
     {
-        $this->logAjaxRateLimitExceeded($request);
+        $this->errorHandlingService->logAjaxRateLimitExceeded($request);
         return ['valid' => false, 'message' => 'Too many verification attempts. Please try again later.'];
     }
 
@@ -157,12 +158,12 @@ class PurchaseVerificationService
         try {
             $sale = $this->verifyWithEnvato($data['purchase_code']);
             if (!$sale) {
-                return $this->handleAjaxVerificationFailure($request, $data);
+                return $this->errorHandlingService->handleAjaxVerificationFailure($request, $data);
             }
 
             $product = Product::findOrFail($data['product_id']);
             if (!$this->validateProductOwnership($product, $sale)) {
-                return $this->handleAjaxProductMismatch($request, $data, $product);
+                return $this->errorHandlingService->handleAjaxProductMismatch($request, $data, $product);
             }
 
             $existingLicense = $this->checkExistingLicense($data['purchase_code']);
@@ -356,112 +357,4 @@ class PurchaseVerificationService
         return substr($purchaseCode, 0, 8) . '...';
     }
 
-    // Error handling methods
-    private function handleVerificationFailure(Request $request, array $data): RedirectResponse
-    {
-        DB::rollBack();
-        Log::warning('Failed to verify purchase code', [
-            'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
-            'ip' => $request->ip(),
-        ]);
-        return back()->withErrors(['purchase_code' => 'Could not verify purchase code. Please check and try again.']);
-    }
-
-    private function handleProductMismatch(Request $request, array $data): RedirectResponse
-    {
-        DB::rollBack();
-        Log::warning('Purchase code does not match product', [
-            'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
-            'ip' => $request->ip(),
-        ]);
-        return back()->withErrors(['purchase_code' => 'Purchase code does not belong to this product.']);
-    }
-
-    private function handleValidationError(\Illuminate\Validation\ValidationException $e, Request $request): RedirectResponse
-    {
-        DB::rollBack();
-        Log::warning('Purchase verification validation failed', [
-            'errors' => $e->errors(),
-            'ip' => $request->ip(),
-        ]);
-        throw $e;
-    }
-
-    private function handleGeneralError(Exception $e, Request $request): RedirectResponse
-    {
-        DB::rollBack();
-        Log::error('Purchase verification failed', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-            'ip' => $request->ip(),
-        ]);
-        return back()->withErrors(['purchase_code' => 'An error occurred while verifying your purchase. Please try again.']);
-    }
-
-    private function handleAjaxVerificationFailure(Request $request, array $data): array
-    {
-        DB::rollBack();
-        Log::warning('AJAX purchase verification failed', [
-            'user_id' => auth()->id(),
-            'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
-            'product_id' => $data['product_id'],
-            'ip' => $request->ip(),
-        ]);
-        return ['valid' => false, 'message' => 'Invalid purchase code. Please check and try again.'];
-    }
-
-    private function handleAjaxProductMismatch(Request $request, array $data, Product $product): array
-    {
-        DB::rollBack();
-        Log::warning('AJAX purchase code does not match product', [
-            'user_id' => auth()->id(),
-            'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
-            'product_id' => $product->id,
-            'ip' => $request->ip(),
-        ]);
-        return ['valid' => false, 'message' => 'Purchase code does not match this product.'];
-    }
-
-    private function handleAjaxValidationError(\Illuminate\Validation\ValidationException $e, Request $request): array
-    {
-        DB::rollBack();
-        Log::warning('AJAX purchase verification validation failed', [
-            'user_id' => auth()->id(),
-            'errors' => $e->errors(),
-            'ip' => $request->ip(),
-        ]);
-        return [
-            'valid' => false,
-            'message' => 'Validation failed',
-            'errors' => $e->errors(),
-        ];
-    }
-
-    private function handleAjaxGeneralError(Exception $e, Request $request): array
-    {
-        DB::rollBack();
-        Log::error('AJAX purchase verification failed', [
-            'user_id' => auth()->id(),
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-            'ip' => $request->ip(),
-        ]);
-        return ['valid' => false, 'message' => 'An error occurred while verifying your purchase. Please try again.'];
-    }
-
-    private function logRateLimitExceeded(Request $request, array $data): void
-    {
-        Log::warning('Rate limit exceeded for purchase verification', [
-            'ip' => $request->ip(),
-            'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
-        ]);
-    }
-
-    private function logAjaxRateLimitExceeded(Request $request): void
-    {
-        Log::warning('Rate limit exceeded for AJAX purchase verification', [
-            'user_id' => auth()->id(),
-            'ip' => $request->ip(),
-        ]);
-    }
 }

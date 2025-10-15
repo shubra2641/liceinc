@@ -15,7 +15,7 @@ class EnvatoProductService
     public function getProductData(int $itemId): JsonResponse
     {
         try {
-            $envatoService = app(\App\Services\EnvatoService::class);
+            $envatoService = app(\App\Services\Envato\EnvatoService::class);
             $itemData = $envatoService->getItemInfo($itemId);
 
             if (!$itemData) {
@@ -52,7 +52,7 @@ class EnvatoProductService
     public function getUserItems(): JsonResponse
     {
         try {
-            $envatoService = app(\App\Services\EnvatoService::class);
+            $envatoService = app(\App\Services\Envato\EnvatoService::class);
             $settings = $envatoService->getEnvatoSettings();
 
             if (empty($settings['username'])) {
