@@ -20,18 +20,51 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-/**
- * Admin Product Controller
- */
 class ProductController extends Controller
 {
     public function __construct(private LicenseGeneratorService $licenseGenerator)
     {
     }
 
-    /**
-     * Get product data from Envato API
-     */
+    // Public Methods
+    public function index(): View
+    {
+        return view('admin.products.index', $this->getIndexData());
+    }
+
+    public function create(): View
+    {
+        return view('admin.products.create', $this->getCreateData());
+    }
+
+    public function store(ProductRequest $request): RedirectResponse
+    {
+        return $this->handleProductOperation($request, 'create');
+    }
+
+    public function show(Product $product): View
+    {
+        $product->load(['category', 'programmingLanguage', 'updates']);
+        return view('admin.products.show', ['product' => $product]);
+    }
+
+    public function edit(Product $product): View
+    {
+        $product->load('files');
+        return view('admin.products.edit', $this->getEditData($product));
+    }
+
+    public function update(ProductRequest $request, Product $product): RedirectResponse
+    {
+        return $this->handleProductOperation($request, 'update', $product);
+    }
+
+    public function destroy(Product $product): RedirectResponse
+    {
+        return $this->handleDelete($product);
+    }
+
+    // API Methods
     public function getEnvatoProductData(Request $request): JsonResponse
     {
         $request->validate(['item_id' => 'required|integer|min:1']);
@@ -53,9 +86,6 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * Get user's Envato items for selection
-     */
     public function getEnvatoUserItems(Request $request): JsonResponse
     {
         try {
@@ -72,124 +102,15 @@ class ProductController extends Controller
                 return $this->jsonError('Unable to fetch user items from Envato', 404);
             }
 
-            $items = $this->formatUserItems($userItems['matches']);
-
-            return response()->json(['success' => true, 'items' => $items]);
+            return response()->json([
+                'success' => true,
+                'items' => $this->formatUserItems($userItems['matches'])
+            ]);
         } catch (\Exception $e) {
             return $this->jsonError('Error fetching user items: ' . $e->getMessage(), 500);
         }
     }
 
-    /**
-     * Display products listing
-     */
-    public function index(): View
-    {
-        $query = $this->buildProductQuery();
-        
-        return view('admin.products.index', [
-            'products' => $query->paginate(10)->withQueryString(),
-            'categories' => $this->getCategories(),
-            'programmingLanguages' => $this->getProgrammingLanguages(),
-            'allProducts' => Product::with(['category', 'programmingLanguage'])->get()
-        ]);
-    }
-
-    /**
-     * Show create product form
-     */
-    public function create(): View
-    {
-        return view('admin.products.create', [
-            'categories' => $this->getCategories(),
-            'programmingLanguages' => $this->getProgrammingLanguages(),
-            'kbCategories' => $this->getKbCategories(),
-            'kbArticles' => $this->getKbArticles(),
-        ]);
-    }
-
-    /**
-     * Store new product
-     */
-    public function store(ProductRequest $request): RedirectResponse
-    {
-        try {
-            DB::beginTransaction();
-            
-            $data = $this->prepareProductData($request);
-            $product = Product::create($data);
-            
-            $this->handleFileUploads($request, $product);
-            $this->generateIntegrationFile($product);
-            
-            DB::commit();
-            return redirect()->route('admin.products.edit', $product)->with('success', 'Product created successfully');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Product creation error: ' . $e->getMessage());
-            return back()->with('error', 'Error creating product: ' . $e->getMessage())->withInput();
-        }
-    }
-
-    /**
-     * Show product details
-     */
-    public function show(Product $product): View
-    {
-        $product->load(['category', 'programmingLanguage', 'updates']);
-        return view('admin.products.show', ['product' => $product]);
-    }
-
-    /**
-     * Update product
-     */
-    public function update(ProductRequest $request, Product $product): RedirectResponse
-    {
-        try {
-            DB::beginTransaction();
-            
-            $data = $this->prepareProductData($request);
-            $this->handleImageUpdate($request, $product, $data);
-            $this->handleGalleryUpdate($request, $data);
-            $this->handleRenewalPeriod($data);
-            
-            $product->update($data);
-            $this->handleFileUploads($request, $product);
-            
-            if ($this->shouldRegenerateIntegration($product, $data)) {
-                $this->generateIntegrationFile($product);
-            }
-            
-            DB::commit();
-            return back()->with('success', 'Product updated successfully');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Product update error: ' . $e->getMessage());
-            return back()->with('error', 'Error updating product: ' . $e->getMessage())->withInput();
-        }
-    }
-
-    /**
-     * Delete product
-     */
-    public function destroy(Product $product): RedirectResponse
-    {
-        try {
-            DB::beginTransaction();
-            $this->deleteIntegrationFile($product);
-            $product->delete();
-            DB::commit();
-            return redirect()->route('admin.products.index')->with('success', 'Product deleted');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Product deletion error: ' . $e->getMessage());
-            return back()->with('error', 'Error deleting product: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Get product data for license forms
-     */
     public function getProductData(Product $product): JsonResponse
     {
         return response()->json([
@@ -204,22 +125,28 @@ class ProductController extends Controller
         ]);
     }
 
-    /**
-     * Show edit product form
-     */
-    public function edit(Product $product): View
+    public function getKbData(): JsonResponse
     {
-        $product->load('files');
-        return view('admin.products.edit', [
-            'product' => $product,
-            'categories' => $this->getCategories(),
-            'programmingLanguages' => $this->getProgrammingLanguages()
+        return response()->json([
+            'success' => true,
+            'categories' => $this->getKbCategories(),
+            'articles' => $this->getKbArticles(),
         ]);
     }
 
-    /**
-     * Download integration file
-     */
+    public function getKbArticles(int $categoryId): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'articles' => KbArticle::where('kb_category_id', $categoryId)
+                ->where('is_published', true)
+                ->with('category:id, name')
+                ->orderBy('title')
+                ->get(['id', 'title', 'slug', 'kb_category_id']),
+        ]);
+    }
+
+    // Integration Methods
     public function downloadIntegration(Product $product)
     {
         if (!$product->integration_file_path || !Storage::disk('public')->exists($product->integration_file_path)) {
@@ -228,9 +155,6 @@ class ProductController extends Controller
         return Storage::disk('public')->download($product->integration_file_path, "{$product->slug}.php");
     }
 
-    /**
-     * Regenerate integration file
-     */
     public function regenerateIntegration(Product $product): RedirectResponse
     {
         try {
@@ -242,9 +166,7 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * Generate test license for product
-     */
+    // License Methods
     public function generateTestLicense(GenerateTestLicenseRequest $request, Product $product): RedirectResponse
     {
         try {
@@ -263,94 +185,42 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * Show license verification logs
-     */
     public function logs(Product $product): View
     {
         $logs = $this->getLicenseLogs($product);
         return view('admin.products.logs', ['product' => $product, 'logs' => $logs]);
     }
 
-    /**
-     * Get KB categories and articles
-     */
-    public function getKbData(): JsonResponse
-    {
-        return response()->json([
-            'success' => true,
-            'categories' => $this->getKbCategories(),
-            'articles' => $this->getKbArticles(),
-        ]);
-    }
-
-    /**
-     * Get KB articles for specific category
-     */
-    public function getKbArticles(int $categoryId): JsonResponse
-    {
-        return response()->json([
-            'success' => true,
-            'articles' => KbArticle::where('kb_category_id', $categoryId)
-                ->where('is_published', true)
-                ->with('category:id, name')
-                ->orderBy('title')
-                ->get(['id', 'title', 'slug', 'kb_category_id']),
-        ]);
-    }
-
     // Helper Methods
-
-    private function jsonError(string $message, int $code = 400): JsonResponse
+    private function getIndexData(): array
     {
-        return response()->json(['success' => false, 'message' => trans("app.{$message}")], $code);
-    }
-
-    private function formatEnvatoData(array $itemData): array
-    {
+        $query = $this->buildProductQuery();
+        
         return [
-            'envato_item_id' => $itemData['id'] ?? null,
-            'purchase_url_envato' => $itemData['url'] ?? null,
-            'purchase_url_buy' => $itemData['url'] ?? null,
-            'support_days' => $this->calculateSupportDays($itemData),
-            'version' => $itemData['version'] ?? null,
-            'price' => isset($itemData['price_cents']) ? ($itemData['price_cents'] / 100) : null,
-            'name' => $itemData['name'] ?? null,
-            'description' => $itemData['description'] ?? null,
+            'products' => $query->paginate(10)->withQueryString(),
+            'categories' => $this->getCategories(),
+            'programmingLanguages' => $this->getProgrammingLanguages(),
+            'allProducts' => Product::with(['category', 'programmingLanguage'])->get()
         ];
     }
 
-    private function formatUserItems(array $matches): array
+    private function getCreateData(): array
     {
-        return collect($matches)->map(function (array $item): array {
-            return [
-                'id' => $item['id'],
-                'name' => $item['name'],
-                'url' => $item['url'],
-                'price' => isset($item['price_cents']) ? ($item['price_cents'] / 100) : 0,
-                'rating' => $item['rating'] ?? null,
-                'sales' => $item['number_of_sales'] ?? 0,
-            ];
-        })->toArray();
+        return [
+            'categories' => $this->getCategories(),
+            'programmingLanguages' => $this->getProgrammingLanguages(),
+            'kbCategories' => $this->getKbCategories(),
+            'kbArticles' => $this->getKbArticles(),
+        ];
     }
 
-    private function calculateSupportDays(array $itemData): int
+    private function getEditData(Product $product): array
     {
-        if (isset($itemData['attributes']) && is_array($itemData['attributes'])) {
-            foreach ($itemData['attributes'] as $attribute) {
-                if (is_array($attribute) && isset($attribute['name']) && $attribute['name'] === 'support') {
-                    $value = strtolower($attribute['value'] ?? '');
-                    if (strpos($value, 'month') !== false) {
-                        preg_match('/(\d+)/', $value, $matches);
-                        return isset($matches[1]) ? (int)$matches[1] * 30 : 180;
-                    } elseif (strpos($value, 'year') !== false) {
-                        preg_match('/(\d+)/', $value, $matches);
-                        return isset($matches[1]) ? (int)$matches[1] * 365 : 365;
-                    }
-                }
-            }
-        }
-        return 180;
+        return [
+            'product' => $product,
+            'categories' => $this->getCategories(),
+            'programmingLanguages' => $this->getProgrammingLanguages()
+        ];
     }
 
     private function buildProductQuery()
@@ -394,24 +264,54 @@ class ProductController extends Controller
         };
     }
 
-    private function getCategories()
+    private function handleProductOperation(ProductRequest $request, string $operation, Product $product = null): RedirectResponse
     {
-        return \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get();
+        try {
+            DB::beginTransaction();
+            
+            $data = $this->prepareProductData($request);
+            
+            if ($operation === 'create') {
+                $product = Product::create($data);
+                $this->handleFileUploads($request, $product);
+                $this->generateIntegrationFile($product);
+                DB::commit();
+                return redirect()->route('admin.products.edit', $product)->with('success', 'Product created successfully');
+            } else {
+                $this->handleImageUpdate($request, $product, $data);
+                $this->handleGalleryUpdate($request, $data);
+                $this->handleRenewalPeriod($data);
+                
+                $product->update($data);
+                $this->handleFileUploads($request, $product);
+                
+                if ($this->shouldRegenerateIntegration($product, $data)) {
+                    $this->generateIntegrationFile($product);
+                }
+                
+                DB::commit();
+                return back()->with('success', 'Product updated successfully');
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Product {$operation} error: " . $e->getMessage());
+            return back()->with('error', "Error {$operation}ing product: " . $e->getMessage())->withInput();
+        }
     }
 
-    private function getProgrammingLanguages()
+    private function handleDelete(Product $product): RedirectResponse
     {
-        return \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get();
-    }
-
-    private function getKbCategories()
-    {
-        return KbCategory::where('is_published', true)->orderBy('name')->get(['id', 'name', 'slug']);
-    }
-
-    private function getKbArticles()
-    {
-        return KbArticle::where('is_published', true)->with('category:id, name')->orderBy('title')->get(['id', 'title', 'slug', 'kb_category_id']);
+        try {
+            DB::beginTransaction();
+            $this->deleteIntegrationFile($product);
+            $product->delete();
+            DB::commit();
+            return redirect()->route('admin.products.index')->with('success', 'Product deleted');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Product deletion error: ' . $e->getMessage());
+            return back()->with('error', 'Error deleting product: ' . $e->getMessage());
+        }
     }
 
     private function prepareProductData(ProductRequest $request): array
@@ -569,5 +469,79 @@ class ProductController extends Controller
             ->orWhere('serial', 'like', '%TEST-%')
             ->latest()
             ->paginate(50);
+    }
+
+    // Data Methods
+    private function getCategories()
+    {
+        return \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get();
+    }
+
+    private function getProgrammingLanguages()
+    {
+        return \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get();
+    }
+
+    private function getKbCategories()
+    {
+        return KbCategory::where('is_published', true)->orderBy('name')->get(['id', 'name', 'slug']);
+    }
+
+    private function getKbArticles()
+    {
+        return KbArticle::where('is_published', true)->with('category:id, name')->orderBy('title')->get(['id', 'title', 'slug', 'kb_category_id']);
+    }
+
+    // Envato Methods
+    private function jsonError(string $message, int $code = 400): JsonResponse
+    {
+        return response()->json(['success' => false, 'message' => trans("app.{$message}")], $code);
+    }
+
+    private function formatEnvatoData(array $itemData): array
+    {
+        return [
+            'envato_item_id' => $itemData['id'] ?? null,
+            'purchase_url_envato' => $itemData['url'] ?? null,
+            'purchase_url_buy' => $itemData['url'] ?? null,
+            'support_days' => $this->calculateSupportDays($itemData),
+            'version' => $itemData['version'] ?? null,
+            'price' => isset($itemData['price_cents']) ? ($itemData['price_cents'] / 100) : null,
+            'name' => $itemData['name'] ?? null,
+            'description' => $itemData['description'] ?? null,
+        ];
+    }
+
+    private function formatUserItems(array $matches): array
+    {
+        return collect($matches)->map(function (array $item): array {
+            return [
+                'id' => $item['id'],
+                'name' => $item['name'],
+                'url' => $item['url'],
+                'price' => isset($item['price_cents']) ? ($item['price_cents'] / 100) : 0,
+                'rating' => $item['rating'] ?? null,
+                'sales' => $item['number_of_sales'] ?? 0,
+            ];
+        })->toArray();
+    }
+
+    private function calculateSupportDays(array $itemData): int
+    {
+        if (isset($itemData['attributes']) && is_array($itemData['attributes'])) {
+            foreach ($itemData['attributes'] as $attribute) {
+                if (is_array($attribute) && isset($attribute['name']) && $attribute['name'] === 'support') {
+                    $value = strtolower($attribute['value'] ?? '');
+                    if (strpos($value, 'month') !== false) {
+                        preg_match('/(\d+)/', $value, $matches);
+                        return isset($matches[1]) ? (int)$matches[1] * 30 : 180;
+                    } elseif (strpos($value, 'year') !== false) {
+                        preg_match('/(\d+)/', $value, $matches);
+                        return isset($matches[1]) ? (int)$matches[1] * 365 : 365;
+                    }
+                }
+            }
+        }
+        return 180;
     }
 }
