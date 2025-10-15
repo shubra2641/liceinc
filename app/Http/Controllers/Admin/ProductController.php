@@ -328,5 +328,4 @@ class ProductController extends Controller
 
         return view('admin.products.logs', ['product' => $product, 'logs' => $logs]);
     }
-
 }

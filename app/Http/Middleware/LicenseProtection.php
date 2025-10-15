@@ -333,7 +333,9 @@ class LicenseProtection
      */
     private function passThrough(Closure $next, Request $request): Response
     {
-        /** @var Response $response */
+        /**
+ * @var Response $response
+*/
         $response = $next($request);
         return $response;
     }

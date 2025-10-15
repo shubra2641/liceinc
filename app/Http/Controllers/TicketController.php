@@ -44,17 +44,17 @@ class TicketController extends Controller
     /**
      * Pagination limit for ticket listing.
      */
-private const PAGINATION_LIMIT = 15;
+    private const PAGINATION_LIMIT = 15;
 
     /**
      * Valid ticket priorities.
      */
-private const VALID_PRIORITIES = ['low', 'medium', 'high'];
+    private const VALID_PRIORITIES = ['low', 'medium', 'high'];
 
     /**
      * Valid ticket statuses.
      */
-private const VALID_STATUSES = ['open', 'pending', 'resolved', 'closed'];
+    private const VALID_STATUSES = ['open', 'pending', 'resolved', 'closed'];
     /**
      * Display a listing of user tickets with enhanced security.
      *
@@ -74,37 +74,37 @@ private const VALID_STATUSES = ['open', 'pending', 'resolved', 'closed'];
      * // - User authorization check
      * // - Latest tickets first
      */
-public function index(): View
-{
-    try {
-        $userId = Auth::id();
-        if (! $userId) {
-            throw new Exception('User not authenticated');
-        }
-        DB::beginTransaction();
-        $tickets = Ticket::where('user_id', $userId)
+    public function index(): View
+    {
+        try {
+            $userId = Auth::id();
+            if (! $userId) {
+                throw new Exception('User not authenticated');
+            }
+            DB::beginTransaction();
+            $tickets = Ticket::where('user_id', $userId)
             ->latest()
             ->paginate(self::PAGINATION_LIMIT);
-        DB::commit();
-        /**
-* @var view-string $viewName
+            DB::commit();
+            /**
+     @var view-string $viewName
 */
-        $viewName = 'tickets.index';
-        return view($viewName, ['tickets' => $tickets]);
-    } catch (Exception $e) {
-        DB::rollBack();
-        Log::error('Failed to load user tickets: ' . $e->getMessage(), [
+            $viewName = 'tickets.index';
+            return view($viewName, ['tickets' => $tickets]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to load user tickets: ' . $e->getMessage(), [
             'user_id' => Auth::id(),
             'trace' => $e->getTraceAsString(),
-        ]);
-        /**
-* @var view-string $viewName
+            ]);
+            /**
+     @var view-string $viewName
 */
-        $viewName = 'tickets.index';
-        return view($viewName, ['tickets' => collect()])
+            $viewName = 'tickets.index';
+            return view($viewName, ['tickets' => collect()])
             ->with('error', 'Failed to load tickets. Please try again.');
+        }
     }
-}
     /**
      * Show the form for creating a new ticket with enhanced security.
      *
@@ -122,22 +122,22 @@ public function index(): View
      * // Returns view with:
      * // - Ticket creation form
      */
-public function create(): View|RedirectResponse
-{
-    try {
-        /**
-* @var view-string $viewName
+    public function create(): View|RedirectResponse
+    {
+        try {
+            /**
+     @var view-string $viewName
 */
-        $viewName = 'tickets.create';
-        return view($viewName);
-    } catch (Exception $e) {
-        Log::error('Failed to load ticket creation form: ' . $e->getMessage(), [
+            $viewName = 'tickets.create';
+            return view($viewName);
+        } catch (Exception $e) {
+            Log::error('Failed to load ticket creation form: ' . $e->getMessage(), [
             'user_id' => Auth::id(),
             'trace' => $e->getTraceAsString(),
-        ]);
-        return redirect()->back()->with('error', 'Failed to load ticket creation form. Please try again.');
+            ]);
+            return redirect()->back()->with('error', 'Failed to load ticket creation form. Please try again.');
+        }
     }
-}
     /**
      * Store a newly created ticket with enhanced security.
      *
@@ -161,32 +161,32 @@ public function create(): View|RedirectResponse
      *     "purchase_code": "ABC123-DEF456"
      * }
      */
-public function store(Request $request, LicenseAutoRegistrationService $licenseService): RedirectResponse
-{
-    try {
-        $validated = $this->validateTicketData($request);
-        $license = $this->handleLicenseRegistration($validated, $licenseService);
+    public function store(Request $request, LicenseAutoRegistrationService $licenseService): RedirectResponse
+    {
+        try {
+            $validated = $this->validateTicketData($request);
+            $license = $this->handleLicenseRegistration($validated, $licenseService);
 
-        $ticketData = [
+            $ticketData = [
             'user_id' => Auth::id(),
             'subject' => $validated['subject'],
             'priority' => $validated['priority'],
             'status' => 'open',
             'content' => $validated['content'],
             'license_id' => $license instanceof \App\Models\License ? $license->id : null,
-        ];
+            ];
 
-        return $this->handleTicketCreation($ticketData, 'tickets.show');
-    } catch (Exception $e) {
-        Log::error('Failed to create ticket: ' . $e->getMessage(), [
+            return $this->handleTicketCreation($ticketData, 'tickets.show');
+        } catch (Exception $e) {
+            Log::error('Failed to create ticket: ' . $e->getMessage(), [
             'user_id' => Auth::id(),
             'request_data' => $request->all(),
             'trace' => $e->getTraceAsString(),
-        ]);
-        return back()->with('error', 'Failed to create ticket. Please try again.')
+            ]);
+            return back()->with('error', 'Failed to create ticket. Please try again.')
             ->withInput();
+        }
     }
-}
     /**
      * Display the specified ticket with enhanced security.
      *
@@ -209,10 +209,10 @@ public function store(Request $request, LicenseAutoRegistrationService $licenseS
      * // - Ticket replies
      * // - User authorization check
      */
-public function show(Ticket $ticket): View
-{
-    return $this->showTicket($ticket, 'tickets.show', false);
-}
+    public function show(Ticket $ticket): View
+    {
+        return $this->showTicket($ticket, 'tickets.show', false);
+    }
     /**
      * Show the form for editing the specified ticket.
      *
@@ -220,10 +220,10 @@ public function show(Ticket $ticket): View
      *
      * @deprecated This method is not implemented
      */
-public function edit(Ticket $ticket): void
-{
-    // Not implemented
-}
+    public function edit(Ticket $ticket): void
+    {
+        // Not implemented
+    }
     /**
      * Update the specified ticket with enhanced security.
      *
@@ -246,10 +246,10 @@ public function edit(Ticket $ticket): void
      *     "status": "pending"
      * }
      */
-public function update(Request $request, Ticket $ticket): RedirectResponse
-{
-    return $this->updateTicket($request, $ticket, false);
-}
+    public function update(Request $request, Ticket $ticket): RedirectResponse
+    {
+        return $this->updateTicket($request, $ticket, false);
+    }
     /**
      * Remove the specified ticket with enhanced security.
      *
@@ -265,10 +265,10 @@ public function update(Request $request, Ticket $ticket): RedirectResponse
      * // Delete ticket:
      * DELETE /tickets/123
      */
-public function destroy(Ticket $ticket): RedirectResponse
-{
-    return $this->destroyTicket($ticket, false, 'tickets.index');
-}
+    public function destroy(Ticket $ticket): RedirectResponse
+    {
+        return $this->destroyTicket($ticket, false, 'tickets.index');
+    }
     /**
      * Add a reply to the specified ticket with enhanced security.
      *
@@ -290,10 +290,10 @@ public function destroy(Ticket $ticket): RedirectResponse
      *     "action": "reply_and_close"
      * }
      */
-public function reply(Request $request, Ticket $ticket): RedirectResponse
-{
-    return $this->replyToTicket($request, $ticket, false, true, false);
-}
+    public function reply(Request $request, Ticket $ticket): RedirectResponse
+    {
+        return $this->replyToTicket($request, $ticket, false, true, false);
+    }
 
 
 
@@ -305,25 +305,25 @@ public function reply(Request $request, Ticket $ticket): RedirectResponse
      *
      * @return mixed The license instance or null
      */
-private function handleLicenseRegistration(array $validated, LicenseAutoRegistrationService $licenseService)
-{
-    if (empty($validated['purchase_code'])) {
+    private function handleLicenseRegistration(array $validated, LicenseAutoRegistrationService $licenseService)
+    {
+        if (empty($validated['purchase_code'])) {
+            return null;
+        }
+        $productId = null;
+        if (! empty($validated['product_slug'])) {
+            $product = Product::where('slug', $validated['product_slug'])->first();
+            $productId = $product?->id;
+        }
+        $registrationResult = $licenseService->autoRegisterLicense(
+            is_string($validated['purchase_code']) ? $validated['purchase_code'] : '',
+            $productId
+        );
+        if ($registrationResult['success']) {
+            return $registrationResult['license'];
+        }
         return null;
     }
-    $productId = null;
-    if (! empty($validated['product_slug'])) {
-        $product = Product::where('slug', $validated['product_slug'])->first();
-        $productId = $product?->id;
-    }
-    $registrationResult = $licenseService->autoRegisterLicense(
-        is_string($validated['purchase_code']) ? $validated['purchase_code'] : '',
-        $productId
-    );
-    if ($registrationResult['success']) {
-        return $registrationResult['license'];
-    }
-    return null;
-}
     /**
      * Check if ticket should be closed.
      *
@@ -331,11 +331,11 @@ private function handleLicenseRegistration(array $validated, LicenseAutoRegistra
      *
      * @return bool True if ticket should be closed
      */
-private function shouldCloseTicket(Request $request): bool
-{
-    return ($request->has('action') && $request->action === 'reply_and_close') ||
+    private function shouldCloseTicket(Request $request): bool
+    {
+        return ($request->has('action') && $request->action === 'reply_and_close') ||
            ($request->has('close_ticket') && $request->close_ticket);
-}
+    }
     /**
      * Check if user can view ticket.
      *
@@ -343,10 +343,10 @@ private function shouldCloseTicket(Request $request): bool
      *
      * @return bool True if user can view ticket
      */
-private function canViewTicket(Ticket $ticket): bool
-{
-    return $ticket->user_id === Auth::id() || Auth::user()?->hasRole('admin');
-}
+    private function canViewTicket(Ticket $ticket): bool
+    {
+        return $ticket->user_id === Auth::id() || Auth::user()?->hasRole('admin');
+    }
     /**
      * Check if user can modify ticket.
      *
@@ -354,8 +354,8 @@ private function canViewTicket(Ticket $ticket): bool
      *
      * @return bool True if user can modify ticket
      */
-private function canModifyTicket(Ticket $ticket): bool
-{
-    return $ticket->user_id === Auth::id() || Auth::user()?->hasRole('admin');
-}
+    private function canModifyTicket(Ticket $ticket): bool
+    {
+        return $ticket->user_id === Auth::id() || Auth::user()?->hasRole('admin');
+    }
 }

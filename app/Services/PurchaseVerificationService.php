@@ -1,0 +1,427 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\Models\License;
+use App\Models\Product;
+use App\Models\User;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
+/**
+ * Purchase Verification Service with enhanced security.
+ *
+ * This service handles purchase code verification, user management,
+ * and license creation with comprehensive error handling and security measures.
+ *
+ * Features:
+ * - Purchase code verification with Envato API
+ * - User creation and management
+ * - License creation and updates
+ * - Rate limiting and security validation
+ * - Comprehensive error handling
+ * - Database transaction support
+ */
+class PurchaseVerificationService
+{
+    private const RATE_LIMIT_DURATION = 1;
+
+    public function __construct(
+        private EnvatoService $envatoService,
+        private LicenseService $licenseService,
+        private PurchaseCodeService $purchaseCodeService
+    ) {
+    }
+
+    /**
+     * Verify purchase code and create/update license with enhanced security.
+     */
+    public function verifyPurchase(Request $request): RedirectResponse
+    {
+        try {
+            $data = $this->validatePurchaseRequest($request);
+            
+            // Rate limiting check
+            if ($this->isRateLimited($request->ip(), 'verify_purchase_')) {
+                $this->logRateLimitExceeded($request, $data);
+                return back()->withErrors(['purchase_code' => 'Too many verification attempts. Please try again later.']);
+            }
+            
+            $this->setRateLimit($request->ip(), 'verify_purchase_');
+            
+            DB::beginTransaction();
+            
+            // Verify purchase with Envato API
+            $sale = $this->verifyWithEnvato($data['purchase_code']);
+            if (!$sale) {
+                return $this->handleVerificationFailure($request, $data);
+            }
+            
+            // Find product and validate ownership
+            $product = $this->findAndValidateProduct($data['product_slug'], $sale);
+            if (!$product) {
+                return $this->handleProductMismatch($request, $data);
+            }
+            
+            // Create or find user
+            $user = $this->createOrFindUser($sale);
+            
+            // Create or update license
+            $this->createOrUpdateLicense($data['purchase_code'], $product, $user, $sale);
+            
+            DB::commit();
+            return back()->with('success', 'Purchase verified and license updated successfully.');
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->handleValidationError($e, $request);
+        } catch (Exception $e) {
+            return $this->handleGeneralError($e, $request);
+        }
+    }
+
+    /**
+     * Verify user purchase via AJAX with enhanced security.
+     */
+    public function verifyUserPurchaseAjax(Request $request): array
+    {
+        try {
+            if (auth()->guest()) {
+                return ['valid' => false, 'message' => 'Authentication required'];
+            }
+            
+            $data = $this->validateAjaxPurchaseRequest($request);
+            
+            // Rate limiting for AJAX requests
+            $rateLimitKey = 'ajax_verify_' . auth()->id() . '_' . $request->ip();
+            if ($this->isRateLimited($rateLimitKey, 'ajax_verify_')) {
+                $this->logAjaxRateLimitExceeded($request);
+                return ['valid' => false, 'message' => 'Too many verification attempts. Please try again later.'];
+            }
+            
+            $this->setRateLimit($rateLimitKey, 'ajax_verify_');
+            
+            DB::beginTransaction();
+            
+            $sale = $this->verifyWithEnvato($data['purchase_code']);
+            if (!$sale) {
+                return $this->handleAjaxVerificationFailure($request, $data);
+            }
+            
+            $product = Product::findOrFail($data['product_id']);
+            if (!$this->validateProductOwnership($product, $sale)) {
+                return $this->handleAjaxProductMismatch($request, $data, $product);
+            }
+            
+            // Check if user already has this license
+            $existingLicense = $this->checkExistingLicense($data['purchase_code']);
+            if ($existingLicense) {
+                DB::rollBack();
+                return [
+                    'valid' => true,
+                    'message' => 'License already exists in your account',
+                    'license' => $existingLicense
+                ];
+            }
+            
+            // Create license for user
+            $license = $this->createUserLicense($data['purchase_code'], $product, $sale);
+            
+            DB::commit();
+            return [
+                'valid' => true,
+                'message' => 'License verified and added to your account',
+                'license' => $license
+            ];
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->handleAjaxValidationError($e, $request);
+        } catch (Exception $e) {
+            return $this->handleAjaxGeneralError($e, $request);
+        }
+    }
+
+    /**
+     * Validate purchase request data.
+     */
+    private function validatePurchaseRequest(Request $request): array
+    {
+        return $request->validate([
+            'purchase_code' => [
+                'required',
+                'string',
+                'regex:/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i',
+                'max:36',
+            ],
+            'product_slug' => [
+                'required',
+                'string',
+                'alpha_dash',
+                'max:255',
+            ],
+        ], [
+            'purchase_code.regex' => 'Purchase code must be a valid UUID format.',
+            'product_slug.alpha_dash' => 'Product slug can only contain letters, numbers, dashes and underscores.',
+        ]);
+    }
+
+    /**
+     * Validate AJAX purchase request data.
+     */
+    private function validateAjaxPurchaseRequest(Request $request): array
+    {
+        return $request->validate([
+            'purchase_code' => [
+                'required',
+                'string',
+                'regex:/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i',
+                'max:36',
+            ],
+            'product_id' => [
+                'required',
+                'integer',
+                'exists:products,id',
+            ],
+        ], [
+            'purchase_code.regex' => 'Purchase code must be a valid UUID format.',
+            'product_id.exists' => 'Selected product does not exist.',
+        ]);
+    }
+
+    /**
+     * Verify purchase with Envato API.
+     */
+    private function verifyWithEnvato(string $purchaseCode): ?array
+    {
+        return $this->envatoService->verifyPurchase($purchaseCode);
+    }
+
+    /**
+     * Find product and validate ownership.
+     */
+    private function findAndValidateProduct(string $productSlug, array $sale): ?Product
+    {
+        $product = Product::where('slug', $productSlug)->firstOrFail();
+        $itemId = data_get($sale, 'item.id');
+        
+        if ((string)$product->envato_item_id !== $itemId) {
+            return null;
+        }
+        
+        return $product;
+    }
+
+    /**
+     * Validate product ownership.
+     */
+    private function validateProductOwnership(Product $product, array $sale): bool
+    {
+        $itemId = data_get($sale, 'item.id');
+        return $product->envato_item_id && $product->envato_item_id === $itemId;
+    }
+
+    /**
+     * Create or find user from sale data.
+     */
+    private function createOrFindUser(array $sale): User
+    {
+        $buyerName = data_get($sale, 'buyer', 'Unknown Buyer');
+        $buyerEmail = data_get($sale, 'buyer_email');
+        
+        return User::firstOrCreate(
+            ['email' => $buyerEmail ?: Str::uuid() . '@envato-temp.local'],
+            [
+                'name' => $buyerName,
+                'password' => Hash::make(Str::random(32)),
+                'email_verified_at' => $buyerEmail ? now() : null,
+            ]
+        );
+    }
+
+    /**
+     * Create or update license.
+     */
+    private function createOrUpdateLicense(string $purchaseCode, Product $product, User $user, array $sale): void
+    {
+        $supportEnd = data_get($sale, 'supported_until');
+        
+        License::updateOrCreate(
+            ['purchase_code' => $purchaseCode],
+            [
+                'product_id' => $product->id,
+                'user_id' => $user->id,
+                'support_expires_at' => $supportEnd ? Carbon::parse($supportEnd)->format('Y-m-d') : null,
+                'status' => 'active',
+                'verified_at' => now(),
+            ]
+        );
+    }
+
+    /**
+     * Create license for user.
+     */
+    private function createUserLicense(string $purchaseCode, Product $product, array $sale): License
+    {
+        return License::create([
+            'purchase_code' => $purchaseCode,
+            'product_id' => $product->id,
+            'user_id' => auth()->id(),
+            'license_type' => 'regular',
+            'status' => 'active',
+            'support_expires_at' => data_get($sale, 'supported_until') ?
+                Carbon::parse(data_get($sale, 'supported_until'))->format('Y-m-d') : null,
+            'verified_at' => now(),
+        ]);
+    }
+
+    /**
+     * Check if user already has this license.
+     */
+    private function checkExistingLicense(string $purchaseCode): ?License
+    {
+        return License::where('purchase_code', $purchaseCode)
+            ->where('user_id', auth()->id())
+            ->first();
+    }
+
+    /**
+     * Check if request is rate limited.
+     */
+    private function isRateLimited(string $key, string $prefix = ''): bool
+    {
+        return cache()->has($prefix . $key);
+    }
+
+    /**
+     * Set rate limit for request.
+     */
+    private function setRateLimit(string $key, string $prefix = ''): void
+    {
+        cache()->put($prefix . $key, true, now()->addMinutes(self::RATE_LIMIT_DURATION));
+    }
+
+    /**
+     * Mask purchase code for logging.
+     */
+    private function maskPurchaseCode(string $purchaseCode): string
+    {
+        return substr($purchaseCode, 0, 8) . '...';
+    }
+
+    // Error handling methods
+    private function handleVerificationFailure(Request $request, array $data): RedirectResponse
+    {
+        DB::rollBack();
+        Log::warning('Failed to verify purchase code', [
+            'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
+            'ip' => $request->ip(),
+        ]);
+        return back()->withErrors(['purchase_code' => 'Could not verify purchase code. Please check and try again.']);
+    }
+
+    private function handleProductMismatch(Request $request, array $data): RedirectResponse
+    {
+        DB::rollBack();
+        Log::warning('Purchase code does not match product', [
+            'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
+            'ip' => $request->ip(),
+        ]);
+        return back()->withErrors(['purchase_code' => 'Purchase code does not belong to this product.']);
+    }
+
+    private function handleValidationError(\Illuminate\Validation\ValidationException $e, Request $request): RedirectResponse
+    {
+        DB::rollBack();
+        Log::warning('Purchase verification validation failed', [
+            'errors' => $e->errors(),
+            'ip' => $request->ip(),
+        ]);
+        throw $e;
+    }
+
+    private function handleGeneralError(Exception $e, Request $request): RedirectResponse
+    {
+        DB::rollBack();
+        Log::error('Purchase verification failed', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'ip' => $request->ip(),
+        ]);
+        return back()->withErrors(['purchase_code' => 'An error occurred while verifying your purchase. Please try again.']);
+    }
+
+    private function handleAjaxVerificationFailure(Request $request, array $data): array
+    {
+        DB::rollBack();
+        Log::warning('AJAX purchase verification failed', [
+            'user_id' => auth()->id(),
+            'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
+            'product_id' => $data['product_id'],
+            'ip' => $request->ip(),
+        ]);
+        return ['valid' => false, 'message' => 'Invalid purchase code. Please check and try again.'];
+    }
+
+    private function handleAjaxProductMismatch(Request $request, array $data, Product $product): array
+    {
+        DB::rollBack();
+        Log::warning('AJAX purchase code does not match product', [
+            'user_id' => auth()->id(),
+            'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
+            'product_id' => $product->id,
+            'ip' => $request->ip(),
+        ]);
+        return ['valid' => false, 'message' => 'Purchase code does not match this product.'];
+    }
+
+    private function handleAjaxValidationError(\Illuminate\Validation\ValidationException $e, Request $request): array
+    {
+        DB::rollBack();
+        Log::warning('AJAX purchase verification validation failed', [
+            'user_id' => auth()->id(),
+            'errors' => $e->errors(),
+            'ip' => $request->ip(),
+        ]);
+        return [
+            'valid' => false,
+            'message' => 'Validation failed',
+            'errors' => $e->errors(),
+        ];
+    }
+
+    private function handleAjaxGeneralError(Exception $e, Request $request): array
+    {
+        DB::rollBack();
+        Log::error('AJAX purchase verification failed', [
+            'user_id' => auth()->id(),
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'ip' => $request->ip(),
+        ]);
+        return ['valid' => false, 'message' => 'An error occurred while verifying your purchase. Please try again.'];
+    }
+
+    private function logRateLimitExceeded(Request $request, array $data): void
+    {
+        Log::warning('Rate limit exceeded for purchase verification', [
+            'ip' => $request->ip(),
+            'purchase_code' => $this->maskPurchaseCode($data['purchase_code']),
+        ]);
+    }
+
+    private function logAjaxRateLimitExceeded(Request $request): void
+    {
+        Log::warning('Rate limit exceeded for AJAX purchase verification', [
+            'user_id' => auth()->id(),
+            'ip' => $request->ip(),
+        ]);
+    }
+}

@@ -202,7 +202,11 @@ class KbPublicController extends Controller
 
             $highlightQuery = htmlspecialchars($q, ENT_QUOTES, 'UTF-8');
             return view('kb.search', compact(
-                'q', 'results', 'resultsWithAccess', 'categoriesWithAccess', 'highlightQuery'
+                'q',
+                'results',
+                'resultsWithAccess',
+                'categoriesWithAccess',
+                'highlightQuery'
             ));
         } catch (\Exception $e) {
             Log::error('KB search failed', ['error' => $e->getMessage()]);
@@ -370,7 +374,7 @@ class KbPublicController extends Controller
                 $product = $productId ? Product::find($productId) : null;
 
                 if ($product && $product->id == $category->product_id) {
-                    $accessToken = 'kb_access_' . $category->id . '_' . time() . '_' . 
+                    $accessToken = 'kb_access_' . $category->id . '_' . time() . '_' .
                         substr(md5($license?->license_key ?? ''), 0, 8);
                     session([$accessToken => [
                         'license_id' => $license?->id,
@@ -414,7 +418,7 @@ class KbPublicController extends Controller
                 $product = $productId ? Product::find($productId) : null;
 
                 if ($product && $product->id == $productId) {
-                    $accessToken = 'kb_article_access_' . $article->id . '_' . time() . '_' . 
+                    $accessToken = 'kb_article_access_' . $article->id . '_' . time() . '_' .
                         substr(md5($license?->license_key ?? ''), 0, 8);
                     session([$accessToken => [
                         'license_id' => $license?->id,

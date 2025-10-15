@@ -23,7 +23,7 @@ class ProductApiService
     public function handleApiRequest(Request $request): JsonResponse
     {
         $action = $request->input('action');
-        
+
         return match ($action) {
             'envato_product_data' => $this->getEnvatoProductData($request),
             'envato_user_items' => $this->getEnvatoUserItems(),
@@ -58,7 +58,7 @@ class ProductApiService
     {
         $productId = $request->input('product_id');
         $product = Product::findOrFail($productId);
-        
+
         return response()->json([
             'id' => $product->id,
             'name' => $product->name,

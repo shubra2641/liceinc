@@ -89,7 +89,7 @@ class VersionHelper
             }
 
             DB::beginTransaction();
-            
+
             $setting = Setting::where('key', 'site_name')->first() ?? Setting::first();
             if (!$setting) {
                 $setting = new Setting();
@@ -239,7 +239,7 @@ class VersionHelper
         try {
             $setting = Setting::where('key', 'current_version')->first();
             $version = $setting ? $setting->value : '1.0.0';
-            
+
             if ($version && !self::isValidVersion($version)) {
                 $version = '1.0.0';
             }
@@ -266,7 +266,7 @@ class VersionHelper
             }
 
             DB::beginTransaction();
-            
+
             \App\Helpers\SettingHelper::updateOrCreateSetting(
                 'current_version',
                 $newVersion,
@@ -294,7 +294,7 @@ class VersionHelper
 
             return $versions->map(function ($setting) {
                 $version = str_replace('version_', '', $setting->key ?? '');
-                
+
                 if (!self::isValidVersion($version)) {
                     return null;
                 }
@@ -319,14 +319,14 @@ class VersionHelper
             }
 
             DB::beginTransaction();
-            
+
             $sanitizedDetails = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
             \App\Helpers\SettingHelper::updateOrCreateSetting(
                 "version_{$version}",
                 $sanitizedDetails,
                 'version'
             );
-            
+
             DB::commit();
 
             return true;

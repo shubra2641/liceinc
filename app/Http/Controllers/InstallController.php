@@ -56,9 +56,9 @@ class InstallController extends Controller
             if ($verificationResult['valid'] ?? false) {
                 session(['install.license' => $verificationResult['data']]);
                 return $this->verificationResponse(
-                    $request, 
-                    true, 
-                    'License verified successfully', 
+                    $request,
+                    true,
+                    'License verified successfully',
                     $verificationResult
                 );
             } else {
@@ -68,10 +68,10 @@ class InstallController extends Controller
         } catch (\Throwable $exception) {
             Log::error('License verification error in InstallController', ['error' => $exception->getMessage()]);
             return $this->verificationResponse(
-                $request, 
-                false, 
-                'An error occurred during verification', 
-                ['general' => $exception->getMessage()], 
+                $request,
+                false,
+                'An error occurred during verification',
+                ['general' => $exception->getMessage()],
                 500
             );
         }
