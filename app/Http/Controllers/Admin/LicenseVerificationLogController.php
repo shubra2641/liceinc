@@ -8,7 +8,7 @@ use App\Helpers\SecureFileHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LicenseVerificationLogRequest;
 use App\Models\LicenseVerificationLog;
-use App\Services\LicenseVerificationLogger;
+use App\Services\License\LicenseVerificationLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

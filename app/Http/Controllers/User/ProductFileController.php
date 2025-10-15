@@ -7,7 +7,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductFile;
-use App\Services\ProductFileService;
+use App\Services\Product\ProductFileService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 

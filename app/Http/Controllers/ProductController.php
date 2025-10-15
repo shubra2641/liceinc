@@ -7,7 +7,7 @@ use App\Models\License;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProgrammingLanguage;
-use App\Services\ProductFileService;
+use App\Services\Product\ProductFileService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
