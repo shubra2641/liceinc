@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Services\System;
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;

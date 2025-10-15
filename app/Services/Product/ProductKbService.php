@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Product;
 
 use App\Models\KbArticle;
 use App\Models\KbCategory;

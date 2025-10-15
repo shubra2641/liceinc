@@ -10,7 +10,7 @@ use App\Models\KbCategory;
 use App\Models\License;
 use App\Models\LicenseLog;
 use App\Models\Product;
-use App\Services\EnvatoProductService;
+use App\Services\Envato\EnvatoProductService;
 use App\Services\License\LicenseGeneratorService;
 use App\Services\Product\ProductApiService;
 use App\Services\Product\ProductIntegrationService;
