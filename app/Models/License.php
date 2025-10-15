@@ -95,21 +95,13 @@ class License extends Model
     protected static function booted(): void
     {
         static::creating(function (License $license): void {
-            static::initializeLicenseKeys($license);
+            // Ensure purchase_code exists; some flows (Envato) provide it explicitly
+            if (empty($license->purchase_code)) {
+                $license->purchase_code = static::generateUniquePurchaseCode();
+            }
+            // Always use purchase_code as license_key for consistency
+            $license->license_key = $license->purchase_code;
         });
-    }
-
-    /**
-     * Initialize license keys during creation.
-     */
-    protected static function initializeLicenseKeys(License $license): void
-    {
-        if (empty($license->purchase_code)) {
-            $license->purchase_code = static::generateUniquePurchaseCode();
-        }
-        
-        // Always use purchase_code as license_key for consistency
-        $license->license_key = $license->purchase_code;
     }
     protected static function generateUniquePurchaseCode(): string
     {
@@ -121,28 +113,19 @@ class License extends Model
         return static::generateUniqueCode('license_key', 32, 8);
     }
 
-    /**
-     * Generate a unique code with specified length and segment size.
-     */
-    protected static function generateUniqueCode(string $field, int $length, int $segmentSize): string
+    private static function generateUniqueCode(string $field, int $length, int $segmentSize): string
     {
         do {
             $code = strtoupper(Str::random($length));
-            $formattedCode = static::formatCode($code, $segmentSize);
-        } while (static::where($field, $formattedCode)->exists());
-        
-        return $formattedCode;
+            $formatted = static::formatCode($code, $segmentSize);
+        } while (static::where($field, $formatted)->exists());
+
+        return $formatted;
     }
 
-    /**
-     * Format code with dashes between segments.
-     */
-    protected static function formatCode(string $code, int $segmentSize): string
+    private static function formatCode(string $code, int $segmentSize): string
     {
-        $segments = [];
-        for ($i = 0; $i < strlen($code); $i += $segmentSize) {
-            $segments[] = substr($code, $i, $segmentSize);
-        }
+        $segments = str_split($code, $segmentSize);
         return implode('-', $segments);
     }
     /**
@@ -207,24 +190,8 @@ class License extends Model
      */
     public function scopeForUser(Builder $query, User|int $user): Builder
     {
-        $userId = static::extractUserId($user);
+        $userId = is_numeric($user) ? (int)$user : ($user instanceof User ? $user->id : null);
         return $query->where('user_id', $userId);
-    }
-
-    /**
-     * Extract user ID from user instance or integer.
-     */
-    protected static function extractUserId(User|int $user): ?int
-    {
-        if (is_numeric($user)) {
-            return (int)$user;
-        }
-        
-        if ($user instanceof User) {
-            return $user->id;
-        }
-        
-        return null;
     }
     /**
      * Scope a query to licenses for a specific customer id (backwards compatibility).
@@ -282,10 +249,7 @@ class License extends Model
         return max(0, $this->getMaxDomains() - $this->active_domains_count);
     }
 
-    /**
-     * Get the maximum number of domains allowed for this license.
-     */
-    protected function getMaxDomains(): int
+    private function getMaxDomains(): int
     {
         return $this->max_domains ?? 1;
     }
