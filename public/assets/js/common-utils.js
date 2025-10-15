@@ -89,13 +89,13 @@ window.CommonUtils = {
         if (!this.isValidUrl(url)) {
             throw new Error('Invalid URL provided');
         }
-        
+
         // Ensure URL is from same origin or whitelisted domains
         const safeUrl = this.safeUrl(url);
         if (safeUrl === '#') {
             throw new Error('URL not allowed');
         }
-        
+
         const response = await fetch(safeUrl, {
             method: 'GET',
             headers: this.getApiHeaders(),

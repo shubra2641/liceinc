@@ -9,118 +9,84 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use InvalidArgumentException;
 
 /**
- * License Auto Registration Service with enhanced security and comprehensive license management.
- *
- * This service provides automated license registration functionality for users,
- * including purchase code verification, license creation, invoice generation,
- * and stock management. It implements comprehensive security measures,
- * input validation, and error handling for reliable license operations.
+ * License Auto Registration Service - Provides automated license registration functionality.
  */
 class LicenseAutoRegistrationService
 {
-    protected PurchaseCodeService $purchaseCodeService;
-    protected InvoiceService $invoiceService;
-    /**
-     * Constructor with dependency injection and enhanced error handling.
-     *
-     * Initializes the service with required dependencies for purchase code
-     * verification and invoice management. Includes proper type hints and
-     * validation for dependency injection.
-     *
-     * @param  PurchaseCodeService  $purchaseCodeService  Service for purchase code verification
-     * @param  InvoiceService  $invoiceService  Service for invoice management
-     */
-    public function __construct(PurchaseCodeService $purchaseCodeService, InvoiceService $invoiceService)
-    {
-        $this->purchaseCodeService = $purchaseCodeService;
-        $this->invoiceService = $invoiceService;
+    public function __construct(
+        private RegistrationValidationService $validationService,
+        private RegistrationProcessingService $processingService,
+        private RegistrationResultService $resultService
+    ) {
     }
+
     /**
-     * Automatically register a license for the authenticated user with enhanced security and error handling.
-     *
-     * Registers a license for the authenticated user if the purchase code is valid
-     * and not already registered. Includes comprehensive validation, security measures,
-     * database transactions, and error handling for reliable license registration.
-     *
-     * @param  string  $purchaseCode  The purchase code to register
-     * @param  int|null  $productId  Optional product ID for the license
-     *
-     * @return array<string, mixed> Registration result with success status, license object, and message
-     *
-     * @throws InvalidArgumentException When purchase code is invalid
-     * @throws \Exception When license registration fails
-     *
-     * @example
-     * $result = $service->autoRegisterLicense('ABC123DEF456', 1);
-     * if ($result['success']) {
-     *     $license = $result['license'];
-     * }
+     * Automatically register a license for the authenticated user.
      */
     public function autoRegisterLicense(string $purchaseCode, ?int $productId = null): array
     {
         try {
             // Validate input parameters
-            $this->validatePurchaseCode($purchaseCode);
-            $this->validateProductId($productId);
-            $user = Auth::user();
-            if (! $user) {
-                return [
-                    'success' => false,
-                    'license' => null,
-                    'message' => 'User must be authenticated',
-                ];
-            }
+            $this->validationService->validatePurchaseCode($purchaseCode);
+            $this->validationService->validateProductId($productId);
+
+            $user = $this->validationService->validateUserAuthentication();
+
             return DB::transaction(function () use ($purchaseCode, $productId, $user) {
                 // Check if user already has this license
-                $existingLicense = $this->findExistingLicense($purchaseCode, $user->id);
+                $existingLicense = $this->processingService->findExistingLicense($purchaseCode, $user->id);
                 if ($existingLicense) {
-                    return [
-                        'success' => true,
-                        'license' => $existingLicense,
-                        'message' => 'License already exists for this user',
-                    ];
+                    return $this->resultService->createExistingLicenseResult($existingLicense);
                 }
+
                 // Verify the purchase code
-                $verificationResult = $this->purchaseCodeService->verifyRawCode($purchaseCode, $productId);
-                if (! $verificationResult['success']) {
-                    return [
-                        'success' => false,
-                        'license' => null,
-                        'message' => $verificationResult['message'] ?? 'Invalid purchase code',
-                    ];
+                $verificationResult = $this->processingService->verifyPurchaseCode($purchaseCode, $productId);
+                if (!$verificationResult['success']) {
+                    return $this->resultService->createInvalidPurchaseCodeResult(
+                        $verificationResult['message'] ?? 'Invalid purchase code'
+                    );
                 }
+
                 // Determine product ID from verification result or provided parameter
-                $licenseProductId = $this->determineProductId($productId, $verificationResult);
-                if (! $licenseProductId) {
-                    return [
-                        'success' => false,
-                        'license' => null,
-                        'message' => 'Could not determine product for this purchase code',
-                    ];
+                $licenseProductId = $this->processingService->determineProductId($productId, $verificationResult);
+                if (!$licenseProductId) {
+                    return $this->resultService->createFailureResult(
+                        'Could not determine product for this purchase code'
+                    );
                 }
+
                 // Verify product exists
-                $product = $this->findProduct($licenseProductId);
-                if (! $product) {
-                    return [
-                        'success' => false,
-                        'license' => null,
-                        'message' => 'Product not found',
-                    ];
+                $product = $this->processingService->findProduct($licenseProductId);
+                if (!$product) {
+                    return $this->resultService->createProductNotFoundResult();
                 }
-                // Create the license
-                $license = $this->createLicense($purchaseCode, $licenseProductId, $user->id, $verificationResult);
-                // Create initial invoice
-                $this->createInitialInvoice($license);
-                // Decrease product stock
-                $this->decreaseProductStock($product);
-                return [
-                    'success' => true,
-                    'license' => $license,
-                    'message' => 'License registered successfully',
-                ];
+
+                // Check if product is available
+                $availability = $this->validationService->isProductAvailable($licenseProductId);
+                if (!$availability['available']) {
+                    return $this->resultService->createFailureResult($availability['reason']);
+                }
+
+                // Check if user can register license
+                $canRegister = $this->validationService->canUserRegisterLicense($user->id, $purchaseCode);
+                if (!$canRegister['can_register']) {
+                    return $this->resultService->createFailureResult($canRegister['reason']);
+                }
+
+                // Process license registration
+                $license = $this->processingService->processLicenseRegistration(
+                    $purchaseCode,
+                    $licenseProductId,
+                    $user->id,
+                    $verificationResult
+                );
+
+                $result = $this->resultService->createSuccessResult($license);
+                $this->resultService->logRegistrationResult($result, $purchaseCode, $productId);
+
+                return $result;
             });
         } catch (\Exception $e) {
             Log::error('Failed to auto-register license', [
@@ -128,51 +94,26 @@ class LicenseAutoRegistrationService
                 'product_id' => $productId,
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
-            throw $e;
+
+            return $this->resultService->createSystemErrorResult('License registration failed');
         }
     }
+
     /**
-     * Check if a purchase code is valid without registering it with enhanced security and error handling.
-     *
-     * Validates a purchase code without creating a license record. Includes
-     * comprehensive validation, security measures, and error handling for
-     * reliable purchase code verification.
-     *
-     * @param  string  $purchaseCode  The purchase code to validate
-     * @param  int|null  $productId  Optional product ID for validation
-     *
-     * @return array Validation result with validity status, message, and existing license
-     *
-     * @throws InvalidArgumentException When purchase code is invalid
-     * @throws \Exception When purchase code validation fails
-     *
-     * @example
-     * $result = $service->checkPurchaseCode('ABC123DEF456', 1);
-     * if ($result['valid']) {
-     *     // Purchase code is valid
-     * }
-     */
-    /**
-     * @return array<string, mixed>
+     * Check if purchase code is valid and can be registered.
      */
     public function checkPurchaseCode(string $purchaseCode, ?int $productId = null): array
     {
         try {
             // Validate input parameters
-            $this->validatePurchaseCode($purchaseCode);
-            $this->validateProductId($productId);
-            $user = Auth::user();
-            if (! $user) {
-                return [
-                    'valid' => false,
-                    'message' => 'User must be authenticated',
-                    'existing_license' => null,
-                ];
-            }
+            $this->validationService->validatePurchaseCode($purchaseCode);
+            $this->validationService->validateProductId($productId);
+
+            $user = $this->validationService->validateUserAuthentication();
+
             // Check if user already has this license
-            $existingLicense = $this->findExistingLicense($purchaseCode, $user->id);
+            $existingLicense = $this->processingService->findExistingLicense($purchaseCode, $user->id);
             if ($existingLicense) {
                 return [
                     'valid' => true,
@@ -180,15 +121,17 @@ class LicenseAutoRegistrationService
                     'existing_license' => $existingLicense,
                 ];
             }
+
             // Verify the purchase code
-            $verificationResult = $this->purchaseCodeService->verifyRawCode($purchaseCode, $productId);
-            if (! $verificationResult['success']) {
+            $verificationResult = $this->processingService->verifyPurchaseCode($purchaseCode, $productId);
+            if (!$verificationResult['success']) {
                 return [
                     'valid' => false,
                     'message' => $verificationResult['message'] ?? 'Invalid purchase code',
                     'existing_license' => null,
                 ];
             }
+
             return [
                 'valid' => true,
                 'message' => 'Purchase code is valid',
@@ -200,190 +143,132 @@ class LicenseAutoRegistrationService
                 'product_id' => $productId,
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
-            throw $e;
-        }
-    }
-    /**
-     * Validate purchase code format and content with enhanced security.
-     *
-     * @param  string  $purchaseCode  The purchase code to validate
-     *
-     * @throws InvalidArgumentException When purchase code is invalid
-     */
-    private function validatePurchaseCode(string $purchaseCode): void
-    {
-        if (empty($purchaseCode)) {
-            throw new InvalidArgumentException('Purchase code cannot be empty');
-        }
-        if (strlen($purchaseCode) < 8 || strlen($purchaseCode) > 100) {
-            throw new InvalidArgumentException('Purchase code must be between 8 and 100 characters');
-        }
-        // Basic format validation
-        if (! preg_match('/^[A-Za-z0-9\-_]+$/', $purchaseCode)) {
-            throw new InvalidArgumentException('Purchase code contains invalid characters');
-        }
-    }
-    /**
-     * Validate product ID with enhanced security.
-     *
-     * @param  int|null  $productId  The product ID to validate
-     *
-     * @throws InvalidArgumentException When product ID is invalid
-     */
-    private function validateProductId(?int $productId): void
-    {
-        if ($productId !== null && ($productId < 1 || $productId > 999999)) {
-            throw new InvalidArgumentException('Product ID must be between 1 and 999999');
-        }
-    }
-    /**
-     * Find existing license for user with enhanced error handling.
-     *
-     * @param  string  $purchaseCode  The purchase code to search for
-     * @param  int  $userId  The user ID to search for
-     *
-     * @return License|null The existing license or null
-     *
-     * @throws \Exception When database query fails
-     */
-    private function findExistingLicense(string $purchaseCode, int $userId): ?License
-    {
-        try {
-            return License::where('purchase_code', $purchaseCode)
-                ->where('user_id', $userId)
-                ->first();
-        } catch (\Exception $e) {
-            Log::error('Failed to find existing license', [
-                'purchase_code' => $purchaseCode,
-                'user_id' => $userId,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            throw $e;
-        }
-    }
-    /**
-     * Determine product ID from verification result or provided parameter.
-     *
-     * @param  int|null  $productId  Provided product ID
-     * @param  array  $verificationResult  Verification result from service
-     *
-     * @return int|null Determined product ID
-     */
-    /**
-     * @param array<string, mixed> $verificationResult
-     */
-    private function determineProductId(?int $productId, array $verificationResult): ?int
-    {
-        if ($productId) {
-            return $productId;
-        }
-        return is_numeric($verificationResult['product_id'] ?? null) ? (int)$verificationResult['product_id'] : null;
-    }
-    /**
-     * Find product by ID with enhanced error handling.
-     *
-     * @param  int  $productId  The product ID to find
-     *
-     * @return Product|null The product or null
-     *
-     * @throws \Exception When database query fails
-     */
-    private function findProduct(int $productId): ?Product
-    {
-        try {
-            return Product::find($productId);
-        } catch (\Exception $e) {
-            Log::error('Failed to find product', [
-                'product_id' => $productId,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            throw $e;
-        }
-    }
-    /**
-     * Create license with enhanced security and error handling.
-     *
-     * @param  string  $purchaseCode  The purchase code
-     * @param  int  $productId  The product ID
-     * @param  int  $userId  The user ID
-     * @param  array  $verificationResult  Verification result data
-     *
-     * @return License The created license
-     *
-     * @throws \Exception When license creation fails
-     */
-    /**
-     * @param array<string, mixed> $verificationResult
-     */
-    private function createLicense(
-        string $purchaseCode,
-        int $productId,
-        int $userId,
-        array $verificationResult,
-    ): License {
-        try {
-            $licenseData = [
-                'purchase_code' => htmlspecialchars($purchaseCode, ENT_QUOTES, 'UTF-8'),
-                'product_id' => $productId,
-                'user_id' => $userId,
-                'license_type' => 'regular',
-                'status' => 'active',
-                'support_expires_at' => $verificationResult['support_expires_at'] ?? null,
+
+            return [
+                'valid' => false,
+                'message' => 'Error checking purchase code',
+                'existing_license' => null,
             ];
-            return License::create($licenseData);
+        }
+    }
+
+    /**
+     * Get registration statistics.
+     */
+    public function getRegistrationStatistics(): array
+    {
+        try {
+            $stats = [
+                'total_registrations' => License::count(),
+                'successful_registrations' => License::where('status', 'active')->count(),
+                'failed_registrations' => License::where('status', 'inactive')->count(),
+                'success_rate' => 0,
+                'average_registration_time' => 0,
+            ];
+
+            if ($stats['total_registrations'] > 0) {
+                $stats['success_rate'] = round(
+                    ($stats['successful_registrations'] / $stats['total_registrations']) * 100,
+                    2
+                );
+            }
+
+            return $this->resultService->formatRegistrationStatistics($stats);
         } catch (\Exception $e) {
-            Log::error('Failed to create license', [
+            Log::error('Failed to get registration statistics', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'total_registrations' => 0,
+                'successful_registrations' => 0,
+                'failed_registrations' => 0,
+                'success_rate' => 0,
+                'average_registration_time' => 0,
+            ];
+        }
+    }
+
+    /**
+     * Bulk register licenses.
+     */
+    public function bulkRegisterLicenses(array $purchaseCodes, ?int $productId = null): array
+    {
+        try {
+            $results = [];
+
+            foreach ($purchaseCodes as $purchaseCode) {
+                $result = $this->autoRegisterLicense($purchaseCode, $productId);
+                $results[] = $result;
+            }
+
+            return $this->resultService->createBulkRegistrationResult($results);
+        } catch (\Exception $e) {
+            Log::error('Bulk license registration failed', [
+                'error' => $e->getMessage(),
+                'purchase_codes' => $purchaseCodes,
+                'product_id' => $productId,
+            ]);
+
+            return $this->resultService->createSystemErrorResult('Bulk registration failed');
+        }
+    }
+
+    /**
+     * Validate registration request.
+     */
+    public function validateRegistrationRequest(string $purchaseCode, ?int $productId): array
+    {
+        try {
+            $errors = $this->validationService->validateRegistrationRequest($purchaseCode, $productId);
+
+            if (!empty($errors)) {
+                return $this->resultService->createValidationErrorResult($errors);
+            }
+
+            return $this->resultService->createSuccessResult(null, 'Registration request is valid');
+        } catch (\Exception $e) {
+            Log::error('Registration request validation failed', [
+                'error' => $e->getMessage(),
                 'purchase_code' => $purchaseCode,
                 'product_id' => $productId,
+            ]);
+
+            return $this->resultService->createSystemErrorResult('Validation failed');
+        }
+    }
+
+    /**
+     * Get user license count.
+     */
+    public function getUserLicenseCount(int $userId): int
+    {
+        try {
+            return License::where('user_id', $userId)->count();
+        } catch (\Exception $e) {
+            Log::error('Failed to get user license count', [
+                'error' => $e->getMessage(),
                 'user_id' => $userId,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
-            throw $e;
+            return 0;
         }
     }
+
     /**
-     * Create initial invoice with enhanced error handling.
-     *
-     * @param  License  $license  The license to create invoice for
-     *
-     * @throws \Exception When invoice creation fails
+     * Check if user can register more licenses.
      */
-    private function createInitialInvoice(License $license): void
+    public function canUserRegisterMoreLicenses(int $userId, int $maxLicenses = 10): bool
     {
         try {
-            $this->invoiceService->createInitialInvoice($license);
+            $currentCount = $this->getUserLicenseCount($userId);
+            return $currentCount < $maxLicenses;
         } catch (\Exception $e) {
-            Log::error('Failed to create initial invoice', [
-                'license_id' => $license->id,
+            Log::error('Failed to check user license limit', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'user_id' => $userId,
             ]);
-            throw $e;
-        }
-    }
-    /**
-     * Decrease product stock with enhanced error handling.
-     *
-     * @param  Product  $product  The product to decrease stock for
-     *
-     * @throws \Exception When stock decrease fails
-     */
-    private function decreaseProductStock(Product $product): void
-    {
-        try {
-            $product->decreaseStock();
-        } catch (\Exception $e) {
-            Log::error('Failed to decrease product stock', [
-                'product_id' => $product->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            throw $e;
+            return false;
         }
     }
 }

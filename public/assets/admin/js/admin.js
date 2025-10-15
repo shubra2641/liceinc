@@ -17,19 +17,19 @@ function showNotification(message, type = 'info') {
 
   // Create notification content safely
   const iconClass = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
-  
+
   // Create notification content safely without innerHTML
   const icon = document.createElement('i');
   icon.className = `fas fa-${iconClass} me-2`;
-  
+
   const messageSpan = document.createElement('span');
   messageSpan.textContent = message; // Use textContent for safety
-  
+
   const closeButton = document.createElement('button');
   closeButton.type = 'button';
   closeButton.className = 'btn-close';
   closeButton.setAttribute('data-bs-dismiss', 'alert');
-  
+
   notification.appendChild(icon);
   notification.appendChild(messageSpan);
   notification.appendChild(closeButton);
@@ -114,20 +114,20 @@ class ToastManager {
     // Create header content safely without innerHTML
     const icon = document.createElement('i');
     icon.className = `${icons[type]} toast-icon`;
-    
+
     const title = document.createElement('h6');
     title.className = 'toast-title';
     title.textContent = titles[type];
-    
+
     const closeButton = document.createElement('button');
     closeButton.type = 'button';
     closeButton.className = 'toast-close';
     closeButton.onclick = () => window.toastManager.hide(closeButton.closest('.toast'));
-    
+
     const closeIcon = document.createElement('i');
     closeIcon.className = 'fas fa-times';
     closeButton.appendChild(closeIcon);
-    
+
     header.appendChild(icon);
     header.appendChild(title);
     header.appendChild(closeButton);
@@ -217,15 +217,15 @@ class AdminDashboard {
   showToast(message, type = 'info', duration = 5000) {
     if (typeof window.toastManager !== 'undefined') {
       switch (type) {
-      case 'success':
-        return window.toastManager.success(message, null, duration);
-      case 'error':
-        return window.toastManager.error(message, null, duration);
-      case 'warning':
-        return window.toastManager.warning(message, null, duration);
-      case 'info':
-      default:
-        return window.toastManager.info(message, null, duration);
+        case 'success':
+          return window.toastManager.success(message, null, duration);
+        case 'error':
+          return window.toastManager.error(message, null, duration);
+        case 'warning':
+          return window.toastManager.warning(message, null, duration);
+        case 'info':
+        default:
+          return window.toastManager.info(message, null, duration);
       }
     }
     return null;
@@ -292,7 +292,7 @@ class AdminDashboard {
 
     // Initialize license preview
     this.initLicensePreview();
-    
+
     // Initialize license calculations
     initLicenseCalculations();
 
@@ -366,7 +366,7 @@ class AdminDashboard {
     if (settingsPage || testApiBtn) {
       this.initSettingsFunctions();
     } else {
-  debugLog('Settings page not detected');
+      debugLog('Settings page not detected');
     }
 
     // Settings functions are initialized conditionally above
@@ -711,7 +711,7 @@ class AdminDashboard {
   // Initialize modals
   initModals() {
     // Auto-focus first input in modals
-    $('.modal').on('shown.bs.modal', function() {
+    $('.modal').on('shown.bs.modal', function () {
       $(this).find('input, textarea, select').first().focus();
     });
   }
@@ -719,7 +719,7 @@ class AdminDashboard {
   // Initialize delete confirmations
   initConfirmations() {
     document.querySelectorAll('form[data-confirm]').forEach(form => {
-      form.addEventListener('submit', function(e) {
+      form.addEventListener('submit', function (e) {
         const message = this.getAttribute('data-confirm');
         if (!confirm(message)) {
           e.preventDefault();
@@ -745,7 +745,7 @@ class AdminDashboard {
     const iconPreview = document.getElementById('icon-preview');
 
     if (iconInput && iconPreview) {
-      iconInput.addEventListener('input', function() {
+      iconInput.addEventListener('input', function () {
         const iconClass = this.value || 'fas fa-ticket-alt';
         // Sanitize icon class to prevent XSS
         const sanitizedIconClass = iconClass.replace(
@@ -777,27 +777,27 @@ class AdminDashboard {
     const previewDescription = document.getElementById('preview-description');
 
     if (nameInput && previewName) {
-      nameInput.addEventListener('input', function() {
+      nameInput.addEventListener('input', function () {
         previewName.textContent =
           this.value || '{{ trans("app.Category Name") }}';
       });
     }
 
     if (descriptionInput && previewDescription) {
-      descriptionInput.addEventListener('input', function() {
+      descriptionInput.addEventListener('input', function () {
         previewDescription.textContent =
           this.value || '{{ trans("app.Category Description") }}';
       });
     }
 
     if (colorInput && colorTextInput && previewDiv) {
-      colorInput.addEventListener('input', function() {
+      colorInput.addEventListener('input', function () {
         const color = this.value;
         colorTextInput.value = color;
         previewDiv.style.backgroundColor = color;
       });
 
-      colorTextInput.addEventListener('input', function() {
+      colorTextInput.addEventListener('input', function () {
         const color = this.value;
         if (/^#[0-9A-F]{6}$/i.test(color)) {
           colorInput.value = color;
@@ -814,14 +814,14 @@ class AdminDashboard {
     const previewExcerpt = document.getElementById('preview-excerpt');
 
     if (titleInput && previewTitle) {
-      titleInput.addEventListener('input', function() {
+      titleInput.addEventListener('input', function () {
         previewTitle.textContent =
           this.value || '{{ trans("app.Article Title") }}';
       });
     }
 
     if (excerptInput && previewExcerpt) {
-      excerptInput.addEventListener('input', function() {
+      excerptInput.addEventListener('input', function () {
         previewExcerpt.textContent =
           this.value || '{{ trans("app.Article Excerpt") }}';
       });
@@ -833,7 +833,7 @@ class AdminDashboard {
     const serialFields = document.getElementById('serial-fields');
 
     if (requiresSerialCheckbox && serialFields) {
-      requiresSerialCheckbox.addEventListener('change', function() {
+      requiresSerialCheckbox.addEventListener('change', function () {
         serialFields.style.display = this.checked ? 'block' : 'none';
       });
     }
@@ -848,13 +848,13 @@ class AdminDashboard {
     const previewRole = document.getElementById('preview-role');
 
     if (nameInput && previewName) {
-      nameInput.addEventListener('input', function() {
+      nameInput.addEventListener('input', function () {
         previewName.textContent = this.value || '{{ trans("app.User Name") }}';
       });
     }
 
     if (emailInput && previewEmail) {
-      emailInput.addEventListener('input', function() {
+      emailInput.addEventListener('input', function () {
         previewEmail.textContent =
           this.value || '{{ trans("app.user@example.com") }}';
       });
@@ -862,7 +862,7 @@ class AdminDashboard {
 
     if (roleInputs.length > 0 && previewRole) {
       roleInputs.forEach(radio => {
-        radio.addEventListener('change', function() {
+        radio.addEventListener('change', function () {
           if (this.checked) {
             const roleText =
               this.value === 'admin' ?
@@ -888,7 +888,7 @@ class AdminDashboard {
     const previewDomains = document.getElementById('preview-domains');
 
     if (productSelect && previewProduct) {
-      productSelect.addEventListener('change', function() {
+      productSelect.addEventListener('change', function () {
         const selectedOption = this.options[this.selectedIndex];
         previewProduct.textContent =
           selectedOption.text || '{{ trans("app.Product Name") }}';
@@ -896,7 +896,7 @@ class AdminDashboard {
     }
 
     if (userSelect && previewUser) {
-      userSelect.addEventListener('change', function() {
+      userSelect.addEventListener('change', function () {
         const selectedOption = this.options[this.selectedIndex];
         previewUser.textContent =
           selectedOption.text || '{{ trans("app.User Name") }}';
@@ -904,7 +904,7 @@ class AdminDashboard {
     }
 
     if (statusSelect && previewStatus) {
-      statusSelect.addEventListener('change', function() {
+      statusSelect.addEventListener('change', function () {
         const selectedOption = this.options[this.selectedIndex];
         const statusValue = selectedOption.value;
         const statusText = selectedOption.text;
@@ -915,7 +915,7 @@ class AdminDashboard {
     }
 
     if (maxDomainsInput && previewDomains) {
-      maxDomainsInput.addEventListener('input', function() {
+      maxDomainsInput.addEventListener('input', function () {
         previewDomains.textContent = this.value || '1';
       });
     }
@@ -933,7 +933,7 @@ class AdminDashboard {
     const previewDueDate = document.getElementById('preview-due-date');
 
     if (userSelect && previewCustomer) {
-      userSelect.addEventListener('change', function() {
+      userSelect.addEventListener('change', function () {
         const selectedOption = this.options[this.selectedIndex];
         previewCustomer.textContent =
           selectedOption.text.split(' (')[0] ||
@@ -954,7 +954,7 @@ class AdminDashboard {
     }
 
     if (statusSelect && previewStatus) {
-      statusSelect.addEventListener('change', function() {
+      statusSelect.addEventListener('change', function () {
         const selectedOption = this.options[this.selectedIndex];
         const statusValue = selectedOption.value;
         const statusText = selectedOption.text;
@@ -970,7 +970,7 @@ class AdminDashboard {
     }
 
     if (dueDateInput && previewDueDate) {
-      dueDateInput.addEventListener('change', function() {
+      dueDateInput.addEventListener('change', function () {
         if (this.value) {
           const date = new Date(this.value);
           previewDueDate.textContent = date.toLocaleDateString('en-US', {
@@ -995,7 +995,7 @@ class AdminDashboard {
 
     // Auto-generate template name from subject
     if (subjectInput && nameInput) {
-      subjectInput.addEventListener('input', function() {
+      subjectInput.addEventListener('input', function () {
         if (!nameInput.value) {
           const value = this.value
             .toLowerCase()
@@ -1052,7 +1052,7 @@ class AdminDashboard {
       '.variable-item[data-variable]',
     );
     variableItems.forEach(item => {
-      item.addEventListener('click', function() {
+      item.addEventListener('click', function () {
         const variable = this.getAttribute('data-variable');
         copyToClipboard(variable);
       });
@@ -1227,11 +1227,10 @@ class AdminDashboard {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             backdrop-filter: blur(10px);
-            ${
-  type === 'success' ?
-    'background: linear-gradient(135deg, #10b981 0%, #059669 100%);' :
-    'background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);'
-}
+            ${type === 'success' ?
+        'background: linear-gradient(135deg, #10b981 0%, #059669 100%);' :
+        'background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);'
+      }
         `;
 
     document.body.appendChild(notification);
@@ -1807,21 +1806,21 @@ class AdminDashboard {
         if (expirationInput && !expirationInput.value) {
           const today = new Date();
           switch (selectedType) {
-          case 'monthly':
-            today.setMonth(today.getMonth() + 1);
-            break;
-          case 'quarterly':
-            today.setMonth(today.getMonth() + 3);
-            break;
-          case 'semi_annual':
-            today.setMonth(today.getMonth() + 6);
-            break;
-          case 'annual':
-            today.setFullYear(today.getFullYear() + 1);
-            break;
-          case 'custom_recurring':
-            today.setMonth(today.getMonth() + 1);
-            break;
+            case 'monthly':
+              today.setMonth(today.getMonth() + 1);
+              break;
+            case 'quarterly':
+              today.setMonth(today.getMonth() + 3);
+              break;
+            case 'semi_annual':
+              today.setMonth(today.getMonth() + 6);
+              break;
+            case 'annual':
+              today.setFullYear(today.getFullYear() + 1);
+              break;
+            case 'custom_recurring':
+              today.setMonth(today.getMonth() + 1);
+              break;
           }
           const [datePart] = today.toISOString().split('T');
           expirationInput.value = datePart;
@@ -1933,18 +1932,18 @@ class AdminDashboard {
               option.value = license.id;
               let statusText = license.status;
               switch (license.status.toLowerCase()) {
-              case 'active':
-                statusText = 'Active';
-                break;
-              case 'expired':
-                statusText = 'Expired';
-                break;
-              case 'suspended':
-                statusText = 'Suspended';
-                break;
-              case 'pending':
-                statusText = 'Pending';
-                break;
+                case 'active':
+                  statusText = 'Active';
+                  break;
+                case 'expired':
+                  statusText = 'Expired';
+                  break;
+                case 'suspended':
+                  statusText = 'Suspended';
+                  break;
+                case 'pending':
+                  statusText = 'Pending';
+                  break;
               }
               option.textContent = `${license.product.name} - ${license.license_type} (${statusText})`;
               licenseSelect.appendChild(option);
@@ -2315,7 +2314,7 @@ class AdminDashboard {
     const invoiceTypeSelect = document.getElementById('invoice_type');
     const renewalGroup = document.getElementById('invoice-renewal-group');
     const renewalPeriodGroup = document.getElementById('invoice-renewal-period-group');
-    
+
     if (invoiceTypeSelect && renewalGroup && renewalPeriodGroup) {
       invoiceTypeSelect.addEventListener('change', () => {
         if (invoiceTypeSelect.value === 'renewal') {
@@ -2337,22 +2336,22 @@ class AdminDashboard {
   initExtendedSupportCalculation() {
     const renewalPeriodSelect = document.getElementById('renewal_period');
     const extendedSupportedUntilInput = document.getElementById('extended_supported_until');
-    
+
     if (renewalPeriodSelect && extendedSupportedUntilInput) {
       const calculateExtendedSupport = () => {
         const renewalPeriod = renewalPeriodSelect.value;
-        
+
         if (renewalPeriod === 'lifetime') {
           extendedSupportedUntilInput.value = '';
           extendedSupportedUntilInput.disabled = true;
           return;
         }
-        
+
         extendedSupportedUntilInput.disabled = false;
-        
+
         const today = new Date();
         let daysToAdd = 0;
-        
+
         switch (renewalPeriod) {
           case 'monthly':
             daysToAdd = 30;
@@ -2372,14 +2371,14 @@ class AdminDashboard {
           default:
             return;
         }
-        
+
         const futureDate = new Date(today.getTime() + (daysToAdd * 24 * 60 * 60 * 1000));
         const formattedDate = futureDate.toISOString().split('T')[0];
         extendedSupportedUntilInput.value = formattedDate;
       };
-      
+
       renewalPeriodSelect.addEventListener('change', calculateExtendedSupport);
-      
+
       // Calculate on page load if value exists
       if (renewalPeriodSelect.value) {
         calculateExtendedSupport();
@@ -3325,7 +3324,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function initApiTestButtonDirectly() {
   const testBtn = document.getElementById('test-api-btn');
   if (testBtn && !testBtn.dataset.apiTestInitialized) {
-  // Removed unused self variable
+    // Removed unused self variable
     testBtn.addEventListener('click', () => {
       if (window.adminDashboard && window.adminDashboard.testEnvatoApi) {
         window.adminDashboard.testEnvatoApi();
@@ -3423,7 +3422,7 @@ function initProgrammingLanguagesEditIconPreview() {
   const iconPreview = document.getElementById('icon-preview');
 
   if (iconInput && iconPreview) {
-    iconInput.addEventListener('input', function() {
+    iconInput.addEventListener('input', function () {
       const iconClass = this.value.trim();
       if (iconClass) {
         iconPreview.className = iconClass;
@@ -3459,7 +3458,7 @@ function initProgrammingLanguagesEditButtons() {
     '[data-action="load-template"]',
   );
   loadTemplateButtons.forEach(button => {
-    button.addEventListener('click', function() {
+    button.addEventListener('click', function () {
       const templateName = this.getAttribute('data-template');
       loadTemplate(templateName);
     });
@@ -3470,7 +3469,7 @@ function initProgrammingLanguagesEditButtons() {
     '[data-action="save-template"]',
   );
   saveTemplateButtons.forEach(button => {
-    button.addEventListener('click', function() {
+    button.addEventListener('click', function () {
       const templateName = this.getAttribute('data-template');
       saveTemplate(templateName);
     });
@@ -3481,7 +3480,7 @@ function initProgrammingLanguagesEditButtons() {
     '[data-action="preview-template"]',
   );
   previewTemplateButtons.forEach(button => {
-    button.addEventListener('click', function() {
+    button.addEventListener('click', function () {
       const templateName = this.getAttribute('data-template');
       previewTemplate(templateName);
     });
@@ -4004,7 +4003,7 @@ function loadSavedTemplate() {
         showNotification('Saved template loaded successfully!', 'success');
       }
     }
-  } catch (error) {}
+  } catch (error) { }
 }
 
 
@@ -4110,15 +4109,15 @@ function showValidationResults(results) {
                     </div>
                     <div class="list-group">
                         ${results
-    .map(
-      result => `
+      .map(
+        result => `
                             <div class="list-group-item d-flex align-items-center">
                                 <i class="fas fa-${result.type === 'success' ? 'check-circle text-success' : result.type === 'warning' ? 'exclamation-triangle text-warning' : 'times-circle text-danger'} me-3"></i>
                                 <span>${result.message}</span>
                             </div>
                         `,
-    )
-    .join('')}
+      )
+      .join('')}
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -4231,7 +4230,7 @@ function showAvailableTemplates() {
   if (existingModal) {
     existingModal.remove();
   }
-  
+
   const modal = document.createElement('div');
   modal.className = 'modal fade';
   modal.setAttribute('aria-hidden', 'false');
@@ -4346,8 +4345,8 @@ function viewTemplate() {
                             <h6>Saved Templates</h6>
                             <div class="list-group">
                                 ${savedTemplates
-    .map(
-      (template, index) => `
+      .map(
+        (template, index) => `
                                     <button class="list-group-item list-group-item-action ${index === 0 ? 'active' : ''}" 
                                             onclick="viewTemplateContent('${template.name}', this)">
                                         <div class="d-flex w-100 justify-content-between">
@@ -4358,8 +4357,8 @@ function viewTemplate() {
                                         <small>Version: ${template.version}</small>
                                     </button>
                                 `,
-    )
-    .join('')}
+      )
+      .join('')}
                             </div>
                         </div>
                         <div class="col-md-8">
@@ -4533,7 +4532,7 @@ class License {
     }
   }, 50);
 
-  typeSelect.addEventListener('change', function() {
+  typeSelect.addEventListener('change', function () {
     const templates = {
       default: `<?php
 // Default License Template
@@ -4608,7 +4607,7 @@ function saveNewTemplate() {
   }));
 
   showNotification('Template created successfully!', 'success');
-  
+
   // Close modal
   bootstrap.Modal.getInstance(document.querySelector('.modal')).hide();
 }
@@ -5326,7 +5325,7 @@ function initCharts() {
                     color: 'rgba(0, 0, 0, 0.1)',
                   },
                   ticks: {
-                    callback: function(value) {
+                    callback: function (value) {
                       return `$${value.toLocaleString()}`;
                     },
                   },
@@ -5475,7 +5474,7 @@ function initProgrammingLanguagesCreateIconPreview() {
   const iconPreview = document.getElementById('icon-preview');
 
   if (iconInput && iconPreview) {
-    iconInput.addEventListener('input', function() {
+    iconInput.addEventListener('input', function () {
       const iconClass = this.value.trim();
       if (iconClass) {
         iconPreview.className = iconClass;
@@ -5491,7 +5490,7 @@ function initProgrammingLanguagesCreateTemplatePreview() {
   const templatePreview = document.getElementById('template-preview');
 
   if (templateInput && templatePreview) {
-    templateInput.addEventListener('input', function() {
+    templateInput.addEventListener('input', function () {
       const template = this.value.trim();
       if (template) {
         templatePreview.textContent = template;
@@ -5578,7 +5577,7 @@ function initializeHumanQuestions() {
     }
   });
 
-  addBtn.addEventListener('click', function() {
+  addBtn.addEventListener('click', function () {
     const idx = list.querySelectorAll('.human-question-row').length;
     const wrapper = document.createElement('div');
     wrapper.className = 'human-question-row mb-3';
@@ -5629,12 +5628,12 @@ function initializeApiTokenGeneration() {
 
   // Make token input editable when clicked
   if (tokenInput) {
-    tokenInput.addEventListener('click', function() {
+    tokenInput.addEventListener('click', function () {
       this.removeAttribute('readonly');
     });
 
     // Allow manual input
-    tokenInput.addEventListener('input', function() {
+    tokenInput.addEventListener('input', function () {
       // Remove readonly when user starts typing
       this.removeAttribute('readonly');
     });
@@ -5647,7 +5646,7 @@ function initializeApiTesting() {
   const apiTestResult = document.getElementById('api-test-result');
 
   if (testApiBtn && apiTestResult) {
-    testApiBtn.addEventListener('click', function() {
+    testApiBtn.addEventListener('click', function () {
       const button = this;
       const originalText = button.innerHTML;
 
@@ -5658,7 +5657,7 @@ function initializeApiTesting() {
 
       // Get token value
       const token = document.getElementById('envato_personal_token').value;
-      
+
       // Create form data
       const formData = new FormData();
       formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
@@ -5673,10 +5672,10 @@ function initializeApiTesting() {
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         }
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          apiTestResult.innerHTML = `
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            apiTestResult.innerHTML = `
             <div class="admin-alert admin-alert-success">
               <div class="admin-alert-content">
                 <i class="fas fa-check-circle admin-alert-icon"></i>
@@ -5687,8 +5686,8 @@ function initializeApiTesting() {
               </div>
             </div>
           `;
-        } else {
-          apiTestResult.innerHTML = `
+          } else {
+            apiTestResult.innerHTML = `
             <div class="admin-alert admin-alert-danger">
               <div class="admin-alert-content">
                 <i class="fas fa-times-circle admin-alert-icon"></i>
@@ -5699,10 +5698,10 @@ function initializeApiTesting() {
               </div>
             </div>
           `;
-        }
-      })
-      .catch(error => {
-        apiTestResult.innerHTML = `
+          }
+        })
+        .catch(error => {
+          apiTestResult.innerHTML = `
           <div class="admin-alert admin-alert-danger">
             <div class="admin-alert-content">
               <i class="fas fa-times-circle admin-alert-icon"></i>
@@ -5713,12 +5712,12 @@ function initializeApiTesting() {
             </div>
           </div>
         `;
-      })
-      .finally(() => {
-        // Restore button state
-        button.innerHTML = originalText;
-        button.disabled = false;
-      });
+        })
+        .finally(() => {
+          // Restore button state
+          button.innerHTML = originalText;
+          button.disabled = false;
+        });
     });
   }
 }
@@ -5755,7 +5754,7 @@ function initializeSettingsTabs() {
   initializeTabs();
 
   tabButtons.forEach(button => {
-    button.addEventListener('click', function() {
+    button.addEventListener('click', function () {
       const targetTab = this.getAttribute('data-tab');
 
       // Remove active class from all buttons
@@ -5823,11 +5822,11 @@ function initializeColorPickers() {
   colorInputs.forEach(input => {
     const textInput = input.nextElementSibling;
     if (textInput && textInput.type === 'text') {
-      input.addEventListener('input', function() {
+      input.addEventListener('input', function () {
         textInput.value = this.value;
       });
 
-      textInput.addEventListener('input', function() {
+      textInput.addEventListener('input', function () {
         if (this.value.match(/^#[0-9A-F]{6}$/i)) {
           input.value = this.value;
         }
@@ -6010,7 +6009,7 @@ function checkUpdateNotification() {
     .catch(error => {
       // Only log error if it's not a 404 or similar expected error
       if (!error.message.includes('404') && !error.message.includes('429')) {
-  debugLog('Update notification request failed:', error);
+        debugLog('Update notification request failed:', error);
       }
     });
 }
@@ -6115,81 +6114,81 @@ function initLicenseCalculations() {
   const licenseExpiresInput = document.getElementById('license_expires_at');
   const supportExpiresInput = document.getElementById('support_expires_at');
   const generatePreviewBtn = document.querySelector('[data-action="generate-preview"]');
-  
+
   if (!productSelect) return;
-  
+
   // Calculate dates and domains when product changes
   productSelect.addEventListener('change', calculateLicenseData);
-  
+
   // Calculate domains when license type changes
   if (licenseTypeSelect) {
     licenseTypeSelect.addEventListener('change', calculateMaxDomains);
   }
-  
+
   // Generate preview button
   if (generatePreviewBtn) {
     generatePreviewBtn.addEventListener('click', generateLicensePreview);
   }
-  
+
   function calculateLicenseData() {
     const productId = productSelect.value;
     if (!productId) {
       resetFields();
       return;
     }
-    
+
     // Get product data from data attributes or fetch from server
     const productOption = productSelect.querySelector(`option[value="${productId}"]`);
     if (!productOption) return;
-    
+
     const durationDays = parseInt(productOption.dataset.durationDays) || 365;
     const supportDays = parseInt(productOption.dataset.supportDays) || 365;
     const maxDomains = parseInt(productOption.dataset.maxDomains) || 1;
     const licenseType = productOption.dataset.licenseType || '';
-    
+
     // Auto-fill license type from product
     if (licenseTypeSelect && licenseType) {
       licenseTypeSelect.value = licenseType;
     }
-    
+
     // Calculate dates
     const today = new Date();
     const licenseExpiry = new Date(today);
     licenseExpiry.setDate(today.getDate() + durationDays);
-    
+
     const supportExpiry = new Date(today);
     supportExpiry.setDate(today.getDate() + supportDays);
-    
+
     // Update fields
     if (maxDomainsInput) {
       maxDomainsInput.value = maxDomains;
     }
-    
+
     if (licenseExpiresInput) {
       licenseExpiresInput.value = formatDate(licenseExpiry);
     }
-    
+
     if (supportExpiresInput) {
       supportExpiresInput.value = formatDate(supportExpiry);
     }
-    
+
     // Also calculate max domains based on license type
     calculateMaxDomains();
   }
-  
+
   function calculateMaxDomains() {
     const licenseType = licenseTypeSelect ? licenseTypeSelect.value : '';
     const productId = productSelect.value;
-    
+
     if (!licenseType || !productId) return;
-    
+
     // Get base max domains from product
     const productOption = productSelect.querySelector(`option[value="${productId}"]`);
     if (!productOption) return;
-    
+
     const baseMaxDomains = parseInt(productOption.dataset.maxDomains) || 1;
     let calculatedDomains = baseMaxDomains;
-    
+
     // Calculate based on license type
     switch (licenseType) {
       case 'single':
@@ -6207,40 +6206,40 @@ function initLicenseCalculations() {
       default:
         calculatedDomains = baseMaxDomains;
     }
-    
+
     // Update max domains field
     if (maxDomainsInput) {
       maxDomainsInput.value = calculatedDomains;
     }
   }
-  
+
   function resetFields() {
     if (maxDomainsInput) maxDomainsInput.value = '';
     if (licenseExpiresInput) licenseExpiresInput.value = '';
     if (supportExpiresInput) supportExpiresInput.value = '';
   }
-  
+
   function formatDate(date) {
     return date.toISOString().split('T')[0];
   }
-  
+
   function generateLicensePreview() {
     const productId = productSelect.value;
     const userId = document.getElementById('user_id')?.value;
-    
+
     if (!productId || !userId) {
       alert('Please select both user and product first.');
       return;
     }
-    
+
     // Generate preview data
     const previewKey = document.getElementById('preview-license-key');
     const previewDomains = document.getElementById('preview-domains');
-    
+
     if (previewKey) {
       previewKey.textContent = 'LIC-' + Math.random().toString(36).substr(2, 9).toUpperCase();
     }
-    
+
     if (previewDomains && maxDomainsInput) {
       previewDomains.textContent = maxDomainsInput.value || '1';
     }

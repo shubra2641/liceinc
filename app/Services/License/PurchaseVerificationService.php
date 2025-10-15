@@ -356,5 +356,4 @@ class PurchaseVerificationService
     {
         return substr($purchaseCode, 0, 8) . '...';
     }
-
 }
