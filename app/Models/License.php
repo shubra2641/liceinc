@@ -95,33 +95,55 @@ class License extends Model
     protected static function booted(): void
     {
         static::creating(function (License $license): void {
-            // Ensure purchase_code exists; some flows (Envato) provide it explicitly
-            if (empty($license->purchase_code)) {
-                $license->purchase_code = static::generateUniquePurchaseCode();
-            }
-            // Always use purchase_code as license_key for consistency
-            $license->license_key = $license->purchase_code;
+            static::initializeLicenseKeys($license);
         });
+    }
+
+    /**
+     * Initialize license keys during creation.
+     */
+    protected static function initializeLicenseKeys(License $license): void
+    {
+        if (empty($license->purchase_code)) {
+            $license->purchase_code = static::generateUniquePurchaseCode();
+        }
+        
+        // Always use purchase_code as license_key for consistency
+        $license->license_key = $license->purchase_code;
     }
     protected static function generateUniquePurchaseCode(): string
     {
-        do {
-            $code = strtoupper(Str::random(16));
-            // Format like XXXX-XXXX-XXXX-XXXX
-            $code = substr($code, 0, 4) . '-' . substr($code, 4, 4) . '-' .
-                substr($code, 8, 4) . '-' . substr($code, 12, 4);
-        } while (static::where('purchase_code', $code)->exists());
-        return $code;
+        return static::generateUniqueCode('purchase_code', 16, 4);
     }
+
     protected static function generateUniqueLicenseKey(): string
     {
+        return static::generateUniqueCode('license_key', 32, 8);
+    }
+
+    /**
+     * Generate a unique code with specified length and segment size.
+     */
+    protected static function generateUniqueCode(string $field, int $length, int $segmentSize): string
+    {
         do {
-            $key = strtoupper(Str::random(32));
-            // Format like XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX
-            $key = substr($key, 0, 8) . '-' . substr($key, 8, 8) . '-' .
-                substr($key, 16, 8) . '-' . substr($key, 24, 8);
-        } while (static::where('license_key', $key)->exists());
-        return $key;
+            $code = strtoupper(Str::random($length));
+            $formattedCode = static::formatCode($code, $segmentSize);
+        } while (static::where($field, $formattedCode)->exists());
+        
+        return $formattedCode;
+    }
+
+    /**
+     * Format code with dashes between segments.
+     */
+    protected static function formatCode(string $code, int $segmentSize): string
+    {
+        $segments = [];
+        for ($i = 0; $i < strlen($code); $i += $segmentSize) {
+            $segments[] = substr($code, $i, $segmentSize);
+        }
+        return implode('-', $segments);
     }
     /**
      * @return BelongsTo<Product, $this>
@@ -185,13 +207,24 @@ class License extends Model
      */
     public function scopeForUser(Builder $query, User|int $user): Builder
     {
-        $userId = null;
-        if (is_numeric($user)) {
-            $userId = (int)$user;
-        } elseif ($user instanceof User) {
-            $userId = $user->id;
-        }
+        $userId = static::extractUserId($user);
         return $query->where('user_id', $userId);
+    }
+
+    /**
+     * Extract user ID from user instance or integer.
+     */
+    protected static function extractUserId(User|int $user): ?int
+    {
+        if (is_numeric($user)) {
+            return (int)$user;
+        }
+        
+        if ($user instanceof User) {
+            return $user->id;
+        }
+        
+        return null;
     }
     /**
      * Scope a query to licenses for a specific customer id (backwards compatibility).
@@ -238,15 +271,22 @@ class License extends Model
      */
     public function hasReachedDomainLimit(): bool
     {
-        $maxDomains = $this->max_domains ?? 1;
-        return $this->active_domains_count >= $maxDomains;
+        return $this->active_domains_count >= $this->getMaxDomains();
     }
+
     /**
      * Get remaining domains that can be added.
      */
     public function getRemainingDomainsAttribute(): int
     {
-        $maxDomains = $this->max_domains ?? 1;
-        return max(0, $maxDomains - $this->active_domains_count);
+        return max(0, $this->getMaxDomains() - $this->active_domains_count);
+    }
+
+    /**
+     * Get the maximum number of domains allowed for this license.
+     */
+    protected function getMaxDomains(): int
+    {
+        return $this->max_domains ?? 1;
     }
 }
