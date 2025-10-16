@@ -44,7 +44,8 @@ return [
     'failure' => 'Failure',
     'no_history' => 'No history available',
     'no_domains' => 'No domains registered',
-    'envato_verification_failed' => 'Warning: Failed to verify with Envato. License is valid locally but there may be an issue with Envato.',
+    'envato_verification_failed' => 'Warning: Failed to verify with Envato. License is valid locally ' .
+        'but there may be an issue with Envato.',
     'envato_support_expired' => 'Warning: Envato support has expired for this license.',
     'envato_verification_success' => 'Envato verification successful.',
     'envato' => 'Envato',

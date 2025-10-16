@@ -18,7 +18,8 @@ use Illuminate\Support\Facades\Log;
  */
 class GenerateRenewalInvoices extends Command
 {
-    protected $signature = 'licenses:generate-renewal-invoices {--days=7 : Number of days before expiry to generate invoices}';
+    protected $signature = 'licenses:generate-renewal-invoices ' .
+        '{--days=7 : Number of days before expiry to generate invoices}';
 
     protected $description = 'Generate renewal invoices for licenses that are about to expire';
 
@@ -56,7 +57,9 @@ class GenerateRenewalInvoices extends Command
 
                     if ($invoice !== null) {
                         $generatedCount++;
-                        $this->line('Generated renewal invoice for license ' . $license->license_key . ' (Product: ' . ($license->product->name ?? 'Unknown Product') . ')');
+                        $this->line('Generated renewal invoice for license ' . 
+                            $license->license_key . ' (Product: ' . 
+                            ($license->product->name ?? 'Unknown Product') . ')');
 
                         if ($this->sendRenewalNotifications($license, $invoice)) {
                             $emailSentCount++;
@@ -73,7 +76,8 @@ class GenerateRenewalInvoices extends Command
                 }
             }
 
-            $this->info('Generated ' . $generatedCount . ' renewal invoices and sent ' . $emailSentCount . ' email notifications.');
+            $this->info('Generated ' . $generatedCount . ' renewal invoices and sent ' . 
+                $emailSentCount . ' email notifications.');
             if ($errorCount > 0) {
                 $this->warn('Encountered ' . $errorCount . ' errors during processing. Check logs for details.');
             }
@@ -155,7 +159,11 @@ class GenerateRenewalInvoices extends Command
             }
 
             $newExpiryDate = $this->calculateNewExpiryDate($license, $product);
-            $description = htmlspecialchars('Renewal for ' . $product->name . ' - License ' . $license->license_key, ENT_QUOTES, 'UTF-8');
+            $description = htmlspecialchars(
+                'Renewal for ' . $product->name . ' - License ' . $license->license_key, 
+                ENT_QUOTES, 
+                'UTF-8'
+            );
 
             $invoice = $this->invoiceService->createRenewalInvoice($license, [
                 'amount' => $renewalPrice,
@@ -358,6 +366,7 @@ class GenerateRenewalInvoices extends Command
             'error' => $e->getMessage(),
         ]);
 
-        $this->error('Failed to generate renewal invoice for license ' . $license->license_key . ': ' . $e->getMessage());
+        $this->error('Failed to generate renewal invoice for license ' . 
+            $license->license_key . ': ' . $e->getMessage());
     }
 }

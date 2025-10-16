@@ -6,8 +6,8 @@ return [
     // Welcome Page
     'welcome_title' => 'Welcome to License Management System',
     'welcome_subtitle' => 'Let\'s get your system up and running in just a few steps',
-    'welcome_description' => 'This installation wizard will guide you through setting up your License Management System.'.
-        'The process should take about 5-10 minutes.',
+    'welcome_description' => 'This installation wizard will guide you through setting up your ' .
+        'License Management System. The process should take about 5-10 minutes.',
     'get_started' => 'Get Started',
     'what_we_will_setup' => 'What we\'ll set up:',
     'select_language' => 'Select Language',
@@ -61,7 +61,8 @@ return [
     'admin_email' => 'Email Address',
     'admin_password' => 'Password',
     'admin_password_confirmation' => 'Confirm Password',
-    'password_requirements' => 'Password must be at least 8 characters long and contain a mix of letters, numbers, and symbols.',
+    'password_requirements' => 'Password must be at least 8 characters long and contain a mix of ' .
+        'letters, numbers, and symbols.',
     'create_admin_account' => 'Create Admin Account',
 
     // Settings Page

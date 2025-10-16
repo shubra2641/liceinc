@@ -101,7 +101,8 @@ class UpdateController extends Controller
             $versionStatus = VersionHelper::getVersionStatus();
 
             if ($versionStatus['is_update_available']) {
-                $message = "Update available! Current: {$versionStatus['current_version']}, Latest: {$versionStatus['latest_version']}";
+                $message = "Update available! Current: {$versionStatus['current_version']}, " .
+                    "Latest: {$versionStatus['latest_version']}";
 
                 return redirect()->back()->with('success', $message);
             }
@@ -324,7 +325,8 @@ class UpdateController extends Controller
             DB::rollBack();
             Log::error('Auto update check failed', ['error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'An error occurred while checking for updates: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while checking for updates: ' . 
+                $e->getMessage());
         }
     }
 
@@ -471,7 +473,12 @@ class UpdateController extends Controller
     /**
      * Perform auto update.
      */
-    private function performAutoUpdate(string $version, string $licenseKey, string $productSlug, ?string $domain = null): array
+    private function performAutoUpdate(
+        string $version, 
+        string $licenseKey, 
+        string $productSlug, 
+        ?string $domain = null
+    ): array
     {
         try {
             if (! VersionHelper::isValidVersion($version)) {
@@ -565,7 +572,8 @@ class UpdateController extends Controller
             $productsData = $this->licenseServerService->getProducts();
             if ($productsData['success']) {
                 $allProducts = $productsData['data']['products'] ?? [];
-                $specificProduct = array_filter($allProducts, fn ($product) => $product['slug'] === 'the-ultimate-license-management-system');
+                $specificProduct = array_filter($allProducts, fn ($product) => 
+                    $product['slug'] === 'the-ultimate-license-management-system');
 
                 return array_values($specificProduct)[0] ?? [];
             }
@@ -585,7 +593,10 @@ class UpdateController extends Controller
     {
         try {
             $currentVersion = VersionHelper::getCurrentVersion();
-            $latestVersionData = $this->licenseServerService->getUpdateInfo('the-ultimate-license-management-system', $currentVersion);
+            $latestVersionData = $this->licenseServerService->getUpdateInfo(
+                'the-ultimate-license-management-system', 
+                $currentVersion
+            );
 
             if ($latestVersionData['success']) {
                 $data = $latestVersionData['data'];

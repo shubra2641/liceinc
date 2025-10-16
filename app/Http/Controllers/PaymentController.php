@@ -270,7 +270,8 @@ class PaymentController extends Controller
     private function handleProductPayment(string $transactionId, string $gateway): RedirectResponse
     {
         $productId = session('payment_product_id');
-        $product = $productId ? Product::find($productId) : Product::where('is_active', true)->where('price', '>', 0)->first();
+        $product = $productId ? Product::find($productId) : 
+            Product::where('is_active', true)->where('price', '>', 0)->first();
 
         if (! $product) {
             return redirect()->route('user.dashboard')->with('error', trans('app.No products available for purchase'));
@@ -310,7 +311,8 @@ class PaymentController extends Controller
                 ->with('success', trans('app.Payment successful! Your license has been activated.'));
         } else {
             return redirect()->route('payment.failure-page', $gateway)
-                ->with('error_message', trans('app.Payment successful but failed to create license. Please contact support.'));
+                ->with('error_message', trans('app.Payment successful but failed to create license. ' .
+                    'Please contact support.'));
         }
     }
 }
