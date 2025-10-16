@@ -29,7 +29,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $isAdmin = $user->is_admin ?? false;
-        
+
         return view($isAdmin ? 'admin.profile.edit' : 'profile.index', [
             'user' => $user,
             'hasApiConfig' => $this->hasEnvatoConfig(),
@@ -43,33 +43,32 @@ class ProfileController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             $user = $request->user();
             $user->fill($request->validated());
-            
+
             if ($user->isDirty('email')) {
                 $user->email_verified_at = null;
                 $user->save();
                 $user->sendEmailVerificationNotification();
-                
+
                 DB::commit();
                 return Redirect::route('verification.notice')
                     ->with('success', 'Please verify your email address.');
             }
-            
+
             $user->save();
             DB::commit();
-            
+
             $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
             return Redirect::route($route)->with('success', 'Profile updated successfully.');
-            
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Profile update failed', [
                 'error' => $e->getMessage(),
                 'user_id' => $request->user()?->id,
             ]);
-            
+
             $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
             return Redirect::route($route)->with('error', 'Failed to update profile.');
         }
@@ -85,25 +84,24 @@ class ProfileController extends Controller
                 'current_password' => 'required|current_password',
                 'password' => 'required|string|min:8|confirmed',
             ]);
-            
+
             DB::beginTransaction();
-            
+
             $user = $request->user();
             $user->password = Hash::make($request->password);
             $user->save();
-            
+
             DB::commit();
-            
+
             $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
             return Redirect::route($route)->with('success', 'Password updated successfully.');
-            
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Password update failed', [
                 'error' => $e->getMessage(),
                 'user_id' => $request->user()?->id,
             ]);
-            
+
             $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
             return Redirect::route($route)->with('error', 'Failed to update password.');
         }
@@ -119,40 +117,39 @@ class ProfileController extends Controller
                 $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
                 return Redirect::route($route)->with('error', 'Envato API not configured.');
             }
-            
+
             DB::beginTransaction();
-            
+
             $user = $request->user();
             $settings = \App\Models\Setting::first();
-            
+
             $response = \Illuminate\Support\Facades\Http::withToken($settings->envato_personal_token)
                 ->acceptJson()
                 ->timeout(30)
                 ->get('https://api.envato.com/v1/market/private/user/account.json');
-            
+
             if ($response->successful()) {
                 $data = $response->json();
                 $user->envato_username = $data['username'] ?? null;
                 $user->envato_id = $data['id'] ?? null;
                 $user->save();
-                
+
                 DB::commit();
-                
+
                 $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
                 return Redirect::route($route)->with('success', 'Envato account connected successfully.');
             }
-            
+
             DB::rollBack();
             $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
             return Redirect::route($route)->with('error', 'Failed to connect to Envato.');
-            
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Envato connection failed', [
                 'error' => $e->getMessage(),
                 'user_id' => $request->user()?->id,
             ]);
-            
+
             $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
             return Redirect::route($route)->with('error', 'Failed to connect to Envato.');
         }
@@ -165,7 +162,7 @@ class ProfileController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             $user = $request->user();
             $user->envato_username = null;
             $user->envato_id = null;
@@ -173,19 +170,18 @@ class ProfileController extends Controller
             $user->envato_refresh_token = null;
             $user->envato_token_expires_at = null;
             $user->save();
-            
+
             DB::commit();
-            
+
             $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
             return Redirect::route($route)->with('success', 'Envato account disconnected successfully.');
-            
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Envato disconnection failed', [
                 'error' => $e->getMessage(),
                 'user_id' => $request->user()?->id,
             ]);
-            
+
             $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
             return Redirect::route($route)->with('error', 'Failed to disconnect from Envato.');
         }
@@ -200,27 +196,26 @@ class ProfileController extends Controller
             $request->validate([
                 'password' => 'required|current_password',
             ]);
-            
+
             DB::beginTransaction();
-            
+
             $user = $request->user();
             Auth::logout();
             $user->delete();
-            
+
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            
+
             DB::commit();
-            
+
             return Redirect::to('/');
-            
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Account deletion failed', [
                 'error' => $e->getMessage(),
                 'user_id' => $request->user()?->id,
             ]);
-            
+
             $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
             return Redirect::route($route)->with('error', 'Failed to delete account.');
         }
