@@ -9,15 +9,18 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * License Server Service - Simplified
+ * License Server Service - Simplified.
  */
 class LicenseServerService
 {
     protected string $baseUrl;
+
     protected int $timeout;
 
     private const CACHE_DURATION_UPDATES = 300;
+
     private const CACHE_DURATION_HISTORY = 600;
+
     private const CACHE_DURATION_PRODUCTS = 1800;
 
     public function __construct()
@@ -27,26 +30,29 @@ class LicenseServerService
     }
 
     /**
-     * Get license server domain
+     * Get license server domain.
      */
     public function getDomain(): string
     {
         try {
             $domain = config('license_server.domain');
-            if (!$domain || $domain === 'my-logos.com') {
+            if (! $domain || $domain === 'my-logos.com') {
                 $appUrl = config('app.url');
                 $parsedDomain = parse_url($appUrl, PHP_URL_HOST);
+
                 return $parsedDomain ?: 'localhost';
             }
+
             return $this->sanitizeDomain($domain);
         } catch (\Exception $e) {
             Log::error('Failed to get license server domain', ['error' => $e->getMessage()]);
+
             return 'localhost';
         }
     }
 
     /**
-     * Get license server base URL
+     * Get license server base URL.
      */
     public function getBaseUrl(): string
     {
@@ -54,7 +60,7 @@ class LicenseServerService
     }
 
     /**
-     * Check for available updates
+     * Check for available updates.
      */
     public function checkUpdates(string $licenseKey, string $currentVersion, string $productSlug, ?string $domain = null): array
     {
@@ -79,8 +85,10 @@ class LicenseServerService
                 $data = $response->json();
                 if (is_array($data) && isset($data['success'])) {
                     Cache::put($cacheKey, $data, self::CACHE_DURATION_UPDATES);
+
                     return $data;
                 }
+
                 return $this->createErrorResponse('Invalid response format', 'INVALID_RESPONSE');
             }
 
@@ -91,12 +99,13 @@ class LicenseServerService
                 'license_key' => $this->hashForLogging($licenseKey),
                 'product_slug' => $productSlug,
             ]);
-            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
+
+            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
         }
     }
 
     /**
-     * Get version history
+     * Get version history.
      */
     public function getVersionHistory(string $licenseKey, string $productSlug, ?string $domain = null): array
     {
@@ -120,6 +129,7 @@ class LicenseServerService
                 $data = $response->json();
                 if (is_array($data)) {
                     Cache::put($cacheKey, $data, self::CACHE_DURATION_HISTORY);
+
                     return $data;
                 }
             }
@@ -131,12 +141,13 @@ class LicenseServerService
                 'license_key' => $this->hashForLogging($licenseKey),
                 'product_slug' => $productSlug,
             ]);
-            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
+
+            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
         }
     }
 
     /**
-     * Get update information without license verification
+     * Get update information without license verification.
      */
     public function getUpdateInfo(string $productSlug, string $currentVersion): array
     {
@@ -159,6 +170,7 @@ class LicenseServerService
                 $data = $response->json();
                 if (is_array($data)) {
                     Cache::put($cacheKey, $data, self::CACHE_DURATION_HISTORY);
+
                     return $data;
                 }
             }
@@ -170,12 +182,13 @@ class LicenseServerService
                 'product_slug' => $productSlug,
                 'current_version' => $currentVersion,
             ]);
-            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
+
+            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
         }
     }
 
     /**
-     * Get latest version
+     * Get latest version.
      */
     public function getLatestVersion(string $licenseKey, string $productSlug, ?string $domain = null): array
     {
@@ -199,6 +212,7 @@ class LicenseServerService
                 $data = $response->json();
                 if (is_array($data)) {
                     Cache::put($cacheKey, $data, self::CACHE_DURATION_UPDATES);
+
                     return $data;
                 }
             }
@@ -210,12 +224,13 @@ class LicenseServerService
                 'license_key' => $this->hashForLogging($licenseKey),
                 'product_slug' => $productSlug,
             ]);
-            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
+
+            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
         }
     }
 
     /**
-     * Download update file
+     * Download update file.
      */
     public function downloadUpdate(string $licenseKey, string $version, string $productSlug, ?string $domain = null): array
     {
@@ -232,13 +247,13 @@ class LicenseServerService
 
             if ($response->successful()) {
                 $tempDir = storage_path('app/temp');
-                if (!is_dir($tempDir)) {
-                    if (!mkdir($tempDir, 0755, true)) {
+                if (! is_dir($tempDir)) {
+                    if (! mkdir($tempDir, 0755, true)) {
                         return $this->createErrorResponse('Failed to create temporary directory', 'DIRECTORY_ERROR');
                     }
                 }
 
-                $tempPath = $tempDir . '/update_' . $this->sanitizeFilename($version) . '_' . time() . '.zip';
+                $tempPath = $tempDir.'/update_'.$this->sanitizeFilename($version).'_'.time().'.zip';
                 if (file_put_contents($tempPath, $response->body()) === false) {
                     return $this->createErrorResponse('Failed to save update file', 'FILE_SAVE_ERROR');
                 }
@@ -258,12 +273,13 @@ class LicenseServerService
                 'product_slug' => $productSlug,
                 'version' => $version,
             ]);
-            return $this->createErrorResponse('Download error: ' . $e->getMessage(), 'NETWORK_ERROR');
+
+            return $this->createErrorResponse('Download error: '.$e->getMessage(), 'NETWORK_ERROR');
         }
     }
 
     /**
-     * Get available products
+     * Get available products.
      */
     public function getProducts(): array
     {
@@ -281,6 +297,7 @@ class LicenseServerService
                 $data = $response->json();
                 if (is_array($data)) {
                     Cache::put($cacheKey, $data, self::CACHE_DURATION_PRODUCTS);
+
                     return $data;
                 }
             }
@@ -288,12 +305,13 @@ class LicenseServerService
             return $this->createErrorResponse('Failed to get products', 'SERVER_ERROR');
         } catch (\Exception $e) {
             Log::error('License server products failed', ['error' => $e->getMessage()]);
-            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
+
+            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
         }
     }
 
     /**
-     * Clear cache for specific license
+     * Clear cache for specific license.
      */
     public function clearCache(string $licenseKey, string $productSlug): void
     {
@@ -318,7 +336,7 @@ class LicenseServerService
     }
 
     /**
-     * Clear all license cache
+     * Clear all license cache.
      */
     public function clearAllCache(): void
     {
@@ -330,7 +348,7 @@ class LicenseServerService
     }
 
     /**
-     * Validate update parameters
+     * Validate update parameters.
      */
     private function validateParameters(string $licenseKey, string $currentVersion, string $productSlug, ?string $domain): void
     {
@@ -343,13 +361,13 @@ class LicenseServerService
         if (empty($productSlug)) {
             throw new \InvalidArgumentException('Product slug cannot be empty');
         }
-        if ($domain && !filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
+        if ($domain && ! filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
             throw new \InvalidArgumentException('Invalid domain format');
         }
     }
 
     /**
-     * Validate history parameters
+     * Validate history parameters.
      */
     private function validateHistoryParameters(string $licenseKey, string $productSlug, ?string $domain): void
     {
@@ -359,13 +377,13 @@ class LicenseServerService
         if (empty($productSlug)) {
             throw new \InvalidArgumentException('Product slug cannot be empty');
         }
-        if ($domain && !filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
+        if ($domain && ! filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
             throw new \InvalidArgumentException('Invalid domain format');
         }
     }
 
     /**
-     * Validate update info parameters
+     * Validate update info parameters.
      */
     private function validateUpdateInfoParameters(string $productSlug, string $currentVersion): void
     {
@@ -378,7 +396,7 @@ class LicenseServerService
     }
 
     /**
-     * Validate latest version parameters
+     * Validate latest version parameters.
      */
     private function validateLatestVersionParameters(string $licenseKey, string $productSlug, ?string $domain): void
     {
@@ -388,13 +406,13 @@ class LicenseServerService
         if (empty($productSlug)) {
             throw new \InvalidArgumentException('Product slug cannot be empty');
         }
-        if ($domain && !filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
+        if ($domain && ! filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
             throw new \InvalidArgumentException('Invalid domain format');
         }
     }
 
     /**
-     * Validate download parameters
+     * Validate download parameters.
      */
     private function validateDownloadParameters(string $licenseKey, string $version, string $productSlug, ?string $domain): void
     {
@@ -407,13 +425,13 @@ class LicenseServerService
         if (empty($productSlug)) {
             throw new \InvalidArgumentException('Product slug cannot be empty');
         }
-        if ($domain && !filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
+        if ($domain && ! filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
             throw new \InvalidArgumentException('Invalid domain format');
         }
     }
 
     /**
-     * Create error response
+     * Create error response.
      */
     private function createErrorResponse(string $message, string $errorCode): array
     {
@@ -425,7 +443,7 @@ class LicenseServerService
     }
 
     /**
-     * Sanitize input
+     * Sanitize input.
      */
     private function sanitizeInput(string $input): string
     {
@@ -433,7 +451,7 @@ class LicenseServerService
     }
 
     /**
-     * Sanitize domain
+     * Sanitize domain.
      */
     private function sanitizeDomain(string $domain): string
     {
@@ -441,29 +459,32 @@ class LicenseServerService
     }
 
     /**
-     * Sanitize filename
+     * Sanitize filename.
      */
     private function sanitizeFilename(string $filename): ?string
     {
         $result = preg_replace('/[^a-zA-Z0-9._-]/', '', $filename);
+
         return $result !== null ? $result : null;
     }
 
     /**
-     * Hash data for cache keys
+     * Hash data for cache keys.
      */
     private function hashForCache(string $data): string
     {
         $appKey = config('app.key');
-        return hash('sha256', $data . $appKey);
+
+        return hash('sha256', $data.$appKey);
     }
 
     /**
-     * Hash data for logging
+     * Hash data for logging.
      */
     private function hashForLogging(string $data): string
     {
         $appKey = config('app.key');
-        return substr(hash('sha256', $data . $appKey), 0, 8) . '...';
+
+        return substr(hash('sha256', $data.$appKey), 0, 8).'...';
     }
 }

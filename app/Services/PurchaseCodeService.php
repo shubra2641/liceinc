@@ -40,6 +40,7 @@ class PurchaseCodeService
      * @var EnvatoService
      */
     protected $envatoService;
+
     /**
      * Create a new PurchaseCodeService instance.
      *
@@ -49,6 +50,7 @@ class PurchaseCodeService
     {
         $this->envatoService = $envatoService;
     }
+
     /**
      * Clean and validate purchase code format with security validation.
      *
@@ -81,6 +83,7 @@ class PurchaseCodeService
             if (strlen($cleaned) < 8 || strlen($cleaned) > 50) {
                 throw new \InvalidArgumentException('Purchase code length is invalid');
             }
+
             return $cleaned;
         } catch (\Exception $e) {
             Log::error('Error cleaning purchase code', [
@@ -91,6 +94,7 @@ class PurchaseCodeService
             throw $e;
         }
     }
+
     /**
      * Validate purchase code format with comprehensive security checks.
      *
@@ -115,17 +119,20 @@ class PurchaseCodeService
                 return false;
             }
             $cleaned = $this->cleanPurchaseCode($purchaseCode);
+
             // Basic format validation - should be alphanumeric and reasonable length
-            return (bool) preg_match('/^[A-Z0-9]{8, 50}$/', $cleaned);
+            return (bool)preg_match('/^[A-Z0-9]{8, 50}$/', $cleaned);
         } catch (\Exception $e) {
             Log::error('Error validating purchase code format', [
                 'purchase_code_length' => strlen($purchaseCode),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return false;
         }
     }
+
     /**
      * Verify purchase code with dual verification system and comprehensive security.
      *
@@ -176,6 +183,7 @@ class PurchaseCodeService
             if ($envatoResult['success']) {
                 return $envatoResult;
             }
+
             return [
                 'success' => false,
                 'error' => 'Invalid purchase code',
@@ -192,6 +200,7 @@ class PurchaseCodeService
             throw $e;
         }
     }
+
     /**
      * Sanitize input data to prevent XSS and injection attacks.
      *
@@ -213,8 +222,10 @@ class PurchaseCodeService
         $input = trim($input);
         // Escape HTML entities
         $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
+
         return $input;
     }
+
     /**
      * Verify against our database with comprehensive security validation.
      *
@@ -263,6 +274,7 @@ class PurchaseCodeService
                     'product_id' => $license->product_id,
                 ];
             }
+
             return [
                 'success' => false,
                 'error' => 'Purchase code not found in our database',
@@ -278,6 +290,7 @@ class PurchaseCodeService
             throw $e;
         }
     }
+
     /**
      * Verify raw code directly against database with comprehensive validation.
      *
@@ -342,6 +355,7 @@ class PurchaseCodeService
                     'expired' => trans('license_status.license_expired'),
                 ];
                 $message = $statusMessages[$license->status] ?? trans('license_status.license_inactive');
+
                 return [
                     'success' => false,
                     'error' => 'license_status',
@@ -360,6 +374,7 @@ class PurchaseCodeService
                     'source' => 'database_raw',
                 ];
             }
+
             // All checks passed
             return [
                 'success' => true,
@@ -377,6 +392,7 @@ class PurchaseCodeService
             throw $e;
         }
     }
+
     /**
      * @return array<string, mixed>
      */
@@ -385,10 +401,10 @@ class PurchaseCodeService
         try {
             $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
             if (
-                !$envatoData
-                || !isset($envatoData['item'])
-                || !is_array($envatoData['item'])
-                || !isset($envatoData['item']['id'])
+                ! $envatoData
+                || ! isset($envatoData['item'])
+                || ! is_array($envatoData['item'])
+                || ! isset($envatoData['item']['id'])
             ) {
                 return [
                     'success' => false,
@@ -401,7 +417,7 @@ class PurchaseCodeService
             // If product ID is specified, verify it matches the Envato item
             if ($productId) {
                 $product = Product::find($productId);
-                if (!$product || !$product->envato_item_id || $product->envato_item_id != $envatoItemId) {
+                if (! $product || ! $product->envato_item_id || $product->envato_item_id != $envatoItemId) {
                     return [
                         'success' => false,
                         'error' => 'Purchase code does not belong to this product',
@@ -413,6 +429,7 @@ class PurchaseCodeService
             if ($user) {
                 $this->createLicenseFromEnvato($user, $purchaseCode, $envatoData, $productId);
             }
+
             return [
                 'success' => true,
                 'envato_data' => $envatoData,
@@ -428,6 +445,7 @@ class PurchaseCodeService
             ];
         }
     }
+
     /**
      * Create license record from Envato data.
      */
@@ -451,7 +469,7 @@ class PurchaseCodeService
         $licenseData = [
             'user_id' => $user->id,
             'purchase_code' => $purchaseCode,
-            'license_key' => 'envato_' . $purchaseCode,
+            'license_key' => 'envato_'.$purchaseCode,
             'license_type' => 'regular',
             'status' => 'active',
             'purchase_date' => data_get($envatoData, 'sold_at')
@@ -460,8 +478,8 @@ class PurchaseCodeService
                     strtotime(
                         is_string(data_get($envatoData, 'sold_at'))
                             ? data_get($envatoData, 'sold_at')
-                            : ''
-                    ) ?: time()
+                            : '',
+                    ) ?: time(),
                 )
                 : now(),
             'support_expires_at' => data_get($envatoData, 'supported_until')
@@ -470,8 +488,8 @@ class PurchaseCodeService
                     strtotime(
                         is_string(data_get($envatoData, 'supported_until'))
                             ? data_get($envatoData, 'supported_until')
-                            : ''
-                    ) ?: time()
+                            : '',
+                    ) ?: time(),
                 )
                 : null,
             'license_expires_at' => null, // Lifetime license
@@ -489,6 +507,7 @@ class PurchaseCodeService
             return null;
         }
     }
+
     /**
      * Check if user has access to specific product via any license.
      */
@@ -503,6 +522,7 @@ class PurchaseCodeService
             })
             ->exists();
     }
+
     /**
      * Check if user has access to KB content via product license.
      */
@@ -512,9 +532,11 @@ class PurchaseCodeService
         if (! $kbItem->product_id) {
             return true;
         }
+
         // Check if user has license for the linked product
         return $this->userHasProductAccess($user, $kbItem->product_id);
     }
+
     /**
      * Get accessible KB content for user based on their licenses.
      */
@@ -531,6 +553,7 @@ class PurchaseCodeService
             })
             ->pluck('product_id')
             ->toArray();
+
         return [
             'categories' => \App\Models\KbCategory::where(function ($query) use ($userProductIds) {
                 $query->whereNull('product_id')
@@ -542,6 +565,7 @@ class PurchaseCodeService
             })->where('is_published', true)->get(),
         ];
     }
+
     /**
      * Check if user has access to KB category via product license.
      */
@@ -551,9 +575,11 @@ class PurchaseCodeService
         if (! $category->product_id) {
             return true;
         }
+
         // Check if user has license for the linked product
         return $this->userHasProductAccess($user, $category->product_id);
     }
+
     /**
      * Check if user has access to KB article considering both direct product and category product.
      */
@@ -567,6 +593,7 @@ class PurchaseCodeService
         if ($article->category->product_id) {
             return $this->userHasCategoryAccess($user, $article->category);
         }
+
         // No product restrictions
         return true;
     }

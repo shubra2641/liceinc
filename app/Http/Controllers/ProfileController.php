@@ -53,6 +53,7 @@ class ProfileController extends Controller
                 $user->sendEmailVerificationNotification();
 
                 DB::commit();
+
                 return Redirect::route('verification.notice')
                     ->with('success', 'Please verify your email address.');
             }
@@ -61,6 +62,7 @@ class ProfileController extends Controller
             DB::commit();
 
             $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
+
             return Redirect::route($route)->with('success', 'Profile updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -70,6 +72,7 @@ class ProfileController extends Controller
             ]);
 
             $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
+
             return Redirect::route($route)->with('error', 'Failed to update profile.');
         }
     }
@@ -94,6 +97,7 @@ class ProfileController extends Controller
             DB::commit();
 
             $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
+
             return Redirect::route($route)->with('success', 'Password updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -103,6 +107,7 @@ class ProfileController extends Controller
             ]);
 
             $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
+
             return Redirect::route($route)->with('error', 'Failed to update password.');
         }
     }
@@ -113,8 +118,9 @@ class ProfileController extends Controller
     public function connectEnvato(Request $request): RedirectResponse
     {
         try {
-            if (!$this->hasEnvatoConfig()) {
+            if (! $this->hasEnvatoConfig()) {
                 $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
+
                 return Redirect::route($route)->with('error', 'Envato API not configured.');
             }
 
@@ -137,11 +143,13 @@ class ProfileController extends Controller
                 DB::commit();
 
                 $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
+
                 return Redirect::route($route)->with('success', 'Envato account connected successfully.');
             }
 
             DB::rollBack();
             $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
+
             return Redirect::route($route)->with('error', 'Failed to connect to Envato.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -151,6 +159,7 @@ class ProfileController extends Controller
             ]);
 
             $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
+
             return Redirect::route($route)->with('error', 'Failed to connect to Envato.');
         }
     }
@@ -174,6 +183,7 @@ class ProfileController extends Controller
             DB::commit();
 
             $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
+
             return Redirect::route($route)->with('success', 'Envato account disconnected successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -183,6 +193,7 @@ class ProfileController extends Controller
             ]);
 
             $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
+
             return Redirect::route($route)->with('error', 'Failed to disconnect from Envato.');
         }
     }
@@ -217,6 +228,7 @@ class ProfileController extends Controller
             ]);
 
             $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
+
             return Redirect::route($route)->with('error', 'Failed to delete account.');
         }
     }
@@ -227,6 +239,7 @@ class ProfileController extends Controller
     private function hasEnvatoConfig(): bool
     {
         $settings = \App\Models\Setting::first();
+
         return $settings && $settings->envato_personal_token;
     }
 }

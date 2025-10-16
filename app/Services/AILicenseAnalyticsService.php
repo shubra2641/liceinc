@@ -14,14 +14,14 @@ use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 /**
- * AI License Analytics Service - Simplified
+ * AI License Analytics Service - Simplified.
  */
 class AILicenseAnalyticsService
 {
     private const CACHE_TTL = 3600;
 
     /**
-     * Get dashboard analytics data
+     * Get dashboard analytics data.
      */
     public function getDashboardAnalytics(int $days = 30): array
     {
@@ -29,21 +29,21 @@ class AILicenseAnalyticsService
         $cacheKey = "analytics_dashboard_{$days}";
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($days) {
-                    return [
+            return [
                 'overview' => $this->getOverview($days),
                 'trends' => $this->getTrends($days),
                 'predictions' => $this->getPredictions($days),
-                        'generated_at' => now()->toISOString(),
-                    ];
+                'generated_at' => now()->toISOString(),
+            ];
         });
     }
 
     /**
-     * Get overview statistics
+     * Get overview statistics.
      */
     private function getOverview(int $days): array
     {
-            $startDate = now()->subDays($days);
+        $startDate = now()->subDays($days);
 
         return [
             'total_licenses' => License::count(),
@@ -59,7 +59,7 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Get trend analysis
+     * Get trend analysis.
      */
     private function getTrends(int $days): array
     {
@@ -90,7 +90,7 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Get predictive insights
+     * Get predictive insights.
      */
     private function getPredictions(int $days): array
     {
@@ -102,24 +102,24 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Get real-time updates
+     * Get real-time updates.
      */
     public function getRealTimeUpdates(): array
     {
-            $cacheKey = 'realtime_analytics_' . now()->format('Y-m-d-H');
+        $cacheKey = 'realtime_analytics_'.now()->format('Y-m-d-H');
 
         return Cache::remember($cacheKey, 300, function () {
-                    return [
+            return [
                 'active_licenses_now' => License::where('status', 'active')->count(),
-                        'licenses_created_today' => License::whereDate('created_at', today())->count(),
-                        'revenue_today' => $this->calculateTodayRevenue(),
-                        'generated_at' => now()->toISOString(),
-                    ];
+                'licenses_created_today' => License::whereDate('created_at', today())->count(),
+                'revenue_today' => $this->calculateTodayRevenue(),
+                'generated_at' => now()->toISOString(),
+            ];
         });
     }
 
     /**
-     * Log analytics event
+     * Log analytics event.
      */
     public function logAnalyticsEvent(string $eventType, array $eventData = []): void
     {
@@ -132,18 +132,18 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Calculate revenue for period
+     * Calculate revenue for period.
      */
     private function calculateRevenue(Carbon $startDate): float
     {
-        return (float) DB::table('invoices')
+        return (float)DB::table('invoices')
             ->where('status', 'paid')
             ->where('created_at', '>=', $startDate)
             ->sum('amount');
     }
 
     /**
-     * Calculate growth rate
+     * Calculate growth rate.
      */
     private function calculateGrowthRate(int $days): float
     {
@@ -161,20 +161,20 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Calculate churn rate
+     * Calculate churn rate.
      */
     private function calculateChurnRate(int $days): float
     {
         $total = User::where('role', 'customer')->count();
         $churned = User::where('role', 'customer')
-                ->where('last_login_at', '<', now()->subDays($days))
-                ->count();
+            ->where('last_login_at', '<', now()->subDays($days))
+            ->count();
 
         return $total > 0 ? ($churned / $total) * 100 : 0.0;
     }
 
     /**
-     * Calculate health score
+     * Calculate health score.
      */
     private function calculateHealthScore(int $days): float
     {
@@ -190,7 +190,7 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Get revenue trends
+     * Get revenue trends.
      */
     private function getRevenueTrends(Carbon $startDate): array
     {
@@ -211,7 +211,7 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Predict license expirations
+     * Predict license expirations.
      */
     private function predictExpirations(): array
     {
@@ -233,7 +233,7 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Forecast revenue
+     * Forecast revenue.
      */
     private function forecastRevenue(int $days): array
     {
@@ -248,7 +248,7 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Predict customer churn
+     * Predict customer churn.
      */
     private function predictChurn(): array
     {
@@ -271,12 +271,12 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Calculate renewal probability
+     * Calculate renewal probability.
      */
     private function calculateRenewalProbability(License $license): float
     {
         $user = $license->user;
-        if (!$user) {
+        if (! $user) {
             return 0.5;
         }
 
@@ -297,12 +297,12 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Calculate churn score
+     * Calculate churn score.
      */
     private function calculateChurnScore(int $userId): float
     {
         $user = User::find($userId);
-        if (!$user) {
+        if (! $user) {
             return 0.0;
         }
 
@@ -323,41 +323,43 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Calculate today's revenue
+     * Calculate today's revenue.
      */
     private function calculateTodayRevenue(): float
     {
-        return (float) DB::table('invoices')
+        return (float)DB::table('invoices')
             ->where('status', 'paid')
             ->whereDate('created_at', today())
             ->sum('amount');
     }
 
     /**
-     * Get user history
+     * Get user history.
      */
     private function getUserHistory(int $userId): float
     {
         $purchases = DB::table('licenses')->where('user_id', $userId)->count();
+
         return min(1.0, $purchases / 5);
     }
 
     /**
-     * Get user activity
+     * Get user activity.
      */
     private function getUserActivity(int $userId): float
     {
         $user = User::find($userId);
-        if (!$user || !$user->last_login_at) {
+        if (! $user || ! $user->last_login_at) {
             return 0.0;
         }
 
         $daysSinceLogin = now()->diffInDays($user->last_login_at);
+
         return max(0.0, 1.0 - ($daysSinceLogin / 30));
     }
 
     /**
-     * Get payment history
+     * Get payment history.
      */
     private function getPaymentHistory(int $userId): float
     {
@@ -379,7 +381,7 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Validate days parameter
+     * Validate days parameter.
      */
     private function validateDays(int $days): void
     {
@@ -389,7 +391,7 @@ class AILicenseAnalyticsService
     }
 
     /**
-     * Sanitize data
+     * Sanitize data.
      */
     private function sanitizeData(array $data): array
     {
@@ -404,6 +406,7 @@ class AILicenseAnalyticsService
                 $sanitized[$key] = $value;
             }
         }
+
         return $sanitized;
     }
 }

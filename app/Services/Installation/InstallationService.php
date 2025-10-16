@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Installation Service
+ * Installation Service.
  *
  * Handles complex installation operations to reduce controller complexity.
  */
@@ -25,9 +25,11 @@ class InstallationService
         try {
             Artisan::call('migrate', ['--force' => true]);
             Log::info('Database migrations completed successfully');
+
             return true;
         } catch (\Exception $e) {
             Log::error('Migration failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -59,7 +61,7 @@ class InstallationService
             } catch (\Exception $seederError) {
                 Log::warning('Seeder execution failed', [
                     'seeder' => $seeder,
-                    'error' => $seederError->getMessage()
+                    'error' => $seederError->getMessage(),
                 ]);
                 $success = false;
             }
@@ -76,9 +78,11 @@ class InstallationService
         try {
             Artisan::call('storage:link');
             Log::info('Storage link created successfully');
+
             return true;
         } catch (\Exception $e) {
             Log::info('Storage link creation skipped', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -91,9 +95,11 @@ class InstallationService
         try {
             File::put(storage_path('.installed'), now()->toDateTimeString());
             Log::info('Installation completed successfully');
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to create installed file', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -112,7 +118,7 @@ class InstallationService
                 $sessionConfig = str_replace(
                     "'driver' => env('SESSION_DRIVER', 'file')",
                     "'driver' => env('SESSION_DRIVER', 'database')",
-                    $sessionConfig
+                    $sessionConfig,
                 );
                 File::put($configPath, $sessionConfig);
             }
@@ -122,15 +128,17 @@ class InstallationService
                 $cacheConfig = str_replace(
                     "'default' => env('CACHE_DRIVER', 'file')",
                     "'default' => env('CACHE_DRIVER', 'database')",
-                    $cacheConfig
+                    $cacheConfig,
                 );
                 File::put($cachePath, $cacheConfig);
             }
 
             Log::info('Session and cache drivers updated to database');
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to update session drivers', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -148,12 +156,14 @@ class InstallationService
                 [
                     'value' => json_encode($licenseConfig),
                     'updated_at' => now(),
-                ]
+                ],
             );
             Log::info('License information stored successfully');
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to store license information', ['error' => $e->getMessage()]);
+
             return false;
         }
     }

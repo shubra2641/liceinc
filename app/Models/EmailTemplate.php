@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * EmailTemplate Model.
@@ -26,6 +25,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @property string|null $description Template description
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
+ *
  * @method static Builder<static>|EmailTemplate active()
  * @method static Builder<static>|EmailTemplate forCategory(string $category)
  * @method static Builder<static>|EmailTemplate forType(string $type)
@@ -43,6 +43,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @method static Builder<static>|EmailTemplate whereType($value)
  * @method static Builder<static>|EmailTemplate whereUpdatedAt($value)
  * @method static Builder<static>|EmailTemplate whereVariables($value)
+ *
  * @mixin \Eloquent
  */
 class EmailTemplate extends Model
@@ -65,6 +66,7 @@ class EmailTemplate extends Model
         'is_active',
         'description',
     ];
+
     /**
      * The attributes that should be cast.
      *
@@ -74,6 +76,7 @@ class EmailTemplate extends Model
         'variables' => 'array',
         'is_active' => 'boolean',
     ];
+
     /**
      * Scope a query to only include active templates.
      *
@@ -85,6 +88,7 @@ class EmailTemplate extends Model
     {
         return $query->where('is_active', true);
     }
+
     /**
      * Scope a query to only include templates for a specific type.
      *
@@ -96,6 +100,7 @@ class EmailTemplate extends Model
     {
         return $query->where('type', $type);
     }
+
     /**
      * Scope a query to only include templates for a specific category.
      *
@@ -107,6 +112,7 @@ class EmailTemplate extends Model
     {
         return $query->where('category', $category);
     }
+
     /**
      * Get template by name.
      */
@@ -114,6 +120,7 @@ class EmailTemplate extends Model
     {
         return static::where('name', $name)->active()->first();
     }
+
     /**
      * Get all templates for a specific type and category.
      */
@@ -126,6 +133,7 @@ class EmailTemplate extends Model
     ): Collection {
         return static::forType($type)->forCategory($category)->active()->get();
     }
+
     /**
      * Process template variables and return rendered content.
      */
@@ -138,11 +146,13 @@ class EmailTemplate extends Model
     {
         $subject = $this->replaceVariables($this->subject ?? '', $data);
         $body = $this->replaceVariables($this->body ?? '', $data);
+
         return [
             'subject' => $subject,
             'body' => $body,
         ];
     }
+
     /**
      * Replace variables in template content.
      */
@@ -154,6 +164,7 @@ class EmailTemplate extends Model
         foreach ($data as $key => $value) {
             $content = str_replace("{{$key}}", is_string($value) ? $value : '', $content);
         }
+
         return $content;
     }
 }

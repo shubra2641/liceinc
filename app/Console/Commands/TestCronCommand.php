@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Models\License;
 use App\Models\Invoice;
+use App\Models\License;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Test Cron Command - Simple and reliable cron testing
+ * Test Cron Command - Simple and reliable cron testing.
  *
  * This command tests all cron-related functionality without complexity
  */
 class TestCronCommand extends Command
 {
     protected $signature = 'cron:test {--type=all : Type of test (all, licenses, invoices)}';
+
     protected $description = 'Test cron functionality for licenses and invoices';
 
     public function handle(): int
@@ -43,10 +43,12 @@ class TestCronCommand extends Command
 
             $this->newLine();
             $this->info('✅ Cron test completed successfully!');
+
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            $this->error('❌ Cron test failed: ' . $e->getMessage());
+            $this->error('❌ Cron test failed: '.$e->getMessage());
             Log::error('Cron test failed', ['error' => $e->getMessage()]);
+
             return Command::FAILURE;
         }
     }

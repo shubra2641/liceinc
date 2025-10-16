@@ -49,8 +49,10 @@ class VerifyEmailController extends Controller
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
         }
+
         return $this->redirectToDashboard();
     }
+
     /**
      * Redirect to dashboard with verification status.
      *
@@ -62,6 +64,6 @@ class VerifyEmailController extends Controller
      */
     private function redirectToDashboard(): RedirectResponse
     {
-        return redirect()->intended(route('dashboard', absolute: false) . '?verified=1');
+        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
     }
 }

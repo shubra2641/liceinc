@@ -6,24 +6,24 @@ namespace App\Helpers;
 
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Configuration Helper - Simplified
+ * Configuration Helper - Simplified.
  */
 class ConfigHelper
 {
     private const CACHE_PREFIX = 'config_';
+
     private const CACHE_TTL = 3600; // 1 hour
 
     /**
-     * Get setting value with caching
+     * Get setting value with caching.
      */
     public static function getSetting(string $key, $default = null, ?string $configKey = null): mixed
     {
         try {
-            $cacheKey = self::CACHE_PREFIX . md5($key);
+            $cacheKey = self::CACHE_PREFIX.md5($key);
 
             // Try cache first
             $cachedValue = Cache::get($cacheKey);
@@ -35,6 +35,7 @@ class ConfigHelper
             $value = self::getFromDatabase($key);
             if ($value !== null) {
                 Cache::put($cacheKey, $value, self::CACHE_TTL);
+
                 return self::castValue($value, $default);
             }
 
@@ -42,18 +43,20 @@ class ConfigHelper
             if ($configKey) {
                 $configValue = config($configKey, $default);
                 Cache::put($cacheKey, $configValue, self::CACHE_TTL);
+
                 return self::castValue($configValue, $default);
             }
 
             return $default;
         } catch (\Exception $e) {
             Log::error('Failed to get setting', ['key' => $key, 'error' => $e->getMessage()]);
+
             return $configKey ? config($configKey, $default) : $default;
         }
     }
 
     /**
-     * Get multiple settings at once
+     * Get multiple settings at once.
      */
     public static function getSettings(array $keys): array
     {
@@ -62,7 +65,7 @@ class ConfigHelper
 
         // Check cache for each key
         foreach ($keys as $key) {
-            $cacheKey = self::CACHE_PREFIX . md5($key);
+            $cacheKey = self::CACHE_PREFIX.md5($key);
             $cachedValue = Cache::get($cacheKey);
             if ($cachedValue !== null) {
                 $settings[$key] = $cachedValue;
@@ -72,11 +75,11 @@ class ConfigHelper
         }
 
         // Fetch uncached keys from database
-        if (!empty($uncachedKeys)) {
+        if (! empty($uncachedKeys)) {
             $dbSettings = self::getMultipleFromDatabase($uncachedKeys);
             foreach ($dbSettings as $key => $value) {
                 $settings[$key] = $value;
-                $cacheKey = self::CACHE_PREFIX . md5($key);
+                $cacheKey = self::CACHE_PREFIX.md5($key);
                 Cache::put($cacheKey, $value, self::CACHE_TTL);
             }
         }
@@ -85,7 +88,7 @@ class ConfigHelper
     }
 
     /**
-     * Get setting from database
+     * Get setting from database.
      */
     private static function getFromDatabase(string $key): mixed
     {
@@ -113,12 +116,13 @@ class ConfigHelper
             return null;
         } catch (\Exception $e) {
             Log::debug('Database query failed', ['key' => $key, 'error' => $e->getMessage()]);
+
             return null;
         }
     }
 
     /**
-     * Get multiple settings from database
+     * Get multiple settings from database.
      */
     private static function getMultipleFromDatabase(array $keys): array
     {
@@ -136,7 +140,7 @@ class ConfigHelper
 
             // Get column format settings for remaining keys
             $remainingKeys = array_diff($keys, array_keys($settings));
-            if (!empty($remainingKeys)) {
+            if (! empty($remainingKeys)) {
                 $columnSettings = Setting::select($remainingKeys)
                     ->where(function ($query) use ($remainingKeys) {
                         foreach ($remainingKeys as $key) {
@@ -162,7 +166,7 @@ class ConfigHelper
     }
 
     /**
-     * Cast value to appropriate type
+     * Cast value to appropriate type.
      */
     private static function castValue(mixed $value, mixed $default): mixed
     {
@@ -186,8 +190,10 @@ class ConfigHelper
                     }
                     if (is_string($value)) {
                         $decoded = json_decode($value, true);
+
                         return json_last_error() === JSON_ERROR_NONE ? $decoded : $default;
                     }
+
                     return $default;
             }
         }
@@ -196,7 +202,7 @@ class ConfigHelper
     }
 
     /**
-     * Get typed setting
+     * Get typed setting.
      */
     public static function getTypedSetting(string $key, string $type, $default = null): mixed
     {
@@ -220,8 +226,10 @@ class ConfigHelper
                 }
                 if (is_string($value)) {
                     $decoded = json_decode($value, true);
+
                     return json_last_error() === JSON_ERROR_NONE ? $decoded : [];
                 }
+
                 return [];
             default:
                 return $value;
@@ -229,12 +237,13 @@ class ConfigHelper
     }
 
     /**
-     * Check if setting exists
+     * Check if setting exists.
      */
     public static function hasSetting(string $key): bool
     {
         try {
             $value = self::getSetting($key);
+
             return $value !== null && $value !== '';
         } catch (\Exception $e) {
             return false;
@@ -242,16 +251,16 @@ class ConfigHelper
     }
 
     /**
-     * Clear setting cache
+     * Clear setting cache.
      */
     public static function clearSettingCache(string $key): void
     {
-        $cacheKey = self::CACHE_PREFIX . md5($key);
+        $cacheKey = self::CACHE_PREFIX.md5($key);
         Cache::forget($cacheKey);
     }
 
     /**
-     * Clear all cache
+     * Clear all cache.
      */
     public static function clearAllCache(): void
     {
@@ -259,7 +268,7 @@ class ConfigHelper
     }
 
     /**
-     * Get license settings
+     * Get license settings.
      */
     public static function getLicenseSettings(): array
     {
@@ -321,7 +330,7 @@ class ConfigHelper
     }
 
     /**
-     * Get Envato settings
+     * Get Envato settings.
      */
     public static function getEnvatoSettings(): array
     {
@@ -337,7 +346,7 @@ class ConfigHelper
     }
 
     /**
-     * Get settings with environment fallback
+     * Get settings with environment fallback.
      */
     public static function getSettingsWithEnvFallback(array $keys, array $envMappings = []): array
     {
@@ -357,7 +366,7 @@ class ConfigHelper
     }
 
     /**
-     * Warm up cache for frequently used settings
+     * Warm up cache for frequently used settings.
      */
     public static function warmUpCache(array $keys = []): void
     {

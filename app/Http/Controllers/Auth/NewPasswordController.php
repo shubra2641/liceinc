@@ -39,6 +39,7 @@ class NewPasswordController extends Controller
     {
         return view('auth.reset-password', ['request' => $request]);
     }
+
     /**
      * Handle an incoming new password request.
      *
@@ -56,8 +57,10 @@ class NewPasswordController extends Controller
     {
         $this->validatePasswordResetRequest($request);
         $status = $this->resetPassword($request);
+
         return $this->handlePasswordResetResponse($request, $status);
     }
+
     /**
      * Validate the password reset request.
      *
@@ -73,6 +76,7 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
     }
+
     /**
      * Reset the user's password.
      *
@@ -89,8 +93,10 @@ class NewPasswordController extends Controller
                 event(new PasswordReset($user));
             },
         );
+
         return is_string($result) ? $result : '';
     }
+
     /**
      * Update user's password and remember token.
      *
@@ -104,6 +110,7 @@ class NewPasswordController extends Controller
             'remember_token' => Str::random(60),
         ])->save();
     }
+
     /**
      * Handle the password reset response.
      *
@@ -117,6 +124,7 @@ class NewPasswordController extends Controller
         if ($status == Password::PASSWORD_RESET) {
             return redirect()->route('login')->with('success', __($status));
         }
+
         return back()->withInput($request->only('email'))
             ->withErrors(['email' => __($status)]);
     }

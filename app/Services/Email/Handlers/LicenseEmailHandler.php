@@ -26,7 +26,7 @@ class LicenseEmailHandler
 
     public function __construct(
         protected EmailServiceInterface $emailService,
-        protected EmailValidatorInterface $validator
+        protected EmailValidatorInterface $validator,
     ) {
     }
 
@@ -35,12 +35,14 @@ class LicenseEmailHandler
      */
     public function sendPaymentConfirmation(License $license, Invoice $invoice): bool
     {
-        if (!$license->user) {
+        if (! $license->user) {
             $this->logInvalidUser('payment confirmation');
+
             return false;
         }
 
         $data = $this->buildPaymentConfirmationData($license, $invoice);
+
         return $this->emailService->sendToUser($license->user, 'payment_confirmation', $data);
     }
 
@@ -75,6 +77,7 @@ class LicenseEmailHandler
         $gateway = $invoice->metadata['gateway'] ?? null;
         $method = is_string($gateway) ? $gateway : 'Unknown';
         $result = $this->sanitizeString(ucfirst($method));
+
         return $result ?: 'Unknown';
     }
 
@@ -102,6 +105,7 @@ class LicenseEmailHandler
     public function sendLicenseExpiring(User $user, array $licenseData): bool
     {
         $sanitizedData = $this->sanitizeLicenseData($licenseData);
+
         return $this->emailService->sendToUser($user, 'user_license_expiring', $sanitizedData);
     }
 
@@ -151,12 +155,14 @@ class LicenseEmailHandler
     public function sendLicenseCreated(License $license, ?User $user = null): bool
     {
         $targetUser = $user ?? $license->user;
-        if (!$targetUser) {
+        if (! $targetUser) {
             $this->logInvalidUser('license creation notification');
+
             return false;
         }
 
         $data = $this->buildLicenseCreatedData($license);
+
         return $this->emailService->sendToUser($targetUser, 'license_created', $data);
     }
 
@@ -211,6 +217,7 @@ class LicenseEmailHandler
     public function sendAdminPaymentNotification(License $license, Invoice $invoice): bool
     {
         $data = $this->buildAdminPaymentData($license, $invoice);
+
         return $this->emailService->sendToAdmin('admin_payment_license_created', $data);
     }
 
@@ -244,6 +251,7 @@ class LicenseEmailHandler
     private function getTransactionId(Invoice $invoice): string
     {
         $transactionId = $invoice->metadata['transaction_id'] ?? 'N/A';
+
         return is_string($transactionId) ? $transactionId : 'N/A';
     }
 }

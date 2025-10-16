@@ -98,7 +98,7 @@ class CheckUpdatesRequest extends FormRequest
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

@@ -31,8 +31,10 @@ class PaymentSettingsRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
+
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -76,6 +78,7 @@ class PaymentSettingsRequest extends FormRequest
                 ],
             ];
         }
+
         // Update settings validation - matches the Controller and View
         return [
             'gateway' => [
@@ -125,6 +128,7 @@ class PaymentSettingsRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -146,6 +150,7 @@ class PaymentSettingsRequest extends FormRequest
             'webhook_url.url' => 'Webhook URL must be a valid URL.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -166,6 +171,7 @@ class PaymentSettingsRequest extends FormRequest
             'webhook_url' => 'webhook URL',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */

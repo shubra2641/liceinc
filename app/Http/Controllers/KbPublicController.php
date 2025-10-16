@@ -14,17 +14,17 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 /**
- * Knowledge Base Public Controller - Simplified
+ * Knowledge Base Public Controller - Simplified.
  */
 class KbPublicController extends Controller
 {
     public function __construct(
-        private PurchaseCodeService $purchaseCodeService
+        private PurchaseCodeService $purchaseCodeService,
     ) {
     }
 
     /**
-     * Display KB index
+     * Display KB index.
      */
     public function index(): View
     {
@@ -47,12 +47,13 @@ class KbPublicController extends Controller
             return view('kb.index', compact('categories', 'latest'));
         } catch (\Exception $e) {
             Log::error('KB index failed', ['error' => $e->getMessage()]);
+
             return view('kb.index', ['categories' => collect(), 'latest' => collect()]);
         }
     }
 
     /**
-     * Display KB category
+     * Display KB category.
      */
     public function category(string $slug): View|RedirectResponse
     {
@@ -66,12 +67,13 @@ class KbPublicController extends Controller
             return $this->handleCategoryAccess($category);
         } catch (\Exception $e) {
             Log::error('KB category failed', ['error' => $e->getMessage(), 'slug' => $slug]);
+
             return redirect()->route('kb.index')->with('error', 'Category not found.');
         }
     }
 
     /**
-     * Display KB article
+     * Display KB article.
      */
     public function article(string $slug): View|RedirectResponse
     {
@@ -85,12 +87,13 @@ class KbPublicController extends Controller
             return $this->handleArticleAccess($article);
         } catch (\Exception $e) {
             Log::error('KB article failed', ['error' => $e->getMessage(), 'slug' => $slug]);
+
             return redirect()->route('kb.index')->with('error', 'Article not found.');
         }
     }
 
     /**
-     * Search KB
+     * Search KB.
      */
     public function search(Request $request): View
     {
@@ -107,12 +110,13 @@ class KbPublicController extends Controller
             return view('kb.search', compact('q', 'results'));
         } catch (\Exception $e) {
             Log::error('KB search failed', ['error' => $e->getMessage()]);
+
             return view('kb.search', ['q' => '', 'results' => collect()]);
         }
     }
 
     /**
-     * Get category by slug
+     * Get category by slug.
      */
     private function getCategoryBySlug(string $slug): KbCategory
     {
@@ -122,7 +126,7 @@ class KbPublicController extends Controller
     }
 
     /**
-     * Get article by slug
+     * Get article by slug.
      */
     private function getArticleBySlug(string $slug): KbArticle
     {
@@ -136,15 +140,15 @@ class KbPublicController extends Controller
     }
 
     /**
-     * Check if user can access category
+     * Check if user can access category.
      */
     private function canAccessCategory(KbCategory $category): bool
     {
-        if (!$category->requires_serial && !$category->product_id) {
+        if (! $category->requires_serial && ! $category->product_id) {
             return true;
         }
 
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return false;
         }
 
@@ -152,7 +156,7 @@ class KbPublicController extends Controller
     }
 
     /**
-     * Check if user can access article
+     * Check if user can access article.
      */
     private function canAccessArticle(KbArticle $article): bool
     {
@@ -162,24 +166,25 @@ class KbPublicController extends Controller
                          $article->category->requires_serial ||
                          $article->category->product_id;
 
-        if (!$requiresAccess) {
+        if (! $requiresAccess) {
             return true;
         }
 
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return false;
         }
 
         $productId = $article->product_id ?: $article->category->product_id;
+
         return $this->checkUserLicense($productId);
     }
 
     /**
-     * Check user license for product
+     * Check user license for product.
      */
     private function checkUserLicense(?int $productId): bool
     {
-        if (!$productId) {
+        if (! $productId) {
             return false;
         }
 
@@ -194,7 +199,7 @@ class KbPublicController extends Controller
     }
 
     /**
-     * Show category page
+     * Show category page.
      */
     private function showCategory(KbCategory $category): View
     {
@@ -218,7 +223,7 @@ class KbPublicController extends Controller
     }
 
     /**
-     * Show article page
+     * Show article page.
      */
     private function showArticle(KbArticle $article): View
     {
@@ -239,11 +244,11 @@ class KbPublicController extends Controller
     }
 
     /**
-     * Handle category access
+     * Handle category access.
      */
     private function handleCategoryAccess(KbCategory $category): View|RedirectResponse
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect()->route('login')
                 ->with('error', 'You must be logged in to access this category.');
         }
@@ -252,11 +257,11 @@ class KbPublicController extends Controller
     }
 
     /**
-     * Handle article access
+     * Handle article access.
      */
     private function handleArticleAccess(KbArticle $article): View|RedirectResponse
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect()->route('login')
                 ->with('error', 'You must be logged in to access this article.');
         }
@@ -265,17 +270,18 @@ class KbPublicController extends Controller
     }
 
     /**
-     * Sanitize search query
+     * Sanitize search query.
      */
     private function sanitizeQuery(string $query): string
     {
         $query = trim($query);
         $query = htmlspecialchars($query, ENT_QUOTES, 'UTF-8');
+
         return strlen($query) > 255 ? substr($query, 0, 255) : $query;
     }
 
     /**
-     * Perform search
+     * Perform search.
      */
     private function performSearch(string $query): Collection
     {
@@ -285,7 +291,7 @@ class KbPublicController extends Controller
                 ->get();
         }
 
-        $searchTerm = '%' . strtolower($query) . '%';
+        $searchTerm = '%'.strtolower($query).'%';
 
         $articles = KbArticle::where('is_published', true)
             ->whereHas('category', function ($query) {
@@ -311,17 +317,18 @@ class KbPublicController extends Controller
     }
 
     /**
-     * Highlight search terms
+     * Highlight search terms.
      */
     public static function highlightSearchTerm($text, $query)
     {
         if (empty($query)) {
             return $text;
         }
+
         return preg_replace(
-            '/(' . preg_quote($query, '/') . ')/i',
+            '/('.preg_quote($query, '/').')/i',
             '<mark class="search-highlight">$1</mark>',
-            $text
+            $text,
         ) ?? $text;
     }
 }

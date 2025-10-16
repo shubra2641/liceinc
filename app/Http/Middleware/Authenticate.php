@@ -59,6 +59,7 @@ class Authenticate extends Middleware
             if ($request->expectsJson()) {
                 return null;
             }
+
             return route('login');
         } catch (Throwable $e) {
             Log::error('Authentication middleware redirect error', [
@@ -69,10 +70,12 @@ class Authenticate extends Middleware
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Fallback to login route for web requests
             return route('login');
         }
     }
+
     /**
      * Handle an unauthenticated user with enhanced security and logging.
      *
@@ -116,6 +119,7 @@ class Authenticate extends Middleware
             parent::unauthenticated($request, $guards);
         }
     }
+
     /**
      * Log authentication failure for security monitoring.
      *

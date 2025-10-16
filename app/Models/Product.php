@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Collection;
-use Carbon\Carbon;
 
 /**
  * @property int $id
@@ -61,10 +60,10 @@ use Carbon\Carbon;
  * @property int $duration_days
  * @property bool $auto_renewal
  * @property int $renewal_reminder_days
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ProductFile> $activeFiles
+ * @property-read Collection<int, ProductFile> $activeFiles
  * @property-read int|null $active_files_count
- * @property-read \App\Models\ProductCategory|null $category
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ProductFile> $files
+ * @property-read ProductCategory|null $category
+ * @property-read Collection<int, ProductFile> $files
  * @property-read int|null $files_count
  * @property-read string $current_version
  * @property-read mixed $formatted_extended_support_price
@@ -75,16 +74,17 @@ use Carbon\Carbon;
  * @property-read mixed $stock_status
  * @property-read mixed $tax_amount
  * @property-read mixed $total_price
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
+ * @property-read Collection<int, Invoice> $invoices
  * @property-read int|null $invoices_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle> $kbArticles
+ * @property-read Collection<int, KbArticle> $kbArticles
  * @property-read int|null $kb_articles_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory> $kbCategories
+ * @property-read Collection<int, KbCategory> $kbCategories
  * @property-read int|null $kb_categories_count
- * @property-read \App\Models\ProductUpdate|null $latestUpdate
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\License> $licenses
+ * @property-read ProductUpdate|null $latestUpdate
+ * @property-read Collection<int, License> $licenses
  * @property-read int|null $licenses_count
- * @property-read \App\Models\ProgrammingLanguage|null $programmingLanguage
+ * @property-read ProgrammingLanguage|null $programmingLanguage
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Product newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Product newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Product query()
@@ -135,6 +135,7 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereTaxRate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Product whereVersion($value)
+ *
  * @mixin \Eloquent
  */
 class Product extends Model
@@ -142,8 +143,6 @@ class Product extends Model
     /**
      * @phpstan-ignore-next-line
      */
-
-
     protected $fillable = [
         'name',
         'slug',
@@ -190,6 +189,7 @@ class Product extends Model
         'auto_renewal',
         'renewal_reminder_days',
     ];
+
     protected $casts = [
         'price' => 'float',
         'extended_support_price' => 'float',
@@ -235,6 +235,7 @@ class Product extends Model
         'kb_articles' => 'array',
         'auto_renewal' => 'boolean',
     ];
+
     /**
      * @return HasMany<License, $this>
      */
@@ -242,6 +243,7 @@ class Product extends Model
     {
         return $this->hasMany(License::class);
     }
+
     /**
      * Get product files.
      */
@@ -252,6 +254,7 @@ class Product extends Model
     {
         return $this->hasMany(ProductFile::class);
     }
+
     /**
      * Get the product updates.
      */
@@ -262,6 +265,7 @@ class Product extends Model
     {
         return $this->hasMany(ProductUpdate::class);
     }
+
     /**
      * Get the latest update for this product.
      */
@@ -272,6 +276,7 @@ class Product extends Model
     {
         return $this->hasOne(ProductUpdate::class)->active()->latest('version');
     }
+
     /**
      * Get the current version of the product.
      */
@@ -279,6 +284,7 @@ class Product extends Model
     {
         return $this->latestUpdate->version ?? $this->version ?? '1.0.0';
     }
+
     /**
      * Get active product files.
      */
@@ -289,6 +295,7 @@ class Product extends Model
     {
         return $this->hasMany(ProductFile::class)->where('is_active', true);
     }
+
     /**
      * @return BelongsTo<ProgrammingLanguage, $this>
      */
@@ -296,6 +303,7 @@ class Product extends Model
     {
         return $this->belongsTo(ProgrammingLanguage::class, 'programming_language');
     }
+
     /**
      * @return BelongsTo<ProductCategory, $this>
      */
@@ -304,6 +312,7 @@ class Product extends Model
         // Specify foreign key explicitly to avoid default 'product_category_id'
         return $this->belongsTo(ProductCategory::class, 'category_id');
     }
+
     /**
      * Get KB categories linked to this product.
      */
@@ -314,6 +323,7 @@ class Product extends Model
     {
         return $this->belongsToMany(KbCategory::class, 'product_kb_categories', 'product_id', 'kb_category_id');
     }
+
     /**
      * Get KB articles linked to this product.
      */
@@ -324,6 +334,7 @@ class Product extends Model
     {
         return $this->belongsToMany(KbArticle::class, 'product_kb_articles', 'product_id', 'kb_article_id');
     }
+
     /**
      * Get KB categories by IDs stored in JSON.
      */
@@ -336,8 +347,10 @@ class Product extends Model
             return [];
         }
         $categoryIds = json_decode($value, true) ?? [];
-        return is_array($categoryIds) ? array_map(fn($id) => is_numeric($id) ? (int)$id : 0, $categoryIds) : [];
+
+        return is_array($categoryIds) ? array_map(fn ($id) => is_numeric($id) ? (int)$id : 0, $categoryIds) : [];
     }
+
     /**
      * Get KB articles by IDs stored in JSON.
      */
@@ -350,34 +363,40 @@ class Product extends Model
             return [];
         }
         $articleIds = json_decode($value, true) ?? [];
-        return is_array($articleIds) ? array_map(fn($id) => is_numeric($id) ? (int)$id : 0, $articleIds) : [];
+
+        return is_array($articleIds) ? array_map(fn ($id) => is_numeric($id) ? (int)$id : 0, $articleIds) : [];
     }
+
     /**
      * Get KB categories as Collection.
      */
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, KbCategory>
+     * @return Collection<int, KbCategory>
      */
-    public function getKbCategoriesCollection(): \Illuminate\Database\Eloquent\Collection
+    public function getKbCategoriesCollection(): Collection
     {
         if (! $this->kb_categories) {
-            return new \Illuminate\Database\Eloquent\Collection();
+            return new Collection();
         }
+
         return KbCategory::whereIn('id', $this->kb_categories)->get();
     }
+
     /**
      * Get KB articles as Collection.
      */
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, KbArticle>
+     * @return Collection<int, KbArticle>
      */
-    public function getKbArticlesCollection(): \Illuminate\Database\Eloquent\Collection
+    public function getKbArticlesCollection(): Collection
     {
         if (! $this->kb_articles) {
-            return new \Illuminate\Database\Eloquent\Collection();
+            return new Collection();
         }
+
         return KbArticle::whereIn('id', $this->kb_articles)->get();
     }
+
     /**
      * Check if product has KB access requirements.
      */
@@ -387,6 +406,7 @@ class Product extends Model
                ((is_array($this->kb_categories) && count($this->kb_categories) > 0) ||
                 (is_array($this->kb_articles) && count($this->kb_articles) > 0));
     }
+
     /**
      * Get all accessible KB content (categories + articles from selected categories).
      */
@@ -395,15 +415,15 @@ class Product extends Model
      */
     /**
      * @return array{
-     *     categories: \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbCategory>,
-     *     articles: \Illuminate\Database\Eloquent\Collection<int, \App\Models\KbArticle>
+     *     categories: Collection<int, KbCategory>,
+     *     articles: Collection<int, KbArticle>
      * }
      */
     public function getAccessibleKbContent(): array
     {
         $accessibleContent = [
-            'categories' => new \Illuminate\Database\Eloquent\Collection(),
-            'articles' => new \Illuminate\Database\Eloquent\Collection(),
+            'categories' => new Collection(),
+            'articles' => new Collection(),
         ];
         // Get selected categories
         if (is_array($this->kb_categories) && count($this->kb_categories) > 0) {
@@ -418,8 +438,10 @@ class Product extends Model
             $specificArticles = KbArticle::whereIn('id', $this->kb_articles)->get();
             $accessibleContent['articles'] = $accessibleContent['articles']->merge($specificArticles)->unique('id');
         }
+
         return $accessibleContent;
     }
+
     /**
      * Check if support is still active for a license.
      */
@@ -427,28 +449,33 @@ class Product extends Model
     {
         return $licenseCreatedAt->copy()->addDays($this->support_days)->isFuture();
     }
+
     /**
      * Get extended support price formatted.
      */
     public function getFormattedExtendedSupportPriceAttribute(): string
     {
         $price = $this->extended_support_price ?? 0.0;
-        return '$' . number_format((float)$price, 2);
+
+        return '$'.number_format((float)$price, 2);
     }
+
     /**
      * Get formatted price.
      */
     public function getFormattedPriceAttribute(): string
     {
-        return '$' . number_format((float)$this->price, 2);
+        return '$'.number_format((float)$this->price, 2);
     }
+
     /**
      * Get formatted renewal price.
      */
     public function getFormattedRenewalPriceAttribute(): string
     {
-        return $this->renewal_price ? '$' . number_format((float)$this->renewal_price, 2) : 'N/A';
+        return $this->renewal_price ? '$'.number_format((float)$this->renewal_price, 2) : 'N/A';
     }
+
     /**
      * Get renewal period label.
      */
@@ -464,14 +491,17 @@ class Product extends Model
             default => 'Annual',
         };
     }
+
     /**
      * Get renewal period label (method version for view compatibility).
      */
     public function renewalPeriodLabel(): string
     {
         $label = $this->renewal_period_label ?? 'Annual';
+
         return is_string($label) ? $label : 'Annual';
     }
+
     /**
      * Check if product is in stock.
      */
@@ -482,6 +512,7 @@ class Product extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
     /**
      * Check if product has limited stock.
      */
@@ -489,6 +520,7 @@ class Product extends Model
     {
         return ! is_null($this->stock) && (int)$this->stock > 0;
     }
+
     /**
      * Check if product is in stock.
      */
@@ -496,6 +528,7 @@ class Product extends Model
     {
         return is_null($this->stock) || (int)$this->stock > 0;
     }
+
     /**
      * Decrease stock by specified amount.
      */
@@ -505,6 +538,7 @@ class Product extends Model
             $this->decrement('stock', $amount);
         }
     }
+
     /**
      * Increase stock by specified amount.
      */
@@ -514,6 +548,7 @@ class Product extends Model
             $this->increment('stock', $amount);
         }
     }
+
     /**
      * Get stock status.
      */
@@ -522,8 +557,10 @@ class Product extends Model
         if (is_null($this->stock)) {
             return 'Unlimited';
         }
-        return (int)$this->stock > 0 ? 'In Stock (' . $this->stock . ')' : 'Out of Stock';
+
+        return (int)$this->stock > 0 ? 'In Stock ('.$this->stock.')' : 'Out of Stock';
     }
+
     /**
      * Get renewal price (fallback to regular price if not set).
      */
@@ -531,14 +568,17 @@ class Product extends Model
     {
         return (float)($this->renewal_price ?? $this->price);
     }
+
     /**
      * Calculate next renewal date.
      */
     public function getNextRenewalDate(Carbon $fromDate = null): Carbon
     {
         $fromDate = $fromDate ?? now();
+
         return $fromDate->copy()->addDays($this->duration_days);
     }
+
     /**
      * Calculate tax amount.
      */
@@ -546,6 +586,7 @@ class Product extends Model
     {
         return (float)$this->price * ((float)$this->tax_rate / 100);
     }
+
     /**
      * Get total price including tax.
      */
@@ -553,6 +594,7 @@ class Product extends Model
     {
         return (float)$this->price + (float)$this->tax_amount;
     }
+
     /**
      * Get the latest version for this product (from updates or base version).
      */
@@ -567,6 +609,7 @@ class Product extends Model
             // Return the latest update version
             return (string)($latestUpdate->version ?? '1.0');
         }
+
         // If no updates available, return the base product version
         return (string)($this->version ?? '1.0');
     }

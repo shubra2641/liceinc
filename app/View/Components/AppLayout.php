@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\View\Components;
 
+use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\Component;
 use Illuminate\View\View;
-use Illuminate\Contracts\View\View as ViewContract;
 
 /**
  * Application Layout Component with Enhanced Security.
@@ -49,12 +49,13 @@ class AppLayout extends Component
             }
             // Render the layout with security context
             /**
- * @var view-string $viewName
-*/
+             * @var view-string $viewName
+             */
             $viewName = 'layouts.app';
             $view = view($viewName, []);
             // Add security headers and context
             $this->addSecurityContext($view);
+
             return $view;
         } catch (\Exception $e) {
             Log::error('Failed to render application layout', [
@@ -64,6 +65,7 @@ class AppLayout extends Component
             throw $e;
         }
     }
+
     /**
      * Add security context to the view with enhanced security measures.
      *

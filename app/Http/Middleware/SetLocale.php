@@ -53,9 +53,10 @@ class SetLocale
             $this->setApplicationLocale($validatedLocale);
             $response = $next($request);
             /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+             * @var Response $typedResponse
+             */
             $typedResponse = $response;
+
             return $typedResponse;
         } catch (\Exception $e) {
             Log::error('SetLocale middleware failed', [
@@ -69,12 +70,14 @@ class SetLocale
             app()->setLocale(is_string(config('app.locale')) ? config('app.locale') : 'en');
             $response = $next($request);
             /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+             * @var Response $typedResponse
+             */
             $typedResponse = $response;
+
             return $typedResponse;
         }
     }
+
     /**
      * Validate request with enhanced security and comprehensive validation.
      *
@@ -85,6 +88,7 @@ class SetLocale
         // Request is already typed as Request, no need to check instanceof
         // This method is kept for future validation logic
     }
+
     /**
      * Get locale from session or configuration with enhanced security.
      *
@@ -115,6 +119,7 @@ class SetLocale
             throw $e;
         }
     }
+
     /**
      * Validate and sanitize locale with enhanced security and comprehensive validation.
      *
@@ -148,11 +153,14 @@ class SetLocale
                     'supported_locales' => $supportedLocales,
                 ]);
             }
+
             // Fallback to default locale instead of throwing exception
             return is_string(config('app.locale', 'en')) ? config('app.locale', 'en') : 'en';
         }
+
         return $sanitizedLocale;
     }
+
     /**
      * Set application locale with enhanced security and error handling.
      *
@@ -173,6 +181,7 @@ class SetLocale
             throw $e;
         }
     }
+
     /**
      * Get supported locales with enhanced security and validation.
      *
@@ -187,12 +196,14 @@ class SetLocale
             // return the keys; otherwise return the flat array as-is
             $keys = array_keys($configLocales);
             $isAssociative = array_filter($keys, 'is_string') === $keys;
+
             return $isAssociative ? array_map(function ($key) {
                 return $key;
             }, $keys) : array_map(function ($value) {
                 return $value;
             }, array_values($configLocales));
         }
+
         // Default supported locales
         return [
             'en',

@@ -5,7 +5,7 @@ namespace App\Http\Requests\Traits;
 trait ProfileDataSanitization
 {
     /**
-     * Sanitize common profile fields
+     * Sanitize common profile fields.
      */
     protected function sanitizeProfileFields(): void
     {
@@ -25,7 +25,7 @@ trait ProfileDataSanitization
     }
 
     /**
-     * Sanitize additional profile fields
+     * Sanitize additional profile fields.
      */
     protected function sanitizeAdditionalFields(): void
     {
@@ -40,7 +40,7 @@ trait ProfileDataSanitization
     }
 
     /**
-     * Sanitize Envato fields
+     * Sanitize Envato fields.
      */
     protected function sanitizeEnvatoFields(): void
     {

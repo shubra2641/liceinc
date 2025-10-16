@@ -13,12 +13,12 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Application Service Provider
+ * Application Service Provider.
  */
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register application services
+     * Register application services.
      */
     public function register(): void
     {
@@ -36,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Exception $e) {
             // Log error but don't break the application
             if (app()->bound('log')) {
-                app('log')->error('Failed to register service providers: ' . $e->getMessage());
+                app('log')->error('Failed to register service providers: '.$e->getMessage());
             }
             // Re-throw if it's a critical error
             if ($e instanceof \InvalidArgumentException) {
@@ -44,8 +44,9 @@ class AppServiceProvider extends ServiceProvider
             }
         }
     }
+
     /**
-     * Bootstrap application services
+     * Bootstrap application services.
      */
     public function boot(): void
     {
@@ -56,11 +57,11 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure application URL
+     * Configure application URL.
      */
     private function configureAppUrl(): void
     {
-        if (!app()->runningInConsole()) {
+        if (! app()->runningInConsole()) {
             $currentHost = request()->getHost();
             $currentScheme = request()->getScheme();
             $appUrl = config('app.url');
@@ -71,9 +72,9 @@ class AppServiceProvider extends ServiceProvider
                 $currentScheme !== ($parsedAppUrl['scheme'] ?? 'http')
             ) {
                 $path = trim(dirname(request()->getScriptName()), '/');
-                $baseUrl = $currentScheme . '://' . $currentHost;
+                $baseUrl = $currentScheme.'://'.$currentHost;
                 if ($path && $path !== '.') {
-                    $baseUrl .= '/' . $path;
+                    $baseUrl .= '/'.$path;
                 }
                 config(['app.url' => $baseUrl]);
                 app('url')->useOrigin($baseUrl);
@@ -82,22 +83,24 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register view composers
+     * Register view composers.
      */
     private function registerViewComposers(): void
     {
         View::composer('*', LayoutComposer::class);
     }
+
     /**
-     * Configure pagination
+     * Configure pagination.
      */
     private function configurePagination(): void
     {
         Paginator::defaultView('pagination::bootstrap-5');
         Paginator::defaultSimpleView('pagination::simple-bootstrap-5');
     }
+
     /**
-     * Configure rate limiters
+     * Configure rate limiters.
      */
     private function configureRateLimiters(): void
     {
@@ -107,6 +110,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('api', function ($request) {
             $user = $request->user();
+
             return Limit::perMinute(300)->by($user?->id ?: $request->ip());
         });
 

@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Models\License;
 use App\Models\Invoice;
+use App\Models\License;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Process Cron Command - Simple cron processing
+ * Process Cron Command - Simple cron processing.
  *
  * This command processes all cron tasks in a simple, reliable way
  */
 class ProcessCronCommand extends Command
 {
     protected $signature = 'cron:process {--type=all : Type to process (all, licenses, invoices)}';
+
     protected $description = 'Process all cron tasks';
 
     public function handle(): int
@@ -50,8 +51,9 @@ class ProcessCronCommand extends Command
             return Command::SUCCESS;
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->error('❌ Processing failed: ' . $e->getMessage());
+            $this->error('❌ Processing failed: '.$e->getMessage());
             Log::error('Cron processing failed', ['error' => $e->getMessage()]);
+
             return Command::FAILURE;
         }
     }
@@ -77,6 +79,7 @@ class ProcessCronCommand extends Command
         }
 
         $this->line("   Processed: {$processed} expired licenses");
+
         return $processed;
     }
 
@@ -99,12 +102,13 @@ class ProcessCronCommand extends Command
             } catch (\Exception $e) {
                 Log::warning(
                     "Failed to process overdue invoice {$invoice->invoice_number}",
-                    ['error' => $e->getMessage()]
+                    ['error' => $e->getMessage()],
                 );
             }
         }
 
         $this->line("   Processed: {$processed} overdue invoices");
+
         return $processed;
     }
 
@@ -128,7 +132,7 @@ class ProcessCronCommand extends Command
                     $newExpiryDate = $this->calculateNewExpiryDate($license);
                     $license->update([
                         'status' => 'active',
-                        'license_expires_at' => $newExpiryDate
+                        'license_expires_at' => $newExpiryDate,
                     ]);
                     $processed++;
                     $this->line("   • Renewed license: {$license->license_key}");
@@ -137,18 +141,19 @@ class ProcessCronCommand extends Command
                         'license_id' => $license->id,
                         'license_key' => $license->license_key,
                         'invoice_id' => $invoice->id,
-                        'new_expiry_date' => $newExpiryDate
+                        'new_expiry_date' => $newExpiryDate,
                     ]);
                 }
             } catch (\Exception $e) {
                 Log::warning(
                     "Failed to renew license for invoice {$invoice->invoice_number}",
-                    ['error' => $e->getMessage()]
+                    ['error' => $e->getMessage()],
                 );
             }
         }
 
         $this->line("   Processed: {$processed} paid invoices");
+
         return $processed;
     }
 
@@ -176,6 +181,7 @@ class ProcessCronCommand extends Command
 
         // Default to product duration
         $durationDays = $product->duration_days ?? 365;
+
         return $currentExpiry->copy()->addDays($durationDays);
     }
 
@@ -199,7 +205,7 @@ class ProcessCronCommand extends Command
                     ->where('status', 'pending')
                     ->first();
 
-                if (!$existingInvoice && $license->product) {
+                if (! $existingInvoice && $license->product) {
                     $renewalPrice = $license->product->renewal_price ?? $license->product->price ?? 0;
 
                     if ($renewalPrice > 0) {
@@ -208,7 +214,7 @@ class ProcessCronCommand extends Command
                             'user_id' => $license->user_id,
                             'license_id' => $license->id,
                             'product_id' => $license->product_id,
-                            'invoice_number' => 'REN-' . time() . '-' . $license->id,
+                            'invoice_number' => 'REN-'.time().'-'.$license->id,
                             'type' => 'renewal',
                             'status' => 'pending',
                             'amount' => $renewalPrice,
@@ -225,19 +231,20 @@ class ProcessCronCommand extends Command
                             'license_id' => $license->id,
                             'license_key' => $license->license_key,
                             'invoice_id' => $invoice->id,
-                            'amount' => $renewalPrice
+                            'amount' => $renewalPrice,
                         ]);
                     }
                 }
             } catch (\Exception $e) {
                 Log::warning(
                     "Failed to create renewal invoice for license {$license->license_key}",
-                    ['error' => $e->getMessage()]
+                    ['error' => $e->getMessage()],
                 );
             }
         }
 
         $this->line("   Generated: {$processed} renewal invoices");
+
         return $processed;
     }
 }

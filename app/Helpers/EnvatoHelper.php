@@ -36,14 +36,17 @@ class EnvatoHelper
      * Cache key for Envato configuration check.
      */
     private const CACHE_KEY_CONFIGURED = 'envato_configured';
+
     /**
      * Cache key for Envato settings.
      */
     private const CACHE_KEY_SETTINGS = 'envato_settings';
+
     /**
      * Cache duration in minutes.
      */
     private const CACHE_DURATION = 60;
+
     /**
      * Check if Envato API settings are configured with enhanced security.
      *
@@ -78,17 +81,21 @@ class EnvatoHelper
                         return false;
                     }
                 }
+
                 return true;
             });
+
             return is_bool($result) ? $result : false;
         } catch (\Exception $e) {
             Log::error('Error checking Envato configuration', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return false;
         }
     }
+
     /**
      * Alias method for isEnvatoConfigured() for backward compatibility.
      *
@@ -108,6 +115,7 @@ class EnvatoHelper
     {
         return self::isEnvatoConfigured();
     }
+
     /**
      * Get Envato API settings with enhanced security and validation.
      *
@@ -146,6 +154,7 @@ class EnvatoHelper
                         return null;
                     }
                 }
+
                 return [
                     'personal_token' => self::sanitizeOutput($setting->envato_personal_token),
                     'client_id' => self::sanitizeOutput($setting->envato_client_id),
@@ -159,17 +168,21 @@ class EnvatoHelper
                         $sanitizedResult[$key] = $value;
                     }
                 }
+
                 return $sanitizedResult;
             }
+
             return null;
         } catch (\Exception $e) {
             Log::error('Error retrieving Envato settings', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return null;
         }
     }
+
     /**
      * Clear Envato settings cache.
      *
@@ -192,6 +205,7 @@ class EnvatoHelper
             ]);
         }
     }
+
     /**
      * Validate Envato settings format.
      *
@@ -213,8 +227,10 @@ class EnvatoHelper
                 return false;
             }
         }
+
         return true;
     }
+
     /**
      * Sanitize output to prevent XSS attacks.
      *
@@ -227,6 +243,7 @@ class EnvatoHelper
         if ($output === null) {
             return '';
         }
+
         return htmlspecialchars($output, ENT_QUOTES, 'UTF-8');
     }
 }

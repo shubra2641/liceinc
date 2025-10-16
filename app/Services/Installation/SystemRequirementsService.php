@@ -110,6 +110,7 @@ class SystemRequirementsService
     {
         try {
             \DB::connection()->getPdo();
+
             return [
                 'connected' => true,
                 'message' => 'Database connection successful',
@@ -117,7 +118,7 @@ class SystemRequirementsService
         } catch (\Exception $e) {
             return [
                 'connected' => false,
-                'message' => 'Database connection failed: ' . $e->getMessage(),
+                'message' => 'Database connection failed: '.$e->getMessage(),
             ];
         }
     }

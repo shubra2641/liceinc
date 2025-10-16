@@ -6,8 +6,8 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class RegisterRequest extends FormRequest
 {
@@ -18,6 +18,7 @@ class RegisterRequest extends FormRequest
     {
         return true;
     }
+
     /**
      * Handle a failed validation attempt.
      */
@@ -60,8 +61,8 @@ class RegisterRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
      */
     /**
- * @return array<string, array<int, string>>
-*/
+     * @return array<string, array<int, string>>
+     */
     public function rules(): array
     {
         return [

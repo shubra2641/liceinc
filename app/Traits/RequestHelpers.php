@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Traits;
 
 /**
- * Request Helpers Trait
+ * Request Helpers Trait.
  *
  * Provides common request functionality to eliminate code duplication
  * across different request classes.
@@ -53,6 +53,7 @@ trait RequestHelpers
      * Handle filter and sort parameters.
      *
      * @param array $additionalFilters Additional filter fields to include
+     *
      * @return void
      */
     protected function handleFilterAndSort(array $additionalFilters = []): void
@@ -79,6 +80,7 @@ trait RequestHelpers
      * Set default values for update requests.
      *
      * @param array $defaults Default values to set
+     *
      * @return void
      */
     protected function setDefaultValues(array $defaults = []): void

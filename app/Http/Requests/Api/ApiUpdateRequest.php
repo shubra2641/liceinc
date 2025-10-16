@@ -35,6 +35,7 @@ class ApiUpdateRequest extends FormRequest
     {
         return true; // API requests are generally public but validated by license
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -316,9 +317,11 @@ class ApiUpdateRequest extends FormRequest
                 ],
             ];
         }
+
         // Default validation (should not reach here)
         return [];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -330,7 +333,7 @@ class ApiUpdateRequest extends FormRequest
             'license_key.required' => 'License key is required.',
             'license_key.regex' => 'License key can only contain letters, numbers, hyphens, and underscores.',
             'current_version.required' => 'Current version is required.',
-            'current_version.regex' => 'Current version must be in format: x.y or x.y.z or x.y.z-suffix ' .
+            'current_version.regex' => 'Current version must be in format: x.y or x.y.z or x.y.z-suffix '.
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
             'domain.required' => 'Domain is required.',
             'domain.regex' => 'Domain can only contain letters, numbers, hyphens, underscores, and dots.',
@@ -339,7 +342,7 @@ class ApiUpdateRequest extends FormRequest
             'product_id.integer' => 'Product ID must be a valid integer.',
             'product_id.min' => 'Product ID must be at least 1.',
             'version.required' => 'Version is required.',
-            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix ' .
+            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix '.
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
             'include_changelog.boolean' => 'Include changelog must be true or false.',
             'include_dependencies.boolean' => 'Include dependencies must be true or false.',
@@ -354,7 +357,7 @@ class ApiUpdateRequest extends FormRequest
             'limit.max' => 'Limit cannot exceed 100.',
             'offset.min' => 'Offset must be at least 0.',
             'sort_order.regex' => 'Sort order contains invalid characters.',
-            'filter_version.regex' => 'Filter version must be in format: x.y or x.y.z or x.y.z-suffix ' .
+            'filter_version.regex' => 'Filter version must be in format: x.y or x.y.z or x.y.z-suffix '.
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
             'filter_date_from.date' => 'Filter date from must be a valid date.',
             'filter_date_to.date' => 'Filter date to must be a valid date.',
@@ -367,6 +370,7 @@ class ApiUpdateRequest extends FormRequest
             'include_rollback_info.boolean' => 'Include rollback info must be true or false.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -404,6 +408,7 @@ class ApiUpdateRequest extends FormRequest
             'include_rollback_info' => 'include rollback info',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */
@@ -429,6 +434,7 @@ class ApiUpdateRequest extends FormRequest
             'sort_order' => $this->sort_order ?? 'desc',
         ]);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -442,7 +448,7 @@ class ApiUpdateRequest extends FormRequest
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

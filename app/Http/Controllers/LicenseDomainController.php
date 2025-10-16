@@ -16,6 +16,7 @@ class LicenseDomainController extends Controller
     {
         return response('', 200);
     }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -23,6 +24,7 @@ class LicenseDomainController extends Controller
     {
         return response('', 200);
     }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -30,6 +32,7 @@ class LicenseDomainController extends Controller
     {
         return response('', 200);
     }
+
     /**
      * Display the specified resource.
      */
@@ -37,6 +40,7 @@ class LicenseDomainController extends Controller
     {
         return response('', 200);
     }
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -44,6 +48,7 @@ class LicenseDomainController extends Controller
     {
         return response('', 200);
     }
+
     /**
      * Update the specified resource in storage.
      */
@@ -51,12 +56,14 @@ class LicenseDomainController extends Controller
     {
         return response('', 200);
     }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(LicenseDomain $licenseDomain): \Illuminate\Http\RedirectResponse
     {
         $licenseDomain->delete();
+
         return redirect()->back()->with('success', 'Domain removed successfully.');
     }
 }

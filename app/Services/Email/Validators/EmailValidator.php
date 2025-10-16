@@ -47,7 +47,7 @@ class EmailValidator implements EmailValidatorInterface
         }
 
         $sanitized = filter_var(trim($email), FILTER_SANITIZE_EMAIL);
-        if ($sanitized === false || !filter_var($sanitized, FILTER_VALIDATE_EMAIL)) {
+        if ($sanitized === false || ! filter_var($sanitized, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Invalid email address format');
         }
 
@@ -64,9 +64,9 @@ class EmailValidator implements EmailValidatorInterface
         $allowedTypes = ['user', 'admin'];
         $sanitized = htmlspecialchars(trim($type), ENT_QUOTES, 'UTF-8');
 
-        if (!in_array($sanitized, $allowedTypes, true)) {
+        if (! in_array($sanitized, $allowedTypes, true)) {
             throw new \InvalidArgumentException(
-                'Invalid template type. Allowed values: ' . implode(', ', $allowedTypes)
+                'Invalid template type. Allowed values: '.implode(', ', $allowedTypes),
             );
         }
 
@@ -82,11 +82,12 @@ class EmailValidator implements EmailValidatorInterface
             return null;
         }
 
-        if (!is_string($input) && !is_scalar($input)) {
+        if (! is_string($input) && ! is_scalar($input)) {
             return null;
         }
 
-        $stringValue = is_string($input) ? $input : (string) $input;
+        $stringValue = is_string($input) ? $input : (string)$input;
+
         return htmlspecialchars(trim($stringValue), ENT_QUOTES, 'UTF-8');
     }
 
@@ -107,13 +108,13 @@ class EmailValidator implements EmailValidatorInterface
          */
         $sanitized = [];
         foreach ($data as $key => $value) {
-            $stringKey = is_string($key) ? $key : (string) $key;
+            $stringKey = is_string($key) ? $key : (string)$key;
             if (is_array($value)) {
                 $sanitized[$stringKey] = $this->sanitizeData($value);
             } elseif (is_string($value)) {
                 $sanitized[$stringKey] = $this->sanitizeString($value) ?? '';
             } else {
-                $sanitized[$stringKey] = is_scalar($value) ? (string) $value : '';
+                $sanitized[$stringKey] = is_scalar($value) ? (string)$value : '';
             }
         }
 

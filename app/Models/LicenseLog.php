@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -22,7 +21,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read string|null $action
  * @property-read string|null $message
- * @property-read \App\Models\License $license
+ * @property-read License $license
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog query()
@@ -37,6 +37,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseLog whereUserAgent($value)
+ *
  * @mixin \Eloquent
  */
 class LicenseLog extends Model
@@ -44,8 +45,6 @@ class LicenseLog extends Model
     /**
      * @phpstan-ignore-next-line
      */
-
-
     protected $fillable = [
         'license_id',
         'domain',
@@ -56,10 +55,12 @@ class LicenseLog extends Model
         'request_data',
         'response_data',
     ];
+
     protected $casts = [
         'request_data' => 'array',
         'response_data' => 'array',
     ];
+
     /**
      * @return BelongsTo<License, $this>
      */
@@ -67,6 +68,7 @@ class LicenseLog extends Model
     {
         return $this->belongsTo(License::class);
     }
+
     /**
      * Virtual attribute to access the action from request_data.
      */
@@ -78,8 +80,10 @@ class LicenseLog extends Model
         }
         // Data is already type-hinted as array
         $action = $data['action'] ?? null;
+
         return is_string($action) ? $action : null;
     }
+
     /**
      * Virtual attribute to access the message from response_data.
      */
@@ -91,8 +95,10 @@ class LicenseLog extends Model
         }
         // Data is already type-hinted as array
         $message = $data['message'] ?? null;
+
         return is_string($message) ? $message : null;
     }
+
     /**
      * Get API calls grouped by date for the last N days.
      *
@@ -106,6 +112,7 @@ class LicenseLog extends Model
             ->orderBy('date')
             ->get();
     }
+
     /**
      * Get API status distribution for the last N days.
      *
@@ -118,6 +125,7 @@ class LicenseLog extends Model
             ->groupBy('status')
             ->get();
     }
+
     /**
      * Get top domains by API calls.
      *
@@ -132,6 +140,7 @@ class LicenseLog extends Model
             ->limit($limit)
             ->get();
     }
+
     /**
      * Get API calls by hour for today.
      *

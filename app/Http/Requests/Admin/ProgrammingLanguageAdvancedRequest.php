@@ -30,8 +30,10 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
+
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -164,9 +166,11 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
                 ],
             ];
         }
+
         // Default validation (should not reach here)
         return [];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -197,6 +201,7 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
             'encoding.in' => 'Encoding must be one of: utf-8, utf-16, ascii, latin1.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -225,6 +230,7 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
             'encoding' => 'file encoding',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */
@@ -272,6 +278,7 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
             'encoding' => $this->encoding ?? 'utf-8',
         ]);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -285,7 +292,7 @@ class ProgrammingLanguageAdvancedRequest extends FormRequest
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

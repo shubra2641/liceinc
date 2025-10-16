@@ -54,28 +54,29 @@ class ProductController extends Controller
             'price_low' => $query->orderBy('price', 'asc'),
             'price_high' => $query->orderBy('price', 'desc'),
             'newest' => $query->orderBy('created_at', 'desc'),
-            default => $query->orderBy('name', 'asc')
+            default => $query->orderBy('name', 'asc'),
         };
 
         return view('user.products.index', [
             'products' => $query->paginate(15)->withQueryString(),
             'categories' => ProductCategory::where('is_active', true)->orderBy('sort_order')->get(),
-            'programmingLanguages' => ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get()
+            'programmingLanguages' => ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get(),
         ]);
     }
 
     public function show(Product $product): View
     {
-        if (!$product->is_active) {
+        if (! $product->is_active) {
             abort(404);
         }
+
         return $this->showProduct($product);
     }
 
     public function publicShow(string $slug): View
     {
         $slug = htmlspecialchars(trim($slug), ENT_QUOTES, 'UTF-8');
-        if (!$slug) {
+        if (! $slug) {
             abort(404);
         }
 
@@ -116,8 +117,8 @@ class ProductController extends Controller
             'relatedProducts' => Product::where('category_id', $product->category_id)->where('id', '!=', $product->id)
                 ->where('is_active', true)->with(['category', 'programmingLanguage'])
                 ->orderBy('created_at', 'desc')->limit(3)->get(),
-            'screenshots' => $product->screenshots && !empty($product->screenshots) ?
-                (is_string($product->screenshots) ? json_decode($product->screenshots, true) : $product->screenshots) : null
+            'screenshots' => $product->screenshots && ! empty($product->screenshots) ?
+                (is_string($product->screenshots) ? json_decode($product->screenshots, true) : $product->screenshots) : null,
         ]);
     }
 }

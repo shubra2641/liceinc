@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -16,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $webhook_url
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting query()
@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting whereIsSandbox($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentSetting whereWebhookUrl($value)
+ *
  * @mixin \Eloquent
  */
 class PaymentSetting extends Model
@@ -34,8 +35,6 @@ class PaymentSetting extends Model
     /**
      * @phpstan-ignore-next-line
      */
-
-
     protected $fillable = [
         'gateway',
         'is_enabled',
@@ -43,11 +42,13 @@ class PaymentSetting extends Model
         'credentials',
         'webhook_url',
     ];
+
     protected $casts = [
         'is_enabled' => 'boolean',
         'is_sandbox' => 'boolean',
         'credentials' => 'array',
     ];
+
     /**
      * Get payment setting by gateway.
      */
@@ -55,14 +56,17 @@ class PaymentSetting extends Model
     {
         return static::where('gateway', $gateway)->first();
     }
+
     /**
      * Check if gateway is enabled.
      */
     public static function isGatewayEnabled(string $gateway): bool
     {
         $setting = static::getByGateway($gateway);
+
         return $setting ? $setting->is_enabled : false;
     }
+
     /**
      * Get enabled gateways.
      */
@@ -80,8 +84,10 @@ class PaymentSetting extends Model
                 $result[] = $gateway;
             }
         }
+
         return $result;
     }
+
     /**
      * Get credentials for a specific gateway.
      */
@@ -93,9 +99,10 @@ class PaymentSetting extends Model
         $setting = static::getByGateway($gateway);
         $credentials = $setting ? (is_array($setting->credentials) ? $setting->credentials : []) : [];
         /**
- * @var array<string, mixed> $typedCredentials
-*/
+         * @var array<string, mixed> $typedCredentials
+         */
         $typedCredentials = $credentials;
+
         return $typedCredentials;
     }
 }

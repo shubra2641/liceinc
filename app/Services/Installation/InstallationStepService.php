@@ -43,7 +43,7 @@ class InstallationStepService
         $steps = $this->getInstallationSteps();
 
         return array_map(function ($index, $stepData) use ($currentStep) {
-            $stepNumber = (int) $index + 1;
+            $stepNumber = (int)$index + 1;
             $isCompleted = $stepNumber < $currentStep;
             $isCurrent = $stepNumber == $currentStep;
             $isPending = $stepNumber > $currentStep;

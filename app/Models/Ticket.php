@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,12 +21,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int|null $invoice_id
  * @property string|null $purchase_code
  * @property int|null $category_id
- * @property-read \App\Models\TicketCategory|null $category
- * @property-read \App\Models\Invoice|null $invoice
- * @property-read \App\Models\License|null $license
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TicketReply> $replies
+ * @property-read TicketCategory|null $category
+ * @property-read Invoice|null $invoice
+ * @property-read License|null $license
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TicketReply> $replies
  * @property-read int|null $replies_count
- * @property-read \App\Models\User|null $user
+ * @property-read User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket query()
@@ -43,6 +43,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereSubject($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class Ticket extends Model
@@ -50,8 +51,6 @@ class Ticket extends Model
     /**
      * @phpstan-ignore-next-line
      */
-
-
     protected $fillable = [
         'user_id',
         'license_id',
@@ -63,11 +62,13 @@ class Ticket extends Model
         'status',
         'content',
     ];
+
     protected $casts = [
         'user_id' => 'integer',
         'license_id' => 'integer',
         'category_id' => 'integer',
     ];
+
     /**
      * @return BelongsTo<User, $this>
      */
@@ -75,6 +76,7 @@ class Ticket extends Model
     {
         return $this->belongsTo(User::class);
     }
+
     /**
      * @return BelongsTo<License, $this>
      */
@@ -82,6 +84,7 @@ class Ticket extends Model
     {
         return $this->belongsTo(License::class);
     }
+
     /**
      * @return BelongsTo<Invoice, $this>
      */
@@ -89,6 +92,7 @@ class Ticket extends Model
     {
         return $this->belongsTo(Invoice::class);
     }
+
     /**
      * @return BelongsTo<TicketCategory, $this>
      */
@@ -96,6 +100,7 @@ class Ticket extends Model
     {
         return $this->belongsTo(TicketCategory::class, 'category_id');
     }
+
     /**
      * @return HasMany<TicketReply, $this>
      */

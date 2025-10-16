@@ -105,6 +105,7 @@ class LicenseVerificationLogger
                     'message' => $message,
                 ]);
             }
+
             return $log;
         } catch (Exception $e) {
             // Fallback logging if database fails
@@ -114,6 +115,7 @@ class LicenseVerificationLogger
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Return a mock log entry
             return new LicenseVerificationLog([
                 'purchase_code_hash' => hash('sha256', $purchaseCode),
@@ -124,6 +126,7 @@ class LicenseVerificationLogger
             ]);
         }
     }
+
     /**
      * Get verification statistics with enhanced security.
      *
@@ -146,6 +149,7 @@ class LicenseVerificationLogger
         try {
             $days = self::validateDays($days);
             $startDate = now()->subDays($days);
+
             return [
                 'total_attempts' => LicenseVerificationLog::where('created_at', '>=', $startDate)
                     ->count(),
@@ -160,7 +164,8 @@ class LicenseVerificationLogger
                 'recent_failed_attempts' => LicenseVerificationLog::recent(24)->failed()->count(),
             ];
         } catch (Exception $e) {
-            Log::error('Failed to get verification statistics: ' . $e->getMessage());
+            Log::error('Failed to get verification statistics: '.$e->getMessage());
+
             return [
                 'total_attempts' => 0,
                 'successful_attempts' => 0,
@@ -171,6 +176,7 @@ class LicenseVerificationLogger
             ];
         }
     }
+
     /**
      * Get suspicious activity with enhanced security.
      *
@@ -203,15 +209,18 @@ class LicenseVerificationLogger
                 ->get()
                 ->toArray();
             /**
- * @var array<string, mixed> $typedResult
-*/
+             * @var array<string, mixed> $typedResult
+             */
             $typedResult = $result;
+
             return $typedResult;
         } catch (Exception $e) {
-            Log::error('Failed to get suspicious activity: ' . $e->getMessage());
+            Log::error('Failed to get suspicious activity: '.$e->getMessage());
+
             return [];
         }
     }
+
     /**
      * Get recent verification attempts with enhanced security.
      *
@@ -233,15 +242,18 @@ class LicenseVerificationLogger
     {
         try {
             $limit = self::validateLimit($limit);
+
             return LicenseVerificationLog::with([])
                 ->orderBy('created_at', 'desc')
                 ->limit($limit)
                 ->get();
         } catch (Exception $e) {
-            Log::error('Failed to get recent attempts: ' . $e->getMessage());
+            Log::error('Failed to get recent attempts: '.$e->getMessage());
+
             return new Collection();
         }
     }
+
     /**
      * Clean old logs with enhanced security.
      *
@@ -262,13 +274,16 @@ class LicenseVerificationLogger
             $days = self::validateDays($days);
             $cutoffDate = now()->subDays($days);
             $deletedCount = LicenseVerificationLog::where('created_at', '<', $cutoffDate)->delete();
+
             // Cleanup completed successfully - no logging needed for successful operations
             return is_numeric($deletedCount) ? (int)$deletedCount : 0;
         } catch (Exception $e) {
-            Log::error('Failed to clean old logs: ' . $e->getMessage());
+            Log::error('Failed to clean old logs: '.$e->getMessage());
+
             return 0;
         }
     }
+
     /**
      * Validate and sanitize purchase code.
      *
@@ -292,8 +307,10 @@ class LicenseVerificationLogger
         if (empty($sanitized) || strlen($sanitized) < 10) {
             throw new \InvalidArgumentException('Purchase code must be at least 10 characters long');
         }
+
         return $sanitized;
     }
+
     /**
      * Validate and sanitize domain.
      *
@@ -317,8 +334,10 @@ class LicenseVerificationLogger
         if (empty($sanitized) || strlen($sanitized) < 3) {
             throw new \InvalidArgumentException('Domain must be at least 3 characters long');
         }
+
         return $sanitized;
     }
+
     /**
      * Validate and sanitize verification source.
      *
@@ -339,11 +358,13 @@ class LicenseVerificationLogger
         $sanitized = htmlspecialchars(trim($source), ENT_QUOTES, 'UTF-8');
         if (! in_array($sanitized, $allowedSources, true)) {
             throw new \InvalidArgumentException(
-                'Invalid verification source. Allowed values: ' . implode(', ', $allowedSources),
+                'Invalid verification source. Allowed values: '.implode(', ', $allowedSources),
             );
         }
+
         return $sanitized;
     }
+
     /**
      * Get validated IP address from request.
      *
@@ -362,8 +383,10 @@ class LicenseVerificationLogger
         if (empty($ipAddress)) {
             return 'unknown';
         }
+
         return htmlspecialchars(trim($ipAddress), ENT_QUOTES, 'UTF-8');
     }
+
     /**
      * Get validated user agent from request.
      *
@@ -382,8 +405,10 @@ class LicenseVerificationLogger
         if (empty($userAgent)) {
             return 'unknown';
         }
+
         return htmlspecialchars(trim($userAgent), ENT_QUOTES, 'UTF-8');
     }
+
     /**
      * Validate days parameter.
      *
@@ -402,8 +427,10 @@ class LicenseVerificationLogger
         if ($days <= 0 || $days > 365) {
             throw new \InvalidArgumentException('Days must be between 1 and 365');
         }
+
         return $days;
     }
+
     /**
      * Validate hours parameter.
      *
@@ -422,8 +449,10 @@ class LicenseVerificationLogger
         if ($hours <= 0 || $hours > 168) {
             throw new \InvalidArgumentException('Hours must be between 1 and 168');
         }
+
         return $hours;
     }
+
     /**
      * Validate minimum attempts parameter.
      *
@@ -442,8 +471,10 @@ class LicenseVerificationLogger
         if ($minAttempts <= 0 || $minAttempts > 100) {
             throw new \InvalidArgumentException('Minimum attempts must be between 1 and 100');
         }
+
         return $minAttempts;
     }
+
     /**
      * Validate limit parameter.
      *
@@ -462,8 +493,10 @@ class LicenseVerificationLogger
         if ($limit <= 0 || $limit > 1000) {
             throw new \InvalidArgumentException('Limit must be between 1 and 1000');
         }
+
         return $limit;
     }
+
     /**
      * Determine status based on validation results.
      *
@@ -507,6 +540,7 @@ class LicenseVerificationLogger
         if ($input === null) {
             return null;
         }
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

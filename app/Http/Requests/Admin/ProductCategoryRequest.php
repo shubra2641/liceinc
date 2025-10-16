@@ -32,8 +32,10 @@ class ProductCategoryRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
+
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -44,6 +46,7 @@ class ProductCategoryRequest extends FormRequest
         $category = $this->route('product_category');
         $categoryId = $category && is_object($category) && property_exists($category, 'id') ? $category->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
+
         return [
             'name' => [
                 'required',
@@ -87,7 +90,7 @@ class ProductCategoryRequest extends FormRequest
             'parent_id' => [
                 'nullable',
                 'exists:product_categories,id',
-                'not_in:' . (is_string($categoryId) ? $categoryId : ''),
+                'not_in:'.(is_string($categoryId) ? $categoryId : ''),
             ],
             'meta_title' => [
                 'nullable',
@@ -136,6 +139,7 @@ class ProductCategoryRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -145,7 +149,7 @@ class ProductCategoryRequest extends FormRequest
     {
         return [
             'name.regex' => 'Category name contains invalid characters. Only letters, numbers, '
-                . 'spaces, hyphens, underscores, and ampersands are allowed.',
+                .'spaces, hyphens, underscores, and ampersands are allowed.',
             'name.unique' => 'A category with this name already exists.',
             'slug.regex' => 'Slug can only contain lowercase letters, numbers, hyphens, and underscores.',
             'slug.unique' => 'A category with this slug already exists.',
@@ -165,6 +169,7 @@ class ProductCategoryRequest extends FormRequest
             'parent_id.not_in' => 'A category cannot be its own parent.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -191,6 +196,7 @@ class ProductCategoryRequest extends FormRequest
             'allow_subcategories' => 'allow subcategories',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */
@@ -224,6 +230,7 @@ class ProductCategoryRequest extends FormRequest
             'allow_subcategories' => $this->has('allow_subcategories'),
         ]);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -237,7 +244,7 @@ class ProductCategoryRequest extends FormRequest
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

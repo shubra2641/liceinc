@@ -42,6 +42,7 @@ class KbArticleController extends Controller
     {
         $this->middleware(['auth', 'user', 'verified']);
     }
+
     /**
      * Display a listing of knowledge base articles with enhanced security.
      *
@@ -71,6 +72,7 @@ class KbArticleController extends Controller
             }
             $articles = KbArticle::with('category')->latest()->paginate(10);
             $categories = KbCategory::all();
+
             return view('admin.kb.articles.index', ['articles' => $articles, 'categories' => $categories]);
         } catch (\Exception $e) {
             Log::error('Failed to load KB articles index', [
@@ -84,6 +86,7 @@ class KbArticleController extends Controller
             abort(500, 'Failed to load articles');
         }
     }
+
     /**
      * Show the form for creating a new knowledge base article.
      *
@@ -112,6 +115,7 @@ class KbArticleController extends Controller
                 abort(403, 'Unauthorized access');
             }
             $categories = KbCategory::pluck('name', 'id');
+
             return view('admin.kb.articles.create', ['categories' => $categories]);
         } catch (\Exception $e) {
             Log::error('Failed to load KB article creation form', [
@@ -125,6 +129,7 @@ class KbArticleController extends Controller
             abort(500, 'Failed to load creation form');
         }
     }
+
     /**
      * Store a newly created knowledge base article with enhanced security.
      *
@@ -163,6 +168,7 @@ class KbArticleController extends Controller
             // @phpstan-ignore-next-line
             KbArticle::create($data);
             DB::commit();
+
             return redirect()->route('admin.kb-articles.index')->with('success', 'Article created successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
@@ -171,6 +177,7 @@ class KbArticleController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
+
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -182,9 +189,11 @@ class KbArticleController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
+
             return back()->with('error', 'Failed to create article. Please try again.');
         }
     }
+
     /**
      * Show the form for editing the specified knowledge base article.
      *
@@ -215,6 +224,7 @@ class KbArticleController extends Controller
                 abort(403, 'Unauthorized access');
             }
             $categories = KbCategory::pluck('name', 'id');
+
             return view('admin.kb.articles.edit', ['article' => $kbArticle, 'categories' => $categories]);
         } catch (\Exception $e) {
             Log::error('Failed to load KB article editing form', [
@@ -228,6 +238,7 @@ class KbArticleController extends Controller
             abort(500, 'Failed to load editing form');
         }
     }
+
     /**
      * Update the specified knowledge base article with enhanced security.
      *
@@ -266,6 +277,7 @@ class KbArticleController extends Controller
             // @phpstan-ignore-next-line
             $kbArticle->update($data);
             DB::commit();
+
             return back()->with('success', 'Article updated successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
@@ -274,6 +286,7 @@ class KbArticleController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
+
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -285,9 +298,11 @@ class KbArticleController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
+
             return back()->with('error', 'Failed to update article. Please try again.');
         }
     }
+
     /**
      * Remove the specified knowledge base article with enhanced security.
      *
@@ -321,6 +336,7 @@ class KbArticleController extends Controller
             DB::beginTransaction();
             $kbArticle->delete();
             DB::commit();
+
             return redirect()->route('admin.kb-articles.index')->with('success', 'Article deleted successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -332,12 +348,13 @@ class KbArticleController extends Controller
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
             ]);
+
             return back()->with('error', 'Failed to delete article. Please try again.');
         }
     }
 
     /**
-     * Process and sanitize article data
+     * Process and sanitize article data.
      */
     private function processArticleData(array $validated, Request $request): array
     {
@@ -362,12 +379,12 @@ class KbArticleController extends Controller
     }
 
     /**
-     * Check admin authorization
+     * Check admin authorization.
      */
     private function checkAdminAuthorization(string $action): void
     {
         $user = Auth::user();
-        if (!$user || (!$user->is_admin && !$user->hasRole('admin'))) {
+        if (! $user || (! $user->is_admin && ! $user->hasRole('admin'))) {
             Log::warning("Unauthorized attempt to {$action}", [
                 'user_id' => Auth::id(),
                 'ip' => request()->ip(),
@@ -378,7 +395,7 @@ class KbArticleController extends Controller
     }
 
     /**
-     * Get article validation rules
+     * Get article validation rules.
      */
     private function getArticleValidationRules(): array
     {

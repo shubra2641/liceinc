@@ -11,7 +11,6 @@ use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Ticket;
 use App\Models\TicketCategory;
-use App\Models\TicketReply;
 use App\Models\User;
 use App\Services\Email\EmailFacade;
 use App\Traits\TicketHelpers;
@@ -64,7 +63,7 @@ class TicketController extends Controller
      *
      * @return View The tickets index view
      *
-     * @throws \Exception When database operations fail
+     * @throws Exception When database operations fail
      *
      * @example
      * // Access tickets list:
@@ -83,7 +82,7 @@ class TicketController extends Controller
             DB::commit();
 
             return view('admin.tickets.index', ['tickets' => $tickets]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error('Tickets listing failed', [
                 'error' => $e->getMessage(),
@@ -134,7 +133,7 @@ class TicketController extends Controller
      *
      * @return RedirectResponse Redirect to tickets index or back with error
      *
-     * @throws \Exception When database operations fail
+     * @throws Exception When database operations fail
      *
      * @example
      * // Request:
@@ -248,7 +247,7 @@ class TicketController extends Controller
                     'currency' => config('app.currency', 'USD'),
                     'type' => ($billingType && $billingType !== 'one_time') ? 'recurring' : 'one_time',
                     'metadata' => $metadata,
-                    'invoice_number' => 'INV-' . strtoupper(uniqid()),
+                    'invoice_number' => 'INV-'.strtoupper(uniqid()),
                 ]);
                 $ticketData['invoice_id'] = $invoice->id;
             }
@@ -263,7 +262,7 @@ class TicketController extends Controller
             DB::commit();
 
             return redirect()->route('admin.tickets.index')->with('success', 'Ticket created successfully for user');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to create ticket', [
                 'error' => $e->getMessage(),
@@ -276,7 +275,6 @@ class TicketController extends Controller
                 ->withInput();
         }
     }
-
 
     /**
      * Display the specified ticket.
@@ -341,7 +339,7 @@ class TicketController extends Controller
      *
      * @return RedirectResponse Redirect back with success or error message
      *
-     * @throws \Exception When database operations fail
+     * @throws Exception When database operations fail
      *
      * @example
      * // Update request:
@@ -371,7 +369,7 @@ class TicketController extends Controller
      *
      * @return RedirectResponse Redirect to tickets index or back with error
      *
-     * @throws \Exception When database operations fail
+     * @throws Exception When database operations fail
      *
      * @example
      * // Delete ticket:
@@ -399,7 +397,7 @@ class TicketController extends Controller
      *
      * @return RedirectResponse Redirect back with success or error message
      *
-     * @throws \Exception When database operations fail
+     * @throws Exception When database operations fail
      *
      * @example
      * // Reply request:
@@ -427,7 +425,7 @@ class TicketController extends Controller
      *
      * @return RedirectResponse Redirect back with success or error message
      *
-     * @throws \Exception When database operations fail
+     * @throws Exception When database operations fail
      *
      * @example
      * // Status update request:
@@ -462,7 +460,7 @@ class TicketController extends Controller
                         'new_status' => $ticket->status,
                     ]);
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Failed to send ticket status update email', [
                     'error' => $e->getMessage(),
                     'ticket_id' => $ticket->id,
@@ -472,8 +470,9 @@ class TicketController extends Controller
             DB::commit();
 
             $status = $ticket->status ?? 'open';
-            return back()->with('success', 'Ticket status updated to ' . ucfirst($status));
-        } catch (\Exception $e) {
+
+            return back()->with('success', 'Ticket status updated to '.ucfirst($status));
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to update ticket status', [
                 'error' => $e->getMessage(),
@@ -482,7 +481,7 @@ class TicketController extends Controller
                 'request_data' => $request->all(),
             ]);
 
-            return back()->withErrors(['status' => 'Error updating ticket status: ' . $e->getMessage()]);
+            return back()->withErrors(['status' => 'Error updating ticket status: '.$e->getMessage()]);
         }
     }
 }

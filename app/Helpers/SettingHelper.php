@@ -9,7 +9,7 @@ use App\Models\Setting;
 class SettingHelper
 {
     /**
-     * Safely update or create a setting without creating duplicates
+     * Safely update or create a setting without creating duplicates.
      *
      * @param string $key
      * @param mixed $value
@@ -22,7 +22,7 @@ class SettingHelper
         string $key,
         $value,
         string $type = 'Lic general',
-        string $version = '1.0.5'
+        string $version = '1.0.5',
     ): Setting {
         // Find the FIRST (oldest) setting with this key
         $setting = Setting::where('key', $key)->orderBy('id', 'asc')->first();
@@ -33,7 +33,7 @@ class SettingHelper
                 'value' => $value,
                 'type' => $type,
                 'version' => $version,
-                'last_updated_at' => now()
+                'last_updated_at' => now(),
             ]);
 
             return $setting;
@@ -44,13 +44,13 @@ class SettingHelper
                 'value' => $value,
                 'type' => $type,
                 'version' => $version,
-                'last_updated_at' => now()
+                'last_updated_at' => now(),
             ]);
         }
     }
 
     /**
-     * Get a setting value safely
+     * Get a setting value safely.
      *
      * @param string $key
      * @param mixed $default
@@ -65,7 +65,7 @@ class SettingHelper
     }
 
     /**
-     * Clean duplicate settings for a specific key
+     * Clean duplicate settings for a specific key.
      *
      * @param string $key
      *
@@ -94,7 +94,7 @@ class SettingHelper
     }
 
     /**
-     * Clean all duplicate settings
+     * Clean all duplicate settings.
      *
      * @return array Summary of cleaned duplicates
      */

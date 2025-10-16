@@ -77,7 +77,7 @@ class ProductUpdateController extends Controller
                 'updates' => $updates,
                 'products' => $products,
                 'productId' => $productId,
-                'product' => $product
+                'product' => $product,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -179,7 +179,7 @@ class ProductUpdateController extends Controller
             $version = $validated['version'] ?? '';
             $versionString = is_string($version) ? $version : '';
             $productSlug = is_string($product->slug) ? $product->slug : '';
-            $fileName = 'update_' . $productSlug . '_' . $versionString . '_' . time() . '.zip';
+            $fileName = 'update_'.$productSlug.'_'.$versionString.'_'.time().'.zip';
             $filePath = $file->storeAs('product-updates', $fileName);
             $fileHash = hash_file('sha256', $file->getRealPath());
             // Convert changelog text to array
@@ -187,7 +187,7 @@ class ProductUpdateController extends Controller
             $changelogArray = $changelogText
                 ? array_filter(array_map(
                     'trim',
-                    explode("\n", is_string($changelogText) ? $changelogText : '')
+                    explode("\n", is_string($changelogText) ? $changelogText : ''),
                 ))
                 : [];
             // Create update record
@@ -331,7 +331,7 @@ class ProductUpdateController extends Controller
             $changelogArray = $changelogText
                 ? array_filter(array_map(
                     'trim',
-                    explode("\n", is_string($changelogText) ? $changelogText : '')
+                    explode("\n", is_string($changelogText) ? $changelogText : ''),
                 ))
                 : [];
             $updateData = [
@@ -350,9 +350,9 @@ class ProductUpdateController extends Controller
             // Handle file upload if provided
             if ($request->hasFile('update_file')) {
                 $file = $request->file('update_file');
-                $fileName = 'update_' . $product_update->product->slug . '_'
-                    . (is_string($validated['version'] ?? null) ? $validated['version'] : '')
-                    . '_' . time() . '.zip';
+                $fileName = 'update_'.$product_update->product->slug.'_'
+                    .(is_string($validated['version'] ?? null) ? $validated['version'] : '')
+                    .'_'.time().'.zip';
                 $filePath = $file->storeAs('product-updates', $fileName);
                 $fileHash = hash_file('sha256', $file->getRealPath());
                 // Delete old file

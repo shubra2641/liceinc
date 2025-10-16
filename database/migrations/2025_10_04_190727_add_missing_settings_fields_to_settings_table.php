@@ -23,7 +23,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Add basic settings fields
+     * Add basic settings fields.
      */
     private function addBasicSettingsFields(Blueprint $table): void
     {
@@ -32,7 +32,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Add license-related settings fields
+     * Add license-related settings fields.
      */
     private function addLicenseSettingsFields(Blueprint $table): void
     {
@@ -46,7 +46,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Add SEO settings fields
+     * Add SEO settings fields.
      */
     private function addSeoSettingsFields(Blueprint $table): void
     {
@@ -60,7 +60,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Add analytics settings fields
+     * Add analytics settings fields.
      */
     private function addAnalyticsSettingsFields(Blueprint $table): void
     {
@@ -70,7 +70,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Add social media settings fields
+     * Add social media settings fields.
      */
     private function addSocialSettingsFields(Blueprint $table): void
     {
@@ -83,7 +83,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Add contact settings fields
+     * Add contact settings fields.
      */
     private function addContactSettingsFields(Blueprint $table): void
     {
@@ -96,7 +96,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Helper method to add column if it doesn't exist
+     * Helper method to add column if it doesn't exist.
      */
     private function addColumnIfNotExists(Blueprint $table, string $column, string $type, string $after, array $options = []): void
     {
@@ -106,11 +106,11 @@ return new class() extends Migration {
 
         $columnDefinition = $table->{$type}($column);
         $columnDefinition->nullable();
-        
+
         if (isset($options['default'])) {
             $columnDefinition->default($options['default']);
         }
-        
+
         $columnDefinition->after($after);
     }
 
@@ -125,32 +125,32 @@ return new class() extends Migration {
     }
 
     /**
-     * Drop all added columns
+     * Drop all added columns.
      */
     private function dropAddedColumns(Blueprint $table): void
     {
         $columnsToDrop = [
             // Basic Settings
             'site_keywords', 'maintenance_message',
-            
+
             // License Settings
             'license_verification_enabled', 'license_auto_verification', 'license_verification_interval',
             'max_license_domains', 'license_expiry_warning_days', 'auto_renewal_enabled', 'renewal_reminder_days',
-            
+
             // SEO Settings
             'seo_og_title', 'seo_og_description', 'seo_og_type', 'seo_og_site_name',
             'seo_twitter_card', 'seo_twitter_site', 'seo_twitter_creator',
-            
+
             // Analytics Settings
             'analytics_google_analytics', 'analytics_google_tag_manager', 'analytics_facebook_pixel',
-            
+
             // Social Settings
             'social_facebook', 'social_twitter', 'social_instagram', 'social_linkedin',
             'social_youtube', 'social_github',
-            
+
             // Contact Settings
             'contact_phone', 'contact_address', 'contact_city', 'contact_state',
-            'contact_country', 'contact_postal_code'
+            'contact_country', 'contact_postal_code',
         ];
 
         $table->dropColumn($columnsToDrop);

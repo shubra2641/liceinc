@@ -37,18 +37,21 @@ class DynamicEmail extends Mailable
      * The email template instance.
      */
     public EmailTemplate $template;
+
     /**
      * The data for variable substitution.
      *
      * @var array<string, mixed>
      */
     public array $data;
+
     /**
      * The rendered email content.
      *
      * @var array<string, string>
      */
     public array $rendered;
+
     /**
      * Create a new message instance with enhanced security.
      *
@@ -65,7 +68,7 @@ class DynamicEmail extends Mailable
     {
         try {
             // Validate template
-            if (!$template->is_active) {
+            if (! $template->is_active) {
                 throw new \InvalidArgumentException('Invalid or inactive email template provided');
             }
             // Sanitize input data
@@ -87,6 +90,7 @@ class DynamicEmail extends Mailable
             throw $e;
         }
     }
+
     /**
      * Get the message envelope with enhanced security.
      *
@@ -101,6 +105,7 @@ class DynamicEmail extends Mailable
     {
         try {
             $subject = $this->sanitizeOutput($this->rendered['subject']);
+
             return new Envelope(
                 subject: $subject,
             );
@@ -113,6 +118,7 @@ class DynamicEmail extends Mailable
             throw $e;
         }
     }
+
     /**
      * Get the message content definition with enhanced security.
      *
@@ -131,6 +137,7 @@ class DynamicEmail extends Mailable
                 'subject' => $this->sanitizeOutput($this->rendered['subject']),
                 'body' => $this->sanitizeOutput($this->rendered['body']),
             ];
+
             return new Content(
                 view: 'emails.dynamic',
                 with: [
@@ -148,6 +155,7 @@ class DynamicEmail extends Mailable
             throw $e;
         }
     }
+
     /**
      * Get the attachments for the message.
      *
@@ -160,6 +168,7 @@ class DynamicEmail extends Mailable
     {
         return [];
     }
+
     /**
      * Sanitize input data to prevent XSS attacks.
      *
@@ -183,8 +192,10 @@ class DynamicEmail extends Mailable
                 $sanitized[$sanitizedKey] = $value;
             }
         }
+
         return $sanitized;
     }
+
     /**
      * Sanitize output content to prevent XSS attacks.
      *
@@ -203,6 +214,7 @@ class DynamicEmail extends Mailable
         $content = strip_tags($content, $allowedTags);
         // Remove dangerous attributes
         $content = preg_replace('/(<[^>]+)\s+(on\w+|javascript:|data:|vbscript:)[^>]*>/i', '$1>', $content);
+
         return trim($content ?? '');
     }
 }

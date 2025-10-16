@@ -38,18 +38,22 @@ class GuestLayout extends Component
      * Additional CSS classes for the layout.
      */
     public string $class;
+
     /**
      * Additional CSS classes for the body element.
      */
     public string $bodyClass;
+
     /**
      * Whether to include the navigation bar.
      */
     public bool $showNavigation;
+
     /**
      * Whether to include the footer.
      */
     public bool $showFooter;
+
     /**
      * Create a new component instance.
      *
@@ -69,6 +73,7 @@ class GuestLayout extends Component
         $this->showNavigation = $showNavigation;
         $this->showFooter = $showFooter;
     }
+
     /**
      * Get the view / contents that represents the component.
      *
@@ -102,6 +107,7 @@ class GuestLayout extends Component
             throw $e;
         }
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *

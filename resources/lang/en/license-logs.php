@@ -85,7 +85,7 @@ return [
 
     // Alerts and Messages
     'suspicious_activity_detected' => 'Suspicious Activity Detected!',
-    'suspicious_activity_description' => 'Multiple failed verification attempts detected ' .
+    'suspicious_activity_description' => 'Multiple failed verification attempts detected '.
         'from the following IP addresses:',
     'failed_attempts_from' => 'failed attempts',
     'last_attempt' => 'last',

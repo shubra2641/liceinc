@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Helpers\SecureFileHelper;
 use App\Models\Invoice;
 use App\Models\License;
 use App\Models\LicenseDomain;
@@ -20,7 +21,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
-use App\Helpers\SecureFileHelper;
 
 /**
  * Reports Controller with enhanced security and comprehensive reporting functionality.
@@ -76,8 +76,8 @@ class ReportsController extends Controller
     {
         try {
             /**
- * @var View $result
-*/
+             * @var View $result
+             */
             $result = $this->transaction(function () {
                 // Basic metrics
                 $totalLicenses = License::count();
@@ -121,12 +121,12 @@ class ReportsController extends Controller
                 $monthlyRevenueData = [];
                 foreach ($last3Months as $month) {
                     $found = $monthlyRevenueRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '') . '-'
-                            . str_pad(
+                        return (is_string($item->year) ? $item->year : '').'-'
+                            .str_pad(
                                 (string)(is_numeric($item->month) ? $item->month : 0),
                                 2,
                                 '0',
-                                STR_PAD_LEFT
+                                STR_PAD_LEFT,
                             ) === $month;
                     });
                     $monthlyRevenueData[] = $found ? (float)(is_numeric($found->revenue) ? $found->revenue : 0) : 0;
@@ -150,12 +150,12 @@ class ReportsController extends Controller
                 $monthlyLicensesData = [];
                 foreach ($last3Months as $month) {
                     $found = $monthlyLicensesRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '') . '-'
-                            . str_pad(
+                        return (is_string($item->year) ? $item->year : '').'-'
+                            .str_pad(
                                 (string)(is_numeric($item->month) ? $item->month : 0),
                                 2,
                                 '0',
-                                STR_PAD_LEFT
+                                STR_PAD_LEFT,
                             ) === $month;
                     });
                     $monthlyLicensesData[] = $found ? (int)(is_numeric($found->count) ? $found->count : 0) : 0;
@@ -182,7 +182,7 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $licenseTypeData = [
                     'labels' => $licenseTypeDataRaw->pluck('license_type')->map(function ($type) {
-                        return __('app.' . (is_string($type) ? $type : '')) ?: ucfirst(is_string($type) ? $type : '');
+                        return __('app.'.(is_string($type) ? $type : '')) ?: ucfirst(is_string($type) ? $type : '');
                     })->toArray(),
                     'datasets' => [[
                         'data' => $licenseTypeDataRaw->pluck('count')->toArray(),
@@ -197,7 +197,7 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $licenseStatusData = [
                     'labels' => $licenseStatusDataRaw->pluck('status')->map(function ($status) {
-                        return __('app.' . (is_string($status) ? $status : ''))
+                        return __('app.'.(is_string($status) ? $status : ''))
                             ?: ucfirst(is_string($status) ? $status : '');
                     })->toArray(),
                     'datasets' => [[
@@ -225,7 +225,7 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $apiStatusData = [
                     'labels' => $apiStatusDataRaw->pluck('status')->map(function ($status) {
-                        return __('app.' . (is_string($status) ? $status : ''))
+                        return __('app.'.(is_string($status) ? $status : ''))
                             ?: ucfirst(is_string($status) ? $status : '');
                     })->toArray(),
                     'datasets' => [[
@@ -244,6 +244,7 @@ class ReportsController extends Controller
                         $product->revenue = $product->licenses->sum(function ($license) {
                             return $license->product->price ?? 0;
                         });
+
                         return $product;
                     });
                 // Recent license activities
@@ -269,12 +270,12 @@ class ReportsController extends Controller
                 $invoiceMonthlyData = [];
                 foreach ($last3Months as $month) {
                     $found = $invoiceMonthlyRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '') . '-'
-                            . str_pad(
+                        return (is_string($item->year) ? $item->year : '').'-'
+                            .str_pad(
                                 (string)(is_numeric($item->month) ? $item->month : 0),
                                 2,
                                 '0',
-                                STR_PAD_LEFT
+                                STR_PAD_LEFT,
                             ) === $month;
                     });
                     $invoiceMonthlyData[] = $found ? (float)(is_numeric($found->total) ? $found->total : 0) : 0;
@@ -321,12 +322,12 @@ class ReportsController extends Controller
                 $userRegistrationsData = [];
                 foreach ($last3Months as $month) {
                     $found = $userRegistrationsRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '') . '-'
-                            . str_pad(
+                        return (is_string($item->year) ? $item->year : '').'-'
+                            .str_pad(
                                 (string)(is_numeric($item->month) ? $item->month : 0),
                                 2,
                                 '0',
-                                STR_PAD_LEFT
+                                STR_PAD_LEFT,
                             ) === $month;
                     });
                     $userRegistrationsData[] = $found ? (int)(is_numeric($found->count) ? $found->count : 0) : 0;
@@ -401,6 +402,7 @@ class ReportsController extends Controller
                     ]);
                     $totalRateLimitedAttempts += is_numeric($failedCall->attempts) ? (int)$failedCall->attempts : 0;
                 }
+
                 return view('admin.reports', [
                     'totalLicenses' => $totalLicenses,
                     'activeLicenses' => $activeLicenses,
@@ -429,12 +431,14 @@ class ReportsController extends Controller
                     'invoiceMonthlyAmounts' => $invoiceMonthlyAmounts,
                 ]);
             });
+
             return $result;
         } catch (Throwable $e) {
             Log::error('Failed to load reports dashboard', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return view('admin.reports', [
                 'totalLicenses' => 0,
                 'activeLicenses' => 0,
@@ -464,6 +468,7 @@ class ReportsController extends Controller
             ])->with('error', 'Failed to load reports data. Please try again.');
         }
     }
+
     /**
      * Get license data for AJAX requests with enhanced security and validation.
      *
@@ -484,8 +489,8 @@ class ReportsController extends Controller
     {
         try {
             /**
- * @var JsonResponse $result
-*/
+             * @var JsonResponse $result
+             */
             $result = $this->transaction(function () use ($request) {
                 $period = $this->sanitizeInput($request->get('period', 'month'));
                 switch ($period) {
@@ -515,8 +520,10 @@ class ReportsController extends Controller
                     'records_count' => $data->count(),
                     'ip' => $request->ip(),
                 ]);
+
                 return $this->successResponse($data, 'License data retrieved successfully');
             });
+
             return $result;
         } catch (Throwable $e) {
             Log::error('Failed to retrieve license data', [
@@ -526,6 +533,7 @@ class ReportsController extends Controller
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $this->errorResponse(
                 'Failed to retrieve license data. Please try again.',
                 null,
@@ -533,6 +541,7 @@ class ReportsController extends Controller
             );
         }
     }
+
     /**
      * Get API status data with enhanced security and validation.
      *
@@ -553,8 +562,8 @@ class ReportsController extends Controller
     {
         try {
             /**
- * @var JsonResponse $result
-*/
+             * @var JsonResponse $result
+             */
             $result = $this->transaction(function () use ($request) {
                 $period = $this->sanitizeInput($request->get('period', 'week'));
                 switch ($period) {
@@ -585,8 +594,10 @@ class ReportsController extends Controller
                     'records_count' => $data->count(),
                     'ip' => $request->ip(),
                 ]);
+
                 return $this->successResponse($data, 'API status data retrieved successfully');
             });
+
             return $result;
         } catch (Throwable $e) {
             Log::error('Failed to retrieve API status data', [
@@ -596,6 +607,7 @@ class ReportsController extends Controller
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $this->errorResponse(
                 'Failed to retrieve API status data. Please try again.',
                 null,
@@ -603,6 +615,7 @@ class ReportsController extends Controller
             );
         }
     }
+
     /**
      * Export reports data to PDF or CSV format with enhanced security and validation.
      *
@@ -611,7 +624,7 @@ class ReportsController extends Controller
      *
      * @param  Request  $request  The current HTTP request instance
      *
-     * @return \Illuminate\Http\Response The export file response
+     * @return Response The export file response
      *
      * @throws \Exception When export operation fails
      *
@@ -623,8 +636,8 @@ class ReportsController extends Controller
     {
         try {
             /**
- * @var \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse $result
-*/
+             * @var Response|JsonResponse|StreamedResponse $result
+             */
             $result = $this->transaction(function () use ($request) {
                 $format = $this->sanitizeInput($request->get('format', 'pdf'));
                 $dateFrom = $this->sanitizeInput($request->get('date_from'));
@@ -632,7 +645,7 @@ class ReportsController extends Controller
                 // Get data for export
                 $data = $this->getExportData(
                     is_string($dateFrom) ? $dateFrom : null,
-                    is_string($dateTo) ? $dateTo : null
+                    is_string($dateTo) ? $dateTo : null,
                 );
                 Log::debug('Reports export initiated', [
                     'format' => $format,
@@ -647,6 +660,7 @@ class ReportsController extends Controller
                     return $this->exportToPdf($data);
                 }
             });
+
             return $result;
         } catch (Throwable $e) {
             Log::error('Failed to export reports', [
@@ -658,12 +672,14 @@ class ReportsController extends Controller
                 'user_agent' => $request->userAgent(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to export reports. Please try again.',
             ], 500);
         }
     }
+
     /**
      * Get data for export with enhanced security and validation.
      *
@@ -684,6 +700,7 @@ class ReportsController extends Controller
             $query->where('created_at', '<=', $dateTo);
         }
         $licenses = $query->get();
+
         return [
             'licenses' => $licenses,
             'summary' => [
@@ -698,21 +715,22 @@ class ReportsController extends Controller
             'date_to' => $dateTo,
         ];
     }
+
     /**
      * Export data to CSV format with enhanced security and validation.
      *
      * @param  array<string, mixed>  $data  The data to export
      *
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse The CSV file response
+     * @return StreamedResponse The CSV file response
      *
      * @throws \Exception When CSV export fails
      */
-    private function exportToCsv(array $data): \Symfony\Component\HttpFoundation\StreamedResponse
+    private function exportToCsv(array $data): StreamedResponse
     {
-        $filename = 'reports_' . now()->format('Y-m-d_H-i-s') . '.csv';
+        $filename = 'reports_'.now()->format('Y-m-d_H-i-s').'.csv';
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
         $callback = function () use ($data) {
             $file = fopen('php://output', 'w');
@@ -724,25 +742,27 @@ class ReportsController extends Controller
                 SecureFileHelper::closeFile($file);
             }
         };
+
         return response()->stream($callback, 200, $headers);
     }
+
     /**
      * Export data to PDF format with enhanced security and validation.
      *
      * @param  array<string, mixed>  $data  The data to export
      *
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse The PDF file response
+     * @return StreamedResponse The PDF file response
      *
      * @throws \Exception When PDF export fails
      */
-    private function exportToPdf(array $data): \Symfony\Component\HttpFoundation\StreamedResponse
+    private function exportToPdf(array $data): StreamedResponse
     {
         // For now, return CSV as PDF generation requires additional packages
         // You can install dompdf or similar package for proper PDF generation
-        $filename = 'reports_' . now()->format('Y-m-d_H-i-s') . '.pdf';
+        $filename = 'reports_'.now()->format('Y-m-d_H-i-s').'.pdf';
         $headers = [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
         $callback = function () use ($data) {
             $file = fopen('php://output', 'w');
@@ -754,6 +774,7 @@ class ReportsController extends Controller
                 SecureFileHelper::closeFile($file);
             }
         };
+
         return response()->stream($callback, 200, $headers);
     }
 

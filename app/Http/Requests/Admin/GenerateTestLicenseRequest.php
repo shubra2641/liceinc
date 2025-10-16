@@ -28,6 +28,7 @@ class GenerateTestLicenseRequest extends FormRequest
     {
         return true; // Authorization handled by middleware
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -55,6 +56,7 @@ class GenerateTestLicenseRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -73,6 +75,7 @@ class GenerateTestLicenseRequest extends FormRequest
             'name.regex' => 'Name contains invalid characters.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -86,6 +89,7 @@ class GenerateTestLicenseRequest extends FormRequest
             'name' => 'user name',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */

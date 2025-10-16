@@ -33,6 +33,7 @@ class ErrorController extends Controller
                 'user_agent' => request()->userAgent(),
                 'timestamp' => now(),
             ]);
+
             return response()->json([
                 'error' => 'Authentication route not found',
                 'message' => 'The requested authentication route does not exist.',
@@ -43,6 +44,7 @@ class ErrorController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json(['error' => 'Internal server error'], 500);
         }
     }

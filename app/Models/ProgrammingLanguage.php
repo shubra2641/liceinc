@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * @property int $id
@@ -23,8 +22,9 @@ use Illuminate\Support\Facades\Storage;
  * @property string|null $license_template
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $products
  * @property-read int|null $products_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage query()
@@ -40,6 +40,7 @@ use Illuminate\Support\Facades\Storage;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereSortOrder($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProgrammingLanguage whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class ProgrammingLanguage extends Model
@@ -47,8 +48,6 @@ class ProgrammingLanguage extends Model
     /**
      * @phpstan-ignore-next-line
      */
-
-
     protected $fillable = [
         'name',
         'slug',
@@ -59,9 +58,11 @@ class ProgrammingLanguage extends Model
         'file_extension',
         'license_template',
     ];
+
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
     /**
      * @return HasMany<Product, $this>
      */
@@ -69,6 +70,7 @@ class ProgrammingLanguage extends Model
     {
         return $this->hasMany(Product::class, 'programming_language');
     }
+
     protected static function boot()
     {
         parent::boot();
@@ -85,6 +87,7 @@ class ProgrammingLanguage extends Model
             }
         });
     }
+
     /**
      * Get the license template for this language.
      */
@@ -92,6 +95,7 @@ class ProgrammingLanguage extends Model
     {
         return $this->license_template ?: $this->getDefaultLicenseTemplate();
     }
+
     /**
      * Get default license template for this language.
      */
@@ -100,94 +104,96 @@ class ProgrammingLanguage extends Model
         $templates = [
             'php' => "<?php
 
-declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n" .
-                " * License: {LICENSE_CODE}\n * Valid Until: {VALID_UNTIL}\n */\n\n" .
-                "define('LICENSE_CODE', '{LICENSE_CODE}');\n" .
-                "define('LICENSE_DOMAIN', '{DOMAIN}');\n" .
-                "define('LICENSE_VALID_UNTIL', '{VALID_UNTIL}');\n\n" .
-                "define('PRODUCT_NAME', '{PRODUCT_NAME}');\n" .
-                "define('PRODUCT_VERSION', '{PRODUCT_VERSION}');\n\n" .
-                "// Verification function\n" .
-                "function verify_license() {\n" .
-                "    // License verification logic here\n" .
-                "    return true;\n" .
+declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n".
+                " * License: {LICENSE_CODE}\n * Valid Until: {VALID_UNTIL}\n */\n\n".
+                "define('LICENSE_CODE', '{LICENSE_CODE}');\n".
+                "define('LICENSE_DOMAIN', '{DOMAIN}');\n".
+                "define('LICENSE_VALID_UNTIL', '{VALID_UNTIL}');\n\n".
+                "define('PRODUCT_NAME', '{PRODUCT_NAME}');\n".
+                "define('PRODUCT_VERSION', '{PRODUCT_VERSION}');\n\n".
+                "// Verification function\n".
+                "function verify_license() {\n".
+                "    // License verification logic here\n".
+                "    return true;\n".
                 "}\n?>",
-            'javascript' => "/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n" .
-                " * License: {LICENSE_CODE}\n * Valid Until: {VALID_UNTIL}\n */\n\n" .
-                "const LICENSE_CONFIG = {\n" .
-                "    code: '{LICENSE_CODE}',\n" .
-                "    domain: '{DOMAIN}',\n" .
-                "    validUntil: '{VALID_UNTIL}',\n" .
-                "    product: '{PRODUCT_NAME}',\n" .
-                "    version: '{PRODUCT_VERSION}'\n" .
-                "};\n\n" .
-                "// Verification function\n" .
-                "function verifyLicense() {\n" .
-                "    // License verification logic here\n" .
-                "    return true;\n" .
-                "}\n\n" .
+            'javascript' => "/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n".
+                " * License: {LICENSE_CODE}\n * Valid Until: {VALID_UNTIL}\n */\n\n".
+                "const LICENSE_CONFIG = {\n".
+                "    code: '{LICENSE_CODE}',\n".
+                "    domain: '{DOMAIN}',\n".
+                "    validUntil: '{VALID_UNTIL}',\n".
+                "    product: '{PRODUCT_NAME}',\n".
+                "    version: '{PRODUCT_VERSION}'\n".
+                "};\n\n".
+                "// Verification function\n".
+                "function verifyLicense() {\n".
+                "    // License verification logic here\n".
+                "    return true;\n".
+                "}\n\n".
                 'module.exports = { LICENSE_CONFIG, verifyLicense };',
-            'python' => "# License Verification\n# Product: {PRODUCT_NAME}\n# Domain: {DOMAIN}\n" .
-                "# License: {LICENSE_CODE}\n# Valid Until: {VALID_UNTIL}\n\n" .
-                "LICENSE_CODE = '{LICENSE_CODE}'\n" .
-                "LICENSE_DOMAIN = '{DOMAIN}'\n" .
-                "LICENSE_VALID_UNTIL = '{VALID_UNTIL}'\n\n" .
-                "PRODUCT_NAME = '{PRODUCT_NAME}'\n" .
-                "PRODUCT_VERSION = '{PRODUCT_VERSION}'\n\n" .
-                "# Verification function\n" .
-                "def verify_license():\n" .
-                "    # License verification logic here\n" .
+            'python' => "# License Verification\n# Product: {PRODUCT_NAME}\n# Domain: {DOMAIN}\n".
+                "# License: {LICENSE_CODE}\n# Valid Until: {VALID_UNTIL}\n\n".
+                "LICENSE_CODE = '{LICENSE_CODE}'\n".
+                "LICENSE_DOMAIN = '{DOMAIN}'\n".
+                "LICENSE_VALID_UNTIL = '{VALID_UNTIL}'\n\n".
+                "PRODUCT_NAME = '{PRODUCT_NAME}'\n".
+                "PRODUCT_VERSION = '{PRODUCT_VERSION}'\n\n".
+                "# Verification function\n".
+                "def verify_license():\n".
+                "    # License verification logic here\n".
                 '    return True',
-            'csharp' => "// License Verification\n// Product: {PRODUCT_NAME}\n// Domain: {DOMAIN}\n" .
-                "// License: {LICENSE_CODE}\n// Valid Until: {VALID_UNTIL}\n\n" .
-                "using System;\n\n" .
-                "namespace LicenseVerification\n" .
-                "{\n" .
-                "    public static class LicenseConfig\n" .
-                "    {\n" .
-                "        public const string Code = \"{LICENSE_CODE}\";\n" .
-                "        public const string Domain = \"{DOMAIN}\";\n" .
-                "        public const string ValidUntil = \"{VALID_UNTIL}\";\n" .
-                "        public const string ProductName = \"{PRODUCT_NAME}\";\n" .
-                "        public const string ProductVersion = \"{PRODUCT_VERSION}\";\n\n" .
-                "        public static bool VerifyLicense()\n" .
-                "        {\n" .
-                "            // License verification logic here\n" .
-                "            return true;\n" .
-                "        }\n" .
-                "    }\n" .
+            'csharp' => "// License Verification\n// Product: {PRODUCT_NAME}\n// Domain: {DOMAIN}\n".
+                "// License: {LICENSE_CODE}\n// Valid Until: {VALID_UNTIL}\n\n".
+                "using System;\n\n".
+                "namespace LicenseVerification\n".
+                "{\n".
+                "    public static class LicenseConfig\n".
+                "    {\n".
+                "        public const string Code = \"{LICENSE_CODE}\";\n".
+                "        public const string Domain = \"{DOMAIN}\";\n".
+                "        public const string ValidUntil = \"{VALID_UNTIL}\";\n".
+                "        public const string ProductName = \"{PRODUCT_NAME}\";\n".
+                "        public const string ProductVersion = \"{PRODUCT_VERSION}\";\n\n".
+                "        public static bool VerifyLicense()\n".
+                "        {\n".
+                "            // License verification logic here\n".
+                "            return true;\n".
+                "        }\n".
+                "    }\n".
                 '}',
-            'java' => "// License Verification\n// Product: {PRODUCT_NAME}\n// Domain: {DOMAIN}\n" .
-                "// License: {LICENSE_CODE}\n// Valid Until: {VALID_UNTIL}\n\n" .
-                "package com.licenseverification;\n\n" .
-                "public class LicenseConfig {\n" .
-                "    public static final String CODE = \"{LICENSE_CODE}\";\n" .
-                "    public static final String DOMAIN = \"{DOMAIN}\";\n" .
-                "    public static final String VALID_UNTIL = \"{VALID_UNTIL}\";\n" .
-                "    public static final String PRODUCT_NAME = \"{PRODUCT_NAME}\";\n" .
-                "    public static final String PRODUCT_VERSION = \"{PRODUCT_VERSION}\";\n\n" .
-                "    public static boolean verifyLicense() {\n" .
-                "        // License verification logic here\n" .
-                "        return true;\n" .
-                "    }\n" .
+            'java' => "// License Verification\n// Product: {PRODUCT_NAME}\n// Domain: {DOMAIN}\n".
+                "// License: {LICENSE_CODE}\n// Valid Until: {VALID_UNTIL}\n\n".
+                "package com.licenseverification;\n\n".
+                "public class LicenseConfig {\n".
+                "    public static final String CODE = \"{LICENSE_CODE}\";\n".
+                "    public static final String DOMAIN = \"{DOMAIN}\";\n".
+                "    public static final String VALID_UNTIL = \"{VALID_UNTIL}\";\n".
+                "    public static final String PRODUCT_NAME = \"{PRODUCT_NAME}\";\n".
+                "    public static final String PRODUCT_VERSION = \"{PRODUCT_VERSION}\";\n\n".
+                "    public static boolean verifyLicense() {\n".
+                "        // License verification logic here\n".
+                "        return true;\n".
+                "    }\n".
                 '}',
-            'cpp' => "// License Verification\n// Product: {PRODUCT_NAME}\n// Domain: {DOMAIN}\n" .
-                "// License: {LICENSE_CODE}\n// Valid Until: {VALID_UNTIL}\n\n" .
-                "#ifndef LICENSE_CONFIG_H\n" .
-                "#define LICENSE_CONFIG_H\n\n" .
-                "#include <string>\n\n" .
-                "namespace LicenseVerification {\n" .
-                "    const std::string CODE = \"{LICENSE_CODE}\";\n" .
-                "    const std::string DOMAIN = \"{DOMAIN}\";\n" .
-                "    const std::string VALID_UNTIL = \"{VALID_UNTIL}\";\n" .
-                "    const std::string PRODUCT_NAME = \"{PRODUCT_NAME}\";\n" .
-                "    const std::string PRODUCT_VERSION = \"{PRODUCT_VERSION}\";\n\n" .
-                "    bool verifyLicense();\n" .
-                "}\n\n" .
+            'cpp' => "// License Verification\n// Product: {PRODUCT_NAME}\n// Domain: {DOMAIN}\n".
+                "// License: {LICENSE_CODE}\n// Valid Until: {VALID_UNTIL}\n\n".
+                "#ifndef LICENSE_CONFIG_H\n".
+                "#define LICENSE_CONFIG_H\n\n".
+                "#include <string>\n\n".
+                "namespace LicenseVerification {\n".
+                "    const std::string CODE = \"{LICENSE_CODE}\";\n".
+                "    const std::string DOMAIN = \"{DOMAIN}\";\n".
+                "    const std::string VALID_UNTIL = \"{VALID_UNTIL}\";\n".
+                "    const std::string PRODUCT_NAME = \"{PRODUCT_NAME}\";\n".
+                "    const std::string PRODUCT_VERSION = \"{PRODUCT_VERSION}\";\n\n".
+                "    bool verifyLicense();\n".
+                "}\n\n".
                 '#endif // LICENSE_CONFIG_H',
         ];
+
         return $templates[strtolower($this->slug)] ?? $templates['php'];
     }
+
     /**
      * Check if template file exists.
      */
@@ -195,11 +201,13 @@ declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAM
     {
         try {
             $templatePath = $this->getTemplateFilePath();
+
             return file_exists($templatePath);
         } catch (\Exception $e) {
             return false;
         }
     }
+
     /**
      * Get template file path.
      */
@@ -212,8 +220,10 @@ declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAM
         if (! preg_match('/^[a-z0-9\-_]+$/i', $slug)) {
             $slug = Str::slug($this->name ?: $slug);
         }
+
         return resource_path("templates/licenses/{$slug}.php");
     }
+
     /**
      * Get template information.
      */
@@ -223,6 +233,7 @@ declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAM
     public function getTemplateInfo(): array
     {
         $templatePath = $this->getTemplateFilePath();
+
         return [
             'has_file' => $this->hasTemplateFile(),
             'file_path' => $templatePath,
@@ -234,6 +245,7 @@ declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAM
                 file_get_contents($templatePath) : $this->getLicenseTemplate(),
         ];
     }
+
     /**
      * Get available template files from resources/templates/licenses/.
      */
@@ -248,7 +260,7 @@ declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAM
             // Look for both .php and .blade.php files
             $files = array_merge(
                 Storage::disk('local')->files($templateDir, true),
-                Storage::disk('local')->files($templateDir, true)
+                Storage::disk('local')->files($templateDir, true),
             );
             $files = array_filter($files, function ($file) {
                 return is_string($file) && preg_match('/\.(php|blade\.php)$/', $file);
@@ -264,6 +276,7 @@ declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAM
                 ];
             }
         }
+
         return $templates;
     }
 }

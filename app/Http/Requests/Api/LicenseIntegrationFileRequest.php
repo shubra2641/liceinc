@@ -29,6 +29,7 @@ class LicenseIntegrationFileRequest extends FormRequest
     {
         return true; // API endpoint - authorization handled by middleware
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -45,6 +46,7 @@ class LicenseIntegrationFileRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -54,11 +56,12 @@ class LicenseIntegrationFileRequest extends FormRequest
     {
         return [
             'product_slug.required' => 'Product slug is required.',
-            'product_slug.regex' => 'Product slug contains invalid characters. ' .
+            'product_slug.regex' => 'Product slug contains invalid characters. '.
                 'Only lowercase letters, numbers, and hyphens are allowed.',
             'product_slug.max' => 'Product slug may not be greater than 255 characters.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -70,6 +73,7 @@ class LicenseIntegrationFileRequest extends FormRequest
             'product_slug' => 'product slug',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */
@@ -80,6 +84,7 @@ class LicenseIntegrationFileRequest extends FormRequest
             'product_slug' => $this->sanitizeInput($this->input('product_slug')),
         ]);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -93,7 +98,7 @@ class LicenseIntegrationFileRequest extends FormRequest
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

@@ -12,11 +12,11 @@ return new class() extends Migration {
      */
     public function up(): void
     {
-        if (!Schema::hasTable('users')) {
+        if (! Schema::hasTable('users')) {
             return;
         }
 
-            Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {
             $this->addPersonalInfoFields($table);
             $this->addAddressFields($table);
             $this->addContactFields($table);
@@ -29,7 +29,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Add personal information fields
+     * Add personal information fields.
      */
     private function addPersonalInfoFields(Blueprint $table): void
     {
@@ -39,7 +39,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Add address fields
+     * Add address fields.
      */
     private function addAddressFields(Blueprint $table): void
     {
@@ -52,7 +52,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Add contact information fields
+     * Add contact information fields.
      */
     private function addContactFields(Blueprint $table): void
     {
@@ -61,7 +61,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Add additional user fields
+     * Add additional user fields.
      */
     private function addAdditionalFields(Blueprint $table): void
     {
@@ -72,13 +72,13 @@ return new class() extends Migration {
         $this->addColumnIfNotExists($table, 'lastlogin', 'timestamp', 'expdate');
         $this->addColumnIfNotExists($table, 'status', 'enum', 'lastlogin', [
             'values' => ['active', 'inactive', 'suspended'],
-            'default' => 'active'
+            'default' => 'active',
         ]);
         $this->addColumnIfNotExists($table, 'language', 'string', 'status', ['length' => 5, 'default' => 'en']);
     }
 
     /**
-     * Add email and SSO fields
+     * Add email and SSO fields.
      */
     private function addEmailAndSSOFields(Blueprint $table): void
     {
@@ -88,7 +88,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Add password reset fields
+     * Add password reset fields.
      */
     private function addPasswordResetFields(Blueprint $table): void
     {
@@ -97,21 +97,21 @@ return new class() extends Migration {
     }
 
     /**
-     * Add financial fields
+     * Add financial fields.
      */
     private function addFinancialFields(Blueprint $table): void
     {
         $this->addColumnIfNotExists($table, 'credit', 'decimal', 'pwresetexpiry', [
             'precision' => 10,
             'scale' => 2,
-            'default' => 0.00
+            'default' => 0.00,
         ]);
-        
+
         $booleanFields = [
             'taxexempt', 'latefeeoveride', 'overideduenotices', 'separateinvoices',
-            'disableautocc', 'emailoptout', 'marketing_emails_opt_in', 'overrideautoclose'
+            'disableautocc', 'emailoptout', 'marketing_emails_opt_in', 'overrideautoclose',
         ];
-        
+
         $previousField = 'credit';
         foreach ($booleanFields as $field) {
             $this->addColumnIfNotExists($table, $field, 'boolean', $previousField, ['default' => false]);
@@ -120,7 +120,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Add timestamp fields
+     * Add timestamp fields.
      */
     private function addTimestampFields(Blueprint $table): void
     {
@@ -128,7 +128,7 @@ return new class() extends Migration {
     }
 
     /**
-     * Helper method to add column if it doesn't exist
+     * Helper method to add column if it doesn't exist.
      */
     private function addColumnIfNotExists(Blueprint $table, string $column, string $type, string $after, array $options = []): void
     {
@@ -137,21 +137,21 @@ return new class() extends Migration {
         }
 
         $columnDefinition = $table->{$type}($column, $options['length'] ?? null);
-        
+
         if (isset($options['precision'])) {
             $columnDefinition = $table->{$type}($column, $options['precision'], $options['scale'] ?? 0);
         }
-        
+
         if (isset($options['values'])) {
             $columnDefinition = $table->{$type}($column, $options['values']);
         }
-        
+
         $columnDefinition->nullable();
-        
+
         if (isset($options['default'])) {
             $columnDefinition->default($options['default']);
         }
-        
+
         $columnDefinition->after($after);
     }
 
@@ -160,7 +160,7 @@ return new class() extends Migration {
      */
     public function down(): void
     {
-        if (!Schema::hasTable('users')) {
+        if (! Schema::hasTable('users')) {
             return;
         }
 
@@ -170,36 +170,36 @@ return new class() extends Migration {
     }
 
     /**
-     * Drop all added columns
+     * Drop all added columns.
      */
     private function dropAddedColumns(Blueprint $table): void
     {
         $columnsToDrop = [
             // Personal Information
             'firstname', 'lastname', 'companyname',
-            
+
             // Address Fields
             'address1', 'address2', 'city', 'state', 'postcode', 'country',
-            
+
             // Contact Information
             'phonenumber', 'currency',
-            
+
             // Additional Fields
             'notes', 'cardnum', 'startdate', 'expdate', 'lastlogin', 'status', 'language',
-            
+
             // SSO and Email
             'allow_sso', 'email_verified', 'email_preferences',
-            
+
             // Password Reset
             'pwresetkey', 'pwresetexpiry',
-            
+
             // Financial Fields
             'credit', 'taxexempt', 'latefeeoveride', 'overideduenotices',
             'separateinvoices', 'disableautocc', 'emailoptout',
             'marketing_emails_opt_in', 'overrideautoclose',
-            
+
             // Timestamps
-            'datecreated'
+            'datecreated',
         ];
 
         $table->dropColumn($columnsToDrop);

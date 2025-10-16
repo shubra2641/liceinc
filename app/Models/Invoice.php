@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 /**
@@ -30,9 +29,10 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read mixed $days_until_due
  * @property-read mixed $remaining_amount
- * @property-read \App\Models\License|null $license
- * @property-read \App\Models\Product|null $product
- * @property-read \App\Models\User $user
+ * @property-read License|null $license
+ * @property-read Product|null $product
+ * @property-read User $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice dueSoon($days = 7)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice newQuery()
@@ -55,6 +55,7 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class Invoice extends Model
@@ -62,8 +63,6 @@ class Invoice extends Model
     /**
      * @phpstan-ignore-next-line
      */
-
-
     protected $fillable = [
         'invoice_number',
         'user_id',
@@ -78,12 +77,14 @@ class Invoice extends Model
         'notes',
         'metadata',
     ];
+
     protected $casts = [
         'due_date' => 'date',
         'paid_at' => 'date',
         'amount' => 'decimal:2',
         'metadata' => 'array',
     ];
+
     // العلاقات
     /**
      * @return BelongsTo<User, $this>
@@ -92,6 +93,7 @@ class Invoice extends Model
     {
         return $this->belongsTo(User::class);
     }
+
     /**
      * @return BelongsTo<License, $this>
      */
@@ -99,6 +101,7 @@ class Invoice extends Model
     {
         return $this->belongsTo(License::class);
     }
+
     /**
      * @return BelongsTo<Product, $this>
      */
@@ -106,6 +109,7 @@ class Invoice extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
     // Scopes
     /**
      * @param Builder<Invoice> $query
@@ -116,6 +120,7 @@ class Invoice extends Model
     {
         return $query->where('status', 'pending');
     }
+
     /**
      * @param Builder<Invoice> $query
      *
@@ -125,6 +130,7 @@ class Invoice extends Model
     {
         return $query->where('status', 'paid');
     }
+
     /**
      * @param Builder<Invoice> $query
      *
@@ -134,6 +140,7 @@ class Invoice extends Model
     {
         return $query->where('status', 'overdue');
     }
+
     /**
      * @param Builder<Invoice> $query
      *
@@ -144,6 +151,7 @@ class Invoice extends Model
         return $query->where('due_date', '<=', now()->addDays($days))
             ->where('status', 'pending');
     }
+
     // معالجات
     protected static function boot()
     {
@@ -154,16 +162,19 @@ class Invoice extends Model
             }
         });
     }
+
     /**
      * توليد رقم فاتورة فريد.
      */
     public static function generateInvoiceNumber(): string
     {
         do {
-            $number = 'INV-' . date('Y') . '-' . strtoupper(Str::random(8));
+            $number = 'INV-'.date('Y').'-'.strtoupper(Str::random(8));
         } while (static::where('invoice_number', $number)->exists());
+
         return $number;
     }
+
     /**
      * التحقق من انتهاء صلاحية الفاتورة.
      */
@@ -171,6 +182,7 @@ class Invoice extends Model
     {
         return $this->status === 'pending' && $this->due_date->isPast();
     }
+
     /**
      * تحديث حالة الفاتورة إلى مدفوعة.
      */
@@ -181,6 +193,7 @@ class Invoice extends Model
             'paid_at' => now(),
         ]);
     }
+
     /**
      * تحديث حالة الفاتورة إلى متأخرة.
      */
@@ -188,6 +201,7 @@ class Invoice extends Model
     {
         $this->update(['status' => 'overdue']);
     }
+
     /**
      * إلغاء الفاتورة.
      */
@@ -195,6 +209,7 @@ class Invoice extends Model
     {
         $this->update(['status' => 'cancelled']);
     }
+
     /**
      * الحصول على المبلغ المتبقي.
      */
@@ -202,6 +217,7 @@ class Invoice extends Model
     {
         return $this->status === 'paid' ? 0.0 : (float)$this->amount;
     }
+
     /**
      * الحصول على عدد الأيام المتبقية حتى تاريخ الاستحقاق
      */

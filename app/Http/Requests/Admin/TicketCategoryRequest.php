@@ -31,8 +31,10 @@ class TicketCategoryRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
+
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -43,6 +45,7 @@ class TicketCategoryRequest extends FormRequest
         $category = $this->route('ticket_category');
         $categoryId = $category && is_object($category) && property_exists($category, 'id') ? $category->id : null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
+
         return [
             'name' => [
                 'required',
@@ -144,6 +147,7 @@ class TicketCategoryRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -172,6 +176,7 @@ class TicketCategoryRequest extends FormRequest
             'template_content.regex' => 'Template content contains invalid characters.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -197,6 +202,7 @@ class TicketCategoryRequest extends FormRequest
             'template_content' => 'template content',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */
@@ -241,6 +247,7 @@ class TicketCategoryRequest extends FormRequest
             'priority' => $this->priority ?? 'medium',
         ]);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -254,7 +261,7 @@ class TicketCategoryRequest extends FormRequest
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

@@ -32,6 +32,7 @@ class LanguageController extends Controller
                 Log::warning('Invalid locale format attempted', [
                     'locale' => $sanitizedLocale,
                 ]);
+
                 return back()->with('error', 'Invalid language format.');
             }
             $availableLanguages = $this->getAvailableLanguages();
@@ -40,18 +41,22 @@ class LanguageController extends Controller
                     'locale' => $sanitizedLocale,
                     'available_languages' => $availableLanguages,
                 ]);
+
                 return back()->with('error', 'Language not supported.');
             }
             session(['locale' => $sanitizedLocale]);
+
             return back();
         } catch (\Exception $e) {
             Log::error('Language switch error', [
                 'error' => $e->getMessage(),
                 'locale' => $locale,
             ]);
+
             return back()->with('error', 'Failed to switch language. Please try again.');
         }
     }
+
     /**
      * Get available languages from resources/lang directory.
      *
@@ -64,7 +69,7 @@ class LanguageController extends Controller
         if (Storage::disk('local')->exists($langPath)) {
             $directories = array_diff(scandir($langPath), ['.', '..']);
             foreach ($directories as $dir) {
-                if (Storage::disk('local')->exists($langPath . DIRECTORY_SEPARATOR . $dir)) {
+                if (Storage::disk('local')->exists($langPath.DIRECTORY_SEPARATOR.$dir)) {
                     $available[] = $dir;
                 }
             }
@@ -72,8 +77,10 @@ class LanguageController extends Controller
         if (empty($available)) {
             $available = ['en', 'ar'];
         }
+
         return $available;
     }
+
     /**
      * Get available languages with metadata for views.
      *
@@ -86,7 +93,7 @@ class LanguageController extends Controller
         if (is_dir($langPath)) {
             $directories = array_diff(scandir($langPath), ['.', '..']);
             foreach ($directories as $dir) {
-                if (is_dir($langPath . DIRECTORY_SEPARATOR . $dir)) {
+                if (is_dir($langPath.DIRECTORY_SEPARATOR.$dir)) {
                     $languages[] = [
                         'code' => $dir,
                         'name' => ucfirst($dir),
@@ -102,6 +109,7 @@ class LanguageController extends Controller
                 ['code' => 'ar', 'name' => 'Arabic', 'native_name' => 'العربية', 'flag' => '🇸🇦'],
             ];
         }
+
         return $languages;
     }
 }

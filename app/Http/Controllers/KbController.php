@@ -37,10 +37,12 @@ class KbController extends Controller
      * Pagination limit for article listing.
      */
     private const PAGINATION_LIMIT = 10;
+
     /**
      * Recent articles limit.
      */
     private const RECENT_ARTICLES_LIMIT = 10;
+
     /**
      * Display a listing of knowledge base articles with enhanced security.
      *
@@ -69,16 +71,19 @@ class KbController extends Controller
                 ->limit(self::RECENT_ARTICLES_LIMIT)
                 ->get();
             DB::commit();
+
             return view('kb.index', ['categories' => $categories, 'recentArticles' => $recentArticles]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load knowledge base index: ' . $e->getMessage(), [
+            Log::error('Failed to load knowledge base index: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return view('kb.index', ['categories' => collect(), 'recentArticles' => collect()])
                 ->with('error', 'Failed to load knowledge base. Please try again.');
         }
     }
+
     /**
      * Show the form for creating a new knowledge base article with enhanced security.
      *
@@ -96,25 +101,28 @@ class KbController extends Controller
      * // Returns view with:
      * // - All available categories
      */
-    public function create(): View|\Illuminate\Http\RedirectResponse
+    public function create(): View|RedirectResponse
     {
         try {
             DB::beginTransaction();
             $categories = KbCategory::all();
             DB::commit();
             /**
- * @var view-string $viewName
-*/
+             * @var view-string $viewName
+             */
             $viewName = 'kb.create';
+
             return view($viewName, ['categories' => $categories]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load article creation form: ' . $e->getMessage(), [
+            Log::error('Failed to load article creation form: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return redirect()->back()->with('error', 'Failed to load article creation form. Please try again.');
         }
     }
+
     /**
      * Store a newly created knowledge base article with enhanced security.
      *
@@ -147,18 +155,21 @@ class KbController extends Controller
             DB::beginTransaction();
             KbArticle::create($validated);
             DB::commit();
+
             return redirect()->route('kb.index')
                 ->with('success', 'Article created successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to create knowledge base article: ' . $e->getMessage(), [
+            Log::error('Failed to create knowledge base article: '.$e->getMessage(), [
                 'user_id' => auth()->id(),
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()->with('error', 'Failed to create article. Please try again.')->withInput();
         }
     }
+
     /**
      * Display the specified knowledge base article with enhanced security.
      *
@@ -187,19 +198,21 @@ class KbController extends Controller
             $article->load('category');
             DB::commit();
             /**
- * @var view-string $viewName
-*/
+             * @var view-string $viewName
+             */
             $viewName = 'kb.show';
+
             return view($viewName, ['article' => $article]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load knowledge base article: ' . $e->getMessage(), [
+            Log::error('Failed to load knowledge base article: '.$e->getMessage(), [
                 'article_id' => $article->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
             abort(500, 'Failed to load article. Please try again.');
         }
     }
+
     /**
      * Show the form for editing the specified knowledge base article with enhanced security.
      *
@@ -220,7 +233,7 @@ class KbController extends Controller
      * // - Article data
      * // - All available categories
      */
-    public function edit(KbArticle $article): View|\Illuminate\Http\RedirectResponse
+    public function edit(KbArticle $article): View|RedirectResponse
     {
         try {
             // Article is validated by type hint
@@ -228,19 +241,22 @@ class KbController extends Controller
             $categories = KbCategory::all();
             DB::commit();
             /**
- * @var view-string $viewName
-*/
+             * @var view-string $viewName
+             */
             $viewName = 'kb.edit';
+
             return view($viewName, ['article' => $article, 'categories' => $categories]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load article editing form: ' . $e->getMessage(), [
+            Log::error('Failed to load article editing form: '.$e->getMessage(), [
                 'article_id' => $article->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return redirect()->back()->with('error', 'Failed to load article editing form. Please try again.');
         }
     }
+
     /**
      * Update the specified knowledge base article with enhanced security.
      *
@@ -271,18 +287,21 @@ class KbController extends Controller
             DB::beginTransaction();
             $article->update($validated);
             DB::commit();
+
             return redirect()->route('kb.show', $article)
                 ->with('success', 'Article updated successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to update knowledge base article: ' . $e->getMessage(), [
+            Log::error('Failed to update knowledge base article: '.$e->getMessage(), [
                 'article_id' => $article->id ?? null,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()->with('error', 'Failed to update article. Please try again.')->withInput();
         }
     }
+
     /**
      * Remove the specified knowledge base article with enhanced security.
      *
@@ -306,17 +325,20 @@ class KbController extends Controller
             DB::beginTransaction();
             $article->delete();
             DB::commit();
+
             return redirect()->route('kb.index')
                 ->with('success', 'Article deleted successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to delete knowledge base article: ' . $e->getMessage(), [
+            Log::error('Failed to delete knowledge base article: '.$e->getMessage(), [
                 'article_id' => $article->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()->with('error', 'Failed to delete article. Please try again.');
         }
     }
+
     /**
      * Search knowledge base articles with enhanced security.
      *
@@ -352,17 +374,20 @@ class KbController extends Controller
                 ->with('category')
                 ->paginate(self::PAGINATION_LIMIT);
             DB::commit();
+
             return view('kb.search', ['articles' => $articles, 'query' => $query]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to search knowledge base articles: ' . $e->getMessage(), [
+            Log::error('Failed to search knowledge base articles: '.$e->getMessage(), [
                 'query' => $request->get('q'),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return view('kb.search', ['articles' => collect(), 'query' => ''])
                 ->with('error', 'Failed to search articles. Please try again.');
         }
     }
+
     /**
      * Show articles by category with enhanced security.
      *
@@ -392,17 +417,20 @@ class KbController extends Controller
                 ->where('status', 'published')
                 ->paginate(self::PAGINATION_LIMIT);
             DB::commit();
+
             return view('kb.category', ['category' => $category, 'articles' => $articles]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load category articles: ' . $e->getMessage(), [
+            Log::error('Failed to load category articles: '.$e->getMessage(), [
                 'category_id' => $category->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return view('kb.category', ['category' => null, 'articles' => collect()])
                 ->with('error', 'Failed to load category articles. Please try again.');
         }
     }
+
     /**
      * Validate article creation data.
      *
@@ -423,11 +451,13 @@ class KbController extends Controller
         ]);
 
         /**
- * @var array<string, mixed> $result
-*/
+         * @var array<string, mixed> $result
+         */
         $result = $validated;
+
         return $result;
     }
+
     /**
      * Validate article update data.
      *
@@ -440,7 +470,7 @@ class KbController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:kb_articles,slug,' . $article->id,
+            'slug' => 'required|string|max:255|unique:kb_articles,slug,'.$article->id,
             'content' => 'required|string',
             'category_id' => 'required|exists:kb_categories,id',
             'status' => 'required|in:draft, published',
@@ -449,11 +479,13 @@ class KbController extends Controller
         ]);
 
         /**
- * @var array<string, mixed> $result
-*/
+         * @var array<string, mixed> $result
+         */
         $result = $validated;
+
         return $result;
     }
+
     /**
      * Validate search query.
      *
@@ -466,6 +498,7 @@ class KbController extends Controller
         if (! $query) {
             return '';
         }
+
         // Sanitize search query to prevent XSS
         return htmlspecialchars(trim($query), ENT_QUOTES, 'UTF-8');
     }

@@ -41,10 +41,12 @@ class ProcessOverdueInvoices implements ShouldQueue
      * The number of times the job may be attempted.
      */
     public int $tries = 3;
+
     /**
      * The number of seconds the job can run before timing out.
      */
     public int $timeout = 300;
+
     /**
      * Create a new job instance.
      *
@@ -54,6 +56,7 @@ class ProcessOverdueInvoices implements ShouldQueue
     {
         //
     }
+
     /**
      * Execute the job with enhanced error handling.
      *
@@ -82,6 +85,7 @@ class ProcessOverdueInvoices implements ShouldQueue
             throw $e;
         }
     }
+
     /**
      * Process overdue invoices and update their status.
      *
@@ -114,8 +118,10 @@ class ProcessOverdueInvoices implements ShouldQueue
                 ]);
             }
         }
+
         return $processedCount;
     }
+
     /**
      * Handle a job failure.
      *

@@ -47,6 +47,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             throw $e;
         }
     }
+
     /**
      * Bootstrap services with comprehensive error handling and security validation.
      *
@@ -74,6 +75,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             throw $e;
         }
     }
+
     /**
      * Create and configure the Envato provider with enhanced security validation.
      *
@@ -104,7 +106,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             // Create provider with validated settings
             $request = request(); // Use global request helper
             // Ensure session is available
-            if (!$request->hasSession()) {
+            if (! $request->hasSession()) {
                 $request->setLaravelSession(app('session.store'));
             }
             $clientId = is_string($settings['client_id'] ?? config('services.envato.client_id') ?? '')
@@ -116,6 +118,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             $redirect = is_string($settings['redirect'] ?? config('services.envato.redirect') ?? '')
                 ? ($settings['redirect'] ?? config('services.envato.redirect') ?? '')
                 : '';
+
             return new EnvatoProvider(
                 $request,
                 $this->sanitizeSetting($clientId) ?? '',
@@ -130,6 +133,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             throw $e;
         }
     }
+
     /**
      * Get the Envato service instance with error handling.
      *
@@ -144,6 +148,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
     {
         try {
             $service = app(EnvatoService::class);
+
             return $service;
         } catch (\Exception $e) {
             Log::error('Failed to resolve EnvatoService', [
@@ -153,6 +158,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             throw $e;
         }
     }
+
     /**
      * Get and validate Envato settings with comprehensive error handling.
      *
@@ -169,6 +175,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
     {
         try {
             $settings = $envatoService->getEnvatoSettings();
+
             return $settings;
         } catch (\Exception $e) {
             Log::error('Failed to get Envato settings', [
@@ -178,6 +185,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             throw $e;
         }
     }
+
     /**
      * Validate that all required settings are present and valid.
      *
@@ -206,6 +214,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
             throw new InvalidArgumentException('Invalid redirect URL format');
         }
     }
+
     /**
      * Sanitize setting values to prevent XSS and injection attacks.
      *
@@ -227,6 +236,7 @@ class EnvatoSocialiteProvider extends ServiceProvider
         if (filter_var($sanitized, FILTER_VALIDATE_URL) !== false) {
             return $sanitized;
         }
+
         return $sanitized;
     }
 }

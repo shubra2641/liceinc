@@ -33,6 +33,7 @@ class PasswordResetLinkController extends Controller
     {
         return view('auth.forgot-password');
     }
+
     /**
      * Handle an incoming password reset link request.
      *
@@ -48,8 +49,10 @@ class PasswordResetLinkController extends Controller
     public function store(PasswordResetRequest $request): RedirectResponse
     {
         $status = $this->sendPasswordResetLink($request);
+
         return $this->handlePasswordResetResponse($request, $status);
     }
+
     /**
      * Send password reset link to user.
      *
@@ -63,6 +66,7 @@ class PasswordResetLinkController extends Controller
             $request->only('email'),
         );
     }
+
     /**
      * Handle the password reset response.
      *
@@ -76,6 +80,7 @@ class PasswordResetLinkController extends Controller
         if ($status == Password::RESET_LINK_SENT) {
             return back()->with('success', __($status));
         }
+
         return back()->withInput($request->only('email'))
             ->withErrors(['email' => __($status)]);
     }

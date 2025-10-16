@@ -8,7 +8,6 @@ use App\Models\Invoice;
 use App\Models\License;
 use App\Models\User;
 use App\Services\Email\EmailFacade;
-use App\Services\Email\Contracts\EmailServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -18,6 +17,7 @@ use Illuminate\Database\Eloquent\Collection;
  * while using the new modular email system underneath.
  *
  * @version 1.0.0
+ *
  * @deprecated Use \App\Services\Email\EmailFacade or \App\Services\Email\Facades\Email instead
  */
 class EmailService
@@ -38,7 +38,7 @@ class EmailService
         string $templateName,
         string $recipientEmail,
         array $data = [],
-        ?string $recipientName = null
+        ?string $recipientName = null,
     ): bool {
         return $this->emailFacade->sendEmail($templateName, $recipientEmail, $data, $recipientName);
     }
@@ -187,6 +187,7 @@ class EmailService
      *
      * @param License $license
      * @param Invoice $invoice
+     *
      *\n     * @return bool
      */
     public function sendPaymentConfirmation(License $license, Invoice $invoice): bool
@@ -199,6 +200,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $licenseData
+     *
      *\n     * @return bool
      */
     public function sendLicenseExpiring(User $user, array $licenseData): bool
@@ -211,6 +213,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $licenseData
+     *
      *\n     * @return bool
      */
     public function sendLicenseUpdated(User $user, array $licenseData): bool
@@ -223,6 +226,7 @@ class EmailService
      *
      * @param License $license
      * @param User|null $user
+     *
      *\n     * @return bool
      */
     public function sendLicenseCreated(License $license, ?User $user = null): bool
@@ -235,6 +239,7 @@ class EmailService
      *
      * @param License $license
      * @param Invoice $invoice
+     *
      *\n     * @return bool
      */
     public function sendAdminPaymentNotification(License $license, Invoice $invoice): bool
@@ -248,6 +253,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $invoiceData
+     *
      *\n     * @return bool
      */
     public function sendInvoiceApproachingDue(User $user, array $invoiceData): bool
@@ -260,6 +266,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $invoiceData
+     *
      *\n     * @return bool
      */
     public function sendInvoicePaid(User $user, array $invoiceData): bool
@@ -272,6 +279,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $invoiceData
+     *
      *\n     * @return bool
      */
     public function sendInvoiceCancelled(User $user, array $invoiceData): bool
@@ -283,6 +291,7 @@ class EmailService
      * Send custom invoice payment confirmation.
      *
      * @param Invoice $invoice
+     *
      *\n     * @return bool
      */
     public function sendCustomInvoicePaymentConfirmation(Invoice $invoice): bool
@@ -294,6 +303,7 @@ class EmailService
      * Send admin custom invoice payment notification.
      *
      * @param Invoice $invoice
+     *
      *\n     * @return bool
      */
     public function sendAdminCustomInvoicePaymentNotification(Invoice $invoice): bool
@@ -305,6 +315,7 @@ class EmailService
      * Send payment failure notification.
      *
      * @param Invoice $order
+     *
      *\n     * @return bool
      */
     public function sendPaymentFailureNotification(Invoice $order): bool
@@ -318,6 +329,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $ticketData
+     *
      *\n     * @return bool
      */
     public function sendTicketCreated(User $user, array $ticketData): bool
@@ -330,6 +342,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $ticketData
+     *
      *\n     * @return bool
      */
     public function sendTicketStatusUpdate(User $user, array $ticketData): bool
@@ -342,6 +355,7 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $ticketData
+     *
      *\n     * @return bool
      */
     public function sendTicketReply(User $user, array $ticketData): bool
@@ -353,6 +367,7 @@ class EmailService
      * Send admin ticket created email.
      *
      * @param array<string, mixed> $ticketData
+     *
      *\n     * @return bool
      */
     public function sendAdminTicketCreated(array $ticketData): bool
@@ -364,6 +379,7 @@ class EmailService
      * Send admin ticket reply email.
      *
      * @param array<string, mixed> $ticketData
+     *
      *\n     * @return bool
      */
     public function sendAdminTicketReply(array $ticketData): bool
@@ -375,6 +391,7 @@ class EmailService
      * Send admin ticket closed email.
      *
      * @param array<string, mixed> $ticketData
+     *
      *\n     * @return bool
      */
     public function sendAdminTicketClosed(array $ticketData): bool
@@ -402,6 +419,7 @@ class EmailService
      * Send admin license created email.
      *
      * @param array<string, mixed> $licenseData
+     *
      *\n     * @return bool
      */
     public function sendAdminLicenseCreated(array $licenseData): bool
@@ -413,6 +431,7 @@ class EmailService
      * Send admin license expiring email.
      *
      * @param array<string, mixed> $licenseData
+     *
      *\n     * @return bool
      */
     public function sendAdminLicenseExpiring(array $licenseData): bool
@@ -424,6 +443,7 @@ class EmailService
      * Send admin license renewed email.
      *
      * @param array<string, mixed> $licenseData
+     *
      *\n     * @return bool
      */
     public function sendAdminLicenseRenewed(array $licenseData): bool
@@ -436,9 +456,10 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $renewalData
+     *
      *\n     * @return bool
      */
-    public function sendRenewalReminder(\App\Models\User $user, array $renewalData): bool
+    public function sendRenewalReminder(User $user, array $renewalData): bool
     {
         return $this->emailFacade->sendToUser($user, 'user_renewal_reminder', $renewalData);
     }
@@ -447,6 +468,7 @@ class EmailService
      * Send admin renewal reminder email.
      *
      * @param array<string, mixed> $renewalData
+     *
      *\n     * @return bool
      */
     public function sendAdminRenewalReminder(array $renewalData): bool
@@ -459,9 +481,10 @@ class EmailService
      *
      * @param User $user
      * @param array<string, mixed> $productData
+     *
      *\n     * @return bool
      */
-    public function sendProductVersionUpdate(\App\Models\User $user, array $productData): bool
+    public function sendProductVersionUpdate(User $user, array $productData): bool
     {
         return $this->emailFacade->sendToUser($user, 'user_product_version_update', $productData);
     }
@@ -470,6 +493,7 @@ class EmailService
      * Send admin invoice approaching due email.
      *
      * @param array<string, mixed> $invoiceData
+     *
      *\n     * @return bool
      */
     public function sendAdminInvoiceApproachingDue(array $invoiceData): bool
@@ -481,6 +505,7 @@ class EmailService
      * Send admin invoice cancelled email.
      *
      * @param array<string, mixed> $invoiceData
+     *
      *\n     * @return bool
      */
     public function sendAdminInvoiceCancelled(array $invoiceData): bool

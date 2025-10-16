@@ -54,61 +54,68 @@ class DemoModeMiddleware
             if (! $this->isDemoModeEnabled()) {
                 $response = $next($request);
                 /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+                 * @var Response $typedResponse
+                 */
                 $typedResponse = $response;
+
                 return $typedResponse;
             }
             // Skip demo mode for installation routes
             if ($request->routeIs('install.*')) {
                 $response = $next($request);
                 /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+                 * @var Response $typedResponse
+                 */
                 $typedResponse = $response;
+
                 return $typedResponse;
             }
             // Skip demo mode for login and authentication routes
             if ($this->isAuthenticationRoute($request)) {
                 $response = $next($request);
                 /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+                 * @var Response $typedResponse
+                 */
                 $typedResponse = $response;
+
                 return $typedResponse;
             }
             // Skip demo mode for AJAX requests that are read-only
             if ($request->ajax() && $this->isReadOnlyAjaxRequest($request)) {
                 $response = $next($request);
                 /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+                 * @var Response $typedResponse
+                 */
                 $typedResponse = $response;
+
                 return $typedResponse;
             }
             // Block destructive HTTP methods (but allow login POST)
             if ($this->isDestructiveMethod($request->method()) && ! $this->isLoginPost($request)) {
                 $response = $this->handleDemoModeBlock($request);
                 /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+                 * @var Response $typedResponse
+                 */
                 $typedResponse = $response;
+
                 return $typedResponse;
             }
             // Block destructive form submissions
             if ($request->isMethod('POST') && $this->isDestructiveAction($request)) {
                 $response = $this->handleDemoModeBlock($request);
                 /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+                 * @var Response $typedResponse
+                 */
                 $typedResponse = $response;
+
                 return $typedResponse;
             }
             $response = $next($request);
             /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+             * @var Response $typedResponse
+             */
             $typedResponse = $response;
+
             return $typedResponse;
         } catch (\Exception $e) {
             Log::error('Demo mode middleware failed', [
@@ -121,12 +128,14 @@ class DemoModeMiddleware
             // In case of error, allow the request to proceed
             $response = $next($request);
             /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+             * @var Response $typedResponse
+             */
             $typedResponse = $response;
+
             return $typedResponse;
         }
     }
+
     /**
      * Check if demo mode is enabled with enhanced validation.
      *
@@ -135,8 +144,10 @@ class DemoModeMiddleware
     private function isDemoModeEnabled(): bool
     {
         $demoMode = config('app.demo_mode', false);
+
         return $demoMode === true || $demoMode === '1' || $demoMode === 'true';
     }
+
     /**
      * Check if the request is for authentication routes.
      *
@@ -172,8 +183,10 @@ class DemoModeMiddleware
                 return true;
             }
         }
+
         return false;
     }
+
     /**
      * Check if the HTTP method is destructive with enhanced validation.
      *
@@ -184,8 +197,10 @@ class DemoModeMiddleware
     private function isDestructiveMethod(string $method): bool
     {
         $destructiveMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
+
         return in_array(strtoupper($method), $destructiveMethods, true);
     }
+
     /**
      * Check if this is a login POST request with enhanced validation.
      *
@@ -212,8 +227,10 @@ class DemoModeMiddleware
                 return true;
             }
         }
+
         return false;
     }
+
     /**
      * Check if the request is a destructive action with enhanced validation.
      *
@@ -227,7 +244,7 @@ class DemoModeMiddleware
         $action = $this->sanitizeInput(
             is_string($request->get('_method', $request->method()))
                 ? $request->get('_method', $request->method())
-                : null
+                : null,
         );
         // List of destructive actions
         $destructiveActions = [
@@ -258,8 +275,10 @@ class DemoModeMiddleware
                 return true;
             }
         }
+
         return false;
     }
+
     /**
      * Check if AJAX request is read-only with enhanced validation.
      *
@@ -280,8 +299,10 @@ class DemoModeMiddleware
                 return true;
             }
         }
+
         return false;
     }
+
     /**
      * Handle demo mode blocking with enhanced security.
      *
@@ -299,10 +320,12 @@ class DemoModeMiddleware
                 'demo_mode' => true,
             ], 403);
         }
+
         return redirect()->back()
             ->with('error', $message)
             ->with('demo_mode', true);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -315,6 +338,7 @@ class DemoModeMiddleware
         if ($input === null) {
             return null;
         }
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

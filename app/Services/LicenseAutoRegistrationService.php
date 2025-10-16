@@ -22,7 +22,9 @@ use InvalidArgumentException;
 class LicenseAutoRegistrationService
 {
     protected PurchaseCodeService $purchaseCodeService;
+
     protected InvoiceService $invoiceService;
+
     /**
      * Constructor with dependency injection and enhanced error handling.
      *
@@ -38,6 +40,7 @@ class LicenseAutoRegistrationService
         $this->purchaseCodeService = $purchaseCodeService;
         $this->invoiceService = $invoiceService;
     }
+
     /**
      * Automatically register a license for the authenticated user with enhanced security and error handling.
      *
@@ -73,6 +76,7 @@ class LicenseAutoRegistrationService
                     'message' => 'User must be authenticated',
                 ];
             }
+
             return DB::transaction(function () use ($purchaseCode, $productId, $user) {
                 // Check if user already has this license
                 $existingLicense = $this->findExistingLicense($purchaseCode, $user->id);
@@ -116,6 +120,7 @@ class LicenseAutoRegistrationService
                 $this->createInitialInvoice($license);
                 // Decrease product stock
                 $this->decreaseProductStock($product);
+
                 return [
                     'success' => true,
                     'license' => $license,
@@ -133,6 +138,7 @@ class LicenseAutoRegistrationService
             throw $e;
         }
     }
+
     /**
      * Check if a purchase code is valid without registering it with enhanced security and error handling.
      *
@@ -189,6 +195,7 @@ class LicenseAutoRegistrationService
                     'existing_license' => null,
                 ];
             }
+
             return [
                 'valid' => true,
                 'message' => 'Purchase code is valid',
@@ -205,6 +212,7 @@ class LicenseAutoRegistrationService
             throw $e;
         }
     }
+
     /**
      * Validate purchase code format and content with enhanced security.
      *
@@ -225,6 +233,7 @@ class LicenseAutoRegistrationService
             throw new InvalidArgumentException('Purchase code contains invalid characters');
         }
     }
+
     /**
      * Validate product ID with enhanced security.
      *
@@ -238,6 +247,7 @@ class LicenseAutoRegistrationService
             throw new InvalidArgumentException('Product ID must be between 1 and 999999');
         }
     }
+
     /**
      * Find existing license for user with enhanced error handling.
      *
@@ -264,6 +274,7 @@ class LicenseAutoRegistrationService
             throw $e;
         }
     }
+
     /**
      * Determine product ID from verification result or provided parameter.
      *
@@ -280,8 +291,10 @@ class LicenseAutoRegistrationService
         if ($productId) {
             return $productId;
         }
+
         return is_numeric($verificationResult['product_id'] ?? null) ? (int)$verificationResult['product_id'] : null;
     }
+
     /**
      * Find product by ID with enhanced error handling.
      *
@@ -304,6 +317,7 @@ class LicenseAutoRegistrationService
             throw $e;
         }
     }
+
     /**
      * Create license with enhanced security and error handling.
      *
@@ -334,6 +348,7 @@ class LicenseAutoRegistrationService
                 'status' => 'active',
                 'support_expires_at' => $verificationResult['support_expires_at'] ?? null,
             ];
+
             return License::create($licenseData);
         } catch (\Exception $e) {
             Log::error('Failed to create license', [
@@ -346,6 +361,7 @@ class LicenseAutoRegistrationService
             throw $e;
         }
     }
+
     /**
      * Create initial invoice with enhanced error handling.
      *
@@ -366,6 +382,7 @@ class LicenseAutoRegistrationService
             throw $e;
         }
     }
+
     /**
      * Decrease product stock with enhanced error handling.
      *

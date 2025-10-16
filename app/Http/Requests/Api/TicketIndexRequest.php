@@ -28,6 +28,7 @@ class TicketIndexRequest extends FormRequest
     {
         return true; // Authorization handled by middleware
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -70,6 +71,7 @@ class TicketIndexRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -88,6 +90,7 @@ class TicketIndexRequest extends FormRequest
             'per_page.max' => 'Per page cannot exceed 100 items.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -104,6 +107,7 @@ class TicketIndexRequest extends FormRequest
             'per_page' => 'items per page',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */

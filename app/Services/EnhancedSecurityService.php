@@ -56,6 +56,7 @@ class EnhancedSecurityService
         'admin_actions' => ['max_attempts' => 20, 'decay_minutes' => 1],
         'user_registration' => ['max_attempts' => 3, 'decay_minutes' => 60],
     ];
+
     /**
      * Dangerous patterns for XSS and injection detection.
      *
@@ -81,6 +82,7 @@ class EnhancedSecurityService
         '/<textarea[^>]*>/si',
         '/<select[^>]*>/si',
     ];
+
     /**
      * SQL injection patterns for detection.
      *
@@ -100,6 +102,7 @@ class EnhancedSecurityService
         '/exec\s*\(/i',
         '/execute\s*\(/i',
     ];
+
     /**
      * Command injection patterns for detection.
      *
@@ -117,6 +120,7 @@ class EnhancedSecurityService
         '/;\s*whoami/i',
         '/;\s*id\s*/i',
     ];
+
     /**
      * Check rate limit for specific action with enhanced validation.
      *
@@ -143,23 +147,26 @@ class EnhancedSecurityService
             }
             $config = self::RATE_LIMITS[$action] ?? self::RATE_LIMITS['api_requests'];
             $result = RateLimiter::attempt(
-                $action . ':' . $identifier,
+                $action.':'.$identifier,
                 $config['max_attempts'],
                 function () {
                     // Rate limit not exceeded
                 },
                 $config['decay_minutes'] * 60,
             );
-            return (bool) $result;
+
+            return (bool)$result;
         } catch (\Exception $e) {
             Log::error('Rate limit check failed', [
                 'error' => $e->getMessage(),
                 'action' => $action,
                 'identifier' => $this->hashForLogging($identifier),
             ]);
+
             return false;
         }
     }
+
     /**
      * Get remaining attempts for rate limit with validation.
      *
@@ -177,7 +184,8 @@ class EnhancedSecurityService
                 throw new \InvalidArgumentException('Action and identifier cannot be empty');
             }
             $config = self::RATE_LIMITS[$action] ?? self::RATE_LIMITS['api_requests'];
-            $key = $action . ':' . $identifier;
+            $key = $action.':'.$identifier;
+
             return RateLimiter::remaining($key, $config['max_attempts']);
         } catch (\Exception $e) {
             Log::error('Failed to get remaining attempts', [
@@ -185,9 +193,11 @@ class EnhancedSecurityService
                 'action' => $action,
                 'identifier' => $this->hashForLogging($identifier),
             ]);
+
             return 0;
         }
     }
+
     /**
      * Clear rate limit for specific action and identifier.
      *
@@ -202,7 +212,7 @@ class EnhancedSecurityService
             if (empty($action) || empty($identifier)) {
                 throw new \InvalidArgumentException('Action and identifier cannot be empty');
             }
-            RateLimiter::clear($action . ':' . $identifier);
+            RateLimiter::clear($action.':'.$identifier);
         } catch (\Exception $e) {
             Log::error('Failed to clear rate limit', [
                 'error' => $e->getMessage(),
@@ -211,6 +221,7 @@ class EnhancedSecurityService
             ]);
         }
     }
+
     /**
      * Sanitize input data to prevent XSS attacks with enhanced security.
      *
@@ -248,15 +259,18 @@ class EnhancedSecurityService
             }
             // Convert special characters to HTML entities
             $data = htmlspecialchars($data, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
             return trim($data);
         } catch (\Exception $e) {
             Log::error('Input sanitization failed', [
                 'error' => $e->getMessage(),
                 'data_type' => gettype($data),
             ]);
+
             return is_string($data) ? '' : $data;
         }
     }
+
     /**
      * Validate file upload security with comprehensive checks.
      *
@@ -313,8 +327,10 @@ class EnhancedSecurityService
             ]);
             $errors[] = 'File validation failed';
         }
+
         return $errors;
     }
+
     /**
      * Check if content contains malicious patterns.
      *
@@ -330,14 +346,17 @@ class EnhancedSecurityService
                     return true;
                 }
             }
+
             return false;
         } catch (\Exception $e) {
             Log::error('Malicious content detection failed', [
                 'error' => $e->getMessage(),
             ]);
+
             return true; // Fail safe - assume malicious if detection fails
         }
     }
+
     /**
      * Check if file is potentially executable.
      *
@@ -353,8 +372,10 @@ class EnhancedSecurityService
             'jar', 'sh', 'pl', 'py', 'rb', 'cgi', 'asp', 'aspx',
         ];
         $extension = strtolower($file->getClientOriginalExtension());
+
         return in_array($extension, $executableExtensions);
     }
+
     /**
      * Check file content for malicious patterns.
      *
@@ -370,15 +391,18 @@ class EnhancedSecurityService
                 return false;
             }
             $content = substr($content, 0, 1024); // Check first 1KB
+
             return $this->containsMaliciousContent($content);
         } catch (\Exception $e) {
             Log::error('File content check failed', [
                 'error' => $e->getMessage(),
                 'filename' => $file->getClientOriginalName(),
             ]);
+
             return true; // Fail safe
         }
     }
+
     /**
      * Generate secure random token with enhanced entropy.
      *
@@ -394,12 +418,14 @@ class EnhancedSecurityService
             if ($length < 8 || $length > 256) {
                 throw new \InvalidArgumentException('Token length must be between 8 and 256 characters');
             }
+
             return bin2hex(random_bytes(max(1, (int)($length / 2))));
         } catch (\Exception $e) {
             Log::error('Secure token generation failed', [
                 'error' => $e->getMessage(),
                 'length' => $length,
             ]);
+
             // Fallback to less secure but functional method
             return substr(
                 str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 10)),
@@ -408,6 +434,7 @@ class EnhancedSecurityService
             );
         }
     }
+
     /**
      * Hash sensitive data for logging with enhanced security.
      *
@@ -420,14 +447,17 @@ class EnhancedSecurityService
         try {
             $appKey = config('app.key');
             $keyString = is_string($appKey) ? $appKey : '';
-            return hash('sha256', $data . $keyString);
+
+            return hash('sha256', $data.$keyString);
         } catch (\Exception $e) {
             Log::error('Data hashing failed', [
                 'error' => $e->getMessage(),
             ]);
+
             return 'hash_failed';
         }
     }
+
     /**
      * Log security event with comprehensive context.
      *
@@ -438,7 +468,7 @@ class EnhancedSecurityService
     public function logSecurityEvent(string $event, Request $request, array $context = []): void
     {
         try {
-            Log::warning('Security event: ' . $event, array_merge([
+            Log::warning('Security event: '.$event, array_merge([
                 'event' => $event,
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
@@ -455,6 +485,7 @@ class EnhancedSecurityService
             ]);
         }
     }
+
     /**
      * Detect suspicious activity patterns with enhanced detection.
      *
@@ -503,8 +534,10 @@ class EnhancedSecurityService
                 'url' => $request->fullUrl(),
             ]);
         }
+
         return $suspicious;
     }
+
     /**
      * Check if user agent is suspicious.
      *
@@ -532,8 +565,10 @@ class EnhancedSecurityService
                 return true;
             }
         }
+
         return false;
     }
+
     /**
      * Get client fingerprint for tracking with enhanced accuracy.
      *
@@ -551,14 +586,17 @@ class EnhancedSecurityService
                 $request->header('Accept-Encoding'),
                 $request->header('Accept'),
             ];
+
             return hash('sha256', implode('|', array_filter($components)));
         } catch (\Exception $e) {
             Log::error('Client fingerprint generation failed', [
                 'error' => $e->getMessage(),
             ]);
+
             return 'fingerprint_failed';
         }
     }
+
     /**
      * Check if IP is in whitelist with enhanced validation.
      *
@@ -577,15 +615,18 @@ class EnhancedSecurityService
                 return false;
             }
             $whitelistedIps = array_map('trim', explode(', ', $whitelist));
+
             return in_array($ip, $whitelistedIps);
         } catch (\Exception $e) {
             Log::error('IP whitelist check failed', [
                 'error' => $e->getMessage(),
                 'ip' => $ip,
             ]);
+
             return false;
         }
     }
+
     /**
      * Check if IP is in blacklist with enhanced validation.
      *
@@ -605,12 +646,14 @@ class EnhancedSecurityService
                 return false;
             }
             $blacklistedIps = array_map('trim', explode(', ', $blacklist));
+
             return in_array($ip, $blacklistedIps);
         } catch (\Exception $e) {
             Log::error('IP blacklist check failed', [
                 'error' => $e->getMessage(),
                 'ip' => $ip,
             ]);
+
             return false;
         }
     }

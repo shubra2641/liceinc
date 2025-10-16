@@ -23,8 +23,8 @@ class MigrationHelper
      */
     public static function analyzeFile(string $filePath): array
     {
-        if (!file_exists($filePath)) {
-            return ['error' => 'File not found: ' . $filePath];
+        if (! file_exists($filePath)) {
+            return ['error' => 'File not found: '.$filePath];
         }
 
         $content = file_get_contents($filePath);
@@ -38,8 +38,8 @@ class MigrationHelper
                 'suggestion' => 'Replace EmailService with EmailFacade for better type safety',
                 'example' => [
                     'old' => 'use App\Services\EmailService;',
-                    'new' => 'use App\Services\Email\Facades\Email;'
-                ]
+                    'new' => 'use App\Services\Email\Facades\Email;',
+                ],
             ];
         }
 
@@ -62,8 +62,8 @@ class MigrationHelper
                     'suggestion' => "Use {$suggestion} instead of \$emailService->{$method}()",
                     'example' => [
                         'old' => "\$emailService->{$method}(...);",
-                        'new' => "Email::{$method}(...);"
-                    ]
+                        'new' => "Email::{$method}(...);",
+                    ],
                 ];
             }
         }
@@ -71,7 +71,7 @@ class MigrationHelper
         return [
             'file' => $filePath,
             'recommendations' => $recommendations,
-            'total_recommendations' => count($recommendations)
+            'total_recommendations' => count($recommendations),
         ];
     }
 
@@ -88,7 +88,7 @@ class MigrationHelper
 
         // Find all PHP files that might use EmailService
         $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($projectPath . '/app')
+            new \RecursiveDirectoryIterator($projectPath.'/app'),
         );
 
         foreach ($iterator as $file) {
@@ -110,8 +110,8 @@ class MigrationHelper
             'recommendations' => $recommendations,
             'summary' => [
                 'total_files' => count($files),
-                'total_recommendations' => array_sum(array_column($recommendations, 'total_recommendations'))
-            ]
+                'total_recommendations' => array_sum(array_column($recommendations, 'total_recommendations')),
+            ],
         ];
     }
 
@@ -132,7 +132,7 @@ class MigrationHelper
 
         $script = "<?php\n\n";
         $script .= "// Migration script for: {$filePath}\n";
-        $script .= "// Generated on: " . date('Y-m-d H:i:s') . "\n\n";
+        $script .= '// Generated on: '.date('Y-m-d H:i:s')."\n\n";
 
         if (isset($analysis['recommendations']) && is_array($analysis['recommendations'])) {
             foreach ($analysis['recommendations'] as $recommendation) {
@@ -184,18 +184,18 @@ class MigrationHelper
         // Check if service provider is registered
         $providers = config('app.providers', []);
         $status['service_provider_registered'] = is_array($providers) && in_array(
-            \App\Services\Email\EmailServiceProvider::class,
-            $providers
+            EmailServiceProvider::class,
+            $providers,
         );
 
         // Check if facade is available
-        $status['facade_available'] = class_exists(\App\Services\Email\Facades\Email::class);
+        $status['facade_available'] = class_exists(Facades\Email::class);
 
         // Check if config file exists
         $status['config_file_exists'] = file_exists(config_path('email_services.php'));
 
         // Check if handlers are registered
-        $status['handlers_registered'] = app()->bound(\App\Services\Email\Handlers\UserEmailHandler::class);
+        $status['handlers_registered'] = app()->bound(Handlers\UserEmailHandler::class);
 
         return $status;
     }
@@ -216,7 +216,7 @@ class MigrationHelper
         ];
 
         $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($projectPath . '/app')
+            new \RecursiveDirectoryIterator($projectPath.'/app'),
         );
 
         foreach ($iterator as $file) {
@@ -237,7 +237,7 @@ class MigrationHelper
                     $methods = [
                         'sendEmail', 'sendToUser', 'sendToAdmin', 'sendBulkEmail',
                         'sendUserWelcome', 'sendEmailVerification', 'sendPasswordReset',
-                        'sendNewUserNotification', 'sendPaymentConfirmation'
+                        'sendNewUserNotification', 'sendPaymentConfirmation',
                     ];
 
                     foreach ($methods as $method) {

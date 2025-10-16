@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\View\Components;
 
-use Illuminate\Support\Facades\Log;
 use App\Helpers\SecureFileHelper;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
@@ -29,10 +29,12 @@ class NavLink extends Component
      * The active state of the navigation link.
      */
     public bool $active;
+
     /**
      * The CSS classes for the navigation link.
      */
     public string $classes;
+
     /**
      * Create a new component instance with enhanced security.
      *
@@ -55,6 +57,7 @@ class NavLink extends Component
             throw $e;
         }
     }
+
     /**
      * Validate the active state with enhanced security.
      *
@@ -86,8 +89,9 @@ class NavLink extends Component
             'active' => $active,
             'type' => SecureFileHelper::getType($active),
         ]);
-        throw new \InvalidArgumentException('Invalid active state: ' . var_export($active, true));
+        throw new \InvalidArgumentException('Invalid active state: '.var_export($active, true));
     }
+
     /**
      * Get the CSS classes for the link with enhanced security.
      *
@@ -98,8 +102,10 @@ class NavLink extends Component
         if ($this->active) {
             return 'nav-link-active';
         }
+
         return 'nav-link';
     }
+
     /**
      * Get the view / contents that represent the component with enhanced security.
      *
@@ -126,6 +132,7 @@ class NavLink extends Component
                 'classes' => htmlspecialchars($this->classes, ENT_QUOTES, 'UTF-8'),
                 'security_token' => csrf_token(),
             ]);
+
             return $view;
         } catch (\Exception $e) {
             Log::error('Failed to render NavLink component', [

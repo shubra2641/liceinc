@@ -7,32 +7,25 @@ return [
     '2 hours ago' => '2 Hours Ago',
     '24/7 Support' => '24/7 Support',
     '30-Day Money Back Guarantee' => '30-Day Money Back Guarantee',
-    'A new verification link has been sent to the email address you provided during registration.' =>
-        'A New Verification Link Has Been Sent To The Email Address You Provided During Registration.',
-    'Please verify your email address before accessing your account.' =>
-        'Please verify your email address before accessing your account.',
-    'Please verify your email address. A verification link has been sent to your email.' =>
-        'Please verify your email address. A verification link has been sent to your email.',
+    'A new verification link has been sent to the email address you provided during registration.' => 'A New Verification Link Has Been Sent To The Email Address You Provided During Registration.',
+    'Please verify your email address before accessing your account.' => 'Please verify your email address before accessing your account.',
+    'Please verify your email address. A verification link has been sent to your email.' => 'Please verify your email address. A verification link has been sent to your email.',
     'Test Email Warning' => 'Test Email Warning',
     'Test Email Detected' => 'Test Email Detected',
     'You are using a test email address' => 'You are using a test email address',
     'Test email addresses cannot receive verification emails' => 'Test email addresses cannot receive verification emails',
-    'You are using a test email address that cannot receive verification emails' =>
-        'You are using a test email address that cannot receive verification emails',
+    'You are using a test email address that cannot receive verification emails' => 'You are using a test email address that cannot receive verification emails',
     'Test Email Address' => 'Test Email Address',
-    'You are currently using a test email address ({{email}}) that cannot receive verification emails. ' .
-        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com ' .
-        'are not real email addresses and cannot receive emails.' =>
-        'You are currently using a test email address ({{email}}) that cannot receive verification emails. ' .
-        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com ' .
+    'You are currently using a test email address ({{email}}) that cannot receive verification emails. '.
+        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
+        'are not real email addresses and cannot receive emails.' => 'You are currently using a test email address ({{email}}) that cannot receive verification emails. '.
+        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
         'are not real email addresses and cannot receive emails.',
     'You are currently using a test email address' => 'You are currently using a test email address',
-    'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com ' .
-        'are not real email addresses and cannot receive emails.' =>
-        'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com ' .
+    'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
+        'are not real email addresses and cannot receive emails.' => 'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
         'are not real email addresses and cannot receive emails.',
-    'To use the system normally, please register with a real email address that can receive verification emails.' =>
-        'To use the system normally, please register with a real email address ' .
+    'To use the system normally, please register with a real email address that can receive verification emails.' => 'To use the system normally, please register with a real email address '.
         'that can receive verification emails.',
     'Continue to Dashboard' => 'Continue to Dashboard',
     'About Test Emails' => 'About Test Emails',
@@ -46,20 +39,16 @@ return [
     'Connected to Envato' => 'Connected to Envato',
     'Username' => 'Username',
     'Envato ID' => 'Envato ID',
-    'Are you sure you want to disconnect from Envato?' =>
-        'Are you sure you want to disconnect from Envato?',
+    'Are you sure you want to disconnect from Envato?' => 'Are you sure you want to disconnect from Envato?',
     'Disconnect Envato Account' => 'Disconnect Envato Account',
     'Envato API Configured' => 'Envato API Configured',
-    'Envato API is configured and ready to connect your account.' =>
-        'Envato API is configured and ready to connect your account.',
+    'Envato API is configured and ready to connect your account.' => 'Envato API is configured and ready to connect your account.',
     'Connect Envato Account' => 'Connect Envato Account',
     'Envato API Not Configured' => 'Envato API Not Configured',
-    'Please configure Envato API settings first to connect your account.' =>
-        'Please configure Envato API settings first to connect your account.',
+    'Please configure Envato API settings first to connect your account.' => 'Please configure Envato API settings first to connect your account.',
     'Configure Envato API' => 'Configure Envato API',
     'API Token Configured' => 'API Token Configured',
-    'You can now connect your admin account to Envato in your profile.' =>
-        'You can now connect your admin account to Envato in your profile.',
+    'You can now connect your admin account to Envato in your profile.' => 'You can now connect your admin account to Envato in your profile.',
     'Profile Updated' => 'Profile Updated',
     'Your profile has been updated successfully.' => 'Your profile has been updated successfully.',
     'Envato Account Unlinked' => 'Envato Account Unlinked',
@@ -97,10 +86,10 @@ return [
     'update_db_restored' => 'Database restored from backup.',
     'update_db_restore_failed' => 'Failed to restore database from backup.',
     'Updater Backups' => 'Updater Backups',
-    'backups_list_help' => 'Manage previously created backups. ' .
+    'backups_list_help' => 'Manage previously created backups. '.
         'You can restore a backup to roll back files and optionally the database.',
     'no_backups_found' => 'No backups found.',
-    'confirm_restore_backup' => 'Are you sure you want to restore this backup? ' .
+    'confirm_restore_backup' => 'Are you sure you want to restore this backup? '.
         'This will replace current application files.',
     'Restore' => 'Restore',
     'File' => 'File',
@@ -314,12 +303,9 @@ return [
     'Category will be visible to users' => 'Category Will Be Visible To Users',
     'Change Featured Image' => 'Change Featured Image',
     'Change Password' => 'Change Password',
-    'Change the status to pending to add a reply' =>
-        'Change The Status To Pending To Add A Reply',
-    'Change your password to keep your account secure' =>
-        'Change Your Password To Keep Your Account Secure',
-    'Chart period selection requires JavaScript to be enabled' =>
-        'Chart Period Selection Requires JavaScript To Be Enabled',
+    'Change the status to pending to add a reply' => 'Change The Status To Pending To Add A Reply',
+    'Change your password to keep your account secure' => 'Change Your Password To Keep Your Account Secure',
+    'Chart period selection requires JavaScript to be enabled' => 'Chart Period Selection Requires JavaScript To Be Enabled',
     'Check Another License' => 'Check Another License',
     'Check Email' => 'Check Email',
     'Check Envato API status' => 'Check Envato API Status',
@@ -843,31 +829,21 @@ return [
     'Manage and customize email templates' => 'Manage And Customize Email Templates',
     'Manage and monitor all system invoices' => 'Manage And Monitor All System Invoices',
     'Manage and monitor license usage' => 'Manage And Monitor License Usage',
-    'Manage and monitor license usage across your platform' =>
-        'Manage And Monitor License Usage Across Your Platform',
-    'Manage and organize knowledge base articles' =>
-        'Manage And Organize Knowledge Base Articles',
-    'Manage email templates for the system' =>
-        'Manage Email Templates For The System',
-    'Manage licenses and generate license keys' =>
-        'Manage Licenses And Generate License Keys',
-    'Manage system invoices and payments' =>
-        'Manage System Invoices And Payments',
-    'Manage system users and their permissions' =>
-        'Manage System Users And Their Permissions',
-    'Manage your Envato account connection' =>
-        'Manage Your Envato Account Connection',
+    'Manage and monitor license usage across your platform' => 'Manage And Monitor License Usage Across Your Platform',
+    'Manage and organize knowledge base articles' => 'Manage And Organize Knowledge Base Articles',
+    'Manage email templates for the system' => 'Manage Email Templates For The System',
+    'Manage licenses and generate license keys' => 'Manage Licenses And Generate License Keys',
+    'Manage system invoices and payments' => 'Manage System Invoices And Payments',
+    'Manage system users and their permissions' => 'Manage System Users And Their Permissions',
+    'Manage your Envato account connection' => 'Manage Your Envato Account Connection',
     'Manage your account' => 'Manage Your Account',
-    'Manage your account information and settings' =>
-        'Manage Your Account Information And Settings',
-    'Manage your account settings and preferences' =>
-        'Manage Your Account Settings And Preferences',
+    'Manage your account information and settings' => 'Manage Your Account Information And Settings',
+    'Manage your account settings and preferences' => 'Manage Your Account Settings And Preferences',
     'Manage your invoices and payments' => 'Manage Your Invoices And Payments',
     'Manage your license and registered domains' => 'Manage Your License And Registered Domains',
     'Manage your licenses' => 'Manage Your Licenses',
     'Manage your licenses and products' => 'Manage Your Licenses And Products',
-    'Manage your licenses, track downloads, and access support from your personal dashboard' =>
-        'Manage Your Licenses, Track Downloads, And Access Support From Your Personal Dashboard',
+    'Manage your licenses, track downloads, and access support from your personal dashboard' => 'Manage Your Licenses, Track Downloads, And Access Support From Your Personal Dashboard',
     'Manage your product catalog' => 'Manage Your Product Catalog',
     'Manage your product categories' => 'Manage Your Product Categories',
     'Manage your products catalog' => 'Manage Your Products Catalog',
@@ -2743,7 +2719,7 @@ return [
     'Stripe secret key is required' => 'Stripe secret key is required',
     'PayPal connection error: :error' => 'PayPal connection error: :error',
     'Stripe connection error: :error' => 'Stripe connection error: :error',
-    'You don\'t have any invoices yet' =>    'You don\'t have any invoices yet',
+    'You don\'t have any invoices yet' => 'You don\'t have any invoices yet',
     'contact_information' => 'Contact Information',
     'contact_phone' => 'Contact Phone',
     'enter_contact_phone' => 'Enter contact phone number',

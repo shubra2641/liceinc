@@ -31,8 +31,10 @@ class InvoiceRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
+
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -42,6 +44,7 @@ class InvoiceRequest extends FormRequest
     {
         $invoiceId = $this->route('invoice')->id ?? null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
+
         return [
             'user_id' => [
                 'required',
@@ -168,6 +171,7 @@ class InvoiceRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -181,7 +185,7 @@ class InvoiceRequest extends FormRequest
             'product_id.exists' => 'Selected product does not exist.',
             'type.required' => 'Invoice type is required.',
             'type.in' => 'Invoice type must be one of: initial, renewal, upgrade, custom.',
-            'custom_invoice_type.in' => 'Custom invoice type must be one of: one_time, monthly, quarterly, ' .
+            'custom_invoice_type.in' => 'Custom invoice type must be one of: one_time, monthly, quarterly, '.
                 'semi_annual, annual, three_years, lifetime.',
             'custom_product_name.max' => 'Product name cannot exceed 255 characters.',
             'expiration_date.date' => 'Expiration date must be a valid date.',
@@ -215,6 +219,7 @@ class InvoiceRequest extends FormRequest
             'next_billing_date.after' => 'Next billing date must be in the future.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -244,6 +249,7 @@ class InvoiceRequest extends FormRequest
             'next_billing_date' => 'next billing date',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */
@@ -269,6 +275,7 @@ class InvoiceRequest extends FormRequest
             'billing_type' => $this->billing_type ?? 'one_time',
         ]);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -282,7 +289,7 @@ class InvoiceRequest extends FormRequest
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

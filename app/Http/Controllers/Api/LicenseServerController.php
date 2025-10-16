@@ -6,27 +6,26 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\CheckUpdatesRequest;
-use App\Http\Requests\Api\GetVersionHistoryRequest;
 use App\Http\Requests\Api\GetLatestVersionRequest;
 use App\Http\Requests\Api\GetUpdateInfoRequest;
+use App\Http\Requests\Api\GetVersionHistoryRequest;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\ProductUpdate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Simplified License Server Controller
+ * Simplified License Server Controller.
  */
 class LicenseServerController extends Controller
 {
     /**
-     * Check for updates
+     * Check for updates.
      */
     public function checkUpdates(CheckUpdatesRequest $request): JsonResponse
     {
@@ -39,14 +38,14 @@ class LicenseServerController extends Controller
             $domain = $data['domain'];
             $productSlug = $data['product_slug'];
 
-            if (!$this->verifyLicense($licenseKey, $domain, $productSlug)) {
+            if (! $this->verifyLicense($licenseKey, $domain, $productSlug)) {
                 return $this->errorResponse('Invalid license', 'INVALID_LICENSE', 403);
             }
 
             $product = $this->getProduct($productSlug);
             $latestUpdate = $this->getLatestUpdate($product->id);
 
-            if (!$latestUpdate) {
+            if (! $latestUpdate) {
                 return $this->successResponse([
                         'current_version' => $currentVersion,
                         'latest_version' => $currentVersion,
@@ -67,12 +66,13 @@ class LicenseServerController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Update check failed', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Update check failed', 'SERVER_ERROR', 500);
         }
     }
 
     /**
-     * Get version history
+     * Get version history.
      */
     public function getVersionHistory(GetVersionHistoryRequest $request): JsonResponse
     {
@@ -80,7 +80,7 @@ class LicenseServerController extends Controller
             $this->checkRateLimit('version-history', $request->ip(), 10);
 
             $data = $request->validated();
-            if (!$this->verifyLicense($data['license_key'], $data['domain'], $data['product_slug'])) {
+            if (! $this->verifyLicense($data['license_key'], $data['domain'], $data['product_slug'])) {
                 return $this->errorResponse('Invalid license', 'INVALID_LICENSE', 403);
             }
 
@@ -93,12 +93,13 @@ class LicenseServerController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Version history failed', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Version history failed', 'SERVER_ERROR', 500);
         }
     }
 
     /**
-     * Download update file
+     * Download update file.
      */
     public function downloadUpdate(Request $request, string $licenseKey, string $version): Response|JsonResponse
     {
@@ -108,30 +109,31 @@ class LicenseServerController extends Controller
             $domain = $request->input('domain');
             $productSlug = $request->input('product_slug');
 
-            if (!$productSlug) {
+            if (! $productSlug) {
                 return $this->errorResponse('Product slug required', 'PRODUCT_SLUG_REQUIRED', 422);
             }
 
-            if (!$this->verifyLicense($licenseKey, $domain, $productSlug)) {
+            if (! $this->verifyLicense($licenseKey, $domain, $productSlug)) {
                 return $this->errorResponse('Invalid license', 'INVALID_LICENSE', 403);
             }
 
             $product = $this->getProduct($productSlug);
             $update = $this->getUpdateByVersion($product->id, $version);
 
-            if (!$update || !Storage::exists($update->file_path)) {
+            if (! $update || ! Storage::exists($update->file_path)) {
                 return $this->errorResponse('Update not found', 'UPDATE_NOT_FOUND', 404);
             }
 
             return Storage::download($update->file_path, $update->file_name ?? "update_{$version}.zip");
         } catch (\Exception $e) {
             Log::error('Download failed', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Download failed', 'SERVER_ERROR', 500);
         }
     }
 
     /**
-     * Get latest version
+     * Get latest version.
      */
     public function getLatestVersion(GetLatestVersionRequest $request): JsonResponse
     {
@@ -139,14 +141,14 @@ class LicenseServerController extends Controller
             $this->checkRateLimit('latest-version', $request->ip(), 15);
 
             $data = $request->validated();
-            if (!$this->verifyLicense($data['license_key'], $data['domain'], $data['product_slug'])) {
+            if (! $this->verifyLicense($data['license_key'], $data['domain'], $data['product_slug'])) {
                 return $this->errorResponse('Invalid license', 'INVALID_LICENSE', 403);
             }
 
             $product = $this->getProduct($data['product_slug']);
             $latestUpdate = $this->getLatestUpdate($product->id);
 
-            if (!$latestUpdate) {
+            if (! $latestUpdate) {
                 return $this->errorResponse('No updates available', 'NO_UPDATES', 404);
             }
 
@@ -164,12 +166,13 @@ class LicenseServerController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Latest version failed', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Latest version failed', 'SERVER_ERROR', 500);
         }
     }
 
     /**
-     * Get update info without license
+     * Get update info without license.
      */
     public function getUpdateInfo(GetUpdateInfoRequest $request): JsonResponse
     {
@@ -180,7 +183,7 @@ class LicenseServerController extends Controller
             $product = $this->getProduct($data['product_slug']);
             $nextUpdate = $this->getNextUpdate($product->id, $data['current_version']);
 
-            if (!$nextUpdate) {
+            if (! $nextUpdate) {
                 return $this->errorResponse('No updates available', 'NO_UPDATES', 404);
             }
 
@@ -195,12 +198,13 @@ class LicenseServerController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Update info failed', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Update info failed', 'SERVER_ERROR', 500);
         }
     }
 
     /**
-     * Get all products
+     * Get all products.
      */
     public function getProducts(Request $request): JsonResponse
     {
@@ -214,18 +218,19 @@ class LicenseServerController extends Controller
             return $this->successResponse(['products' => $products]);
         } catch (\Exception $e) {
             Log::error('Get products failed', ['error' => $e->getMessage()]);
+
             return $this->errorResponse('Get products failed', 'SERVER_ERROR', 500);
         }
     }
 
     /**
-     * Verify license
+     * Verify license.
      */
     private function verifyLicense(string $licenseKey, ?string $domain, string $productSlug): bool
     {
         try {
             $product = Product::where('slug', $productSlug)->first();
-            if (!$product) {
+            if (! $product) {
                 return false;
             }
 
@@ -233,7 +238,7 @@ class LicenseServerController extends Controller
                 ->where('product_id', $product->id)
                 ->first();
 
-            if (!$license || $license->status !== 'active') {
+            if (! $license || $license->status !== 'active') {
                 return false;
             }
 
@@ -248,12 +253,13 @@ class LicenseServerController extends Controller
             return true;
         } catch (\Exception $e) {
             Log::error('License verification failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     /**
-     * Verify domain
+     * Verify domain.
      */
     private function verifyDomain(License $license, string $domain): bool
     {
@@ -267,6 +273,7 @@ class LicenseServerController extends Controller
         foreach ($authorizedDomains as $authDomain) {
             if ($this->isDomainMatch($cleanDomain, $authDomain->domain)) {
                 $authDomain->update(['last_used_at' => now()]);
+
                 return true;
             }
         }
@@ -275,7 +282,7 @@ class LicenseServerController extends Controller
     }
 
     /**
-     * Auto register domain
+     * Auto register domain.
      */
     private function autoRegisterDomain(License $license, string $domain): bool
     {
@@ -287,6 +294,7 @@ class LicenseServerController extends Controller
             $existingDomain = $license->domains()->where('domain', $domain)->first();
             if ($existingDomain) {
                 $existingDomain->update(['last_used_at' => now()]);
+
                 return true;
             }
 
@@ -300,24 +308,26 @@ class LicenseServerController extends Controller
             return true;
         } catch (\Exception $e) {
             Log::error('Domain registration failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     /**
-     * Get product by slug
+     * Get product by slug.
      */
     private function getProduct(string $slug): Product
     {
         $product = Product::where('slug', $slug)->first();
-        if (!$product) {
+        if (! $product) {
             throw new \Exception('Product not found');
         }
+
         return $product;
     }
 
     /**
-     * Get latest update
+     * Get latest update.
      */
     private function getLatestUpdate(int $productId): ?ProductUpdate
     {
@@ -328,7 +338,7 @@ class LicenseServerController extends Controller
     }
 
     /**
-     * Get all updates
+     * Get all updates.
      */
     private function getAllUpdates(int $productId, string $licenseKey, string $productSlug): array
     {
@@ -352,7 +362,7 @@ class LicenseServerController extends Controller
     }
 
     /**
-     * Get update by version
+     * Get update by version.
      */
     private function getUpdateByVersion(int $productId, string $version): ?ProductUpdate
     {
@@ -363,7 +373,7 @@ class LicenseServerController extends Controller
     }
 
     /**
-     * Get next update
+     * Get next update.
      */
     private function getNextUpdate(int $productId, string $currentVersion): ?ProductUpdate
     {
@@ -375,7 +385,7 @@ class LicenseServerController extends Controller
     }
 
     /**
-     * Get product info
+     * Get product info.
      */
     private function getProductInfo(Product $product): array
     {
@@ -387,7 +397,7 @@ class LicenseServerController extends Controller
     }
 
     /**
-     * Get update info
+     * Get update info.
      */
     private function getUpdateInfo(ProductUpdate $update, string $licenseKey, string $productSlug): array
     {
@@ -405,7 +415,7 @@ class LicenseServerController extends Controller
     }
 
     /**
-     * Get update info data
+     * Get update info data.
      */
     private function getUpdateInfoData(ProductUpdate $update): array
     {
@@ -425,18 +435,18 @@ class LicenseServerController extends Controller
     }
 
     /**
-     * Get download URL
+     * Get download URL.
      */
     private function getDownloadUrl(string $version, string $licenseKey, string $productSlug): string
     {
         return route('api.license.download-update', [
             'license_key' => $licenseKey,
             'version' => $version,
-        ]) . '?product_slug=' . $productSlug;
+        ]).'?product_slug='.$productSlug;
     }
 
     /**
-     * Compare versions
+     * Compare versions.
      */
     private function compareVersions(string $version1, string $version2): int
     {
@@ -444,16 +454,17 @@ class LicenseServerController extends Controller
     }
 
     /**
-     * Clean domain
+     * Clean domain.
      */
     private function cleanDomain(string $domain): string
     {
         $domain = preg_replace('/^https?:\/\//', '', $domain) ?? $domain;
+
         return preg_replace('/^www\./', '', $domain) ?? $domain;
     }
 
     /**
-     * Check domain match
+     * Check domain match.
      */
     private function isDomainMatch(string $domain, string $authDomain): bool
     {
@@ -463,6 +474,7 @@ class LicenseServerController extends Controller
 
         if (str_starts_with($authDomain, '*.')) {
             $pattern = str_replace('*.', '', $authDomain);
+
             return str_ends_with($domain, $pattern);
         }
 
@@ -470,7 +482,7 @@ class LicenseServerController extends Controller
     }
 
     /**
-     * Check rate limit
+     * Check rate limit.
      */
     private function checkRateLimit(string $key, string $ip, int $maxAttempts): void
     {
@@ -482,7 +494,7 @@ class LicenseServerController extends Controller
     }
 
     /**
-     * Success response
+     * Success response.
      */
     private function successResponse(array $data): JsonResponse
     {
@@ -490,7 +502,7 @@ class LicenseServerController extends Controller
     }
 
     /**
-     * Error response
+     * Error response.
      */
     private function errorResponse(string $message, string $errorCode, int $status = 400): JsonResponse
     {

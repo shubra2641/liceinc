@@ -24,7 +24,7 @@ class TicketEmailHandler
 
     public function __construct(
         protected EmailServiceInterface $emailService,
-        protected EmailValidatorInterface $validator
+        protected EmailValidatorInterface $validator,
     ) {
     }
 

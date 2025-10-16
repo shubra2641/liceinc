@@ -25,7 +25,7 @@ class UserEmailHandler implements EmailHandlerInterface
 
     public function __construct(
         protected EmailServiceInterface $emailService,
-        protected EmailValidatorInterface $validator
+        protected EmailValidatorInterface $validator,
     ) {
     }
 
@@ -34,8 +34,9 @@ class UserEmailHandler implements EmailHandlerInterface
      */
     public function sendUserWelcome(User $user): bool
     {
-        if (!$user->created_at) {
+        if (! $user->created_at) {
             $this->logInvalidUser('welcome email');
+
             return false;
         }
 
@@ -59,6 +60,7 @@ class UserEmailHandler implements EmailHandlerInterface
     {
         if (empty($verificationUrl)) {
             $this->logInvalidUser('email verification');
+
             return false;
         }
 

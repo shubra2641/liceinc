@@ -35,6 +35,7 @@ class ProfileUpdateRequest extends FormRequest
     {
         return auth()->check();
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -146,6 +147,7 @@ class ProfileUpdateRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -172,6 +174,7 @@ class ProfileUpdateRequest extends FormRequest
             'password.confirmed' => 'The password confirmation does not match.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -194,6 +197,7 @@ class ProfileUpdateRequest extends FormRequest
             'password_confirmation' => 'password confirmation',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */
@@ -202,6 +206,7 @@ class ProfileUpdateRequest extends FormRequest
         $this->sanitizeProfileFields();
         $this->sanitizeEnvatoFields();
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -215,7 +220,7 @@ class ProfileUpdateRequest extends FormRequest
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

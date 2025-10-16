@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
@@ -33,7 +32,8 @@ use Illuminate\Support\Facades\Storage;
  * @property-read string|null $download_url
  * @property-read string|null $file_url
  * @property-read string $formatted_file_size
- * @property-read \App\Models\Product $product
+ * @property-read Product $product
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate active()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate major()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate newModelQuery()
@@ -59,6 +59,7 @@ use Illuminate\Support\Facades\Storage;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProductUpdate whereVersion($value)
+ *
  * @mixin \Eloquent
  */
 class ProductUpdate extends Model
@@ -66,7 +67,6 @@ class ProductUpdate extends Model
     /**
      * @phpstan-ignore-next-line
      */
-
 
     /**
      * The attributes that are mass assignable.
@@ -93,6 +93,7 @@ class ProductUpdate extends Model
         'compatibility',
         'released_at',
     ];
+
     /**
      * The attributes that should be cast.
      *
@@ -107,6 +108,7 @@ class ProductUpdate extends Model
         'compatibility' => 'array',
         'released_at' => 'datetime',
     ];
+
     /**
      * Get the product that owns the update.
      */
@@ -117,6 +119,7 @@ class ProductUpdate extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
     /**
      * Get the update file URL.
      */
@@ -125,8 +128,10 @@ class ProductUpdate extends Model
         if (! $this->file_path) {
             return null;
         }
+
         return Storage::url($this->file_path);
     }
+
     /**
      * Get the update file download URL.
      */
@@ -135,11 +140,13 @@ class ProductUpdate extends Model
         if (! $this->file_path) {
             return null;
         }
+
         return route('api.product-updates.download', [
             'product' => $this->product_id,
             'version' => $this->version,
         ]);
     }
+
     /**
      * Check if this update is newer than given version.
      */
@@ -147,6 +154,7 @@ class ProductUpdate extends Model
     {
         return version_compare($this->version, $version, '>');
     }
+
     /**
      * Check if this update is compatible with given version.
      */
@@ -155,8 +163,10 @@ class ProductUpdate extends Model
         if (! $this->compatibility) {
             return true;
         }
+
         return in_array($version, $this->compatibility);
     }
+
     /**
      * Check if system meets requirements.
      */
@@ -189,8 +199,10 @@ class ProductUpdate extends Model
                 }
             }
         }
+
         return true;
     }
+
     /**
      * Get changelog as text (for editing).
      */
@@ -200,9 +212,11 @@ class ProductUpdate extends Model
         if (empty($changelog)) {
             return '';
         }
+
         // Changelog is already validated
         return implode("\n", $changelog);
     }
+
     /**
      * Get formatted file size.
      */
@@ -217,8 +231,10 @@ class ProductUpdate extends Model
         for ($i = 0; $bytes > 1024 && $i < $unitsCount - 1; $i++) {
             $bytes /= 1024;
         }
-        return round($bytes, 2) . ' ' . $units[$i];
+
+        return round($bytes, 2).' '.$units[$i];
     }
+
     /**
      * Scope for active updates.
      */
@@ -231,6 +247,7 @@ class ProductUpdate extends Model
     {
         return $query->where('is_active', true);
     }
+
     /**
      * Scope for major updates.
      */
@@ -243,6 +260,7 @@ class ProductUpdate extends Model
     {
         return $query->where('is_major', true);
     }
+
     /**
      * Scope for required updates.
      */
@@ -255,6 +273,7 @@ class ProductUpdate extends Model
     {
         return $query->where('is_required', true);
     }
+
     /**
      * Scope for updates newer than version.
      */

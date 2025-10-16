@@ -39,8 +39,11 @@ class ProductFileSecurityMiddleware
      * Rate limiting configuration for file downloads.
      */
     private const RATE_LIMIT_KEY = 'file_download';
+
     private const MAX_ATTEMPTS = 10; // Max 10 downloads per minute per IP
+
     private const DECAY_MINUTES = 1;
+
     /**
      * Handle an incoming request with enhanced security and comprehensive validation.
      *
@@ -71,9 +74,10 @@ class ProductFileSecurityMiddleware
             }
             $response = $next($request);
             /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+             * @var Response $typedResponse
+             */
             $typedResponse = $response;
+
             return $typedResponse;
         } catch (Throwable $e) {
             Log::error('ProductFileSecurityMiddleware processing error', [
@@ -85,6 +89,7 @@ class ProductFileSecurityMiddleware
                 'user_id' => auth()->id(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Fallback to access denied for security
             return response()->json([
                 'error' => 'File access denied due to security error',
@@ -92,6 +97,7 @@ class ProductFileSecurityMiddleware
             ], 403);
         }
     }
+
     /**
      * Check rate limit for file downloads with enhanced security.
      *
@@ -108,7 +114,7 @@ class ProductFileSecurityMiddleware
     private function checkRateLimit(Request $request): bool
     {
         try {
-            $key = self::RATE_LIMIT_KEY . ':' . $request->ip();
+            $key = self::RATE_LIMIT_KEY.':'.$request->ip();
             $result = RateLimiter::attempt(
                 $key,
                 self::MAX_ATTEMPTS,
@@ -117,6 +123,7 @@ class ProductFileSecurityMiddleware
                 },
                 self::DECAY_MINUTES * 60,
             );
+
             return is_bool($result) ? $result : false;
         } catch (Throwable $e) {
             Log::error('Rate limit check error', [
@@ -124,10 +131,12 @@ class ProductFileSecurityMiddleware
                 'ip' => $request->ip(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Fail safe: allow the request if rate limiter fails
             return true;
         }
     }
+
     /**
      * Validate file access with enhanced security.
      *
@@ -153,6 +162,7 @@ class ProductFileSecurityMiddleware
                     'user_agent' => $request->userAgent(),
                     'user_id' => auth()->id(),
                 ]);
+
                 return;
             }
             // Log file access for security monitoring (without success logging)
@@ -172,6 +182,7 @@ class ProductFileSecurityMiddleware
             throw $e;
         }
     }
+
     /**
      * Perform additional security checks for file access.
      *
@@ -215,6 +226,7 @@ class ProductFileSecurityMiddleware
             throw $e;
         }
     }
+
     /**
      * Log file access for security monitoring.
      *
@@ -258,6 +270,7 @@ class ProductFileSecurityMiddleware
             ]);
         }
     }
+
     /**
      * Determine if file access should be logged for security monitoring.
      *
@@ -278,9 +291,11 @@ class ProductFileSecurityMiddleware
         if ($this->isHighValueFile($file)) {
             return true;
         }
+
         // Default: don't log successful operations
         return false;
     }
+
     /**
      * Check if request has suspicious patterns.
      *
@@ -298,8 +313,10 @@ class ProductFileSecurityMiddleware
                 return true;
             }
         }
+
         return false;
     }
+
     /**
      * Check if file is high-value and should be monitored.
      *
@@ -313,6 +330,7 @@ class ProductFileSecurityMiddleware
         // This is a placeholder for actual business logic
         return false; // Default: not high-value
     }
+
     /**
      * Create rate limit exceeded response.
      *
@@ -324,6 +342,7 @@ class ProductFileSecurityMiddleware
             'max_attempts' => self::MAX_ATTEMPTS,
             'decay_minutes' => self::DECAY_MINUTES,
         ]);
+
         return response()->json([
             'error' => 'Too many download attempts. Please try again later.',
             'error_code' => 'RATE_LIMIT_EXCEEDED',

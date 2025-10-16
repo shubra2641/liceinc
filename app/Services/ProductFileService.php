@@ -13,12 +13,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
- * Product File Service - Simplified
+ * Product File Service - Simplified.
  */
 class ProductFileService
 {
     /**
-     * Upload and encrypt a file for a product
+     * Upload and encrypt a file for a product.
      */
     public function uploadFile(Product $product, UploadedFile $file, ?string $description = null): ProductFile
     {
@@ -28,10 +28,10 @@ class ProductFileService
             $encryptionKey = Str::random(32);
             $originalName = $this->sanitizeInput($file->getClientOriginalName());
             $extension = $this->sanitizeInput($file->getClientOriginalExtension());
-            $encryptedName = Str::uuid() . '.' . $extension;
+            $encryptedName = Str::uuid().'.'.$extension;
 
-            $directory = 'product-files/' . $product->id;
-            $filePath = $directory . '/' . $encryptedName;
+            $directory = 'product-files/'.$product->id;
+            $filePath = $directory.'/'.$encryptedName;
 
             if (strpos($filePath, '..') !== false) {
                 throw new \InvalidArgumentException('Invalid file path detected');
@@ -72,33 +72,35 @@ class ProductFileService
     }
 
     /**
-     * Download a file for a user
+     * Download a file for a user.
      */
     public function downloadFile(ProductFile $file, ?int $userId = null): ?array
     {
         try {
             if ($userId) {
                 $permissions = $this->userCanDownloadFiles($file->product, $userId);
-                if (!$permissions['can_download']) {
+                if (! $permissions['can_download']) {
                     return null;
                 }
             }
 
-            if (!$file->fileExists()) {
+            if (! $file->fileExists()) {
                 Log::error('File not found for download', [
                     'file_id' => $file->id,
                     'user_id' => $userId,
                     'file_path' => $file->file_path ?? 'unknown',
                 ]);
+
                 return null;
             }
 
             $content = $file->getDecryptedContent();
-            if (!$content) {
+            if (! $content) {
                 Log::error('Failed to decrypt file', [
                     'file_id' => $file->id,
                     'user_id' => $userId,
                 ]);
+
                 return null;
             }
 
@@ -107,6 +109,7 @@ class ProductFileService
                     'file_id' => $file->id,
                     'user_id' => $userId,
                 ]);
+
                 return null;
             }
 
@@ -129,7 +132,7 @@ class ProductFileService
     }
 
     /**
-     * Delete a product file
+     * Delete a product file.
      */
     public function deleteFile(ProductFile $file): bool
     {
@@ -139,6 +142,7 @@ class ProductFileService
             }
 
             $file->delete();
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to delete product file', [
@@ -151,7 +155,7 @@ class ProductFileService
     }
 
     /**
-     * Get files for a product
+     * Get files for a product.
      */
     public function getProductFiles(Product $product, bool $activeOnly = true): \Illuminate\Database\Eloquent\Collection
     {
@@ -173,7 +177,7 @@ class ProductFileService
     }
 
     /**
-     * Check if user can download files
+     * Check if user can download files.
      */
     public function userCanDownloadFiles(Product $product, int $userId): array
     {
@@ -189,12 +193,12 @@ class ProductFileService
     }
 
     /**
-     * Get all available versions for a product
+     * Get all available versions for a product.
      */
     public function getAllProductVersions(Product $product, int $userId): array
     {
         $permissions = $this->userCanDownloadFiles($product, $userId);
-        if (!$permissions['can_download']) {
+        if (! $permissions['can_download']) {
             return [];
         }
 
@@ -231,12 +235,12 @@ class ProductFileService
     }
 
     /**
-     * Get the latest product file
+     * Get the latest product file.
      */
     public function getLatestProductFile(Product $product, int $userId): ?ProductFile
     {
         $permissions = $this->userCanDownloadFiles($product, $userId);
-        if (!$permissions['can_download']) {
+        if (! $permissions['can_download']) {
             return null;
         }
 
@@ -256,7 +260,7 @@ class ProductFileService
     }
 
     /**
-     * Get the latest product version
+     * Get the latest product version.
      */
     public function getLatestProductVersion(Product $product): string
     {
@@ -273,15 +277,15 @@ class ProductFileService
     }
 
     /**
-     * Download update file
+     * Download update file.
      */
     public function downloadUpdateFile(\App\Models\ProductUpdate $update, int $userId): array
     {
-        if (!$update->file_path || !Storage::disk('private')->exists($update->file_path)) {
+        if (! $update->file_path || ! Storage::disk('private')->exists($update->file_path)) {
             throw new \Exception('Update file not found');
         }
 
-        $fileName = $update->title . '_v' . $update->version . '.zip';
+        $fileName = $update->title.'_v'.$update->version.'.zip';
 
         return [
             'content' => Storage::disk('private')->get($update->file_path),
@@ -292,7 +296,7 @@ class ProductFileService
     }
 
     /**
-     * Sanitize input data
+     * Sanitize input data.
      */
     private function sanitizeInput(?string $input): string
     {
@@ -308,7 +312,7 @@ class ProductFileService
     }
 
     /**
-     * Validate uploaded file
+     * Validate uploaded file.
      */
     private function validateFile(UploadedFile $file): void
     {
@@ -341,8 +345,8 @@ class ProductFileService
             ];
 
             $mimeType = $file->getMimeType();
-            if (!in_array($mimeType, $allowedTypes)) {
-                throw new \Exception('File type not allowed: ' . $mimeType);
+            if (! in_array($mimeType, $allowedTypes)) {
+                throw new \Exception('File type not allowed: '.$mimeType);
             }
 
             $this->scanFileForMaliciousContent($file);
@@ -358,7 +362,7 @@ class ProductFileService
     }
 
     /**
-     * Scan file for malicious content
+     * Scan file for malicious content.
      */
     private function scanFileForMaliciousContent(UploadedFile $file): void
     {
@@ -405,7 +409,7 @@ class ProductFileService
     }
 
     /**
-     * Encrypt file content
+     * Encrypt file content.
      */
     private function encryptContent(string $content, string $key): string
     {
@@ -436,7 +440,7 @@ class ProductFileService
     }
 
     /**
-     * Check if user has active license
+     * Check if user has active license.
      */
     private function userHasLicense(Product $product, int $userId): bool
     {
@@ -451,7 +455,7 @@ class ProductFileService
     }
 
     /**
-     * Check if user has paid invoice
+     * Check if user has paid invoice.
      */
     private function userHasPaidInvoice(Product $product, int $userId): bool
     {
@@ -462,15 +466,15 @@ class ProductFileService
     }
 
     /**
-     * Get download permission message
+     * Get download permission message.
      */
     private function getDownloadPermissionMessage(bool $hasLicense, bool $hasPaidInvoice): string
     {
-        if (!$hasLicense && !$hasPaidInvoice) {
+        if (! $hasLicense && ! $hasPaidInvoice) {
             return trans('app.You must purchase the product and pay the invoice first');
-        } elseif (!$hasLicense) {
+        } elseif (! $hasLicense) {
             return trans('app.You must purchase the product first');
-        } elseif (!$hasPaidInvoice) {
+        } elseif (! $hasPaidInvoice) {
             return trans('app.You must pay the invoice first');
         }
 
@@ -478,13 +482,13 @@ class ProductFileService
     }
 
     /**
-     * Create update file record
+     * Create update file record.
      */
     private function createUpdateFileRecord(\Illuminate\Database\Eloquent\Model $update): ProductFile
     {
         $file = new ProductFile();
         $file->product_id = is_numeric($update->product_id) ? (int)$update->product_id : 0;
-        $file->original_name = (is_string($update->title) ? $update->title : '') . '_v' . (is_string($update->version) ? $update->version : '') . '.zip';
+        $file->original_name = (is_string($update->title) ? $update->title : '').'_v'.(is_string($update->version) ? $update->version : '').'.zip';
         $filePath = $update->file_path ?? '';
         $file->file_path = is_string($filePath) ? $filePath : '';
         $file->file_size = is_numeric($update->file_size ?? 0) ? (int)($update->file_size ?? 0) : 0;
@@ -495,7 +499,7 @@ class ProductFileService
         $file->created_at = $update->created_at instanceof \Illuminate\Support\Carbon ? $update->created_at : null;
         $file->updated_at = $update->updated_at instanceof \Illuminate\Support\Carbon ? $update->updated_at : null;
 
-        $file->formatted_size = $file->file_size > 0 ? number_format($file->file_size / 1024 / 1024, 2) . ' MB' : 'Unknown';
+        $file->formatted_size = $file->file_size > 0 ? number_format($file->file_size / 1024 / 1024, 2).' MB' : 'Unknown';
         $file->update_info = $update->toArray();
         $file->is_update = true;
 

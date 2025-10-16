@@ -33,8 +33,8 @@ return [
     */
     'services' => [
         'core' => [
-            'class' => \App\Services\Email\CoreEmailService::class,
-            'validator' => \App\Services\Email\Validators\EmailValidator::class,
+            'class' => App\Services\Email\CoreEmailService::class,
+            'validator' => App\Services\Email\Validators\EmailValidator::class,
         ],
     ],
 
@@ -47,10 +47,10 @@ return [
     |
     */
     'handlers' => [
-        'user' => \App\Services\Email\Handlers\UserEmailHandler::class,
-        'license' => \App\Services\Email\Handlers\LicenseEmailHandler::class,
-        'invoice' => \App\Services\Email\Handlers\InvoiceEmailHandler::class,
-        'ticket' => \App\Services\Email\Handlers\TicketEmailHandler::class,
+        'user' => App\Services\Email\Handlers\UserEmailHandler::class,
+        'license' => App\Services\Email\Handlers\LicenseEmailHandler::class,
+        'invoice' => App\Services\Email\Handlers\InvoiceEmailHandler::class,
+        'ticket' => App\Services\Email\Handlers\TicketEmailHandler::class,
     ],
 
     /*

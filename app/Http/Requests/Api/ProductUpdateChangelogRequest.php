@@ -19,7 +19,7 @@ class ProductUpdateChangelogRequest extends BaseApiRequest
     {
         return array_merge(
             $this->getCommonRules(),
-            $this->getProductIdRules()
+            $this->getProductIdRules(),
         );
     }
 
@@ -30,7 +30,7 @@ class ProductUpdateChangelogRequest extends BaseApiRequest
     {
         return array_merge(
             $this->getCommonMessages(),
-            $this->getProductIdMessages()
+            $this->getProductIdMessages(),
         );
     }
 }

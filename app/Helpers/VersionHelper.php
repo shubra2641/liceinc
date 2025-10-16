@@ -10,35 +10,37 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Version Helper - Simplified
+ * Version Helper - Simplified.
  */
 class VersionHelper
 {
     /**
-     * Get current version from database
+     * Get current version from database.
      */
     public static function getCurrentVersion(): string
     {
         try {
             return Cache::remember('app_version', 3600, function () {
                 $setting = Setting::where('key', 'site_name')->first() ?? Setting::first();
+
                 return $setting->version ?? '1.0.1';
             });
         } catch (\Exception $e) {
             Log::error('Failed to get current version', ['error' => $e->getMessage()]);
+
             return '1.0.1';
         }
     }
 
     /**
-     * Get latest version from version.json file
+     * Get latest version from version.json file.
      */
     public static function getLatestVersion(): string
     {
         try {
             $versionFile = storage_path('version.json');
 
-            if (!file_exists($versionFile) || !is_readable($versionFile)) {
+            if (! file_exists($versionFile) || ! is_readable($versionFile)) {
                 return '1.0.1';
             }
 
@@ -53,15 +55,17 @@ class VersionHelper
             }
 
             $version = $versionData['current_version'] ?? '1.0.1';
+
             return self::isValidVersion($version) ? $version : '1.0.1';
         } catch (\Exception $e) {
             Log::error('Failed to read version file', ['error' => $e->getMessage()]);
+
             return '1.0.1';
         }
     }
 
     /**
-     * Check if update is available
+     * Check if update is available.
      */
     public static function isUpdateAvailable(): bool
     {
@@ -69,24 +73,25 @@ class VersionHelper
             $currentVersion = self::getCurrentVersion();
             $latestVersion = self::getLatestVersion();
 
-            if (!self::isValidVersion($currentVersion) || !self::isValidVersion($latestVersion)) {
+            if (! self::isValidVersion($currentVersion) || ! self::isValidVersion($latestVersion)) {
                 return false;
             }
 
             return version_compare($latestVersion, $currentVersion, '>');
         } catch (\Exception $e) {
             Log::error('Failed to check update availability', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     /**
-     * Compare two version numbers
+     * Compare two version numbers.
      */
     public static function compareVersions(string $version1, string $version2): int
     {
         try {
-            if (!self::isValidVersion($version1) || !self::isValidVersion($version2)) {
+            if (! self::isValidVersion($version1) || ! self::isValidVersion($version2)) {
                 throw new \InvalidArgumentException('Invalid version format');
             }
 
@@ -98,24 +103,24 @@ class VersionHelper
     }
 
     /**
-     * Update application version in database
+     * Update application version in database.
      */
     public static function updateVersion(string $newVersion): bool
     {
         try {
             DB::beginTransaction();
 
-            if (!self::isValidVersion($newVersion)) {
+            if (! self::isValidVersion($newVersion)) {
                 throw new \InvalidArgumentException("Invalid version format: {$newVersion}");
             }
 
             $currentVersion = self::getCurrentVersion();
-            if (!self::canUpdateToVersion($newVersion)) {
+            if (! self::canUpdateToVersion($newVersion)) {
                 throw new \InvalidArgumentException("Cannot update to older version. Current: {$currentVersion}, Target: {$newVersion}");
             }
 
             $setting = Setting::where('key', 'site_name')->first() ?? Setting::first();
-            if (!$setting) {
+            if (! $setting) {
                 $setting = new Setting();
                 $setting->key = 'site_name';
                 $setting->value = config('app.name', 'License Management System');
@@ -131,6 +136,7 @@ class VersionHelper
             Cache::forget('app_version');
 
             DB::commit();
+
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -140,14 +146,14 @@ class VersionHelper
     }
 
     /**
-     * Get version information from version.json
+     * Get version information from version.json.
      */
     public static function getVersionInfo(?string $version = null): array
     {
         try {
             $versionFile = storage_path('version.json');
 
-            if (!file_exists($versionFile) || !is_readable($versionFile)) {
+            if (! file_exists($versionFile) || ! is_readable($versionFile)) {
                 return [];
             }
 
@@ -162,34 +168,36 @@ class VersionHelper
             }
 
             if ($version) {
-                if (!self::isValidVersion($version)) {
+                if (! self::isValidVersion($version)) {
                     return [];
                 }
 
                 $changelog = $versionData['changelog'][$version] ?? [];
+
                 return is_array($changelog) ? $changelog : [];
             }
 
             return is_array($versionData) ? $versionData : [];
         } catch (\Exception $e) {
             Log::error('Failed to get version info', ['error' => $e->getMessage()]);
+
             return [];
         }
     }
 
     /**
-     * Get update instructions for a version
+     * Get update instructions for a version.
      */
     public static function getUpdateInstructions(string $version): array
     {
         try {
-            if (!self::isValidVersion($version)) {
+            if (! self::isValidVersion($version)) {
                 throw new \InvalidArgumentException("Invalid version format: {$version}");
             }
 
             $versionFile = storage_path('version.json');
 
-            if (!file_exists($versionFile) || !is_readable($versionFile)) {
+            if (! file_exists($versionFile) || ! is_readable($versionFile)) {
                 return [];
             }
 
@@ -204,6 +212,7 @@ class VersionHelper
             }
 
             $instructions = $versionData['update_instructions'][$version] ?? [];
+
             return is_array($instructions) ? $instructions : [];
         } catch (\Exception $e) {
             Log::error('Failed to get update instructions', ['error' => $e->getMessage()]);
@@ -212,7 +221,7 @@ class VersionHelper
     }
 
     /**
-     * Check if version is valid format
+     * Check if version is valid format.
      */
     public static function isValidVersion(string $version): bool
     {
@@ -234,12 +243,13 @@ class VersionHelper
             return $isValid;
         } catch (\Exception $e) {
             Log::error('Error validating version format', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     /**
-     * Get version status for admin dashboard
+     * Get version status for admin dashboard.
      */
     public static function getVersionStatus(): array
     {
@@ -248,7 +258,7 @@ class VersionHelper
             $latestVersion = self::getLatestVersion();
             $isUpdateAvailable = self::isUpdateAvailable();
 
-            if (!self::isValidVersion($currentVersion) || !self::isValidVersion($latestVersion)) {
+            if (! self::isValidVersion($currentVersion) || ! self::isValidVersion($latestVersion)) {
                 throw new \Exception('Invalid version format detected');
             }
 
@@ -267,18 +277,18 @@ class VersionHelper
     }
 
     /**
-     * Check if target version is newer than current version
+     * Check if target version is newer than current version.
      */
     public static function canUpdateToVersion(string $targetVersion): bool
     {
         try {
             $currentVersion = self::getCurrentVersion();
 
-            if (!self::isValidVersion($targetVersion)) {
+            if (! self::isValidVersion($targetVersion)) {
                 throw new \InvalidArgumentException("Invalid target version format: {$targetVersion}");
             }
 
-            if (!self::isValidVersion($currentVersion)) {
+            if (! self::isValidVersion($currentVersion)) {
                 throw new \InvalidArgumentException("Invalid current version format: {$currentVersion}");
             }
 
@@ -290,7 +300,7 @@ class VersionHelper
     }
 
     /**
-     * Get current version from database settings
+     * Get current version from database settings.
      */
     public static function getCurrentVersionFromDatabase(): string
     {
@@ -298,43 +308,45 @@ class VersionHelper
             $setting = Setting::where('key', 'current_version')->first();
             $version = $setting ? $setting->value : '1.0.0';
 
-            if ($version && !self::isValidVersion($version)) {
+            if ($version && ! self::isValidVersion($version)) {
                 $version = '1.0.0';
             }
 
             return $version ?? '1.0.0';
         } catch (\Exception $e) {
             Log::error('Failed to get current version from database', ['error' => $e->getMessage()]);
+
             return '1.0.0';
         }
     }
 
     /**
-     * Update current version in database settings
+     * Update current version in database settings.
      */
     public static function updateCurrentVersionInDatabase(string $newVersion): bool
     {
         try {
             DB::beginTransaction();
 
-            if (!self::isValidVersion($newVersion)) {
+            if (! self::isValidVersion($newVersion)) {
                 throw new \InvalidArgumentException("Invalid version format: {$newVersion}");
             }
 
             $currentVersion = self::getCurrentVersionFromDatabase();
-            if (!self::canUpdateToVersion($newVersion)) {
+            if (! self::canUpdateToVersion($newVersion)) {
                 throw new \InvalidArgumentException("Cannot update to older version. Current: {$currentVersion}, Target: {$newVersion}");
             }
 
-            \App\Helpers\SettingHelper::updateOrCreateSetting(
+            SettingHelper::updateOrCreateSetting(
                 'current_version',
                 $newVersion,
                 'version',
-                $newVersion
+                $newVersion,
             );
 
             Cache::forget('app_version');
             DB::commit();
+
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -344,7 +356,7 @@ class VersionHelper
     }
 
     /**
-     * Get version history from database
+     * Get version history from database.
      */
     public static function getVersionHistory(): array
     {
@@ -356,7 +368,7 @@ class VersionHelper
             $history = $versions->map(function ($setting) {
                 $version = str_replace('version_', '', $setting->key ?? '');
 
-                if (!self::isValidVersion($version)) {
+                if (! self::isValidVersion($version)) {
                     return null;
                 }
 
@@ -370,30 +382,32 @@ class VersionHelper
             return $history;
         } catch (\Exception $e) {
             Log::error('Failed to get version history', ['error' => $e->getMessage()]);
+
             return [];
         }
     }
 
     /**
-     * Record version update in history
+     * Record version update in history.
      */
     public static function recordVersionUpdate(string $version, string $details = ''): bool
     {
         try {
             DB::beginTransaction();
 
-            if (!self::isValidVersion($version)) {
+            if (! self::isValidVersion($version)) {
                 throw new \InvalidArgumentException("Invalid version format: {$version}");
             }
 
             $sanitizedDetails = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
-            \App\Helpers\SettingHelper::updateOrCreateSetting(
+            SettingHelper::updateOrCreateSetting(
                 "version_{$version}",
                 $sanitizedDetails,
-                'version'
+                'version',
             );
 
             DB::commit();
+
             return true;
         } catch (\Exception $e) {
             DB::rollBack();

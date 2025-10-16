@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\ProductUpdateApiRequest;
-use App\Http\Requests\Api\ProductUpdateCheckRequest;
-use App\Http\Requests\Api\ProductUpdateLatestVersionRequest;
-use App\Http\Requests\Api\ProductUpdateDownloadRequest;
 use App\Http\Requests\Api\ProductUpdateChangelogRequest;
+use App\Http\Requests\Api\ProductUpdateCheckRequest;
+use App\Http\Requests\Api\ProductUpdateDownloadRequest;
+use App\Http\Requests\Api\ProductUpdateLatestVersionRequest;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\ProductUpdate;
@@ -65,7 +64,7 @@ class ProductUpdateApiController extends Controller
             ->where('status', 'active')
             ->first();
 
-        if (!$license) {
+        if (! $license) {
             return [
                 'success' => false,
                 'message' => 'Invalid license key or product',
@@ -133,6 +132,7 @@ class ProductUpdateApiController extends Controller
             $verificationError = $this->verifyLicenseAndDomain($licenseKey, $productId, $domain);
             if ($verificationError) {
                 DB::rollBack();
+
                 return response()->json($verificationError, 403);
             }
             // Get available updates
@@ -143,41 +143,44 @@ class ProductUpdateApiController extends Controller
                 ->get();
             $response = [
                 'success' => true,
-                'product_id'  => $productId,
+                'product_id' => $productId,
                 'current_version' => $currentVersion,
-                'latest_version'  => $updates->first()->version ?? $currentVersion,
+                'latest_version' => $updates->first()->version ?? $currentVersion,
                 'updates_available' => $updates->count(),
                 'updates' => $updates->map(function ($update) {
                     return [
                         'version' => $update->version,
-                        'title'  => $update->title,
+                        'title' => $update->title,
                         'description' => $update->description,
-                        'changelog'  => $update->changelog,
+                        'changelog' => $update->changelog,
                         'is_major' => $update->is_major,
-                        'is_required'  => $update->is_required,
+                        'is_required' => $update->is_required,
                         'file_size' => $update->formatted_file_size,
-                        'released_at'  => $update->released_at?->toISOString(),
+                        'released_at' => $update->released_at?->toISOString(),
                         'download_url' => $update->download_url,
-                        'requirements'  => $update->requirements,
+                        'requirements' => $update->requirements,
                         'compatibility' => $update->compatibility,
                     ];
                 }),
             ];
             DB::commit();
+
             return response()->json($response);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Product update check failed', [
                 'error' => $e->getMessage(),
-                'trace'  => $e->getTraceAsString(),
+                'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all(),
             ]);
+
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'message' => 'Failed to check for updates',
             ], 500);
         }
     }
+
     /**
      * Get latest version information with enhanced security.
      *
@@ -224,6 +227,7 @@ class ProductUpdateApiController extends Controller
             $verificationError = $this->verifyLicenseAndDomain($licenseKey, $productId, $domain);
             if ($verificationError) {
                 DB::rollBack();
+
                 return response()->json($verificationError, 403);
             }
 
@@ -234,6 +238,7 @@ class ProductUpdateApiController extends Controller
                 ->first();
             if (! $latestUpdate) {
                 DB::rollBack();
+
                 return response()->json([
                     'success' => false,
                     'message' => 'No updates available',
@@ -241,34 +246,37 @@ class ProductUpdateApiController extends Controller
             }
             $response = [
                 'success' => true,
-                'product_id'  => $productId,
+                'product_id' => $productId,
                 'latest_version' => $latestUpdate->version,
-                'title'  => $latestUpdate->title,
+                'title' => $latestUpdate->title,
                 'description' => $latestUpdate->description,
-                'changelog'  => $latestUpdate->changelog,
+                'changelog' => $latestUpdate->changelog,
                 'is_major' => $latestUpdate->is_major,
-                'is_required'  => $latestUpdate->is_required,
+                'is_required' => $latestUpdate->is_required,
                 'file_size' => $latestUpdate->formatted_file_size,
-                'released_at'  => $latestUpdate->released_at?->toISOString(),
+                'released_at' => $latestUpdate->released_at?->toISOString(),
                 'download_url' => $latestUpdate->download_url,
-                'requirements'  => $latestUpdate->requirements,
+                'requirements' => $latestUpdate->requirements,
                 'compatibility' => $latestUpdate->compatibility,
             ];
             DB::commit();
+
             return response()->json($response);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Get latest version failed', [
                 'error' => $e->getMessage(),
-                'trace'  => $e->getTraceAsString(),
+                'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all(),
             ]);
+
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'message' => 'Failed to get latest version',
             ], 500);
         }
     }
+
     /**
      * Download update file with enhanced security.
      *
@@ -308,12 +316,14 @@ class ProductUpdateApiController extends Controller
                 ->first();
             if (! $license) {
                 DB::rollBack();
+
                 return new Response('Invalid license key or product', 403);
             }
             // Check domain if required
             if ($license->product && $license->product->requires_domain) {
                 if ($license->domains()->where('domain', $domain)->exists() === false) {
                     DB::rollBack();
+
                     return new Response('Domain not registered for this license', 403);
                 }
             }
@@ -324,28 +334,33 @@ class ProductUpdateApiController extends Controller
                 ->first();
             if (! $update || ! $update->file_path) {
                 DB::rollBack();
+
                 return new Response('Update file not found', 404);
             }
             // Check if file exists
             if (! Storage::exists($update->file_path)) {
                 DB::rollBack();
+
                 return new Response('Update file not available', 404);
             }
             DB::commit();
+
             // Return file download
             return new Response('File download initiated');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Product update download failed', [
                 'error' => $e->getMessage(),
-                'trace'  => $e->getTraceAsString(),
+                'trace' => $e->getTraceAsString(),
                 'product_id' => $productId,
-                'version'  => $version,
+                'version' => $version,
                 'request_data' => $request->all(),
             ]);
+
             return new Response('Failed to download update', 500);
         }
     }
+
     /**
      * Get update changelog with enhanced security.
      *
@@ -397,6 +412,7 @@ class ProductUpdateApiController extends Controller
             $verificationError = $this->verifyLicenseAndDomain($licenseKey, $productId, $domain);
             if ($verificationError) {
                 DB::rollBack();
+
                 return response()->json($verificationError, 403);
             }
 
@@ -408,28 +424,30 @@ class ProductUpdateApiController extends Controller
             $changelog = $updates->map(function ($update) {
                 return [
                     'version' => $update->version,
-                    'title'  => $update->title,
+                    'title' => $update->title,
                     'changelog' => $update->changelog,
-                    'is_major'  => $update->is_major,
+                    'is_major' => $update->is_major,
                     'is_required' => $update->is_required,
-                    'released_at'  => $update->released_at?->toISOString(),
+                    'released_at' => $update->released_at?->toISOString(),
                 ];
             });
             DB::commit();
+
             return response()->json([
                 'success' => true,
-                'product_id'  => $productId,
+                'product_id' => $productId,
                 'changelog' => $changelog,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Get changelog failed', [
                 'error' => $e->getMessage(),
-                'trace'  => $e->getTraceAsString(),
+                'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all(),
             ]);
+
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'message' => 'Failed to get changelog',
             ], 500);
         }

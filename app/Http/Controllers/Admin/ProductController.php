@@ -22,7 +22,7 @@ use Illuminate\View\View;
 
 /**
  * Admin Product Controller
- * Handles product management operations
+ * Handles product management operations.
  */
 class ProductController extends Controller
 {
@@ -31,7 +31,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Get product data from Envato API
+     * Get product data from Envato API.
      */
     public function getEnvatoProductData(Request $request): JsonResponse
     {
@@ -41,7 +41,7 @@ class ProductController extends Controller
             $envatoService = app(\App\Services\EnvatoService::class);
             $itemData = $envatoService->getItemInfo((int)$request->input('item_id'));
 
-            if (!$itemData) {
+            if (! $itemData) {
                 return response()->json(['success' => false, 'message' => trans('app.Unable to fetch product data from Envato')], 404);
             }
 
@@ -59,12 +59,12 @@ class ProductController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => trans('app.Error fetching product data: ') . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => trans('app.Error fetching product data: ').$e->getMessage()], 500);
         }
     }
 
     /**
-     * Get user's Envato items for selection
+     * Get user's Envato items for selection.
      */
     public function getEnvatoUserItems(Request $request): JsonResponse
     {
@@ -78,7 +78,7 @@ class ProductController extends Controller
 
             $userItems = $envatoService->getUserItems($settings['username']);
 
-            if (!$userItems || !isset($userItems['matches'])) {
+            if (! $userItems || ! isset($userItems['matches'])) {
                 return response()->json(['success' => false, 'message' => trans('app.Unable to fetch user items from Envato')], 404);
             }
 
@@ -95,12 +95,12 @@ class ProductController extends Controller
 
             return response()->json(['success' => true, 'items' => $items]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => trans('app.Error fetching user items: ') . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => trans('app.Error fetching user items: ').$e->getMessage()], 500);
         }
     }
 
     /**
-     * Calculate support days from Envato item data
+     * Calculate support days from Envato item data.
      */
     private function calculateSupportDays(array $itemData): int
     {
@@ -110,19 +110,22 @@ class ProductController extends Controller
                     $value = strtolower($attribute['value'] ?? '');
                     if (strpos($value, 'month') !== false) {
                         preg_match('/(\d+)/', $value, $matches);
+
                         return isset($matches[1]) ? (int)$matches[1] * 30 : 180;
                     } elseif (strpos($value, 'year') !== false) {
                         preg_match('/(\d+)/', $value, $matches);
+
                         return isset($matches[1]) ? (int)$matches[1] * 365 : 365;
                     }
                 }
             }
         }
+
         return 180;
     }
 
     /**
-     * Get integration code template for product
+     * Get integration code template for product.
      */
     private function getIntegrationCodeTemplate(Product $product, string $apiUrl): string
     {
@@ -130,7 +133,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Display products listing
+     * Display products listing.
      */
     public function index(): View
     {
@@ -158,19 +161,19 @@ class ProductController extends Controller
             'price_low' => $query->orderBy('price', 'asc'),
             'price_high' => $query->orderBy('price', 'desc'),
             'newest' => $query->orderBy('created_at', 'desc'),
-            default => $query->orderBy('name', 'asc')
+            default => $query->orderBy('name', 'asc'),
         };
 
         return view('admin.products.index', [
             'products' => $query->paginate(10)->withQueryString(),
             'categories' => \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get(),
             'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get(),
-            'allProducts' => Product::with(['category', 'programmingLanguage'])->get()
+            'allProducts' => Product::with(['category', 'programmingLanguage'])->get(),
         ]);
     }
 
     /**
-     * Show create product form
+     * Show create product form.
      */
     public function create(): View
     {
@@ -183,7 +186,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Store new product
+     * Store new product.
      */
     public function store(ProductRequest $request): RedirectResponse
     {
@@ -202,7 +205,7 @@ class ProductController extends Controller
             }
 
             if ($request->hasFile('gallery_images')) {
-                $data['gallery_images'] = collect($request->file('gallery_images'))->map(fn($file) => $file->store('products/gallery', 'public'))->toArray();
+                $data['gallery_images'] = collect($request->file('gallery_images'))->map(fn ($file) => $file->store('products/gallery', 'public'))->toArray();
             }
 
             if (isset($data['renewal_period']) && $data['renewal_period'] === 'lifetime') {
@@ -226,22 +229,24 @@ class ProductController extends Controller
             return redirect()->route('admin.products.edit', $product)->with('success', 'Product created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Product creation error: ' . $e->getMessage());
-            return back()->with('error', 'Error creating product: ' . $e->getMessage())->withInput();
+            Log::error('Product creation error: '.$e->getMessage());
+
+            return back()->with('error', 'Error creating product: '.$e->getMessage())->withInput();
         }
     }
 
     /**
-     * Show product details
+     * Show product details.
      */
     public function show(Product $product): View
     {
         $product->load(['category', 'programmingLanguage', 'updates']);
+
         return view('admin.products.show', ['product' => $product]);
     }
 
     /**
-     * Update product
+     * Update product.
      */
     public function update(ProductRequest $request, Product $product): RedirectResponse
     {
@@ -261,7 +266,7 @@ class ProductController extends Controller
             }
 
             if ($request->hasFile('gallery_images')) {
-                $data['gallery_images'] = collect($request->file('gallery_images'))->map(fn($file) => $file->store('products/gallery', 'public'))->toArray();
+                $data['gallery_images'] = collect($request->file('gallery_images'))->map(fn ($file) => $file->store('products/gallery', 'public'))->toArray();
             }
 
             if (isset($data['renewal_period']) && $data['renewal_period'] === 'lifetime') {
@@ -284,16 +289,18 @@ class ProductController extends Controller
             }
 
             DB::commit();
+
             return back()->with('success', 'Product updated successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Product update error: ' . $e->getMessage());
-            return back()->with('error', 'Error updating product: ' . $e->getMessage())->withInput();
+            Log::error('Product update error: '.$e->getMessage());
+
+            return back()->with('error', 'Error updating product: '.$e->getMessage())->withInput();
         }
     }
 
     /**
-     * Delete product
+     * Delete product.
      */
     public function destroy(Product $product): RedirectResponse
     {
@@ -305,16 +312,18 @@ class ProductController extends Controller
             }
             $product->delete();
             DB::commit();
+
             return redirect()->route('admin.products.index')->with('success', 'Product deleted');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Product deletion error: ' . $e->getMessage());
-            return back()->with('error', 'Error deleting product: ' . $e->getMessage());
+            Log::error('Product deletion error: '.$e->getMessage());
+
+            return back()->with('error', 'Error deleting product: '.$e->getMessage());
         }
     }
 
     /**
-     * Get product data for license forms
+     * Get product data for license forms.
      */
     public function getProductData(Product $product): JsonResponse
     {
@@ -331,20 +340,21 @@ class ProductController extends Controller
     }
 
     /**
-     * Show edit product form
+     * Show edit product form.
      */
     public function edit(Product $product): View
     {
         $product->load('files');
+
         return view('admin.products.edit', [
             'product' => $product,
             'categories' => \App\Models\ProductCategory::where('is_active', true)->orderBy('sort_order')->get(),
-            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get()
+            'programmingLanguages' => \App\Models\ProgrammingLanguage::where('is_active', true)->orderBy('sort_order')->get(),
         ]);
     }
 
     /**
-     * Generate integration file for product
+     * Generate integration file for product.
      */
     private function generateIntegrationFile(Product $product): string
     {
@@ -367,28 +377,30 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             $apiDomain = rtrim(config('app.url', ''), '/');
             $verificationEndpoint = config('license.verification_endpoint', '/api/license/verify');
-            $apiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
+            $apiUrl = $apiDomain.'/'.ltrim($verificationEndpoint, '/');
             $integrationCode = $this->getIntegrationCodeTemplate($product, $apiUrl);
             $filePath = "integration/{$product->slug}.php";
             Storage::disk('public')->put($filePath, $integrationCode);
             $product->update(['integration_file_path' => $filePath]);
+
             return $filePath;
         }
     }
 
     /**
-     * Download integration file
+     * Download integration file.
      */
     public function downloadIntegration(Product $product)
     {
-        if (!$product->integration_file_path || !Storage::disk('public')->exists($product->integration_file_path)) {
+        if (! $product->integration_file_path || ! Storage::disk('public')->exists($product->integration_file_path)) {
             return redirect()->back()->with('error', 'Integration file not found. Please regenerate it.');
         }
+
         return Storage::disk('public')->download($product->integration_file_path, "{$product->slug}.php");
     }
 
     /**
-     * Regenerate integration file
+     * Regenerate integration file.
      */
     public function regenerateIntegration(Product $product): RedirectResponse
     {
@@ -408,14 +420,15 @@ class ProductController extends Controller
             }
 
             $this->generateIntegrationFile($product);
+
             return redirect()->back()->with('success', 'Integration file regenerated successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to Regenerate file: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to Regenerate file: '.$e->getMessage());
         }
     }
 
     /**
-     * Get file extensions for programming language
+     * Get file extensions for programming language.
      */
     private function getFileExtensionsForLanguage(string $languageSlug): array
     {
@@ -431,7 +444,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Generate test license for product
+     * Generate test license for product.
      */
     public function generateTestLicense(GenerateTestLicenseRequest $request, Product $product): RedirectResponse
     {
@@ -446,10 +459,10 @@ class ProductController extends Controller
                     'email' => $data['email'],
                     'password' => bcrypt('password123'),
                     'email_verified_at' => now(),
-                ]
+                ],
             );
 
-            $purchaseCode = 'TEST-' . strtoupper(Str::random(16));
+            $purchaseCode = 'TEST-'.strtoupper(Str::random(16));
 
             $license = License::create([
                 'product_id' => $product->id,
@@ -467,13 +480,14 @@ class ProductController extends Controller
             return redirect()->back()->with('success', "Test license generated: {$purchaseCode}");
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Test license generation error: ' . $e->getMessage());
-            return back()->with('error', 'Error generating test license: ' . $e->getMessage())->withInput();
+            Log::error('Test license generation error: '.$e->getMessage());
+
+            return back()->with('error', 'Error generating test license: '.$e->getMessage())->withInput();
         }
     }
 
     /**
-     * Show license verification logs
+     * Show license verification logs.
      */
     public function logs(Product $product): View
     {
@@ -487,7 +501,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Get KB categories and articles
+     * Get KB categories and articles.
      */
     public function getKbData(): JsonResponse
     {
@@ -499,7 +513,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Get KB articles for specific category
+     * Get KB articles for specific category.
      */
     public function getKbArticles(int $categoryId): JsonResponse
     {

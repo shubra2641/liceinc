@@ -31,7 +31,7 @@ class CoreEmailService implements EmailServiceInterface
     use EmailLoggingTrait;
 
     public function __construct(
-        protected EmailValidatorInterface $validator
+        protected EmailValidatorInterface $validator,
     ) {
     }
 
@@ -44,7 +44,7 @@ class CoreEmailService implements EmailServiceInterface
         string $templateName,
         string $recipientEmail,
         array $data = [],
-        ?string $recipientName = null
+        ?string $recipientName = null,
     ): bool {
         try {
             // Validate and sanitize inputs
@@ -54,8 +54,9 @@ class CoreEmailService implements EmailServiceInterface
             $data = $this->sanitizeData($data);
 
             $template = EmailTemplate::getByName($templateName);
-            if (!$template) {
+            if (! $template) {
                 $this->logTemplateNotFound($templateName);
+
                 return false;
             }
 
@@ -75,6 +76,7 @@ class CoreEmailService implements EmailServiceInterface
             return true;
         } catch (Exception $e) {
             $this->logEmailError($templateName, $recipientEmail, $e->getMessage(), $e);
+
             return false;
         }
     }
@@ -86,8 +88,9 @@ class CoreEmailService implements EmailServiceInterface
      */
     public function sendToUser(User $user, string $templateName, array $data = []): bool
     {
-        if (!$user->email) {
+        if (! $user->email) {
             $this->logInvalidUser('email sending');
+
             return false;
         }
 
@@ -112,6 +115,7 @@ class CoreEmailService implements EmailServiceInterface
         $adminEmail = Setting::get('support_email', config('mail.from.address'));
         if (empty($adminEmail)) {
             $this->logAdminEmailNotConfigured();
+
             return false;
         }
 
@@ -124,7 +128,7 @@ class CoreEmailService implements EmailServiceInterface
             $templateName,
             is_string($adminEmail) ? $adminEmail : 'admin@example.com',
             array_merge($data, $adminData),
-            'Administrator'
+            'Administrator',
         );
     }
 
@@ -140,6 +144,7 @@ class CoreEmailService implements EmailServiceInterface
     {
         if (empty($users)) {
             Log::error('Empty users array provided for bulk email sending');
+
             return ['total' => 0, 'success' => 0, 'failed' => 0, 'errors' => []];
         }
 
@@ -208,7 +213,7 @@ class CoreEmailService implements EmailServiceInterface
         $sanitizedData = $this->sanitizeData($data);
         $template = EmailTemplate::getByName($validatedTemplateName);
 
-        if (!$template) {
+        if (! $template) {
             throw new \InvalidArgumentException("Template not found: {$validatedTemplateName}");
         }
 

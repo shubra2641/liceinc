@@ -10,24 +10,24 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * License Generator Service - Simplified
+ * License Generator Service - Simplified.
  */
 class LicenseGeneratorService
 {
     /**
-     * Generate license verification file for a product
+     * Generate license verification file for a product.
      */
     public function generateLicenseFile(Product $product): string
     {
         try {
-            if (!$product->id) {
+            if (! $product->id) {
                 throw new \InvalidArgumentException('Invalid product provided');
             }
 
             $product->refresh();
             $language = $product->programmingLanguage;
-            if (!$language) {
-                throw new \Exception('Programming language not found for product: ' . $product->id);
+            if (! $language) {
+                throw new \Exception('Programming language not found for product: '.$product->id);
             }
 
             // Delete old files
@@ -41,6 +41,7 @@ class LicenseGeneratorService
 
             // Update product with new file path
             $product->update(['integration_file_path' => $filePath]);
+
             return $filePath;
         } catch (\Exception $e) {
             Log::error('Error generating license file', [
@@ -52,17 +53,17 @@ class LicenseGeneratorService
     }
 
     /**
-     * Delete old license files for a product
+     * Delete old license files for a product.
      */
     private function deleteOldLicenseFiles(Product $product): void
     {
         try {
-            if (!$product->id) {
+            if (! $product->id) {
                 return;
             }
 
             $productDir = "licenses/{$product->id}";
-            if (!Storage::disk('public')->exists($productDir)) {
+            if (! Storage::disk('public')->exists($productDir)) {
                 return;
             }
 
@@ -79,24 +80,24 @@ class LicenseGeneratorService
     }
 
     /**
-     * Get license template for programming language
+     * Get license template for programming language.
      */
     private function getLicenseTemplate(ProgrammingLanguage $language): string
     {
         try {
-            if (!$language->slug) {
+            if (! $language->slug) {
                 throw new \InvalidArgumentException('Invalid programming language provided');
             }
 
             $templatePath = resource_path("templates/licenses/{$language->slug}.blade.php");
 
-            if (!file_exists($templatePath)) {
+            if (! file_exists($templatePath)) {
                 $this->createDefaultTemplate($language);
             }
 
             $content = file_get_contents($templatePath);
             if ($content === false) {
-                throw new \Exception('Failed to read template file: ' . $templatePath);
+                throw new \Exception('Failed to read template file: '.$templatePath);
             }
 
             return $content;
@@ -110,7 +111,7 @@ class LicenseGeneratorService
     }
 
     /**
-     * Compile template with product data
+     * Compile template with product data.
      */
     private function compileTemplate(string $template, Product $product): string
     {
@@ -119,14 +120,14 @@ class LicenseGeneratorService
                 throw new \InvalidArgumentException('Template content cannot be empty');
             }
 
-            if (!$product->id) {
+            if (! $product->id) {
                 throw new \InvalidArgumentException('Invalid product for template compilation');
             }
 
             // Build API URL
             $apiDomain = rtrim(config('app.url', ''), '/');
             $verificationEndpoint = config('license.verification_endpoint', '/api/license/verify');
-            $licenseApiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
+            $licenseApiUrl = $apiDomain.'/'.ltrim($verificationEndpoint, '/');
 
             // Prepare data
             $data = [
@@ -157,12 +158,12 @@ class LicenseGeneratorService
     }
 
     /**
-     * Generate verification key for product
+     * Generate verification key for product.
      */
     private function generateVerificationKey(Product $product): string
     {
         try {
-            if (!$product->id || !$product->slug) {
+            if (! $product->id || ! $product->slug) {
                 throw new \InvalidArgumentException('Invalid product data for key generation');
             }
 
@@ -171,7 +172,8 @@ class LicenseGeneratorService
                 throw new \Exception('Application key not configured');
             }
 
-            $keyData = (string)$product->id . $product->slug . $appKey;
+            $keyData = (string)$product->id.$product->slug.$appKey;
+
             return hash('sha256', $keyData);
         } catch (\Exception $e) {
             Log::error('Error generating verification key', [
@@ -183,12 +185,12 @@ class LicenseGeneratorService
     }
 
     /**
-     * Generate file name for license file
+     * Generate file name for license file.
      */
     private function generateFileName(Product $product, ProgrammingLanguage $language): string
     {
         try {
-            if (!$product->slug || !$language->slug) {
+            if (! $product->slug || ! $language->slug) {
                 throw new \InvalidArgumentException('Invalid product or language for filename generation');
             }
 
@@ -208,7 +210,7 @@ class LicenseGeneratorService
     }
 
     /**
-     * Get file extension for programming language
+     * Get file extension for programming language.
      */
     private function getFileExtensionForLanguage(string $languageSlug): string
     {
@@ -246,12 +248,12 @@ class LicenseGeneratorService
     }
 
     /**
-     * Save license file to storage
+     * Save license file to storage.
      */
     private function saveLicenseFile(string $content, string $fileName, Product $product): string
     {
         try {
-            if (empty($content) || empty($fileName) || !$product->id) {
+            if (empty($content) || empty($fileName) || ! $product->id) {
                 throw new \InvalidArgumentException('Invalid data for file saving');
             }
 
@@ -259,6 +261,7 @@ class LicenseGeneratorService
             $path = "licenses/{$product->id}/{$sanitizedFileName}";
 
             Storage::disk('public')->put($path, $content);
+
             return $path;
         } catch (\Exception $e) {
             Log::error('Error saving license file', [
@@ -271,30 +274,32 @@ class LicenseGeneratorService
     }
 
     /**
-     * Get API token
+     * Get API token.
      */
     private function getApiToken(): string
     {
         $token = \App\Helpers\ConfigHelper::getSetting('license_api_token', '', 'LICENSE_API_TOKEN');
+
         return is_string($token) ? $token : '';
     }
 
     /**
-     * Get Envato token
+     * Get Envato token.
      */
     private function getEnvatoToken(): string
     {
         $token = \App\Helpers\ConfigHelper::getSetting('envato_personal_token', '', 'ENVATO_PERSONAL_TOKEN');
+
         return is_string($token) ? $token : '';
     }
 
     /**
-     * Create default template for programming language
+     * Create default template for programming language.
      */
     private function createDefaultTemplate(ProgrammingLanguage $language): void
     {
         $templateDir = resource_path('templates/licenses');
-        if (!is_dir($templateDir)) {
+        if (! is_dir($templateDir)) {
             mkdir($templateDir, 0755, true);
         }
 
@@ -314,7 +319,7 @@ class LicenseGeneratorService
     }
 
     /**
-     * Get PHP license template
+     * Get PHP license template.
      */
     private function getPHPTemplate(): string
     {
@@ -398,7 +403,7 @@ PHP;
     }
 
     /**
-     * Get JavaScript license template
+     * Get JavaScript license template.
      */
     private function getJavaScriptTemplate(): string
     {
@@ -471,7 +476,7 @@ JS;
     }
 
     /**
-     * Get Python license template
+     * Get Python license template.
      */
     private function getPythonTemplate(): string
     {
@@ -540,7 +545,7 @@ PYTHON;
     }
 
     /**
-     * Get generic template for other languages
+     * Get generic template for other languages.
      */
     private function getGenericTemplate(ProgrammingLanguage $language): string
     {

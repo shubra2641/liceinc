@@ -30,8 +30,10 @@ class UpdateNotificationRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
+
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -74,6 +76,7 @@ class UpdateNotificationRequest extends FormRequest
                 ],
             ];
         }
+
         // Default validation (for other notification operations)
         return [
             'notification_type' => [
@@ -132,6 +135,7 @@ class UpdateNotificationRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -165,6 +169,7 @@ class UpdateNotificationRequest extends FormRequest
             'dismiss_after_hours.max' => 'Dismiss after hours cannot exceed 168 (1 week).',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -193,6 +198,7 @@ class UpdateNotificationRequest extends FormRequest
             'dismiss_after_hours' => 'dismiss after hours',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */
@@ -232,6 +238,7 @@ class UpdateNotificationRequest extends FormRequest
             'dismiss_after_hours' => $this->dismiss_after_hours ?? 24,
         ]);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -245,7 +252,7 @@ class UpdateNotificationRequest extends FormRequest
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

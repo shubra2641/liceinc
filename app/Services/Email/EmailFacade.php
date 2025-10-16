@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Email;
 
-use App\Models\User;
-use App\Models\License;
 use App\Models\Invoice;
+use App\Models\License;
+use App\Models\User;
 use App\Services\Email\Contracts\EmailServiceInterface;
 use App\Services\Email\Handlers\InvoiceEmailHandler;
 use App\Services\Email\Handlers\LicenseEmailHandler;
@@ -28,7 +28,7 @@ class EmailFacade
         protected UserEmailHandler $userHandler,
         protected LicenseEmailHandler $licenseHandler,
         protected InvoiceEmailHandler $invoiceHandler,
-        protected TicketEmailHandler $ticketHandler
+        protected TicketEmailHandler $ticketHandler,
     ) {
     }
 
@@ -48,7 +48,7 @@ class EmailFacade
         string $templateName,
         string $recipientEmail,
         array $data = [],
-        ?string $recipientName = null
+        ?string $recipientName = null,
     ): bool {
         return $this->emailService->sendEmail($templateName, $recipientEmail, $data, $recipientName);
     }
@@ -65,7 +65,7 @@ class EmailFacade
     public function sendToUser(
         User $user,
         string $templateName,
-        array $data = []
+        array $data = [],
     ): bool {
         return $this->emailService->sendToUser($user, $templateName, $data);
     }
@@ -80,7 +80,7 @@ class EmailFacade
      */
     public function sendToAdmin(
         string $templateName,
-        array $data = []
+        array $data = [],
     ): bool {
         return $this->emailService->sendToAdmin($templateName, $data);
     }
@@ -97,7 +97,7 @@ class EmailFacade
     public function sendBulkEmail(
         array $users,
         string $templateName,
-        array $data = []
+        array $data = [],
     ): array {
         return $this->emailService->sendBulkEmail($users, $templateName, $data);
     }
@@ -112,7 +112,7 @@ class EmailFacade
      */
     public function getTemplates(
         string $type,
-        ?string $category = null
+        ?string $category = null,
     ): Collection {
         return $this->emailService->getTemplates($type, $category);
     }
@@ -127,7 +127,7 @@ class EmailFacade
      */
     public function testTemplate(
         string $templateName,
-        array $data = []
+        array $data = [],
     ): array {
         return $this->emailService->testTemplate($templateName, $data);
     }
@@ -156,7 +156,7 @@ class EmailFacade
      */
     public function sendEmailVerification(
         User $user,
-        string $verificationUrl
+        string $verificationUrl,
     ): bool {
         return $this->userHandler->sendEmailVerification($user, $verificationUrl);
     }
@@ -171,7 +171,7 @@ class EmailFacade
      */
     public function sendPasswordReset(
         User $user,
-        string $resetUrl
+        string $resetUrl,
     ): bool {
         return $this->userHandler->sendPasswordReset($user, $resetUrl);
     }
@@ -212,7 +212,7 @@ class EmailFacade
      */
     public function sendPaymentConfirmation(
         License $license,
-        Invoice $invoice
+        Invoice $invoice,
     ): bool {
         return $this->licenseHandler->sendPaymentConfirmation($license, $invoice);
     }
@@ -227,7 +227,7 @@ class EmailFacade
      */
     public function sendLicenseExpiring(
         User $user,
-        array $licenseData
+        array $licenseData,
     ): bool {
         return $this->licenseHandler->sendLicenseExpiring($user, $licenseData);
     }
@@ -242,7 +242,7 @@ class EmailFacade
      */
     public function sendLicenseUpdated(
         User $user,
-        array $licenseData
+        array $licenseData,
     ): bool {
         return $this->licenseHandler->sendLicenseUpdated($user, $licenseData);
     }
@@ -257,7 +257,7 @@ class EmailFacade
      */
     public function sendLicenseCreated(
         License $license,
-        ?User $user = null
+        ?User $user = null,
     ): bool {
         return $this->licenseHandler->sendLicenseCreated($license, $user);
     }
@@ -272,7 +272,7 @@ class EmailFacade
      */
     public function sendAdminPaymentNotification(
         License $license,
-        Invoice $invoice
+        Invoice $invoice,
     ): bool {
         return $this->licenseHandler->sendAdminPaymentNotification($license, $invoice);
     }
@@ -284,11 +284,12 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param Invoice $invoice The invoice object
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendInvoiceCreated(
         User $user,
-        Invoice $invoice
+        Invoice $invoice,
     ): bool {
         return $this->invoiceHandler->sendInvoiceCreated($user, $invoice);
     }
@@ -298,11 +299,12 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $invoiceData Invoice data
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendInvoiceApproachingDue(
         User $user,
-        array $invoiceData
+        array $invoiceData,
     ): bool {
         return $this->invoiceHandler->sendInvoiceApproachingDue($user, $invoiceData);
     }
@@ -312,11 +314,12 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $invoiceData Invoice data
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendInvoicePaid(
         User $user,
-        array $invoiceData
+        array $invoiceData,
     ): bool {
         return $this->invoiceHandler->sendInvoicePaid($user, $invoiceData);
     }
@@ -326,11 +329,12 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $invoiceData Invoice data
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendInvoiceCancelled(
         User $user,
-        array $invoiceData
+        array $invoiceData,
     ): bool {
         return $this->invoiceHandler->sendInvoiceCancelled($user, $invoiceData);
     }
@@ -339,10 +343,11 @@ class EmailFacade
      * Send custom invoice payment confirmation email.
      *
      * @param Invoice $invoice The invoice object
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendCustomInvoicePaymentConfirmation(
-        Invoice $invoice
+        Invoice $invoice,
     ): bool {
         return $this->invoiceHandler->sendCustomInvoicePaymentConfirmation($invoice);
     }
@@ -351,10 +356,11 @@ class EmailFacade
      * Send admin custom invoice payment notification email.
      *
      * @param Invoice $invoice The invoice object
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendAdminCustomInvoicePaymentNotification(
-        Invoice $invoice
+        Invoice $invoice,
     ): bool {
         return $this->invoiceHandler->sendAdminCustomInvoicePaymentNotification($invoice);
     }
@@ -363,10 +369,11 @@ class EmailFacade
      * Send payment failure notification email.
      *
      * @param Invoice $order The invoice/order object
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendPaymentFailureNotification(
-        Invoice $order
+        Invoice $order,
     ): bool {
         return $this->invoiceHandler->sendPaymentFailureNotification($order);
     }
@@ -378,11 +385,12 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $ticketData Ticket data
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendTicketCreated(
         User $user,
-        array $ticketData
+        array $ticketData,
     ): bool {
         return $this->ticketHandler->sendTicketCreated($user, $ticketData);
     }
@@ -392,11 +400,12 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $ticketData Ticket data
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendTicketStatusUpdate(
         User $user,
-        array $ticketData
+        array $ticketData,
     ): bool {
         return $this->ticketHandler->sendTicketStatusUpdate($user, $ticketData);
     }
@@ -406,11 +415,12 @@ class EmailFacade
      *
      * @param User $user The user to send email to
      * @param array<string, mixed> $ticketData Ticket data
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendTicketReply(
         User $user,
-        array $ticketData
+        array $ticketData,
     ): bool {
         return $this->ticketHandler->sendTicketReply($user, $ticketData);
     }
@@ -419,10 +429,11 @@ class EmailFacade
      * Send admin ticket created notification email.
      *
      * @param array<string, mixed> $ticketData Ticket data
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendAdminTicketCreated(
-        array $ticketData
+        array $ticketData,
     ): bool {
         return $this->ticketHandler->sendAdminTicketCreated($ticketData);
     }
@@ -431,10 +442,11 @@ class EmailFacade
      * Send admin ticket reply notification email.
      *
      * @param array<string, mixed> $ticketData Ticket data
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendAdminTicketReply(
-        array $ticketData
+        array $ticketData,
     ): bool {
         return $this->ticketHandler->sendAdminTicketReply($ticketData);
     }
@@ -443,10 +455,11 @@ class EmailFacade
      * Send admin ticket closed notification email.
      *
      * @param array<string, mixed> $ticketData Ticket data
+     *
      *\n     * @return bool True if email sent successfully
      */
     public function sendAdminTicketClosed(
-        array $ticketData
+        array $ticketData,
     ): bool {
         return $this->ticketHandler->sendAdminTicketClosed($ticketData);
     }

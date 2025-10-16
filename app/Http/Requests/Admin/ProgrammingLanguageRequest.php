@@ -32,8 +32,10 @@ class ProgrammingLanguageRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
+
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -43,6 +45,7 @@ class ProgrammingLanguageRequest extends FormRequest
     {
         $languageId = $this->route('programming_language')?->id;
         $isUpdate = $languageId !== null;
+
         return [
             'name' => [
                 $isUpdate ? 'nullable' : 'required',
@@ -122,6 +125,7 @@ class ProgrammingLanguageRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -149,6 +153,7 @@ class ProgrammingLanguageRequest extends FormRequest
             'documentation_url.url' => 'Documentation URL must be a valid URL.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -174,6 +179,7 @@ class ProgrammingLanguageRequest extends FormRequest
             'documentation_url' => 'documentation URL',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */
@@ -198,6 +204,7 @@ class ProgrammingLanguageRequest extends FormRequest
             'sort_order' => $this->sort_order ?? 0,
         ]);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -211,7 +218,7 @@ class ProgrammingLanguageRequest extends FormRequest
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

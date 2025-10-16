@@ -44,8 +44,7 @@ return [
     'failure' => 'Failure',
     'no_history' => 'No history available',
     'no_domains' => 'No domains registered',
-    'envato_verification_failed' =>
-     'Warning: Failed to verify with Envato. License is valid locally but there may be an issue with Envato.',
+    'envato_verification_failed' => 'Warning: Failed to verify with Envato. License is valid locally but there may be an issue with Envato.',
     'envato_support_expired' => 'Warning: Envato support has expired for this license.',
     'envato_verification_success' => 'Envato verification successful.',
     'envato' => 'Envato',
@@ -57,9 +56,9 @@ return [
     'license_inactive' => 'The license is inactive.',
     'license_expired' => 'The license has expired.',
     'license_suspended' => 'The license has been suspended.',
-    'category_requires_license_no_product' => 'This section requires a license ' .
+    'category_requires_license_no_product' => 'This section requires a license '.
         'but no specific product has been specified.',
-    'article_requires_license_no_product' => 'This article requires a license ' .
+    'article_requires_license_no_product' => 'This article requires a license '.
         'but no specific product has been specified.',
     'Portfolio HTML Template' => 'Portfolio HTML Template',
 ];

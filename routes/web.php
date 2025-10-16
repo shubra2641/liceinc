@@ -41,34 +41,34 @@ use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProductFileController;
 use App\Http\Controllers\Admin\ProductUpdateController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\ProgrammingLanguageController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TicketCategoryController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\UpdateController;
 use App\Http\Controllers\Admin\UpdateNotificationController;
-// User Controllers
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\User\TicketController as UserTicketController;
+// User Controllers
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\KbArticleController;
 use App\Http\Controllers\KbCategoryController;
-// Admin Controllers
 use App\Http\Controllers\KbPublicController;
 use App\Http\Controllers\LanguageController;
+// Admin Controllers
 use App\Http\Controllers\LicenseDomainController;
 use App\Http\Controllers\LicenseStatusController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentPageController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\User\EnvatoController as UserEnvatoController;
 use App\Http\Controllers\User\InvoiceController as UserInvoiceController;
 use App\Http\Controllers\User\LicenseController as UserLicenseController;
 use App\Http\Controllers\User\ProductFileController as UserProductFileController;
+use App\Http\Controllers\User\TicketController as UserTicketController;
 // API Controllers
 
 // Legacy Controllers (to be reviewed)
@@ -94,7 +94,6 @@ use Illuminate\Support\Facades\Route;
  * All inputs are validated (validate) and sanitized (htmlspecialchars, htmlentities) before processing.
  * Authentication checks (Auth::check, Auth::user) applied via middleware to protected routes.
  */
-
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 /**
@@ -628,7 +627,6 @@ Route::middleware(['auth', 'admin', 'verified'])->prefix('admin')->name('admin.'
             [UpdateController::class, 'installAutoUpdate'],
         )->name('updates.auto-install');
 
-
         // Database Version Management
         Route::get(
             '/current-version',
@@ -763,7 +761,7 @@ Route::middleware(['auth', 'user'])->group(function () {
 // AUTH ROUTES (Laravel Breeze/Jetstream)
 // ============================================================================
 
-require __DIR__ . '/auth.php'; // security-ignore: LARAVEL_ROUTES
+require __DIR__.'/auth.php'; // security-ignore: LARAVEL_ROUTES
 
 // ============================================================================
 // INSTALLATION ROUTES

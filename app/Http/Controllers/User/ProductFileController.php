@@ -42,6 +42,7 @@ class ProductFileController extends Controller
      * @var ProductFileService
      */
     protected $productFileService;
+
     /**
      * Create a new ProductFileController instance.
      *
@@ -51,6 +52,7 @@ class ProductFileController extends Controller
     {
         $this->productFileService = $productFileService;
     }
+
     /**
      * Download a product file with comprehensive security validation.
      *
@@ -89,33 +91,34 @@ class ProductFileController extends Controller
             // Check user permissions
             $permissions = $this->productFileService->userCanDownloadFiles(
                 $file->product,
-                auth()->id() ? (int)auth()->id() : 0
+                auth()->id() ? (int)auth()->id() : 0,
             );
             if (! $permissions['can_download']) {
                 abort(403, is_string($permissions['message']) ? $permissions['message'] : 'Access denied');
             }
             $fileData = $this->productFileService->downloadFile(
                 $file,
-                auth()->id() ? (int)auth()->id() : 0
+                auth()->id() ? (int)auth()->id() : 0,
             );
             if (! $fileData) {
                 abort(403, 'File download failed');
             }
+
             return response(is_string($fileData['content']) ? $fileData['content'] : '')
                 ->header(
                     'Content-Type',
                     is_string($fileData['mime_type'])
                         ? $fileData['mime_type']
-                        : 'application/octet-stream'
+                        : 'application/octet-stream',
                 )
                 ->header(
                     'Content-Disposition',
                     'attachment; filename="'
-                        . $this->sanitizeFilename(
+                        .$this->sanitizeFilename(
                             is_string($fileData['filename'])
                                 ? $fileData['filename']
-                                : ''
-                        ) . '"'
+                                : '',
+                        ).'"',
                 )
                 ->header('Content-Length', is_numeric($fileData['size']) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -132,6 +135,7 @@ class ProductFileController extends Controller
             abort(500, 'Download failed');
         }
     }
+
     /**
      * Get downloadable files for a product (user must have valid license and paid invoice).
      */
@@ -163,6 +167,7 @@ class ProductFileController extends Controller
             ->first();
         // Get latest file (update or base)
         $latestFile = $this->productFileService->getLatestProductFile($product, auth()->id() ? (int)auth()->id() : 0);
+
         // Return view with data
         return view('user.products.files.index', [
             'product' => $product,
@@ -172,6 +177,7 @@ class ProductFileController extends Controller
             'latestFile' => $latestFile,
         ]);
     }
+
     /**
      * Download a specific update version.
      */
@@ -200,21 +206,22 @@ class ProductFileController extends Controller
                 abort(404, 'Update file not available');
             }
             $fileData = $this->productFileService->downloadUpdateFile($update, auth()->id() ? (int)auth()->id() : 0);
+
             // Return file download response
             return response(is_string($fileData['content']) ? $fileData['content'] : '')
                 ->header(
                     'Content-Type',
                     is_string($fileData['mime_type'])
                         ? $fileData['mime_type']
-                        : 'application/octet-stream'
+                        : 'application/octet-stream',
                 )
                 ->header(
                     'Content-Disposition',
-                    'attachment; filename="' . (
+                    'attachment; filename="'.(
                         is_string($fileData['filename'])
                             ? $fileData['filename']
                             : ''
-                    ) . '"'
+                    ).'"',
                 )
                 ->header('Content-Length', is_numeric($fileData['size']) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -230,6 +237,7 @@ class ProductFileController extends Controller
             abort(500, 'Download failed');
         }
     }
+
     /**
      * Download the latest version (update or base file).
      */
@@ -252,7 +260,7 @@ class ProductFileController extends Controller
             // Get the latest file (update or base)
             $latestFile = $this->productFileService->getLatestProductFile(
                 $product,
-                auth()->id() ? (int)auth()->id() : 0
+                auth()->id() ? (int)auth()->id() : 0,
             );
             if (! $latestFile) {
                 abort(404, 'No files available for download');
@@ -267,33 +275,34 @@ class ProductFileController extends Controller
                 }
                 $fileData = $this->productFileService->downloadUpdateFile(
                     $update,
-                    auth()->id() ? (int)auth()->id() : 0
+                    auth()->id() ? (int)auth()->id() : 0,
                 );
             } else {
                 // It's a regular product file
                 $fileData = $this->productFileService->downloadFile(
                     $latestFile,
-                    auth()->id() ? (int)auth()->id() : 0
+                    auth()->id() ? (int)auth()->id() : 0,
                 );
             }
             if (! $fileData) {
                 abort(403, 'File download failed');
             }
+
             // Return file download response
             return response(is_string($fileData['content']) ? $fileData['content'] : '')
                 ->header(
                     'Content-Type',
                     is_string($fileData['mime_type'])
                         ? $fileData['mime_type']
-                        : 'application/octet-stream'
+                        : 'application/octet-stream',
                 )
                 ->header(
                     'Content-Disposition',
-                    'attachment; filename="' . (
+                    'attachment; filename="'.(
                         is_string($fileData['filename'])
                             ? $fileData['filename']
                             : ''
-                    ) . '"'
+                    ).'"',
                 )
                 ->header('Content-Length', is_numeric($fileData['size']) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -308,6 +317,7 @@ class ProductFileController extends Controller
             abort(500, 'Download failed');
         }
     }
+
     /**
      * Download all files as a ZIP archive.
      */
@@ -332,8 +342,8 @@ class ProductFileController extends Controller
         }
         try {
             // Create temporary ZIP file
-            $zipFileName = $product->slug . '_files_' . now()->format('Y-m-d_H-i-s') . '.zip';
-            $zipPath = storage_path('app/temp/' . $zipFileName);
+            $zipFileName = $product->slug.'_files_'.now()->format('Y-m-d_H-i-s').'.zip';
+            $zipPath = storage_path('app/temp/'.$zipFileName);
             // Ensure temp directory exists
             if (! file_exists(dirname($zipPath))) {
                 mkdir(dirname($zipPath), 0755, true);
@@ -346,12 +356,12 @@ class ProductFileController extends Controller
             foreach ($files as $file) {
                 $fileData = $this->productFileService->downloadFile(
                     $file,
-                    auth()->id() ? (int)auth()->id() : 0
+                    auth()->id() ? (int)auth()->id() : 0,
                 );
                 if ($fileData) {
                     $zip->addFromString(
                         $file->original_name,
-                        is_string($fileData['content']) ? $fileData['content'] : ''
+                        is_string($fileData['content']) ? $fileData['content'] : '',
                     );
                     $addedFiles++;
                 }
@@ -361,10 +371,11 @@ class ProductFileController extends Controller
                 unlink($zipPath);
                 abort(500, 'No files could be added to ZIP');
             }
+
             // Return ZIP download response
             return new Response(file_get_contents($zipPath), 200, [
                 'Content-Type' => 'application/zip',
-                'Content-Disposition' => 'attachment; filename="' . $zipFileName . '"'
+                'Content-Disposition' => 'attachment; filename="'.$zipFileName.'"',
             ]);
         } catch (\Exception $e) {
             Log::error('ZIP download failed', [
@@ -375,6 +386,7 @@ class ProductFileController extends Controller
             abort(500, 'ZIP creation failed');
         }
     }
+
     /**
      * Sanitize filename for secure download headers.
      *
@@ -399,8 +411,9 @@ class ProductFileController extends Controller
             if ($filename && strlen($filename) > 255) {
                 $extension = pathinfo($filename, PATHINFO_EXTENSION);
                 $name = pathinfo($filename, PATHINFO_FILENAME);
-                $filename = substr($name, 0, 255 - strlen($extension) - 1) . '.' . $extension;
+                $filename = substr($name, 0, 255 - strlen($extension) - 1).'.'.$extension;
             }
+
             return $filename ?? '';
         } catch (\Exception $e) {
             Log::error('Error sanitizing filename', [
@@ -408,6 +421,7 @@ class ProductFileController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return 'download';
         }
     }

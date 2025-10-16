@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Services\Installation;
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 
 /**
- * User Creation Service
+ * User Creation Service.
  *
  * Handles user creation operations to reduce controller complexity.
  */
@@ -39,10 +39,12 @@ class UserCreationService
 
             DB::commit();
             Log::info('Admin user created successfully', ['user_id' => $user->id]);
+
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to create admin user', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -68,10 +70,12 @@ class UserCreationService
 
             DB::commit();
             Log::info('Test user created successfully', ['user_id' => $user->id]);
+
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to create test user', ['error' => $e->getMessage()]);
+
             return false;
         }
     }

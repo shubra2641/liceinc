@@ -66,9 +66,10 @@ class AutoUpdateController extends Controller
     public function index()
     {
         /**
- * @var view-string $view
-*/
+         * @var view-string $view
+         */
         $view = 'admin.auto-update.index';
+
         return view($view);
     }
 
@@ -167,7 +168,7 @@ class AutoUpdateController extends Controller
                 ]);
             } else {
                 Log::warning('Update check failed', [
-                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4) . '...',
+                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4).'...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'current_version' => $currentVersion,
@@ -196,7 +197,7 @@ class AutoUpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while checking for updates: ' . $e->getMessage(),
+                'message' => 'An error occurred while checking for updates: '.$e->getMessage(),
                 'error_code' => 'SERVER_ERROR',
             ], 500);
         }
@@ -290,7 +291,7 @@ class AutoUpdateController extends Controller
             );
             if (! $updateData['success']) {
                 Log::warning('License verification failed during update installation', [
-                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4) . '...',
+                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4).'...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'version' => $version,
@@ -314,7 +315,7 @@ class AutoUpdateController extends Controller
             );
             if (! $downloadResult['success']) {
                 Log::error('Update download failed', [
-                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4) . '...',
+                    'license_key' => substr(is_string($licenseKey) ? $licenseKey : '', 0, 4).'...',
                     'product_slug' => $productSlug,
                     'domain' => $domain,
                     'version' => $version,
@@ -329,7 +330,7 @@ class AutoUpdateController extends Controller
                 ], 500);
             }
             // Save update file
-            $updateFileName = 'update_' . (is_string($version) ? $version : '') . '_' . time() . '.zip';
+            $updateFileName = 'update_'.(is_string($version) ? $version : '').'_'.time().'.zip';
             $updateFilePath = storage_path("app/updates/{$updateFileName}");
             // Ensure updates directory exists
             if (! File::exists(storage_path('app/updates'))) {
@@ -398,8 +399,8 @@ class AutoUpdateController extends Controller
      * @version 1.0.6
      */
     /**
- * @return array<string, mixed>
-*/
+     * @return array<string, mixed>
+     */
     private function installUpdatePackage(string $updateFilePath, string $version): array
     {
         try {
@@ -415,7 +416,7 @@ class AutoUpdateController extends Controller
             $backupPath = $this->createBackup();
             try {
                 // Extract to temporary directory
-                $tempPath = storage_path("app/temp/update_{$version}_" . time());
+                $tempPath = storage_path("app/temp/update_{$version}_".time());
                 $zip->extractTo($tempPath);
                 $zip->close();
                 // Install files
@@ -448,7 +449,7 @@ class AutoUpdateController extends Controller
 
             return [
                 'success' => false,
-                'message' => 'Failed to install update package: ' . $e->getMessage(),
+                'message' => 'Failed to install update package: '.$e->getMessage(),
             ];
         }
     }
@@ -466,7 +467,7 @@ class AutoUpdateController extends Controller
     private function createBackup(): ?string
     {
         try {
-            $backupName = 'auto_update_backup_' . date('Y-m-d_H-i-s');
+            $backupName = 'auto_update_backup_'.date('Y-m-d_H-i-s');
             $backupPath = storage_path("app/backups/{$backupName}");
             if (! File::exists(storage_path('app/backups'))) {
                 File::makeDirectory(storage_path('app/backups'), 0755, true);
@@ -500,7 +501,7 @@ class AutoUpdateController extends Controller
      */
     private function installFiles(string $tempPath): void
     {
-        $sourcePath = $tempPath . '/files';
+        $sourcePath = $tempPath.'/files';
         if (! File::exists($sourcePath)) {
             return; // No files to install
         }
@@ -520,7 +521,7 @@ class AutoUpdateController extends Controller
      */
     private function runMigrations(string $tempPath): void
     {
-        $migrationsPath = $tempPath . '/database/migrations';
+        $migrationsPath = $tempPath.'/database/migrations';
         if (! File::exists($migrationsPath)) {
             return; // No migrations to run
         }
@@ -571,8 +572,8 @@ class AutoUpdateController extends Controller
         }
         $files = File::allFiles($source);
         foreach ($files as $file) {
-            $relativePath = str_replace($source . '/', '', $file->getPathname());
-            $targetPath = $destination . '/' . $relativePath;
+            $relativePath = str_replace($source.'/', '', $file->getPathname());
+            $targetPath = $destination.'/'.$relativePath;
             // Ensure target directory exists
             $targetDir = dirname($targetPath);
             if (! File::exists($targetDir)) {

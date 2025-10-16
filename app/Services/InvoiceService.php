@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Helpers\SecurityHelper;
 use App\Models\Invoice;
 use App\Models\License;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Helpers\SecurityHelper;
 use Illuminate\Support\Str;
 
 /**
@@ -80,6 +80,7 @@ class InvoiceService
                 'notes' => 'Initial license invoice',
             ]);
             DB::commit();
+
             return $invoice;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -92,6 +93,7 @@ class InvoiceService
             throw $e;
         }
     }
+
     /**
      * Generate unique invoice number with enhanced validation.
      *
@@ -108,14 +110,15 @@ class InvoiceService
             $maxAttempts = 10;
             $attempts = 0;
             do {
-                $invoiceNumber = 'INV-' . strtoupper(Str::random(8));
+                $invoiceNumber = 'INV-'.strtoupper(Str::random(8));
                 $attempts++;
                 if ($attempts > $maxAttempts) {
                     throw new \Exception(
-                        'Failed to generate unique invoice number after ' . $maxAttempts . ' attempts'
+                        'Failed to generate unique invoice number after '.$maxAttempts.' attempts',
                     );
                 }
             } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
+
             return $invoiceNumber;
         } catch (\Exception $e) {
             Log::error('Invoice number generation failed', [
@@ -125,6 +128,7 @@ class InvoiceService
             throw $e;
         }
     }
+
     /**
      * Create renewal invoice with enhanced security.
      *
@@ -182,6 +186,7 @@ class InvoiceService
             }
 
             DB::commit();
+
             return $invoice;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -194,6 +199,7 @@ class InvoiceService
             throw $e;
         }
     }
+
     /**
      * Mark invoice as paid with enhanced validation.
      *
@@ -231,6 +237,7 @@ class InvoiceService
             throw $e;
         }
     }
+
     /**
      * Mark invoice as overdue with enhanced validation.
      *
@@ -264,6 +271,7 @@ class InvoiceService
             throw $e;
         }
     }
+
     /**
      * Get invoice statistics with enhanced performance.
      *
@@ -299,6 +307,7 @@ class InvoiceService
             throw $e;
         }
     }
+
     /**
      * Create invoice for payment system with enhanced security.
      *
@@ -354,6 +363,7 @@ class InvoiceService
                 ],
             ]);
             DB::commit();
+
             return $invoice;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -369,6 +379,7 @@ class InvoiceService
             throw $e;
         }
     }
+
     /**
      * Validate invoice parameters.
      *
@@ -383,10 +394,11 @@ class InvoiceService
         $validStatuses = ['paid', 'pending', 'overdue', 'cancelled'];
         if (! in_array($paymentStatus, $validStatuses)) {
             throw new \InvalidArgumentException(
-                'Invalid payment status: ' . SecurityHelper::escapeVariable($paymentStatus)
+                'Invalid payment status: '.SecurityHelper::escapeVariable($paymentStatus),
             );
         }
     }
+
     /**
      * Validate license.
      *
@@ -406,6 +418,7 @@ class InvoiceService
             throw new \InvalidArgumentException('License must have a product');
         }
     }
+
     /**
      * Validate invoice.
      *
@@ -419,6 +432,7 @@ class InvoiceService
             throw new \InvalidArgumentException('Invoice does not exist');
         }
     }
+
     /**
      * Validate payment invoice parameters.
      *
@@ -456,6 +470,7 @@ class InvoiceService
             throw new \InvalidArgumentException('Gateway cannot be empty');
         }
     }
+
     /**
      * Sanitize amount for security.
      *
@@ -465,11 +480,13 @@ class InvoiceService
      */
     private function sanitizeAmount(mixed $amount): float
     {
-        if (!is_numeric($amount)) {
+        if (! is_numeric($amount)) {
             return 0.0;
         }
+
         return max(0, round((float)$amount, 2));
     }
+
     /**
      * Sanitize status for security.
      *
@@ -480,8 +497,10 @@ class InvoiceService
     private function sanitizeStatus(string $status): string
     {
         $validStatuses = ['paid', 'pending', 'overdue', 'cancelled'];
+
         return in_array($status, $validStatuses) ? $status : 'pending';
     }
+
     /**
      * Sanitize currency for security.
      *
@@ -493,6 +512,7 @@ class InvoiceService
     {
         return strtoupper(trim($currency));
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -506,7 +526,7 @@ class InvoiceService
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 
@@ -514,7 +534,7 @@ class InvoiceService
     }
 
     /**
-     * Activate license when invoice is paid
+     * Activate license when invoice is paid.
      *
      * @param Invoice $invoice
      *

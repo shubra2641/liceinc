@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 /**
- * Product Category Model - Simplified
+ * Product Category Model - Simplified.
  */
 class ProductCategory extends Model
 {
@@ -44,7 +44,7 @@ class ProductCategory extends Model
     ];
 
     /**
-     * Get products for this category
+     * Get products for this category.
      */
     public function products(): HasMany
     {
@@ -52,7 +52,7 @@ class ProductCategory extends Model
     }
 
     /**
-     * Get parent category
+     * Get parent category.
      */
     public function parent(): BelongsTo
     {
@@ -60,7 +60,7 @@ class ProductCategory extends Model
     }
 
     /**
-     * Get child categories
+     * Get child categories.
      */
     public function children(): HasMany
     {
@@ -68,7 +68,7 @@ class ProductCategory extends Model
     }
 
     /**
-     * Scope for root categories (no parent)
+     * Scope for root categories (no parent).
      */
     public function scopeRoots($query)
     {
@@ -76,7 +76,7 @@ class ProductCategory extends Model
     }
 
     /**
-     * Scope for active categories
+     * Scope for active categories.
      */
     public function scopeActive($query)
     {
@@ -84,7 +84,7 @@ class ProductCategory extends Model
     }
 
     /**
-     * Scope for menu visible categories
+     * Scope for menu visible categories.
      */
     public function scopeMenuVisible($query)
     {
@@ -92,7 +92,7 @@ class ProductCategory extends Model
     }
 
     /**
-     * Scope for featured categories
+     * Scope for featured categories.
      */
     public function scopeFeatured($query)
     {
@@ -100,7 +100,7 @@ class ProductCategory extends Model
     }
 
     /**
-     * Auto-generate slug from name
+     * Auto-generate slug from name.
      */
     protected static function boot()
     {

@@ -63,29 +63,29 @@ class PaymentSettingsController extends Controller
             DB::commit();
 
             // Create default settings if not found
-            if (!$paypalSettings) {
+            if (! $paypalSettings) {
                 $paypalSettings = new PaymentSetting([
                     'gateway' => 'paypal',
                     'is_enabled' => false,
                     'is_sandbox' => true,
                     'credentials' => ['client_id' => '', 'client_secret' => ''],
-                    'webhook_url' => ''
+                    'webhook_url' => '',
                 ]);
             }
 
-            if (!$stripeSettings) {
+            if (! $stripeSettings) {
                 $stripeSettings = new PaymentSetting([
                     'gateway' => 'stripe',
                     'is_enabled' => false,
                     'is_sandbox' => true,
                     'credentials' => ['publishable_key' => '', 'secret_key' => '', 'webhook_secret' => ''],
-                    'webhook_url' => ''
+                    'webhook_url' => '',
                 ]);
             }
 
             return view('admin.payment-settings.index', [
                 'paypalSettings' => $paypalSettings,
-                'stripeSettings' => $stripeSettings
+                'stripeSettings' => $stripeSettings,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -100,7 +100,7 @@ class PaymentSettingsController extends Controller
                 'is_enabled' => false,
                 'is_sandbox' => true,
                 'credentials' => ['client_id' => '', 'client_secret' => ''],
-                'webhook_url' => ''
+                'webhook_url' => '',
             ]);
 
             $stripeSettings = new PaymentSetting([
@@ -108,15 +108,16 @@ class PaymentSettingsController extends Controller
                 'is_enabled' => false,
                 'is_sandbox' => true,
                 'credentials' => ['publishable_key' => '', 'secret_key' => '', 'webhook_secret' => ''],
-                'webhook_url' => ''
+                'webhook_url' => '',
             ]);
 
             return view('admin.payment-settings.index', [
                 'paypalSettings' => $paypalSettings,
-                'stripeSettings' => $stripeSettings
+                'stripeSettings' => $stripeSettings,
             ]);
         }
     }
+
     /**
      * Update payment settings with enhanced security.
      *
@@ -152,6 +153,7 @@ class PaymentSettingsController extends Controller
             $settings = PaymentSetting::getByGateway(is_string($gateway) ? $gateway : '');
             if (! $settings) {
                 DB::rollBack();
+
                 return redirect()->back()->with('error', trans('app.Payment gateway not found'));
             }
             // Get validated credentials (already sanitized by Request class)
@@ -164,6 +166,7 @@ class PaymentSettingsController extends Controller
                 'webhook_url' => $webhookUrl,
             ]);
             DB::commit();
+
             return redirect()->back()->with('success', trans('app.Payment settings updated successfully'));
         } catch (\Exception $e) {
             DB::rollBack();
@@ -172,9 +175,11 @@ class PaymentSettingsController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'gateway' => $request->gateway ?? 'unknown',
             ]);
+
             return redirect()->back()->with('error', trans('app.Failed to update payment settings'));
         }
     }
+
     /**
      * Test payment gateway connection with enhanced security.
      *
@@ -206,14 +211,14 @@ class PaymentSettingsController extends Controller
             $credentials = $validated['credentials'];
             if ($gateway === 'paypal') {
                 /**
- * @var array<string, mixed> $paypalCredentials
-*/
+                 * @var array<string, mixed> $paypalCredentials
+                 */
                 $paypalCredentials = is_array($credentials) ? $credentials : [];
                 $result = $this->testPayPalConnection($paypalCredentials);
             } elseif ($gateway === 'stripe') {
                 /**
- * @var array<string, mixed> $stripeCredentials
-*/
+                 * @var array<string, mixed> $stripeCredentials
+                 */
                 $stripeCredentials = is_array($credentials) ? $credentials : [];
                 $result = $this->testStripeConnection($stripeCredentials);
             } else {
@@ -222,6 +227,7 @@ class PaymentSettingsController extends Controller
                     'message' => trans('app.Unsupported payment gateway'),
                 ], 400);
             }
+
             return response()->json($result);
         } catch (\Exception $e) {
             Log::error('Payment gateway connection test failed', [
@@ -229,12 +235,14 @@ class PaymentSettingsController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'gateway' => $request->gateway ?? 'unknown',
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => trans('app.Connection test failed: :error', ['error' => $e->getMessage()]),
             ], 500);
         }
     }
+
     /**
      * Test PayPal connection with enhanced security.
      *
@@ -262,26 +270,28 @@ class PaymentSettingsController extends Controller
                     'message' => trans('app.PayPal credentials are incomplete'),
                 ];
             }
-            $paypal = new class {
+            $paypal = new class() {
                 public function __construct()
                 {
                     // Mock PayPal SDK implementation
                 }
+
                 public function execute(mixed $request): object
                 {
-                    return (object) ['statusCode' => 201];
+                    return (object)['statusCode' => 201];
                 }
             };
             // Try to create a simple order to test connection
-            $request = new class {
+            $request = new class() {
                 public function prefer(string $preference): mixed
                 {
                     // Mock implementation
                     return $this;
                 }
+
                 /**
- * @var array<string, mixed>
-*/
+                 * @var array<string, mixed>
+                 */
                 public array $body = [];
             };
             $preferResult = $request->prefer('return=representation');
@@ -315,15 +325,17 @@ class PaymentSettingsController extends Controller
                 'client_id' => substr(
                     is_string($credentials['client_id'] ?? null) ? $credentials['client_id'] : '',
                     0,
-                    8
-                ) . '...',
+                    8,
+                ).'...',
             ]);
+
             return [
                 'success' => false,
                 'message' => trans('app.PayPal connection error: :error', ['error' => $e->getMessage()]),
             ];
         }
     }
+
     /**
      * Test Stripe connection with enhanced security.
      *
@@ -373,9 +385,10 @@ class PaymentSettingsController extends Controller
                 'secret_key' => substr(
                     is_string($credentials['secret_key']) ? $credentials['secret_key'] : '',
                     0,
-                    8
-                ) . '...',
+                    8,
+                ).'...',
             ]);
+
             return [
                 'success' => false,
                 'message' => trans('app.Stripe connection error: :error', ['error' => $e->getMessage()]),

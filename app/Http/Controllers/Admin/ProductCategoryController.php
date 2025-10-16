@@ -51,6 +51,7 @@ class ProductCategoryController extends Controller
         $this->middleware('user');
         $this->middleware('verified');
     }
+
     /**
      * Display a listing of product categories with enhanced security.
      *
@@ -79,6 +80,7 @@ class ProductCategoryController extends Controller
                 ->orderBy('name')
                 ->paginate(15);
             DB::commit();
+
             return view('admin.product-categories.index', ['categories' => $categories]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -86,12 +88,14 @@ class ProductCategoryController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Return empty categories on error
             return view('admin.product-categories.index', [
                 'categories' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15),
             ]);
         }
     }
+
     /**
      * Show the form for creating a new product category.
      *
@@ -112,6 +116,7 @@ class ProductCategoryController extends Controller
     {
         return view('admin.product-categories.create');
     }
+
     /**
      * Store a newly created product category with enhanced security.
      *
@@ -141,13 +146,14 @@ class ProductCategoryController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'product-category-store:' . $request->ip() . ':' . Auth::id();
+            $key = 'product-category-store:'.$request->ip().':'.Auth::id();
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for product category creation', [
                     'ip' => $request->ip(),
                     'user_id' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
+
                 return redirect()->back()
                     ->withInput()
                     ->with('error', 'Too many requests. Please try again later.');
@@ -162,6 +168,7 @@ class ProductCategoryController extends Controller
                     'is_admin' => $user ? $user->is_admin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
+
                 return redirect()->back()
                     ->withInput()
                     ->with('error', 'Access denied. Admin privileges required.');
@@ -185,6 +192,7 @@ class ProductCategoryController extends Controller
             }
             ProductCategory::create($validated);
             DB::commit();
+
             return redirect()->route('admin.product-categories.index')
                 ->with('success', 'Category created successfully.');
         } catch (ValidationException $e) {
@@ -199,11 +207,13 @@ class ProductCategoryController extends Controller
                 'ip' => $request->ip(),
                 'name' => $request->name ?? 'unknown',
             ]);
+
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Failed to create category. Please try again.');
         }
     }
+
     /**
      * Display the specified product category with enhanced security.
      *
@@ -232,9 +242,10 @@ class ProductCategoryController extends Controller
             $product_category->load('products');
             DB::commit();
             /**
- * @var view-string $viewName
-*/
+             * @var view-string $viewName
+             */
             $viewName = 'admin.product-categories.show';
+
             return view($viewName, ['product_category' => $product_category]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -243,10 +254,12 @@ class ProductCategoryController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'category_id' => $product_category->id ?? 'unknown',
             ]);
+
             return redirect()->route('admin.product-categories.index')
                 ->with('error', 'Failed to load category details.');
         }
     }
+
     /**
      * Show the form for editing the specified product category.
      *
@@ -268,11 +281,13 @@ class ProductCategoryController extends Controller
     public function edit(ProductCategory $product_category): View
     {
         /**
- * @var view-string $viewName
-*/
+         * @var view-string $viewName
+         */
         $viewName = 'admin.product-categories.edit';
+
         return view($viewName, ['product_category' => $product_category]);
     }
+
     /**
      * Update the specified product category with enhanced security.
      *
@@ -305,7 +320,7 @@ class ProductCategoryController extends Controller
             $key = sprintf(
                 'product-category-update:%s:%s',
                 $request->ip(),
-                Auth::id()
+                Auth::id(),
             ); // security-ignore: SQL_STRING_CONCAT
             if (RateLimiter::tooManyAttempts($key, 5)) {
                 Log::warning('Rate limit exceeded for product category update', [
@@ -313,6 +328,7 @@ class ProductCategoryController extends Controller
                     'user_id' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
+
                 return redirect()->back()
                     ->withInput()
                     ->with('error', 'Too many requests. Please try again later.');
@@ -328,6 +344,7 @@ class ProductCategoryController extends Controller
                     'is_admin' => $user ? $user->is_admin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
+
                 return redirect()->back()
                     ->withInput()
                     ->with('error', 'Access denied. Admin privileges required.');
@@ -359,6 +376,7 @@ class ProductCategoryController extends Controller
             }
             $product_category->update($validated);
             DB::commit();
+
             return redirect()->route('admin.product-categories.index')
                 ->with('success', 'Category updated successfully.');
         } catch (ValidationException $e) {
@@ -374,11 +392,13 @@ class ProductCategoryController extends Controller
                 'category_id' => $product_category->id,
                 'name' => $request->name ?? 'unknown',
             ]);
+
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Failed to update category. Please try again.');
         }
     }
+
     /**
      * Remove the specified product category with enhanced security.
      *
@@ -404,13 +424,14 @@ class ProductCategoryController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'product-category-delete:' . request()->ip() . ':' . Auth::id();
+            $key = 'product-category-delete:'.request()->ip().':'.Auth::id();
             if (RateLimiter::tooManyAttempts($key, 3)) {
                 Log::warning('Rate limit exceeded for product category deletion', [
                     'ip' => request()->ip(),
                     'user_id' => Auth::id(),
                     'attempts' => RateLimiter::attempts($key),
                 ]);
+
                 return redirect()->back()
                     ->with('error', 'Too many requests. Please try again later.');
             }
@@ -425,6 +446,7 @@ class ProductCategoryController extends Controller
                     'is_admin' => $user ? $user->is_admin : false,
                     'has_admin_role' => $user ? $user->hasRole('admin') : false,
                 ]);
+
                 return redirect()->back()
                     ->with('error', 'Access denied. Admin privileges required.');
             }
@@ -432,6 +454,7 @@ class ProductCategoryController extends Controller
             // Check if category has products
             if ($product_category->products()->count() > 0) {
                 DB::rollBack();
+
                 return redirect()->back()
                     ->with('error', 'Cannot delete category with existing products.');
             }
@@ -449,6 +472,7 @@ class ProductCategoryController extends Controller
             }
             $product_category->delete();
             DB::commit();
+
             return redirect()->route('admin.product-categories.index')
                 ->with('success', 'Category deleted successfully.');
         } catch (\Exception $e) {
@@ -460,6 +484,7 @@ class ProductCategoryController extends Controller
                 'ip' => request()->ip(),
                 'category_id' => $product_category->id,
             ]);
+
             return redirect()->back()
                 ->with('error', 'Failed to delete category. Please try again.');
         }

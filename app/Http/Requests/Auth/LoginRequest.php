@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Auth;
 
+use App\Helpers\SecurityHelper;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -11,7 +12,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use App\Helpers\SecurityHelper;
 
 /**
  * Login Request with enhanced security and validation.
@@ -38,6 +38,7 @@ class LoginRequest extends FormRequest
     {
         return true;
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -64,6 +65,7 @@ class LoginRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -81,6 +83,7 @@ class LoginRequest extends FormRequest
             'remember.in' => 'تذكرني يجب أن يكون صحيح أو خطأ.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -94,6 +97,7 @@ class LoginRequest extends FormRequest
             'remember' => 'remember me',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */
@@ -106,6 +110,7 @@ class LoginRequest extends FormRequest
             ]);
         }
     }
+
     /**
      * Sanitize email input with validation.
      *
@@ -115,14 +120,16 @@ class LoginRequest extends FormRequest
      */
     private function sanitizeEmail(mixed $email): ?string
     {
-        if ($email === null || !is_string($email)) {
+        if ($email === null || ! is_string($email)) {
             return null;
         }
         // Trim and convert to lowercase for consistency
         $email = trim(strtolower($email));
+
         // Don't use htmlspecialchars for email as it can break the format
         return $email;
     }
+
     /**
      * Attempt to authenticate the request's credentials with enhanced security.
      *
@@ -152,6 +159,7 @@ class LoginRequest extends FormRequest
         }
         RateLimiter::clear($this->throttleKey());
     }
+
     /**
      * Ensure the login request is not rate limited with enhanced security logging.
      *
@@ -182,6 +190,7 @@ class LoginRequest extends FormRequest
             ]),
         ]);
     }
+
     /**
      * Get the rate limiting throttle key for the request with enhanced security.
      *
@@ -192,6 +201,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')->toString()) . '|' . $this->ip());
+        return Str::transliterate(Str::lower($this->string('email')->toString()).'|'.$this->ip());
     }
 }

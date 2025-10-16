@@ -275,7 +275,7 @@ class EmailTemplateController extends Controller
         return view('admin.email-templates.edit', [
             'email_template' => $email_template,
             'types' => $types,
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -473,7 +473,7 @@ class EmailTemplateController extends Controller
                 ]);
                 $rendered = [
                     'subject' => 'Error rendering template',
-                    'body' => 'Error: ' . $e->getMessage(),
+                    'body' => 'Error: '.$e->getMessage(),
                 ];
             }
 
@@ -574,7 +574,7 @@ class EmailTemplateController extends Controller
 
             return redirect()
                 ->back()
-                ->with('error', 'Error sending test email: ' . $e->getMessage());
+                ->with('error', 'Error sending test email: '.$e->getMessage());
         }
     }
 
@@ -607,9 +607,9 @@ class EmailTemplateController extends Controller
             'current_year' => date('Y'),
             'verification_url' => (is_string(config('app.url'))
                 ? config('app.url')
-                : '') . '/verify-email?token=test-token',
-            'reset_url' => (is_string(config('app.url')) ? config('app.url') : '') . '/reset-password?token=test-token',
-            'license_key' => 'LIC-' . strtoupper(substr(md5((string)time()), 0, 8)),
+                : '').'/verify-email?token=test-token',
+            'reset_url' => (is_string(config('app.url')) ? config('app.url') : '').'/reset-password?token=test-token',
+            'license_key' => 'LIC-'.strtoupper(substr(md5((string)time()), 0, 8)),
             'product_name' => 'Test Product',
             'expires_at' => now()->addYear()->format('M d, Y'),
             'days_remaining' => 30,
@@ -623,9 +623,10 @@ class EmailTemplateController extends Controller
         ];
 
         /**
- * @var array<string, mixed> $result
-*/
+         * @var array<string, mixed> $result
+         */
         $result = array_merge($defaultData, is_array($testData) ? $testData : []);
+
         return $result;
     }
 }

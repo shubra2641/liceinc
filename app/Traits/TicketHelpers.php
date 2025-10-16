@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace App\Traits;
 
 use App\Models\Ticket;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Exception;
 
 /**
- * Ticket Helpers Trait
+ * Ticket Helpers Trait.
  *
  * Provides common ticket functionality to eliminate code duplication
  * across different ticket controllers.
@@ -27,26 +27,29 @@ trait TicketHelpers
      * @param array $ticketData
      * @param string $successRoute
      * @param string $successMessage
+     *
      * @return RedirectResponse
      */
     protected function handleTicketCreation(
         array $ticketData,
         string $successRoute,
-        string $successMessage = 'Ticket created successfully'
+        string $successMessage = 'Ticket created successfully',
     ): RedirectResponse {
         try {
             DB::beginTransaction();
             $ticket = Ticket::create($ticketData);
             DB::commit();
+
             return redirect()->route($successRoute, $ticket)
                 ->with('success', $successMessage);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to create ticket: ' . $e->getMessage(), [
+            Log::error('Failed to create ticket: '.$e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_data' => $ticketData,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()->with('error', 'Failed to create ticket. Please try again.')
                 ->withInput();
         }
@@ -57,12 +60,13 @@ trait TicketHelpers
      *
      * @param Ticket $ticket
      * @param string $viewName
+     *
      * @return View
      */
     protected function handleTicketDisplay(Ticket $ticket, string $viewName): View
     {
         try {
-            if (!$this->canViewTicket($ticket)) {
+            if (! $this->canViewTicket($ticket)) {
                 Log::warning('Unauthorized ticket access attempt', [
                     'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
@@ -75,10 +79,11 @@ trait TicketHelpers
             DB::beginTransaction();
             $ticket->load(['user', 'replies.user']);
             DB::commit();
+
             return view($viewName, ['ticket' => $ticket]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load ticket details: ' . $e->getMessage(), [
+            Log::error('Failed to load ticket details: '.$e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id,
                 'trace' => $e->getTraceAsString(),
@@ -93,26 +98,29 @@ trait TicketHelpers
      * @param Ticket $ticket
      * @param array $updateData
      * @param string $successMessage
+     *
      * @return RedirectResponse
      */
     protected function handleTicketUpdate(
         Ticket $ticket,
         array $updateData,
-        string $successMessage = 'Ticket updated successfully'
+        string $successMessage = 'Ticket updated successfully',
     ): RedirectResponse {
         try {
             DB::beginTransaction();
             $ticket->update($updateData);
             DB::commit();
+
             return back()->with('success', $successMessage);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to update ticket: ' . $e->getMessage(), [
+            Log::error('Failed to update ticket: '.$e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id,
                 'update_data' => $updateData,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()->with('error', 'Failed to update ticket. Please try again.');
         }
     }
@@ -123,15 +131,16 @@ trait TicketHelpers
      * @param \Illuminate\Http\Request $request
      * @param Ticket $ticket
      * @param bool $isAdmin
+     *
      * @return RedirectResponse
      */
     protected function updateTicket(
         \Illuminate\Http\Request $request,
         Ticket $ticket,
-        bool $isAdmin = false
+        bool $isAdmin = false,
     ): RedirectResponse {
         try {
-            if (!$isAdmin && !$this->canModifyTicket($ticket)) {
+            if (! $isAdmin && ! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket modification attempt', [
                     'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
@@ -142,14 +151,16 @@ trait TicketHelpers
             }
 
             $validated = $this->validateTicketUpdateData($request);
+
             return $this->handleTicketUpdate($ticket, $validated);
         } catch (Exception $e) {
-            Log::error('Failed to update ticket: ' . $e->getMessage(), [
+            Log::error('Failed to update ticket: '.$e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()->with('error', 'Failed to update ticket. Please try again.');
         }
     }
@@ -160,15 +171,16 @@ trait TicketHelpers
      * @param Ticket $ticket
      * @param bool $isAdmin
      * @param string $redirectRoute
+     *
      * @return RedirectResponse
      */
     protected function destroyTicket(
         Ticket $ticket,
         bool $isAdmin = false,
-        string $redirectRoute = 'tickets.index'
+        string $redirectRoute = 'tickets.index',
     ): RedirectResponse {
         try {
-            if (!$isAdmin && !$this->canModifyTicket($ticket)) {
+            if (! $isAdmin && ! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket deletion attempt', [
                     'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
@@ -180,14 +192,16 @@ trait TicketHelpers
             DB::beginTransaction();
             $ticket->delete();
             DB::commit();
+
             return redirect()->route($redirectRoute)->with('success', 'Ticket deleted');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to delete ticket: ' . $e->getMessage(), [
+            Log::error('Failed to delete ticket: '.$e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()->with('error', 'Failed to delete ticket. Please try again.');
         }
     }
@@ -200,6 +214,7 @@ trait TicketHelpers
      * @param bool $sendNotification
      * @param bool $allowClose
      * @param bool $isAdmin
+     *
      * @return RedirectResponse
      */
     protected function replyToTicket(
@@ -207,10 +222,10 @@ trait TicketHelpers
         Ticket $ticket,
         bool $sendNotification = false,
         bool $allowClose = false,
-        bool $isAdmin = false
+        bool $isAdmin = false,
     ): RedirectResponse {
         try {
-            if (!$isAdmin && !$this->canModifyTicket($ticket)) {
+            if (! $isAdmin && ! $this->canModifyTicket($ticket)) {
                 Log::warning('Unauthorized ticket reply attempt', [
                     'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
@@ -254,7 +269,7 @@ trait TicketHelpers
                         'reply_message' => $validated['message'],
                         'replied_by' => $user->name ?? 'Admin',
                     ]);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::error('Failed to send ticket reply email', [
                         'error' => $e->getMessage(),
                         'ticket_id' => $ticket->id,
@@ -264,15 +279,17 @@ trait TicketHelpers
             }
 
             DB::commit();
+
             return back()->with('success', $message);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to add ticket reply: ' . $e->getMessage(), [
+            Log::error('Failed to add ticket reply: '.$e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()->with('error', 'Failed to add reply. Please try again.');
         }
     }
@@ -283,12 +300,13 @@ trait TicketHelpers
      * @param Ticket $ticket
      * @param string $viewName
      * @param bool $isAdmin
+     *
      * @return View
      */
     protected function showTicket(Ticket $ticket, string $viewName, bool $isAdmin = false): View
     {
         try {
-            if (!$isAdmin && !$this->canViewTicket($ticket)) {
+            if (! $isAdmin && ! $this->canViewTicket($ticket)) {
                 Log::warning('Unauthorized ticket access attempt', [
                     'user_id' => Auth::id(),
                     'ticket_id' => $ticket->id,
@@ -305,10 +323,11 @@ trait TicketHelpers
                 $ticket->load(['user', 'replies.user']);
             }
             DB::commit();
+
             return view($viewName, ['ticket' => $ticket]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load ticket details: ' . $e->getMessage(), [
+            Log::error('Failed to load ticket details: '.$e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id,
                 'trace' => $e->getTraceAsString(),
@@ -321,14 +340,15 @@ trait TicketHelpers
      * Validate ticket update data.
      *
      * @param \Illuminate\Http\Request $request
+     *
      * @return array
      */
     protected function validateTicketUpdateData(\Illuminate\Http\Request $request): array
     {
         $validated = $request->validate([
             'subject' => ['sometimes', 'string', 'max:255'],
-            'priority' => ['sometimes', 'in:' . implode(', ', $this->getValidPriorities())],
-            'status' => ['sometimes', 'in:' . implode(', ', $this->getValidStatuses())],
+            'priority' => ['sometimes', 'in:'.implode(', ', $this->getValidPriorities())],
+            'status' => ['sometimes', 'in:'.implode(', ', $this->getValidStatuses())],
             'content' => ['sometimes', 'string'],
         ]);
 
@@ -360,6 +380,7 @@ trait TicketHelpers
      *
      * @param \Illuminate\Http\Request $request
      * @param array $additionalRules
+     *
      * @return array
      */
     protected function validateReplyData(\Illuminate\Http\Request $request, array $additionalRules = []): array
@@ -370,6 +391,7 @@ trait TicketHelpers
         ];
 
         $rules = array_merge($baseRules, $additionalRules);
+
         return $request->validate($rules);
     }
 
@@ -377,6 +399,7 @@ trait TicketHelpers
      * Check if ticket should be closed based on request.
      *
      * @param \Illuminate\Http\Request $request
+     *
      * @return bool
      */
     protected function shouldCloseTicket(\Illuminate\Http\Request $request): bool
@@ -388,6 +411,7 @@ trait TicketHelpers
      * Check if user can modify the ticket.
      *
      * @param Ticket $ticket
+     *
      * @return bool
      */
     protected function canModifyTicket(Ticket $ticket): bool
@@ -399,13 +423,14 @@ trait TicketHelpers
      * Check if user can view the ticket.
      *
      * @param Ticket $ticket
+     *
      * @return bool
      */
     protected function canViewTicket(Ticket $ticket): bool
     {
         // Allow viewing if user owns the ticket or is admin
         // For guest tickets (user_id is null), allow viewing
-        return !$ticket->user_id || // Guest ticket
+        return ! $ticket->user_id || // Guest ticket
                Auth::id() === $ticket->user_id ||
                Auth::user()?->hasRole('admin');
     }
@@ -415,6 +440,7 @@ trait TicketHelpers
      *
      * @param array $filters
      * @param int $perPage
+     *
      * @return Collection
      */
     protected function getTicketsWithFilters(array $filters = [], int $perPage = 15): Collection
@@ -442,19 +468,21 @@ trait TicketHelpers
      *
      * @param \Illuminate\Http\Request $request
      * @param array $additionalRules
+     *
      * @return array
      */
     protected function validateTicketData(\Illuminate\Http\Request $request, array $additionalRules = []): array
     {
         $baseRules = [
             'subject' => ['required', 'string', 'max:255'],
-            'priority' => ['required', 'in:' . implode(', ', $this->getValidPriorities())],
+            'priority' => ['required', 'in:'.implode(', ', $this->getValidPriorities())],
             'content' => ['required', 'string'],
             'purchase_code' => ['nullable', 'string'],
             'product_slug' => ['nullable', 'string'],
         ];
 
         $rules = array_merge($baseRules, $additionalRules);
+
         return $request->validate($rules);
     }
 }

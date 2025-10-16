@@ -15,11 +15,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
 /**
- * Payment Controller - Ultra Simplified
+ * Payment Controller - Ultra Simplified.
  *
  * Handles payment processing with minimal complexity.
  */
@@ -27,20 +26,20 @@ class PaymentController extends Controller
 {
     public function __construct(
         private PaymentService $paymentService,
-        private EmailFacade $emailService
+        private EmailFacade $emailService,
     ) {
     }
 
     /**
-     * Show payment gateways
+     * Show payment gateways.
      */
     public function showPaymentGateways(Product $product): View|RedirectResponse
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login')->with('error', trans('app.Please login to purchase this product'));
         }
 
-        if (!$product->is_active || $product->price <= 0) {
+        if (! $product->is_active || $product->price <= 0) {
             return redirect()->back()->with('error', trans('app.Product is not available for purchase'));
         }
 
@@ -51,12 +50,12 @@ class PaymentController extends Controller
 
         return view('payment.gateways', [
             'product' => $product,
-            'enabledGateways' => $enabledGateways
+            'enabledGateways' => $enabledGateways,
         ]);
     }
 
     /**
-     * Process payment
+     * Process payment.
      */
     public function processPayment(Request $request, Product $product): RedirectResponse
     {
@@ -65,11 +64,11 @@ class PaymentController extends Controller
             'invoice_id' => 'nullable|exists:invoices,id',
         ]);
 
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->back()->with('error', trans('app.Please login to purchase this product'));
         }
 
-        if (!PaymentSetting::isGatewayEnabled($validated['gateway'])) {
+        if (! PaymentSetting::isGatewayEnabled($validated['gateway'])) {
             return redirect()->back()->with('error', trans('app.Selected payment gateway is not available'));
         }
 
@@ -82,8 +81,9 @@ class PaymentController extends Controller
                 ->where('status', 'pending')
                 ->first();
 
-            if (!$invoice) {
+            if (! $invoice) {
                 DB::rollBack();
+
                 return redirect()->back()->with('error', trans('app.Invoice not found or already paid'));
             }
         }
@@ -115,17 +115,17 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle payment success
+     * Handle payment success.
      */
     public function handleSuccess(Request $request, string $gateway): RedirectResponse
     {
         $transactionId = $this->getTransactionId($request, $gateway);
-        if (!$transactionId) {
+        if (! $transactionId) {
             return redirect()->route('user.dashboard')->with('error', trans('app.Invalid payment response'));
         }
 
         $verificationResult = $this->paymentService->verifyPayment($gateway, $transactionId);
-        if (!$verificationResult['success']) {
+        if (! $verificationResult['success']) {
             return redirect()->route('payment.failure-page', $gateway)
                 ->with('error_message', trans('app.Payment verification failed. Please contact support.'));
         }
@@ -138,17 +138,18 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle payment cancel
+     * Handle payment cancel.
      */
     public function handleCancel(Request $request, string $gateway): RedirectResponse
     {
         session()->forget('payment_product_id');
+
         return redirect()->route('payment.cancel', $gateway)
             ->with('info', trans('app.Payment was cancelled. You can try again anytime.'));
     }
 
     /**
-     * Handle payment failure
+     * Handle payment failure.
      */
     public function handleFailure(Request $request, string $gateway): RedirectResponse
     {
@@ -160,7 +161,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle webhook
+     * Handle webhook.
      */
     public function handleWebhook(Request $request, string $gateway): JsonResponse
     {
@@ -175,7 +176,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Process custom payment
+     * Process custom payment.
      */
     public function processCustomPayment(Request $request, Invoice $invoice): RedirectResponse
     {
@@ -183,7 +184,7 @@ class PaymentController extends Controller
             'gateway' => 'required|in:stripe,paypal',
         ]);
 
-        if (!PaymentSetting::isGatewayEnabled($validated['gateway'])) {
+        if (! PaymentSetting::isGatewayEnabled($validated['gateway'])) {
             return redirect()->back()->with('error', 'Payment gateway is not available');
         }
 
@@ -217,7 +218,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Get transaction ID
+     * Get transaction ID.
      */
     private function getTransactionId(Request $request, string $gateway): ?string
     {
@@ -229,14 +230,14 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle custom payment
+     * Handle custom payment.
      */
     private function handleCustomPayment(string $transactionId, string $gateway): RedirectResponse
     {
         $invoiceId = session('payment_invoice_id');
         $invoice = Invoice::find($invoiceId);
 
-        if (!$invoice) {
+        if (! $invoice) {
             return redirect()->route('user.dashboard')->with('error', trans('app.Invoice not found'));
         }
 
@@ -264,14 +265,14 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle product payment
+     * Handle product payment.
      */
     private function handleProductPayment(string $transactionId, string $gateway): RedirectResponse
     {
         $productId = session('payment_product_id');
         $product = $productId ? Product::find($productId) : Product::where('is_active', true)->where('price', '>', 0)->first();
 
-        if (!$product) {
+        if (! $product) {
             return redirect()->route('user.dashboard')->with('error', trans('app.No products available for purchase'));
         }
 
@@ -294,7 +295,7 @@ class PaymentController extends Controller
             session()->forget(['payment_product_id', 'payment_invoice_id']);
 
             try {
-                if ($result['license'] instanceof \App\Models\License && $result['invoice'] instanceof \App\Models\Invoice) {
+                if ($result['license'] instanceof \App\Models\License && $result['invoice'] instanceof Invoice) {
                     $this->emailService->sendPaymentConfirmation($result['license'], $result['invoice']);
                     $this->emailService->sendLicenseCreated($result['license']);
                     $this->emailService->sendAdminPaymentNotification($result['license'], $result['invoice']);

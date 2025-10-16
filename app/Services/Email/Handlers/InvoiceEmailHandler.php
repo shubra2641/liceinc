@@ -25,7 +25,7 @@ class InvoiceEmailHandler
 
     public function __construct(
         protected EmailServiceInterface $emailService,
-        protected EmailValidatorInterface $validator
+        protected EmailValidatorInterface $validator,
     ) {
     }
 
@@ -106,7 +106,7 @@ class InvoiceEmailHandler
             'payment_method' => ucfirst(
                 is_string($invoice->metadata['gateway'] ?? null)
                     ? $invoice->metadata['gateway']
-                    : 'Unknown'
+                    : 'Unknown',
             ),
             'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
@@ -128,7 +128,7 @@ class InvoiceEmailHandler
             'payment_method' => ucfirst(
                 is_string($invoice->metadata['gateway'] ?? null)
                     ? $invoice->metadata['gateway']
-                    : 'Unknown'
+                    : 'Unknown',
             ),
             'transaction_id' => $invoice->metadata['transaction_id'] ?? 'N/A',
             'payment_date' => $invoice->paid_at?->format('M d, Y \a\t g:i A') ?? 'Unknown',
@@ -155,7 +155,7 @@ class InvoiceEmailHandler
                     ? $order->gateway_response['error']
                     : 'Unknown error',
                 'failure_date' => now()->format('M d, Y \a\t g:i A'),
-            ]
+            ],
         );
     }
 }

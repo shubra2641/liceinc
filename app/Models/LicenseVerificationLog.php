@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string $masked_purchase_code
  * @property-read string $source_badge_class
  * @property-read string $status_badge_class
+ *
  * @method static Builder<static>|LicenseVerificationLog failed()
  * @method static Builder<static>|LicenseVerificationLog forDomain(string $domain)
  * @method static Builder<static>|LicenseVerificationLog forIp(string $ip)
@@ -49,6 +50,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static Builder<static>|LicenseVerificationLog whereUserAgent($value)
  * @method static Builder<static>|LicenseVerificationLog whereVerificationSource($value)
  * @method static Builder<static>|LicenseVerificationLog whereVerifiedAt($value)
+ *
  * @mixin \Eloquent
  */
 class LicenseVerificationLog extends Model
@@ -62,6 +64,7 @@ class LicenseVerificationLog extends Model
      * @phpstan-ignore-next-line
      */
     protected static $factory = LicenseVerificationLogFactory::class;
+
     protected $fillable = [
         'purchase_code_hash',
         'domain',
@@ -75,11 +78,13 @@ class LicenseVerificationLog extends Model
         'error_details',
         'verified_at',
     ];
+
     protected $casts = [
         'is_valid' => 'boolean',
         'response_data' => 'array',
         'verified_at' => 'datetime',
     ];
+
     /**
      * Scope for successful verifications.
      *
@@ -94,6 +99,7 @@ class LicenseVerificationLog extends Model
     {
         return $query->where('is_valid', true)->where('status', 'success');
     }
+
     /**
      * Scope for failed verifications.
      *
@@ -105,6 +111,7 @@ class LicenseVerificationLog extends Model
     {
         return $query->where('is_valid', false);
     }
+
     /**
      * Scope for specific domain.
      *
@@ -116,6 +123,7 @@ class LicenseVerificationLog extends Model
     {
         return $query->where('domain', $domain);
     }
+
     /**
      * Scope for specific IP address.
      *
@@ -127,6 +135,7 @@ class LicenseVerificationLog extends Model
     {
         return $query->where('ip_address', $ip);
     }
+
     /**
      * Scope for specific verification source.
      *
@@ -138,6 +147,7 @@ class LicenseVerificationLog extends Model
     {
         return $query->where('verification_source', $source);
     }
+
     /**
      * Scope for recent attempts (last 24 hours).
      *
@@ -149,6 +159,7 @@ class LicenseVerificationLog extends Model
     {
         return $query->where('created_at', '>=', now()->subHours($hours));
     }
+
     /**
      * Get masked purchase code for display.
      */
@@ -157,10 +168,12 @@ class LicenseVerificationLog extends Model
         // Show first 4 and last 4 characters, mask the middle
         $hash = $this->purchase_code_hash;
         if (strlen($hash) > 8) {
-            return substr($hash, 0, 4) . '****' . substr($hash, -4);
+            return substr($hash, 0, 4).'****'.substr($hash, -4);
         }
+
         return '****';
     }
+
     /**
      * Get status badge class.
      */
@@ -173,6 +186,7 @@ class LicenseVerificationLog extends Model
             default => 'badge-secondary',
         };
     }
+
     /**
      * Get verification source badge class.
      */

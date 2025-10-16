@@ -29,8 +29,10 @@ class SystemUpdateRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
+
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -74,6 +76,7 @@ class SystemUpdateRequest extends FormRequest
                 ],
             ];
         }
+
         // Update validation
         return [
             'version' => [
@@ -143,6 +146,7 @@ class SystemUpdateRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -152,7 +156,7 @@ class SystemUpdateRequest extends FormRequest
     {
         return [
             'version.required' => 'Version is required.',
-            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix ' .
+            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix '.
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
             'confirm.required' => 'Confirmation is required for this operation.',
             'confirm.accepted' => 'You must confirm this operation to proceed.',
@@ -178,6 +182,7 @@ class SystemUpdateRequest extends FormRequest
             'dry_run.boolean' => 'Dry run must be true or false.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -210,6 +215,7 @@ class SystemUpdateRequest extends FormRequest
             'dry_run' => 'dry run',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */
@@ -257,6 +263,7 @@ class SystemUpdateRequest extends FormRequest
             'rollback_on_error' => $this->rollback_on_error ?? true,
         ]);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -270,7 +277,7 @@ class SystemUpdateRequest extends FormRequest
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

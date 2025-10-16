@@ -44,6 +44,7 @@ class EnvatoController extends Controller
      * Rate limiting duration in minutes.
      */
     private const RATE_LIMIT_DURATION = 1;
+
     /**
      * Verify purchase code with Envato API and create/update license with enhanced security.
      *
@@ -80,11 +81,12 @@ class EnvatoController extends Controller
                 Log::warning('Rate limit exceeded for purchase verification', [
                     'ip' => $request->ip(),
                     'purchase_code' => $this->maskPurchaseCode(
-                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : '',
                     ),
                 ]);
+
                 return back()->withErrors(['purchase_code' => 'Too many verification attempts. '
-                    . 'Please try again later.']);
+                    .'Please try again later.']);
             }
             if ($clientIp) {
                 $this->setRateLimit($clientIp, 'verify_purchase_');
@@ -96,12 +98,13 @@ class EnvatoController extends Controller
                 DB::rollBack();
                 Log::warning('Failed to verify purchase code', [
                     'purchase_code' => $this->maskPurchaseCode(
-                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : '',
                     ),
                     'ip' => $request->ip(),
                 ]);
+
                 return back()->withErrors(['purchase_code' => 'Could not verify purchase code. '
-                    . 'Please check and try again.']);
+                    .'Please check and try again.']);
             }
             // Find product by slug
             $product = Product::where('slug', $data['product_slug'])->firstOrFail();
@@ -117,17 +120,18 @@ class EnvatoController extends Controller
                 DB::rollBack();
                 Log::warning('Purchase code does not match product', [
                     'purchase_code' => $this->maskPurchaseCode(
-                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : '',
                     ),
                     'product_id' => $product->id,
                     'expected_item_id' => $product->envato_item_id,
                     'actual_item_id' => $itemId,
                 ]);
+
                 return back()->withErrors(['purchase_code' => 'Purchase code does not belong to this product.']);
             }
             // Create or find user by email
             $user = User::firstOrCreate(
-                ['email' => $buyerEmail ?: Str::uuid() . '@envato-temp.local'],
+                ['email' => $buyerEmail ?: Str::uuid().'@envato-temp.local'],
                 [
                     'name' => $buyerName,
                     'password' => Hash::make(Str::random(32)),
@@ -148,6 +152,7 @@ class EnvatoController extends Controller
                 ],
             );
             DB::commit();
+
             return back()->with('success', 'Purchase verified and license updated successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
@@ -163,10 +168,12 @@ class EnvatoController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'ip' => $request->ip(),
             ]);
+
             return back()->withErrors(['purchase_code' => 'An error occurred while verifying your purchase. '
-                . 'Please try again.']);
+                .'Please try again.']);
         }
     }
+
     /**
      * Redirect user to Envato OAuth authorization page with enhanced security.
      *
@@ -192,9 +199,11 @@ class EnvatoController extends Controller
                 'ip' => request()->ip(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return redirect('/login')->withErrors(['envato' => 'Unable to connect to Envato. Please try again.']);
         }
     }
+
     /**
      * Handle Envato OAuth callback and authenticate user with enhanced security.
      *
@@ -217,8 +226,8 @@ class EnvatoController extends Controller
         try {
             DB::beginTransaction();
             /**
- * @var \Laravel\Socialite\Two\User $envatoUser
-*/
+             * @var \Laravel\Socialite\Two\User $envatoUser
+             */
             $envatoUser = Socialite::driver('envato')->user();
             $username = $envatoUser->getNickname() ?: $envatoUser->getId();
             if (! $username) {
@@ -227,6 +236,7 @@ class EnvatoController extends Controller
                     'envato_id' => $envatoUser->getId(),
                     'ip' => request()->ip(),
                 ]);
+
                 return redirect('/login')->withErrors([
                     'envato' => 'Could not retrieve username from Envato. Please try again.',
                 ]);
@@ -246,7 +256,7 @@ class EnvatoController extends Controller
             // Check if we have a real email, if not, create a temporary one
             $email = $envatoUser->getEmail();
             if (! $email || str_contains($email, '@envato.temp')) {
-                $email = 'temp_' . $username . '@envato.local';
+                $email = 'temp_'.$username.'@envato.local';
             }
             $user = User::updateOrCreate(
                 ['email' => $email],
@@ -261,6 +271,7 @@ class EnvatoController extends Controller
                     'Please update your email address in your profile to complete your account setup.',
                 );
             }
+
             return redirect('/dashboard')->with('success', 'Successfully logged in with Envato!');
         } catch (Exception $e) {
             DB::rollBack();
@@ -269,9 +280,11 @@ class EnvatoController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'ip' => request()->ip(),
             ]);
+
             return redirect('/login')->withErrors(['envato' => 'Authentication failed. Please try again.']);
         }
     }
+
     /**
      * Link existing user account with Envato OAuth with enhanced security.
      *
@@ -300,8 +313,8 @@ class EnvatoController extends Controller
             }
             DB::beginTransaction();
             /**
- * @var \Laravel\Socialite\Two\User $envatoUser
-*/
+             * @var \Laravel\Socialite\Two\User $envatoUser
+             */
             $envatoUser = Socialite::driver('envato')->user();
             $userInfo = $envato->getOAuthUserInfo($envatoUser->token);
             if ($userInfo === null) {
@@ -311,6 +324,7 @@ class EnvatoController extends Controller
                     'envato_id' => $envatoUser->getId(),
                     'ip' => $request->ip(),
                 ]);
+
                 return back()->withErrors([
                     'envato' => 'Could not retrieve user information from Envato. Please try again.',
                 ]);
@@ -327,6 +341,7 @@ class EnvatoController extends Controller
                     'existing_user_id' => $existingUser->id,
                     'ip' => $request->ip(),
                 ]);
+
                 return back()->withErrors(['envato' => 'This Envato account is already linked to another user.']);
             }
             $user = auth()->user();
@@ -340,6 +355,7 @@ class EnvatoController extends Controller
                 ]);
             }
             DB::commit();
+
             return back()->with('success', 'Envato account linked successfully! You can now verify your purchases.');
         } catch (Exception $e) {
             DB::rollBack();
@@ -349,9 +365,11 @@ class EnvatoController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'ip' => $request->ip(),
             ]);
+
             return back()->withErrors(['envato' => 'Failed to link Envato account. Please try again.']);
         }
     }
+
     /**
      * Verify user's purchase code via AJAX request with enhanced security.
      *
@@ -388,12 +406,13 @@ class EnvatoController extends Controller
             // Enhanced validation
             $data = $this->validateAjaxPurchaseRequest($request);
             // Rate limiting for AJAX requests
-            $rateLimitKey = 'ajax_verify_' . auth()->id() . '_' . $request->ip();
+            $rateLimitKey = 'ajax_verify_'.auth()->id().'_'.$request->ip();
             if ($this->isRateLimited($rateLimitKey, 'ajax_verify_')) {
                 Log::warning('Rate limit exceeded for AJAX purchase verification', [
                     'user_id' => auth()->id(),
                     'ip' => $request->ip(),
                 ]);
+
                 return response()->json([
                     'valid' => false,
                     'message' => 'Too many verification attempts. Please try again later.',
@@ -407,11 +426,12 @@ class EnvatoController extends Controller
                 Log::warning('AJAX purchase verification failed', [
                     'user_id' => auth()->id(),
                     'purchase_code' => $this->maskPurchaseCode(
-                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : '',
                     ),
                     'product_id' => $data['product_id'],
                     'ip' => $request->ip(),
                 ]);
+
                 return response()->json([
                     'valid' => false,
                     'message' => 'Invalid purchase code. Please check and try again.',
@@ -424,13 +444,14 @@ class EnvatoController extends Controller
                 Log::warning('AJAX purchase code does not match product', [
                     'user_id' => auth()->id(),
                     'purchase_code' => $this->maskPurchaseCode(
-                        is_string($data['purchase_code']) ? $data['purchase_code'] : ''
+                        is_string($data['purchase_code']) ? $data['purchase_code'] : '',
                     ),
                     'product_id' => $product->id,
                     'expected_item_id' => $product->envato_item_id,
                     'actual_item_id' => $itemId,
                     'ip' => $request->ip(),
                 ]);
+
                 return response()->json([
                     'valid' => false,
                     'message' => 'Purchase code does not match this product.',
@@ -442,6 +463,7 @@ class EnvatoController extends Controller
                 ->first();
             if ($existingLicense) {
                 DB::rollBack();
+
                 return response()->json([
                     'valid' => true,
                     'message' => 'License already exists in your account',
@@ -459,11 +481,12 @@ class EnvatoController extends Controller
                     Carbon::parse(
                         is_string(data_get($sale, 'supported_until'))
                             ? data_get($sale, 'supported_until')
-                            : ''
+                            : '',
                     )->format('Y-m-d') : null,
                 'verified_at' => now(),
             ]);
             DB::commit();
+
             return response()->json([
                 'valid' => true,
                 'message' => 'License verified and added to your account',
@@ -476,6 +499,7 @@ class EnvatoController extends Controller
                 'errors' => $e->errors(),
                 'ip' => $request->ip(),
             ]);
+
             return response()->json([
                 'valid' => false,
                 'message' => 'Validation failed',
@@ -489,12 +513,14 @@ class EnvatoController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'ip' => $request->ip(),
             ]);
+
             return response()->json([
                 'valid' => false,
                 'message' => 'An error occurred while verifying your purchase. Please try again.',
             ], 500);
         }
     }
+
     /**
      * Validate purchase request data.
      *
@@ -526,11 +552,13 @@ class EnvatoController extends Controller
         ]);
 
         /**
- * @var array<string, mixed> $result
-*/
+         * @var array<string, mixed> $result
+         */
         $result = $validated;
+
         return $result;
     }
+
     /**
      * Validate AJAX purchase request data.
      *
@@ -558,11 +586,13 @@ class EnvatoController extends Controller
         ]);
 
         /**
- * @var array<string, mixed> $result
-*/
+         * @var array<string, mixed> $result
+         */
         $result = $validated;
+
         return $result;
     }
+
     /**
      * Check if request is rate limited.
      *
@@ -573,8 +603,9 @@ class EnvatoController extends Controller
      */
     private function isRateLimited(string $key, string $prefix = ''): bool
     {
-        return cache()->has($prefix . $key);
+        return cache()->has($prefix.$key);
     }
+
     /**
      * Set rate limit for request.
      *
@@ -583,8 +614,9 @@ class EnvatoController extends Controller
      */
     private function setRateLimit(string $key, string $prefix = ''): void
     {
-        cache()->put($prefix . $key, true, now()->addMinutes(self::RATE_LIMIT_DURATION));
+        cache()->put($prefix.$key, true, now()->addMinutes(self::RATE_LIMIT_DURATION));
     }
+
     /**
      * Mask purchase code for logging.
      *
@@ -594,6 +626,6 @@ class EnvatoController extends Controller
      */
     private function maskPurchaseCode(string $purchaseCode): string
     {
-        return substr($purchaseCode, 0, 8) . '...';
+        return substr($purchaseCode, 0, 8).'...';
     }
 }

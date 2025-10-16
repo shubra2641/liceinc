@@ -55,20 +55,23 @@ class InstallController extends Controller
 
             if ($verificationResult['valid'] ?? false) {
                 session(['install.license' => $verificationResult['data']]);
+
                 return $this->verificationResponse($request, true, 'License verified successfully', $verificationResult);
             } else {
                 $message = $verificationResult['message'] ?? 'License verification failed';
+
                 return $this->verificationResponse($request, false, $message, $verificationResult);
             }
         } catch (\Throwable $exception) {
             Log::error('License verification error in InstallController', ['error' => $exception->getMessage()]);
+
             return $this->verificationResponse($request, false, 'An error occurred during verification', ['general' => $exception->getMessage()], 500);
         }
     }
 
     public function requirements(): View
     {
-        if (!session('install.license')) {
+        if (! session('install.license')) {
             return redirect()->route('install.license')->withErrors(['error' => 'Please verify your license first.']);
         }
 
@@ -84,23 +87,23 @@ class InstallController extends Controller
             'writable_dirs' => [
                 'storage' => is_writable(storage_path()),
                 'bootstrap/cache' => is_writable(base_path('bootstrap/cache')),
-            ]
+            ],
         ];
 
         $allPassed = $requirements['php_version'] &&
-                    array_reduce($requirements['extensions'], fn($carry, $ext) => $carry && $ext, true) &&
-                    array_reduce($requirements['writable_dirs'], fn($carry, $dir) => $carry && $dir, true);
+                    array_reduce($requirements['extensions'], fn ($carry, $ext) => $carry && $ext, true) &&
+                    array_reduce($requirements['writable_dirs'], fn ($carry, $dir) => $carry && $dir, true);
 
         return view('install.requirements', [
             'step' => 3,
             'requirements' => $requirements,
-            'allPassed' => $allPassed
+            'allPassed' => $allPassed,
         ]);
     }
 
     public function database(): View
     {
-        if (!session('install.license')) {
+        if (! session('install.license')) {
             return redirect()->route('install.license')->withErrors(['error' => 'Please verify your license first.']);
         }
 
@@ -114,7 +117,7 @@ class InstallController extends Controller
             'port' => 'required|integer',
             'database' => 'required|string',
             'username' => 'required|string',
-            'password' => 'nullable|string'
+            'password' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -138,18 +141,19 @@ class InstallController extends Controller
             DB::connection('test')->getPdo();
 
             session(['install.database' => $request->all()]);
+
             return redirect()->route('install.admin');
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['database' => 'Database connection failed: ' . $e->getMessage()])->withInput();
+            return redirect()->back()->withErrors(['database' => 'Database connection failed: '.$e->getMessage()])->withInput();
         }
     }
 
     public function admin(): View
     {
-        if (!session('install.license')) {
+        if (! session('install.license')) {
             return redirect()->route('install.license')->withErrors(['error' => 'Please verify your license first.']);
         }
-        if (!session('install.database')) {
+        if (! session('install.database')) {
             return redirect()->route('install.database')->withErrors(['error' => 'Please configure database settings first.']);
         }
 
@@ -161,7 +165,7 @@ class InstallController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'password' => 'required|string|min:8|confirmed'
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -169,18 +173,19 @@ class InstallController extends Controller
         }
 
         session(['install.admin' => $request->all()]);
+
         return redirect()->route('install.settings');
     }
 
     public function settings(): View
     {
-        if (!session('install.license')) {
+        if (! session('install.license')) {
             return redirect()->route('install.license')->withErrors(['error' => 'Please verify your license first.']);
         }
-        if (!session('install.database')) {
+        if (! session('install.database')) {
             return redirect()->route('install.database')->withErrors(['error' => 'Please configure database settings first.']);
         }
-        if (!session('install.admin')) {
+        if (! session('install.admin')) {
             return redirect()->route('install.admin')->withErrors(['error' => 'Please create admin account first.']);
         }
 
@@ -196,7 +201,7 @@ class InstallController extends Controller
             'mail_port' => 'nullable|integer',
             'mail_username' => 'nullable|string',
             'mail_password' => 'nullable|string',
-            'mail_encryption' => 'nullable|string'
+            'mail_encryption' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -204,21 +209,22 @@ class InstallController extends Controller
         }
 
         session(['install.settings' => $request->all()]);
+
         return redirect()->route('install.install');
     }
 
     public function install(): View
     {
-        if (!session('install.license')) {
+        if (! session('install.license')) {
             return redirect()->route('install.license')->withErrors(['error' => 'Please verify your license first.']);
         }
-        if (!session('install.database')) {
+        if (! session('install.database')) {
             return redirect()->route('install.database')->withErrors(['error' => 'Please configure database settings first.']);
         }
-        if (!session('install.admin')) {
+        if (! session('install.admin')) {
             return redirect()->route('install.admin')->withErrors(['error' => 'Please create admin account first.']);
         }
-        if (!session('install.settings')) {
+        if (! session('install.settings')) {
             return redirect()->route('install.settings')->withErrors(['error' => 'Please configure application settings first.']);
         }
 
@@ -245,7 +251,7 @@ class InstallController extends Controller
 
             return response()->json(['success' => true, 'message' => 'Installation completed successfully']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Installation failed: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Installation failed: '.$e->getMessage()], 500);
         }
     }
 
@@ -256,21 +262,21 @@ class InstallController extends Controller
 
         $envContent = file_get_contents(base_path('.env'));
 
-        $envContent = str_replace('DB_HOST=127.0.0.1', 'DB_HOST=' . $database['host'], $envContent);
-        $envContent = str_replace('DB_PORT=3306', 'DB_PORT=' . $database['port'], $envContent);
-        $envContent = str_replace('DB_DATABASE=laravel', 'DB_DATABASE=' . $database['database'], $envContent);
-        $envContent = str_replace('DB_USERNAME=root', 'DB_USERNAME=' . $database['username'], $envContent);
-        $envContent = str_replace('DB_PASSWORD=', 'DB_PASSWORD=' . $database['password'], $envContent);
+        $envContent = str_replace('DB_HOST=127.0.0.1', 'DB_HOST='.$database['host'], $envContent);
+        $envContent = str_replace('DB_PORT=3306', 'DB_PORT='.$database['port'], $envContent);
+        $envContent = str_replace('DB_DATABASE=laravel', 'DB_DATABASE='.$database['database'], $envContent);
+        $envContent = str_replace('DB_USERNAME=root', 'DB_USERNAME='.$database['username'], $envContent);
+        $envContent = str_replace('DB_PASSWORD=', 'DB_PASSWORD='.$database['password'], $envContent);
 
-        $envContent = str_replace('APP_NAME=Laravel', 'APP_NAME="' . $settings['app_name'] . '"', $envContent);
-        $envContent = str_replace('APP_URL=http://localhost', 'APP_URL=' . $settings['app_url'], $envContent);
+        $envContent = str_replace('APP_NAME=Laravel', 'APP_NAME="'.$settings['app_name'].'"', $envContent);
+        $envContent = str_replace('APP_URL=http://localhost', 'APP_URL='.$settings['app_url'], $envContent);
 
         if ($settings['mail_host']) {
-            $envContent = str_replace('MAIL_HOST=mailpit', 'MAIL_HOST=' . $settings['mail_host'], $envContent);
-            $envContent = str_replace('MAIL_PORT=1025', 'MAIL_PORT=' . $settings['mail_port'], $envContent);
-            $envContent = str_replace('MAIL_USERNAME=null', 'MAIL_USERNAME=' . $settings['mail_username'], $envContent);
-            $envContent = str_replace('MAIL_PASSWORD=null', 'MAIL_PASSWORD=' . $settings['mail_password'], $envContent);
-            $envContent = str_replace('MAIL_ENCRYPTION=null', 'MAIL_ENCRYPTION=' . $settings['mail_encryption'], $envContent);
+            $envContent = str_replace('MAIL_HOST=mailpit', 'MAIL_HOST='.$settings['mail_host'], $envContent);
+            $envContent = str_replace('MAIL_PORT=1025', 'MAIL_PORT='.$settings['mail_port'], $envContent);
+            $envContent = str_replace('MAIL_USERNAME=null', 'MAIL_USERNAME='.$settings['mail_username'], $envContent);
+            $envContent = str_replace('MAIL_PASSWORD=null', 'MAIL_PASSWORD='.$settings['mail_password'], $envContent);
+            $envContent = str_replace('MAIL_ENCRYPTION=null', 'MAIL_ENCRYPTION='.$settings['mail_encryption'], $envContent);
         }
 
         file_put_contents(base_path('.env'), $envContent);
@@ -285,7 +291,7 @@ class InstallController extends Controller
             'email' => $admin['email'],
             'password' => Hash::make($admin['password']),
             'is_admin' => true,
-            'email_verified_at' => now()
+            'email_verified_at' => now(),
         ]);
     }
 
@@ -319,6 +325,7 @@ class InstallController extends Controller
         if ($request->expectsJson()) {
             return response()->json(['success' => false, 'message' => $message], 422);
         }
+
         return redirect()->back()->withErrors(['purchase_code' => $message])->withInput();
     }
 
@@ -331,7 +338,7 @@ class InstallController extends Controller
             return response()->json([
                 'success' => $success,
                 'message' => $message,
-                'data' => $data
+                'data' => $data,
             ], $statusCode);
         }
 

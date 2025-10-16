@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -15,8 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $message
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Ticket $ticket
- * @property-read \App\Models\User $user
+ * @property-read Ticket $ticket
+ * @property-read User $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketReply newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketReply newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketReply query()
@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketReply whereTicketId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketReply whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketReply whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class TicketReply extends Model
@@ -44,10 +45,12 @@ class TicketReply extends Model
         'user_id',
         'message',
     ];
+
     protected $casts = [
         'ticket_id' => 'integer',
         'user_id' => 'integer',
     ];
+
     /**
      * @return BelongsTo<Ticket, $this>
      */
@@ -55,6 +58,7 @@ class TicketReply extends Model
     {
         return $this->belongsTo(Ticket::class);
     }
+
     /**
      * @return BelongsTo<User, $this>
      */

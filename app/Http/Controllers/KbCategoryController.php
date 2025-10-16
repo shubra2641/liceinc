@@ -70,16 +70,19 @@ class KbCategoryController extends Controller
                 ->with('parent')
                 ->latest()
                 ->paginate(15);
+
             return view('admin.kb.categories.index', ['categories' => $categories]);
         } catch (Throwable $e) {
             Log::error('Failed to load knowledge base categories', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return view('admin.kb.categories.index', ['categories' => collect()])
                 ->with('error', 'Failed to load categories. Please try again.');
         }
     }
+
     /**
      * Show the form for creating a new knowledge base category with enhanced security.
      *
@@ -99,18 +102,21 @@ class KbCategoryController extends Controller
         try {
             $parents = KbCategory::pluck('name', 'id');
             $products = Product::where('is_active', true)->get();
+
             return view('admin.kb.categories.create', ['parents' => $parents, 'products' => $products]);
         } catch (Throwable $e) {
             Log::error('Failed to load category creation form', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return view('admin.kb.categories.create', [
                 'parents' => collect(),
                 'products' => collect(),
             ])->with('error', 'Failed to load form data. Please try again.');
         }
     }
+
     /**
      * Store a newly created knowledge base category with enhanced security and validation.
      *
@@ -157,6 +163,7 @@ class KbCategoryController extends Controller
                     'name' => $category->name,
                     'slug' => $category->slug,
                 ]);
+
                 return $this->redirectWithMessage(
                     'admin.kb-categories.index',
                     'Category created successfully',
@@ -169,10 +176,13 @@ class KbCategoryController extends Controller
                 'input' => $this->sanitizeInput($request->all()),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()->withErrors(['general' => 'Failed to create category. Please try again.']);
         }
+
         return $result instanceof RedirectResponse ? $result : back();
     }
+
     /**
      * Display the specified knowledge base category with enhanced security.
      *
@@ -189,7 +199,7 @@ class KbCategoryController extends Controller
      * // Show category details
      * $view = $kbCategoryController->show($kbCategory);
      */
-    public function show(KbCategory $kbCategory): View|\Illuminate\Http\RedirectResponse
+    public function show(KbCategory $kbCategory): View|RedirectResponse
     {
         try {
             $kbCategory->load(['articles' => function ($query) {
@@ -201,9 +211,10 @@ class KbCategoryController extends Controller
                 }
             }, 'parent', 'product']);
             /**
- * @var view-string $viewName
-*/
+             * @var view-string $viewName
+             */
             $viewName = 'admin.kb.categories.show';
+
             return view($viewName, ['kbCategory' => $kbCategory]);
         } catch (Throwable $e) {
             Log::error('Failed to load knowledge base category details', [
@@ -211,10 +222,12 @@ class KbCategoryController extends Controller
                 'category_id' => $kbCategory->id,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return redirect()->route('admin.kb-categories.index')
                 ->with('error', 'Failed to load category details. Please try again.');
         }
     }
+
     /**
      * Show the form for editing the specified knowledge base category with enhanced security.
      *
@@ -231,11 +244,12 @@ class KbCategoryController extends Controller
      * // Show edit form
      * $view = $kbCategoryController->edit($kbCategory);
      */
-    public function edit(KbCategory $kbCategory): View|\Illuminate\Http\RedirectResponse
+    public function edit(KbCategory $kbCategory): View|RedirectResponse
     {
         try {
             $parents = KbCategory::where('id', '!=', $kbCategory->id)->pluck('name', 'id');
             $products = Product::where('is_active', true)->get();
+
             return view('admin.kb.categories.edit', [
                 'category' => $kbCategory,
                 'parents' => $parents,
@@ -247,10 +261,12 @@ class KbCategoryController extends Controller
                 'category_id' => $kbCategory->id,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return redirect()->route('admin.kb-categories.index')
                 ->with('error', 'Failed to load edit form. Please try again.');
         }
     }
+
     /**
      * Update the specified knowledge base category with enhanced security and validation.
      *
@@ -298,6 +314,7 @@ class KbCategoryController extends Controller
                     'name' => $kbCategory->name,
                     'slug' => $kbCategory->slug,
                 ]);
+
                 return back()->with('success', 'Category updated successfully');
             });
         } catch (Throwable $e) {
@@ -307,10 +324,13 @@ class KbCategoryController extends Controller
                 'input' => $this->sanitizeInput($request->all()),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()->withErrors(['general' => 'Failed to update category. Please try again.']);
         }
+
         return $result instanceof RedirectResponse ? $result : back();
     }
+
     /**
      * Remove the specified knowledge base category with enhanced security and comprehensive handling.
      *
@@ -362,6 +382,7 @@ class KbCategoryController extends Controller
                         'uncategorized_category_id' => $uncat->id,
                     ]);
                 }
+
                 return $this->redirectWithMessage(
                     'admin.kb-categories.index',
                     'Category deleted successfully',
@@ -375,10 +396,13 @@ class KbCategoryController extends Controller
                 'delete_mode' => request('delete_mode', 'keep_articles'),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()->withErrors(['general' => 'Failed to delete category. Please try again.']);
         }
+
         return $result instanceof RedirectResponse ? $result : back();
     }
+
     /**
      * Sanitize category data to prevent XSS attacks.
      *
@@ -398,6 +422,7 @@ class KbCategoryController extends Controller
                 $sanitized[$key] = $value;
             }
         }
+
         return $sanitized;
     }
 }

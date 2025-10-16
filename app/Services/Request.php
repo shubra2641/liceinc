@@ -60,6 +60,7 @@ class Request extends FormRequest
         if ($input === null) {
             return null;
         }
+
         return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }

@@ -37,6 +37,7 @@ class InvoiceController extends Controller
      * Pagination limit for invoice listing.
      */
     private const PAGINATION_LIMIT = 10;
+
     /**
      * Display a listing of user invoices with enhanced security.
      *
@@ -77,24 +78,27 @@ class InvoiceController extends Controller
                 $status = $this->validateStatus(
                     is_string($request->validated('status'))
                         ? $request->validated('status')
-                        : ''
+                        : '',
                 );
                 $query->where('status', $status);
             }
             $invoices = $query->latest()->paginate(self::PAGINATION_LIMIT);
             DB::commit();
+
             return view('user.invoices.index', ['invoices' => $invoices]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load user invoices: ' . $e->getMessage(), [
+            Log::error('Failed to load user invoices: '.$e->getMessage(), [
                 'user_id' => Auth::id(),
                 'request_url' => $request->fullUrl(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return view('user.invoices.index', ['invoices' => collect()])
                 ->with('error', 'Failed to load invoices. Please try again.');
         }
     }
+
     /**
      * Display the specified invoice with enhanced security.
      *
@@ -147,6 +151,7 @@ class InvoiceController extends Controller
             // Get enabled payment gateways
             $enabledGateways = \App\Models\PaymentSetting::getEnabledGateways();
             DB::commit();
+
             return view(
                 'user.invoices.show',
                 [
@@ -160,7 +165,7 @@ class InvoiceController extends Controller
             );
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load invoice details: ' . $e->getMessage(), [
+            Log::error('Failed to load invoice details: '.$e->getMessage(), [
                 'user_id' => Auth::id(),
                 'invoice_id' => $invoice->id ?? null,
                 'trace' => $e->getTraceAsString(),
@@ -168,6 +173,7 @@ class InvoiceController extends Controller
             abort(500, 'Failed to load invoice details. Please try again.');
         }
     }
+
     /**
      * Validate invoice status parameter.
      *
@@ -181,8 +187,9 @@ class InvoiceController extends Controller
     {
         $validStatuses = ['pending', 'paid', 'overdue', 'cancelled'];
         if (! in_array($status, $validStatuses, true)) {
-            throw new \InvalidArgumentException('Invalid invoice status: ' . $status);
+            throw new \InvalidArgumentException('Invalid invoice status: '.$status);
         }
+
         return $status;
     }
 }

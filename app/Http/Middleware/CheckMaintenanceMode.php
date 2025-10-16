@@ -68,6 +68,7 @@ class CheckMaintenanceMode
                     return $this->returnMaintenancePage();
                 }
             }
+
             return $next($request);
         } catch (\Exception $e) {
             Log::error('Error in CheckMaintenanceMode middleware', [
@@ -77,10 +78,12 @@ class CheckMaintenanceMode
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // In case of error, allow request to proceed to prevent site blocking
             return $next($request);
         }
     }
+
     /**
      * Check maintenance mode status from database settings.
      *
@@ -93,15 +96,18 @@ class CheckMaintenanceMode
     {
         try {
             $isMaintenance = (bool)Setting::get('maintenance_mode', false);
+
             return $isMaintenance;
         } catch (\Throwable $e) {
             // If settings table is not ready, do not block the site
             Log::warning('Settings table not available, maintenance mode disabled', [
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
+
     /**
      * Validate access permissions for maintenance mode bypass.
      *
@@ -121,6 +127,7 @@ class CheckMaintenanceMode
             $isHealth = $this->isHealthEndpoint($request);
             // Allow access to static assets and essential files
             $isAllowlisted = $this->isAllowlistedPath($request);
+
             return $isAdminPath || $isHealth || $isAllowlisted;
         } catch (\Exception $e) {
             Log::error('Error validating access permissions', [
@@ -128,10 +135,12 @@ class CheckMaintenanceMode
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // In case of error, deny access to be safe
             return false;
         }
     }
+
     /**
      * Check if request is for admin area.
      *
@@ -147,15 +156,18 @@ class CheckMaintenanceMode
                 $routeName = $request->route()->getName() ?? '';
                 $isAdminPath = str_starts_with($routeName, 'admin.');
             }
+
             return $isAdminPath;
         } catch (\Exception $e) {
             Log::error('Error checking admin path', [
                 'url' => $request->url() ?: 'unknown',
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
+
     /**
      * Check if request is for health endpoints.
      *
@@ -174,9 +186,11 @@ class CheckMaintenanceMode
                 'url' => $request->url() ?: 'unknown',
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
+
     /**
      * Check if request is for allowlisted static assets.
      *
@@ -200,15 +214,18 @@ class CheckMaintenanceMode
                     return true;
                 }
             }
+
             return false;
         } catch (\Exception $e) {
             Log::error('Error checking allowlisted path', [
                 'url' => $request->url() ?: 'unknown',
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
+
     /**
      * Return maintenance page response.
      *
@@ -223,6 +240,7 @@ class CheckMaintenanceMode
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Fallback to simple text response
             return response('Service temporarily unavailable. Please try again later.', 503);
         }

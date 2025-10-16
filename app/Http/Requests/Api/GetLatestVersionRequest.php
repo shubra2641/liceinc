@@ -19,7 +19,7 @@ class GetLatestVersionRequest extends BaseApiRequest
     {
         return array_merge(
             $this->getCommonRules(),
-            $this->getProductSlugRules()
+            $this->getProductSlugRules(),
         );
     }
 
@@ -30,7 +30,7 @@ class GetLatestVersionRequest extends BaseApiRequest
     {
         return array_merge(
             $this->getCommonMessages(),
-            $this->getProductSlugMessages()
+            $this->getProductSlugMessages(),
         );
     }
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Installation;
 
-use LicenseProtection\LicenseVerifier;
 use Illuminate\Support\Facades\Log;
+use LicenseProtection\LicenseVerifier;
 
 /**
  * License Verification Service.
@@ -76,7 +76,7 @@ class LicenseVerificationService
             throw new \InvalidArgumentException('Invalid purchase code');
         }
 
-        if (empty($domain) || !filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
+        if (empty($domain) || ! filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
             throw new \InvalidArgumentException('Invalid domain');
         }
     }

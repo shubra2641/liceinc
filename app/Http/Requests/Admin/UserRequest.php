@@ -34,8 +34,10 @@ class UserRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
+
         return auth()->check() && $user && ($user->is_admin || $user->hasRole('admin'));
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -45,6 +47,7 @@ class UserRequest extends FormRequest
     {
         $userId = $this->route('user')->id ?? null;
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
+
         return [
             'name' => [
                 'required',
@@ -144,6 +147,7 @@ class UserRequest extends FormRequest
             ],
         ];
     }
+
     /**
      * Get custom validation messages.
      *
@@ -176,6 +180,7 @@ class UserRequest extends FormRequest
             'email_verified_at.date' => 'Email verification date must be a valid date.',
         ];
     }
+
     /**
      * Get custom attributes for validator errors.
      *
@@ -204,6 +209,7 @@ class UserRequest extends FormRequest
             'email_verified_at' => 'email verification date',
         ];
     }
+
     /**
      * Prepare the data for validation.
      */
@@ -221,6 +227,7 @@ class UserRequest extends FormRequest
             'email_verified_at' => $this->email_verified_at ?? now(),
         ]);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -234,7 +241,7 @@ class UserRequest extends FormRequest
             return null;
         }
 
-        if (!is_string($input)) {
+        if (! is_string($input)) {
             return null;
         }
 

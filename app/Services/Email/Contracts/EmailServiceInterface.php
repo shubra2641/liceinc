@@ -26,7 +26,7 @@ interface EmailServiceInterface
         string $templateName,
         string $recipientEmail,
         array $data = [],
-        ?string $recipientName = null
+        ?string $recipientName = null,
     ): bool;
 
     /**

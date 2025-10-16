@@ -22,7 +22,7 @@ trait EmailValidationTrait
      */
     protected function initializeValidator(): void
     {
-        if (!isset($this->validator)) {
+        if (! isset($this->validator)) {
             $this->validator = app(EmailValidatorInterface::class);
         }
     }
@@ -33,6 +33,7 @@ trait EmailValidationTrait
     protected function validateTemplateName(string $templateName): string
     {
         $this->initializeValidator();
+
         return $this->validator->validateTemplateName($templateName);
     }
 
@@ -42,6 +43,7 @@ trait EmailValidationTrait
     protected function validateEmail(string $email): string
     {
         $this->initializeValidator();
+
         return $this->validator->validateEmail($email);
     }
 
@@ -51,6 +53,7 @@ trait EmailValidationTrait
     protected function validateTemplateType(string $type): string
     {
         $this->initializeValidator();
+
         return $this->validator->validateTemplateType($type);
     }
 
@@ -61,6 +64,7 @@ trait EmailValidationTrait
     {
         $this->initializeValidator();
         $result = $this->validator->sanitizeString($input);
+
         return $result ?? '';
     }
 
@@ -74,6 +78,7 @@ trait EmailValidationTrait
     protected function sanitizeData(array $data): array
     {
         $this->initializeValidator();
+
         return $this->validator->sanitizeData($data);
     }
 }

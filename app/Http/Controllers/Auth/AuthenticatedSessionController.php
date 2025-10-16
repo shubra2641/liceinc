@@ -42,8 +42,10 @@ class AuthenticatedSessionController extends Controller
     public function create(): View
     {
         $fromInstall = $this->sanitizeInput(request()->get('from_install', false));
+
         return view('auth.login', ['fromInstall' => $fromInstall]);
     }
+
     /**
      * Handle an incoming authentication request with enhanced security.
      *
@@ -72,9 +74,11 @@ class AuthenticatedSessionController extends Controller
             // Handle email verification requirements
             if (! $user->hasVerifiedEmail()) {
                 DB::commit();
+
                 return $this->handleUnverifiedEmail($request, $user);
             }
             DB::commit();
+
             return $this->redirectToDashboard($user);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -87,6 +91,7 @@ class AuthenticatedSessionController extends Controller
             throw $e;
         }
     }
+
     /**
      * Destroy an authenticated session with enhanced security.
      *
@@ -107,6 +112,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
             DB::commit();
+
             return redirect('/');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -116,10 +122,12 @@ class AuthenticatedSessionController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
+
             // Still redirect even if session cleanup fails
             return redirect('/');
         }
     }
+
     /**
      * Handle unverified email addresses with enhanced security.
      *
@@ -139,12 +147,15 @@ class AuthenticatedSessionController extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
+
             return redirect()->route('test-email-warning');
         }
         $this->sendVerificationEmailIfNeeded($request, $user);
+
         return redirect()->route('verification.notice')
             ->with('success', 'Please verify your email address before accessing your account.');
     }
+
     /**
      * Check if the email address is a test email with enhanced validation.
      *
@@ -161,8 +172,10 @@ class AuthenticatedSessionController extends Controller
                 return true;
             }
         }
+
         return false;
     }
+
     /**
      * Send verification email if not already sent with enhanced error handling.
      *
@@ -186,6 +199,7 @@ class AuthenticatedSessionController extends Controller
             }
         }
     }
+
     /**
      * Get security status information.
      *
@@ -211,9 +225,11 @@ class AuthenticatedSessionController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json(['error' => 'Security check failed'], 500);
         }
     }
+
     /**
      * Log authentication events.
      *
@@ -233,6 +249,7 @@ class AuthenticatedSessionController extends Controller
                 'ip' => 'required|ip',
                 'user_agent' => 'required|string|max:500',
             ]);
+
             // Authentication event - no logging needed for successful operations
             return response()->json(['status' => 'logged']);
         } catch (\Exception $e) {
@@ -240,9 +257,11 @@ class AuthenticatedSessionController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json(['error' => 'Logging failed'], 500);
         }
     }
+
     /**
      * Redirect user to appropriate dashboard based on role.
      *
@@ -255,8 +274,10 @@ class AuthenticatedSessionController extends Controller
         $redirectRoute = $user->hasRole('admin')
             ? route('admin.dashboard', absolute: false)
             : route('dashboard', absolute: false);
+
         return redirect()->intended($redirectRoute);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      *
@@ -269,6 +290,7 @@ class AuthenticatedSessionController extends Controller
         if (is_string($input)) {
             return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
         }
+
         return $input;
     }
 }

@@ -40,8 +40,10 @@ class PasswordController extends Controller
         if ($user) {
             $this->updateUserPassword($user, is_string($validated['password']) ? $validated['password'] : '');
         }
+
         return back()->with('success', 'password-updated');
     }
+
     /**
      * Validate the password update request.
      *
@@ -62,11 +64,13 @@ class PasswordController extends Controller
         ]);
 
         /**
- * @var array<string, mixed> $result
-*/
+         * @var array<string, mixed> $result
+         */
         $result = $validated;
+
         return $result;
     }
+
     /**
      * Update the user's password.
      *

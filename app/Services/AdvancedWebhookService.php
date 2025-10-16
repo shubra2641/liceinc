@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Helpers\SecureFileHelper;
 use App\Models\Webhook;
 use App\Models\WebhookLog;
 use Illuminate\Http\Client\Response;
@@ -11,7 +12,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
-use App\Helpers\SecureFileHelper;
 
 /**
  * Advanced Webhook Service with enhanced security and performance.
@@ -42,8 +42,11 @@ use App\Helpers\SecureFileHelper;
 class AdvancedWebhookService
 {
     private const MAX_RETRIES = 3;
+
     private const RETRY_DELAYS = [30, 300, 1800]; // 30s, 5m, 30m
+
     private const TIMEOUT = 30;
+
     /**
      * Send webhook event to configured webhooks with enhanced security.
      *
@@ -82,6 +85,7 @@ class AdvancedWebhookService
             $this->processWebhook($webhook, $eventType, $payload);
         }
     }
+
     /**
      * Process individual webhook with comprehensive error handling.
      *
@@ -119,6 +123,7 @@ class AdvancedWebhookService
             $this->queueWebhookRetry($webhook, $eventType, $payload);
         }
     }
+
     /**
      * Prepare webhook data with security signature and validation.
      *
@@ -155,8 +160,10 @@ class AdvancedWebhookService
         if ($webhook->secret) {
             $data['signature'] = $this->generateSignature($webhook->secret, $data);
         }
+
         return $data;
     }
+
     /**
      * Generate secure HMAC signature for webhook payload.
      *
@@ -177,8 +184,10 @@ class AdvancedWebhookService
         if ($payload === false) {
             $payload = '';
         }
-        return 'sha256=' . hash_hmac('sha256', $payload, $secret);
+
+        return 'sha256='.hash_hmac('sha256', $payload, $secret);
     }
+
     /**
      * Send secure HTTP request to webhook endpoint with proper headers.
      *
@@ -210,10 +219,12 @@ class AdvancedWebhookService
         if (isset($data['signature'])) {
             $headers['X-Webhook-Signature'] = $data['signature'];
         }
+
         return Http::timeout(self::TIMEOUT)
             ->withHeaders($headers)
             ->post($webhook->url, $data);
     }
+
     /**
      * Log webhook delivery attempt with comprehensive details.
      *
@@ -252,6 +263,7 @@ class AdvancedWebhookService
             'execution_time' => $this->getExecutionTime(),
         ]);
     }
+
     /**
      * Update webhook delivery statistics and timestamps.
      *
@@ -273,6 +285,7 @@ class AdvancedWebhookService
             $webhook->update(['last_failed_at' => now()]);
         }
     }
+
     /**
      * Queue webhook for retry with exponential backoff strategy.
      *
@@ -300,6 +313,7 @@ class AdvancedWebhookService
             $this->markWebhookAsFailed($webhook, $eventType);
         }
     }
+
     /**
      * Get current attempt number for webhook retry logic.
      *
@@ -318,8 +332,10 @@ class AdvancedWebhookService
             ->where('event_type', $eventType)
             ->where('created_at', '>=', now()->subHour())
             ->count();
+
         return $attemptCount + 1;
     }
+
     /**
      * Mark webhook as failed after maximum retry attempts.
      *
@@ -342,6 +358,7 @@ class AdvancedWebhookService
             $webhook->update(['is_active' => false]);
         }
     }
+
     /**
      * Verify webhook signature for incoming webhook requests.
      *
@@ -363,9 +380,11 @@ class AdvancedWebhookService
      */
     public function verifyWebhookSignature(string $signature, string $payload, string $secret): bool
     {
-        $expectedSignature = 'sha256=' . hash_hmac('sha256', $payload, $secret);
+        $expectedSignature = 'sha256='.hash_hmac('sha256', $payload, $secret);
+
         return hash_equals($expectedSignature, $signature);
     }
+
     /**
      * Test webhook endpoint with comprehensive diagnostics.
      *
@@ -421,6 +440,7 @@ class AdvancedWebhookService
             ];
         }
     }
+
     /**
      * Get comprehensive webhook statistics and performance metrics.
      *
@@ -456,17 +476,19 @@ class AdvancedWebhookService
         $events = $logs->groupBy('event_type')
             ->map(fn ($group) => $group->count())
             ->toArray();
+
         return [
             'total_attempts' => $totalAttempts,
             'successful_attempts' => $successfulAttempts,
             'failed_attempts' => $failedAttempts,
-            'success_rate' => round((float) $successRate, 2),
-            'average_response_time' => round((float) $avgResponseTime, 3),
+            'success_rate' => round((float)$successRate, 2),
+            'average_response_time' => round((float)$avgResponseTime, 3),
             'events_breakdown' => $events,
             'last_successful' => $webhook->last_successful_at,
             'last_failed' => $webhook->last_failed_at,
         ];
     }
+
     /**
      * Clean up old webhook logs for database maintenance.
      *
@@ -486,8 +508,10 @@ class AdvancedWebhookService
     {
         $cutoffDate = now()->subDays($days);
         $result = WebhookLog::where('created_at', '<', $cutoffDate)->delete();
+
         return is_numeric($result) ? (int)$result : 0;
     }
+
     /**
      * Get webhook health status and performance indicators.
      *
@@ -523,6 +547,7 @@ class AdvancedWebhookService
             $healthScore >= 60 => 'fair',
             default => 'poor',
         };
+
         return [
             'status' => $status,
             'health_score' => round($healthScore, 1),
@@ -531,6 +556,7 @@ class AdvancedWebhookService
             'last_attempt' => $recentLogs->sortByDesc('created_at')->first()?->created_at,
         ];
     }
+
     /**
      * Perform bulk updates on multiple webhooks efficiently.
      *
@@ -557,8 +583,10 @@ class AdvancedWebhookService
     public function bulkUpdateWebhooks(array $webhookIds, array $updates): int
     {
         $updateResult = Webhook::whereIn('id', $webhookIds)->update($updates);
+
         return (int)$updateResult;
     }
+
     /**
      * Generate comprehensive webhook delivery report for monitoring.
      *
@@ -603,8 +631,10 @@ class AdvancedWebhookService
                 'health_status' => $this->getWebhookHealth($webhook)['status'],
             ];
         }
+
         return ['delivery_report' => $report];
     }
+
     /**
      * Get execution time for performance tracking and monitoring.
      *
@@ -619,6 +649,7 @@ class AdvancedWebhookService
         // Use ServerHelper for safe timing calculation
         return \App\Helpers\ServerHelper::getExecutionTime();
     }
+
     /**
      * Send webhook event asynchronously for improved performance.
      *
@@ -643,6 +674,7 @@ class AdvancedWebhookService
             $this->sendWebhookEvent($eventType, $payload, $webhookId);
         });
     }
+
     /**
      * Validate webhook URL with comprehensive security checks.
      *
@@ -680,6 +712,7 @@ class AdvancedWebhookService
         ) {
             $errors[] = 'Localhost URLs are not allowed for webhooks';
         }
+
         return [
             'valid' => empty($errors),
             'errors' => $errors,

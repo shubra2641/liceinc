@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -19,7 +18,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $last_used_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\License $license
+ * @property-read License $license
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain query()
@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LicenseDomain whereVerifiedAt($value)
+ *
  * @mixin \Eloquent
  */
 class LicenseDomain extends Model
@@ -40,11 +41,10 @@ class LicenseDomain extends Model
     /**
      * @phpstan-ignore-next-line
      */
-
-
     protected $fillable = [
         'license_id', 'domain', 'status', 'is_verified', 'verified_at', 'added_at', 'last_used_at',
     ];
+
     protected $casts = [
         'license_id' => 'integer',
         'is_verified' => 'boolean',
@@ -52,6 +52,7 @@ class LicenseDomain extends Model
         'added_at' => 'datetime',
         'last_used_at' => 'datetime',
     ];
+
     /**
      * @return BelongsTo<License, $this>
      */

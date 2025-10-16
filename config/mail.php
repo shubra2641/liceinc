@@ -48,7 +48,7 @@ return [
             'timeout' => null,
             'local_domain' => env(
                 'MAIL_EHLO_DOMAIN',
-                \App\Helpers\SecureFileHelper::parseUrl((string)env('APP_URL', 'http://localhost'), PHP_URL_HOST),
+                App\Helpers\SecureFileHelper::parseUrl((string)env('APP_URL', 'http://localhost'), PHP_URL_HOST),
             ),
         ],
 

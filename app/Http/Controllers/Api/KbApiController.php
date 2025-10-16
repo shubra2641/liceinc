@@ -81,10 +81,12 @@ class KbApiController extends Controller
             $article = $this->findArticleBySlug($articleSlugStr);
             if (! $article) {
                 DB::rollBack();
+
                 return $this->errorResponse('Article not found', 404);
             }
             if (! $this->requiresSerialVerification($article)) {
                 DB::commit();
+
                 return $this->successResponse([
                     'content' => $this->sanitizeOutput($article->content),
                     'title' => $this->sanitizeOutput($article->title),
@@ -99,10 +101,12 @@ class KbApiController extends Controller
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
+
                 return $this->errorResponse('Invalid serial code', 403);
             }
             $this->incrementArticleViews($article);
             DB::commit();
+
             return $this->successResponse([
                 'content' => $this->sanitizeOutput($article->content),
                 'title' => $this->sanitizeOutput($article->title),
@@ -115,9 +119,11 @@ class KbApiController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $this->errorResponse('An error occurred while verifying serial', 500);
         }
     }
+
     /**
      * Get article serial requirements.
      *
@@ -169,6 +175,7 @@ class KbApiController extends Controller
                 $responseData['serial_message'] = $this->sanitizeOutput($message);
                 $responseData['serial_source'] = $serialInfo['source'];
             }
+
             return $this->successResponse($responseData, 'Article requirements retrieved');
         } catch (\Exception $e) {
             Log::error('Error getting article requirements', [
@@ -176,9 +183,11 @@ class KbApiController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $this->errorResponse('An error occurred while retrieving article requirements', 500);
         }
     }
+
     /**
      * Get category serial requirements.
      *
@@ -229,6 +238,7 @@ class KbApiController extends Controller
                     ?: 'Please enter the serial code to access articles in this category.';
                 $responseData['serial_message'] = $this->sanitizeOutput($serialMessage);
             }
+
             return $this->successResponse($responseData, 'Category requirements retrieved');
         } catch (\Exception $e) {
             Log::error('Error getting category requirements', [
@@ -236,9 +246,11 @@ class KbApiController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $this->errorResponse('An error occurred while retrieving category requirements', 500);
         }
     }
+
     /**
      * Find article by slug with published scope.
      *
@@ -250,6 +262,7 @@ class KbApiController extends Controller
     {
         return KbArticle::published()->where('slug', $slug)->first();
     }
+
     /**
      * Find article with category relationship using published scope.
      *
@@ -261,6 +274,7 @@ class KbApiController extends Controller
     {
         return KbArticle::published()->with('category')->where('slug', $slug)->first();
     }
+
     /**
      * Find category with articles relationship using active scope.
      *
@@ -276,6 +290,7 @@ class KbApiController extends Controller
             }
         }])->where('slug', $slug)->first();
     }
+
     /**
      * Check if article requires serial verification.
      *
@@ -288,6 +303,7 @@ class KbApiController extends Controller
         return $article->requires_serial ||
                $article->category->requires_serial;
     }
+
     /**
      * Validate serial code.
      *
@@ -307,8 +323,10 @@ class KbApiController extends Controller
         ) {
             return ['valid' => true, 'source' => 'category'];
         }
+
         return ['valid' => false, 'source' => ''];
     }
+
     /**
      * Get serial information for article.
      *
@@ -334,8 +352,10 @@ class KbApiController extends Controller
                 'source' => 'category',
             ];
         }
+
         return ['message' => '', 'source' => ''];
     }
+
     /**
      * Increment article views with error handling.
      *
@@ -355,6 +375,7 @@ class KbApiController extends Controller
             throw $e;
         }
     }
+
     /**
      * Create success response with proper headers.
      *
@@ -378,8 +399,10 @@ class KbApiController extends Controller
             'timestamp' => now()->toISOString(),
         ];
         $response[$dataKey] = $data;
+
         return response()->json($response, $statusCode);
     }
+
     /**
      * Create error response with proper headers.
      *
@@ -401,8 +424,10 @@ class KbApiController extends Controller
         if ($errors !== null) {
             $response['errors'] = $errors;
         }
+
         return response()->json($response, $statusCode);
     }
+
     /**
      * Sanitize input to prevent XSS attacks.
      */
@@ -417,8 +442,10 @@ class KbApiController extends Controller
         if (is_string($input)) {
             return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
         }
+
         return $input;
     }
+
     /**
      * Sanitize output to prevent XSS attacks.
      *
@@ -431,6 +458,7 @@ class KbApiController extends Controller
         if ($output === null) {
             return '';
         }
+
         return htmlspecialchars($output, ENT_QUOTES, 'UTF-8');
     }
 }

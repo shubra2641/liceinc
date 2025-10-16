@@ -64,13 +64,14 @@ class SecurityHeadersMiddleware
                 throw new \InvalidArgumentException('Invalid response received from next middleware');
             }
             // Apply security headers with validation
-            if ($response instanceof \Symfony\Component\HttpFoundation\Response) {
+            if ($response instanceof Response) {
                 $this->applySecurityHeaders($request, $response);
             }
             /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+             * @var Response $typedResponse
+             */
             $typedResponse = $response;
+
             return $typedResponse;
         } catch (\Exception $e) {
             Log::error('Error in SecurityHeadersMiddleware', [
@@ -83,12 +84,14 @@ class SecurityHeadersMiddleware
             // In case of error, return response without security headers to prevent blocking
             $fallbackResponse = $response ?? $next($request);
             /**
- * @var \Symfony\Component\HttpFoundation\Response $typedResponse
-*/
+             * @var Response $typedResponse
+             */
             $typedResponse = $fallbackResponse;
+
             return $typedResponse;
         }
     }
+
     /**
      * Apply security headers to response with comprehensive validation.
      *
@@ -123,6 +126,7 @@ class SecurityHeadersMiddleware
             throw $e;
         }
     }
+
     /**
      * Get security headers configuration with validation.
      *
@@ -134,16 +138,20 @@ class SecurityHeadersMiddleware
             $headers = config('security.headers', []);
             if (! is_array($headers)) {
                 Log::warning('Invalid security headers configuration, using defaults');
+
                 return $this->getDefaultSecurityHeaders();
             }
+
             return $this->getDefaultSecurityHeaders();
         } catch (\Exception $e) {
             Log::error('Error getting security headers configuration', [
                 'error' => $e->getMessage(),
             ]);
+
             return $this->getDefaultSecurityHeaders();
         }
     }
+
     /**
      * Get Content Security Policy configuration with validation.
      *
@@ -155,16 +163,20 @@ class SecurityHeadersMiddleware
             $csp = config('security.content_security_policy', []);
             if (is_array($csp) === false) {
                 Log::warning('Invalid CSP configuration, using defaults');
+
                 return $this->getDefaultCspConfiguration();
             }
+
             return $this->getDefaultCspConfiguration();
         } catch (\Exception $e) {
             Log::error('Error getting CSP configuration', [
                 'error' => $e->getMessage(),
             ]);
+
             return $this->getDefaultCspConfiguration();
         }
     }
+
     /**
      * Apply standard security headers to response.
      *
@@ -179,7 +191,7 @@ class SecurityHeadersMiddleware
                 $this->setSecurityHeader(
                     $response,
                     'X-Frame-Options',
-                    is_string($headers['x_frame_options']) ? $headers['x_frame_options'] : ''
+                    is_string($headers['x_frame_options']) ? $headers['x_frame_options'] : '',
                 );
             }
             // X-Content-Type-Options: Prevents MIME sniffing
@@ -187,7 +199,7 @@ class SecurityHeadersMiddleware
                 $this->setSecurityHeader(
                     $response,
                     'X-Content-Type-Options',
-                    is_string($headers['x_content_type_options']) ? $headers['x_content_type_options'] : ''
+                    is_string($headers['x_content_type_options']) ? $headers['x_content_type_options'] : '',
                 );
             }
             // X-XSS-Protection: Enables XSS filtering
@@ -195,7 +207,7 @@ class SecurityHeadersMiddleware
                 $this->setSecurityHeader(
                     $response,
                     'X-XSS-Protection',
-                    is_string($headers['x_xss_protection']) ? $headers['x_xss_protection'] : ''
+                    is_string($headers['x_xss_protection']) ? $headers['x_xss_protection'] : '',
                 );
             }
             // Referrer-Policy: Controls referrer information
@@ -203,7 +215,7 @@ class SecurityHeadersMiddleware
                 $this->setSecurityHeader(
                     $response,
                     'Referrer-Policy',
-                    is_string($headers['referrer_policy']) ? $headers['referrer_policy'] : ''
+                    is_string($headers['referrer_policy']) ? $headers['referrer_policy'] : '',
                 );
             }
             // Permissions-Policy: Controls browser features
@@ -211,7 +223,7 @@ class SecurityHeadersMiddleware
                 $this->setSecurityHeader(
                     $response,
                     'Permissions-Policy',
-                    is_string($headers['permissions_policy']) ? $headers['permissions_policy'] : ''
+                    is_string($headers['permissions_policy']) ? $headers['permissions_policy'] : '',
                 );
             }
         } catch (\Exception $e) {
@@ -222,6 +234,7 @@ class SecurityHeadersMiddleware
             throw $e;
         }
     }
+
     /**
      * Apply HTTPS-specific security headers.
      *
@@ -241,7 +254,7 @@ class SecurityHeadersMiddleware
                 $this->setSecurityHeader(
                     $response,
                     'Strict-Transport-Security',
-                    is_string($headers['strict_transport_security']) ? $headers['strict_transport_security'] : ''
+                    is_string($headers['strict_transport_security']) ? $headers['strict_transport_security'] : '',
                 );
             }
         } catch (\Exception $e) {
@@ -252,6 +265,7 @@ class SecurityHeadersMiddleware
             throw $e;
         }
     }
+
     /**
      * Apply Content Security Policy headers.
      *
@@ -276,6 +290,7 @@ class SecurityHeadersMiddleware
             throw $e;
         }
     }
+
     /**
      * Remove server information for security.
      *
@@ -294,6 +309,7 @@ class SecurityHeadersMiddleware
             throw $e;
         }
     }
+
     /**
      * Set security header with validation.
      *
@@ -323,6 +339,7 @@ class SecurityHeadersMiddleware
             throw $e;
         }
     }
+
     /**
      * Get default security headers configuration.
      *
@@ -339,6 +356,7 @@ class SecurityHeadersMiddleware
             'strict_transport_security' => 'max-age=31536000; includeSubDomains',
         ];
     }
+
     /**
      * Get default Content Security Policy configuration.
      *
@@ -360,6 +378,7 @@ class SecurityHeadersMiddleware
             ],
         ];
     }
+
     /**
      * Build Content Security Policy header value with comprehensive validation.
      *
@@ -408,12 +427,14 @@ class SecurityHeadersMiddleware
                     Log::warning('Invalid CSP directive name format', ['directive' => $directive]);
                     continue;
                 }
-                $policy[] = $directive . ' ' . $value;
+                $policy[] = $directive.' '.$value;
             }
             if (empty($policy)) {
                 Log::warning('No valid CSP directives found, using default policy');
+
                 return "default-src 'self'";
             }
+
             return implode('; ', $policy);
         } catch (\Exception $e) {
             Log::error('Error building Content Security Policy', [

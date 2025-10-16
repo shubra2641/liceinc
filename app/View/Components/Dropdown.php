@@ -27,22 +27,27 @@ class Dropdown extends Component
      * The alignment of the dropdown menu.
      */
     public string $align;
+
     /**
      * The width of the dropdown menu.
      */
     public string $width;
+
     /**
      * The CSS classes for the dropdown content.
      */
     public string $contentClasses;
+
     /**
      * The computed alignment CSS classes.
      */
     public string $alignmentClasses;
+
     /**
      * The computed width CSS class.
      */
     public string $widthClass;
+
     /**
      * Create a new component instance with enhanced validation.
      *
@@ -61,6 +66,7 @@ class Dropdown extends Component
         $this->alignmentClasses = $this->getAlignmentClasses();
         $this->widthClass = $this->getWidthClass();
     }
+
     /**
      * Get the alignment CSS classes based on the alignment setting.
      *
@@ -74,6 +80,7 @@ class Dropdown extends Component
             default => 'ltr:origin-top-right rtl:origin-top-left end-0',
         };
     }
+
     /**
      * Get the width CSS class based on the width setting.
      *
@@ -86,6 +93,7 @@ class Dropdown extends Component
             default => $this->width,
         };
     }
+
     /**
      * Get the view / contents that represent the component.
      *
@@ -95,6 +103,7 @@ class Dropdown extends Component
     {
         return view('components.dropdown');
     }
+
     /**
      * Validate and sanitize the alignment parameter.
      *
@@ -108,8 +117,10 @@ class Dropdown extends Component
         if (! in_array($align, $allowedAlignments)) {
             return 'right'; // Default fallback
         }
+
         return $align;
     }
+
     /**
      * Validate and sanitize the width parameter.
      *
@@ -123,8 +134,10 @@ class Dropdown extends Component
         if (preg_match('/^[a-zA-Z0-9\-_]+$/', $width)) {
             return $width;
         }
+
         return '48'; // Default fallback
     }
+
     /**
      * Sanitize content classes to prevent XSS attacks.
      *
@@ -142,6 +155,7 @@ class Dropdown extends Component
         // Trim and normalize whitespace
         $trimmed = trim($sanitized);
         $result = preg_replace('/\s+/', ' ', $trimmed);
+
         return $result !== null ? $result : '';
     }
 }
