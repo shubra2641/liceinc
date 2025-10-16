@@ -56,7 +56,12 @@ class InstallController extends Controller
             if ($verificationResult['valid'] ?? false) {
                 session(['install.license' => $verificationResult['data']]);
 
-                return $this->verificationResponse($request, true, 'License verified successfully', $verificationResult);
+                return $this->verificationResponse(
+                    $request, 
+                    true, 
+                    'License verified successfully', 
+                    $verificationResult
+                );
             } else {
                 $message = $verificationResult['message'] ?? 'License verification failed';
 
@@ -65,7 +70,13 @@ class InstallController extends Controller
         } catch (\Throwable $exception) {
             Log::error('License verification error in InstallController', ['error' => $exception->getMessage()]);
 
-            return $this->verificationResponse($request, false, 'An error occurred during verification', ['general' => $exception->getMessage()], 500);
+            return $this->verificationResponse(
+                $request, 
+                false, 
+                'An error occurred during verification', 
+                ['general' => $exception->getMessage()], 
+                500
+            );
         }
     }
 
@@ -144,7 +155,9 @@ class InstallController extends Controller
 
             return redirect()->route('install.admin');
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['database' => 'Database connection failed: ' . $e->getMessage()])->withInput();
+            return redirect()->back()
+                ->withErrors(['database' => 'Database connection failed: ' . $e->getMessage()])
+                ->withInput();
         }
     }
 
@@ -219,13 +232,16 @@ class InstallController extends Controller
             return redirect()->route('install.license')->withErrors(['error' => 'Please verify your license first.']);
         }
         if (! session('install.database')) {
-            return redirect()->route('install.database')->withErrors(['error' => 'Please configure database settings first.']);
+            return redirect()->route('install.database')
+                ->withErrors(['error' => 'Please configure database settings first.']);
         }
         if (! session('install.admin')) {
-            return redirect()->route('install.admin')->withErrors(['error' => 'Please create admin account first.']);
+            return redirect()->route('install.admin')
+                ->withErrors(['error' => 'Please create admin account first.']);
         }
         if (! session('install.settings')) {
-            return redirect()->route('install.settings')->withErrors(['error' => 'Please configure application settings first.']);
+            return redirect()->route('install.settings')
+                ->withErrors(['error' => 'Please configure application settings first.']);
         }
 
         return view('install.install', ['step' => 7]);
@@ -276,7 +292,11 @@ class InstallController extends Controller
             $envContent = str_replace('MAIL_PORT=1025', 'MAIL_PORT=' . $settings['mail_port'], $envContent);
             $envContent = str_replace('MAIL_USERNAME=null', 'MAIL_USERNAME=' . $settings['mail_username'], $envContent);
             $envContent = str_replace('MAIL_PASSWORD=null', 'MAIL_PASSWORD=' . $settings['mail_password'], $envContent);
-            $envContent = str_replace('MAIL_ENCRYPTION=null', 'MAIL_ENCRYPTION=' . $settings['mail_encryption'], $envContent);
+            $envContent = str_replace(
+                'MAIL_ENCRYPTION=null', 
+                'MAIL_ENCRYPTION=' . $settings['mail_encryption'], 
+                $envContent
+            );
         }
 
         file_put_contents(base_path('.env'), $envContent);
@@ -332,7 +352,13 @@ class InstallController extends Controller
     /**
      * Handle verification response with proper format.
      */
-    private function verificationResponse(Request $request, bool $success, string $message, array $data = [], int $statusCode = 200): RedirectResponse|JsonResponse
+    private function verificationResponse(
+        Request $request, 
+        bool $success, 
+        string $message, 
+        array $data = [], 
+        int $statusCode = 200
+    ): RedirectResponse|JsonResponse
     {
         if ($request->expectsJson()) {
             return response()->json([

@@ -62,7 +62,12 @@ class LicenseServerService
     /**
      * Check for available updates.
      */
-    public function checkUpdates(string $licenseKey, string $currentVersion, string $productSlug, ?string $domain = null): array
+    public function checkUpdates(
+        string $licenseKey, 
+        string $currentVersion, 
+        string $productSlug, 
+        ?string $domain = null
+    ): array
     {
         try {
             $this->validateParameters($licenseKey, $currentVersion, $productSlug, $domain);
@@ -232,12 +237,18 @@ class LicenseServerService
     /**
      * Download update file.
      */
-    public function downloadUpdate(string $licenseKey, string $version, string $productSlug, ?string $domain = null): array
+    public function downloadUpdate(
+        string $licenseKey, 
+        string $version, 
+        string $productSlug, 
+        ?string $domain = null
+    ): array
     {
         try {
             $this->validateDownloadParameters($licenseKey, $version, $productSlug, $domain);
 
-            $url = "{$this->getBaseUrl()}/license/download-update/{$this->sanitizeInput($licenseKey)}/{$this->sanitizeInput($version)}";
+            $url = "{$this->getBaseUrl()}/license/download-update/" . 
+                   "{$this->sanitizeInput($licenseKey)}/{$this->sanitizeInput($version)}";
             $params = [
                 'product_slug' => $this->sanitizeInput($productSlug),
                 'domain' => $domain ? $this->sanitizeDomain($domain) : null,
@@ -350,7 +361,12 @@ class LicenseServerService
     /**
      * Validate update parameters.
      */
-    private function validateParameters(string $licenseKey, string $currentVersion, string $productSlug, ?string $domain): void
+    private function validateParameters(
+        string $licenseKey, 
+        string $currentVersion, 
+        string $productSlug, 
+        ?string $domain
+    ): void
     {
         if (empty($licenseKey)) {
             throw new \InvalidArgumentException('License key cannot be empty');
@@ -414,7 +430,12 @@ class LicenseServerService
     /**
      * Validate download parameters.
      */
-    private function validateDownloadParameters(string $licenseKey, string $version, string $productSlug, ?string $domain): void
+    private function validateDownloadParameters(
+        string $licenseKey, 
+        string $version, 
+        string $productSlug, 
+        ?string $domain
+    ): void
     {
         if (empty($licenseKey)) {
             throw new \InvalidArgumentException('License key cannot be empty');
