@@ -34,15 +34,15 @@ class PaymentService
     {
         try {
             $this->validateOrder($orderData);
-            
+
             if ($gateway === 'paypal') {
                 return $this->processPayPal($orderData);
             }
-            
+
             if ($gateway === 'stripe') {
                 return $this->processStripe($orderData);
             }
-            
+
             return ['success' => false, 'message' => 'Unsupported gateway'];
         } catch (\Exception $e) {
             Log::error('Payment failed', ['error' => $e->getMessage()]);
@@ -112,11 +112,11 @@ class PaymentService
             if ($gateway === 'paypal') {
                 return $this->verifyPayPal($transactionId);
             }
-            
+
             if ($gateway === 'stripe') {
                 return $this->verifyStripe($transactionId);
             }
-            
+
             return ['success' => false, 'message' => 'Unsupported gateway'];
         } catch (\Exception $e) {
             Log::error('Payment verification failed', ['error' => $e->getMessage()]);
@@ -305,7 +305,7 @@ class PaymentService
     private function createStripeSession(array $orderData): Session
     {
         $appUrl = config('app.url');
-        
+
         return Session::create([
             'payment_method_types' => ['card'],
             'line_items' => [

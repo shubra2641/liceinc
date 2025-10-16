@@ -32,7 +32,7 @@ class LicenseServerController extends Controller
     {
         try {
             $this->checkRateLimit('update-check', $request->ip(), 20);
-            
+
             $data = $request->validated();
             $licenseKey = $data['license_key'];
             $currentVersion = $data['current_version'];
@@ -78,7 +78,7 @@ class LicenseServerController extends Controller
     {
         try {
             $this->checkRateLimit('version-history', $request->ip(), 10);
-            
+
             $data = $request->validated();
             if (!$this->verifyLicense($data['license_key'], $data['domain'], $data['product_slug'])) {
                 return $this->errorResponse('Invalid license', 'INVALID_LICENSE', 403);
@@ -104,7 +104,7 @@ class LicenseServerController extends Controller
     {
         try {
             $this->checkRateLimit('file-download', $request->ip(), 5);
-            
+
             $domain = $request->input('domain');
             $productSlug = $request->input('product_slug');
 
@@ -137,7 +137,7 @@ class LicenseServerController extends Controller
     {
         try {
             $this->checkRateLimit('latest-version', $request->ip(), 15);
-            
+
             $data = $request->validated();
             if (!$this->verifyLicense($data['license_key'], $data['domain'], $data['product_slug'])) {
                 return $this->errorResponse('Invalid license', 'INVALID_LICENSE', 403);
@@ -175,7 +175,7 @@ class LicenseServerController extends Controller
     {
         try {
             $this->checkRateLimit('update-info', $request->ip(), 30);
-            
+
             $data = $request->validated();
             $product = $this->getProduct($data['product_slug']);
             $nextUpdate = $this->getNextUpdate($product->id, $data['current_version']);
@@ -206,7 +206,7 @@ class LicenseServerController extends Controller
     {
         try {
             $this->checkRateLimit('products', $request->ip(), 50);
-            
+
             $products = Product::where('is_active', true)
                 ->select(['id', 'name', 'slug', 'description', 'version'])
                 ->get();

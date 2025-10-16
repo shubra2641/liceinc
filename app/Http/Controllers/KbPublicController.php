@@ -58,11 +58,11 @@ class KbPublicController extends Controller
     {
         try {
             $category = $this->getCategoryBySlug($slug);
-            
+
             if ($this->canAccessCategory($category)) {
                 return $this->showCategory($category);
             }
-            
+
             return $this->handleCategoryAccess($category);
         } catch (\Exception $e) {
             Log::error('KB category failed', ['error' => $e->getMessage(), 'slug' => $slug]);
@@ -77,11 +77,11 @@ class KbPublicController extends Controller
     {
         try {
             $article = $this->getArticleBySlug($slug);
-            
+
             if ($this->canAccessArticle($article)) {
                 return $this->showArticle($article);
             }
-            
+
             return $this->handleArticleAccess($article);
         } catch (\Exception $e) {
             Log::error('KB article failed', ['error' => $e->getMessage(), 'slug' => $slug]);
@@ -103,7 +103,7 @@ class KbPublicController extends Controller
 
             $q = $this->sanitizeQuery($request->get('q', ''));
             $results = $this->performSearch($q);
-            
+
             return view('kb.search', compact('q', 'results'));
         } catch (\Exception $e) {
             Log::error('KB search failed', ['error' => $e->getMessage()]);
@@ -223,7 +223,7 @@ class KbPublicController extends Controller
     private function showArticle(KbArticle $article): View
     {
         $article->increment('views');
-        
+
         $related = KbArticle::where('kb_category_id', $article->kb_category_id)
             ->where('id', '!=', $article->id)
             ->where('is_published', true)
@@ -286,7 +286,7 @@ class KbPublicController extends Controller
         }
 
         $searchTerm = '%' . strtolower($query) . '%';
-        
+
         $articles = KbArticle::where('is_published', true)
             ->whereHas('category', function ($query) {
                 $query->where('is_active', true);
