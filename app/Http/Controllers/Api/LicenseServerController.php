@@ -48,10 +48,10 @@ class LicenseServerController extends Controller
 
             if (!$latestUpdate) {
                 return $this->successResponse([
-                    'current_version' => $currentVersion,
-                    'latest_version' => $currentVersion,
-                    'is_update_available' => false,
-                    'update_info' => null,
+                        'current_version' => $currentVersion,
+                        'latest_version' => $currentVersion,
+                        'is_update_available' => false,
+                        'update_info' => null,
                     'product' => $this->getProductInfo($product),
                 ]);
             }
@@ -89,7 +89,7 @@ class LicenseServerController extends Controller
 
             return $this->successResponse([
                 'product' => $this->getProductInfo($product),
-                'versions' => $updates,
+                    'versions' => $updates,
             ]);
         } catch (\Exception $e) {
             Log::error('Version history failed', ['error' => $e->getMessage()]);
@@ -152,14 +152,14 @@ class LicenseServerController extends Controller
 
             return $this->successResponse([
                 'product' => $this->getProductInfo($product),
-                'version' => $latestUpdate->version,
-                'title' => $latestUpdate->title,
-                'description' => $latestUpdate->description,
-                'changelog' => $latestUpdate->changelog,
-                'is_major' => $latestUpdate->is_major,
-                'is_required' => $latestUpdate->is_required,
-                'released_at' => $latestUpdate->released_at?->toISOString(),
-                'file_size' => $latestUpdate->file_size,
+                    'version' => $latestUpdate->version,
+                    'title' => $latestUpdate->title,
+                    'description' => $latestUpdate->description,
+                    'changelog' => $latestUpdate->changelog,
+                    'is_major' => $latestUpdate->is_major,
+                    'is_required' => $latestUpdate->is_required,
+                    'released_at' => $latestUpdate->released_at?->toISOString(),
+                    'file_size' => $latestUpdate->file_size,
                 'download_url' => $this->getDownloadUrl($latestUpdate->version, $data['license_key'], $data['product_slug']),
             ]);
         } catch (\Exception $e) {
@@ -187,10 +187,10 @@ class LicenseServerController extends Controller
             $isUpdateAvailable = version_compare($nextUpdate->version, $data['current_version'], '>');
 
             return $this->successResponse([
-                'is_update_available' => $isUpdateAvailable,
+                    'is_update_available' => $isUpdateAvailable,
                 'current_version' => $data['current_version'],
-                'next_version' => $nextUpdate->version,
-                'message' => $isUpdateAvailable ? 'Update available' : 'No newer updates available',
+                    'next_version' => $nextUpdate->version,
+                    'message' => $isUpdateAvailable ? 'Update available' : 'No newer updates available',
                 'update_info' => $isUpdateAvailable ? $this->getUpdateInfoData($nextUpdate) : null,
             ]);
         } catch (\Exception $e) {
