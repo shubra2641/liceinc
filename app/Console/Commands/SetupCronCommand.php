@@ -45,7 +45,7 @@ class SetupCronCommand extends Command
         $this->line('   1. Open Task Scheduler');
         $this->line('   2. Create Basic Task');
         $this->line('   3. Set trigger to "Daily"');
-        $this->line('   4. Set action to run: '.$batchFile);
+        $this->line('   4. Set action to run: ' . $batchFile);
         $this->line('   5. Set to run every 1 minute');
 
         return 0;
@@ -76,10 +76,10 @@ class SetupCronCommand extends Command
         $phpPath = PHP_BINARY;
         $artisanPath = base_path('artisan');
 
-        return "@echo off\n".
-               'cd /d "'.base_path()."\"\n".
-               "\"{$phpPath}\" \"{$artisanPath}\" schedule:run\n".
-               "timeout /t 60 /nobreak\n".
+        return "@echo off\n" .
+               'cd /d "' . base_path() . "\"\n" .
+               "\"{$phpPath}\" \"{$artisanPath}\" schedule:run\n" .
+               "timeout /t 60 /nobreak\n" .
                "goto :eof\n";
     }
 
@@ -88,12 +88,12 @@ class SetupCronCommand extends Command
         $phpPath = PHP_BINARY;
         $artisanPath = base_path('artisan');
 
-        return "# Laravel Cron Jobs\n".
-               "# Run every minute\n".
-               '* * * * * cd '.base_path()." && {$phpPath} {$artisanPath} schedule:run >> /dev/null 2>&1\n".
-               "\n".
-               "# Optional: Log cron output\n".
-               '# * * * * * cd '.base_path()." && {$phpPath} {$artisanPath} ".
-               'schedule:run >> '.storage_path('logs/cron.log')." 2>&1\n";
+        return "# Laravel Cron Jobs\n" .
+               "# Run every minute\n" .
+               '* * * * * cd ' . base_path() . " && {$phpPath} {$artisanPath} schedule:run >> /dev/null 2>&1\n" .
+               "\n" .
+               "# Optional: Log cron output\n" .
+               '# * * * * * cd ' . base_path() . " && {$phpPath} {$artisanPath} " .
+               'schedule:run >> ' . storage_path('logs/cron.log') . " 2>&1\n";
     }
 }

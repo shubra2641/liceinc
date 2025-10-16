@@ -138,7 +138,7 @@ class Modal extends Component
         $sanitizedMaxWidth = htmlspecialchars(trim($maxWidth), ENT_QUOTES, 'UTF-8');
         if (! in_array($sanitizedMaxWidth, $allowedSizes, true)) {
             throw new \InvalidArgumentException(
-                'Invalid max width. Allowed values: '.implode(', ', $allowedSizes),
+                'Invalid max width. Allowed values: ' . implode(', ', $allowedSizes),
             );
         }
 

@@ -59,7 +59,7 @@ class VerifyArticleSerialRequest extends FormRequest
             'serial.string' => 'Serial code must be a valid string.',
             'serial.max' => 'Serial code cannot exceed 255 characters.',
             'serial.min' => 'Serial code must be at least 3 characters long.',
-            'serial.regex' => 'Serial code contains invalid characters. '.
+            'serial.regex' => 'Serial code contains invalid characters. ' .
                 'Only letters, numbers, hyphens, and underscores are allowed.',
         ];
     }

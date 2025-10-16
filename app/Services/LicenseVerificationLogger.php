@@ -164,7 +164,7 @@ class LicenseVerificationLogger
                 'recent_failed_attempts' => LicenseVerificationLog::recent(24)->failed()->count(),
             ];
         } catch (Exception $e) {
-            Log::error('Failed to get verification statistics: '.$e->getMessage());
+            Log::error('Failed to get verification statistics: ' . $e->getMessage());
 
             return [
                 'total_attempts' => 0,
@@ -215,7 +215,7 @@ class LicenseVerificationLogger
 
             return $typedResult;
         } catch (Exception $e) {
-            Log::error('Failed to get suspicious activity: '.$e->getMessage());
+            Log::error('Failed to get suspicious activity: ' . $e->getMessage());
 
             return [];
         }
@@ -248,7 +248,7 @@ class LicenseVerificationLogger
                 ->limit($limit)
                 ->get();
         } catch (Exception $e) {
-            Log::error('Failed to get recent attempts: '.$e->getMessage());
+            Log::error('Failed to get recent attempts: ' . $e->getMessage());
 
             return new Collection();
         }
@@ -278,7 +278,7 @@ class LicenseVerificationLogger
             // Cleanup completed successfully - no logging needed for successful operations
             return is_numeric($deletedCount) ? (int)$deletedCount : 0;
         } catch (Exception $e) {
-            Log::error('Failed to clean old logs: '.$e->getMessage());
+            Log::error('Failed to clean old logs: ' . $e->getMessage());
 
             return 0;
         }
@@ -358,7 +358,7 @@ class LicenseVerificationLogger
         $sanitized = htmlspecialchars(trim($source), ENT_QUOTES, 'UTF-8');
         if (! in_array($sanitized, $allowedSources, true)) {
             throw new \InvalidArgumentException(
-                'Invalid verification source. Allowed values: '.implode(', ', $allowedSources),
+                'Invalid verification source. Allowed values: ' . implode(', ', $allowedSources),
             );
         }
 

@@ -40,7 +40,7 @@ class EnvatoService
                 'auth_enabled' => (bool)($setting->envato_auth_enabled ?? false),
             ];
         } catch (Exception $e) {
-            Log::error('Failed to retrieve Envato settings: '.$e->getMessage());
+            Log::error('Failed to retrieve Envato settings: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -61,7 +61,7 @@ class EnvatoService
                 return null;
             }
 
-            $cacheKey = 'envato_purchase_'.md5($purchaseCode);
+            $cacheKey = 'envato_purchase_' . md5($purchaseCode);
             $result = Cache::remember($cacheKey, now()->addMinutes(30), function () use ($purchaseCode, $token) {
                 try {
                     $response = Http::withToken($token)
@@ -84,7 +84,7 @@ class EnvatoService
 
                     return is_array($result) ? $result : null;
                 } catch (Exception $e) {
-                    Log::error('Exception during purchase verification: '.$e->getMessage());
+                    Log::error('Exception during purchase verification: ' . $e->getMessage());
 
                     return null;
                 }
@@ -92,7 +92,7 @@ class EnvatoService
 
             return is_array($result) ? $result : null;
         } catch (Exception $e) {
-            Log::error('Failed to verify purchase code: '.$e->getMessage());
+            Log::error('Failed to verify purchase code: ' . $e->getMessage());
 
             return null;
         }
@@ -114,13 +114,13 @@ class EnvatoService
                 return null;
             }
 
-            $cacheKey = 'envato_user_'.md5($username);
+            $cacheKey = 'envato_user_' . md5($username);
             $result = Cache::remember($cacheKey, now()->addHours(1), function () use ($username, $token) {
                 try {
                     $response = Http::withToken($token)
                         ->acceptJson()
                         ->timeout(30)
-                        ->get("{$this->baseUrl}/v2/market/user:".$username);
+                        ->get("{$this->baseUrl}/v2/market/user:" . $username);
 
                     if ($response->failed()) {
                         Log::error('Failed to retrieve user info from Envato API', [
@@ -135,7 +135,7 @@ class EnvatoService
 
                     return is_array($result) ? $result : null;
                 } catch (Exception $e) {
-                    Log::error('Exception during user info retrieval: '.$e->getMessage());
+                    Log::error('Exception during user info retrieval: ' . $e->getMessage());
 
                     return null;
                 }
@@ -143,7 +143,7 @@ class EnvatoService
 
             return is_array($result) ? $result : null;
         } catch (Exception $e) {
-            Log::error('Failed to get user info: '.$e->getMessage());
+            Log::error('Failed to get user info: ' . $e->getMessage());
 
             return null;
         }
@@ -156,7 +156,7 @@ class EnvatoService
     {
         try {
             $accessToken = $this->validateAccessToken($accessToken);
-            $cacheKey = 'envato_oauth_user_'.md5($accessToken);
+            $cacheKey = 'envato_oauth_user_' . md5($accessToken);
 
             $result = Cache::remember($cacheKey, now()->addMinutes(30), function () use ($accessToken) {
                 try {
@@ -177,7 +177,7 @@ class EnvatoService
 
                     return is_array($result) ? $result : null;
                 } catch (Exception $e) {
-                    Log::error('Exception during OAuth user info retrieval: '.$e->getMessage());
+                    Log::error('Exception during OAuth user info retrieval: ' . $e->getMessage());
 
                     return null;
                 }
@@ -185,7 +185,7 @@ class EnvatoService
 
             return is_array($result) ? $result : null;
         } catch (Exception $e) {
-            Log::error('Failed to get OAuth user info: '.$e->getMessage());
+            Log::error('Failed to get OAuth user info: ' . $e->getMessage());
 
             return null;
         }
@@ -212,7 +212,7 @@ class EnvatoService
 
             return $isValid;
         } catch (Exception $e) {
-            Log::error('Exception during token testing: '.$e->getMessage());
+            Log::error('Exception during token testing: ' . $e->getMessage());
 
             return false;
         }
@@ -230,7 +230,7 @@ class EnvatoService
             return null;
         }
 
-        $cacheKey = 'envato_item_'.$itemId;
+        $cacheKey = 'envato_item_' . $itemId;
         $result = Cache::remember($cacheKey, now()->addHours(6), function () use ($itemId, $token) {
             $response = Http::withToken($token)
                 ->acceptJson()
@@ -262,7 +262,7 @@ class EnvatoService
             return null;
         }
 
-        $cacheKey = 'envato_user_items_'.md5($username);
+        $cacheKey = 'envato_user_items_' . md5($username);
         $result = Cache::remember($cacheKey, now()->addHours(6), function () use ($username, $token) {
             $response = Http::withToken($token)
                 ->acceptJson()
@@ -326,7 +326,7 @@ class EnvatoService
             Cache::forget('envato_user_items_*');
             Cache::forget('envato_oauth_user_*');
         } catch (Exception $e) {
-            Log::error('Failed to clear Envato cache: '.$e->getMessage());
+            Log::error('Failed to clear Envato cache: ' . $e->getMessage());
         }
     }
 

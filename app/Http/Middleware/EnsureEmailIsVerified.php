@@ -76,7 +76,7 @@ class EnsureEmailIsVerified
 
             return $typedResponse;
         } catch (Exception $e) {
-            Log::error('Email verification middleware failed: '.$e->getMessage(), [
+            Log::error('Email verification middleware failed: ' . $e->getMessage(), [
                 'request_url' => $request->fullUrl(),
                 'request_method' => $request->method(),
                 'user_id' => $request->user()?->id,
@@ -107,7 +107,7 @@ class EnsureEmailIsVerified
 
             return $user->hasVerifiedEmail();
         } catch (Exception $e) {
-            Log::error('Failed to check email verification status: '.$e->getMessage());
+            Log::error('Failed to check email verification status: ' . $e->getMessage());
 
             return false;
         }
@@ -182,7 +182,7 @@ class EnsureEmailIsVerified
                 'message' => $message,
             ], $status);
         } catch (Exception $e) {
-            Log::error('Failed to create JSON response: '.$e->getMessage());
+            Log::error('Failed to create JSON response: ' . $e->getMessage());
 
             return response()->json([
                 'error' => 'Internal server error',

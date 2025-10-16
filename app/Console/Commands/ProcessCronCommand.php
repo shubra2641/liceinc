@@ -51,7 +51,7 @@ class ProcessCronCommand extends Command
             return Command::SUCCESS;
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->error('❌ Processing failed: '.$e->getMessage());
+            $this->error('❌ Processing failed: ' . $e->getMessage());
             Log::error('Cron processing failed', ['error' => $e->getMessage()]);
 
             return Command::FAILURE;
@@ -214,7 +214,7 @@ class ProcessCronCommand extends Command
                             'user_id' => $license->user_id,
                             'license_id' => $license->id,
                             'product_id' => $license->product_id,
-                            'invoice_number' => 'REN-'.time().'-'.$license->id,
+                            'invoice_number' => 'REN-' . time() . '-' . $license->id,
                             'type' => 'renewal',
                             'status' => 'pending',
                             'amount' => $renewalPrice,

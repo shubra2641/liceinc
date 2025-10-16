@@ -97,7 +97,7 @@ class ServerHelper
         $host = $request->getHost();
         $scheme = $request->getScheme();
 
-        return $scheme.'://'.$host;
+        return $scheme . '://' . $host;
     }
 
     /**

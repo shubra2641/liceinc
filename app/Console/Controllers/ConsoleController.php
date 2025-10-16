@@ -28,7 +28,7 @@ class ConsoleController
         try {
             $this->comment(\Illuminate\Foundation\Inspiring::quote());
         } catch (Exception $e) {
-            Log::error('Failed to display inspiring quote: '.$e->getMessage());
+            Log::error('Failed to display inspiring quote: ' . $e->getMessage());
             $this->error('Failed to display inspiring quote.');
         }
     }
@@ -44,7 +44,7 @@ class ConsoleController
     {
         // Console safe output (not HTML). We still escape control chars just in case.
         $safe = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', (string)$message);
-        echo $safe.PHP_EOL; // security-ignore: ECHO_NO_HTML_ESCAPE(CLI context)
+        echo $safe . PHP_EOL; // security-ignore: ECHO_NO_HTML_ESCAPE(CLI context)
     }
 
     /**
@@ -57,6 +57,6 @@ class ConsoleController
     protected function error($message)
     {
         $safe = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', (string)$message);
-        echo 'Error: '.$safe.PHP_EOL; // security-ignore: ECHO_NO_HTML_ESCAPE(CLI context)
+        echo 'Error: ' . $safe . PHP_EOL; // security-ignore: ECHO_NO_HTML_ESCAPE(CLI context)
     }
 }

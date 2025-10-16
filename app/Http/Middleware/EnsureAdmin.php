@@ -307,6 +307,6 @@ class EnsureAdmin
      */
     private function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data.(is_string(config('app.key')) ? config('app.key') : '')), 0, 8).'...';
+        return substr(hash('sha256', $data . (is_string(config('app.key')) ? config('app.key') : '')), 0, 8) . '...';
     }
 }

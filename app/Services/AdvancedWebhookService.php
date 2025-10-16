@@ -185,7 +185,7 @@ class AdvancedWebhookService
             $payload = '';
         }
 
-        return 'sha256='.hash_hmac('sha256', $payload, $secret);
+        return 'sha256=' . hash_hmac('sha256', $payload, $secret);
     }
 
     /**
@@ -380,7 +380,7 @@ class AdvancedWebhookService
      */
     public function verifyWebhookSignature(string $signature, string $payload, string $secret): bool
     {
-        $expectedSignature = 'sha256='.hash_hmac('sha256', $payload, $secret);
+        $expectedSignature = 'sha256=' . hash_hmac('sha256', $payload, $secret);
 
         return hash_equals($expectedSignature, $signature);
     }

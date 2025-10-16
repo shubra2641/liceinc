@@ -114,7 +114,7 @@ class ProductFileSecurityMiddleware
     private function checkRateLimit(Request $request): bool
     {
         try {
-            $key = self::RATE_LIMIT_KEY.':'.$request->ip();
+            $key = self::RATE_LIMIT_KEY . ':' . $request->ip();
             $result = RateLimiter::attempt(
                 $key,
                 self::MAX_ATTEMPTS,

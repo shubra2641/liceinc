@@ -64,6 +64,6 @@ class VerifyEmailController extends Controller
      */
     private function redirectToDashboard(): RedirectResponse
     {
-        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        return redirect()->intended(route('dashboard', absolute: false) . '?verified=1');
     }
 }

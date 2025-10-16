@@ -44,7 +44,7 @@ trait TicketHelpers
                 ->with('success', $successMessage);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to create ticket: '.$e->getMessage(), [
+            Log::error('Failed to create ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_data' => $ticketData,
                 'trace' => $e->getTraceAsString(),
@@ -83,7 +83,7 @@ trait TicketHelpers
             return view($viewName, ['ticket' => $ticket]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load ticket details: '.$e->getMessage(), [
+            Log::error('Failed to load ticket details: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id,
                 'trace' => $e->getTraceAsString(),
@@ -114,7 +114,7 @@ trait TicketHelpers
             return back()->with('success', $successMessage);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to update ticket: '.$e->getMessage(), [
+            Log::error('Failed to update ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id,
                 'update_data' => $updateData,
@@ -154,7 +154,7 @@ trait TicketHelpers
 
             return $this->handleTicketUpdate($ticket, $validated);
         } catch (Exception $e) {
-            Log::error('Failed to update ticket: '.$e->getMessage(), [
+            Log::error('Failed to update ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
@@ -196,7 +196,7 @@ trait TicketHelpers
             return redirect()->route($redirectRoute)->with('success', 'Ticket deleted');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to delete ticket: '.$e->getMessage(), [
+            Log::error('Failed to delete ticket: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'trace' => $e->getTraceAsString(),
@@ -283,7 +283,7 @@ trait TicketHelpers
             return back()->with('success', $message);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to add ticket reply: '.$e->getMessage(), [
+            Log::error('Failed to add ticket reply: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id ?? null,
                 'request_data' => $request->all(),
@@ -327,7 +327,7 @@ trait TicketHelpers
             return view($viewName, ['ticket' => $ticket]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load ticket details: '.$e->getMessage(), [
+            Log::error('Failed to load ticket details: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'ticket_id' => $ticket->id,
                 'trace' => $e->getTraceAsString(),
@@ -347,8 +347,8 @@ trait TicketHelpers
     {
         $validated = $request->validate([
             'subject' => ['sometimes', 'string', 'max:255'],
-            'priority' => ['sometimes', 'in:'.implode(', ', $this->getValidPriorities())],
-            'status' => ['sometimes', 'in:'.implode(', ', $this->getValidStatuses())],
+            'priority' => ['sometimes', 'in:' . implode(', ', $this->getValidPriorities())],
+            'status' => ['sometimes', 'in:' . implode(', ', $this->getValidStatuses())],
             'content' => ['sometimes', 'string'],
         ]);
 
@@ -475,7 +475,7 @@ trait TicketHelpers
     {
         $baseRules = [
             'subject' => ['required', 'string', 'max:255'],
-            'priority' => ['required', 'in:'.implode(', ', $this->getValidPriorities())],
+            'priority' => ['required', 'in:' . implode(', ', $this->getValidPriorities())],
             'content' => ['required', 'string'],
             'purchase_code' => ['nullable', 'string'],
             'product_slug' => ['nullable', 'string'],

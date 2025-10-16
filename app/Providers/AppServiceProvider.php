@@ -36,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Exception $e) {
             // Log error but don't break the application
             if (app()->bound('log')) {
-                app('log')->error('Failed to register service providers: '.$e->getMessage());
+                app('log')->error('Failed to register service providers: ' . $e->getMessage());
             }
             // Re-throw if it's a critical error
             if ($e instanceof \InvalidArgumentException) {
@@ -72,9 +72,9 @@ class AppServiceProvider extends ServiceProvider
                 $currentScheme !== ($parsedAppUrl['scheme'] ?? 'http')
             ) {
                 $path = trim(dirname(request()->getScriptName()), '/');
-                $baseUrl = $currentScheme.'://'.$currentHost;
+                $baseUrl = $currentScheme . '://' . $currentHost;
                 if ($path && $path !== '.') {
-                    $baseUrl .= '/'.$path;
+                    $baseUrl .= '/' . $path;
                 }
                 config(['app.url' => $baseUrl]);
                 app('url')->useOrigin($baseUrl);

@@ -27,7 +27,7 @@ class SecureFileHelper
 
             return 0;
         } catch (\Exception $e) {
-            Log::error('Failed to get file size: '.$e->getMessage());
+            Log::error('Failed to get file size: ' . $e->getMessage());
 
             return 0;
         }
@@ -41,7 +41,7 @@ class SecureFileHelper
         try {
             return Storage::exists($path);
         } catch (\Exception $e) {
-            Log::error('Failed to check file existence: '.$e->getMessage());
+            Log::error('Failed to check file existence: ' . $e->getMessage());
 
             return false;
         }
@@ -61,7 +61,7 @@ class SecureFileHelper
 
             return is_dir($fullPath);
         } catch (\Exception $e) {
-            Log::error('Failed to check directory: '.$e->getMessage());
+            Log::error('Failed to check directory: ' . $e->getMessage());
 
             return false;
         }
@@ -74,7 +74,7 @@ class SecureFileHelper
     {
         try {
             // Test write capability by creating a temporary file
-            $testFile = $path.'/.test_write_'.uniqid();
+            $testFile = $path . '/.test_write_' . uniqid();
             $result = Storage::put($testFile, 'test');
             if ($result) {
                 Storage::delete($testFile);
@@ -84,7 +84,7 @@ class SecureFileHelper
 
             return false;
         } catch (\Exception $e) {
-            Log::error('Failed to check write permission: '.$e->getMessage());
+            Log::error('Failed to check write permission: ' . $e->getMessage());
 
             return false;
         }
@@ -98,7 +98,7 @@ class SecureFileHelper
         try {
             return Storage::makeDirectory($path);
         } catch (\Exception $e) {
-            Log::error('Failed to create directory: '.$e->getMessage());
+            Log::error('Failed to create directory: ' . $e->getMessage());
 
             return false;
         }
@@ -112,7 +112,7 @@ class SecureFileHelper
         try {
             return Storage::delete($path);
         } catch (\Exception $e) {
-            Log::error('Failed to delete file: '.$e->getMessage());
+            Log::error('Failed to delete file: ' . $e->getMessage());
 
             return false;
         }
@@ -126,7 +126,7 @@ class SecureFileHelper
         try {
             return Storage::put($path, $content) !== false;
         } catch (\Exception $e) {
-            Log::error('Failed to write file contents: '.$e->getMessage());
+            Log::error('Failed to write file contents: ' . $e->getMessage());
 
             return false;
         }
@@ -199,7 +199,7 @@ class SecureFileHelper
 
             return $result !== false;
         } catch (\Exception $e) {
-            Log::error('Failed to set ini setting: '.$e->getMessage());
+            Log::error('Failed to set ini setting: ' . $e->getMessage());
 
             return false;
         }

@@ -427,7 +427,7 @@ class SecurityHeadersMiddleware
                     Log::warning('Invalid CSP directive name format', ['directive' => $directive]);
                     continue;
                 }
-                $policy[] = $directive.' '.$value;
+                $policy[] = $directive . ' ' . $value;
             }
             if (empty($policy)) {
                 Log::warning('No valid CSP directives found, using default policy');

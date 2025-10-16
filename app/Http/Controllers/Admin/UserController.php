@@ -464,7 +464,7 @@ class UserController extends Controller
             // This would typically use Laravel's built-in password reset functionality
             // For now, we'll just return a success message
             return redirect()->back()
-                ->with('success', 'Password reset email sent to '.$user->email);
+                ->with('success', 'Password reset email sent to ' . $user->email);
         } catch (\Exception $e) {
             Log::error('Password reset email failed', [
                 'error' => $e->getMessage(),

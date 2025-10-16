@@ -156,7 +156,7 @@ class SystemUpdateRequest extends FormRequest
     {
         return [
             'version.required' => 'Version is required.',
-            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix '.
+            'version.regex' => 'Version must be in format: x.y or x.y.z or x.y.z-suffix ' .
                 '(e.g., 1.0, 1.0.0, 1.0.0-beta).',
             'confirm.required' => 'Confirmation is required for this operation.',
             'confirm.accepted' => 'You must confirm this operation to proceed.',

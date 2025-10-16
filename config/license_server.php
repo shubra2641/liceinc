@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'url' => env('LICENSE_SERVER_URL', env('APP_URL').'/api'),
+    'url' => env('LICENSE_SERVER_URL', env('APP_URL') . '/api'),
 
     'domain' => env(
         'LICENSE_SERVER_DOMAIN',

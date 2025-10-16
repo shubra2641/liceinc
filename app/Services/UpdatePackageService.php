@@ -26,7 +26,7 @@ class UpdatePackageService
             $this->validatePackagePath($packagePath);
             DB::beginTransaction();
 
-            $tempDir = storage_path('app/temp/update_'.time());
+            $tempDir = storage_path('app/temp/update_' . time());
             if (! SecureFileHelper::isDirectory($tempDir)) {
                 if (! mkdir($tempDir, 0755, true)) {
                     throw new \Exception('Failed to create temporary directory');
@@ -64,7 +64,7 @@ class UpdatePackageService
 
             return [
                 'success' => false,
-                'message' => 'Failed to install update files: '.$e->getMessage(),
+                'message' => 'Failed to install update files: ' . $e->getMessage(),
             ];
         }
     }
@@ -122,7 +122,7 @@ class UpdatePackageService
 
             return [
                 'success' => false,
-                'message' => 'Failed to process update package: '.$e->getMessage(),
+                'message' => 'Failed to process update package: ' . $e->getMessage(),
                 'data' => [],
             ];
         }
@@ -200,7 +200,7 @@ class UpdatePackageService
     private function extractPackage(string $packagePath): ?string
     {
         try {
-            $tempDir = storage_path('app/temp/update_'.time());
+            $tempDir = storage_path('app/temp/update_' . time());
             if (! SecureFileHelper::isDirectory($tempDir)) {
                 if (! mkdir($tempDir, 0755, true)) {
                     throw new \Exception('Failed to create temporary directory');
@@ -261,7 +261,7 @@ class UpdatePackageService
 
             return [
                 'success' => false,
-                'message' => 'Failed to process update files: '.$e->getMessage(),
+                'message' => 'Failed to process update files: ' . $e->getMessage(),
             ];
         }
     }
@@ -272,7 +272,7 @@ class UpdatePackageService
     private function readUpdateConfig(string $extractPath): ?array
     {
         try {
-            $configFile = $extractPath.'/update.json';
+            $configFile = $extractPath . '/update.json';
             if (! SecureFileHelper::fileExists($configFile)) {
                 return null;
             }
@@ -287,7 +287,7 @@ class UpdatePackageService
 
             $config = json_decode($configContent, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception('Invalid JSON in configuration file: '.json_last_error_msg());
+                throw new \Exception('Invalid JSON in configuration file: ' . json_last_error_msg());
             }
 
             return is_array($config) ? $config : [];
@@ -307,7 +307,7 @@ class UpdatePackageService
     {
         try {
             $processedFiles = [];
-            $filesDir = $extractPath.'/files';
+            $filesDir = $extractPath . '/files';
             if (! SecureFileHelper::isDirectory($filesDir)) {
                 return $processedFiles;
             }
@@ -370,13 +370,13 @@ class UpdatePackageService
         ];
 
         try {
-            $migrationsDir = $extractPath.'/migrations';
+            $migrationsDir = $extractPath . '/migrations';
             if (SecureFileHelper::isDirectory($migrationsDir)) {
-                $migrationFiles = glob($migrationsDir.'/*.php') ?: [];
+                $migrationFiles = glob($migrationsDir . '/*.php') ?: [];
 
                 foreach ($migrationFiles as $migrationFile) {
                     $filename = basename($migrationFile);
-                    $targetPath = database_path('migrations/'.$filename);
+                    $targetPath = database_path('migrations/' . $filename);
                     if (! copy($migrationFile, $targetPath)) {
                         throw new \Exception("Failed to copy migration file: {$filename}");
                     }
@@ -395,7 +395,7 @@ class UpdatePackageService
                 'extract_path' => $extractPath,
                 'error' => $e->getMessage(),
             ]);
-            $migrationResult['message'] = 'Migration failed: '.$e->getMessage();
+            $migrationResult['message'] = 'Migration failed: ' . $e->getMessage();
         }
 
         return $migrationResult;
@@ -413,9 +413,9 @@ class UpdatePackageService
         ];
 
         try {
-            $versionFile = $extractPath.'/version.json';
+            $versionFile = $extractPath . '/version.json';
             if (Storage::disk('local')->exists($versionFile)) {
-                if (! is_readable(storage_path('app/'.$versionFile))) {
+                if (! is_readable(storage_path('app/' . $versionFile))) {
                     throw new \Exception('Version file is not readable');
                 }
 
@@ -426,7 +426,7 @@ class UpdatePackageService
 
                 $versionData = json_decode($versionContent, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw new \Exception('Invalid JSON in version file: '.json_last_error_msg());
+                    throw new \Exception('Invalid JSON in version file: ' . json_last_error_msg());
                 }
 
                 $targetVersionFile = storage_path('version.json');
@@ -446,7 +446,7 @@ class UpdatePackageService
                 'extract_path' => $extractPath,
                 'error' => $e->getMessage(),
             ]);
-            $versionResult['message'] = 'Failed to update version: '.$e->getMessage();
+            $versionResult['message'] = 'Failed to update version: ' . $e->getMessage();
         }
 
         return $versionResult;
@@ -466,7 +466,7 @@ class UpdatePackageService
             }
 
             $relativePath = substr($filePath, strlen(base_path()) + 1);
-            $backupPath = $backupDir.'/'.str_replace('/', '_', $relativePath).'_'.time();
+            $backupPath = $backupDir . '/' . str_replace('/', '_', $relativePath) . '_' . time();
             if (! copy($filePath, $backupPath)) {
                 throw new \Exception("Failed to create backup of file: {$filePath}");
             }
@@ -517,7 +517,7 @@ class UpdatePackageService
                 $itemPath = is_object($item) && method_exists($item, 'getPathname') ? $item->getPathname() : '';
                 $sourcePath = str_replace('\\', '/', $itemPath);
                 $relativePath = substr($sourcePath, strlen($sourceDir) + 1);
-                $targetPath = $targetDir.'/'.$relativePath;
+                $targetPath = $targetDir . '/' . $relativePath;
 
                 if (is_object($item) && method_exists($item, 'isDir') && $item->isDir()) {
                     if (! SecureFileHelper::isDirectory($targetPath)) {
@@ -570,7 +570,7 @@ class UpdatePackageService
             $files = is_array($scandirResult) ? array_diff($scandirResult, ['.', '..']) : [];
 
             foreach ($files as $file) {
-                $path = $dir.'/'.$file;
+                $path = $dir . '/' . $file;
                 if (SecureFileHelper::isDirectory($path)) {
                     $this->deleteDirectory($path);
                 } else {

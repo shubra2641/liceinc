@@ -69,7 +69,7 @@ class UpdateNotificationController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to check for updates: '.$e->getMessage(),
+                'message' => 'Failed to check for updates: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -109,7 +109,7 @@ class UpdateNotificationController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get notification status: '.$e->getMessage(),
+                'message' => 'Failed to get notification status: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -161,7 +161,7 @@ class UpdateNotificationController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to dismiss notification: '.$e->getMessage(),
+                'message' => 'Failed to dismiss notification: ' . $e->getMessage(),
             ], 500);
         }
     }

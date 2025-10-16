@@ -104,90 +104,90 @@ class ProgrammingLanguage extends Model
         $templates = [
             'php' => "<?php
 
-declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n".
-                " * License: {LICENSE_CODE}\n * Valid Until: {VALID_UNTIL}\n */\n\n".
-                "define('LICENSE_CODE', '{LICENSE_CODE}');\n".
-                "define('LICENSE_DOMAIN', '{DOMAIN}');\n".
-                "define('LICENSE_VALID_UNTIL', '{VALID_UNTIL}');\n\n".
-                "define('PRODUCT_NAME', '{PRODUCT_NAME}');\n".
-                "define('PRODUCT_VERSION', '{PRODUCT_VERSION}');\n\n".
-                "// Verification function\n".
-                "function verify_license() {\n".
-                "    // License verification logic here\n".
-                "    return true;\n".
+declare(strict_types=1);\n/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n" .
+                " * License: {LICENSE_CODE}\n * Valid Until: {VALID_UNTIL}\n */\n\n" .
+                "define('LICENSE_CODE', '{LICENSE_CODE}');\n" .
+                "define('LICENSE_DOMAIN', '{DOMAIN}');\n" .
+                "define('LICENSE_VALID_UNTIL', '{VALID_UNTIL}');\n\n" .
+                "define('PRODUCT_NAME', '{PRODUCT_NAME}');\n" .
+                "define('PRODUCT_VERSION', '{PRODUCT_VERSION}');\n\n" .
+                "// Verification function\n" .
+                "function verify_license() {\n" .
+                "    // License verification logic here\n" .
+                "    return true;\n" .
                 "}\n?>",
-            'javascript' => "/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n".
-                " * License: {LICENSE_CODE}\n * Valid Until: {VALID_UNTIL}\n */\n\n".
-                "const LICENSE_CONFIG = {\n".
-                "    code: '{LICENSE_CODE}',\n".
-                "    domain: '{DOMAIN}',\n".
-                "    validUntil: '{VALID_UNTIL}',\n".
-                "    product: '{PRODUCT_NAME}',\n".
-                "    version: '{PRODUCT_VERSION}'\n".
-                "};\n\n".
-                "// Verification function\n".
-                "function verifyLicense() {\n".
-                "    // License verification logic here\n".
-                "    return true;\n".
-                "}\n\n".
+            'javascript' => "/**\n * License Verification\n * Product: {PRODUCT_NAME}\n * Domain: {DOMAIN}\n" .
+                " * License: {LICENSE_CODE}\n * Valid Until: {VALID_UNTIL}\n */\n\n" .
+                "const LICENSE_CONFIG = {\n" .
+                "    code: '{LICENSE_CODE}',\n" .
+                "    domain: '{DOMAIN}',\n" .
+                "    validUntil: '{VALID_UNTIL}',\n" .
+                "    product: '{PRODUCT_NAME}',\n" .
+                "    version: '{PRODUCT_VERSION}'\n" .
+                "};\n\n" .
+                "// Verification function\n" .
+                "function verifyLicense() {\n" .
+                "    // License verification logic here\n" .
+                "    return true;\n" .
+                "}\n\n" .
                 'module.exports = { LICENSE_CONFIG, verifyLicense };',
-            'python' => "# License Verification\n# Product: {PRODUCT_NAME}\n# Domain: {DOMAIN}\n".
-                "# License: {LICENSE_CODE}\n# Valid Until: {VALID_UNTIL}\n\n".
-                "LICENSE_CODE = '{LICENSE_CODE}'\n".
-                "LICENSE_DOMAIN = '{DOMAIN}'\n".
-                "LICENSE_VALID_UNTIL = '{VALID_UNTIL}'\n\n".
-                "PRODUCT_NAME = '{PRODUCT_NAME}'\n".
-                "PRODUCT_VERSION = '{PRODUCT_VERSION}'\n\n".
-                "# Verification function\n".
-                "def verify_license():\n".
-                "    # License verification logic here\n".
+            'python' => "# License Verification\n# Product: {PRODUCT_NAME}\n# Domain: {DOMAIN}\n" .
+                "# License: {LICENSE_CODE}\n# Valid Until: {VALID_UNTIL}\n\n" .
+                "LICENSE_CODE = '{LICENSE_CODE}'\n" .
+                "LICENSE_DOMAIN = '{DOMAIN}'\n" .
+                "LICENSE_VALID_UNTIL = '{VALID_UNTIL}'\n\n" .
+                "PRODUCT_NAME = '{PRODUCT_NAME}'\n" .
+                "PRODUCT_VERSION = '{PRODUCT_VERSION}'\n\n" .
+                "# Verification function\n" .
+                "def verify_license():\n" .
+                "    # License verification logic here\n" .
                 '    return True',
-            'csharp' => "// License Verification\n// Product: {PRODUCT_NAME}\n// Domain: {DOMAIN}\n".
-                "// License: {LICENSE_CODE}\n// Valid Until: {VALID_UNTIL}\n\n".
-                "using System;\n\n".
-                "namespace LicenseVerification\n".
-                "{\n".
-                "    public static class LicenseConfig\n".
-                "    {\n".
-                "        public const string Code = \"{LICENSE_CODE}\";\n".
-                "        public const string Domain = \"{DOMAIN}\";\n".
-                "        public const string ValidUntil = \"{VALID_UNTIL}\";\n".
-                "        public const string ProductName = \"{PRODUCT_NAME}\";\n".
-                "        public const string ProductVersion = \"{PRODUCT_VERSION}\";\n\n".
-                "        public static bool VerifyLicense()\n".
-                "        {\n".
-                "            // License verification logic here\n".
-                "            return true;\n".
-                "        }\n".
-                "    }\n".
+            'csharp' => "// License Verification\n// Product: {PRODUCT_NAME}\n// Domain: {DOMAIN}\n" .
+                "// License: {LICENSE_CODE}\n// Valid Until: {VALID_UNTIL}\n\n" .
+                "using System;\n\n" .
+                "namespace LicenseVerification\n" .
+                "{\n" .
+                "    public static class LicenseConfig\n" .
+                "    {\n" .
+                "        public const string Code = \"{LICENSE_CODE}\";\n" .
+                "        public const string Domain = \"{DOMAIN}\";\n" .
+                "        public const string ValidUntil = \"{VALID_UNTIL}\";\n" .
+                "        public const string ProductName = \"{PRODUCT_NAME}\";\n" .
+                "        public const string ProductVersion = \"{PRODUCT_VERSION}\";\n\n" .
+                "        public static bool VerifyLicense()\n" .
+                "        {\n" .
+                "            // License verification logic here\n" .
+                "            return true;\n" .
+                "        }\n" .
+                "    }\n" .
                 '}',
-            'java' => "// License Verification\n// Product: {PRODUCT_NAME}\n// Domain: {DOMAIN}\n".
-                "// License: {LICENSE_CODE}\n// Valid Until: {VALID_UNTIL}\n\n".
-                "package com.licenseverification;\n\n".
-                "public class LicenseConfig {\n".
-                "    public static final String CODE = \"{LICENSE_CODE}\";\n".
-                "    public static final String DOMAIN = \"{DOMAIN}\";\n".
-                "    public static final String VALID_UNTIL = \"{VALID_UNTIL}\";\n".
-                "    public static final String PRODUCT_NAME = \"{PRODUCT_NAME}\";\n".
-                "    public static final String PRODUCT_VERSION = \"{PRODUCT_VERSION}\";\n\n".
-                "    public static boolean verifyLicense() {\n".
-                "        // License verification logic here\n".
-                "        return true;\n".
-                "    }\n".
+            'java' => "// License Verification\n// Product: {PRODUCT_NAME}\n// Domain: {DOMAIN}\n" .
+                "// License: {LICENSE_CODE}\n// Valid Until: {VALID_UNTIL}\n\n" .
+                "package com.licenseverification;\n\n" .
+                "public class LicenseConfig {\n" .
+                "    public static final String CODE = \"{LICENSE_CODE}\";\n" .
+                "    public static final String DOMAIN = \"{DOMAIN}\";\n" .
+                "    public static final String VALID_UNTIL = \"{VALID_UNTIL}\";\n" .
+                "    public static final String PRODUCT_NAME = \"{PRODUCT_NAME}\";\n" .
+                "    public static final String PRODUCT_VERSION = \"{PRODUCT_VERSION}\";\n\n" .
+                "    public static boolean verifyLicense() {\n" .
+                "        // License verification logic here\n" .
+                "        return true;\n" .
+                "    }\n" .
                 '}',
-            'cpp' => "// License Verification\n// Product: {PRODUCT_NAME}\n// Domain: {DOMAIN}\n".
-                "// License: {LICENSE_CODE}\n// Valid Until: {VALID_UNTIL}\n\n".
-                "#ifndef LICENSE_CONFIG_H\n".
-                "#define LICENSE_CONFIG_H\n\n".
-                "#include <string>\n\n".
-                "namespace LicenseVerification {\n".
-                "    const std::string CODE = \"{LICENSE_CODE}\";\n".
-                "    const std::string DOMAIN = \"{DOMAIN}\";\n".
-                "    const std::string VALID_UNTIL = \"{VALID_UNTIL}\";\n".
-                "    const std::string PRODUCT_NAME = \"{PRODUCT_NAME}\";\n".
-                "    const std::string PRODUCT_VERSION = \"{PRODUCT_VERSION}\";\n\n".
-                "    bool verifyLicense();\n".
-                "}\n\n".
+            'cpp' => "// License Verification\n// Product: {PRODUCT_NAME}\n// Domain: {DOMAIN}\n" .
+                "// License: {LICENSE_CODE}\n// Valid Until: {VALID_UNTIL}\n\n" .
+                "#ifndef LICENSE_CONFIG_H\n" .
+                "#define LICENSE_CONFIG_H\n\n" .
+                "#include <string>\n\n" .
+                "namespace LicenseVerification {\n" .
+                "    const std::string CODE = \"{LICENSE_CODE}\";\n" .
+                "    const std::string DOMAIN = \"{DOMAIN}\";\n" .
+                "    const std::string VALID_UNTIL = \"{VALID_UNTIL}\";\n" .
+                "    const std::string PRODUCT_NAME = \"{PRODUCT_NAME}\";\n" .
+                "    const std::string PRODUCT_VERSION = \"{PRODUCT_VERSION}\";\n\n" .
+                "    bool verifyLicense();\n" .
+                "}\n\n" .
                 '#endif // LICENSE_CONFIG_H',
         ];
 

@@ -111,7 +111,7 @@ class SettingController extends Controller
                     'envato_client_secret' => '',
                     'envato_redirect_uri' => (is_string(config('app.url'))
                         ? config('app.url')
-                        : '').'/auth/envato/callback',
+                        : '') . '/auth/envato/callback',
                     'envato_oauth_enabled' => false,
                     'auto_generate_license' => true,
                     'default_license_length' => 32,
@@ -259,7 +259,7 @@ class SettingController extends Controller
                             DB::rollBack();
 
                             return back()->withErrors([
-                                'human_questions' => 'Invalid JSON: '.$e->getMessage(),
+                                'human_questions' => 'Invalid JSON: ' . $e->getMessage(),
                             ])->withInput();
                         }
                     } else {
@@ -383,7 +383,7 @@ class SettingController extends Controller
                 Log::warning('Envato API test failed - invalid token', [
                     'user_id' => Auth::id(),
                     'ip' => $request->ip(),
-                    'token_prefix' => substr(is_string($token) ? $token : '', 0, 8).'...',
+                    'token_prefix' => substr(is_string($token) ? $token : '', 0, 8) . '...',
                 ]);
 
                 return response()->json([
@@ -400,7 +400,7 @@ class SettingController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed: '.implode(
+                'message' => 'Validation failed: ' . implode(
                     ', ',
                     is_array($e->errors()['token'] ?? null)
                         ? $e->errors()['token']
@@ -417,7 +417,7 @@ class SettingController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'API test failed: '.$e->getMessage(),
+                'message' => 'API test failed: ' . $e->getMessage(),
             ], 500);
         }
     }

@@ -148,13 +148,13 @@ class EmailTemplateRequest extends FormRequest
             'body.required' => 'Email body is required.',
             'body.max' => 'Email body must not exceed 50, 000 characters.',
             'type.required' => 'Template type is required.',
-            'type.in' => 'Template type must be one of: user, admin, system, '.
+            'type.in' => 'Template type must be one of: user, admin, system, ' .
                 'notification, marketing.',
             'category.required' => 'Template category is required.',
-            'category.in' => 'Template category must be one of: registration, '.
+            'category.in' => 'Template category must be one of: registration, ' .
                 'license, ticket, invoice, update, notification, marketing, support.',
             'variables.*.regex' => 'Variable names can only contain letters, numbers, spaces, '
-                .'hyphens, and underscores.',
+                . 'hyphens, and underscores.',
             'priority.min' => 'Priority must be at least 1.',
             'priority.max' => 'Priority must not exceed 10.',
             'delay_minutes.min' => 'Delay must be at least 0 minutes.',

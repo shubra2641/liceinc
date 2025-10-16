@@ -15,7 +15,7 @@ return [
 
     'client_id' => env('ENVATO_CLIENT_ID'),
     'client_secret' => env('ENVATO_CLIENT_SECRET'),
-    'redirect_uri' => env('ENVATO_REDIRECT_URI', env('APP_URL').'/auth/envato/callback'),
+    'redirect_uri' => env('ENVATO_REDIRECT_URI', env('APP_URL') . '/auth/envato/callback'),
 
     /*
     |--------------------------------------------------------------------------

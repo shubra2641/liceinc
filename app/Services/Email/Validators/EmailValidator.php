@@ -66,7 +66,7 @@ class EmailValidator implements EmailValidatorInterface
 
         if (! in_array($sanitized, $allowedTypes, true)) {
             throw new \InvalidArgumentException(
-                'Invalid template type. Allowed values: '.implode(', ', $allowedTypes),
+                'Invalid template type. Allowed values: ' . implode(', ', $allowedTypes),
             );
         }
 

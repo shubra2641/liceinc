@@ -204,7 +204,7 @@ abstract class BaseController extends Controller
      */
     protected function logSecurityEvent(string $event, Request $request, array $context = []): void
     {
-        Log::warning('Security event: '.$event, array_merge([
+        Log::warning('Security event: ' . $event, array_merge([
             'url' => $request->fullUrl(),
             'method' => $request->method(),
             'ip' => $request->ip(),
@@ -290,7 +290,7 @@ abstract class BaseController extends Controller
             $message = 'Validation failed';
             $statusCode = Response::HTTP_UNPROCESSABLE_ENTITY;
         }
-        Log::error('Controller exception: '.$context, [
+        Log::error('Controller exception: ' . $context, [
             'exception' => $exception->getMessage(),
             'file' => $exception->getFile(),
             'line' => $exception->getLine(),

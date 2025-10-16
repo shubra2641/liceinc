@@ -270,7 +270,7 @@ class PaymentSettingsController extends Controller
                     'message' => trans('app.PayPal credentials are incomplete'),
                 ];
             }
-            $paypal = new class() {
+            $paypal = new class () {
                 public function __construct()
                 {
                     // Mock PayPal SDK implementation
@@ -282,7 +282,7 @@ class PaymentSettingsController extends Controller
                 }
             };
             // Try to create a simple order to test connection
-            $request = new class() {
+            $request = new class () {
                 public function prefer(string $preference): mixed
                 {
                     // Mock implementation
@@ -326,7 +326,7 @@ class PaymentSettingsController extends Controller
                     is_string($credentials['client_id'] ?? null) ? $credentials['client_id'] : '',
                     0,
                     8,
-                ).'...',
+                ) . '...',
             ]);
 
             return [
@@ -386,7 +386,7 @@ class PaymentSettingsController extends Controller
                     is_string($credentials['secret_key']) ? $credentials['secret_key'] : '',
                     0,
                     8,
-                ).'...',
+                ) . '...',
             ]);
 
             return [

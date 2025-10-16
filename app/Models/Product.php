@@ -457,7 +457,7 @@ class Product extends Model
     {
         $price = $this->extended_support_price ?? 0.0;
 
-        return '$'.number_format((float)$price, 2);
+        return '$' . number_format((float)$price, 2);
     }
 
     /**
@@ -465,7 +465,7 @@ class Product extends Model
      */
     public function getFormattedPriceAttribute(): string
     {
-        return '$'.number_format((float)$this->price, 2);
+        return '$' . number_format((float)$this->price, 2);
     }
 
     /**
@@ -473,7 +473,7 @@ class Product extends Model
      */
     public function getFormattedRenewalPriceAttribute(): string
     {
-        return $this->renewal_price ? '$'.number_format((float)$this->renewal_price, 2) : 'N/A';
+        return $this->renewal_price ? '$' . number_format((float)$this->renewal_price, 2) : 'N/A';
     }
 
     /**
@@ -558,7 +558,7 @@ class Product extends Model
             return 'Unlimited';
         }
 
-        return (int)$this->stock > 0 ? 'In Stock ('.$this->stock.')' : 'Out of Stock';
+        return (int)$this->stock > 0 ? 'In Stock (' . $this->stock . ')' : 'Out of Stock';
     }
 
     /**

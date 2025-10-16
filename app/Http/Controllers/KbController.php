@@ -75,7 +75,7 @@ class KbController extends Controller
             return view('kb.index', ['categories' => $categories, 'recentArticles' => $recentArticles]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load knowledge base index: '.$e->getMessage(), [
+            Log::error('Failed to load knowledge base index: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
@@ -115,7 +115,7 @@ class KbController extends Controller
             return view($viewName, ['categories' => $categories]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load article creation form: '.$e->getMessage(), [
+            Log::error('Failed to load article creation form: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
@@ -160,7 +160,7 @@ class KbController extends Controller
                 ->with('success', 'Article created successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to create knowledge base article: '.$e->getMessage(), [
+            Log::error('Failed to create knowledge base article: ' . $e->getMessage(), [
                 'user_id' => auth()->id(),
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
@@ -205,7 +205,7 @@ class KbController extends Controller
             return view($viewName, ['article' => $article]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load knowledge base article: '.$e->getMessage(), [
+            Log::error('Failed to load knowledge base article: ' . $e->getMessage(), [
                 'article_id' => $article->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -248,7 +248,7 @@ class KbController extends Controller
             return view($viewName, ['article' => $article, 'categories' => $categories]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load article editing form: '.$e->getMessage(), [
+            Log::error('Failed to load article editing form: ' . $e->getMessage(), [
                 'article_id' => $article->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -292,7 +292,7 @@ class KbController extends Controller
                 ->with('success', 'Article updated successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to update knowledge base article: '.$e->getMessage(), [
+            Log::error('Failed to update knowledge base article: ' . $e->getMessage(), [
                 'article_id' => $article->id ?? null,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString(),
@@ -330,7 +330,7 @@ class KbController extends Controller
                 ->with('success', 'Article deleted successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to delete knowledge base article: '.$e->getMessage(), [
+            Log::error('Failed to delete knowledge base article: ' . $e->getMessage(), [
                 'article_id' => $article->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -378,7 +378,7 @@ class KbController extends Controller
             return view('kb.search', ['articles' => $articles, 'query' => $query]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to search knowledge base articles: '.$e->getMessage(), [
+            Log::error('Failed to search knowledge base articles: ' . $e->getMessage(), [
                 'query' => $request->get('q'),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -421,7 +421,7 @@ class KbController extends Controller
             return view('kb.category', ['category' => $category, 'articles' => $articles]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Failed to load category articles: '.$e->getMessage(), [
+            Log::error('Failed to load category articles: ' . $e->getMessage(), [
                 'category_id' => $category->id ?? null,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -470,7 +470,7 @@ class KbController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:kb_articles,slug,'.$article->id,
+            'slug' => 'required|string|max:255|unique:kb_articles,slug,' . $article->id,
             'content' => 'required|string',
             'category_id' => 'required|exists:kb_categories,id',
             'status' => 'required|in:draft, published',

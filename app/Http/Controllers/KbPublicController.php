@@ -291,7 +291,7 @@ class KbPublicController extends Controller
                 ->get();
         }
 
-        $searchTerm = '%'.strtolower($query).'%';
+        $searchTerm = '%' . strtolower($query) . '%';
 
         $articles = KbArticle::where('is_published', true)
             ->whereHas('category', function ($query) {
@@ -326,7 +326,7 @@ class KbPublicController extends Controller
         }
 
         return preg_replace(
-            '/('.preg_quote($query, '/').')/i',
+            '/(' . preg_quote($query, '/') . ')/i',
             '<mark class="search-highlight">$1</mark>',
             $text,
         ) ?? $text;

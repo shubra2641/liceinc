@@ -282,8 +282,8 @@ class PaymentService
 
         $redirectUrls = new RedirectUrls();
         $appUrl = config('app.url');
-        $redirectUrls->setReturnUrl($appUrl.'/payment/success/paypal')
-            ->setCancelUrl($appUrl.'/payment/cancel/paypal');
+        $redirectUrls->setReturnUrl($appUrl . '/payment/success/paypal')
+            ->setCancelUrl($appUrl . '/payment/cancel/paypal');
 
         $payment = new Payment();
         $payment->setIntent('sale');
@@ -328,8 +328,8 @@ class PaymentService
                 ],
             ],
             'mode' => 'payment',
-            'success_url' => $appUrl.'/payment/success/stripe',
-            'cancel_url' => $appUrl.'/payment/cancel/stripe',
+            'success_url' => $appUrl . '/payment/success/stripe',
+            'cancel_url' => $appUrl . '/payment/cancel/stripe',
         ]);
     }
 
@@ -379,7 +379,7 @@ class PaymentService
     private function generateInvoiceNumber(): string
     {
         do {
-            $invoiceNumber = 'INV-'.strtoupper(\Illuminate\Support\Str::random(8));
+            $invoiceNumber = 'INV-' . strtoupper(\Illuminate\Support\Str::random(8));
         } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
 
         return $invoiceNumber;

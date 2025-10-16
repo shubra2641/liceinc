@@ -295,7 +295,7 @@ class TicketCategoryController extends Controller
     public function destroy(TicketCategory $ticket_category): RedirectResponse
     {
         // Rate limiting for category deletions
-        $key = 'ticket-category-delete:'.request()->ip();
+        $key = 'ticket-category-delete:' . request()->ip();
         if (RateLimiter::tooManyAttempts($key, 3)) {
             return redirect()->back()
                 ->with('error', 'Too many deletion attempts. Please try again later.');

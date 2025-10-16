@@ -173,7 +173,7 @@ class TicketRequest extends FormRequest
             'invoice_amount.min' => 'Invoice amount must be at least 0.01.',
             'invoice_amount.max' => 'Invoice amount must not exceed 999,999.99.',
             'billing_type.required_if' => 'Billing type is required when creating an invoice.',
-            'billing_type.in' => 'Billing type must be one of: one_time, recurring, monthly, '.
+            'billing_type.in' => 'Billing type must be one of: one_time, recurring, monthly, ' .
                 'quarterly, semi_annual, annual, custom_recurring.',
             'billing_cycle.required_if' => 'Billing cycle is required for recurring invoices.',
             'billing_cycle.in' => 'Billing cycle must be one of: monthly, quarterly, yearly.',

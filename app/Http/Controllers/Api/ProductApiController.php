@@ -141,7 +141,7 @@ class ProductApiController extends Controller
                 ]);
             }
             Log::warning('Invalid purchase code lookup attempt', [
-                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4).'...',
+                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4) . '...',
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);

@@ -101,7 +101,7 @@ class CheckInstallation
 
             return $typedResponse;
         } catch (Exception $e) {
-            Log::error('Installation check middleware failed: '.$e->getMessage(), [
+            Log::error('Installation check middleware failed: ' . $e->getMessage(), [
                 'request_url' => $request->fullUrl(),
                 'request_method' => $request->method(),
                 'trace' => $e->getTraceAsString(),
@@ -135,7 +135,7 @@ class CheckInstallation
 
             return $routeName ?? '';
         } catch (Exception $e) {
-            Log::error('Failed to get current route name: '.$e->getMessage());
+            Log::error('Failed to get current route name: ' . $e->getMessage());
 
             return '';
         }
@@ -165,7 +165,7 @@ class CheckInstallation
         try {
             return File::exists($installedFile);
         } catch (Exception $e) {
-            Log::error('Failed to check installation file: '.$e->getMessage());
+            Log::error('Failed to check installation file: ' . $e->getMessage());
 
             return false;
         }
@@ -259,7 +259,7 @@ class CheckInstallation
                 'redirect' => $redirect,
             ], $status);
         } catch (Exception $e) {
-            Log::error('Failed to create JSON response: '.$e->getMessage());
+            Log::error('Failed to create JSON response: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,

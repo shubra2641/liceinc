@@ -114,11 +114,11 @@ class ProductFileController extends Controller
                 ->header(
                     'Content-Disposition',
                     'attachment; filename="'
-                        .$this->sanitizeFilename(
+                        . $this->sanitizeFilename(
                             is_string($fileData['filename'])
                                 ? $fileData['filename']
                                 : '',
-                        ).'"',
+                        ) . '"',
                 )
                 ->header('Content-Length', is_numeric($fileData['size']) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -217,11 +217,11 @@ class ProductFileController extends Controller
                 )
                 ->header(
                     'Content-Disposition',
-                    'attachment; filename="'.(
+                    'attachment; filename="' . (
                         is_string($fileData['filename'])
                             ? $fileData['filename']
                             : ''
-                    ).'"',
+                    ) . '"',
                 )
                 ->header('Content-Length', is_numeric($fileData['size']) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -298,11 +298,11 @@ class ProductFileController extends Controller
                 )
                 ->header(
                     'Content-Disposition',
-                    'attachment; filename="'.(
+                    'attachment; filename="' . (
                         is_string($fileData['filename'])
                             ? $fileData['filename']
                             : ''
-                    ).'"',
+                    ) . '"',
                 )
                 ->header('Content-Length', is_numeric($fileData['size']) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -342,8 +342,8 @@ class ProductFileController extends Controller
         }
         try {
             // Create temporary ZIP file
-            $zipFileName = $product->slug.'_files_'.now()->format('Y-m-d_H-i-s').'.zip';
-            $zipPath = storage_path('app/temp/'.$zipFileName);
+            $zipFileName = $product->slug . '_files_' . now()->format('Y-m-d_H-i-s') . '.zip';
+            $zipPath = storage_path('app/temp/' . $zipFileName);
             // Ensure temp directory exists
             if (! file_exists(dirname($zipPath))) {
                 mkdir(dirname($zipPath), 0755, true);
@@ -375,7 +375,7 @@ class ProductFileController extends Controller
             // Return ZIP download response
             return new Response(file_get_contents($zipPath), 200, [
                 'Content-Type' => 'application/zip',
-                'Content-Disposition' => 'attachment; filename="'.$zipFileName.'"',
+                'Content-Disposition' => 'attachment; filename="' . $zipFileName . '"',
             ]);
         } catch (\Exception $e) {
             Log::error('ZIP download failed', [
@@ -411,7 +411,7 @@ class ProductFileController extends Controller
             if ($filename && strlen($filename) > 255) {
                 $extension = pathinfo($filename, PATHINFO_EXTENSION);
                 $name = pathinfo($filename, PATHINFO_FILENAME);
-                $filename = substr($name, 0, 255 - strlen($extension) - 1).'.'.$extension;
+                $filename = substr($name, 0, 255 - strlen($extension) - 1) . '.' . $extension;
             }
 
             return $filename ?? '';

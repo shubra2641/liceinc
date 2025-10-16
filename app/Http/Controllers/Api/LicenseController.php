@@ -107,14 +107,14 @@ class LicenseController extends Controller
             $domain = $validated['domain'];
             // Enhanced rate limiting with multiple keys
             $purchaseCodeStr = is_string($purchaseCode) ? $purchaseCode : '';
-            $rateLimitKey = 'license-verify:'.$request->ip().':'.substr($purchaseCodeStr, 0, 8);
-            $globalRateLimitKey = 'license-verify-global:'.$request->ip();
+            $rateLimitKey = 'license-verify:' . $request->ip() . ':' . substr($purchaseCodeStr, 0, 8);
+            $globalRateLimitKey = 'license-verify-global:' . $request->ip();
             if (
                 RateLimiter::tooManyAttempts($rateLimitKey, 10) ||
                 RateLimiter::tooManyAttempts($globalRateLimitKey, 50)
             ) {
                 Log::warning('Rate limit exceeded for license verification', [
-                    'purchase_code' => substr($purchaseCodeStr, 0, 4).'...',
+                    'purchase_code' => substr($purchaseCodeStr, 0, 4) . '...',
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                     'rate_limit_key_attempts' => RateLimiter::attempts($rateLimitKey),
@@ -261,7 +261,7 @@ class LicenseController extends Controller
             ];
         } catch (\Exception $e) {
             Log::error('Error checking local license', [
-                'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
                 'product_slug' => $productSlug,
                 'domain' => $domain,
                 'error' => $e->getMessage(),
@@ -301,7 +301,7 @@ class LicenseController extends Controller
             $envatoData = $this->envatoService->verifyPurchase($purchaseCode);
             if (! $envatoData) {
                 Log::warning('Envato verification failed', [
-                    'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                    'purchase_code' => substr($purchaseCode, 0, 4) . '...',
                     'product_slug' => $productSlug,
                 ]);
 
@@ -334,7 +334,7 @@ class LicenseController extends Controller
             ];
         } catch (\Exception $e) {
             Log::error('Envato license verification failed', [
-                'purchase_code' => substr($purchaseCode, 0, 4).'...',
+                'purchase_code' => substr($purchaseCode, 0, 4) . '...',
                 'product_slug' => $productSlug,
                 'error' => $e->getMessage(),
             ]);
@@ -370,7 +370,7 @@ class LicenseController extends Controller
         // Mask sensitive fields
         if (isset($allowed['purchase_code']) && is_string($allowed['purchase_code'])) {
             $allowed['purchase_code'] = substr($allowed['purchase_code'], 0, 4)
-                .str_repeat('*', max(0, strlen($allowed['purchase_code']) - 4));
+                . str_repeat('*', max(0, strlen($allowed['purchase_code']) - 4));
         }
         LicenseLog::create([
             'license_id' => $license?->id,
@@ -421,7 +421,7 @@ declare(strict_types=1);\nclass LicenseManager...",
             // Extract sanitized input (already sanitized in Request class)
             $productSlug = $validated['product_slug'];
             // Rate limiting for integration file generation
-            $rateLimitKey = 'license-integration:'.$request->ip();
+            $rateLimitKey = 'license-integration:' . $request->ip();
             if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
                 Log::warning('Rate limit exceeded for integration file generation', [
                     'ip' => $request->ip(),
@@ -455,7 +455,7 @@ declare(strict_types=1);\nclass LicenseManager...",
                     'slug' => $product->slug,
                 ],
                 'integration_file' => $integrationCode,
-                'filename' => 'license_integration_'.$product->slug.'.php',
+                'filename' => 'license_integration_' . $product->slug . '.php',
             ]);
         } catch (ValidationException $e) {
             DB::rollBack();
@@ -489,14 +489,14 @@ declare(strict_types=1);\nclass LicenseManager...",
         $verificationEndpoint = is_string(config('license.verification_endpoint'))
             ? config('license.verification_endpoint')
             : '/api/license/verify';
-        $apiUrl = $apiDomain.'/'.ltrim($verificationEndpoint, '/');
+        $apiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
 
         return "<?php
 
 declare(strict_types=1);
 /**
  * License Integration for {$product->name}
- * Generated on ".now()->format('Y-m-d H:i:s')."
+ * Generated on " . now()->format('Y-m-d H:i:s') . "
  *
  * This file provides license verification functionality for {$product->name}
  * It supports both local system licenses and Envato Market licenses

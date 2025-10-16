@@ -42,7 +42,7 @@ class GenerateRenewalInvoices extends Command
             $daysBeforeExpiry = $this->validateDaysOption();
             $expiryDate = Carbon::now()->addDays($daysBeforeExpiry);
 
-            $this->info('Generating renewal invoices for licenses expiring within '.$daysBeforeExpiry.' days...');
+            $this->info('Generating renewal invoices for licenses expiring within ' . $daysBeforeExpiry . ' days...');
 
             $licenses = $this->getExpiringLicenses($expiryDate);
             $generatedCount = 0;
@@ -56,7 +56,7 @@ class GenerateRenewalInvoices extends Command
 
                     if ($invoice !== null) {
                         $generatedCount++;
-                        $this->line('Generated renewal invoice for license '.$license->license_key.' (Product: '.($license->product->name ?? 'Unknown Product').')');
+                        $this->line('Generated renewal invoice for license ' . $license->license_key . ' (Product: ' . ($license->product->name ?? 'Unknown Product') . ')');
 
                         if ($this->sendRenewalNotifications($license, $invoice)) {
                             $emailSentCount++;
@@ -73,15 +73,15 @@ class GenerateRenewalInvoices extends Command
                 }
             }
 
-            $this->info('Generated '.$generatedCount.' renewal invoices and sent '.$emailSentCount.' email notifications.');
+            $this->info('Generated ' . $generatedCount . ' renewal invoices and sent ' . $emailSentCount . ' email notifications.');
             if ($errorCount > 0) {
-                $this->warn('Encountered '.$errorCount.' errors during processing. Check logs for details.');
+                $this->warn('Encountered ' . $errorCount . ' errors during processing. Check logs for details.');
             }
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
             Log::error('GenerateRenewalInvoices command failed', ['error' => $e->getMessage()]);
-            $this->error('Command failed: '.$e->getMessage());
+            $this->error('Command failed: ' . $e->getMessage());
 
             return Command::FAILURE;
         }
@@ -94,7 +94,7 @@ class GenerateRenewalInvoices extends Command
     {
         $days = (int)$this->option('days');
         if ($days < 1 || $days > 365) {
-            throw new \InvalidArgumentException('Days must be between 1 and 365, got: '.$days);
+            throw new \InvalidArgumentException('Days must be between 1 and 365, got: ' . $days);
         }
 
         return $days;
@@ -140,7 +140,7 @@ class GenerateRenewalInvoices extends Command
                     'productName' => $product->name,
                     'licenseKey' => $license->license_key ?? 'unknown',
                 ]);
-                $this->warn('No renewal price set for product '.$product->name.', skipping invoice generation.');
+                $this->warn('No renewal price set for product ' . $product->name . ', skipping invoice generation.');
 
                 return null;
             }
@@ -151,11 +151,11 @@ class GenerateRenewalInvoices extends Command
                     'renewalPrice' => $renewalPrice,
                     'licenseKey' => $license->license_key ?? 'unknown',
                 ]);
-                throw new \InvalidArgumentException('Renewal price exceeds maximum allowed value: '.$renewalPrice);
+                throw new \InvalidArgumentException('Renewal price exceeds maximum allowed value: ' . $renewalPrice);
             }
 
             $newExpiryDate = $this->calculateNewExpiryDate($license, $product);
-            $description = htmlspecialchars('Renewal for '.$product->name.' - License '.$license->license_key, ENT_QUOTES, 'UTF-8');
+            $description = htmlspecialchars('Renewal for ' . $product->name . ' - License ' . $license->license_key, ENT_QUOTES, 'UTF-8');
 
             $invoice = $this->invoiceService->createRenewalInvoice($license, [
                 'amount' => $renewalPrice,
@@ -358,6 +358,6 @@ class GenerateRenewalInvoices extends Command
             'error' => $e->getMessage(),
         ]);
 
-        $this->error('Failed to generate renewal invoice for license '.$license->license_key.': '.$e->getMessage());
+        $this->error('Failed to generate renewal invoice for license ' . $license->license_key . ': ' . $e->getMessage());
     }
 }

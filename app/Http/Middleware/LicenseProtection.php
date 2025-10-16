@@ -297,7 +297,7 @@ class LicenseProtection
     {
         try {
             DB::beginTransaction();
-            $licenseVerifier = new class() {
+            $licenseVerifier = new class () {
                 /**
                  * @return array<string, mixed>
                  */
@@ -399,6 +399,6 @@ class LicenseProtection
             return str_repeat('*', strlen($purchaseCode));
         }
 
-        return substr($purchaseCode, 0, 8).'...';
+        return substr($purchaseCode, 0, 8) . '...';
     }
 }

@@ -419,10 +419,10 @@ class LicenseController extends Controller
     public function export(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $licenses = License::with(['user', 'product'])->get();
-        $filename = 'licenses_'.date('Y-m-d_H-i-s').'.csv';
+        $filename = 'licenses_' . date('Y-m-d_H-i-s') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
         $callback = function () use ($licenses) {
             $file = SecureFileHelper::openOutput('w');
@@ -470,11 +470,11 @@ class LicenseController extends Controller
         $attempts = 0;
 
         do {
-            $licenseKey = 'LIC-'.strtoupper(Str::random(12));
+            $licenseKey = 'LIC-' . strtoupper(Str::random(12));
             $attempts++;
 
             if ($attempts > $maxAttempts) {
-                throw new \Exception('Failed to generate unique license key after '.$maxAttempts.' attempts');
+                throw new \Exception('Failed to generate unique license key after ' . $maxAttempts . ' attempts');
             }
         } while (License::where('license_key', $licenseKey)->exists());
 

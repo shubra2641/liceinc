@@ -144,7 +144,7 @@ class InstallController extends Controller
 
             return redirect()->route('install.admin');
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['database' => 'Database connection failed: '.$e->getMessage()])->withInput();
+            return redirect()->back()->withErrors(['database' => 'Database connection failed: ' . $e->getMessage()])->withInput();
         }
     }
 
@@ -251,7 +251,7 @@ class InstallController extends Controller
 
             return response()->json(['success' => true, 'message' => 'Installation completed successfully']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Installation failed: '.$e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Installation failed: ' . $e->getMessage()], 500);
         }
     }
 
@@ -262,21 +262,21 @@ class InstallController extends Controller
 
         $envContent = file_get_contents(base_path('.env'));
 
-        $envContent = str_replace('DB_HOST=127.0.0.1', 'DB_HOST='.$database['host'], $envContent);
-        $envContent = str_replace('DB_PORT=3306', 'DB_PORT='.$database['port'], $envContent);
-        $envContent = str_replace('DB_DATABASE=laravel', 'DB_DATABASE='.$database['database'], $envContent);
-        $envContent = str_replace('DB_USERNAME=root', 'DB_USERNAME='.$database['username'], $envContent);
-        $envContent = str_replace('DB_PASSWORD=', 'DB_PASSWORD='.$database['password'], $envContent);
+        $envContent = str_replace('DB_HOST=127.0.0.1', 'DB_HOST=' . $database['host'], $envContent);
+        $envContent = str_replace('DB_PORT=3306', 'DB_PORT=' . $database['port'], $envContent);
+        $envContent = str_replace('DB_DATABASE=laravel', 'DB_DATABASE=' . $database['database'], $envContent);
+        $envContent = str_replace('DB_USERNAME=root', 'DB_USERNAME=' . $database['username'], $envContent);
+        $envContent = str_replace('DB_PASSWORD=', 'DB_PASSWORD=' . $database['password'], $envContent);
 
-        $envContent = str_replace('APP_NAME=Laravel', 'APP_NAME="'.$settings['app_name'].'"', $envContent);
-        $envContent = str_replace('APP_URL=http://localhost', 'APP_URL='.$settings['app_url'], $envContent);
+        $envContent = str_replace('APP_NAME=Laravel', 'APP_NAME="' . $settings['app_name'] . '"', $envContent);
+        $envContent = str_replace('APP_URL=http://localhost', 'APP_URL=' . $settings['app_url'], $envContent);
 
         if ($settings['mail_host']) {
-            $envContent = str_replace('MAIL_HOST=mailpit', 'MAIL_HOST='.$settings['mail_host'], $envContent);
-            $envContent = str_replace('MAIL_PORT=1025', 'MAIL_PORT='.$settings['mail_port'], $envContent);
-            $envContent = str_replace('MAIL_USERNAME=null', 'MAIL_USERNAME='.$settings['mail_username'], $envContent);
-            $envContent = str_replace('MAIL_PASSWORD=null', 'MAIL_PASSWORD='.$settings['mail_password'], $envContent);
-            $envContent = str_replace('MAIL_ENCRYPTION=null', 'MAIL_ENCRYPTION='.$settings['mail_encryption'], $envContent);
+            $envContent = str_replace('MAIL_HOST=mailpit', 'MAIL_HOST=' . $settings['mail_host'], $envContent);
+            $envContent = str_replace('MAIL_PORT=1025', 'MAIL_PORT=' . $settings['mail_port'], $envContent);
+            $envContent = str_replace('MAIL_USERNAME=null', 'MAIL_USERNAME=' . $settings['mail_username'], $envContent);
+            $envContent = str_replace('MAIL_PASSWORD=null', 'MAIL_PASSWORD=' . $settings['mail_password'], $envContent);
+            $envContent = str_replace('MAIL_ENCRYPTION=null', 'MAIL_ENCRYPTION=' . $settings['mail_encryption'], $envContent);
         }
 
         file_put_contents(base_path('.env'), $envContent);

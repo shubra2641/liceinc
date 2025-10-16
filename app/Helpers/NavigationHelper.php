@@ -88,7 +88,7 @@ if (! function_exists('get_breadcrumbs')) {
                 $currentPath = '';
                 foreach ($segments as $segment) {
                     // Ensure spacing around concatenation and assignment per PSR-12
-                    $currentPath = $currentPath.($currentPath ? '.' : '').$segment;
+                    $currentPath = $currentPath . ($currentPath ? '.' : '') . $segment;
                     try {
                         $breadcrumbs[] = [
                             'name' => htmlspecialchars(
@@ -211,7 +211,7 @@ if (function_exists('get_available_languages') === false) {
             }
             $directories = array_diff(scandir($langPath), ['.', '..']);
             foreach ($directories as $dir) {
-                if (SecureFileHelper::isDirectory($langPath.DIRECTORY_SEPARATOR.$dir)) {
+                if (SecureFileHelper::isDirectory($langPath . DIRECTORY_SEPARATOR . $dir)) {
                     $sanitizedCode = htmlspecialchars(trim($dir), ENT_QUOTES, 'UTF-8');
                     if (! empty($sanitizedCode)) {
                         $languages[] = [

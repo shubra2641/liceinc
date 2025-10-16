@@ -24,7 +24,7 @@ class MigrationHelper
     public static function analyzeFile(string $filePath): array
     {
         if (! file_exists($filePath)) {
-            return ['error' => 'File not found: '.$filePath];
+            return ['error' => 'File not found: ' . $filePath];
         }
 
         $content = file_get_contents($filePath);
@@ -88,7 +88,7 @@ class MigrationHelper
 
         // Find all PHP files that might use EmailService
         $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($projectPath.'/app'),
+            new \RecursiveDirectoryIterator($projectPath . '/app'),
         );
 
         foreach ($iterator as $file) {
@@ -132,7 +132,7 @@ class MigrationHelper
 
         $script = "<?php\n\n";
         $script .= "// Migration script for: {$filePath}\n";
-        $script .= '// Generated on: '.date('Y-m-d H:i:s')."\n\n";
+        $script .= '// Generated on: ' . date('Y-m-d H:i:s') . "\n\n";
 
         if (isset($analysis['recommendations']) && is_array($analysis['recommendations'])) {
             foreach ($analysis['recommendations'] as $recommendation) {
@@ -216,7 +216,7 @@ class MigrationHelper
         ];
 
         $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($projectPath.'/app'),
+            new \RecursiveDirectoryIterator($projectPath . '/app'),
         );
 
         foreach ($iterator as $file) {

@@ -77,7 +77,7 @@ class ProfileAdvancedRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
-                'unique:users,email,'.$userId,
+                'unique:users,email,' . $userId,
             ],
             'firstname' => [
                 'nullable',

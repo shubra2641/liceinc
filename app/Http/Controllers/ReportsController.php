@@ -121,8 +121,8 @@ class ReportsController extends Controller
                 $monthlyRevenueData = [];
                 foreach ($last3Months as $month) {
                     $found = $monthlyRevenueRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '').'-'
-                            .str_pad(
+                        return (is_string($item->year) ? $item->year : '') . '-'
+                            . str_pad(
                                 (string)(is_numeric($item->month) ? $item->month : 0),
                                 2,
                                 '0',
@@ -150,8 +150,8 @@ class ReportsController extends Controller
                 $monthlyLicensesData = [];
                 foreach ($last3Months as $month) {
                     $found = $monthlyLicensesRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '').'-'
-                            .str_pad(
+                        return (is_string($item->year) ? $item->year : '') . '-'
+                            . str_pad(
                                 (string)(is_numeric($item->month) ? $item->month : 0),
                                 2,
                                 '0',
@@ -182,7 +182,7 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $licenseTypeData = [
                     'labels' => $licenseTypeDataRaw->pluck('license_type')->map(function ($type) {
-                        return __('app.'.(is_string($type) ? $type : '')) ?: ucfirst(is_string($type) ? $type : '');
+                        return __('app.' . (is_string($type) ? $type : '')) ?: ucfirst(is_string($type) ? $type : '');
                     })->toArray(),
                     'datasets' => [[
                         'data' => $licenseTypeDataRaw->pluck('count')->toArray(),
@@ -197,7 +197,7 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $licenseStatusData = [
                     'labels' => $licenseStatusDataRaw->pluck('status')->map(function ($status) {
-                        return __('app.'.(is_string($status) ? $status : ''))
+                        return __('app.' . (is_string($status) ? $status : ''))
                             ?: ucfirst(is_string($status) ? $status : '');
                     })->toArray(),
                     'datasets' => [[
@@ -225,7 +225,7 @@ class ReportsController extends Controller
                 // Convert to Chart.js format
                 $apiStatusData = [
                     'labels' => $apiStatusDataRaw->pluck('status')->map(function ($status) {
-                        return __('app.'.(is_string($status) ? $status : ''))
+                        return __('app.' . (is_string($status) ? $status : ''))
                             ?: ucfirst(is_string($status) ? $status : '');
                     })->toArray(),
                     'datasets' => [[
@@ -270,8 +270,8 @@ class ReportsController extends Controller
                 $invoiceMonthlyData = [];
                 foreach ($last3Months as $month) {
                     $found = $invoiceMonthlyRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '').'-'
-                            .str_pad(
+                        return (is_string($item->year) ? $item->year : '') . '-'
+                            . str_pad(
                                 (string)(is_numeric($item->month) ? $item->month : 0),
                                 2,
                                 '0',
@@ -322,8 +322,8 @@ class ReportsController extends Controller
                 $userRegistrationsData = [];
                 foreach ($last3Months as $month) {
                     $found = $userRegistrationsRaw->first(function ($item) use ($month) {
-                        return (is_string($item->year) ? $item->year : '').'-'
-                            .str_pad(
+                        return (is_string($item->year) ? $item->year : '') . '-'
+                            . str_pad(
                                 (string)(is_numeric($item->month) ? $item->month : 0),
                                 2,
                                 '0',
@@ -727,10 +727,10 @@ class ReportsController extends Controller
      */
     private function exportToCsv(array $data): StreamedResponse
     {
-        $filename = 'reports_'.now()->format('Y-m-d_H-i-s').'.csv';
+        $filename = 'reports_' . now()->format('Y-m-d_H-i-s') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
         $callback = function () use ($data) {
             $file = fopen('php://output', 'w');
@@ -759,10 +759,10 @@ class ReportsController extends Controller
     {
         // For now, return CSV as PDF generation requires additional packages
         // You can install dompdf or similar package for proper PDF generation
-        $filename = 'reports_'.now()->format('Y-m-d_H-i-s').'.pdf';
+        $filename = 'reports_' . now()->format('Y-m-d_H-i-s') . '.pdf';
         $headers = [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
         $callback = function () use ($data) {
             $file = fopen('php://output', 'w');

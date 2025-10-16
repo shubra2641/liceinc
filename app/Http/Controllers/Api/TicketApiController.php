@@ -262,12 +262,12 @@ class TicketApiController extends Controller
                 }
             } catch (\Throwable $envatoError) {
                 Log::warning('Envato API error during purchase code verification', [
-                    'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4).'...',
+                    'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4) . '...',
                     'error' => $envatoError->getMessage(),
                 ]);
             }
             Log::warning('Purchase code not found in ticket verification', [
-                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4).'...',
+                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4) . '...',
             ]);
             DB::commit();
 
@@ -280,7 +280,7 @@ class TicketApiController extends Controller
             Log::error('Purchase code verification failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4).'...',
+                'purchase_code' => substr(is_string($purchaseCode) ? $purchaseCode : '', 0, 4) . '...',
             ]);
 
             return response()->json([

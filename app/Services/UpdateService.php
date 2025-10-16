@@ -51,8 +51,8 @@ class UpdateService
             throw new \Exception('Failed to create backup directory');
         }
 
-        $backupName = 'backup_'.$version.'_'.date('Y-m-d_H-i-s').'.zip';
-        $backupPath = $backupDir.DIRECTORY_SEPARATOR.$backupName;
+        $backupName = 'backup_' . $version . '_' . date('Y-m-d_H-i-s') . '.zip';
+        $backupPath = $backupDir . DIRECTORY_SEPARATOR . $backupName;
 
         // Define files to backup with validation
         $filesToBackup = [
@@ -66,7 +66,7 @@ class UpdateService
         $result = $zip->open($backupPath, ZipArchive::CREATE);
 
         if ($result !== true) {
-            throw new \Exception('Failed to create backup ZIP file: '.$result);
+            throw new \Exception('Failed to create backup ZIP file: ' . $result);
         }
 
         try {
@@ -111,7 +111,7 @@ class UpdateService
         foreach ($iterator as $file) {
             if ($file instanceof \SplFileInfo && $file->isFile()) {
                 $filePath = $file->getRealPath();
-                $relativePath = $zipPath.DIRECTORY_SEPARATOR.
+                $relativePath = $zipPath . DIRECTORY_SEPARATOR .
                     substr($filePath, strlen($dir) + 1);
 
                 // Normalize path separators for ZIP
@@ -144,7 +144,7 @@ class UpdateService
         try {
             // Step 1: Create backup before update
             $backupPath = $this->createSystemBackup($currentVersion);
-            $steps['backup'] = 'System backup created: '.basename($backupPath);
+            $steps['backup'] = 'System backup created: ' . basename($backupPath);
 
             // Step 2: Run database migrations
             Artisan::call('migrate', ['--force' => true]);
@@ -174,7 +174,7 @@ class UpdateService
             $instructions = VersionHelper::getUpdateInstructions($targetVersion);
             if (! empty($instructions)) {
                 foreach ($instructions as $key => $instruction) {
-                    $steps['instruction_'.$key] = 'Custom instruction: '.(
+                    $steps['instruction_' . $key] = 'Custom instruction: ' . (
                         is_string($instruction) ? $instruction : ''
                     );
                 }
@@ -247,7 +247,7 @@ class UpdateService
     public function findBackupForVersion(string $version): ?string
     {
         $backupDir = storage_path('app/backups');
-        $pattern = $backupDir.'/backup_'.$version.'_*.zip';
+        $pattern = $backupDir . '/backup_' . $version . '_*.zip';
         $files = glob($pattern);
 
         if (! empty($files)) {
@@ -297,11 +297,11 @@ class UpdateService
         try {
             // Step 1: Restore from backup
             $this->restoreFromBackup($backupPath);
-            $steps['restore'] = 'System restored from backup: '.basename($backupPath);
+            $steps['restore'] = 'System restored from backup: ' . basename($backupPath);
 
             // Step 2: Update version in database
             VersionHelper::updateVersion($targetVersion);
-            $steps['version_update'] = 'Version updated to '.$targetVersion;
+            $steps['version_update'] = 'Version updated to ' . $targetVersion;
 
             // Step 3: Clear all caches
             Artisan::call('cache:clear');
@@ -341,7 +341,7 @@ class UpdateService
 
         if ($zip->open($backupPath) === true) {
             // Extract to temporary directory first
-            $tempDir = storage_path('app/temp/restore_'.time());
+            $tempDir = storage_path('app/temp/restore_' . time());
             SecureFileHelper::createDirectory($tempDir, 0755, true);
             $zip->extractTo($tempDir);
             $zip->close();
@@ -450,7 +450,7 @@ class UpdateService
             return [
                 'valid' => false,
                 'error' => 'Target version must be newer than current version. Current: '
-                    .$currentVersion.', Target: '.$targetVersion,
+                    . $currentVersion . ', Target: ' . $targetVersion,
             ];
         }
 
@@ -500,7 +500,7 @@ class UpdateService
         if (! $backupPath) {
             return [
                 'valid' => false,
-                'error' => 'No backup found for version '.$targetVersion.'. Rollback not possible.',
+                'error' => 'No backup found for version ' . $targetVersion . '. Rollback not possible.',
             ];
         }
 

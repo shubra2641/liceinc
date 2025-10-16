@@ -111,7 +111,7 @@ class EnvatoController extends Controller
                     return back()->withErrors(['purchase_code' => 'Purchase does not belong to this product.']);
                 }
                 $user = User::firstOrCreate(
-                    ['email' => $buyerEmail ?: Str::uuid().'@example.com'],
+                    ['email' => $buyerEmail ?: Str::uuid() . '@example.com'],
                     ['name' => $buyerName ?: 'Envato Buyer'],
                 );
                 $license = License::updateOrCreate(
@@ -250,7 +250,7 @@ class EnvatoController extends Controller
                 $email = $envatoUser->getEmail();
                 if (! $email || str_contains($email, '@envato.temp')) {
                     // If we don't have a real email, create a temporary one
-                    $email = 'temp_'.$username.'@envato.local';
+                    $email = 'temp_' . $username . '@envato.local';
                 }
                 $user = User::updateOrCreate(
                     ['email' => $email],

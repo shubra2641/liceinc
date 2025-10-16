@@ -212,7 +212,7 @@ class Controller extends BaseController
      */
     protected function hashForLogging(string $data): string
     {
-        return substr(hash('sha256', $data.(is_string(config('app.key')) ? config('app.key') : '')), 0, 8).'...';
+        return substr(hash('sha256', $data . (is_string(config('app.key')) ? config('app.key') : '')), 0, 8) . '...';
     }
 
     /**
@@ -234,7 +234,7 @@ class Controller extends BaseController
     protected function logSecurityEvent(string $event, Request $request, array $context = []): void
     {
         try {
-            Log::warning('Security event: '.$event, array_merge([
+            Log::warning('Security event: ' . $event, array_merge([
                 'event' => $event,
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
@@ -316,7 +316,7 @@ class Controller extends BaseController
      */
     protected function handleError(Throwable $e, Request $request, string $context = ''): JsonResponse
     {
-        Log::error('Controller error: '.$context, [
+        Log::error('Controller error: ' . $context, [
             'error' => $e->getMessage(),
             'context' => $context,
             'url' => $request->fullUrl(),

@@ -312,12 +312,12 @@ class LicenseController extends Controller
             $attempts = 0;
             $maxAttempts = 100;
             do {
-                $key = strtoupper(substr(md5(microtime().uniqid()), 0, 16));
-                $key = substr($key, 0, 4).'-'.substr($key, 4, 4).'-'.
-                    substr($key, 8, 4).'-'.substr($key, 12, 4);
+                $key = strtoupper(substr(md5(microtime() . uniqid()), 0, 16));
+                $key = substr($key, 0, 4) . '-' . substr($key, 4, 4) . '-' .
+                    substr($key, 8, 4) . '-' . substr($key, 12, 4);
                 $attempts++;
                 if ($attempts >= $maxAttempts) {
-                    throw new \Exception('Unable to generate unique license key after '.$maxAttempts.' attempts');
+                    throw new \Exception('Unable to generate unique license key after ' . $maxAttempts . ' attempts');
                 }
             } while (License::where('license_key', $key)->exists());
 

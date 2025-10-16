@@ -28,10 +28,10 @@ class ProductFileService
             $encryptionKey = Str::random(32);
             $originalName = $this->sanitizeInput($file->getClientOriginalName());
             $extension = $this->sanitizeInput($file->getClientOriginalExtension());
-            $encryptedName = Str::uuid().'.'.$extension;
+            $encryptedName = Str::uuid() . '.' . $extension;
 
-            $directory = 'product-files/'.$product->id;
-            $filePath = $directory.'/'.$encryptedName;
+            $directory = 'product-files/' . $product->id;
+            $filePath = $directory . '/' . $encryptedName;
 
             if (strpos($filePath, '..') !== false) {
                 throw new \InvalidArgumentException('Invalid file path detected');
@@ -285,7 +285,7 @@ class ProductFileService
             throw new \Exception('Update file not found');
         }
 
-        $fileName = $update->title.'_v'.$update->version.'.zip';
+        $fileName = $update->title . '_v' . $update->version . '.zip';
 
         return [
             'content' => Storage::disk('private')->get($update->file_path),
@@ -346,7 +346,7 @@ class ProductFileService
 
             $mimeType = $file->getMimeType();
             if (! in_array($mimeType, $allowedTypes)) {
-                throw new \Exception('File type not allowed: '.$mimeType);
+                throw new \Exception('File type not allowed: ' . $mimeType);
             }
 
             $this->scanFileForMaliciousContent($file);
@@ -488,7 +488,7 @@ class ProductFileService
     {
         $file = new ProductFile();
         $file->product_id = is_numeric($update->product_id) ? (int)$update->product_id : 0;
-        $file->original_name = (is_string($update->title) ? $update->title : '').'_v'.(is_string($update->version) ? $update->version : '').'.zip';
+        $file->original_name = (is_string($update->title) ? $update->title : '') . '_v' . (is_string($update->version) ? $update->version : '') . '.zip';
         $filePath = $update->file_path ?? '';
         $file->file_path = is_string($filePath) ? $filePath : '';
         $file->file_size = is_numeric($update->file_size ?? 0) ? (int)($update->file_size ?? 0) : 0;
@@ -499,7 +499,7 @@ class ProductFileService
         $file->created_at = $update->created_at instanceof \Illuminate\Support\Carbon ? $update->created_at : null;
         $file->updated_at = $update->updated_at instanceof \Illuminate\Support\Carbon ? $update->updated_at : null;
 
-        $file->formatted_size = $file->file_size > 0 ? number_format($file->file_size / 1024 / 1024, 2).' MB' : 'Unknown';
+        $file->formatted_size = $file->file_size > 0 ? number_format($file->file_size / 1024 / 1024, 2) . ' MB' : 'Unknown';
         $file->update_info = $update->toArray();
         $file->is_update = true;
 

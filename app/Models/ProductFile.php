@@ -105,7 +105,7 @@ class ProductFile extends Model
             $bytes /= 1024;
         }
 
-        return round($bytes, 2).' '.$units[$i];
+        return round($bytes, 2) . ' ' . $units[$i];
     }
 
     /**
@@ -148,7 +148,7 @@ class ProductFile extends Model
 
             return $result !== false ? $result : null;
         } catch (\Exception $e) {
-            \Log::error('Failed to decrypt file: '.$e->getMessage());
+            \Log::error('Failed to decrypt file: ' . $e->getMessage());
 
             return null;
         }

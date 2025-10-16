@@ -761,7 +761,7 @@ Route::middleware(['auth', 'user'])->group(function () {
 // AUTH ROUTES (Laravel Breeze/Jetstream)
 // ============================================================================
 
-require __DIR__.'/auth.php'; // security-ignore: LARAVEL_ROUTES
+require __DIR__ . '/auth.php'; // security-ignore: LARAVEL_ROUTES
 
 // ============================================================================
 // INSTALLATION ROUTES

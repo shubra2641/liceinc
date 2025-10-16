@@ -27,7 +27,7 @@ class LicenseGeneratorService
             $product->refresh();
             $language = $product->programmingLanguage;
             if (! $language) {
-                throw new \Exception('Programming language not found for product: '.$product->id);
+                throw new \Exception('Programming language not found for product: ' . $product->id);
             }
 
             // Delete old files
@@ -97,7 +97,7 @@ class LicenseGeneratorService
 
             $content = file_get_contents($templatePath);
             if ($content === false) {
-                throw new \Exception('Failed to read template file: '.$templatePath);
+                throw new \Exception('Failed to read template file: ' . $templatePath);
             }
 
             return $content;
@@ -127,7 +127,7 @@ class LicenseGeneratorService
             // Build API URL
             $apiDomain = rtrim(config('app.url', ''), '/');
             $verificationEndpoint = config('license.verification_endpoint', '/api/license/verify');
-            $licenseApiUrl = $apiDomain.'/'.ltrim($verificationEndpoint, '/');
+            $licenseApiUrl = $apiDomain . '/' . ltrim($verificationEndpoint, '/');
 
             // Prepare data
             $data = [
@@ -172,7 +172,7 @@ class LicenseGeneratorService
                 throw new \Exception('Application key not configured');
             }
 
-            $keyData = (string)$product->id.$product->slug.$appKey;
+            $keyData = (string)$product->id . $product->slug . $appKey;
 
             return hash('sha256', $keyData);
         } catch (\Exception $e) {

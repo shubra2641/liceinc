@@ -118,7 +118,7 @@ class SystemRequirementsService
         } catch (\Exception $e) {
             return [
                 'connected' => false,
-                'message' => 'Database connection failed: '.$e->getMessage(),
+                'message' => 'Database connection failed: ' . $e->getMessage(),
             ];
         }
     }

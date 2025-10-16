@@ -89,7 +89,7 @@ class NavLink extends Component
             'active' => $active,
             'type' => SecureFileHelper::getType($active),
         ]);
-        throw new \InvalidArgumentException('Invalid active state: '.var_export($active, true));
+        throw new \InvalidArgumentException('Invalid active state: ' . var_export($active, true));
     }
 
     /**

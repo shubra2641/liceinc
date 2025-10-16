@@ -168,7 +168,7 @@ class LicenseVerificationLog extends Model
         // Show first 4 and last 4 characters, mask the middle
         $hash = $this->purchase_code_hash;
         if (strlen($hash) > 8) {
-            return substr($hash, 0, 4).'****'.substr($hash, -4);
+            return substr($hash, 0, 4) . '****' . substr($hash, -4);
         }
 
         return '****';

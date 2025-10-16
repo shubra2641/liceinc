@@ -102,7 +102,7 @@ class LicenseApiController extends Controller
             return $result;
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('License API error: '.$e->getMessage());
+            Log::error('License API error: ' . $e->getMessage());
 
             return $this->error('Operation failed', 'INTERNAL_ERROR', 500);
         }
@@ -303,9 +303,9 @@ class LicenseApiController extends Controller
     private function generateKey(): string
     {
         return strtoupper(
-            substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
-            substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
-            substr(md5(uniqid((string)mt_rand(), true)), 0, 8).'-'.
+            substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
+            substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
+            substr(md5(uniqid((string)mt_rand(), true)), 0, 8) . '-' .
             substr(md5(uniqid((string)mt_rand(), true)), 0, 8),
         );
     }
@@ -367,7 +367,7 @@ class LicenseApiController extends Controller
             'expires_at' => $license->license_expires_at?->toISOString(),
             'support_expires_at' => $license->support_expires_at?->toISOString(),
             'status' => $license->status,
-        ],
+            ],
         ]);
     }
 

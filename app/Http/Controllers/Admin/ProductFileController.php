@@ -122,7 +122,7 @@ class ProductFileController extends Controller
     public function store(ProductFileRequest $request, Product $product): JsonResponse
     {
         // Rate limiting for file uploads
-        $key = 'product-file-upload:'.$request->ip();
+        $key = 'product-file-upload:' . $request->ip();
         if (RateLimiter::tooManyAttempts($key, 10)) {
             return response()->json([
                 'success' => false,
@@ -192,7 +192,7 @@ class ProductFileController extends Controller
     public function download(ProductFile $file)
     {
         // Rate limiting for file downloads
-        $key = 'product-file-download:'.request()->ip();
+        $key = 'product-file-download:' . request()->ip();
         if (RateLimiter::tooManyAttempts($key, 20)) {
             abort(429, 'Too many download attempts. Please try again later.');
         }
@@ -213,11 +213,11 @@ class ProductFileController extends Controller
                 )
                 ->header(
                     'Content-Disposition',
-                    'attachment; filename="'.(
+                    'attachment; filename="' . (
                         is_string($fileData['filename'] ?? null)
                             ? $fileData['filename']
                             : 'file'
-                    ).'"',
+                    ) . '"',
                 )
                 ->header('Content-Length', is_numeric($fileData['size'] ?? null) ? (string)$fileData['size'] : '0')
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -318,7 +318,7 @@ class ProductFileController extends Controller
     public function destroy(ProductFile $file): JsonResponse
     {
         // Rate limiting for file deletions
-        $key = 'product-file-delete:'.request()->ip();
+        $key = 'product-file-delete:' . request()->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
             return response()->json([
                 'success' => false,
@@ -441,6 +441,6 @@ class ProductFileController extends Controller
             $bytes /= 1024;
         }
 
-        return round($bytes, $precision).' '.$units[$i];
+        return round($bytes, $precision) . ' ' . $units[$i];
     }
 }

@@ -100,7 +100,7 @@ class LicenseServerService
                 'product_slug' => $productSlug,
             ]);
 
-            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
+            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
         }
     }
 
@@ -142,7 +142,7 @@ class LicenseServerService
                 'product_slug' => $productSlug,
             ]);
 
-            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
+            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
         }
     }
 
@@ -183,7 +183,7 @@ class LicenseServerService
                 'current_version' => $currentVersion,
             ]);
 
-            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
+            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
         }
     }
 
@@ -225,7 +225,7 @@ class LicenseServerService
                 'product_slug' => $productSlug,
             ]);
 
-            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
+            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
         }
     }
 
@@ -253,7 +253,7 @@ class LicenseServerService
                     }
                 }
 
-                $tempPath = $tempDir.'/update_'.$this->sanitizeFilename($version).'_'.time().'.zip';
+                $tempPath = $tempDir . '/update_' . $this->sanitizeFilename($version) . '_' . time() . '.zip';
                 if (file_put_contents($tempPath, $response->body()) === false) {
                     return $this->createErrorResponse('Failed to save update file', 'FILE_SAVE_ERROR');
                 }
@@ -274,7 +274,7 @@ class LicenseServerService
                 'version' => $version,
             ]);
 
-            return $this->createErrorResponse('Download error: '.$e->getMessage(), 'NETWORK_ERROR');
+            return $this->createErrorResponse('Download error: ' . $e->getMessage(), 'NETWORK_ERROR');
         }
     }
 
@@ -306,7 +306,7 @@ class LicenseServerService
         } catch (\Exception $e) {
             Log::error('License server products failed', ['error' => $e->getMessage()]);
 
-            return $this->createErrorResponse('Network error: '.$e->getMessage(), 'NETWORK_ERROR');
+            return $this->createErrorResponse('Network error: ' . $e->getMessage(), 'NETWORK_ERROR');
         }
     }
 
@@ -475,7 +475,7 @@ class LicenseServerService
     {
         $appKey = config('app.key');
 
-        return hash('sha256', $data.$appKey);
+        return hash('sha256', $data . $appKey);
     }
 
     /**
@@ -485,6 +485,6 @@ class LicenseServerService
     {
         $appKey = config('app.key');
 
-        return substr(hash('sha256', $data.$appKey), 0, 8).'...';
+        return substr(hash('sha256', $data . $appKey), 0, 8) . '...';
     }
 }

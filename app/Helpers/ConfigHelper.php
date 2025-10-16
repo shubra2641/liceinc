@@ -23,7 +23,7 @@ class ConfigHelper
     public static function getSetting(string $key, $default = null, ?string $configKey = null): mixed
     {
         try {
-            $cacheKey = self::CACHE_PREFIX.md5($key);
+            $cacheKey = self::CACHE_PREFIX . md5($key);
 
             // Try cache first
             $cachedValue = Cache::get($cacheKey);
@@ -65,7 +65,7 @@ class ConfigHelper
 
         // Check cache for each key
         foreach ($keys as $key) {
-            $cacheKey = self::CACHE_PREFIX.md5($key);
+            $cacheKey = self::CACHE_PREFIX . md5($key);
             $cachedValue = Cache::get($cacheKey);
             if ($cachedValue !== null) {
                 $settings[$key] = $cachedValue;
@@ -79,7 +79,7 @@ class ConfigHelper
             $dbSettings = self::getMultipleFromDatabase($uncachedKeys);
             foreach ($dbSettings as $key => $value) {
                 $settings[$key] = $value;
-                $cacheKey = self::CACHE_PREFIX.md5($key);
+                $cacheKey = self::CACHE_PREFIX . md5($key);
                 Cache::put($cacheKey, $value, self::CACHE_TTL);
             }
         }
@@ -255,7 +255,7 @@ class ConfigHelper
      */
     public static function clearSettingCache(string $key): void
     {
-        $cacheKey = self::CACHE_PREFIX.md5($key);
+        $cacheKey = self::CACHE_PREFIX . md5($key);
         Cache::forget($cacheKey);
     }
 

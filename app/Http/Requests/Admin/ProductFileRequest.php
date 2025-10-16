@@ -67,7 +67,7 @@ class ProductFileRequest extends FormRequest
                 $isUpdate ? 'nullable' : 'required',
                 'file',
                 'mimes:zip,rar,7z,tar,gz,java,cpp,c,cs,go,rb,swift,kt,scala,rs,'
-                    .'html,css,json,xml,yaml,yml,md,txt,pdf,doc,docx,xls,xlsx,ppt,pptx',
+                    . 'html,css,json,xml,yaml,yml,md,txt,pdf,doc,docx,xls,xlsx,ppt,pptx',
                 'max:102400', // 100MB
             ],
             'version' => [
@@ -164,14 +164,14 @@ class ProductFileRequest extends FormRequest
             'description.regex' => 'Description contains invalid characters.',
             'file.required' => 'File upload is required.',
             'file.mimes' => 'File must be a valid file type (zip, rar, 7z, tar, gz, java, cpp, c, cs, go, rb, '
-                .'swift, kt, scala, rs, html, css, json, xml, yaml, yml, md, txt, pdf, '
-                .'doc, docx, xls, xlsx, ppt, pptx).',
+                . 'swift, kt, scala, rs, html, css, json, xml, yaml, yml, md, txt, pdf, '
+                . 'doc, docx, xls, xlsx, ppt, pptx).',
             'file.max' => 'File size must not exceed 100MB.',
             'version.required' => 'File version is required.',
             'version.regex' => 'Version must be in format: x.y.z (e.g., 1.0.0).',
             'file_type.required' => 'File type is required.',
             'file_type.in' => 'File type must be one of: source, binary, documentation, demo, '
-                .'template, plugin, theme, library, other.',
+                . 'template, plugin, theme, library, other.',
             'download_count.min' => 'Download count cannot be negative.',
             'file_size.min' => 'File size must be at least 1 byte.',
             'file_size.max' => 'File size must not exceed 1GB.',

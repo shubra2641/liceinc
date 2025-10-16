@@ -242,7 +242,7 @@ class RegisteredUserController extends Controller
         return User::create([
             'name' => (is_string($this->sanitizeInput($request->firstname))
                 ? $this->sanitizeInput($request->firstname)
-                : '').' '.(is_string($this->sanitizeInput($request->lastname))
+                : '') . ' ' . (is_string($this->sanitizeInput($request->lastname))
                 ? $this->sanitizeInput($request->lastname)
                 : ''),
             'firstname' => $this->sanitizeInput($request->firstname),

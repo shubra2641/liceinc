@@ -619,6 +619,6 @@ class LicenseService
         $appKey = config('app.key');
         $keyString = is_string($appKey) ? $appKey : '';
 
-        return substr(hash('sha256', $data.$keyString), 0, 8).'...';
+        return substr(hash('sha256', $data . $keyString), 0, 8) . '...';
     }
 }

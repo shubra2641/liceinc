@@ -112,7 +112,7 @@ class UpdateController extends Controller
         } catch (\Exception $e) {
             Log::error('Update check failed', ['error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'Failed to check for updates: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Failed to check for updates: ' . $e->getMessage());
         }
     }
 
@@ -140,13 +140,13 @@ class UpdateController extends Controller
 
             return redirect()->route('admin.updates.index')->with(
                 'success',
-                'System updated successfully from '.$currentVersion.' to '.$targetVersion,
+                'System updated successfully from ' . $currentVersion . ' to ' . $targetVersion,
             );
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('System update failed', ['error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'Update failed: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Update failed: ' . $e->getMessage());
         }
     }
 
@@ -179,13 +179,13 @@ class UpdateController extends Controller
 
             return redirect()->route('admin.updates.index')->with(
                 'success',
-                'System rolled back successfully from '.$currentVersion.' to '.$targetVersion,
+                'System rolled back successfully from ' . $currentVersion . ' to ' . $targetVersion,
             );
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('System rollback failed', ['error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'Rollback failed: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Rollback failed: ' . $e->getMessage());
         }
     }
 
@@ -218,7 +218,7 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get version information: '.$e->getMessage(),
+                'message' => 'Failed to get version information: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -233,7 +233,7 @@ class UpdateController extends Controller
             $backups = [];
 
             if (is_dir($backupDir)) {
-                $files = glob($backupDir.'/backup_*.zip');
+                $files = glob($backupDir . '/backup_*.zip');
                 if ($files !== false) {
                     foreach ($files as $file) {
                         $backups[] = [
@@ -260,7 +260,7 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get backups: '.$e->getMessage(),
+                'message' => 'Failed to get backups: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -299,14 +299,14 @@ class UpdateController extends Controller
 
                     if ($updateResult['success']) {
                         DB::commit();
-                        $message = 'Auto update completed successfully! System updated to version '.$nextVersion;
+                        $message = 'Auto update completed successfully! System updated to version ' . $nextVersion;
 
                         return redirect()->route('admin.updates.index')->with('success', $message);
                     } else {
                         DB::rollBack();
 
                         return redirect()->back()
-                            ->with('error', 'Auto update failed: '.($updateResult['message'] ?? 'Unknown error'));
+                            ->with('error', 'Auto update failed: ' . ($updateResult['message'] ?? 'Unknown error'));
                     }
                 }
 
@@ -324,7 +324,7 @@ class UpdateController extends Controller
             DB::rollBack();
             Log::error('Auto update check failed', ['error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'An error occurred while checking for updates: '.$e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while checking for updates: ' . $e->getMessage());
         }
     }
 
@@ -356,7 +356,7 @@ class UpdateController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cannot update to version '.$version.'. Current version is '.$currentVersion,
+                    'message' => 'Cannot update to version ' . $version . '. Current version is ' . $currentVersion,
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
                 ], 400);
             }
@@ -437,7 +437,7 @@ class UpdateController extends Controller
             DB::rollBack();
             Log::error('Auto update installation failed', ['error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'An error occurred while installing update: '.$e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while installing update: ' . $e->getMessage());
         }
     }
 
@@ -463,7 +463,7 @@ class UpdateController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get current version: '.$e->getMessage(),
+                'message' => 'Failed to get current version: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -487,7 +487,7 @@ class UpdateController extends Controller
 
                 return [
                     'success' => false,
-                    'message' => 'Cannot update to version '.$version.'. Current version is '.$currentVersion,
+                    'message' => 'Cannot update to version ' . $version . '. Current version is ' . $currentVersion,
                     'error_code' => 'VERSION_DOWNGRADE_NOT_ALLOWED',
                 ];
             }
@@ -501,7 +501,7 @@ class UpdateController extends Controller
 
                 return [
                     'success' => false,
-                    'message' => 'Download failed: '.($downloadResult['message'] ?? 'Unknown error'),
+                    'message' => 'Download failed: ' . ($downloadResult['message'] ?? 'Unknown error'),
                     'error_code' => 'DOWNLOAD_FAILED',
                 ];
             }
@@ -523,7 +523,7 @@ class UpdateController extends Controller
 
                 return [
                     'success' => true,
-                    'message' => 'Update installed successfully! System updated to version '.$version,
+                    'message' => 'Update installed successfully! System updated to version ' . $version,
                     'data' => [
                         'version' => $version,
                         'files_installed' => $installResult['data']['files_installed'] ?? 0,
@@ -538,7 +538,7 @@ class UpdateController extends Controller
 
                 return [
                     'success' => false,
-                    'message' => 'Installation failed: '.($installResult['message'] ?? 'Unknown error'),
+                    'message' => 'Installation failed: ' . ($installResult['message'] ?? 'Unknown error'),
                     'error_code' => 'INSTALL_FAILED',
                 ];
             }
@@ -550,7 +550,7 @@ class UpdateController extends Controller
 
             return [
                 'success' => false,
-                'message' => 'Auto update failed: '.$e->getMessage(),
+                'message' => 'Auto update failed: ' . $e->getMessage(),
                 'error_code' => 'PROCESS_FAILED',
             ];
         }

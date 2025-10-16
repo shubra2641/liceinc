@@ -247,7 +247,7 @@ class TicketController extends Controller
                     'currency' => config('app.currency', 'USD'),
                     'type' => ($billingType && $billingType !== 'one_time') ? 'recurring' : 'one_time',
                     'metadata' => $metadata,
-                    'invoice_number' => 'INV-'.strtoupper(uniqid()),
+                    'invoice_number' => 'INV-' . strtoupper(uniqid()),
                 ]);
                 $ticketData['invoice_id'] = $invoice->id;
             }
@@ -471,7 +471,7 @@ class TicketController extends Controller
 
             $status = $ticket->status ?? 'open';
 
-            return back()->with('success', 'Ticket status updated to '.ucfirst($status));
+            return back()->with('success', 'Ticket status updated to ' . ucfirst($status));
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Failed to update ticket status', [
@@ -481,7 +481,7 @@ class TicketController extends Controller
                 'request_data' => $request->all(),
             ]);
 
-            return back()->withErrors(['status' => 'Error updating ticket status: '.$e->getMessage()]);
+            return back()->withErrors(['status' => 'Error updating ticket status: ' . $e->getMessage()]);
         }
     }
 }

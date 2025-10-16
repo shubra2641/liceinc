@@ -74,7 +74,7 @@ class LicenseVerificationGuideController extends Controller
     {
         try {
             // Rate limiting for security
-            $key = 'license-guide:'.$request->ip().':'.Auth::id();
+            $key = 'license-guide:' . $request->ip() . ':' . Auth::id();
             if (RateLimiter::tooManyAttempts($key, 10)) {
                 Log::warning('Rate limit exceeded for license verification guide access', [
                     'ip' => $request->ip(),

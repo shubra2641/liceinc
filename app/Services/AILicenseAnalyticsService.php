@@ -106,7 +106,7 @@ class AILicenseAnalyticsService
      */
     public function getRealTimeUpdates(): array
     {
-        $cacheKey = 'realtime_analytics_'.now()->format('Y-m-d-H');
+        $cacheKey = 'realtime_analytics_' . now()->format('Y-m-d-H');
 
         return Cache::remember($cacheKey, 300, function () {
             return [

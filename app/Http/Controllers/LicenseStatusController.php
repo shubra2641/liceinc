@@ -84,7 +84,7 @@ class LicenseStatusController extends Controller
             // Check rate limiting
             if ($this->isRateLimited($request)) {
                 return $this->showError(
-                    __('license_status.verification_error').': Too many attempts. Please try again later.',
+                    __('license_status.verification_error') . ': Too many attempts. Please try again later.',
                 );
             }
 
@@ -136,7 +136,7 @@ class LicenseStatusController extends Controller
         $settings = Setting::first();
         $maxAttempts = $settings->license_max_attempts ?? 5;
         $decayMinutes = $settings->license_lockout_minutes ?? 15;
-        $key = 'license_check_'.md5($ip ?? '');
+        $key = 'license_check_' . md5($ip ?? '');
         $attempts = Cache::get($key, 0);
 
         if ($attempts >= $maxAttempts) {
@@ -213,7 +213,7 @@ class LicenseStatusController extends Controller
                 $settings = Setting::first();
                 $maxAttempts = $settings->license_max_attempts ?? 5;
                 $decayMinutes = $settings->license_lockout_minutes ?? 15;
-                $key = 'license_check_'.md5($ip ?? '');
+                $key = 'license_check_' . md5($ip ?? '');
                 $attempts = Cache::get($key, 0);
                 if ($attempts >= $maxAttempts) {
                     Log::warning('License check rate limit exceeded', [
@@ -224,7 +224,7 @@ class LicenseStatusController extends Controller
                     ]);
 
                     return $this->errorResponse(
-                        __('license_status.verification_error').': Too many attempts. Please try again later.',
+                        __('license_status.verification_error') . ': Too many attempts. Please try again later.',
                         null,
                         429,
                     );
@@ -313,7 +313,7 @@ class LicenseStatusController extends Controller
                     ? $request->validated('license_key') : 'unknown',
                 domain: 'website_check',
                 isValid: false,
-                message: 'License check error: '.$e->getMessage(),
+                message: 'License check error: ' . $e->getMessage(),
                 source: 'website',
                 errorDetails: $e->getMessage(),
             );

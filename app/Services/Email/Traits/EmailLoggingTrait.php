@@ -35,7 +35,7 @@ trait EmailLoggingTrait
         string $message,
         ?\Throwable $exception = null,
     ): void {
-        Log::error('Failed to send email: '.$message, [
+        Log::error('Failed to send email: ' . $message, [
             'template' => $template,
             'recipient' => $recipient,
             'exception' => $exception?->getTraceAsString(),
@@ -47,7 +47,7 @@ trait EmailLoggingTrait
      */
     protected function logTemplateNotFound(string $templateName): void
     {
-        Log::error('Email template not found: '.$templateName);
+        Log::error('Email template not found: ' . $templateName);
     }
 
     /**
@@ -63,7 +63,7 @@ trait EmailLoggingTrait
      */
     protected function logInvalidUser(string $context = 'email sending'): void
     {
-        Log::error('Invalid user provided for '.$context);
+        Log::error('Invalid user provided for ' . $context);
     }
 
     /**
@@ -71,7 +71,7 @@ trait EmailLoggingTrait
      */
     protected function logBulkEmailError(string $message, ?\Throwable $exception = null): void
     {
-        Log::error('Failed to send bulk email: '.$message, [
+        Log::error('Failed to send bulk email: ' . $message, [
             'exception' => $exception?->getTraceAsString(),
         ]);
     }

@@ -100,20 +100,20 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
             }
             // Sanitize token to prevent injection attacks
             $sanitizedToken = htmlspecialchars($token, ENT_QUOTES, 'UTF-8');
-            $response = $this->getHttpClient()->get($this->baseUrl.'/v1/market/private/user/account.json', [
+            $response = $this->getHttpClient()->get($this->baseUrl . '/v1/market/private/user/account.json', [
                 'headers' => [
-                    'Authorization' => 'Bearer '.$sanitizedToken,
+                    'Authorization' => 'Bearer ' . $sanitizedToken,
                     'User-Agent' => 'Sekuret-License-Management/1.0',
                 ],
                 'timeout' => 30,
             ]);
             $statusCode = $response->getStatusCode();
             if ($statusCode >= 400) {
-                throw new \Exception('Failed to retrieve user data from Envato API: HTTP '.(int)$statusCode);
+                throw new \Exception('Failed to retrieve user data from Envato API: HTTP ' . (int)$statusCode);
             }
             $data = json_decode((string)$response->getBody(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception('Invalid JSON response from Envato API: '.json_last_error_msg());
+                throw new \Exception('Invalid JSON response from Envato API: ' . json_last_error_msg());
             }
             if (! is_array($data)) {
                 throw new \Exception('Invalid response format from Envato API');
@@ -167,21 +167,21 @@ class EnvatoProvider extends AbstractProvider implements ProviderInterface
             $accountFirstname = $account['firstname'] ?? null;
             $accountSurname = $account['surname'] ?? null;
             $username = is_string($accountUsername) ? $accountUsername :
-                       strtolower((is_string($accountFirstname) ? $accountFirstname : 'user').
+                       strtolower((is_string($accountFirstname) ? $accountFirstname : 'user') .
                                  (is_string($accountSurname) ? $accountSurname : ''));
             $username = $this->sanitizeInput($username);
             // For OAuth, we might not get email from this endpoint
             // We'll need to get it from somewhere else or generate one
             $accountEmail = $account['email'] ?? null;
-            $email = is_string($accountEmail) ? $accountEmail : ($username.'@envato.temp');
+            $email = is_string($accountEmail) ? $accountEmail : ($username . '@envato.temp');
             $email = $this->sanitizeInput($email);
             // Validate email format
             if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $email = $username.'@envato.temp';
+                $email = $username . '@envato.temp';
             }
             $firstname = $account['firstname'] ?? '';
             $surname = $account['surname'] ?? '';
-            $name = trim((is_string($firstname) ? $firstname : '').' '.(is_string($surname) ? $surname : ''));
+            $name = trim((is_string($firstname) ? $firstname : '') . ' ' . (is_string($surname) ? $surname : ''));
             $name = $this->sanitizeInput($name);
             // Sanitize avatar URL if provided
             $avatar = $account['image'] ?? null;

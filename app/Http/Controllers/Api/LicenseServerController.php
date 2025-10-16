@@ -442,7 +442,7 @@ class LicenseServerController extends Controller
         return route('api.license.download-update', [
             'license_key' => $licenseKey,
             'version' => $version,
-        ]).'?product_slug='.$productSlug;
+        ]) . '?product_slug=' . $productSlug;
     }
 
     /**
