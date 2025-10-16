@@ -6,7 +6,7 @@ return [
     // Welcome Page
     'welcome_title' => 'مرحباً بك في نظام إدارة التراخيص',
     'welcome_subtitle' => 'دعنا ننشئ نظامك في خطوات قليلة',
-    'welcome_description' => 'سيرشدك معالج التثبيت خلال إعداد نظام إدارة التراخيص الخاص بك. '.
+    'welcome_description' => 'سيرشدك معالج التثبيت خلال إعداد نظام إدارة التراخيص الخاص بك.'.
         'العملية تستغرق حوالي 5-10 دقائق.',
     'get_started' => 'ابدأ الآن',
     'what_we_will_setup' => 'ما سنقوم بإعداده:',
@@ -105,11 +105,11 @@ return [
     'fix_requirements' => 'أصلح المتطلبات أولاً',
     'password_hint' => 'يجب أن تكون كلمة المرور 8 أحرف على الأقل',
     'admin_email_hint' => 'سيتم استخدام هذا للإشعارات النظام',
-    'javascript_required_for_email_settings' => 'JavaScript مطلوب لإعدادات البريد الإلكتروني الديناميكية. '.
+    'javascript_required_for_email_settings' => 'JavaScript مطلوب لإعدادات البريد الإلكتروني الديناميكية.'.
         'يرجى تفعيل JavaScript أو تكوين إعدادات البريد الإلكتروني يدوياً.',
-    'javascript_required_for_language_switching' => 'JavaScript مطلوب لتبديل اللغة الديناميكي. '.
+    'javascript_required_for_language_switching' => 'JavaScript مطلوب لتبديل اللغة الديناميكي.'.
         'يرجى تفعيل JavaScript أو تحديث الصفحة بعد تغيير اللغة.',
-    'javascript_required_for_password_validation' => 'JavaScript مطلوب للتحقق من كلمة المرور في الوقت الفعلي. '.
+    'javascript_required_for_password_validation' => 'JavaScript مطلوب للتحقق من كلمة المرور في الوقت الفعلي.'.
         'يرجى تفعيل JavaScript للحصول على تجربة مستخدم أفضل.',
 
     // Success Messages

@@ -11,9 +11,9 @@ return [
 
     // Overview Section
     'overview' => 'Overview',
-    'overview_description' => 'This guide explains how to implement license verification in your applications '.
-        'using our secure license verification system. '.
-        'The system provides real-time verification against our license server '.
+    'overview_description' => 'This guide explains how to implement license verification in your applications'.
+        'using our secure license verification system.'.
+        'The system provides real-time verification against our license server'.
         'to ensure only valid licenses can use your software.',
 
     'secure_verification' => 'Secure Verification',
@@ -28,12 +28,12 @@ return [
     // Installation Section
     'installation_setup' => 'Installation & Setup',
     'step_1_title' => 'Step 1: Download the License Verification File',
-    'step_1_description' => 'Download the license verification file from your admin panel '.
+    'step_1_description' => 'Download the license verification file from your admin panel'.
         'or contact support to get the latest version.',
     'download_command' => 'Download Command',
 
     'step_2_title' => 'Step 2: Upload to Your Server',
-    'step_2_description' => 'Upload the verification file to your server. '.
+    'step_2_description' => 'Upload the verification file to your server.'.
         'For security reasons, we recommend placing it in a non-web accessible directory.',
     'directory_structure' => 'Recommended Directory Structure',
 

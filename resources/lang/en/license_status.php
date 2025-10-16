@@ -56,9 +56,9 @@ return [
     'license_inactive' => 'The license is inactive.',
     'license_expired' => 'The license has expired.',
     'license_suspended' => 'The license has been suspended.',
-    'category_requires_license_no_product' => 'This section requires a license '.
+    'category_requires_license_no_product' => 'This section requires a license'.
         'but no specific product has been specified.',
-    'article_requires_license_no_product' => 'This article requires a license '.
+    'article_requires_license_no_product' => 'This article requires a license'.
         'but no specific product has been specified.',
     'Portfolio HTML Template' => 'Portfolio HTML Template',
 ];

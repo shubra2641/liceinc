@@ -6,7 +6,7 @@ return [
     // Welcome Page
     'welcome_title' => 'नमस्ते लाइसेंस प्रबंधन सिस्टम में',
     'welcome_subtitle' => 'आपके सिस्टम को केवल कुछ चरणों में चलाने के लिए आइए शुरू करें',
-    'welcome_description' => 'इस स्थापना विज़र्ड आपको लाइसेंस प्रबंधन सिस्टम को स्थापना करने के लिए चलाएंगे। '.
+    'welcome_description' => 'इस स्थापना विज़र्ड आपको लाइसेंस प्रबंधन सिस्टम को स्थापना करने के लिए चलाएंगे।'.
         'प्रक्रिया लगभग 5-10 मिनट लेगी।',
     'get_started' => 'शुरू करें',
     'what_we_will_setup' => 'हम क्या सेट अप करेंगे:',
@@ -41,7 +41,7 @@ return [
     // Database Page
     'database_title' => 'डाटाबेस कॉन्फ़िगरेशन',
     'database_subtitle' => 'आपके डाटाबेस कनेक्शन विवरण दर्ज करें',
-    'database_description' => 'Make sure your database server is running and the database exists. '.
+    'database_description' => 'Make sure your database server is running and the database exists.'.
         'The installer will create the necessary tables.',
     'database_host' => 'डाटाबेस होस्ट',
     'database_port' => 'डाटाबेस पोर्ट',
@@ -61,7 +61,7 @@ return [
     'admin_email' => 'ईमेल पता',
     'admin_password' => 'पासवर्ड',
     'admin_password_confirmation' => 'पासवर्ड की पुष्टि करें',
-    'password_requirements' => 'पासवर्ड कम से कम 8 अक्षरों का होना चाहिए '.
+    'password_requirements' => 'पासवर्ड कम से कम 8 अक्षरों का होना चाहिए'.
         'और अक्षरों, संख्याओं और सिंबोलों का मिश्रण होना चाहिए।',
     'create_admin_account' => 'एडमिन खाता बनाएं',
 
@@ -107,11 +107,11 @@ return [
     'fix_requirements' => 'आवश्यकताएं पहले ठीक करें',
     'password_hint' => 'पासवर्ड कम से कम 8 अक्षरों का होना चाहिए',
     'admin_email_hint' => 'इसका उपयोग सिस्टम अधिसूचनाओं के लिए किया जाएगा',
-    'javascript_required_for_email_settings' => 'डायनामिक ईमेल सेटिंग्स के लिए JavaScript आवश्यक है। '.
+    'javascript_required_for_email_settings' => 'डायनामिक ईमेल सेटिंग्स के लिए JavaScript आवश्यक है।'.
         'कृपया JavaScript सक्षम करें या मैन्युअल रूप से ईमेल सेटिंग्स कॉन्फ़िगर करें।',
-    'javascript_required_for_language_switching' => 'डायनामिक भाषा स्विचिंग के लिए JavaScript आवश्यक है। '.
+    'javascript_required_for_language_switching' => 'डायनामिक भाषा स्विचिंग के लिए JavaScript आवश्यक है।'.
         'कृपया JavaScript सक्षम करें या भाषा बदलने के बाद पेज रिफ्रेश करें।',
-    'javascript_required_for_password_validation' => 'रियल-टाइम पासवर्ड सत्यापन के लिए JavaScript आवश्यक है। '.
+    'javascript_required_for_password_validation' => 'रियल-टाइम पासवर्ड सत्यापन के लिए JavaScript आवश्यक है।'.
         'बेहतर उपयोगकर्ता अनुभव के लिए कृपया JavaScript सक्षम करें।',
 
     // Success Messages
@@ -157,7 +157,7 @@ return [
     'completion_title' => 'स्थापना पूरी है',
     'completion_subtitle' => 'आपका सिस्टम सफलतापूर्वक स्थापित और कॉन्फ़िगर किया गया है',
     'installation_completed' => 'स्थापना सफलतापूर्वक पूरी है!',
-    'installation_success_message' => 'बधाई हो! आपका लाइसेंस प्रबंधन सिस्टम सफलतापूर्वक '.
+    'installation_success_message' => 'बधाई हो! आपका लाइसेंस प्रबंधन सिस्टम सफलतापूर्वक'.
         'स्थापित और कॉन्फ़िगर किया गया है।',
     'admin_account_created' => 'एडमिन खाता बनाया गया',
     'account_status' => 'स्थिति',
@@ -165,29 +165,29 @@ return [
     'system_information' => 'सिस्टम जानकारी',
     'database_connected' => 'डाटाबेस',
     'important_notice' => 'महत्वपूर्ण सुरक्षा सूचना',
-    'delete_install_folder_warning' => 'सुरक्षा कारणों के लिए, कृपया इंस्टाल फ़ोल्डर को '.
+    'delete_install_folder_warning' => 'सुरक्षा कारणों के लिए, कृपया इंस्टाल फ़ोल्डर को'.
         'इंस्टालेशन प्रक्रिया पूरी करने के बाद हटाएं।',
     'next_steps' => 'अगले कदम',
     'delete_install_folder' => 'इंस्टाल फ़ोल्डर हटाएं',
-    'delete_install_folder_description' => 'इंस्टाल डायरेक्टरी हटाएं इंस्टालेशन विज़र्ड के लिए '.
+    'delete_install_folder_description' => 'इंस्टाल डायरेक्टरी हटाएं इंस्टालेशन विज़र्ड के लिए'.
         'अनुमति देने से बचाएं।',
     'configure_system' => 'सिस्टम कॉन्फ़िगर करें',
-    'configure_system_description' => 'एडमिन पैनल से प्रवेश करें अपने सिस्टम सेटिंग्स '.
+    'configure_system_description' => 'एडमिन पैनल से प्रवेश करें अपने सिस्टम सेटिंग्स'.
         'और प्राथमिकताओं को कॉन्फ़िगर करने के लिए।',
     'secure_system' => 'सिस्टम सुरक्षित करें',
     'secure_system_description' => 'सुरक्षा सेटिंग्स को समीक्षा करें और अतिरिक्त सुरक्षा मापों को कॉन्फ़िगर करें।',
     'go_to_admin_panel' => 'एडमिन पैनल पर जाएं',
     'go_to_frontend' => 'फ्रंटएंड पर जाएं',
-    'completion_note' => 'आप हमेशा एडमिन पैनल से फ्रंटएंड से प्रवेश कर सकते हैं '.
+    'completion_note' => 'आप हमेशा एडमिन पैनल से फ्रंटएंड से प्रवेश कर सकते हैं'.
         'अपने एडमिन खाते से लॉग इन करके।',
     'database_created' => 'डाटाबेस बनाया गया',
     'system_configured' => 'सिस्टम कॉन्फ़िगर किया गया',
     // Email Configuration
     'email_configuration' => 'ईमेल कॉन्फ़िगरेशन',
-    'email_configuration_subtitle' => 'ईमेल सेटिंग्स को कॉन्फ़िगर करें अधिसूचनाओं '.
+    'email_configuration_subtitle' => 'ईमेल सेटिंग्स को कॉन्फ़िगर करें अधिसूचनाओं'.
         'और सिस्टम ईमेल (वैकल्पिक)',
     'enable_email_notifications' => 'ईमेल सूचनाओं को सक्षम करें',
-    'enable_email_hint' => 'ईमेल सेटिंग्स को कॉन्फ़िगर करने के लिए इसे जांचें। '.
+    'enable_email_hint' => 'ईमेल सेटिंग्स को कॉन्फ़िगर करने के लिए इसे जांचें।'.
         'आप इसे छोड़ सकते हैं और बाद में एडमिन पैनल से कॉन्फ़िगर कर सकते हैं।',
     'mail_mailer' => 'Mail Driver मेल ड्राइवर',
     'mail_host' => 'SMTP होस्ट',

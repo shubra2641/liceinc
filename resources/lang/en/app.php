@@ -16,16 +16,16 @@ return [
     'Test email addresses cannot receive verification emails' => 'Test email addresses cannot receive verification emails',
     'You are using a test email address that cannot receive verification emails' => 'You are using a test email address that cannot receive verification emails',
     'Test Email Address' => 'Test Email Address',
-    'You are currently using a test email address ({{email}}) that cannot receive verification emails. '.
-        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
-        'are not real email addresses and cannot receive emails.' => 'You are currently using a test email address ({{email}}) that cannot receive verification emails. '.
-        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
+    'You are currently using a test email address ({{email}}) that cannot receive verification emails.'.
+        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com'.
+        'are not real email addresses and cannot receive emails.' => 'You are currently using a test email address ({{email}}) that cannot receive verification emails.'.
+        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com'.
         'are not real email addresses and cannot receive emails.',
     'You are currently using a test email address' => 'You are currently using a test email address',
-    'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
-        'are not real email addresses and cannot receive emails.' => 'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
+    'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com'.
+        'are not real email addresses and cannot receive emails.' => 'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com'.
         'are not real email addresses and cannot receive emails.',
-    'To use the system normally, please register with a real email address that can receive verification emails.' => 'To use the system normally, please register with a real email address '.
+    'To use the system normally, please register with a real email address that can receive verification emails.' => 'To use the system normally, please register with a real email address'.
         'that can receive verification emails.',
     'Continue to Dashboard' => 'Continue to Dashboard',
     'About Test Emails' => 'About Test Emails',
@@ -86,10 +86,10 @@ return [
     'update_db_restored' => 'Database restored from backup.',
     'update_db_restore_failed' => 'Failed to restore database from backup.',
     'Updater Backups' => 'Updater Backups',
-    'backups_list_help' => 'Manage previously created backups. '.
+    'backups_list_help' => 'Manage previously created backups.'.
         'You can restore a backup to roll back files and optionally the database.',
     'no_backups_found' => 'No backups found.',
-    'confirm_restore_backup' => 'Are you sure you want to restore this backup? '.
+    'confirm_restore_backup' => 'Are you sure you want to restore this backup?'.
         'This will replace current application files.',
     'Restore' => 'Restore',
     'File' => 'File',

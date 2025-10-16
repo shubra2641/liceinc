@@ -7,7 +7,7 @@ return [
     '2 hours ago' => '2 घंटे पहले',
     '24/7 Support' => '24/7 सहायता',
     '30-Day Money Back Guarantee' => '30-दिन की पैसे वापसी गारंटी',
-    'A new verification link has been sent to the email address you provided during registration.' => 'पंजीकरण के दौरान आपके द्वारा प्रदान किए गए ईमेल पते पर '.
+    'A new verification link has been sent to the email address you provided during registration.' => 'पंजीकरण के दौरान आपके द्वारा प्रदान किए गए ईमेल पते पर'.
         'एक नया सत्यापन लिंक भेजा गया है।',
     'Please verify your email address before accessing your account.' => 'अपने खाते तक पहुंचने से पहले कृपया अपना ईमेल पता सत्यापित करें।',
     'Please verify your email address. A verification link has been sent to your email.' => 'कृपया अपना ईमेल पता सत्यापित करें। आपके ईमेल पर एक सत्यापन लिंक भेजा गया है।',
@@ -17,16 +17,16 @@ return [
     'Test email addresses cannot receive verification emails' => 'टेस्ट ईमेल पते सत्यापन ईमेल प्राप्त नहीं कर सकते',
     'You are using a test email address that cannot receive verification emails' => 'आप एक टेस्ट ईमेल पता उपयोग कर रहे हैं जो सत्यापन ईमेल प्राप्त नहीं कर सकता',
     'Test Email Address' => 'टेस्ट ईमेल पता',
-    'You are currently using a test email address ({{email}}) that cannot receive verification emails. '.
-        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
-        'are not real email addresses and cannot receive emails.' => 'You are currently using a test email address ({{email}}) that cannot receive verification emails. '.
-        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
+    'You are currently using a test email address ({{email}}) that cannot receive verification emails.'.
+        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com'.
+        'are not real email addresses and cannot receive emails.' => 'You are currently using a test email address ({{email}}) that cannot receive verification emails.'.
+        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com'.
         'are not real email addresses and cannot receive emails.',
     'You are currently using a test email address' => 'You are currently using a test email address',
-    'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
-        'are not real email addresses and cannot receive emails.' => 'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
+    'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com'.
+        'are not real email addresses and cannot receive emails.' => 'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com'.
         'are not real email addresses and cannot receive emails.',
-    'To use the system normally, please register with a real email address that can receive verification emails.' => 'To use the system normally, please register with a real email address '.
+    'To use the system normally, please register with a real email address that can receive verification emails.' => 'To use the system normally, please register with a real email address'.
         'that can receive verification emails.',
     'Continue to Dashboard' => 'डैशबोर्ड पर जारी रखें',
     'About Test Emails' => 'टेस्ट ईमेल के बारे में',

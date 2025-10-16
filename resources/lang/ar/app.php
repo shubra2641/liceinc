@@ -16,16 +16,16 @@ return [
     'Test email addresses cannot receive verification emails' => 'عناوين البريد التجريبية لا تستطيع استقبال رسائل التحقق',
     'You are using a test email address that cannot receive verification emails' => 'أنت تستخدم عنوان بريد تجريبي لا يستطيع استقبال رسائل التحقق',
     'Test Email Address' => 'عنوان بريد تجريبي',
-    'You are currently using a test email address ({{email}}) that cannot receive verification emails. '.
-        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
-        'are not real email addresses and cannot receive emails.' => 'أنت تستخدم حالياً عنوان بريد تجريبي ({{email}}) لا يستطيع استقبال رسائل التحقق. '.
-        'عناوين البريد التجريبية مثل @example.com و @test.com و @localhost و @demo.com '.
+    'You are currently using a test email address ({{email}}) that cannot receive verification emails.'.
+        'Test email addresses like @example.com, @test.com, @localhost, and @demo.com'.
+        'are not real email addresses and cannot receive emails.' => 'أنت تستخدم حالياً عنوان بريد تجريبي ({{email}}) لا يستطيع استقبال رسائل التحقق.'.
+        'عناوين البريد التجريبية مثل @example.com و @test.com و @localhost و @demo.com'.
         'ليست عناوين بريد حقيقية ولا تستطيع استقبال الرسائل.',
     'You are currently using a test email address' => 'أنت تستخدم حالياً عنوان بريد تجريبي',
-    'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com '.
-        'are not real email addresses and cannot receive emails.' => 'لا يستطيع استقبال رسائل التحقق. عناوين البريد التجريبية مثل @example.com و @test.com و @localhost و @demo.com '.
+    'that cannot receive verification emails. Test email addresses like @example.com, @test.com, @localhost, and @demo.com'.
+        'are not real email addresses and cannot receive emails.' => 'لا يستطيع استقبال رسائل التحقق. عناوين البريد التجريبية مثل @example.com و @test.com و @localhost و @demo.com'.
         'ليست عناوين بريد حقيقية ولا تستطيع استقبال الرسائل.',
-    'To use the system normally, please register with a real email address that can receive verification emails.' => 'لاستخدام النظام بشكل طبيعي، يرجى التسجيل بعنوان بريد حقيقي '.
+    'To use the system normally, please register with a real email address that can receive verification emails.' => 'لاستخدام النظام بشكل طبيعي، يرجى التسجيل بعنوان بريد حقيقي'.
         'يستطيع استقبال رسائل التحقق.',
     'Continue to Dashboard' => 'المتابعة للوحة التحكم',
     'About Test Emails' => 'حول البريد التجريبي',
@@ -80,18 +80,18 @@ return [
     'update_backup_created' => 'تم إنشاء نسخة احتياطية للملفات: :path',
     'update_backup_failed_files' => 'فشل في إنشاء النسخة الاحتياطية للملفات.',
     'update_db_backup_created' => 'تم إنشاء نسخة احتياطية لقاعدة البيانات: :path',
-    'update_db_backup_skipped' => 'تخطى أو فشل إنشاء نسخة قاعدة البيانات '.
+    'update_db_backup_skipped' => 'تخطى أو فشل إنشاء نسخة قاعدة البيانات'.
         '(mysqldump غير متاح أو حدث خطأ).',
-    'update_validation_failed' => 'فشل التحقق من حزمة التحديث '.
+    'update_validation_failed' => 'فشل التحقق من حزمة التحديث'.
         '(الهيكل المتوقع مفقود).',
     'update_swap_failed' => 'فشل استبدال الملفات الجديدة في مكانها.',
     'update_db_restored' => 'تم استعادة قاعدة البيانات من النسخة الاحتياطية.',
     'update_db_restore_failed' => 'فشل استعادة قاعدة البيانات من النسخة الاحتياطية.',
     'Updater Backups' => 'نسخ التحديث الاحتياطية',
-    'backups_list_help' => 'إدارة النسخ الاحتياطية المنشأة سابقًا. '.
+    'backups_list_help' => 'إدارة النسخ الاحتياطية المنشأة سابقًا.'.
         'يمكنك استعادة نسخة احتياطية لاسترجاع الملفات وقاعدة البيانات إن وجدت.',
     'no_backups_found' => 'لا توجد نسخ احتياطية.',
-    'confirm_restore_backup' => 'هل أنت متأكد أنك تريد استعادة هذه النسخة الاحتياطية؟ '.
+    'confirm_restore_backup' => 'هل أنت متأكد أنك تريد استعادة هذه النسخة الاحتياطية؟'.
         'سيؤدي ذلك إلى استبدال ملفات التطبيق الحالية.',
     'Restore' => 'استعادة',
     'File' => 'الملف',

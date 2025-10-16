@@ -44,7 +44,7 @@ return [
     'failure' => 'विफल',
     'no_history' => 'कोई इतिहास उपलब्ध नहीं है',
     'no_domains' => 'कोई डोमेन्स नहीं पंजीकृत है',
-    'envato_verification_failed' => 'चेतावनी: Envato के साथ सत्यापन विफल हुआ। '.
+    'envato_verification_failed' => 'चेतावनी: Envato के साथ सत्यापन विफल हुआ।'.
         'लाइसेंस स्थानीय रूप से सही है लेकिन Envato के साथ एक समस्या हो सकती है।',
     'envato_support_expired' => 'चेतावनी: Envato समर्थन इस लाइसेंस के लिए समाप्त हो गया है।',
     'envato_verification_success' => 'Envato सत्यापन सफलतापूर्वक पूरा हुआ।',
