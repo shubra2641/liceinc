@@ -57,8 +57,8 @@ class GenerateRenewalInvoices extends Command
 
                     if ($invoice !== null) {
                         $generatedCount++;
-                        $this->line('Generated renewal invoice for license ' . 
-                            $license->license_key . ' (Product: ' . 
+                        $this->line('Generated renewal invoice for license ' .
+                            $license->license_key . ' (Product: ' .
                             ($license->product->name ?? 'Unknown Product') . ')');
 
                         if ($this->sendRenewalNotifications($license, $invoice)) {
@@ -76,7 +76,7 @@ class GenerateRenewalInvoices extends Command
                 }
             }
 
-            $this->info('Generated ' . $generatedCount . ' renewal invoices and sent ' . 
+            $this->info('Generated ' . $generatedCount . ' renewal invoices and sent ' .
                 $emailSentCount . ' email notifications.');
             if ($errorCount > 0) {
                 $this->warn('Encountered ' . $errorCount . ' errors during processing. Check logs for details.');
@@ -160,8 +160,8 @@ class GenerateRenewalInvoices extends Command
 
             $newExpiryDate = $this->calculateNewExpiryDate($license, $product);
             $description = htmlspecialchars(
-                'Renewal for ' . $product->name . ' - License ' . $license->license_key, 
-                ENT_QUOTES, 
+                'Renewal for ' . $product->name . ' - License ' . $license->license_key,
+                ENT_QUOTES,
                 'UTF-8'
             );
 
@@ -366,7 +366,7 @@ class GenerateRenewalInvoices extends Command
             'error' => $e->getMessage(),
         ]);
 
-        $this->error('Failed to generate renewal invoice for license ' . 
+        $this->error('Failed to generate renewal invoice for license ' .
             $license->license_key . ': ' . $e->getMessage());
     }
 }

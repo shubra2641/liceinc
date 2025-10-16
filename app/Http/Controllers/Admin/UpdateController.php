@@ -325,7 +325,7 @@ class UpdateController extends Controller
             DB::rollBack();
             Log::error('Auto update check failed', ['error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'An error occurred while checking for updates: ' . 
+            return redirect()->back()->with('error', 'An error occurred while checking for updates: ' .
                 $e->getMessage());
         }
     }
@@ -474,12 +474,11 @@ class UpdateController extends Controller
      * Perform auto update.
      */
     private function performAutoUpdate(
-        string $version, 
-        string $licenseKey, 
-        string $productSlug, 
+        string $version,
+        string $licenseKey,
+        string $productSlug,
         ?string $domain = null
-    ): array
-    {
+    ): array {
         try {
             if (! VersionHelper::isValidVersion($version)) {
                 return [
@@ -572,7 +571,7 @@ class UpdateController extends Controller
             $productsData = $this->licenseServerService->getProducts();
             if ($productsData['success']) {
                 $allProducts = $productsData['data']['products'] ?? [];
-                $specificProduct = array_filter($allProducts, fn ($product) => 
+                $specificProduct = array_filter($allProducts, fn ($product) =>
                     $product['slug'] === 'the-ultimate-license-management-system');
 
                 return array_values($specificProduct)[0] ?? [];
@@ -594,7 +593,7 @@ class UpdateController extends Controller
         try {
             $currentVersion = VersionHelper::getCurrentVersion();
             $latestVersionData = $this->licenseServerService->getUpdateInfo(
-                'the-ultimate-license-management-system', 
+                'the-ultimate-license-management-system',
                 $currentVersion
             );
 

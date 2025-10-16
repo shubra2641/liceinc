@@ -354,14 +354,13 @@ class PaymentService
      * Create invoice.
      */
     private function createInvoice(
-        User $user, 
-        License $license, 
-        Product $product, 
-        array $orderData, 
-        string $gateway, 
+        User $user,
+        License $license,
+        Product $product,
+        array $orderData,
+        string $gateway,
         ?string $transactionId
-    ): Invoice
-    {
+    ): Invoice {
         return Invoice::create([
             'user_id' => $user->id,
             'product_id' => $product->id,

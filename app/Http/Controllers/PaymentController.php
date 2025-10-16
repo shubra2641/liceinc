@@ -270,7 +270,7 @@ class PaymentController extends Controller
     private function handleProductPayment(string $transactionId, string $gateway): RedirectResponse
     {
         $productId = session('payment_product_id');
-        $product = $productId ? Product::find($productId) : 
+        $product = $productId ? Product::find($productId) :
             Product::where('is_active', true)->where('price', '>', 0)->first();
 
         if (! $product) {
