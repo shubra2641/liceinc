@@ -24,30 +24,30 @@ class ProductFileService
     {
         try {
             $this->validateFile($file);
-            
+
             $encryptionKey = Str::random(32);
             $originalName = $this->sanitizeInput($file->getClientOriginalName());
             $extension = $this->sanitizeInput($file->getClientOriginalExtension());
             $encryptedName = Str::uuid() . '.' . $extension;
-            
+
             $directory = 'product-files/' . $product->id;
             $filePath = $directory . '/' . $encryptedName;
-            
+
             if (strpos($filePath, '..') !== false) {
                 throw new \InvalidArgumentException('Invalid file path detected');
             }
-            
+
             $fileContent = file_get_contents($file->getRealPath());
             if ($fileContent === false) {
                 throw new \Exception('Failed to read uploaded file content');
             }
-            
+
             $checksum = hash('sha256', $fileContent);
             $encryptedContent = $this->encryptContent($fileContent, $encryptionKey);
-            
+
             Storage::disk('private')->put($filePath, $encryptedContent);
             $encryptedKey = Crypt::encryptString($encryptionKey);
-            
+
             $productFile = ProductFile::create([
                 'product_id' => $product->id,
                 'original_name' => $originalName,
@@ -59,7 +59,7 @@ class ProductFileService
                 'checksum' => $checksum,
                 'description' => $this->sanitizeInput($description),
             ]);
-            
+
             return $productFile;
         } catch (\Exception $e) {
             Log::error('Error uploading product file', [
@@ -83,7 +83,7 @@ class ProductFileService
                     return null;
                 }
             }
-            
+
             if (!$file->fileExists()) {
                 Log::error('File not found for download', [
                     'file_id' => $file->id,
@@ -92,7 +92,7 @@ class ProductFileService
                 ]);
                 return null;
             }
-            
+
             $content = $file->getDecryptedContent();
             if (!$content) {
                 Log::error('Failed to decrypt file', [
@@ -101,7 +101,7 @@ class ProductFileService
                 ]);
                 return null;
             }
-            
+
             if (hash('sha256', $content) !== $file->checksum) {
                 Log::error('File checksum mismatch', [
                     'file_id' => $file->id,
@@ -109,9 +109,9 @@ class ProductFileService
                 ]);
                 return null;
             }
-            
+
             $file->incrementDownloadCount();
-            
+
             return [
                 'content' => $content,
                 'filename' => $file->original_name,
@@ -137,7 +137,7 @@ class ProductFileService
             if ($file->fileExists()) {
                 Storage::disk('private')->delete($file->file_path);
             }
-            
+
             $file->delete();
             return true;
         } catch (\Exception $e) {
@@ -160,7 +160,7 @@ class ProductFileService
             if ($activeOnly) {
                 $query->where('is_active', true);
             }
-            
+
             return $query->orderBy('created_at', 'desc')->get();
         } catch (\Exception $e) {
             Log::error('Error getting product files', [
@@ -179,7 +179,7 @@ class ProductFileService
     {
         $hasLicense = $this->userHasLicense($product, $userId);
         $hasPaidInvoice = $this->userHasPaidInvoice($product, $userId);
-        
+
         return [
             'can_download' => $hasLicense && $hasPaidInvoice,
             'has_license' => $hasLicense,
@@ -197,36 +197,36 @@ class ProductFileService
         if (!$permissions['can_download']) {
             return [];
         }
-        
+
         $allVersions = [];
-        
+
         $updates = $product->updates()
             ->where('is_active', true)
             ->orderBy('version', 'desc')
             ->get();
-        
+
         foreach ($updates as $update) {
             $updateFile = $this->createUpdateFileRecord($update);
             $updateFile->is_update = true;
             $updateFile->update_info = $update->toArray();
             $allVersions[] = $updateFile;
         }
-        
+
         $baseFiles = $product->files()
             ->where('is_active', true)
             ->orderBy('created_at', 'desc')
             ->get();
-        
+
         foreach ($baseFiles as $file) {
             $file->is_update = false;
             $file->update_info = null;
             $allVersions[] = $file;
         }
-        
+
         usort($allVersions, function ($a, $b) {
             return $b->created_at <=> $a->created_at;
         });
-        
+
         return ['all_versions' => $allVersions];
     }
 
@@ -239,16 +239,16 @@ class ProductFileService
         if (!$permissions['can_download']) {
             return null;
         }
-        
+
         $latestUpdate = $product->updates()
             ->where('is_active', true)
             ->orderBy('version', 'desc')
             ->first();
-        
+
         if ($latestUpdate && $latestUpdate->update_file_path) {
             return $this->createUpdateFileRecord($latestUpdate);
         }
-        
+
         return $product->files()
             ->where('is_active', true)
             ->orderBy('created_at', 'desc')
@@ -264,11 +264,11 @@ class ProductFileService
             ->where('is_active', true)
             ->orderBy('version', 'desc')
             ->first();
-        
+
         if ($latestUpdate) {
             return $latestUpdate->version;
         }
-        
+
         return $product->version ?? '1.0';
     }
 
@@ -280,9 +280,9 @@ class ProductFileService
         if (!$update->file_path || !Storage::disk('private')->exists($update->file_path)) {
             throw new \Exception('Update file not found');
         }
-        
+
         $fileName = $update->title . '_v' . $update->version . '.zip';
-        
+
         return [
             'content' => Storage::disk('private')->get($update->file_path),
             'filename' => $fileName,
@@ -299,11 +299,11 @@ class ProductFileService
         if ($input === null) {
             return '';
         }
-        
+
         $input = str_replace(["\0", "\x00"], '', $input);
         $input = trim($input);
         $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
-        
+
         return $input;
     }
 
@@ -316,7 +316,7 @@ class ProductFileService
             if ($file->getSize() > 100 * 1024 * 1024) {
                 throw new \Exception('File size cannot exceed 100MB');
             }
-            
+
             $allowedTypes = [
                 'application/zip',
                 'application/x-zip-compressed',
@@ -339,12 +339,12 @@ class ProductFileService
                 'image/gif',
                 'image/svg+xml',
             ];
-            
+
             $mimeType = $file->getMimeType();
             if (!in_array($mimeType, $allowedTypes)) {
                 throw new \Exception('File type not allowed: ' . $mimeType);
             }
-            
+
             $this->scanFileForMaliciousContent($file);
         } catch (\Exception $e) {
             Log::error('File validation failed', [
@@ -367,7 +367,7 @@ class ProductFileService
             if ($content === false) {
                 throw new \Exception('Failed to read file content for scanning');
             }
-            
+
             $maliciousPatterns = [
                 '/eval\s*\(/i',
                 '/base64_decode\s*\(/i',
@@ -384,7 +384,7 @@ class ProductFileService
                 '/call_user_func\s*\(/i',
                 '/call_user_func_array\s*\(/i',
             ];
-            
+
             foreach ($maliciousPatterns as $pattern) {
                 if (preg_match($pattern, $content)) {
                     Log::error('Malicious content detected in file', [
@@ -416,14 +416,14 @@ class ProductFileService
             if (empty($key)) {
                 throw new \InvalidArgumentException('Encryption key cannot be empty');
             }
-            
+
             $iv = substr(hash('sha256', $key), 0, 16);
             $encrypted = openssl_encrypt($content, 'AES-256-CBC', $key, 0, $iv);
-            
+
             if ($encrypted === false) {
                 throw new \Exception('Failed to encrypt content');
             }
-            
+
             return $encrypted;
         } catch (\Exception $e) {
             Log::error('Error encrypting file content', [
@@ -473,7 +473,7 @@ class ProductFileService
         } elseif (!$hasPaidInvoice) {
             return trans('app.You must pay the invoice first');
         }
-        
+
         return '';
     }
 
@@ -494,11 +494,11 @@ class ProductFileService
         $file->download_count = 0;
         $file->created_at = $update->created_at instanceof \Illuminate\Support\Carbon ? $update->created_at : null;
         $file->updated_at = $update->updated_at instanceof \Illuminate\Support\Carbon ? $update->updated_at : null;
-        
+
         $file->formatted_size = $file->file_size > 0 ? number_format($file->file_size / 1024 / 1024, 2) . ' MB' : 'Unknown';
         $file->update_info = $update->toArray();
         $file->is_update = true;
-        
+
         return $file;
     }
 }

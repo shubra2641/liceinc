@@ -105,13 +105,13 @@ class ProductCategory extends Model
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function (ProductCategory $category) {
             if (empty($category->slug)) {
                 $category->slug = Str::slug($category->name ?? '');
             }
         });
-        
+
         static::updating(function (ProductCategory $category) {
             if ($category->isDirty('name')) {
                 $category->slug = Str::slug($category->name ?? '');
