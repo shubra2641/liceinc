@@ -43,7 +43,7 @@ class ProductController extends Controller
 
             if (! $itemData) {
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => trans('app.Unable to fetch product data from Envato')
                 ], 404);
             }
@@ -63,7 +63,7 @@ class ProductController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => trans('app.Error fetching product data: ') . $e->getMessage()
             ], 500);
         }
@@ -80,7 +80,7 @@ class ProductController extends Controller
 
             if (empty($settings['username'])) {
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => trans('app.Envato username not configured')
                 ], 400);
             }
@@ -89,7 +89,7 @@ class ProductController extends Controller
 
             if (! $userItems || ! isset($userItems['matches'])) {
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => trans('app.Unable to fetch user items from Envato')
                 ], 404);
             }
@@ -108,7 +108,7 @@ class ProductController extends Controller
             return response()->json(['success' => true, 'items' => $items]);
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => trans('app.Error fetching user items: ') . $e->getMessage()
             ], 500);
         }

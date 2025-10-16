@@ -57,9 +57,9 @@ class InstallController extends Controller
                 session(['install.license' => $verificationResult['data']]);
 
                 return $this->verificationResponse(
-                    $request, 
-                    true, 
-                    'License verified successfully', 
+                    $request,
+                    true,
+                    'License verified successfully',
                     $verificationResult
                 );
             } else {
@@ -71,10 +71,10 @@ class InstallController extends Controller
             Log::error('License verification error in InstallController', ['error' => $exception->getMessage()]);
 
             return $this->verificationResponse(
-                $request, 
-                false, 
-                'An error occurred during verification', 
-                ['general' => $exception->getMessage()], 
+                $request,
+                false,
+                'An error occurred during verification',
+                ['general' => $exception->getMessage()],
                 500
             );
         }
@@ -293,8 +293,8 @@ class InstallController extends Controller
             $envContent = str_replace('MAIL_USERNAME=null', 'MAIL_USERNAME=' . $settings['mail_username'], $envContent);
             $envContent = str_replace('MAIL_PASSWORD=null', 'MAIL_PASSWORD=' . $settings['mail_password'], $envContent);
             $envContent = str_replace(
-                'MAIL_ENCRYPTION=null', 
-                'MAIL_ENCRYPTION=' . $settings['mail_encryption'], 
+                'MAIL_ENCRYPTION=null',
+                'MAIL_ENCRYPTION=' . $settings['mail_encryption'],
                 $envContent
             );
         }
@@ -353,13 +353,12 @@ class InstallController extends Controller
      * Handle verification response with proper format.
      */
     private function verificationResponse(
-        Request $request, 
-        bool $success, 
-        string $message, 
-        array $data = [], 
+        Request $request,
+        bool $success,
+        string $message,
+        array $data = [],
         int $statusCode = 200
-    ): RedirectResponse|JsonResponse
-    {
+    ): RedirectResponse|JsonResponse {
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => $success,

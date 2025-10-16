@@ -499,8 +499,8 @@ class ProductFileService
         $file->created_at = $update->created_at instanceof \Illuminate\Support\Carbon ? $update->created_at : null;
         $file->updated_at = $update->updated_at instanceof \Illuminate\Support\Carbon ? $update->updated_at : null;
 
-        $file->formatted_size = $file->file_size > 0 
-            ? number_format($file->file_size / 1024 / 1024, 2) . ' MB' 
+        $file->formatted_size = $file->file_size > 0
+            ? number_format($file->file_size / 1024 / 1024, 2) . ' MB'
             : 'Unknown';
         $file->update_info = $update->toArray();
         $file->is_update = true;

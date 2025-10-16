@@ -47,8 +47,8 @@ class ProductController extends Controller
         if ($request?->filled('price_filter')) {
             $filter = $request->validated('price_filter');
             $query->where(
-                $filter === 'free' ? 'price' : 'price', 
-                $filter === 'free' ? 0 : '>', 
+                $filter === 'free' ? 'price' : 'price',
+                $filter === 'free' ? 0 : '>',
                 $filter === 'free' ? null : 0
             );
         }
@@ -104,11 +104,11 @@ class ProductController extends Controller
             app(ProductFileService::class)->userCanDownloadFiles($product, Auth::id() ?: 0) :
             ['can_download' => false, 'message' => ''];
 
-        $product->description_has_html = is_string($product->description) && 
+        $product->description_has_html = is_string($product->description) &&
             strip_tags($product->description) !== $product->description;
-        $product->requirements_has_html = is_string($product->requirements) && 
+        $product->requirements_has_html = is_string($product->requirements) &&
             strip_tags($product->requirements) !== $product->requirements;
-        $product->installation_guide_has_html = is_string($product->installation_guide) && 
+        $product->installation_guide_has_html = is_string($product->installation_guide) &&
             strip_tags($product->installation_guide) !== $product->installation_guide;
 
         return view('user.products.show', [
@@ -125,8 +125,8 @@ class ProductController extends Controller
                 ->where('is_active', true)->with(['category', 'programmingLanguage'])
                 ->orderBy('created_at', 'desc')->limit(3)->get(),
             'screenshots' => $product->screenshots && ! empty($product->screenshots) ?
-                (is_string($product->screenshots) ? 
-                    json_decode($product->screenshots, true) : 
+                (is_string($product->screenshots) ?
+                    json_decode($product->screenshots, true) :
                     $product->screenshots) : null,
         ]);
     }
