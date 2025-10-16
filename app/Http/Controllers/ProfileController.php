@@ -9,323 +9,229 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
 /**
- * Profile Controller with enhanced security.
+ * Unified Profile Controller.
  *
- * This controller handles user profile management including viewing, editing,
- * updating, and account deletion with comprehensive security measures and
- * proper error handling.
- *
- * Features:
- * - User profile display with related data
- * - Profile editing form display
- * - Profile information updates
- * - Account deletion with password confirmation
- * - Enhanced security measures (XSS protection, input validation)
- * - Comprehensive error handling and logging
- * - Proper logging for errors and warnings only
- * - Rate limiting for profile operations
- * - Authorization checks for profile access
+ * Handles profile management for both admin and user roles
+ * with simple, clean code following PSR-12 standards.
  */
 class ProfileController extends Controller
 {
     /**
-     * Create a new controller instance.
-     *
-     * @return void
+     * Show profile edit form.
      */
-    public function __construct()
+    public function edit(Request $request): View
     {
-        $this->middleware(['auth', 'user', 'verified']);
+        $user = $request->user();
+        $isAdmin = $user->is_admin ?? false;
+        
+        return view($isAdmin ? 'admin.profile.edit' : 'profile.index', [
+            'user' => $user,
+            'hasApiConfig' => $this->hasEnvatoConfig(),
+        ]);
     }
+
     /**
-     * Display the user's profile with enhanced security.
-     *
-     * Shows the authenticated user's profile information including
-     * licenses, domains, and tickets with proper authorization checks.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return View The profile index view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access: GET /profile
-     * // Returns: View with user profile data
-     */
-    public function index(Request $request): View|RedirectResponse
-    {
-        try {
-            // Rate limiting
-            $key = 'profile-index:' . (Auth::id() ?? request()->ip());
-            if (RateLimiter::tooManyAttempts($key, 20)) {
-                Log::warning('Rate limit exceeded for profile index', [
-                    'user_id' => Auth::id(),
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                abort(429, 'Too many requests');
-            }
-            RateLimiter::hit($key, 300); // 5 minutes
-            // Authorization check
-            if (! Auth::check()) {
-                Log::warning('Unauthenticated access attempt to profile', [
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                return redirect()->route('login');
-            }
-            $user = $request->user();
-            if ($user) {
-                $user->load(['licenses.product', 'licenses.domains', 'tickets']);
-            }
-            return view('profile.index', [
-                'user' => $user,
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Failed to load profile index', [
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
-                'ip' => request()->ip(),
-            ]);
-            abort(500, 'Failed to load profile');
-        }
-    }
-    /**
-     * Display the user's profile editing form with enhanced security.
-     *
-     * Shows the profile editing form for the authenticated user
-     * with proper authorization checks.
-     *
-     * @param  Request  $request  The HTTP request
-     *
-     * @return View The profile editing form view
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Access: GET /profile/edit
-     * // Returns: View with profile editing form
-     */
-    public function edit(Request $request): View|RedirectResponse
-    {
-        try {
-            // Rate limiting
-            $key = 'profile-edit:' . (Auth::id() ?? request()->ip());
-            if (RateLimiter::tooManyAttempts($key, 10)) {
-                Log::warning('Rate limit exceeded for profile edit form', [
-                    'user_id' => Auth::id(),
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                abort(429, 'Too many requests');
-            }
-            RateLimiter::hit($key, 300); // 5 minutes
-            // Authorization check
-            if (! Auth::check()) {
-                Log::warning('Unauthenticated access attempt to profile edit form', [
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                return redirect()->route('login');
-            }
-            /**
- * @var view-string $viewName
-*/
-            $viewName = 'user.profile.edit';
-            return view($viewName, ['user' => $request->user()]);
-        } catch (\Exception $e) {
-            Log::error('Failed to load profile edit form', [
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
-                'ip' => request()->ip(),
-            ]);
-            abort(500, 'Failed to load profile edit form');
-        }
-    }
-    /**
-     * Update the user's profile information with enhanced security.
-     *
-     * Updates the authenticated user's profile information with
-     * comprehensive validation and security measures.
-     *
-     * @param  ProfileUpdateRequest  $request  The validated request containing profile data
-     *
-     * @return RedirectResponse Redirect to profile edit page with success message
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request:
-     * PUT /profile
-     * {
-     *     "name": "John Doe",
-     *     "email": "john@example.com"
-     * }
+     * Update profile information.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         try {
-            // Rate limiting
-            $key = 'profile-update:' . (Auth::id() ?? request()->ip());
-            if (RateLimiter::tooManyAttempts($key, 5)) {
-                Log::warning('Rate limit exceeded for profile update', [
-                    'user_id' => Auth::id(),
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                return redirect()->back()->with('error', 'Too many requests. Please try again later.');
-            }
-            RateLimiter::hit($key, 300); // 5 minutes
-            // Authorization check
-            if (! Auth::check()) {
-                Log::warning('Unauthenticated attempt to update profile', [
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                return redirect()->route('login');
-            }
             DB::beginTransaction();
+            
             $user = $request->user();
-            $validatedData = $request->validated();
-            // Sanitize input data
-            if (isset($validatedData['name'])) {
-                $validatedData['name'] = $this->sanitizeInput($validatedData['name']);
-            }
-            if (isset($validatedData['email'])) {
-                $validatedData['email'] = $this->sanitizeInput($validatedData['email']);
-            }
-            if ($user) {
-                $user->fill($validatedData);
-                if ($user->isDirty('email')) {
-                    $user->email_verified_at = null;
-                    Log::warning('User email changed, verification required', [
-                        'user_id' => $user->id,
-                        'old_email' => $user->getOriginal('email'),
-                        'new_email' => $user->email,
-                    'ip' => request()->ip(),
-                    ]);
-                }
+            $user->fill($request->validated());
+            
+            if ($user->isDirty('email')) {
+                $user->email_verified_at = null;
                 $user->save();
+                $user->sendEmailVerificationNotification();
+                
+                DB::commit();
+                return Redirect::route('verification.notice')
+                    ->with('success', 'Please verify your email address.');
             }
+            
+            $user->save();
             DB::commit();
-            return Redirect::route('profile.edit')->with('success', 'profile-updated');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            DB::rollBack();
-            Log::warning('Profile update validation failed', [
-                'errors' => $e->errors(),
-                'user_id' => Auth::id(),
-                'ip' => request()->ip(),
-            ]);
-            return redirect()->back()->withErrors($e->errors())->withInput();
+            
+            $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
+            return Redirect::route($route)->with('success', 'Profile updated successfully.');
+            
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Failed to update profile', [
+            Log::error('Profile update failed', [
                 'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
-                'ip' => request()->ip(),
+                'user_id' => $request->user()?->id,
             ]);
-            return redirect()->back()->with('error', 'Failed to update profile. Please try again.');
+            
+            $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
+            return Redirect::route($route)->with('error', 'Failed to update profile.');
         }
     }
+
     /**
-     * Delete the user's account with enhanced security.
-     *
-     * Deletes the authenticated user's account with password confirmation
-     * and proper session cleanup.
-     *
-     * @param  Request  $request  The HTTP request containing password confirmation
-     *
-     * @return RedirectResponse Redirect to home page after account deletion
-     *
-     * @throws \Exception When database operations fail
-     *
-     * @example
-     * // Request:
-     * DELETE /profile
-     * {
-     *     "password": "current_password"
-     * }
+     * Update password.
+     */
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        try {
+            $request->validate([
+                'current_password' => 'required|current_password',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
+            
+            DB::beginTransaction();
+            
+            $user = $request->user();
+            $user->password = Hash::make($request->password);
+            $user->save();
+            
+            DB::commit();
+            
+            $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
+            return Redirect::route($route)->with('success', 'Password updated successfully.');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Password update failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $request->user()?->id,
+            ]);
+            
+            $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
+            return Redirect::route($route)->with('error', 'Failed to update password.');
+        }
+    }
+
+    /**
+     * Connect Envato account.
+     */
+    public function connectEnvato(Request $request): RedirectResponse
+    {
+        try {
+            if (!$this->hasEnvatoConfig()) {
+                $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
+                return Redirect::route($route)->with('error', 'Envato API not configured.');
+            }
+            
+            DB::beginTransaction();
+            
+            $user = $request->user();
+            $settings = \App\Models\Setting::first();
+            
+            $response = \Illuminate\Support\Facades\Http::withToken($settings->envato_personal_token)
+                ->acceptJson()
+                ->timeout(30)
+                ->get('https://api.envato.com/v1/market/private/user/account.json');
+            
+            if ($response->successful()) {
+                $data = $response->json();
+                $user->envato_username = $data['username'] ?? null;
+                $user->envato_id = $data['id'] ?? null;
+                $user->save();
+                
+                DB::commit();
+                
+                $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
+                return Redirect::route($route)->with('success', 'Envato account connected successfully.');
+            }
+            
+            DB::rollBack();
+            $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
+            return Redirect::route($route)->with('error', 'Failed to connect to Envato.');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Envato connection failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $request->user()?->id,
+            ]);
+            
+            $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
+            return Redirect::route($route)->with('error', 'Failed to connect to Envato.');
+        }
+    }
+
+    /**
+     * Disconnect Envato account.
+     */
+    public function disconnectEnvato(Request $request): RedirectResponse
+    {
+        try {
+            DB::beginTransaction();
+            
+            $user = $request->user();
+            $user->envato_username = null;
+            $user->envato_id = null;
+            $user->envato_token = null;
+            $user->envato_refresh_token = null;
+            $user->envato_token_expires_at = null;
+            $user->save();
+            
+            DB::commit();
+            
+            $route = $user->is_admin ? 'admin.profile.edit' : 'profile.edit';
+            return Redirect::route($route)->with('success', 'Envato account disconnected successfully.');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Envato disconnection failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $request->user()?->id,
+            ]);
+            
+            $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
+            return Redirect::route($route)->with('error', 'Failed to disconnect from Envato.');
+        }
+    }
+
+    /**
+     * Delete user account.
      */
     public function destroy(Request $request): RedirectResponse
     {
         try {
-            // Rate limiting
-            $key = 'profile-destroy:' . (Auth::id() ?? request()->ip());
-            if (RateLimiter::tooManyAttempts($key, 3)) {
-                Log::warning('Rate limit exceeded for profile deletion', [
-                    'user_id' => Auth::id(),
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                return redirect()->back()->with('error', 'Too many requests. Please try again later.');
-            }
-            RateLimiter::hit($key, 300); // 5 minutes
-            // Authorization check
-            if (! Auth::check()) {
-                Log::warning('Unauthenticated attempt to delete profile', [
-                    'ip' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-                return redirect()->route('login');
-            }
-            $validated = $request->validateWithBag('userDeletion', [
-                'password' => ['required', 'current_password'],
+            $request->validate([
+                'password' => 'required|current_password',
             ]);
+            
             DB::beginTransaction();
+            
             $user = $request->user();
-            if ($user) {
-                Log::warning('User account deletion initiated', [
-                    'user_id' => $user->id,
-                    'user_email' => $user->email,
-                'ip' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-                ]);
-                Auth::logout();
-                $user->delete();
-            }
+            Auth::logout();
+            $user->delete();
+            
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+            
             DB::commit();
-            Log::warning('User account deleted successfully', [
-                'deleted_user_id' => $user?->id,
-                'ip' => request()->ip(),
-            ]);
+            
             return Redirect::to('/');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            DB::rollBack();
-            Log::warning('Profile deletion validation failed', [
-                'errors' => $e->errors(),
-                'user_id' => Auth::id(),
-                'ip' => request()->ip(),
-            ]);
-            return redirect()->back()->withErrors($e->errors())->withInput();
+            
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Failed to delete profile', [
+            Log::error('Account deletion failed', [
                 'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
-                'ip' => request()->ip(),
+                'user_id' => $request->user()?->id,
             ]);
-            return redirect()->back()->with('error', 'Failed to delete account. Please try again.');
+            
+            $route = $request->user()->is_admin ? 'admin.profile.edit' : 'profile.edit';
+            return Redirect::route($route)->with('error', 'Failed to delete account.');
         }
+    }
+
+    /**
+     * Check if Envato API is configured.
+     */
+    private function hasEnvatoConfig(): bool
+    {
+        $settings = \App\Models\Setting::first();
+        return $settings && $settings->envato_personal_token;
     }
 }

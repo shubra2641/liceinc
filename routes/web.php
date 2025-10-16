@@ -41,7 +41,7 @@ use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProductFileController;
 use App\Http\Controllers\Admin\ProductUpdateController;
-use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\ProgrammingLanguageController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TicketCategoryController;
@@ -69,7 +69,6 @@ use App\Http\Controllers\User\EnvatoController as UserEnvatoController;
 use App\Http\Controllers\User\InvoiceController as UserInvoiceController;
 use App\Http\Controllers\User\LicenseController as UserLicenseController;
 use App\Http\Controllers\User\ProductFileController as UserProductFileController;
-use App\Http\Controllers\User\ProfileController as UserProfileController;
 // API Controllers
 
 // Legacy Controllers (to be reviewed)
@@ -751,12 +750,12 @@ Route::prefix('auth/envato')->group(function () {
  * CSRF protection (csrf, token), Secure password handling.
  */
 Route::middleware(['auth', 'user'])->group(function () {
-    Route::get('/profile', [UserProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [UserProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [UserProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post(
         '/profile/unlink-envato',
-        [UserProfileController::class, 'unlinkEnvato'],
+        [ProfileController::class, 'disconnectEnvato'],
     )->name('profile.unlink-envato');
 });
 
